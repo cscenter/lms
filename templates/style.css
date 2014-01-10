@@ -15,11 +15,11 @@
   color: white;
 }
 
-.header.for-teachers {
+.header.lvl2.for-teachers {
   background-color: #8657AB;
 }
 
-.header.for-students {
+.header.lvl2.for-students {
   background-color: #1C42A3;
 }
 
@@ -31,9 +31,30 @@
   list-style: none;
   float: left;
   line-height: 40px;
-  margin: 0px 15px;
+  padding: 0px 15px;
   font-family: sans-serif;
   font-weight: bolder;
+  cursor: pointer;
+}
+
+.header.lvl1 li:hover {
+  background-color: #2F2F2F;
+}
+
+.header.lvl2.for-teachers li:hover {
+  background-color: #9667BB
+}
+
+.header.for-teachers li.selected {
+  background-color: #561788 !important;
+}
+
+.header.lvl2.for-students li:hover {
+  background-color: #2C52B3;
+}
+
+.header.for-students li.selected {
+  background-color: #1C42A3 !important;
 }
 
 .header li i {
