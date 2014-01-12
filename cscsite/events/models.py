@@ -3,11 +3,21 @@ from django.core.urlresolvers import reverse
 
 class Event(models.Model):
     # author = foo
-    # title = foo
-    slug = models.SlugField(max_length=30)
-    # notification_text = models.TextField()
-    event_text = models.TextField()
-    # email_text = models.TextField()
+    title = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=30,
+                            help_text="short underscore-separated string " \
+                                "for human-readable URLs, as in " \
+                                "test.com/events/<b>important_event</b>/",
+                            unique=True)
+    notification_text = models.TextField(max_length=140,
+                                         help_text="this text is used in " \
+                                             "notifications, 140 symbols max")
+    event_text = models.TextField(max_length=(1024 * 2),
+                                  help_text="this text is used on the site, " \
+                                      "2kb max")
+    email_text = models.TextField(max_length=(1024 * 4),
+                                  help_text="this text is used in emails, " \
+                                      "4kb max")
     # for_groups = foo
 
     def __unicode__(self):
