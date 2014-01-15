@@ -18,6 +18,8 @@ class Event(models.Model):
     email_text = models.TextField(max_length=(1024 * 4),
                                   help_text="this text is used in emails, " \
                                       "4kb max")
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
     # for_groups = foo
 
     def __unicode__(self):
