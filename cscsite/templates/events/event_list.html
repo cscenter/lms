@@ -1,3 +1,13 @@
-{% for event in object_list %}
-{{event.slug}} ({{event.pk}}): {{event.event_text}}<br>
-{% endfor %}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  {% for event in object_list %}
+  <div class="row">
+    <div class="col-xs-12">
+      {{event.slug}} ({{event.pk}}): {{event.event_text}}<br>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content%}
