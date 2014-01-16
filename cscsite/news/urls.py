@@ -1,21 +1,21 @@
 from django.conf.urls import patterns, url
 
-from events import views
+from news import views
 
 urlpatterns = \
     patterns("",
              url(regex=r"^create/$",
-                 view=views.EventCreateView.as_view(),
-                 name="event_create"),
+                 view=views.NewsCreateView.as_view(),
+                 name="news_create"),
              url(regex=r"^update/(?P<pk>\d+)/$",
-                 view=views.EventUpdateView.as_view(),
-                 name="event_update"),
+                 view=views.NewsUpdateView.as_view(),
+                 name="news_update"),
              url(regex=r"^(?P<pk>\d+)/$",
-                 view=views.EventDetailView.as_view(),
-                 name="event_detail"),
+                 view=views.NewsDetailView.as_view(),
+                 name="news_detail"),
              url(regex=r"^$",
-                 view=views.EventListView.as_view(),
-                 name="event_list"))
+                 view=views.NewsListView.as_view(),
+                 name="news_list"))
 
 # # Same view but with a template designed to show larger list items.
 # url(
