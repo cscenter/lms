@@ -45,7 +45,7 @@
   background-color: #9667BB
 }
 
-.header.for-teachers li.selected {
+.header.for-teachers li.current {
   background-color: #561788 !important;
 }
 
@@ -53,7 +53,7 @@
   background-color: #2C52B3;
 }
 
-.header.for-students li.selected {
+.header.for-students li.current {
   background-color: #1C42A3 !important;
 }
 

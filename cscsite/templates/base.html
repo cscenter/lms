@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load current from navigation %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -32,7 +33,7 @@
             <ul>
               <li>О центре <i class="fa fa-caret-down"></i>
               <li>Поступление
-              <li>События
+              <li class="{% current 'event_list' %}">События
               <li>Контакты
               <li class="selected">Преподавание <i class="fa fa-caret-down"></i>
             </ul>
