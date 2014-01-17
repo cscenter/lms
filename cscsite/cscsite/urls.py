@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'cscsite.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^events/', include('events.urls')),
+    url(r'^news/', include('news.urls')),
     url(r'^contacts/', TemplateView.as_view(template_name="contacts.html")),
     url(r'^admin/', include(admin.site.urls)),
 )

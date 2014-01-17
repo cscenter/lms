@@ -2,12 +2,17 @@
 
 {% block content %}
 <div class="container">
-  {% for event in object_list %}
+  {% for news in object_list %}
   <div class="row">
     <div class="col-xs-12">
       {{event.slug}} ({{event.pk}}): {{event.event_text}}<br>
     </div>
   </div>
+  {% empty %}
+  <div class="row">
+    <div class="col-xs-12">
+      No news yet
+    </div>
+  </div>
   {% endfor %}
 </div>
-{% endblock content%}
