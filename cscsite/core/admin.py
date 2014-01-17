@@ -32,7 +32,7 @@ class CSCUserChangeForm(UserChangeForm):
         return data
 
 
-class CSCUserAdmin(UserAdmin):
+class CSCUserAdmin(AdminImageMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
 
