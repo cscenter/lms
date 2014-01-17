@@ -32,12 +32,12 @@ class CSCUserChangeForm(UserChangeForm):
         return data
 
 
-class CSCUserAdmin(AdminImageMixin, UserAdmin):
+class CSCUserAdmin(UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('username', 'email', 'password')}),
         ('Personal info', {'fields': ('last_name', 'first_name', 'patronymic', 'photo', 'note')}),
         ('Current status', {'fields': ('is_teacher', 'is_student', 'enrolment_year')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
