@@ -1,4 +1,7 @@
 Django==1.6.1
+Pillow==2.3.0
 Unipath==1.0
+django-fixture-media==0.1.4
 django-model-utils==2.0
 psycopg2==2.5.2
+sorl-thumbnail==11.12

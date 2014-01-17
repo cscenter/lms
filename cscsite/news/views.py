@@ -8,6 +8,9 @@ class NewsDetailView(generic.DetailView):
 class NewsListView(generic.ListView):
     model = News
 
+    def get_queryset(self):
+        return News.published.all()
+
 class NewsCreateView(generic.CreateView):
     model = News
 

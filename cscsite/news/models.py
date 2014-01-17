@@ -1,26 +1,54 @@
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.utils.translation import ugettext_lazy as _
+from django.utils.html import escape
+
 from model_utils.models import TimeStampedModel
+from model_utils.fields import SplitField, \
+    SPLIT_MARKER, SPLIT_DEFAULT_PARAGRAPHS
+from model_utils.managers import QueryManager
+
+# TODO: "published" should be a date in future
 
 class News(TimeStampedModel):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL)
-    title = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=30,
-                            help_text="short underscore-separated string " \
-                                "for human-readable URLs, as in " \
-                                "test.com/news/<b>some_news</b>/",
+    author = models.ForeignKey(settings.AUTH_USER_MODEL,
+                               verbose_name=_("News|author"),
+                               editable=False,
+                               blank=False,
+                               null=True,
+                               on_delete=models.SET_NULL,
+                               default=lambda: get_user_model())
+
+    title = models.CharField(_("News|title"), max_length=100)
+
+    published = models.BooleanField(_("News|published"),
+                                    default=True)
+
+    slug = models.SlugField(_("News|slug"),
+                            max_length=30,
+                            help_text=_("News|short dash-separated string "
+                                        "for human-readable URLs, as in "
+                                        "test.com/news/<b>some-news</b>/"),
                             unique=True)
-    short_text = models.TextField(max_length=140,
-                                  help_text="140 symbols max")
-    full_text = models.TextField(max_length=(1024 * 4),
-                                  help_text="4kb max")
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+
+    text = SplitField(_("News|text"),
+                      max_length=(1024 * 4),
+                      help_text=(_("News|first %s paragraphs or anything "
+                                   "before %s will serve as excerpt") % \
+                                     (SPLIT_DEFAULT_PARAGRAPHS,
+                                      escape(SPLIT_MARKER))))
+
+    class Meta(object):
+        ordering = ["-created", "author"]
+        verbose_name = _("News|news-singular")
+        verbose_name_plural = _("News|news-plural")
+
+    public = QueryManager(published=True)
 
     def __unicode__(self):
-        # return u"%s (%s)" % (self.title, self.author)
-        return u"%s" % (self.slug)
+        return u"%s (%s)" % (self.title, self.author)
 
     def get_absolute_url(self):
-        # TODO(si14): self.slug?
-        return reverse('news_detail', args=[str(self.pk)])
+        return reverse('news_detail', args=[str(self.slug)])

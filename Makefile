@@ -1,6 +1,9 @@
 run:
 	python cscsite/manage.py runserver --settings=cscsite.settings.local
 
+syncdb:
+	python cscsite/manage.py syncdb --settings=cscsite.settings.local
+
 freeze:
 	pip freeze --local > requirements.txt
 
