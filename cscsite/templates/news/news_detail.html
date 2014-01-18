@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <h2>
+        <a href="{% url 'news_list' %}">←</a>&nbsp;<a href="{% url 'news_detail' slug=object.slug %}">{{ object.title }}</a>
+      </h2>
+      {{ object.text.content|linebreaks }}
+      <p class="news-metainfo">{{ news.created|date }} ({{ news.author }})</p>
+    </div>
+  </div>
+</div>
+{% endblock content %}

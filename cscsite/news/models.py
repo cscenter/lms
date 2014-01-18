@@ -43,6 +43,7 @@ class News(TimeStampedModel):
         verbose_name = _("News|news-singular")
         verbose_name_plural = _("News|news-plural")
 
+    objects = models.Manager()
     public = QueryManager(published=True)
 
     def __unicode__(self):

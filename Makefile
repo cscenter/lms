@@ -9,3 +9,9 @@ freeze:
 
 get-deps:
 	pip install -r requirements.txt
+
+dumpdemo:
+	python cscsite/manage.py dumpdata --settings=cscsite.settings.local --indent=2 > cscsite/fixtures/demo_data.json
+
+loaddemo:
+	python cscsite/manage.py loaddata --settings=cscsite.settings.local cscsite/fixtures/demo_data.json

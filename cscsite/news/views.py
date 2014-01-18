@@ -9,7 +9,7 @@ class NewsListView(generic.ListView):
     model = News
 
     def get_queryset(self):
-        return News.published.all()
+        return News.public.all()
 
 class NewsCreateView(generic.CreateView):
     model = News
