@@ -16,10 +16,8 @@ class News(TimeStampedModel):
     author = models.ForeignKey(settings.AUTH_USER_MODEL,
                                verbose_name=_("News|author"),
                                editable=False,
-                               blank=False,
                                null=True,
-                               on_delete=models.SET_NULL,
-                               default=lambda: get_user_model())
+                               on_delete=models.SET_NULL)
 
     title = models.CharField(_("News|title"), max_length=100)
 
@@ -27,7 +25,7 @@ class News(TimeStampedModel):
                                     default=True)
 
     slug = models.SlugField(_("News|slug"),
-                            max_length=30,
+                            max_length=70,
                             help_text=_("News|short dash-separated string "
                                         "for human-readable URLs, as in "
                                         "test.com/news/<b>some-news</b>/"),
