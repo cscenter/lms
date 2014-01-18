@@ -27,6 +27,14 @@
   padding-left: 0px;
 }
 
+.header a {
+  color: white;
+}
+
+.header a:hover {
+  decoration: none;
+}
+
 .header li {
   list-style: none;
   float: left;
@@ -71,4 +79,8 @@
   font-family: sans-serif;
   font-weight: bolder;
   text-align: right;
+}
+
+.news-metainfo {
+  color: #AAA;
 }
