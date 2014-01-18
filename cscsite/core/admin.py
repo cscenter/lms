@@ -36,12 +36,15 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
 
-    fieldsets = (
+    fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
-        ('Personal info', {'fields': ('last_name', 'first_name', 'patronymic', 'photo', 'note')}),
-        ('Current status', {'fields': ('is_teacher', 'is_student', 'enrolment_year')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
-        )
+        ('Personal info', {'fields': ['last_name', 'first_name', 'patronymic',
+                                      'photo', 'note']}),
+        ('Current status', {'fields': ['is_teacher', 'is_student',
+                                       'enrolment_year']}),
+        ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
+                                    'groups', 'user_permissions']}),
+        ('Important dates', {'fields': ['last_login', 'date_joined']})
+        ]
 
 admin.site.register(CSCUser, CSCUserAdmin)
