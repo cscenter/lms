@@ -6,7 +6,6 @@ class NewsAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not change:
-            print request.user
             obj.author = request.user
         obj.save()
 
