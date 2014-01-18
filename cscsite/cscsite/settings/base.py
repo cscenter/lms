@@ -17,6 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 PROJECT_DIR = Path(__file__).ancestor(3)
 MEDIA_ROOT = PROJECT_DIR.child("media")
+MEDIA_URL = "/media/"
 STATIC_ROOT = PROJECT_DIR.child("static")
 
 STATICFILES_DIRS = (
