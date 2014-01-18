@@ -45,6 +45,6 @@ class CSCUser(AbstractUser):
 
     # TODO: test this
     def get_full_name(self):
-        return unicode("%s %s %s" % (self.last_name,
-                                     self.first_name,
-                                     self.patronymic))
+        return unicode(("%s %s %s" % (self.last_name,
+                                      self.first_name,
+                                      self.patronymic)).strip())
