@@ -27,23 +27,48 @@
       <div class="container">
         <div class="row">
           <div class="col-xs-1">
-            <img src="{% static "img/csclogo.png" %}">
+            <a href="{% url 'index' %}">
+              <img src="{% static "img/csclogo.png" %}">
+            </a>
           </div>
           <div class="col-xs-8">
             <ul>
-              <li>О центре <i class="fa fa-caret-down"></i>
-              <li>Поступление</li>
+              <li>
+                О центре <i class="fa fa-caret-down"></i>
+              </li>
               <a href="{% url 'news_list' %}">
                 <li class="{% current 'news_list' %}">
                   События
                 </li>
               </a>
-              <li>Контакты
-              <li class="selected">Преподавание <i class="fa fa-caret-down"></i>
+              {% if user.is_authenticated %}
+                {% if user.is_student %}
+                  <li>
+                    Обучение <i class="fa fa-caret-down"></i>
+                  </li>
+                {% endif %}
+                {% if user.is_teacher %}
+                  <li>
+                    Преподавание <i class="fa fa-caret-down"></i>
+                  </li>
+                {% endif %}
+                {% if user.is_staff %}
+                  <li>
+                    Ведомость <i class="fa fa-caret-down"></i>
+                  </li>
+                {% endif %}
+              {% else %}
+                <li>Поступление</li>
+              {% endif %}
+              <li>Контакты</li>
             </ul>
           </div>
           <div class="col-xs-3 login">
-            <i class="fa fa-user"></i> Алёна
+            {% if user.is_authenticated %}
+              <i class="fa fa-user"></i>&nbsp;{{ user.username }}
+            {% else %}
+              Вход
+            {% endif %}
           </div>
         </div>
       </div>
