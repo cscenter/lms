@@ -16,7 +16,6 @@
       {% if news.text.has_more %}
       <p><a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a></p>
       {% endif %}
-
       <p class="news-metainfo">{{ news.created|date }} ({{ news.author }})</p>
     </div>
   </div>

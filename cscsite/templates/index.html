@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="index-image-container">
+        <img src="{% static "img/csc_index.jpg" %}">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4">
+      <h3>{% trans "News" %}</h3>
+      <ul>
+        {% for news in news_objects %}
+        <li>
+          <a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'news_list' %}">{% trans "All news" %}</a>
+    </div>
+    <div class="col-xs-4">
+      <h3>{% trans "How to enroll" %}</h3>
+      <p>{% trans "Warning: to enroll, you should provide all information about your family for at least 3 centuries. If such information is not available, please reconsider enrollment." %}</p>
+      <p>{% trans "Computer Science Center will be glad to see new people with decent heritage." %}</p>
+      <p><a href="">{% trans "Enrollment information" %}</a></p>
+    </div>
+    <div class="col-xs-4">
+      <h3>{% trans "Made by" %}</h3>
+      <table class="index-madeby-table">
+      <tr>
+        <td><img src="{% static "img/madeby_shad.png" %}"></td>
+        <td><a href="http://shad.yandex.ru/" target="_blank">{% trans "School of Data Analysis" %}</a></td>
+      </tr>
+      <tr>
+        <td><img src="{% static "img/madeby_jb.png" %}"></td>
+        <td><a href="http://www.jetbrains.com/" target="_blank">{% trans "JetBrains" %}</a></td>
+      </tr>
+      <tr>
+        <td><img src="{% static "img/madeby_pomi.png" %}"></td>
+        <td><a href="http://compsciclub.ru/" target="_blank">{% trans "Computer Science Club" %}</a></td>
+      </tr>
+      <tr>
+        <td><img src="{% static "img/madeby_fml.png" %}"></td>
+        <td><a href="http://239.ru/" target="_blank">{% trans "FML #239" %}</a></td>
+      </tr>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4"> </div>
+    <div class="col-xs-4">
+      <div class="index-social-icons-container">
+        <a href="http://vkontakte.ru/compscicenter" target="_blank"><i class="fa fa-vk fa-lg"></i></a>
+        <a href="https://www.facebook.com/CSCenter" target="_blank"><i class="fa fa-facebook fa-lg"></i></a>
+        <a href="http://twitter.com/#Compscicenter" target="_blank"><i class="fa fa-twitter fa-lg"></i></a>
+        <a href="http://cscenter.livejournal.com/" target="_blank"><i class="fa fa-pencil fa-lg"></i></a>
+        <a href="http://compscicenter.ru/rss" target="_blank"><i class="fa fa-rss-square fa-lg"></i></a>
+      </div>
+    </div>
+    </div>
+    <div class="col-xs-4"> </div>
+  </div>
+</div>
+{% endblock content %}

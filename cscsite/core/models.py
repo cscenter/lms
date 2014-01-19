@@ -24,6 +24,7 @@ class CSCUser(AbstractUser):
         _("CSCUser|note"),
         blank=True)
 
+    # TODO: this should be handled by groups
     is_teacher = models.BooleanField(
         _("CSCUser|teacher"),
         default=False,
