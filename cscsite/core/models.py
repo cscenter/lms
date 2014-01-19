@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
@@ -45,6 +46,6 @@ class CSCUser(AbstractUser):
 
     # TODO: test this
     def get_full_name(self):
-        return unicode(("%s %s %s" % (self.last_name,
-                                      self.first_name,
-                                      self.patronymic)).strip())
+        return force_text("{0} {1} {2}".format(self.last_name,
+                                               self.first_name,
+                                               self.patronymic).strip())
