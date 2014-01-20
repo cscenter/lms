@@ -13,15 +13,7 @@
   width: 100%;
   height: 40px;
   color: white;
-  visibility: hidden;
-}
-
-.header.lvl2.for-teachers {
-  background-color: #8657AB;
-}
-
-.header.lvl2.for-students {
-  background-color: #1C42A3;
+  /* visibility: hidden; */
 }
 
 .header ul {
@@ -46,25 +38,46 @@
   cursor: pointer;
 }
 
-.header.lvl1 li:hover {
+.header.lvl2.for-guests {
+  background-color: #3F3F3F;
+}
+.header.for-guests li:hover {
   background-color: #2F2F2F;
 }
-
-.header.lvl2.for-teachers li:hover {
-  background-color: #9667BB
+.header.for-guests li.current {
+  background-color: #222222; !important
 }
 
+.header.lvl2.for-students {
+  background-color: #1C42A3;
+}
+.header.for-students li:hover {
+  background-color: #2C52B3;
+}
+.header.for-students li.current {
+  background-color: #1C42A3 !important;
+}
+
+.header.lvl2.for-teachers {
+  background-color: #8657AB;
+}
+.header.for-teachers li:hover {
+  background-color: #9667BB
+}
 .header.for-teachers li.current {
   background-color: #561788 !important;
 }
 
-.header.lvl2.for-students li:hover {
-  background-color: #2C52B3;
+.header.lvl2.for-staff {
+  background-color: #C73827;
+}
+.header.for-staff li:hover {
+  background-color: #EE8C80
+}
+.header.for-staff li.current {
+  background-color: #E75847 !important;
 }
 
-.header.for-students li.current {
-  background-color: #1C42A3 !important;
-}
 
 .header li i {
   font-weight: normal;

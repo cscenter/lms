@@ -1,5 +1,7 @@
 {% load staticfiles %}
 {% load current from navigation %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -23,7 +25,14 @@
   </head>
   <body>
 
-    <div class="header lvl1 for-teachers">
+    <div class="header lvl1
+                {% if user.is_authenticated %}
+                  {% if user.is_student %} for-students {% endif %}
+                  {% if user.is_teacher %} for-teachers {% endif %}                                {% if user.is_staff %} for-staff {% endif %}
+                {% else %}
+                for-guests
+                {% endif %}
+                ">
       <div class="container">
         <div class="row">
           <div class="col-xs-1">
@@ -33,9 +42,14 @@
           </div>
           <div class="col-xs-8">
             <ul>
-              <li>
-                О центре <i class="fa fa-caret-down"></i>
-              </li>
+              <a href="{% url 'syllabus' %}">
+                <li class="{% current 'syllabus' %}
+                           {% current 'orgs' %}
+                           {% current 'profs' %}
+                           {% current 'alumni' %}">
+                  О центре <i class="fa fa-caret-down"></i>
+                </li>
+              </a>
               <a href="{% url 'news_list' %}">
                 <li class="{% current 'news_list' %}">
                   События
@@ -67,28 +81,75 @@
             {% if user.is_authenticated %}
               <i class="fa fa-user"></i>&nbsp;{{ user.username }}
             {% else %}
-              Вход
+              {% trans "Login" %}
             {% endif %}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="header lvl2 for-teachers">
+    {% with url_name=request.resolver_match.url_name %}
+    {% if url_name == 'syllabus' or url_name == 'orgs' or url_name == 'profs' or url_name == 'alumni'%}
+    <div class="header lvl2
+                {% if user.is_authenticated %}
+                  {% if user.is_student %} for-students {% endif %}
+                  {% if user.is_teacher %} for-teachers {% endif %}                                {% if user.is_staff %} for-staff {% endif %}
+                {% else %}
+                for-guests
+                {% endif %}">
       <div class="container">
         <div class="row">
           <div class="col-xs-1"></div>
           <div class="col-xs-11">
             <ul>
-              <li>Задания <span class="badge">3</span>
-              <li class="selected">Расписание <span class="badge">2</span>
-              <li>Курсы <span class="badge">2</span>
-              <li>Ведомость
+              <a href="{% url 'syllabus' %}">
+                <li class="{% current 'syllabus' %}">
+                  Программа
+                </li>
+              </a>
+              <a href="{% url 'orgs' %}">
+                <li class="{% current 'orgs' %}">
+                  Руководители и организаторы
+                </li>
+              </a>
+              <a href="{% url 'profs' %}">
+                <li class="{% current 'profs' %}">
+                  Преподаватели
+                </li>
+              </a>
+              <a href="{% url 'alumni' %}">
+                <li class="{% current 'alumni' %}">
+                  Выпускники
+                </li>
+              </a>
             </ul>
           </div>
         </div>
       </div>
     </div>
+    {% else %}
+      {% if url_name == 'foobar' %}
+      <div class="header lvl2 for-teachers">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-1"></div>
+            <div class="col-xs-11">
+              <ul>
+                <li>Задания <span class="badge">3</span>
+                <li class="selected">Расписание <span class="badge">2</span>
+                <li>Курсы <span class="badge">2</span>
+                <li>Ведомость
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="header lvl2 for-guests" style="visibility:hidden">
+      </div>
+      {% endif %}
+    {% endif %}
+    {% endwith %}
 
     {% block content %}
     <div class="container">
