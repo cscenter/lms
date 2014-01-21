@@ -79,7 +79,7 @@
           </div>
           <div class="col-xs-3 login">
             {% if user.is_authenticated %}
-              <i class="fa fa-user"></i>&nbsp;{{ user.username }}
+              <i class="fa fa-user"></i>&nbsp;{{ user }}
             {% else %}
               {% trans "Login" %}
             {% endif %}
