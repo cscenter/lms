@@ -115,3 +115,24 @@ STATIC_URL = '/static/'
 # Custom user model
 
 AUTH_USER_MODEL = "core.CSCUser"
+
+# URL names info for top menu. Possible keys:
+# "parent": name of "parent" menu item, as if in submenu
+# "alias": name of "alias" to current url name, when highlighted menu entry
+#          should differ from current url
+# cscsite.core.templatetags.navigation will comply if there is no entry for
+# current URL name
+
+MENU_URL_NAMES = {
+    'index': {},
+
+    'syllabus': {'parent': 'about'},
+    'orgs': {'parent': 'about'},
+    'profs': {'parent': 'about'},
+    'alumni': {'parent': 'about'},
+
+    'news_list': {},
+    'news_detail': {'alias': 'news_list'},
+
+    'contacts': {}
+    }
