@@ -24,17 +24,6 @@ class CSCUser(AbstractUser):
         _("CSCUser|note"),
         blank=True)
 
-    # TODO: this should be handled by groups
-    is_teacher = models.BooleanField(
-        _("CSCUser|teacher"),
-        default=False,
-        help_text=_("CSCUser|Designates whether the user is a teacher"))
-
-    is_student = models.BooleanField(
-        _("CSCUser|student"),
-        default=False,
-        help_text=_("CSCUser|Designates whether the user is a student"))
-
     enrolment_year = models.PositiveSmallIntegerField(
         _("CSCUser|enrolment year"),
         validators=[MinValueValidator(1990)],
@@ -44,6 +33,10 @@ class CSCUser(AbstractUser):
     class Meta:
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
+
+    def clean(self):
+        print self.groups
+        pass
 
     # TODO: test this
     def get_full_name(self):

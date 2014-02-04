@@ -26,9 +26,9 @@ class CSCUserChangeForm(UserChangeForm):
     # TODO: test this
     def clean(self):
         data = self.cleaned_data
-        if data['is_student'] and data['enrolment_year'] is None:
-            raise ValidationError(_("CSCUser|enrolment year should be provided "
-                                    "for students"))
+        # if data['is_student'] and data['enrolment_year'] is None:
+        #     raise ValidationError(_("CSCUser|enrolment year should be provided "
+        #                             "for students"))
         return data
 
 
@@ -39,9 +39,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
         ('Personal info', {'fields': ['last_name', 'first_name', 'patronymic',
-                                      'photo', 'note']}),
-        ('Current status', {'fields': ['is_teacher', 'is_student',
-                                       'enrolment_year']}),
+                                      'photo', 'note', 'enrolment_year']}),
         ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions']}),
         ('Important dates', {'fields': ['last_login', 'date_joined']})
