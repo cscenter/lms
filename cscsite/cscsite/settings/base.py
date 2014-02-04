@@ -55,6 +55,7 @@ INSTALLED_APPS = (
 
     'sorl.thumbnail',
 
+    'users',
     'core',
     'news',
 )
@@ -114,7 +115,7 @@ STATIC_URL = '/static/'
 
 # Custom user model
 
-AUTH_USER_MODEL = "core.CSCUser"
+AUTH_USER_MODEL = "users.CSCUser"
 
 # URL names info for top menu. Possible keys:
 # "parent": name of "parent" menu item, as if in submenu
