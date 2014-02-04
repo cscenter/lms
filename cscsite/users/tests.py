@@ -5,10 +5,6 @@ from django.core.exceptions import ValidationError
 
 from .models import CSCUser
 
-IS_STUDENT_PK = 1
-IS_TEACHER_PK = 2
-IS_GRADUATE_PK = 3
-
 class UserTests(TestCase):
     def test_student_should_have_enrollment_year(self):
         """
@@ -18,7 +14,7 @@ class UserTests(TestCase):
         """
         user = CSCUser()
         user.save()
-        user.groups = [IS_STUDENT_PK]
+        user.groups = [user.IS_STUDENT_PK]
         self.assertRaises(ValidationError, user.clean)
         user.enrolment_year = 2010
         self.assertIsNone(user.clean())
@@ -31,7 +27,7 @@ class UserTests(TestCase):
         """
         user = CSCUser()
         user.save()
-        user.groups = [IS_GRADUATE_PK]
+        user.groups = [user.IS_GRADUATE_PK]
         self.assertRaises(ValidationError, user.clean)
         user.graduation_year = 2011
         self.assertIsNone(user.clean())
@@ -55,15 +51,16 @@ class UserTests(TestCase):
         self.assertFalse(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user.groups = [IS_STUDENT_PK]
+        user.groups = [user.IS_STUDENT_PK]
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user.groups = [IS_STUDENT_PK, IS_TEACHER_PK]
+        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user.groups = [IS_STUDENT_PK, IS_TEACHER_PK, IS_GRADUATE_PK]
+        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK,
+                       user.IS_GRADUATE_PK]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)

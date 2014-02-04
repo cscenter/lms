@@ -137,3 +137,22 @@
 .index-madeby-table td {
   padding: 10px;
 }
+
+.user-tile {
+  width: 450px;
+  margin: 10px;
+  float: left;
+}
+
+.user-tile img {
+  float: left;
+}
+
+.user-tile .user-info {
+  float: left;
+  padding: 10px;
+}
+
+.user-tile .user-info h4 {
+  margin-top: 0px;
+}
