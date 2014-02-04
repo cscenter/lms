@@ -46,35 +46,35 @@
             <ul>
               <a href="{% url 'syllabus' %}">
                 <li class="{% current 'about' %}">
-                  О центре <i class="fa fa-caret-down"></i>
+                  {% trans "About CSC" %} <i class="fa fa-caret-down"></i>
                 </li>
               </a>
               <a href="{% url 'news_list' %}">
                 <li class="{% current 'news_list' %}">
-                  События
+                  {% trans "News" %}
                 </li>
               </a>
               {% if user.is_authenticated %}
                 {% if user.is_student %}
                   <li>
-                    Обучение <i class="fa fa-caret-down"></i>
+                    {% trans "Learning" %} <i class="fa fa-caret-down"></i>
                   </li>
                 {% endif %}
                 {% if user.is_teacher %}
                   <li>
-                    Преподавание <i class="fa fa-caret-down"></i>
+                    {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
                   </li>
                 {% endif %}
                 {% if user.is_staff %}
                   <li>
-                    Ведомость <i class="fa fa-caret-down"></i>
+                    {% trans "Marks sheet" %} <i class="fa fa-caret-down"></i>
                   </li>
                 {% endif %}
               {% else %}
-                <li>Поступление</li>
+                <li>{% trans "Enrollment" %}</li>
               {% endif %}
               <a href="{% url 'contacts' %}">
-                <li class="{% current 'contacts' %}">Контакты</li>
+                <li class="{% current 'contacts' %}">{% trans "Contacts" %}</li>
               </a>
             </ul>
           </div>
@@ -98,22 +98,22 @@
               <ul>
                 <a href="{% url 'syllabus' %}">
                   <li class="{% current 'syllabus' %}">
-                    Программа
+                    {% trans "Syllabus" %}
                   </li>
                 </a>
                 <a href="{% url 'orgs' %}" style="display: block;">
                   <li class="{% current 'orgs' %}">
-                    Руководители и организаторы
+                    {% trans "Organizers and staff" %}
                   </li>
                 </a>
                 <a href="{% url 'profs' %}">
                   <li class="{% current 'profs' %}">
-                    Преподаватели
+                    {% trans "Professors" %}
                   </li>
                 </a>
                 <a href="{% url 'alumni' %}">
                   <li class="{% current 'alumni' %}">
-                    Выпускники
+                    {% trans "Alumni" %}
                   </li>
                 </a>
               </ul>
