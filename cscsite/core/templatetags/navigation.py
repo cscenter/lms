@@ -17,7 +17,7 @@ def current(context, url_name, return_value='current', **kwargs):
         logger.warning("can't find url {0} in MENU_URL_NAMES".format(url_name))
         return return_value if matched_simple else ''
     else:
-        url_info = URL_NAMES[current_url_name]
+        url_info = settings.MENU_URL_NAMES[current_url_name]
         matched_alias = ('alias' in url_info and
                          url_info['alias'] == url_name)
         matched_parent = ('parent' in url_info and

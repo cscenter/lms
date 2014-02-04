@@ -23,15 +23,6 @@ class CSCUserChangeForm(UserChangeForm):
     class Meta:
         model = CSCUser
 
-    # TODO: test this
-    def clean(self):
-        data = self.cleaned_data
-        # if data['is_student'] and data['enrolment_year'] is None:
-        #     raise ValidationError(_("CSCUser|enrolment year should be provided "
-        #                             "for students"))
-        return data
-
-
 class CSCUserAdmin(AdminImageMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm

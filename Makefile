@@ -15,3 +15,6 @@ dumpdemo:
 
 loaddemo:
 	python cscsite/manage.py loaddata --settings=cscsite.settings.local cscsite/fixtures/demo_data.json
+
+test:
+	python cscsite/manage.py test core index news users --settings=cscsite.settings.test

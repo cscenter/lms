@@ -14,6 +14,7 @@
   <div class="row">
     <div class="col-xs-4">
       <h3>{% trans "News" %}</h3>
+      {% if news_objects %}
       <ul>
         {% for news in news_objects %}
         <li>
@@ -22,6 +23,9 @@
         {% endfor %}
       </ul>
       <a href="{% url 'news_list' %}">{% trans "All news" %}</a>
+      {% else %}
+      <p>{% trans "No news yet" %}</p>
+      {% endif %}
     </div>
     <div class="col-xs-4">
       <h3>{% trans "How to enroll" %}</h3>
