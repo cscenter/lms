@@ -30,6 +30,12 @@ class CSCUser(AbstractUser):
         blank=True,
         null=True)
 
+    graduation_year = models.PositiveSmallIntegerField(
+        _("CSCUser|graduation year"),
+        validators=[MinValueValidator(1990)],
+        blank=True,
+        null=True)
+
     class Meta:
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
@@ -50,8 +56,10 @@ class CSCUser(AbstractUser):
         if self.is_student and self.enrolment_year is None:
             raise ValidationError(_("CSCUser|enrolment year should be provided "
                                     "for students"))
-    # TODO: test this
+        if self.is_graduate and self.graduation_year is None:
+            raise ValidationError(_("CSCUser|graduation year should be provided "
+                                    "for graduates"))
     def get_full_name(self):
-        return force_text("{0} {1} {2}".format(self.last_name,
-                                               self.first_name,
-                                               self.patronymic).strip())
+        return force_text(u"{0} {1} {2}".format(self.last_name,
+                                                self.first_name,
+                                                self.patronymic).strip())
