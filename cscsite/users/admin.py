@@ -30,7 +30,8 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
         ('Personal info', {'fields': ['last_name', 'first_name', 'patronymic',
-                                      'photo', 'note', 'enrolment_year']}),
+                                      'photo', 'note', 'enrolment_year',
+                                      'graduation_year']}),
         ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions']}),
         ('Important dates', {'fields': ['last_login', 'date_joined']})
