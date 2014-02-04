@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      {% for user in object_list %}
+      <div class="user-tile">
+        {% thumbnail user.photo "100x100" crop="center" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+        {% endthumbnail %}
+        <div class="user-info">
+          <h4>{{ user.get_full_name }}</h4>
+          <p>{{ user.note }}</p>
+        </div>
+      </div>
+      {% empty %}
+      {% trans "No alumnis yet" %}
+      {% endfor %}
+  </div>
+</div>
+{% endblock content %}
