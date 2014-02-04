@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 from unipath import Path
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 PROJECT_DIR = Path(__file__).ancestor(3)
@@ -58,6 +57,7 @@ INSTALLED_APPS = (
     'users',
     'core',
     'news',
+    'index',
 )
 
 MIDDLEWARE_CLASSES = (
