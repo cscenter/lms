@@ -339,7 +339,7 @@
 },
 {
   "pk": 1,
-  "model": "core.cscuser",
+  "model": "users.cscuser",
   "fields": {
     "username": "admin",
     "first_name": "",
@@ -361,7 +361,7 @@
 },
 {
   "pk": 2,
-  "model": "core.cscuser",
+  "model": "users.cscuser",
   "fields": {
     "username": "superbobry",
     "first_name": "\u0421\u0435\u0440\u0433\u0435\u0439",
@@ -383,7 +383,7 @@
 },
 {
   "pk": 3,
-  "model": "core.cscuser",
+  "model": "users.cscuser",
   "fields": {
     "username": "katyasosa",
     "first_name": "\u041a\u0430\u0442\u044f",
