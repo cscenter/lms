@@ -9,6 +9,10 @@ from django.utils import timezone
 from sorl.thumbnail import ImageField
 
 class CSCUser(AbstractUser):
+    IS_STUDENT_PK = 1
+    IS_TEACHER_PK = 2
+    IS_GRADUATE_PK = 3
+
     patronymic = models.CharField(
         _("CSCUser|patronymic"),
         max_length=100,
@@ -40,6 +44,22 @@ class CSCUser(AbstractUser):
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
+    def clean(self):
+        # avoid checking if the model wasn't yet saved, otherwise exception
+        # will be thrown about missing many-to-many relation
+        if self.pk:
+            if self.is_student and self.enrolment_year is None:
+                raise ValidationError(_("CSCUser|enrolment year should be "
+                                        "provided for students"))
+            if self.is_graduate and self.graduation_year is None:
+                raise ValidationError(_("CSCUser|graduation year should be "
+                                        " provided for graduates"))
+
+    def get_full_name(self):
+        return force_text(u"{0} {1} {2}".format(self.last_name,
+                                                self.first_name,
+                                                self.patronymic).strip())
+
     @property
     def is_student(self):
         return self.groups.filter(name="Student").exists()
@@ -51,15 +71,3 @@ class CSCUser(AbstractUser):
     @property
     def is_graduate(self):
         return self.groups.filter(name="Graduate").exists()
-
-    def clean(self):
-        if self.is_student and self.enrolment_year is None:
-            raise ValidationError(_("CSCUser|enrolment year should be provided "
-                                    "for students"))
-        if self.is_graduate and self.graduation_year is None:
-            raise ValidationError(_("CSCUser|graduation year should be provided "
-                                    "for graduates"))
-    def get_full_name(self):
-        return force_text(u"{0} {1} {2}".format(self.last_name,
-                                                self.first_name,
-                                                self.patronymic).strip())
