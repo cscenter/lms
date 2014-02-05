@@ -7,7 +7,11 @@
       <h2>
         <a href="{% url 'news_list' %}">←</a>&nbsp;<a href="{% url 'news_detail' slug=object.slug %}">{{ object.title }}</a>
       </h2>
-      {{ object.text.content|linebreaks }}
+
+      <div class="ubertext">
+        {{ object.text.content|linebreaks }}
+      </div>
+
       <p class="news-metainfo">{{ news.created|date }} ({{ news.author }})</p>
     </div>
   </div>
