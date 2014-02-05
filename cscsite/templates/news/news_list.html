@@ -11,7 +11,9 @@
           {{ news.title }}
         </a>
       </h2>
-      {{ news.text.excerpt|linebreaks }}
+      <div class="ubertext">
+        {{ news.text.excerpt|linebreaks }}
+      </div>
 
       {% if news.text.has_more %}
       <p><a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a></p>

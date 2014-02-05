@@ -151,6 +151,7 @@
 .user-tile .user-info {
   float: left;
   padding: 10px;
+  width: 350px;
 }
 
 .user-tile .user-info h4 {
