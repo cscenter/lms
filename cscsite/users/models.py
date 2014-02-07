@@ -26,6 +26,7 @@ class CSCUser(AbstractUser):
 
     note = models.TextField(
         _("CSCUser|note"),
+        help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
 
     enrolment_year = models.PositiveSmallIntegerField(
