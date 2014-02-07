@@ -6,68 +6,91 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <div class="index-image-container">
-        <img src="{% static "img/csc_index.jpg" %}">
+      <div class=" container index-image-container" style="background-image:url('{% static "img/index_bg.png" %}')">
+        <div class="row">
+          <div class="col-xs-2"></div>
+          <div class="col-xs-6 callout">
+            <h1>Computer Science Center</h1>
+            <p>Computer Science Center is a decent place to learn! Come and learn to knit and dig holes here.</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 callout-buttons">
+            <button type="button" class="btn btn-lg btn-info">
+              {% trans "Learn more" %}
+            </button>
+            <button type="button" class="btn btn-lg btn-primary">
+              {% trans "How to enroll" %}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-4">
-      <h3>{% trans "News" %}</h3>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-10">
+      <h1 class="bigger-margin">{% trans "CS Center News" %}</h1>
+
       {% if news_objects %}
-      <ul>
+      <ul class="index-news">
         {% for news in news_objects %}
         <li>
-          <a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a>
+          <span class="date">{{ news.created|date }}</span>
+          <h3><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h3>
+          <div class="ubertext">
+            {{ news.text.excerpt }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>
+          {% endif %}
+          </div>
         </li>
         {% endfor %}
       </ul>
-      <a href="{% url 'news_list' %}">{% trans "All news" %}</a>
+      <a href="{% url 'news_list' %}"><h4 class="bigger-margin">{% trans "All news" %}</h4></a>
+
       {% else %}
       <p>{% trans "No news yet" %}</p>
       {% endif %}
-    </div>
-    <div class="col-xs-4">
-      <h3>{% trans "How to enroll" %}</h3>
-      <p>{% trans "Warning: to enroll, you should provide all information about your family for at least 3 centuries. If such information is not available, please reconsider enrollment." %}</p>
-      <p>{% trans "Computer Science Center will be glad to see new people with decent heritage." %}</p>
-      <p><a href="">{% trans "Enrollment information" %}</a></p>
-    </div>
-    <div class="col-xs-4">
-      <h3>{% trans "Made by" %}</h3>
-      <table class="index-madeby-table">
-      <tr>
-        <td><img src="{% static "img/madeby_shad.png" %}"></td>
-        <td><a href="http://shad.yandex.ru/" target="_blank">{% trans "School of Data Analysis" %}</a></td>
-      </tr>
-      <tr>
-        <td><img src="{% static "img/madeby_jb.png" %}"></td>
-        <td><a href="http://www.jetbrains.com/" target="_blank">{% trans "JetBrains" %}</a></td>
-      </tr>
-      <tr>
-        <td><img src="{% static "img/madeby_pomi.png" %}"></td>
-        <td><a href="http://compsciclub.ru/" target="_blank">{% trans "Computer Science Club" %}</a></td>
-      </tr>
-      <tr>
-        <td><img src="{% static "img/madeby_fml.png" %}"></td>
-        <td><a href="http://239.ru/" target="_blank">{% trans "FML #239" %}</a></td>
-      </tr>
-      </table>
+
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-4"> </div>
-    <div class="col-xs-4">
-      <div class="index-social-icons-container">
-        <a href="http://vkontakte.ru/compscicenter" target="_blank"><i class="fa fa-vk fa-lg"></i></a>
-        <a href="https://www.facebook.com/CSCenter" target="_blank"><i class="fa fa-facebook fa-lg"></i></a>
-        <a href="http://twitter.com/#Compscicenter" target="_blank"><i class="fa fa-twitter fa-lg"></i></a>
-        <a href="http://cscenter.livejournal.com/" target="_blank"><i class="fa fa-pencil fa-lg"></i></a>
-        <a href="http://compscicenter.ru/rss" target="_blank"><i class="fa fa-rss-square fa-lg"></i></a>
-      </div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-10">
+      <h1 class="bigger-margin">{% trans "Supported by" %}</h1>
+      <ul class="supported-by">
+        <a href="http://shad.yandex.ru/" target="_blank">
+          <li>
+            <img src="holder.js/100x40">
+            <p>{% trans "Yandex School of Data Analysis" %}</p>
+          </li>
+        </a>
+        <a href="http://www.jetbrains.com/" target="_blank">
+          <li>
+            <img src="holder.js/100x40">
+            <p>{% trans "JetBrains" %}</p>
+          </li>
+        </a>
+        <a href="http://compsciclub.ru/" target="_blank">
+          <li>
+            <img src="holder.js/100x40">
+            <p>{% trans "Computer Science Club" %}</p>
+          </li>
+        </a>
+        <a href="http://239.ru/" target="_blank">
+          <li>
+            <img src="holder.js/100x40">
+            <p>{% trans "FML #239" %}</p>
+          </li>
+        </a>
+      </ul>
     </div>
-    </div>
-    <div class="col-xs-4"> </div>
+    <!-- <div class="col-xs-4"> -->
+    <!--   <h3>{% trans "How to enroll" %}</h3> -->
+    <!--   <p>{% trans "Warning: to enroll, you should provide all information about your family for at least 3 centuries. If such information is not available, please reconsider enrollment." %}</p> -->
+    <!--   <p>{% trans "Computer Science Center will be glad to see new people with decent heritage." %}</p> -->
+    <!--   <p><a href="">{% trans "Enrollment information" %}</a></p> -->
+    <!-- </div> -->
+
   </div>
 </div>
 {% endblock content %}
