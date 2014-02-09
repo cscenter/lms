@@ -53,14 +53,14 @@
                 ">
       <div class="container">
         <div class="row">
-          <div class="col-xs-1 logo-cell">
-            <a href="{% url 'index' %}">
-              <div class="logo-container">
-                <img src="{% static "img/csclogo2.png" %}">
-              </div>
-            </a>
-          </div>
-          <div class="col-xs-8">
+          <div class="col-xs-9">
+            <div class="logo-cell">
+              <a href="{% url 'index' %}">
+                <div class="logo-container">
+                  <img src="{% static "img/csclogo2.png" %}">
+                </div>
+              </a>
+            </div>
             <ul>
               <a href="{% url 'syllabus' %}">
                 <li class="{% current 'about' %}">
@@ -98,9 +98,11 @@
           </div>
           <div class="col-xs-3 login">
             {% if user.is_authenticated %}
-              <i class="fa fa-user"></i>&nbsp;{{ user }}
+            <i class="fa fa-user"></i>&nbsp;{{ user }}&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
             {% else %}
+            <a href="{% url 'login' %}">
               {% trans "Login" %}
+            </a>
             {% endif %}
           </div>
         </div>

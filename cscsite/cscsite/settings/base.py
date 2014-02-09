@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'sorl.thumbnail',
+    'crispy_forms',
 
     'users',
     'core',
@@ -137,3 +138,8 @@ MENU_URL_NAMES = {
 
     'contacts': {}
     }
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
