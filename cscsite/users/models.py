@@ -63,12 +63,12 @@ class CSCUser(AbstractUser):
 
     @property
     def is_student(self):
-        return self.groups.filter(name="Student").exists()
+        return self.groups.filter(pk=self.IS_STUDENT_PK).exists()
 
     @property
     def is_teacher(self):
-        return self.groups.filter(name="Teacher").exists()
+        return self.groups.filter(pk=self.IS_TEACHER_PK).exists()
 
     @property
     def is_graduate(self):
-        return self.groups.filter(name="Graduate").exists()
+        return self.groups.filter(pk=self.IS_GRADUATE_PK).exists()
