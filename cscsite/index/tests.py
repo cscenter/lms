@@ -5,7 +5,7 @@ from news.models import News
 
 class IndexTests(TestCase):
     def test_no_news(self):
-        response = self.client.get(reverse("index"))
+        response = self.client.get(reverse('index'))
         self.assertItemsEqual(response.context['news_objects'], [])
         # Assuming that there is no translation in tests
         self.assertEqual(response.content.count("All news"), 0)
