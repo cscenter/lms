@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django.test import TestCase
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
+
+from bs4 import BeautifulSoup
 
 from .models import CSCUser
 
@@ -64,3 +68,30 @@ class UserTests(TestCase):
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
+
+    def test_login_page(self):
+        resp = self.client.get(reverse('login'))
+        soup = BeautifulSoup(resp.content)
+        maybe_form = soup.find_all("form")
+        self.assertEqual(len(maybe_form), 1)
+        form = maybe_form[0]
+        self.assertEqual(len(form.select('input[name="username"]')), 1)
+        self.assertEqual(len(form.select('input[name="password"]')), 1)
+        self.assertEqual(len(form.select('input[type="submit"]')), 1)
+
+    # TODO: test auth
+    def test_login_works(self):
+        test_user = "testuser"
+        test_password = "test123foobar@!"
+        test_email = "foo@bar.net"
+        CSCUser.objects.create_user(test_user, test_email, test_password)
+        self.assertNotIn('_auth_user_id', self.client.session)
+        resp = self.client.post('/login/', {'username': test_user,
+                                            'password': test_password + "BAD"})
+        self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "enter a correct username")
+        resp = self.client.post('/login/', {'username': test_user,
+                                            'password': test_password})
+        self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
+        self.assertIn('_auth_user_id', self.client.session)
