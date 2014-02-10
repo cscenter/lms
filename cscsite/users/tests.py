@@ -79,19 +79,35 @@ class UserTests(TestCase):
         self.assertEqual(len(form.select('input[name="password"]')), 1)
         self.assertEqual(len(form.select('input[type="submit"]')), 1)
 
-    # TODO: test auth
+    # TODO: test group-restricted pages
     def test_login_works(self):
         test_user = "testuser"
         test_password = "test123foobar@!"
         test_email = "foo@bar.net"
         CSCUser.objects.create_user(test_user, test_email, test_password)
         self.assertNotIn('_auth_user_id', self.client.session)
-        resp = self.client.post('/login/', {'username': test_user,
-                                            'password': test_password + "BAD"})
+        resp = self.client.post(reverse('login'),
+                                {'username': test_user,
+                                 'password': test_password + "BAD"})
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "enter a correct username")
-        resp = self.client.post('/login/', {'username': test_user,
-                                            'password': test_password})
+        resp = self.client.post(reverse('login'),
+                                {'username': test_user,
+                                 'password': test_password})
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
+
+    def test_logout_works(self):
+        test_user = "testuser"
+        test_password = "test123foobar@!"
+        test_email = "foo@bar.net"
+        CSCUser.objects.create_user(test_user, test_email, test_password)
+        login = self.client.login(username=test_user,
+                                  password=test_password)
+        self.assertTrue(login)
+        self.assertIn('_auth_user_id', self.client.session)
+        resp = self.client.get(reverse('logout'))
+        self.assertRedirects(resp, settings.LOGOUT_REDIRECT_URL,
+                             status_code=301)
+        self.assertNotIn('_auth_user_id', self.client.session)
