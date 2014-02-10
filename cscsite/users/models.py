@@ -2,11 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
+from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-from django.utils import timezone
+from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
+
+import logging
 
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
@@ -61,14 +64,14 @@ class CSCUser(AbstractUser):
                                                 self.first_name,
                                                 self.patronymic).strip())
 
+    @cached_property
+    def _cs_group_pks(self):
+        return [group.pk for group in self.groups.all()]
+
     @property
     def is_student(self):
-        return self.groups.filter(pk=self.IS_STUDENT_PK).exists()
+        return self.IS_STUDENT_PK in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_teacher(self):
-        return self.groups.filter(pk=self.IS_TEACHER_PK).exists()
-
-    @property
-    def is_graduate(self):
-        return self.groups.filter(pk=self.IS_GRADUATE_PK).exists()
+        return self.IS_TEACHER_PK in self._cs_group_pks
