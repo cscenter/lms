@@ -35,6 +35,7 @@ h4.bigger-margin {
 .header-lvl2-container {
   position: relative;
   height: 40px;
+  margin-bottom: 20px;
 }
 
 .header.lvl2 {

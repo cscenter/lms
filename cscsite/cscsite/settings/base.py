@@ -54,6 +54,7 @@ INSTALLED_APPS = (
 
     'sorl.thumbnail',
     'crispy_forms',
+    'floppyforms',
 
     'users',
     'core',
