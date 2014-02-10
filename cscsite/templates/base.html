@@ -43,14 +43,7 @@
   </head>
   <body class="tex2jax_ignore">
 
-    <div class="header lvl1
-                {% if user.is_authenticated %}
-                  {% if user.is_student %} for-students {% endif %}
-                  {% if user.is_teacher %} for-teachers {% endif %}                                {% if user.is_staff %} for-staff {% endif %}
-                {% else %}
-                for-guests
-                {% endif %}
-                ">
+    <div class="header lvl1">
       <div class="container">
         <div class="row">
           <div class="col-xs-9">
@@ -113,8 +106,8 @@
       <div class="header lvl2 {% current 'about' %}">
         <div class="container">
           <div class="row">
-            <div class="col-xs-1"></div>
-            <div class="col-xs-11">
+            <div class="col-xs-12">
+              <div class="logo-cell"></div>
               <ul>
                 <a href="{% url 'syllabus' %}">
                   <li class="{% current 'syllabus' %}">
