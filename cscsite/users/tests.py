@@ -50,19 +50,25 @@ class UserTests(TestCase):
         """
         Tests properties based on groups (is_student, is_graduate, is_teacher)
         """
-        user = CSCUser()
+        user = CSCUser(username="foo")
         user.save()
         self.assertFalse(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
+        user = CSCUser(username="bar")
+        user.save()
         user.groups = [user.IS_STUDENT_PK]
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
+        user = CSCUser(username="baz")
+        user.save()
         user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
+        user = CSCUser(username="baq")
+        user.save()
         user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK,
                        user.IS_GRADUATE_PK]
         self.assertTrue(user.is_student)

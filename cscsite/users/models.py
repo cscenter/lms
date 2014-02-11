@@ -72,6 +72,10 @@ class CSCUser(AbstractUser):
     def is_student(self):
         return self.IS_STUDENT_PK in self._cs_group_pks
 
-    @cached_property
+    @property
     def is_teacher(self):
         return self.IS_TEACHER_PK in self._cs_group_pks
+
+    @property
+    def is_graduate(self):
+        return self.IS_GRADUATE_PK in self._cs_group_pks
