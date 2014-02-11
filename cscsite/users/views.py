@@ -56,21 +56,12 @@ class LoginView(FormView):
 
     # TODO: redirect on user-specific page?
     def get_success_url(self):
-        redirect_to = settings.LOGOUT_REDIRECT_URL
+        redirect_to = self.request.REQUEST.get(self.redirect_field_name)
 
-        if self.redirect_field_name in self.request.REQUEST:
-            maybe_redirect_to = self.request.REQUEST[self.redirect_field_name]
-            if is_safe_url(url=maybe_redirect_to,
-                           host=self.request.get_host()):
-                redirect_to = maybe_redirect_to
+        if not is_safe_url(redirect_to, self.request.get_host()):
+            redirect_to = settings.LOGOUT_REDIRECT_URL
 
         return redirect_to
-
-    def check_and_delete_test_cookie(self):
-        if self.request.session.test_cookie_worked():
-            self.request.session.delete_test_cookie()
-            return True
-        return False
 
     def get(self, request, *args, **kwargs):
         self.request.session.set_test_cookie()
@@ -80,7 +71,8 @@ class LoginView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         if form.is_valid():
-            self.check_and_delete_test_cookie()
+            if self.request.session.test_cookie_worked():
+                self.request.session.delete_test_cookie()
             return self.form_valid(form)
         else:
             self.request.session.set_test_cookie()
