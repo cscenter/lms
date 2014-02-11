@@ -10,11 +10,11 @@ from django.views.generic import FormView, View, RedirectView
 from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
+from braces.views import LoginRequiredMixin
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden
 from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
-from braces.views import LoginRequiredMixin
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
