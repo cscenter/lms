@@ -66,7 +66,7 @@ class CSCUser(AbstractUser):
 
     @cached_property
     def _cs_group_pks(self):
-        return [group.pk for group in self.groups.all()]
+        return self.groups.values_list("pk", flat=True)
 
     @property
     def is_student(self):
