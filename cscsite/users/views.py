@@ -14,6 +14,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden
 from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
+from braces.views import LoginRequiredMixin
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -78,7 +79,7 @@ class LoginView(FormView):
             self.request.session.set_test_cookie()
             return self.form_invalid(form)
 
-class LogoutView(RedirectView):
+class LogoutView(LoginRequiredMixin, RedirectView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
 
     def get(self, request, *args, **kwargs):
