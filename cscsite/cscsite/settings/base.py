@@ -137,7 +137,10 @@ MENU_URL_NAMES = {
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
 
-    'contacts': {}
+    'contacts': {},
+
+    'login': {},
+    'logout': {}
     }
 
 LOGIN_REDIRECT_URL = "/"
