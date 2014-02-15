@@ -1,0 +1,38 @@
+[
+    {
+        "model": "textpages.textpage",
+        "pk": 1,
+        "fields": {
+            "url_name": "syllabus",
+            "name": "Syllabus",
+            "text": "# Syllabus\n\nThis is Computer Science Center syllabus. **Please change this text**."
+        }
+    },
+    {
+        "model": "textpages.textpage",
+        "pk": 2,
+        "fields": {
+            "url_name": "orgs",
+            "name": "Organizers",
+            "text": "# Organizers\n\nThis is a list of people that made Computer Science Center real. **Please change this text**."
+        }
+    },
+    {
+        "model": "textpages.textpage",
+        "pk": 3,
+        "fields": {
+            "url_name": "contacts",
+            "name": "Contacts",
+            "text": "# Contacts\n\nThis is how you can contact Computer Science Center. **Please change this text**."
+        }
+    },
+    {
+        "model": "textpages.textpage",
+        "pk": 4,
+        "fields": {
+            "url_name": "licenses",
+            "name": "Licenses",
+            "text": "# Licenses\n\nThis is a list of licenses available for Computer Science Center students. **Please change this text**."
+        }
+    }
+]
