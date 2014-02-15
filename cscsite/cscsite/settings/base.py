@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'news',
     'index',
     'textpages',
+    'learning'
 )
 
 MIDDLEWARE_CLASSES = (
