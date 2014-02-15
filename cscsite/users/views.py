@@ -34,9 +34,7 @@ class LoginForm(AuthenticationForm):
         self.helper.layout = Layout(
             'username',
             'password',
-            FormActions(Submit('submit', _("Submit"))),
-            # TODO: test if "next" is working
-            Hidden('next', ''))
+            FormActions(Submit('submit', _("Submit"))))
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
 # TODO: rename all XXXView to just XXX?
