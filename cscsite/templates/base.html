@@ -82,7 +82,9 @@
                   </li>
                 {% endif %}
               {% else %}
-                <li>{% trans "Enrollment" %}</li>
+                  <a href="{% url 'enrollment' %}">
+                    <li class="{% current 'enrollment' %}">{% trans "Enrollment" %}</li>
+                  </a>
               {% endif %}
               <a href="{% url 'contacts' %}">
                 <li class="{% current 'contacts' %}">{% trans "Contacts" %}</li>

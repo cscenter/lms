@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     url(r'^profs/$', ProfView.as_view(), name='profs'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^news/', include('news.urls')),
+    url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
 
     url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
