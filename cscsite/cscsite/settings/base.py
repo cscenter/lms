@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'core',
     'news',
     'index',
+    'textpages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -143,6 +144,7 @@ MENU_URL_NAMES = {
     'logout': {}
     }
 
+LOGIN_URL= "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
