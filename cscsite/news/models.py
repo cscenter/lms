@@ -34,7 +34,8 @@ class News(TimeStampedModel):
     text = SplitField(_("News|text"),
                       max_length=(1024 * 4),
                       help_text=(_("News|first %s paragraphs or anything "
-                                   "before %s will serve as excerpt") % \
+                                   "before %s will serve as excerpt; "
+                                   "LaTeX+Markdown is enabled") % \
                                      (SPLIT_DEFAULT_PARAGRAPHS,
                                       escape(SPLIT_MARKER))))
 
