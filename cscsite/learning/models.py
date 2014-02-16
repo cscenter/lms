@@ -10,6 +10,8 @@ from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 
+from users.models import CSCUser
+
 # TODO: check that teacher is a teacher
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"),
@@ -19,7 +21,9 @@ class Course(TimeStampedModel):
         verbose_name=_("Course|teacher"),
         null=True,
         on_delete=models.SET_NULL,
-        limit_choices_to={'is_teacher': True})
+        limit_choices_to={'groups__name': 'Teacher'})
+    ongoing = models.BooleanField(_("Course|ongoing"),
+                                  default=True)
 
     class Meta(object):
         ordering = ["name", "created"]
@@ -62,7 +66,7 @@ class AssignmentStudent(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
-        limit_choices_to={'is_student': True})
+        limit_choices_to={'groups__name': 'Student'})
 
     state = StatusField(verbose_name=_("Asssignment|state"),
                         choices_name='STATES')

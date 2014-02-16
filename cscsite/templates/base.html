@@ -72,9 +72,11 @@
                   </li>
                 {% endif %}
                 {% if user.is_teacher %}
-                  <li>
-                    {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
-                  </li>
+                  <a href="{% url 'courses_teacher' %}">
+                    <li class="{% current 'teaching' %} for-teachers">
+                      {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
+                    </li>
+                  </a>
                 {% endif %}
                 {% if user.is_staff %}
                   <li>
@@ -137,16 +139,18 @@
         </div>
       </div>
 
-      <div class="header lvl2 for-teachers">
+      <div class="header lvl2 for-teachers {% current 'teaching' %}">
         <div class="container">
           <div class="row">
-            <div class="col-xs-1"></div>
-            <div class="col-xs-11">
+            <div class="col-xs-12">
+              <div class="logo-cell"></div>
               <ul>
-                <li>Задания <span class="badge">3</span>
-                <li class="selected">Расписание <span class="badge">2</span>
-                <li>Курсы <span class="badge">2</span>
-                <li>Ведомость
+                <li>Задания <span class="badge">3</span></li>
+                <a href="{% url 'courses_teacher' %}">
+                  <li class="{% current 'courses_teacher' %}">
+                    Курсы <span class="badge">2 </span>
+                  </li>
+                </a>
               </ul>
             </div>
           </div>

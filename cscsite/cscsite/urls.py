@@ -8,6 +8,7 @@ from django.contrib import admin
 from index.views import IndexView, AlumniView, ProfView
 from users.views import LoginView, LogoutView
 from textpages.views import TextpageOpenView, TextpageStudentView
+from learning.views import CourseTeacherListView, CourseUpdateView
 
 admin.autodiscover()
 
@@ -20,6 +21,11 @@ urlpatterns = patterns('',
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
+
+    url(r'^teaching/courses/$', CourseTeacherListView.as_view(),
+        name='courses_teacher'),
+    url(r'^teaching/courses/(?P<pk>\d+)$', CourseUpdateView.as_view(),
+        name='course_edit'),
 
     url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
 
