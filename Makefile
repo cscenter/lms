@@ -17,4 +17,4 @@ loaddemo:
 	python cscsite/manage.py loaddata --settings=cscsite.settings.local cscsite/fixtures/demo_data.json
 
 test:
-	python cscsite/manage.py test core index news users textpages --settings=cscsite.settings.test
+	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test
