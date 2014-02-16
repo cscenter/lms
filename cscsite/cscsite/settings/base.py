@@ -139,6 +139,10 @@ MENU_URL_NAMES = {
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
 
+    'courses_teacher': {'parent': 'teaching'},
+    # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
+    'course_edit': {'alias': 'courses_teacher'},
+
     'contacts': {},
 
     'login': {},

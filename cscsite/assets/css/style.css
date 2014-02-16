@@ -97,8 +97,11 @@ h4.bigger-margin {
 .header.lvl2.for-teachers {
   background-color: #8657AB;
 }
+li.for-teachers.current {
+  background-color: #561788 !important;
+}
 .header.for-teachers li:hover {
-  background-color: #9667BB
+  background-color: #9667BB;
 }
 .header.for-teachers li.current {
   background-color: #561788 !important;
