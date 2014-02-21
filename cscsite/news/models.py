@@ -19,21 +19,21 @@ class News(TimeStampedModel):
                                null=True,
                                on_delete=models.SET_NULL)
 
-    title = models.CharField(_("News|title"), max_length=100)
+    title = models.CharField(_("News|title"), max_length=140)
 
     published = models.BooleanField(_("News|published"),
                                     default=True)
 
     slug = models.SlugField(_("News|slug"),
                             max_length=70,
-                            help_text=_("News|short dash-separated string "
+                            help_text=_("Short dash-separated string "
                                         "for human-readable URLs, as in "
                                         "test.com/news/<b>some-news</b>/"),
                             unique=True)
 
     text = SplitField(_("News|text"),
                       max_length=(1024 * 4),
-                      help_text=(_("News|first %s paragraphs or anything "
+                      help_text=(_("First %s paragraphs or anything "
                                    "before %s will serve as excerpt; "
                                    "LaTeX+Markdown is enabled") % \
                                      (SPLIT_DEFAULT_PARAGRAPHS,

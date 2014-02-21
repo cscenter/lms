@@ -4,6 +4,9 @@ import time
 
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator
+from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils import Choices
@@ -14,27 +17,89 @@ from users.models import CSCUser
 
 # TODO: check that teacher is a teacher
 class Course(TimeStampedModel):
-    name = models.CharField(_("Course|name"),
-                            max_length=140)
-    teacher = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Course|teacher"),
-        null=True,
-        on_delete=models.SET_NULL,
-        limit_choices_to={'groups__name': 'Teacher'})
-    ongoing = models.BooleanField(_("Course|ongoing"),
-                                  default=True)
+    name = models.CharField(_("Course|name"), max_length=140)
+
+    slug = models.SlugField(_("News|slug"),
+                            max_length=70,
+                            help_text=_("Short dash-separated string "
+                                        "for human-readable URLs, as in "
+                                        "test.com/news/<b>some-news</b>/"),
+                            unique=True)
+
+    description = models.TextField(
+        _("Course|description"),
+        max_length=(1024*4),
+        help_text=(_("LaTeX+Markdown is enabled")))
 
     class Meta(object):
-        ordering = ["name", "created"]
+        ordering = ["name"]
         verbose_name = _("Course|course")
         verbose_name_plural = _("Course|courses")
 
+    def __unicode__(self):
+        return force_text(self.name)
+
+    def get_absolute_url(self):
+        return reverse('course_detail', args=[self.slug])
+
+class Semester(models.Model):
+    TYPES = Choices(('spring', _("Semester|spring")),
+                    ('autumn', _("Semester|autumn")))
+
+    year = models.PositiveSmallIntegerField(
+        _("CSCUser|Year"),
+        validators=[MinValueValidator(1990)])
+
+    type = StatusField(verbose_name=_("Semester|type"),
+                       choices_name='TYPES')
+
+    class Meta(object):
+        ordering = ["year", "type"]
+
+    def __unicode__(self):
+        return "{0} {1}".format(self.TYPES[self.type], year)
+
+class CourseOffering(TimeStampedModel):
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course"),
+        on_delete=models.PROTECT)
+
+    teachers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Course|teachers"),
+        limit_choices_to={'groups__name': 'Teacher'})
+
+    semester = models.ForeignKey(
+        Semester,
+        verbose_name=_("Semester"),
+        on_delete=models.PROTECT)
+
+    class Meta(object):
+        ordering = ["-semester", "course__created"]
+        verbose_name = _("Course offering")
+        verbose_name_plural = _("Course offerings")
+
+class CourseNews(TimeStampedModel):
+    course_offering = models.ForeignKey(
+        Course,
+        verbose_name=_("Course offering"),
+        on_delete=models.PROTECT)
+
+    title = models.CharField(_("CourseNews|title"), max_length=140)
+
+    text = models.TextField(_("CourseNews|text"),
+                     max_length=(1024 * 4),
+                     help_text=(_("LaTeX+Markdown is enabled")))
+
+    class Meta(object):
+        ordering = ["-created"]
 
 class Assignment(TimeStampedModel):
-    course = models.ForeignKey(Course,
-                               verbose_name=_("Assignment|course"),
-                               on_delete=models.CASCADE)
+    course_offering = models.ForeignKey(
+        CourseOffering,
+        verbose_name=_("Course"),
+        on_delete=models.PROTECT)
     deadline = models.DateField(_("Assignment|deadline"))
     online = models.BooleanField(_("Assignment|can be passed online"),
                                  default=True)
@@ -44,7 +109,7 @@ class Assignment(TimeStampedModel):
                             help_text=_("LaTeX+Markdown is enabled"))
 
     class Meta(object):
-        ordering = ["course", "created"]
+        ordering = ["course_offering", "created"]
         verbose_name = _("Assignment|assignment")
         verbose_name_plural = _("Assignment|assignments")
 
@@ -61,7 +126,7 @@ class AssignmentStudent(TimeStampedModel):
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("AssignmentStudent|assignment"),
-        on_delete=models.CASCADE)
+        on_delete=models.PROTECT)
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),

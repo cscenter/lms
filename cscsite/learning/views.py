@@ -19,3 +19,7 @@ class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
     form_class = CourseUpdateForm
     template_name = "learning/courses_update.html"
     success_url = reverse_lazy('courses_teacher')
+
+class CourseDetailView(generic.DetailView):
+    model = Course
+    template_name = "learning/course_detail.html"
