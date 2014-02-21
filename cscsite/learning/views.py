@@ -23,3 +23,8 @@ class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
 class CourseDetailView(generic.DetailView):
     model = Course
     template_name = "learning/course_detail.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(CourseDetailView, self).get_context_data(*args, **kwargs)
+        context['offerings'] = self.object.courseoffering_set.all()
+        return context

@@ -64,6 +64,9 @@ class CSCUser(AbstractUser):
                                                 self.first_name,
                                                 self.patronymic).strip())
 
+    def __unicode__(self):
+        return self.get_full_name()
+
     @cached_property
     def _cs_group_pks(self):
         return self.groups.values_list("pk", flat=True)
