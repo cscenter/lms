@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div class="container">
@@ -7,10 +8,20 @@
       <h2>
         {{ object.name }}
       </h2>
-
+      <hr>
       <div class="ubertext">
         {{ object.description }}
       </div>
+      <hr>
+      <h4>{% trans 'Course offerings and professors:' %}</h4>
+      <ul>
+      {% for offering in offerings %}
+      <li>
+        {{ offering.semester }} ({{ offering.teachers.all|join:", " }})
+      </li>
+      {% empty %}
+      {% endfor %}
+      </ul>
     </div>
   </div>
 </div>

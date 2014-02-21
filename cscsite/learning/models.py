@@ -33,8 +33,8 @@ class Course(TimeStampedModel):
 
     class Meta(object):
         ordering = ["name"]
-        verbose_name = _("Course|course")
-        verbose_name_plural = _("Course|courses")
+        verbose_name = _("course")
+        verbose_name_plural = _("courses")
 
     def __unicode__(self):
         return force_text(self.name)
@@ -43,8 +43,8 @@ class Course(TimeStampedModel):
         return reverse('course_detail', args=[self.slug])
 
 class Semester(models.Model):
-    TYPES = Choices(('spring', _("Semester|spring")),
-                    ('autumn', _("Semester|autumn")))
+    TYPES = Choices(('spring', _("spring")),
+                    ('autumn', _("autumn")))
 
     year = models.PositiveSmallIntegerField(
         _("CSCUser|Year"),
@@ -57,7 +57,7 @@ class Semester(models.Model):
         ordering = ["year", "type"]
 
     def __unicode__(self):
-        return "{0} {1}".format(self.TYPES[self.type], year)
+        return "{0} {1}".format(self.TYPES[self.type], self.year)
 
 class CourseOffering(TimeStampedModel):
     course = models.ForeignKey(
@@ -79,6 +79,10 @@ class CourseOffering(TimeStampedModel):
         ordering = ["-semester", "course__created"]
         verbose_name = _("Course offering")
         verbose_name_plural = _("Course offerings")
+
+    def __unicode__(self):
+        return "{0} ({1})".format(unicode(self.course),
+                                  unicode(self.semester))
 
 class CourseNews(TimeStampedModel):
     course_offering = models.ForeignKey(
