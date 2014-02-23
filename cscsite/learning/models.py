@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import time
+import os.path
 
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.core.urlresolvers import reverse
-from django.utils.encoding import force_text
+from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils import Choices
@@ -16,15 +17,17 @@ from model_utils.models import TimeStampedModel
 from users.models import CSCUser
 
 # TODO: check that teacher is a teacher
+@python_2_unicode_compatible
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
 
-    slug = models.SlugField(_("News|slug"),
-                            max_length=70,
-                            help_text=_("Short dash-separated string "
-                                        "for human-readable URLs, as in "
-                                        "test.com/news/<b>some-news</b>/"),
-                            unique=True)
+    slug = models.SlugField(
+        _("News|slug"),
+        max_length=70,
+        help_text=_("Short dash-separated string "
+                    "for human-readable URLs, as in "
+                    "test.com/news/<b>some-news</b>/"),
+        unique=True)
 
     description = models.TextField(
         _("Course|description"),
@@ -36,12 +39,13 @@ class Course(TimeStampedModel):
         verbose_name = _("course")
         verbose_name_plural = _("courses")
 
-    def __unicode__(self):
+    def __str__(self):
         return force_text(self.name)
 
     def get_absolute_url(self):
         return reverse('course_detail', args=[self.slug])
 
+@python_2_unicode_compatible
 class Semester(models.Model):
     TYPES = Choices(('spring', _("spring")),
                     ('autumn', _("autumn")))
@@ -56,9 +60,10 @@ class Semester(models.Model):
     class Meta(object):
         ordering = ["year", "type"]
 
-    def __unicode__(self):
+    def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
 
+@python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
     course = models.ForeignKey(
         Course,
@@ -80,9 +85,9 @@ class CourseOffering(TimeStampedModel):
         verbose_name = _("Course offering")
         verbose_name_plural = _("Course offerings")
 
-    def __unicode__(self):
-        return "{0} ({1})".format(unicode(self.course),
-                                  unicode(self.semester))
+    def __str__(self):
+        return "{0} ({1})".format(force_text(self.course),
+                                  force_text(self.semester))
 
 class CourseNews(TimeStampedModel):
     course_offering = models.ForeignKey(
@@ -163,6 +168,7 @@ class AssignmentComment(TimeStampedModel):
     # TODO: test this
     file = models.FileField(
         upload_to=(lambda instance, filename:
+                       # TODO: use os.path.join here
                        "user_{0}/assignment_{1}/{2}_{3}".format(
                            instance.assignment_student.student.pk,
                            instance.assignment_student.assignment.pk,

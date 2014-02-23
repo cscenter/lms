@@ -11,7 +11,7 @@ class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         return (Course.objects
-                .filter(teacher=self.request.user)
+                .filter(teachers=self.request.user)
                 .order_by('-ongoing', 'name'))
 
 class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):

@@ -28,8 +28,8 @@ urlpatterns = patterns('',
     url(r'^teaching/courses/(?P<pk>\d+)$', CourseUpdateView.as_view(),
         name='course_edit'),
 
-    url(regex=r"^courses/(?P<slug>[-\w]+)/$",
-        view=CourseDetailView.as_view(),
+    url(r"^courses/(?P<slug>[-\w]+)/$",
+        CourseDetailView.as_view(),
         name="course_detail"),
 
     url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
