@@ -8,8 +8,12 @@ from django.contrib import admin
 from index.views import IndexView, AlumniView, ProfView
 from users.views import LoginView, LogoutView
 from textpages.views import TextpageOpenView, TextpageStudentView
-from learning.views import CourseTeacherListView, CourseUpdateView, \
-    CourseDetailView
+from learning.views import \
+    TimetableTeacherView, \
+    CourseTeacherListView, CourseUpdateView, \
+    CourseDetailView, \
+    CourseClassDetailView, \
+    VenueListView, VenueDetailView
 
 admin.autodiscover()
 
@@ -23,14 +27,24 @@ urlpatterns = patterns('',
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
 
+    url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
+        name='timetable_teacher'),
     url(r'^teaching/courses/$', CourseTeacherListView.as_view(),
         name='courses_teacher'),
     url(r'^teaching/courses/(?P<pk>\d+)$', CourseUpdateView.as_view(),
         name='course_edit'),
 
-    url(r"^courses/(?P<slug>[-\w]+)/$",
-        CourseDetailView.as_view(),
+    url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
         name="course_detail"),
+
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<pk>[-\w]+)$",
+        CourseClassDetailView.as_view(),
+        name="class_detail"),
+
+    url(r"^venues/$", VenueListView.as_view(),
+        name="venue_list"),
+    url(r"^venues/(?P<pk>[-\w]+)/$", VenueDetailView.as_view(),
+        name="venue_detail"),
 
     url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
 

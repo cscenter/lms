@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <h2>
+        {{ object.name }} <small>{{ object.course_offering.course.name }}</small>
+      </h2>
+
+      <table class="table table-striped">
+        <tr>
+          <td>{% trans "What" %}:</td>
+          <td>{{ object.type_display }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "When" %}:</td>
+          <td>{{ object.date|date:"l, d F Y" }}, {{ object.starts_at|time:"H:i" }}–{{ object.ends_at|time:"H:i" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Where" %}:</td>
+          <td><a href="{% url 'venue_detail' object.venue.pk %}">{{ object.venue.name }}</a></td>
+        </tr>
+      </table>
+
+      {% if object.description %}
+      <h4 class="bigger-margin">{% trans "Description" %}</h4>
+      <div class="ubertext">
+        {{ object.description|safe }}
+      </div>
+      {% endif %}
+
+      {% if object.materials %}
+      <h4 class="bigger-margin">{% trans "Materials" %}</h4>
+      <div class="ubertext">
+        {{ object.materials|safe }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

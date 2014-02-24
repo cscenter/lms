@@ -146,9 +146,14 @@
               <div class="logo-cell"></div>
               <ul>
                 <li>Задания <span class="badge">3</span></li>
+                <a href="{% url 'timetable_teacher' %}">
+                  <li class="{% current 'timetable_teacher' %}">
+                    {% trans "Timetable" %}
+                  </li>
+                </a>
                 <a href="{% url 'courses_teacher' %}">
                   <li class="{% current 'courses_teacher' %}">
-                    Курсы <span class="badge">2 </span>
+                    {% trans "Courses" %}
                   </li>
                 </a>
               </ul>

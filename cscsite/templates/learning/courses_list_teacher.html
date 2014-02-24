@@ -2,33 +2,51 @@
 {% load i18n %}
 
 {% block content %}
+{% if object_list %}
+{% regroup object_list by is_ongoing as courses_grouped %}
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <table class="table table-striped" width="100%">
+      {% for courses in courses_grouped %}
+      <h4>
+        {% if courses.list %}
+          {% if courses.grouper %}
+          {% trans "Ongoing courses" %}
+          {% else %}
+          {% trans "Course archive" %}
+          {% endif %}
+        {% endif %}
+      </h4>
+      <table class="table" width="100%">
         <thead>
-          <th>{% trans "Course" %}</th><th>{% trans "Active-masculine" %}</th>
+          <th>{% trans "Name" %}</th>
+          <th width="20%">{% trans "Semester" %}</th>
         </thead>
-        <tbody>
-          {% for course in object_list %}
-          <tr>
-            <td>
-              <a href="{% url 'course_edit' course.pk %}">
-                {{ course.name }}
-              </a>
-            </td>
-            <td>
-              {% if course.ongoing %}
-              {% trans "Yes" %}
-              {% else %}
-              {% trans "No" %}
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        {% for courseoffering in courses.list %}
+        <tr>
+          <td>
+            <a href="{% url 'course_detail' courseoffering.course.slug %}">
+              {{ courseoffering.course.name }}
+            </a>
+          </td>
+          <td>{{ courseoffering.semester }}</td>
+        </tr>
+        {% endfor %}
       </table>
+      {% endfor %}
     </div>
   </div>
 </div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3"></div>
+    <div class="col-xs-6 center-aligned">
+      <h4>{% trans "No courses yet" %}</h4>
+    </div>
+    <div class="col-xs-3">
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock content %}

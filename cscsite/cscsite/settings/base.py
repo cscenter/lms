@@ -139,6 +139,7 @@ MENU_URL_NAMES = {
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
 
+    'timetable_teacher': {'parent': 'teaching'},
     'courses_teacher': {'parent': 'teaching'},
     # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
     'course_edit': {'alias': 'courses_teacher'},
@@ -154,3 +155,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+# don't know what will happen if we change this when there are models in DB
+SPRING_TERM_START = '10 jan'
+AUTUMN_TERM_START = '10 aug'

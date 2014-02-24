@@ -252,3 +252,34 @@ li.for-teachers.current {
 .user-tile .user-info h4 {
   margin-top: 0px;
 }
+
+.timetable .badge {
+  color: black;
+  border: 1px solid #858585;
+  font-weight: normal;
+  border-radius: 5px;
+}
+
+.timetable .badge.lecture {
+  background-color: #F9F9F9;
+}
+
+.timetable .badge.seminar {
+  background-color: #E9E9E9;
+}
+
+.timetable-header-row .center {
+  text-align: center;
+}
+
+.timetable-header-row .center h2 {
+  margin: 0px;
+}
+
+.timetable-main-row h4 {
+  margin-top: 40px;
+}
+
+.center-aligned {
+  text-align: center;
+}
