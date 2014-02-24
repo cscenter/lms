@@ -2,12 +2,16 @@ from __future__ import unicode_literals
 
 import time
 import os.path
+import datetime
+
+import dateutil.parser as dparser
 
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.core.urlresolvers import reverse
-from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils import Choices
@@ -16,11 +20,9 @@ from model_utils.models import TimeStampedModel
 
 from users.models import CSCUser
 
-# TODO: check that teacher is a teacher
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
-
     slug = models.SlugField(
         _("News|slug"),
         max_length=70,
@@ -28,7 +30,6 @@ class Course(TimeStampedModel):
                     "for human-readable URLs, as in "
                     "test.com/news/<b>some-news</b>/"),
         unique=True)
-
     description = models.TextField(
         _("Course|description"),
         max_length=(1024*4),
@@ -40,7 +41,7 @@ class Course(TimeStampedModel):
         verbose_name_plural = _("courses")
 
     def __str__(self):
-        return force_text(self.name)
+        return smart_text(self.name)
 
     def get_absolute_url(self):
         return reverse('course_detail', args=[self.slug])
@@ -53,7 +54,6 @@ class Semester(models.Model):
     year = models.PositiveSmallIntegerField(
         _("CSCUser|Year"),
         validators=[MinValueValidator(1990)])
-
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
 
@@ -69,12 +69,10 @@ class CourseOffering(TimeStampedModel):
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
-
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         limit_choices_to={'groups__name': 'Teacher'})
-
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
@@ -86,23 +84,130 @@ class CourseOffering(TimeStampedModel):
         verbose_name_plural = _("Course offerings")
 
     def __str__(self):
-        return "{0} ({1})".format(force_text(self.course),
-                                  force_text(self.semester))
+        return "{0} ({1})".format(smart_text(self.course),
+                                  smart_text(self.semester))
 
+    # TODO: test this
+    @cached_property
+    def is_ongoing(self):
+        now = datetime.datetime.now()
+
+        spring_term_start = dparser.parse(settings.SPRING_TERM_START)
+        next_year = now + datetime.timedelta(days=365)
+        # safer against leap years
+        next_spring_term_start = dparser.parse(settings.SPRING_TERM_START,
+                                               default=next_year)
+        autumn_term_start = dparser.parse(settings.AUTUMN_TERM_START)
+
+        if (self.semester.type == 'spring' and
+            (now >= autumn_term_start or
+             now <= spring_term_start)):
+            print "SPRING", self
+            return False
+        if (self.semester.type == 'autumn' and
+            (now <= autumn_term_start or
+             now >= next_spring_term_start)):
+            print "AUTUMN", self
+            return False
+        return True
+
+
+@python_2_unicode_compatible
 class CourseNews(TimeStampedModel):
     course_offering = models.ForeignKey(
-        Course,
+        CourseOffering,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
-
     title = models.CharField(_("CourseNews|title"), max_length=140)
-
-    text = models.TextField(_("CourseNews|text"),
-                     max_length=(1024 * 4),
-                     help_text=(_("LaTeX+Markdown is enabled")))
+    text = models.TextField(
+        _("CourseNews|text"),
+        max_length=(1024 * 4),
+        help_text=(_("LaTeX+Markdown is enabled")))
 
     class Meta(object):
         ordering = ["-created"]
+        verbose_name = _("Course news-singular")
+        verbose_name_plural = _("Course news-plural")
+
+    def __str__(self):
+        return "{0} ({1})".format(smart_text(self.title),
+                                  smart_text(self.course_offering))
+
+@python_2_unicode_compatible
+class Venue(models.Model):
+    name = models.CharField(_("Name"), max_length=140)
+    description = models.TextField(
+        _("Description"),
+        max_length=(1024 * 4),
+        help_text=(_("LaTeX+Markdown is enabled")))
+
+    class Meta(object):
+        ordering = ["name"]
+        verbose_name = _("Venue")
+        verbose_name_plural = _("Venues")
+
+    def __str__(self):
+        return "{0}".format(smart_text(self.name))
+
+    def get_absolute_url(self):
+        return reverse('venue_detail', args=[self.pk])
+
+@python_2_unicode_compatible
+class CourseClass(TimeStampedModel):
+    TYPES = Choices(('lecture', _("Lecture")),
+                    ('seminar', _("Seminar")))
+
+    course_offering = models.ForeignKey(
+        CourseOffering,
+        verbose_name=_("Course offering"),
+        on_delete=models.PROTECT)
+    venue = models.ForeignKey(
+        Venue,
+        verbose_name=_("CourseClass|Venue"),
+        on_delete=models.PROTECT)
+    type = StatusField(
+        _("Type"),
+        choices_name='TYPES')
+    name = models.CharField(_("Name"), max_length=140)
+    description = models.TextField(
+        _("Description"),
+        max_length=(1024 * 4),
+        blank=True,
+        help_text=(_("LaTeX+Markdown is enabled")))
+    materials = models.TextField(
+        _("CourseClass|Materials"),
+        max_length=(1024 * 4),
+        blank=True,
+        help_text=(_("LaTeX+Markdown is enabled")))
+    date = models.DateField(_("Date"))
+    starts_at = models.TimeField(_("Starts at"))
+    ends_at = models.TimeField(_("Ends at"))
+
+    class Meta(object):
+        ordering = ["-date", "course_offering", "starts_at"]
+        verbose_name = _("Class")
+        verbose_name_plural = _("Classes")
+
+    def __str__(self):
+        return "{0}".format(smart_text(self.name))
+
+    def get_absolute_url(self):
+        return reverse('class_detail', args=[self.course_offering.course.slug,
+                                             self.pk])
+
+    def clean(self):
+        super(CourseClass, self).clean()
+        # ends_at should be later than starts_at
+        if self.starts_at >= self.ends_at:
+            raise ValidationError(_("Class should end after it's start"))
+
+    def type_display_prop(self):
+        return self.TYPES[self.type]
+    type_display_prop.short_description = _("Type")
+    type_display_prop.admin_order_field = 'type'
+
+    type_display = property(type_display_prop)
+
 
 class Assignment(TimeStampedModel):
     course_offering = models.ForeignKey(

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+
+{% block content %}
+{% if object_list %}
+{% regroup object_list by date|date:"l, d F Y" as classes_by_day %}
+<div class="container">
+  <div class="row timetable-header-row">
+    <div class="col-xs-4">
+      <div class="btn-group">
+        <button type="button" class="btn btn-default">&lt;</button>
+        <button type="button" class="btn btn-default">&gt;</button>
+      </div>
+    </div>
+    <div class="col-xs-4 center">
+      <h2>Spring 2014</h2>
+    </div>
+    <div class="col-xs-4">
+      <div class="btn-toolbar pull-right" role="toolbar">
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-default active">{% trans 'List' %}</button>
+          <button type="button" class="btn btn-default">{% trans 'Calendar' %}</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary">{% trans 'Add class' %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row timetable-main-row">
+    <div class="col-xs-12">
+      {% for day in classes_by_day %}
+      <h4>{{ day.grouper }}</h4>
+      <table class="table timetable" width="100%">
+        <thead>
+          <th width="15%">{% trans "Time" %}</th>
+          <th>{% trans "Name" %}</th>
+          <th width="15%">{% trans "Course" %}</th>
+          <th width="12%">{% trans "Venue" %}</th>
+          <th width="10%"></th>
+          <th width="10%">{% trans "Materials" %}</th>
+        </thead>
+        {% for class in day.list %}
+        <tr>
+          <td>{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
+          <td>
+            <a href="{% url 'class_detail' class.course_offering.course.slug class.pk %}">
+              {{ class.name }}
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'course_detail' class.course_offering.course.slug %}">
+              {{ class.course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'venue_detail' class.venue.pk %}">
+              {{ class.venue }}
+            </a>
+          </td>
+          <td>
+            {% if class.type == 'lecture'%}
+            <span class="badge lecture">{% trans 'Lecture' %}</span>
+            {% else %}
+            <span class="badge seminar">{% trans 'Seminar' %}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if class.materials %}
+            {% trans "Yes" %}
+            {% else %}
+            {% trans "No" %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3"></div>
+    <div class="col-xs-6 center-aligned">
+      <h4>{% trans "No classes yet" %}</h4>
+    </div>
+    <div class="col-xs-3">
+      <div class="btn-group pull-right">
+        <button type="button" class="btn btn-primary">{% trans 'Add class' %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock content %}
