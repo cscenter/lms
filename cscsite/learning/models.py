@@ -32,7 +32,6 @@ class Course(TimeStampedModel):
         unique=True)
     description = models.TextField(
         _("Course|description"),
-        max_length=(1024*4),
         help_text=(_("LaTeX+Markdown is enabled")))
 
     class Meta(object):
@@ -121,7 +120,6 @@ class CourseNews(TimeStampedModel):
     title = models.CharField(_("CourseNews|title"), max_length=140)
     text = models.TextField(
         _("CourseNews|text"),
-        max_length=(1024 * 4),
         help_text=(_("LaTeX+Markdown is enabled")))
 
     class Meta(object):
@@ -138,7 +136,6 @@ class Venue(models.Model):
     name = models.CharField(_("Name"), max_length=140)
     description = models.TextField(
         _("Description"),
-        max_length=(1024 * 4),
         help_text=(_("LaTeX+Markdown is enabled")))
 
     class Meta(object):
@@ -171,12 +168,10 @@ class CourseClass(TimeStampedModel):
     name = models.CharField(_("Name"), max_length=140)
     description = models.TextField(
         _("Description"),
-        max_length=(1024 * 4),
         blank=True,
         help_text=(_("LaTeX+Markdown is enabled")))
     materials = models.TextField(
         _("CourseClass|Materials"),
-        max_length=(1024 * 4),
         blank=True,
         help_text=(_("LaTeX+Markdown is enabled")))
     date = models.DateField(_("Date"))
