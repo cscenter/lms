@@ -1,12 +1,15 @@
-from django.core.urlresolvers import reverse_lazy
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 
 from braces.views import LoginRequiredMixin
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseNews
-from learning.forms import CourseUpdateForm
+    CourseOfferingNews
+from learning.forms import CourseUpdateForm, CourseOfferingEnrollForm
 
 class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
     model = CourseOffering
@@ -46,11 +49,49 @@ class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
 class CourseDetailView(LoginRequiredMixin, generic.DetailView):
     model = Course
     template_name = "learning/course_detail.html"
+    context_object_name = 'course'
 
     def get_context_data(self, *args, **kwargs):
         context = super(CourseDetailView, self).get_context_data(*args, **kwargs)
         context['offerings'] = self.object.courseoffering_set.all()
         return context
+
+class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
+    model = CourseOffering
+    context_object_name = 'course_offering'
+    template_name = "learning/courseoffering_detail.html"
+
+    def get_object(self):
+        year, semester_type = self.kwargs['semester_slug'].split("-")
+        return get_object_or_404(
+            self.model.objects
+            .filter(semester__type=semester_type,
+                    semester__year=year,
+                    course__slug=self.kwargs['course_slug'])
+            .select_related('course', 'semester'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CourseOfferingDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        context['is_enrolled'] = (self.request.user.is_student and
+                                  (self.request.user
+                                   .enrolled_on
+                                   .filter(pk=self.object.pk)
+                                   .exists()))
+        return context
+
+
+class CourseOfferingEnrollView(generic.FormView):
+    http_method_names = ['post']
+    form_class = CourseOfferingEnrollForm
+
+    def form_valid(self, form):
+        self.course_offering = get_object_or_404(
+            CourseOffering.objects.filter(pk=form.cleaned_data['course_offering_pk']))
+        self.request.user.enrolled_on.add(self.course_offering)
+        return redirect('course_offering_detail',
+                        course_slug=self.course_offering.course.slug,
+                        semester_slug=self.course_offering.semester.slug)
 
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):

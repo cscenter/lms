@@ -6,18 +6,18 @@
   <div class="row">
     <div class="col-xs-12">
       <h2>
-        {{ object.name }}
+        {{ course.name }}
       </h2>
       <hr>
       <div class="ubertext">
-        {{ object.description|safe }}
+        {{ course.description|safe }}
       </div>
       <hr>
-      <h4>{% trans 'Course offerings and professors:' %}</h4>
+      <h4>{% trans 'Course offerings:' %}</h4>
       <ul>
       {% for offering in offerings %}
       <li>
-        {{ offering.semester }} ({{ offering.teachers.all|join:", " }})
+        <a href="{% url 'course_offering_detail' course.slug offering.semester.slug %}">{{ offering.semester }}</a>
       </li>
       {% empty %}
       {% endfor %}

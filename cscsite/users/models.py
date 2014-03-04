@@ -11,6 +11,8 @@ from sorl.thumbnail import ImageField
 
 import logging
 
+from learning.models import CourseOffering
+
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
     IS_TEACHER_PK = 2
@@ -20,29 +22,29 @@ class CSCUser(AbstractUser):
         _("CSCUser|patronymic"),
         max_length=100,
         blank=True)
-
-    # TODO: come up with something clever for resizing/validation here
     photo = ImageField(
         _("CSCUser|photo"),
         upload_to="photos/",
         blank=True)
-
     note = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
-
     enrolment_year = models.PositiveSmallIntegerField(
         _("CSCUser|enrolment year"),
         validators=[MinValueValidator(1990)],
         blank=True,
         null=True)
-
     graduation_year = models.PositiveSmallIntegerField(
         _("CSCUser|graduation year"),
-        validators=[MinValueValidator(1990)],
         blank=True,
+        validators=[MinValueValidator(1990)],
         null=True)
+    # NOTE: check if user is a student here?
+    enrolled_on = models.ManyToManyField(
+        CourseOffering,
+        verbose_name=_("User|enrolled_on"),
+        blank=True)
 
     class Meta:
         verbose_name = _("CSCUser|user")

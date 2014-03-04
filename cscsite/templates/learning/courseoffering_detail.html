@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {{ course_offering.course.name }}
+        <small>{{ course_offering.semester }}</small>
+      </h2>
+      {% if request.user.is_student %}
+        {% if is_enrolled%}
+        <button class="btn btn-success disabled">
+          {% trans 'You are enrolled' %}
+        </button>
+        {% else %}
+        <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+          {% csrf_token %}
+          <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+          <button type="submit" class="btn btn-default">
+            {% trans 'Take this course' %}
+          </button>
+        </form>
+        {% endif %}
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-4">
+      <ul>
+        {% for teacher in course_offering.teachers.all %}
+        <li class="list-unstyled">
+          {% thumbnail teacher.photo "50x50" crop="center" as im %}
+          <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+          {% endthumbnail %}
+          {{ teacher }}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-xs-8">
+      {% if course_offering.description %}
+      <div class="ubertext">
+        {{ course_offering.description|safe }}
+      </div>
+      {% else %}
+      <div class="ubertext">
+        {{ course_offering.course.description|safe }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      {% for news in course_offering.courseofferingnews_set.all %}
+      <h3>{{ news.title }}</h3>
+      <div class="ubertext">
+        {{ news.text|safe }}
+      </div>
+      <p class="news-metainfo">{{ news.created|date }}</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
