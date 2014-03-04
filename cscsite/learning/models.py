@@ -18,8 +18,6 @@ from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 
-from users.models import CSCUser
-
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
@@ -62,6 +60,10 @@ class Semester(models.Model):
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
 
+    @property
+    def slug(self):
+        return "{0}-{1}".format(self.year, self.type)
+
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
     course = models.ForeignKey(
@@ -76,6 +78,10 @@ class CourseOffering(TimeStampedModel):
         Semester,
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
+    description = models.TextField(
+        _("CourseOffering|description"),
+        help_text=(_("LaTeX+Markdown is enabled")),
+        blank=True)
 
     class Meta(object):
         ordering = ["-semester", "course__created"]
@@ -85,6 +91,10 @@ class CourseOffering(TimeStampedModel):
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.course),
                                   smart_text(self.semester))
+
+    def get_absolute_url(self):
+        return reverse('course_offering_detail', args=[self.course.slug,
+                                                       self.semester.slug])
 
     # TODO: test this
     @cached_property
@@ -112,7 +122,7 @@ class CourseOffering(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class CourseNews(TimeStampedModel):
+class CourseOfferingNews(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
         verbose_name=_("Course offering"),

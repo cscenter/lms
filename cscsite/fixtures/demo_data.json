@@ -484,7 +484,7 @@
 
     {
         "pk": 1,
-        "model": "learning.coursenews",
+        "model": "learning.courseofferingnews",
         "fields": {
             "title": "\u041a\u0443\u0440\u0441 \u043d\u0430\u0447\u0430\u043b\u0441\u044f!",
             "course_offering": 1,
@@ -495,7 +495,7 @@
     },
     {
         "pk": 2,
-        "model": "learning.coursenews",
+        "model": "learning.courseofferingnews",
         "fields": {
             "title": "\u041d\u0430\u0447\u0430\u043b\u043e \u043a\u0443\u0440\u0441\u0430",
             "course_offering": 2,

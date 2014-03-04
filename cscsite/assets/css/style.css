@@ -283,3 +283,16 @@ li.for-teachers.current {
 .center-aligned {
   text-align: center;
 }
+
+.h2-and-buttons h2 {
+  float: left;
+}
+
+.h2-and-buttons button {
+  float: right;
+  margin-top: 20px;
+}
+
+.h2-and-buttons hr {
+  clear: both;
+}
