@@ -9,18 +9,7 @@ from braces.views import LoginRequiredMixin
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews
-from learning.forms import CourseUpdateForm, CourseOfferingEnrollForm
-
-class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
-    model = CourseOffering
-    template_name = "learning/courses_list_teacher.html"
-
-    def get_queryset(self):
-        return (self.model.objects
-                .filter(teachers=self.request.user)
-                .order_by('semester__year', '-semester__type', 'course__name')
-                .select_related('course', 'semester'))
-
+from learning.forms import CourseUpdateForm, CourseOfferingPKForm
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     model = CourseClass
@@ -46,6 +35,42 @@ class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
     success_url = reverse_lazy('courses_teacher')
 
 
+class CourseListView(LoginRequiredMixin, generic.ListView):
+    model = CourseOffering
+    template_name = "learning/courses_list.html"
+    context_object_name = 'course_list'
+
+    list_type = 'all'
+
+    def get_queryset(self):
+        return (self.model.objects
+                .order_by('semester__year', '-semester__type', 'course__name')
+                .select_related('course', 'semester')
+                .prefetch_related('teachers'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CourseListView, self)
+                   .get_context_data(*args, **kwargs))
+        ongoing, archive = [], []
+        for course in context['course_list']:
+            if course.is_ongoing:
+                ongoing.append(course)
+            else:
+                archive.append(course)
+        context['course_list_ongoing'] = ongoing
+        context['course_list_archive'] = archive
+        context['list_type'] = self.list_type
+        return context
+
+class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
+    list_type = 'teaching'
+
+    def get_queryset(self):
+        return (super(CourseTeacherListView, self)
+                .get_queryset()
+                .filter(teachers=self.request.user))
+
+
 class CourseDetailView(LoginRequiredMixin, generic.DetailView):
     model = Course
     template_name = "learning/course_detail.html"
@@ -55,6 +80,7 @@ class CourseDetailView(LoginRequiredMixin, generic.DetailView):
         context = super(CourseDetailView, self).get_context_data(*args, **kwargs)
         context['offerings'] = self.object.courseoffering_set.all()
         return context
+
 
 class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
     model = CourseOffering
@@ -83,15 +109,30 @@ class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
 
 class CourseOfferingEnrollView(generic.FormView):
     http_method_names = ['post']
-    form_class = CourseOfferingEnrollForm
+    form_class = CourseOfferingPKForm
 
     def form_valid(self, form):
-        self.course_offering = get_object_or_404(
-            CourseOffering.objects.filter(pk=form.cleaned_data['course_offering_pk']))
-        self.request.user.enrolled_on.add(self.course_offering)
+        course_offering = get_object_or_404(
+            CourseOffering.objects.filter(
+                pk=form.cleaned_data['course_offering_pk']))
+        self.request.user.enrolled_on.add(course_offering)
         return redirect('course_offering_detail',
-                        course_slug=self.course_offering.course.slug,
-                        semester_slug=self.course_offering.semester.slug)
+                        course_slug=course_offering.course.slug,
+                        semester_slug=course_offering.semester.slug)
+
+
+class CourseOfferingUnenrollView(generic.FormView):
+    http_method_names = ['post']
+    form_class = CourseOfferingPKForm
+
+    def form_valid(self, form):
+        course_offering = get_object_or_404(
+            CourseOffering.objects.filter(
+                pk=form.cleaned_data['course_offering_pk']))
+        self.request.user.enrolled_on.remove(course_offering)
+        return redirect('course_offering_detail',
+                        course_slug=course_offering.course.slug,
+                        semester_slug=course_offering.semester.slug)
 
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):

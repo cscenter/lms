@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {% trans "Courses" %}
+      </h2>
+      {% if request.user.is_student or request.user.is_teacher %}
+      <div class="btn-group">
+        <a href="{% url 'course_list' %}"
+           role="button"
+           class="btn btn-default
+                  {% if list_type == 'all' %}
+                  active
+                  {% endif %}">All</a>
+        {% if request.user.is_student %}
+        <a href="#"
+           role="button"
+           class="btn btn-default
+                  {% if list_type == 'learning' %}
+                  active
+                  {% endif %}">Learning</a>
+        {% endif %}
+        {% if request.user.is_teacher %}
+        <a href="{% url 'course_list_teacher' %}"
+           role="button"
+           class="btn btn-default
+                  {% if list_type == 'teaching' %}
+                  active
+                  {% endif %}">Teaching</a>
+        {% endif %}
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  {% if course_list_ongoing %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Ongoing" %}</h3>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">
+            {% trans "Professors" %}
+          </th>
+        </thead>
+        {% for courseoffering in course_list_ongoing %}
+        <tr>
+          <td>
+            <a href="{% url 'course_detail' courseoffering.course.slug %}">
+              {{ courseoffering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-inline">
+            {% for teacher in courseoffering.teachers.all %}
+            {{ teacher.get_full_name }}
+            {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if course_list_archive %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Archive" %}</h3>
+      {% regroup course_list_archive by semester as archive %}
+      {% for semester in archive %}
+      <h4>{{ semester.grouper }}</h4>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">{% trans "Professors" %}</th>
+        </thead>
+        {% for courseoffering in semester.list %}
+        <tr>
+          <td>
+            <a href="{% url 'course_detail' courseoffering.course.slug %}">
+              {{ courseoffering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+              {% for teacher in courseoffering.teachers.all %}
+              <li>{{ teacher.get_full_name }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% if not course_list_ongoing and not course_list_archive %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3"></div>
+    <div class="col-xs-6 center-aligned">
+      <h4>{% trans "No courses yet" %}</h4>
+    </div>
+    <div class="col-xs-3">
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock content %}

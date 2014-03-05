@@ -72,7 +72,7 @@
                   </li>
                 {% endif %}
                 {% if user.is_teacher %}
-                  <a href="{% url 'courses_teacher' %}">
+                  <a href="{% url 'course_list_teacher' %}">
                     <li class="{% current 'teaching' %} for-teachers">
                       {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
                     </li>
@@ -118,6 +118,11 @@
                     {% trans "Syllabus" %}
                   </li>
                 </a>
+                <a href="{% url 'course_list' %}">
+                  <li class="{% current 'course_list' %}">
+                    {% trans "Courses" %}
+                  </li>
+                </a>
                 <a href="{% url 'orgs' %}" style="display: block;">
                   <li class="{% current 'orgs' %}">
                     {% trans "Organizers and staff" %}
@@ -151,7 +156,7 @@
                     {% trans "Timetable" %}
                   </li>
                 </a>
-                <a href="{% url 'courses_teacher' %}">
+                <a href="{% url 'course_list_teacher' %}">
                   <li class="{% current 'courses_teacher' %}">
                     {% trans "Courses" %}
                   </li>

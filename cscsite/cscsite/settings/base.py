@@ -132,6 +132,7 @@ MENU_URL_NAMES = {
     'index': {},
 
     'syllabus': {'parent': 'about'},
+    'course_list': {'parent': 'about'},
     'orgs': {'parent': 'about'},
     'profs': {'parent': 'about'},
     'alumni': {'parent': 'about'},
@@ -140,7 +141,7 @@ MENU_URL_NAMES = {
     'news_detail': {'alias': 'news_list'},
 
     'timetable_teacher': {'parent': 'teaching'},
-    'courses_teacher': {'parent': 'teaching'},
+    'course_list_teacher': {'parent': 'teaching'},
     # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
     'course_edit': {'alias': 'courses_teacher'},
 
