@@ -288,8 +288,16 @@ li.for-teachers.current {
   float: left;
 }
 
+.h2-and-buttons .btn-group {
+  float: right;
+}
+
 .h2-and-buttons button {
   float: right;
+  margin-top: 20px;
+}
+
+.h2-and-buttons a.btn {
   margin-top: 20px;
 }
 

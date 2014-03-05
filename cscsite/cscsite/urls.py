@@ -11,9 +11,9 @@ from textpages.views import TextpageOpenView, TextpageStudentView
 from learning.views import \
     TimetableTeacherView, \
     CourseTeacherListView, CourseUpdateView, \
-    CourseDetailView, \
+    CourseListView, CourseDetailView, \
     CourseOfferingDetailView, \
-    CourseOfferingEnrollView, \
+    CourseOfferingEnrollView, CourseOfferingUnenrollView, \
     CourseClassDetailView, \
     VenueListView, VenueDetailView
 
@@ -32,10 +32,12 @@ urlpatterns = patterns('',
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),
     url(r'^teaching/courses/$', CourseTeacherListView.as_view(),
-        name='courses_teacher'),
+        name='course_list_teacher'),
     url(r'^teaching/courses/(?P<pk>\d+)$', CourseUpdateView.as_view(),
         name='course_edit'),
 
+    url(r"^courses/$", CourseListView.as_view(),
+        name="course_list"),
     url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
         name="course_detail"),
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)$",
@@ -44,6 +46,9 @@ urlpatterns = patterns('',
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/enroll$",
         CourseOfferingEnrollView.as_view(),
         name="course_offering_enroll"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/unenroll$",
+        CourseOfferingUnenrollView.as_view(),
+        name="course_offering_unenroll"),
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/(?P<pk>[-\w]+)$",
         CourseClassDetailView.as_view(),
         name="class_detail"),

@@ -31,5 +31,5 @@ class CourseUpdateForm(forms.ModelForm):
         model = Course
         fields = ['name', 'ongoing']
 
-class CourseOfferingEnrollForm(forms.Form):
+class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)

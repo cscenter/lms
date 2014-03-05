@@ -111,12 +111,10 @@ class CourseOffering(TimeStampedModel):
         if (self.semester.type == 'spring' and
             (now >= autumn_term_start or
              now <= spring_term_start)):
-            print "SPRING", self
             return False
         if (self.semester.type == 'autumn' and
             (now <= autumn_term_start or
              now >= next_spring_term_start)):
-            print "AUTUMN", self
             return False
         return True
 
