@@ -87,11 +87,14 @@ h4.bigger-margin {
 .header.lvl2.for-students {
   background-color: #1C42A3;
 }
+li.for-students.current {
+  background-color: #0C2A74 !important;
+}
 .header.for-students li:hover {
   background-color: #2C52B3;
 }
 .header.for-students li.current {
-  background-color: #1C42A3 !important;
+  background-color: #0C2A74 !important;
 }
 
 .header.lvl2.for-teachers {

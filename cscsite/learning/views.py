@@ -70,6 +70,14 @@ class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
                 .get_queryset()
                 .filter(teachers=self.request.user))
 
+class CourseStudentListView(StudentOnlyMixin, CourseListView):
+    list_type = 'learning'
+
+    def get_queryset(self):
+        return (super(CourseStudentListView, self)
+                .get_queryset()
+                .filter(cscuser__enrolled_on=self.request.user))
+
 
 class CourseDetailView(LoginRequiredMixin, generic.DetailView):
     model = Course
