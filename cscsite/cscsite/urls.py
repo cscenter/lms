@@ -11,6 +11,7 @@ from textpages.views import TextpageOpenView, TextpageStudentView
 from learning.views import \
     TimetableTeacherView, \
     CourseTeacherListView, CourseUpdateView, \
+    CourseStudentListView, \
     CourseListView, CourseDetailView, \
     CourseOfferingDetailView, \
     CourseOfferingEnrollView, CourseOfferingUnenrollView, \
@@ -28,6 +29,9 @@ urlpatterns = patterns('',
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
+
+    url(r'^learning/courses/$', CourseStudentListView.as_view(),
+        name='course_list_student'),
 
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),

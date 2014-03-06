@@ -67,9 +67,11 @@
               </a>
               {% if user.is_authenticated %}
                 {% if user.is_student %}
-                  <li>
-                    {% trans "Learning" %} <i class="fa fa-caret-down"></i>
-                  </li>
+                  <a href="{% url 'course_list_student' %}">
+                    <li class="{% current 'learning' %} for-students">
+                      {% trans "Learning" %} <i class="fa fa-caret-down"></i>
+                    </li>
+                  </a>
                 {% endif %}
                 {% if user.is_teacher %}
                   <a href="{% url 'course_list_teacher' %}">
@@ -136,6 +138,24 @@
                 <a href="{% url 'alumni' %}">
                   <li class="{% current 'alumni' %}">
                     {% trans "Alumni" %}
+                  </li>
+                </a>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="header lvl2 for-students {% current 'learning' %}">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="logo-cell"></div>
+              <ul>
+                <li>Задания <span class="badge">3</span></li>
+                <a href="{% url 'course_list_student' %}">
+                  <li class="{% current 'course_list_student' %}">
+                    {% trans "Courses" %}
                   </li>
                 </a>
               </ul>

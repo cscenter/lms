@@ -17,7 +17,7 @@
                   active
                   {% endif %}">All</a>
         {% if request.user.is_student %}
-        <a href="#"
+        <a href="{% url 'course_list_student' %}"
            role="button"
            class="btn btn-default
                   {% if list_type == 'learning' %}

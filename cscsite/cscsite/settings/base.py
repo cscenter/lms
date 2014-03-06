@@ -140,6 +140,8 @@ MENU_URL_NAMES = {
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
 
+    'course_list_student': {'parent': 'learning'},
+
     'timetable_teacher': {'parent': 'teaching'},
     'course_list_teacher': {'parent': 'teaching'},
     # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
