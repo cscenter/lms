@@ -196,8 +196,10 @@ class CourseClass(TimeStampedModel):
         return "{0}".format(smart_text(self.name))
 
     def get_absolute_url(self):
-        return reverse('class_detail', args=[self.course_offering.course.slug,
-                                             self.pk])
+        return reverse('class_detail',
+                       args=[self.course_offering.course.slug,
+                             self.course_offering.semester.slug,
+                             self.pk])
 
     def clean(self):
         super(CourseClass, self).clean()
