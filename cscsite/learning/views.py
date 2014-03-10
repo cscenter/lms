@@ -9,7 +9,8 @@ from braces.views import LoginRequiredMixin
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews
-from learning.forms import CourseUpdateForm, CourseOfferingPKForm
+from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
+    CourseOfferingEditDescrForm
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     model = CourseClass
@@ -91,11 +92,7 @@ class CourseDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
-class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
-    model = CourseOffering
-    context_object_name = 'course_offering'
-    template_name = "learning/courseoffering_detail.html"
-
+class GetCourseOfferingObjectMixin:
     def get_object(self):
         year, semester_type = self.kwargs['semester_slug'].split("-")
         return get_object_or_404(
@@ -108,6 +105,13 @@ class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
                               'courseclass_set',
                               'courseofferingnews_set'))
 
+class CourseOfferingDetailView(LoginRequiredMixin,
+                               GetCourseOfferingObjectMixin,
+                               generic.DetailView):
+    model = CourseOffering
+    context_object_name = 'course_offering'
+    template_name = "learning/courseoffering_detail.html"
+
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
@@ -117,6 +121,15 @@ class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
                                    .filter(pk=self.object.pk)
                                    .exists()))
         return context
+
+
+class CourseOfferingEditDescrView(TeacherOnlyMixin,
+                                  GetCourseOfferingObjectMixin,
+                                  generic.UpdateView):
+    model = CourseOffering
+    fields = ['description']
+    template_name = "learning/courseoffering_edit_descr.html"
+    form_class = CourseOfferingEditDescrForm
 
 
 class CourseOfferingEnrollView(generic.FormView):

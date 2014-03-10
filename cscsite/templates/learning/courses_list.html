@@ -9,29 +9,31 @@
         {% trans "Courses" %}
       </h2>
       {% if request.user.is_student or request.user.is_teacher %}
-      <div class="btn-group">
-        <a href="{% url 'course_list' %}"
-           role="button"
-           class="btn btn-default
-                  {% if list_type == 'all' %}
-                  active
-                  {% endif %}">All</a>
-        {% if request.user.is_student %}
-        <a href="{% url 'course_list_student' %}"
-           role="button"
-           class="btn btn-default
-                  {% if list_type == 'learning' %}
-                  active
-                  {% endif %}">Learning</a>
-        {% endif %}
-        {% if request.user.is_teacher %}
-        <a href="{% url 'course_list_teacher' %}"
-           role="button"
-           class="btn btn-default
-                  {% if list_type == 'teaching' %}
-                  active
-                  {% endif %}">Teaching</a>
-        {% endif %}
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a href="{% url 'course_list' %}"
+             role="button"
+             class="btn btn-default
+                    {% if list_type == 'all' %}
+                    active
+                    {% endif %}">All</a>
+          {% if request.user.is_student %}
+          <a href="{% url 'course_list_student' %}"
+             role="button"
+             class="btn btn-default
+                    {% if list_type == 'learning' %}
+                    active
+                    {% endif %}">Learning</a>
+          {% endif %}
+          {% if request.user.is_teacher %}
+          <a href="{% url 'course_list_teacher' %}"
+             role="button"
+             class="btn btn-default
+                    {% if list_type == 'teaching' %}
+                    active
+                    {% endif %}">Teaching</a>
+          {% endif %}
+        </div>
       </div>
       {% endif %}
       <hr>
