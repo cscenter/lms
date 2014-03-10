@@ -103,7 +103,10 @@ class CourseOfferingDetailView(LoginRequiredMixin, generic.DetailView):
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug'])
-            .select_related('course', 'semester'))
+            .select_related('course', 'semester')
+            .prefetch_related('teachers',
+                              'courseclass_set',
+                              'courseofferingnews_set'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)

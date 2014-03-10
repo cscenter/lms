@@ -16,7 +16,7 @@
           {% csrf_token %}
           <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
           <button type="submit" class="btn btn-danger">
-            {% trans 'Unenroll' %}
+            {% trans "Unenroll" %}
           </button>
         </form>
         {% else %}
@@ -24,7 +24,7 @@
           {% csrf_token %}
           <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
           <button type="submit" class="btn btn-primary">
-            {% trans 'Enroll' %}
+            {% trans "Enroll" %}
           </button>
         </form>
         {% endif %}
@@ -55,9 +55,24 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-12">
+    <div class="col-xs-4">
+      <h4>{% trans "Classes" %}</h4>
+      {% if course_offering.courseclass_set.all %}
+      <ul class="list-unstyled">
+        {% for class in course_offering.courseclass_set.all reversed %}
+        <li>
+          {{ class.date|date:"d.m:" }}
+          <a href="{% url 'class_detail' course_offering.course.slug course_offering.semester.slug class.pk%}">
+            {{ class.name }}
+            </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    <div class="col-xs-8">
       {% for news in course_offering.courseofferingnews_set.all %}
-      <h3>{{ news.title }}</h3>
+      <h4>{{ news.title }}</h4>
       <div class="ubertext">
         {{ news.text|safe }}
       </div>
