@@ -34,7 +34,8 @@ class LoginForm(AuthenticationForm):
         self.helper.layout = Layout(
             'username',
             'password',
-            FormActions(Submit('submit', _("Submit"))))
+            FormActions(Submit('submit', _("Submit"),
+                               css_class="pull-right")))
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
 # TODO: rename all XXXView to just XXX?

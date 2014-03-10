@@ -14,7 +14,10 @@ from learning.views import \
     CourseStudentListView, \
     CourseListView, CourseDetailView, \
     CourseOfferingDetailView, \
-    CourseOfferingEditDescrView, \
+   CourseOfferingEditDescrView, \
+    CourseOfferingNewsCreateView, \
+    CourseOfferingNewsUpdateView, \
+    CourseOfferingNewsDeleteView, \
     CourseOfferingEnrollView, CourseOfferingUnenrollView, \
     CourseClassDetailView, \
     VenueListView, VenueDetailView
@@ -49,9 +52,18 @@ urlpatterns = patterns('',
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
         CourseOfferingDetailView.as_view(),
         name="course_offering_detail"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit_descr/$",
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-descr/$",
         CourseOfferingEditDescrView.as_view(),
         name="course_offering_edit_descr"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/create-news/$",
+        CourseOfferingNewsCreateView.as_view(),
+        name="course_offering_news_create"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-news-(?P<pk>[-\w]+)/$",
+        CourseOfferingNewsUpdateView.as_view(),
+        name="course_offering_news_update"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/delete-news-(?P<pk>[-\w]+)/$",
+        CourseOfferingNewsDeleteView.as_view(),
+        name="course_offering_news_delete"),
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/enroll$",
         CourseOfferingEnrollView.as_view(),
         name="course_offering_enroll"),

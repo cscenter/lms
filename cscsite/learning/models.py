@@ -80,8 +80,8 @@ class CourseOffering(TimeStampedModel):
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
     description = models.TextField(
-        _("CourseOffering|description"),
-        help_text=(_("LaTeX+Markdown is enabled")),
+        _("Description"),
+        help_text=(_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description")),
         blank=True)
 
     class Meta(object):
@@ -90,7 +90,7 @@ class CourseOffering(TimeStampedModel):
         verbose_name_plural = _("Course offerings")
 
     def __str__(self):
-        return "{0} ({1})".format(smart_text(self.course),
+        return "{0}, {1}".format(smart_text(self.course),
                                   smart_text(self.semester))
 
     def get_absolute_url(self):
