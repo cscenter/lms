@@ -81,7 +81,7 @@ class CourseOffering(TimeStampedModel):
         on_delete=models.PROTECT)
     description = models.TextField(
         _("Description"),
-        help_text=(_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description")),
+        help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
         blank=True)
 
     class Meta(object):

@@ -36,7 +36,9 @@ class CourseOfferingPKForm(forms.Form):
 
 
 class CourseOfferingEditDescrForm(forms.ModelForm):
-    description = forms.CharField(widget=forms.Textarea)
+    description = forms.CharField(
+        help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
+        widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
