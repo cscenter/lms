@@ -35,7 +35,7 @@ class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
     success_url = reverse_lazy('courses_teacher')
 
 
-class CourseListView(LoginRequiredMixin, generic.ListView):
+class CourseListView(generic.ListView):
     model = CourseOffering
     template_name = "learning/courses_list.html"
     context_object_name = 'course_list'
@@ -69,6 +69,7 @@ class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
         return (super(CourseTeacherListView, self)
                 .get_queryset()
                 .filter(teachers=self.request.user))
+
 
 class CourseStudentListView(StudentOnlyMixin, CourseListView):
     list_type = 'learning'
