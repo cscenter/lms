@@ -8,6 +8,7 @@ import dateutil.parser as dparser
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_text, python_2_unicode_compatible
