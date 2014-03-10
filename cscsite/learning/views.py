@@ -10,7 +10,8 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews
 from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
-    CourseOfferingEditDescrForm
+    CourseOfferingEditDescrForm, \
+    CourseOfferingNewsForm
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     model = CourseClass
@@ -63,6 +64,7 @@ class CourseListView(generic.ListView):
         context['list_type'] = self.list_type
         return context
 
+
 class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
     list_type = 'teaching'
 
@@ -105,6 +107,7 @@ class GetCourseOfferingObjectMixin:
                               'courseclass_set',
                               'courseofferingnews_set'))
 
+
 class CourseOfferingDetailView(LoginRequiredMixin,
                                GetCourseOfferingObjectMixin,
                                generic.DetailView):
@@ -127,10 +130,45 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
                                   GetCourseOfferingObjectMixin,
                                   generic.UpdateView):
     model = CourseOffering
-    fields = ['description']
-    template_name = "learning/courseoffering_edit_descr.html"
+    template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingEditDescrForm
 
+
+class CourseOfferingNewsCreateView(TeacherOnlyMixin,
+                                   generic.CreateView):
+    model = CourseOfferingNews
+    template_name = "learning/simple_crispy_form.html"
+    form_class = CourseOfferingNewsForm
+
+    def form_valid(self, form):
+        year, semester_type = self.kwargs['semester_slug'].split("-")
+        course_offering = get_object_or_404(
+            CourseOffering.objects
+            .filter(semester__type=semester_type,
+                    semester__year=year,
+                    course__slug=self.kwargs['course_slug']))
+        form.instance.course_offering = course_offering
+        self.success_url = course_offering.get_absolute_url()
+        return super(CourseOfferingNewsCreateView, self).form_valid(form)
+
+
+class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
+                                   generic.UpdateView):
+    model = CourseOfferingNews
+    template_name = "learning/simple_crispy_form.html"
+    form_class = CourseOfferingNewsForm
+
+    def get_success_url(self):
+        return self.object.course_offering.get_absolute_url()
+
+
+class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
+                                   generic.DeleteView):
+    model = CourseOfferingNews
+    template_name = "learning/simple_delete_confirmation.html"
+
+    def get_success_url(self):
+        return self.object.course_offering.get_absolute_url()
 
 class CourseOfferingEnrollView(generic.FormView):
     http_method_names = ['post']

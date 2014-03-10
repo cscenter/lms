@@ -5,7 +5,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden
 from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
 
-from learning.models import Course, CourseOffering
+from learning.models import Course, CourseOffering, CourseOfferingNews
 
 class CourseUpdateForm(forms.ModelForm):
     name = forms.CharField(
@@ -13,7 +13,6 @@ class CourseUpdateForm(forms.ModelForm):
         label=_("Course|name"),
         widget=forms.TextInput(attrs={'autofocus': 'autofocus'}))
     ongoing = forms.BooleanField(
-        required=False,
         label=_("Course|ongoing"))
 
     def __init__(self, *args, **kwargs):
@@ -31,20 +30,40 @@ class CourseUpdateForm(forms.ModelForm):
         model = Course
         fields = ['name', 'ongoing']
 
+
 class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)
 
+
 class CourseOfferingEditDescrForm(forms.ModelForm):
-    description = forms.CharField(
-        label=_("Description"),
-        help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
-        widget=forms.Textarea)
+    description = forms.CharField(widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.add_input(Submit('save', _('Save')))
+        self.helper.add_input(Submit('save', _('Save'),
+                                     css_class="pull-right"))
         super(CourseOfferingEditDescrForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = CourseOffering
         fields = ['description']
+
+
+class CourseOfferingNewsForm(forms.ModelForm):
+    title = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'autofocus': 'autofocus'}))
+    text = forms.CharField(
+        required=True,
+        widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('save', _('Save'),
+                                     css_class="pull-right"))
+        super(CourseOfferingNewsForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = CourseOfferingNews
+        fields = ['title', 'text']
