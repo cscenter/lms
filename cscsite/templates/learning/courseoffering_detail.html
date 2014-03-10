@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load thumbnail %}
 
 {% block content %}
 <div class="container">
@@ -10,25 +9,41 @@
         {{ course_offering.course.name }}
         <small>{{ course_offering.semester }}</small>
       </h2>
-      {% if request.user.is_student %}
-        {% if is_enrolled%}
-<form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
-          {% csrf_token %}
-          <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-          <button type="submit" class="btn btn-danger">
-            {% trans "Unenroll" %}
-          </button>
-        </form>
-        {% else %}
-        <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
-          {% csrf_token %}
-          <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-          <button type="submit" class="btn btn-primary">
-            {% trans "Enroll" %}
-          </button>
-        </form>
+      <div class="btn-toolbar">
+        {% if request.user.is_teacher %}
+        <div class="btn-group">
+          <a href="" class="btn btn-primary" role="button">
+            {% trans "Add news" %}
+          </a>
+        </div>
+        <div class="btn-group">
+          <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
+            {% trans "Edit" %}
+          </a>
+        </div>
         {% endif %}
-      {% endif %}
+        {% if request.user.is_student %}
+        <div class="btn-group">
+          {% if is_enrolled%}
+          <form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+            <button type="submit" class="btn btn-danger">
+              {% trans "Unenroll" %}
+            </button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+            <button type="submit" class="btn btn-primary">
+              {% trans "Enroll" %}
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
       <hr>
     </div>
   </div>

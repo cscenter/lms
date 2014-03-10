@@ -133,6 +133,8 @@ MENU_URL_NAMES = {
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
+    # TODO: link-walking!
+    'course_offering_detail': {'alias': 'course_list'},
     'orgs': {'parent': 'about'},
     'profs': {'parent': 'about'},
     'alumni': {'parent': 'about'},
