@@ -11,7 +11,8 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews
 from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
-    CourseOfferingNewsForm
+    CourseOfferingNewsForm, \
+    CourseClassForm
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     model = CourseClass
@@ -94,7 +95,7 @@ class CourseDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
-class GetCourseOfferingObjectMixin:
+class GetCourseOfferingObjectMixin(object):
     def get_object(self):
         year, semester_type = self.kwargs['semester_slug'].split("-")
         return get_object_or_404(
@@ -170,6 +171,7 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
     def get_success_url(self):
         return self.object.course_offering.get_absolute_url()
 
+
 class CourseOfferingEnrollView(generic.FormView):
     http_method_names = ['post']
     form_class = CourseOfferingPKForm
@@ -200,6 +202,40 @@ class CourseOfferingUnenrollView(generic.FormView):
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
     model = CourseClass
+
+
+class CourseClassCreateUpdateMixin(object):
+    model = CourseClass
+    template_name = "learning/simple_crispy_form.html"
+    form_class = CourseClassForm
+
+    def get_form(self, form_class):
+        return form_class(self.request.user, **self.get_form_kwargs())
+
+    def get_success_url(self):
+        if self.request.GET.get('back') == 'timetable':
+            return reverse('timetable_teacher')
+        else:
+            return super(CourseClassCreateUpdateMixin, self).get_success_url()
+
+
+class CourseClassCreateView(TeacherOnlyMixin,
+                            CourseClassCreateUpdateMixin,
+                            generic.CreateView):
+    pass
+
+
+class CourseClassUpdateView(TeacherOnlyMixin,
+                            CourseClassCreateUpdateMixin,
+                            generic.UpdateView):
+    pass
+
+
+class CourseClassDeleteView(TeacherOnlyMixin,
+                            generic.DeleteView):
+    model = CourseClass
+    template_name = "learning/simple_delete_confirmation.html"
+    success_url = reverse_lazy('timetable_teacher')
 
 
 class VenueListView(generic.ListView):

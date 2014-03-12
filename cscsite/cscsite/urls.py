@@ -14,12 +14,15 @@ from learning.views import \
     CourseStudentListView, \
     CourseListView, CourseDetailView, \
     CourseOfferingDetailView, \
-   CourseOfferingEditDescrView, \
+    CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
     CourseOfferingNewsDeleteView, \
     CourseOfferingEnrollView, CourseOfferingUnenrollView, \
     CourseClassDetailView, \
+    CourseClassCreateView, \
+    CourseClassUpdateView, \
+    CourseClassDeleteView, \
     VenueListView, VenueDetailView
 
 admin.autodiscover()
@@ -43,6 +46,12 @@ urlpatterns = patterns('',
         name='course_list_teacher'),
     url(r'^teaching/courses/(?P<pk>\d+)/$', CourseUpdateView.as_view(),
         name='course_edit'),
+    url(r'^teaching/add-class/$', CourseClassCreateView.as_view(),
+        name='course_class_add'),
+    url(r'^teaching/edit-class-(?P<pk>[-\w]+)/$', CourseClassUpdateView.as_view(),
+        name='course_class_edit'),
+    url(r'^teaching/delete-class-(?P<pk>[-\w]+)/$', CourseClassDeleteView.as_view(),
+        name='course_class_delete'),
 
     url(r"^courses/$", CourseListView.as_view(),
         name="course_list"),
