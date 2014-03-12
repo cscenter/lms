@@ -50,17 +50,16 @@
             {% trans "Professors" %}
           </th>
         </thead>
-        {% for courseoffering in course_list_ongoing %}
+        {% for course_offering in course_list_ongoing %}
         <tr>
           <td>
-            <a href="{% url 'course_detail' courseoffering.course.slug %}">
-              {{ courseoffering.course.name }}
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+              {{ course_offering.course.name }}
             </a>
-            (<a href="{% url 'course_offering_detail' courseoffering.course.slug courseoffering.semester.slug %}">{% trans "current offering" %}</a>)
           </td>
           <td>
             <ul class="list-inline">
-            {% for teacher in courseoffering.teachers.all %}
+            {% for teacher in course_offering.teachers.all %}
             {{ teacher.get_full_name }}
             {% endfor %}
             </ul>
@@ -83,16 +82,16 @@
           <th></th>
           <th width="30%">{% trans "Professors" %}</th>
         </thead>
-        {% for courseoffering in semester.list %}
+        {% for course_offering in semester.list %}
         <tr>
           <td>
-            <a href="{% url 'course_detail' courseoffering.course.slug %}">
-              {{ courseoffering.course.name }}
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+              {{ course_offering.course.name }}
             </a>
           </td>
           <td>
             <ul class="list-unstyled">
-              {% for teacher in courseoffering.teachers.all %}
+              {% for teacher in course_offering.teachers.all %}
               <li>{{ teacher.get_full_name }}</li>
               {% endfor %}
             </ul>
