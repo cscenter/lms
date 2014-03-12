@@ -6,6 +6,7 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
+        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>
         {{ course_offering.course.name }}
         <small>{{ course_offering.semester }}</small>
       </h2>
