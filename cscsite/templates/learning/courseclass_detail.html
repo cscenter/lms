@@ -4,11 +4,21 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-xs-12">
+    <div class="col-xs-12 h2-and-buttons">
       <h2>
         {{ object.name }} <small>{{ object.course_offering.course.name }}</small>
       </h2>
-
+      {% if request.user.is_teacher %}
+      <div class="btn-toolbar">
+        <a href="{% url 'course_class_edit' object.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{% url 'course_class_delete' object.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
       <table class="table table-striped">
         <tr>
           <td>{% trans "What" %}:</td>
