@@ -221,17 +221,17 @@ class Assignment(TimeStampedModel):
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
     deadline = models.DateField(_("Assignment|deadline"))
-    online = models.BooleanField(_("Assignment|can be passed online"),
-                                 default=True)
+    is_online = models.BooleanField(_("Assignment|can be passed online"),
+                                    default=True)
     title = models.CharField(_("Asssignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=_("LaTeX+Markdown is enabled"))
 
     class Meta(object):
-        ordering = ["course_offering", "created"]
-        verbose_name = _("Assignment|assignment")
-        verbose_name_plural = _("Assignment|assignments")
+        ordering = ["created", "course_offering"]
+        verbose_name = _("Assignment")
+        verbose_name_plural = _("Assignments")
 
 
 # TODO: check if student is a student
@@ -254,14 +254,15 @@ class AssignmentStudent(TimeStampedModel):
         limit_choices_to={'groups__name': 'Student'})
 
     state = StatusField(verbose_name=_("Asssignment|state"),
-                        choices_name='STATES')
+                        choices_name='STATES',
+                        default='not_checked')
     state_changed = MonitorField(verbose_name=_("Asssignment|state changed"),
                                  monitor='state')
 
     class Meta(object):
         ordering = ["assignment", "student"]
-        verbose_name = _("Assignment|assignment")
-        verbose_name_plural = _("Assignment|assignments")
+        verbose_name = _("Assignment-student")
+        verbose_name_plural = _("Assignment-students")
 
     @property
     def status_display(self):
@@ -286,3 +287,8 @@ class AssignmentComment(TimeStampedModel):
                            time.time(),
                            filename)),
         blank=True)
+
+    class Meta(object):
+        ordering = ["created"]
+        verbose_name = _("Assignment-comment")
+        verbose_name_plural = _("Assignment-comments")
