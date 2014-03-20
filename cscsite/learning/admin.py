@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from learning.models import Course, Semester, CourseOffering, Venue, \
-    CourseClass, CourseOfferingNews
+    CourseClass, CourseOfferingNews, \
+    Assignment, AssignmentStudent, AssignmentComment
 
 class CourseClassAdmin(admin.ModelAdmin):
     save_as = True
@@ -19,3 +20,6 @@ admin.site.register(CourseOffering)
 admin.site.register(Venue)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
+admin.site.register(Assignment)
+admin.site.register(AssignmentStudent)
+admin.site.register(AssignmentComment)
