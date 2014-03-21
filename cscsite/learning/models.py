@@ -6,11 +6,11 @@ import datetime
 
 import dateutil.parser as dparser
 
-from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -74,6 +74,7 @@ class CourseOffering(TimeStampedModel):
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
+        related_name='teaching_set',
         limit_choices_to={'groups__name': 'Teacher'})
     semester = models.ForeignKey(
         Semester,
@@ -83,6 +84,12 @@ class CourseOffering(TimeStampedModel):
         _("Description"),
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
         blank=True)
+    enrolled_students = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Enrolled students"),
+        related_name='enrolled_on_set',
+        blank=True,
+        through='Enrollment')
 
     class Meta(object):
         ordering = ["-semester", "course__created"]
@@ -158,6 +165,7 @@ class Venue(models.Model):
     def get_absolute_url(self):
         return reverse('venue_detail', args=[self.pk])
 
+
 @python_2_unicode_compatible
 class CourseClass(TimeStampedModel):
     TYPES = Choices(('lecture', _("Lecture")),
@@ -215,11 +223,17 @@ class CourseClass(TimeStampedModel):
     type_display = property(type_display_prop)
 
 
+@python_2_unicode_compatible
 class Assignment(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
-        verbose_name=_("Course"),
+        verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
+    assigned_to = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Assignment|assigned_to"),
+        blank=True,
+        through='AssignmentStudent')
     deadline = models.DateField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
@@ -233,8 +247,21 @@ class Assignment(TimeStampedModel):
         verbose_name = _("Assignment")
         verbose_name_plural = _("Assignments")
 
+    def __init__(self, *args, **kwargs):
+        super(Assignment, self).__init__(*args, **kwargs)
+        if self.pk:
+            self._original_course_offering = self.course_offering
 
-# TODO: check if student is a student
+    def clean(self):
+        if self.pk and self._original_course_offering != self.course_offering:
+            raise ValidationError(_("Course offering modification "
+                                    "is not allowed"))
+
+    def __str__(self):
+        return "{0} ({1})".format(smart_text(self.title),
+                                  smart_text(self.course_offering))
+
+
 class AssignmentStudent(TimeStampedModel):
     STATES = Choices(('not_checked', _("Assignment|not checked")),
                      ('being_checked', _("Assignment|being checked")),
@@ -246,23 +273,29 @@ class AssignmentStudent(TimeStampedModel):
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("AssignmentStudent|assignment"),
-        on_delete=models.PROTECT)
+        on_delete=models.CASCADE)
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
         limit_choices_to={'groups__name': 'Student'})
-
-    state = StatusField(verbose_name=_("Asssignment|state"),
-                        choices_name='STATES',
-                        default='not_checked')
-    state_changed = MonitorField(verbose_name=_("Asssignment|state changed"),
-                                 monitor='state')
+    state = StatusField(
+        verbose_name=_("Asssignment|state"),
+        choices_name='STATES',
+        default='not_checked')
+    state_changed = MonitorField(
+        verbose_name=_("Asssignment|state changed"),
+        monitor='state')
 
     class Meta:
         ordering = ["assignment", "student"]
         verbose_name = _("Assignment-student")
         verbose_name_plural = _("Assignment-students")
+
+    def clean(self):
+        if not self.student.is_student:
+            raise ValidationError(_("Student field should point to "
+                                    "an actual student"))
 
     @property
     def status_display(self):
@@ -292,3 +325,26 @@ class AssignmentComment(TimeStampedModel):
         ordering = ["created"]
         verbose_name = _("Assignment-comment")
         verbose_name_plural = _("Assignment-comments")
+
+
+class Enrollment(TimeStampedModel):
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE)
+    course_offering = models.ForeignKey(
+        CourseOffering,
+        verbose_name=_("Course offering"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["student", "course_offering"]
+        verbose_name = _("Enrollment")
+        verbose_name_plural = _("Enrollments")
+
+    def clean(self):
+        if not self.student.is_student:
+            raise ValidationError(_("Only students can enroll to courses"))
+
+
+import signals
