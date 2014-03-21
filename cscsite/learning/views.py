@@ -8,7 +8,7 @@ from braces.views import LoginRequiredMixin
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews
+    CourseOfferingNews, Enrollment
 from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -121,7 +121,7 @@ class CourseOfferingDetailView(LoginRequiredMixin,
                    .get_context_data(*args, **kwargs))
         context['is_enrolled'] = (self.request.user.is_student and
                                   (self.request.user
-                                   .enrolled_on
+                                   .enrolled_on_set
                                    .filter(pk=self.object.pk)
                                    .exists()))
         return context
@@ -180,7 +180,8 @@ class CourseOfferingEnrollView(generic.FormView):
         course_offering = get_object_or_404(
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
-        self.request.user.enrolled_on.add(course_offering)
+        Enrollment(student=self.request.user,
+                   course_offering=course_offering).save()
         return redirect('course_offering_detail',
                         course_slug=course_offering.course.slug,
                         semester_slug=course_offering.semester.slug)
@@ -194,7 +195,10 @@ class CourseOfferingUnenrollView(generic.FormView):
         course_offering = get_object_or_404(
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
-        self.request.user.enrolled_on.remove(course_offering)
+        enrollment = get_object_or_404(
+            Enrollment.objects.filter(student=self.request.user,
+                                      course_offering=course_offering))
+        enrollment.delete()
         return redirect('course_offering_detail',
                         course_slug=course_offering.course.slug,
                         semester_slug=course_offering.semester.slug)

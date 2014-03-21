@@ -4,7 +4,8 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from sorl.thumbnail.admin import AdminImageMixin
 
-from users.models import CSCUser
+from users.models import CSCUser #, Enrollment
+
 
 class CSCUserCreationForm(UserCreationForm):
     class Meta:
@@ -19,9 +20,11 @@ class CSCUserCreationForm(UserCreationForm):
             return username
         raise forms.ValidationError(self.error_messages["duplicate_username"])
 
+
 class CSCUserChangeForm(UserChangeForm):
     class Meta:
         model = CSCUser
+
 
 class CSCUserAdmin(AdminImageMixin, UserAdmin):
     form = CSCUserChangeForm
@@ -34,8 +37,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
                                       'graduation_year']}),
         ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions']}),
-        ('Important dates', {'fields': ['last_login', 'date_joined']}),
-        ('Enrollment', {'fields': ['enrolled_on']})
-        ]
+        ('Important dates', {'fields': ['last_login', 'date_joined']})]
+
 
 admin.site.register(CSCUser, CSCUserAdmin)

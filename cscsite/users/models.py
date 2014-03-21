@@ -1,9 +1,12 @@
+from __future__ import unicode_literals
+
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.utils import timezone
-from django.utils.encoding import force_text
+from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
@@ -13,6 +16,7 @@ import logging
 
 from learning.models import CourseOffering
 
+@python_2_unicode_compatible
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
     IS_TEACHER_PK = 2
@@ -40,11 +44,6 @@ class CSCUser(AbstractUser):
         blank=True,
         validators=[MinValueValidator(1990)],
         null=True)
-    # NOTE: check if user is a student here?
-    enrolled_on = models.ManyToManyField(
-        CourseOffering,
-        verbose_name=_("User|enrolled_on"),
-        blank=True)
 
     class Meta:
         verbose_name = _("CSCUser|user")
@@ -62,12 +61,12 @@ class CSCUser(AbstractUser):
                                         " provided for graduates"))
 
     def get_full_name(self):
-        return force_text(u"{0} {1} {2}".format(self.last_name,
-                                                self.first_name,
-                                                self.patronymic).strip())
+        return smart_text("{0} {1} {2}".format(self.last_name,
+                                               self.first_name,
+                                               self.patronymic).strip())
 
-    def __unicode__(self):
-        return self.get_full_name()
+    def __str__(self):
+        return smart_text(self.get_full_name())
 
     @cached_property
     def _cs_group_pks(self):
