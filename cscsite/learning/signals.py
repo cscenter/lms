@@ -8,7 +8,8 @@ from models import Assignment, AssignmentStudent, CourseOffering, Enrollment
 @receiver(models.signals.post_save, sender=Assignment)
 def populate_assignment_students(sender, instance, created,
                                  *args, **kwargs):
-    if not created: return
+    if not created:
+        return
     students = instance.course_offering.enrolled_students.all()
     AssignmentStudent.objects.bulk_create(
             AssignmentStudent(assignment=instance, student=student)
@@ -18,7 +19,8 @@ def populate_assignment_students(sender, instance, created,
 @receiver(models.signals.post_save, sender=Enrollment)
 def populate_student_assignments(sender, instance, created,
                                  *args, **kwargs):
-    if not created: return
+    if not created:
+        return
     assignments = instance.course_offering.assignment_set.all()
     AssignmentStudent.objects.bulk_create(
         AssignmentStudent(assignment=assignment, student=instance.student)
