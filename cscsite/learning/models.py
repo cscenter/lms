@@ -33,7 +33,7 @@ class Course(TimeStampedModel):
         _("Course|description"),
         help_text=(_("LaTeX+Markdown is enabled")))
 
-    class Meta(object):
+    class Meta:
         ordering = ["name"]
         verbose_name = _("course")
         verbose_name_plural = _("courses")
@@ -55,7 +55,7 @@ class Semester(models.Model):
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
 
-    class Meta(object):
+    class Meta:
         ordering = ["year", "type"]
 
     def __str__(self):
@@ -131,7 +131,7 @@ class CourseOfferingNews(TimeStampedModel):
         _("CourseNews|text"),
         help_text=(_("LaTeX+Markdown is enabled")))
 
-    class Meta(object):
+    class Meta:
         ordering = ["-created"]
         verbose_name = _("Course news-singular")
         verbose_name_plural = _("Course news-plural")
@@ -147,7 +147,7 @@ class Venue(models.Model):
         _("Description"),
         help_text=(_("LaTeX+Markdown is enabled")))
 
-    class Meta(object):
+    class Meta:
         ordering = ["name"]
         verbose_name = _("Venue")
         verbose_name_plural = _("Venues")
@@ -187,7 +187,7 @@ class CourseClass(TimeStampedModel):
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
 
-    class Meta(object):
+    class Meta:
         ordering = ["-date", "course_offering", "starts_at"]
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
@@ -228,7 +228,7 @@ class Assignment(TimeStampedModel):
     text = models.TextField(_("Assignment|text"),
                             help_text=_("LaTeX+Markdown is enabled"))
 
-    class Meta(object):
+    class Meta:
         ordering = ["created", "course_offering"]
         verbose_name = _("Assignment")
         verbose_name_plural = _("Assignments")
@@ -259,7 +259,7 @@ class AssignmentStudent(TimeStampedModel):
     state_changed = MonitorField(verbose_name=_("Asssignment|state changed"),
                                  monitor='state')
 
-    class Meta(object):
+    class Meta:
         ordering = ["assignment", "student"]
         verbose_name = _("Assignment-student")
         verbose_name_plural = _("Assignment-students")
@@ -288,7 +288,7 @@ class AssignmentComment(TimeStampedModel):
                            filename)),
         blank=True)
 
-    class Meta(object):
+    class Meta:
         ordering = ["created"]
         verbose_name = _("Assignment-comment")
         verbose_name_plural = _("Assignment-comments")
