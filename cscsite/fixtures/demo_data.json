@@ -503,5 +503,44 @@
             "modified": "2014-02-24T16:06:28.555Z",
             "created": "2014-02-24T16:06:28.545Z"
         }
-    }
+    },
+{
+  "pk": 1,
+  "model": "learning.assignment",
+  "fields": {
+    "title": "\u041f\u0435\u0440\u0432\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435",
+    "text": "\u041d\u0443\u0436\u043d\u043e \u0432\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u043f\u0435\u0440\u0432\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435 \u0446\u0435\u043b\u0438\u043a\u043e\u043c.\r\n\r\n$$ e = mc^2 $$",
+    "created": "2014-03-22T11:20:05.455Z",
+    "modified": "2014-03-22T11:20:05.473Z",
+    "deadline": "2014-03-20T12:00:00Z",
+    "is_online": true,
+    "course_offering": 2
+  }
+},
+{
+  "pk": 2,
+  "model": "learning.assignment",
+  "fields": {
+    "title": "\u0412\u0442\u043e\u0440\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435",
+    "text": "\u041f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430, \u0432\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u0435 \u044d\u0442\u043e \u0437\u0430\u0434\u0430\u043d\u0438\u0435!",
+    "created": "2014-03-22T11:20:42.329Z",
+    "modified": "2014-03-22T11:20:42.341Z",
+    "deadline": "2014-04-17T12:00:00Z",
+    "is_online": true,
+    "course_offering": 2
+  }
+},
+{
+  "pk": 3,
+  "model": "learning.assignment",
+  "fields": {
+    "title": "\u0417\u0430\u0434\u0430\u043d\u0438\u0435 \u043e\u0444\u0444\u043b\u0430\u0439\u043d",
+    "text": "\u0418\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0434\u0432\u043e\u0439\u043d\u043e\u0435 \u0441\u0430\u043b\u044c\u0442\u043e \u043d\u0430\u0437\u0430\u0434.",
+    "created": "2014-03-22T11:21:48.953Z",
+    "modified": "2014-03-22T11:21:48.966Z",
+    "deadline": "2014-05-10T09:00:00Z",
+    "is_online": false,
+    "course_offering": 2
+  }
+}
 ]
