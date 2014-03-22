@@ -14,6 +14,7 @@ from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
@@ -263,7 +264,7 @@ class Assignment(TimeStampedModel):
 
     @property
     def open(self):
-        return self.deadline > datetime.datetime.now()
+        return self.deadline > timezone.now()
 
 
 class AssignmentStudent(TimeStampedModel):

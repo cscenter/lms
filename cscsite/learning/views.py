@@ -260,7 +260,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
     def get_queryset(self):
         return (self.model.objects
                 .filter(student=self.request.user)
-                .order_by('deadline',
+                .order_by('assignment__deadline',
                           'assignment__course_offering__course__name')
                 .select_related('assignment',
                                 'assignment__course_offering',
@@ -271,7 +271,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
                    .get_context_data(*args, **kwargs))
         open_assignments, archive = [], []
         for assignment_student in context['assignment_list']:
-            if assignment_student.open:
+            if assignment_student.assignment.open:
                 open_assignments.append(assignment_student)
             else:
                 archive.append(assignment_student)
