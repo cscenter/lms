@@ -8,7 +8,8 @@ from braces.views import LoginRequiredMixin
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment
+    CourseOfferingNews, Enrollment, \
+    Assignment, AssignmentStudent
 from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -81,7 +82,7 @@ class CourseStudentListView(StudentOnlyMixin, CourseListView):
     def get_queryset(self):
         return (super(CourseStudentListView, self)
                 .get_queryset()
-                .filter(cscuser__enrolled_on=self.request.user))
+                .filter(enrolled_students=self.request.user))
 
 
 class CourseDetailView(LoginRequiredMixin, generic.DetailView):
@@ -235,8 +236,7 @@ class CourseClassUpdateView(TeacherOnlyMixin,
     pass
 
 
-class CourseClassDeleteView(TeacherOnlyMixin,
-                            generic.DeleteView):
+class CourseClassDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = CourseClass
     template_name = "learning/simple_delete_confirmation.html"
     success_url = reverse_lazy('timetable_teacher')
@@ -250,3 +250,32 @@ class VenueListView(generic.ListView):
 class VenueDetailView(generic.DetailView):
     model = Venue
     template_name = "learning/venue_detail.html"
+
+
+class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
+    model = AssignmentStudent
+    template_name = "learning/assignment_list.html"
+    context_object_name = 'assignment_list'
+
+    def get_queryset(self):
+        return (self.model.objects
+                .filter(student=self.request.user)
+                .order_by('deadline',
+                          'assignment__course_offering__course__name')
+                .select_related('assignment',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(AssignmentStudentListView, self)
+                   .get_context_data(*args, **kwargs))
+        open_assignments, archive = [], []
+        for assignment_student in context['assignment_list']:
+            if assignment_student.open:
+                open_assignments.append(assignment_student)
+            else:
+                archive.append(assignment_student)
+        archive.reverse()
+        context['assignment_list_open'] = open_assignments
+        context['assignment_list_archive'] = archive
+        return context
