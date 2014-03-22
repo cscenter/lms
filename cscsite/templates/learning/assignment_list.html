@@ -1,68 +1,60 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load humanize %}
 
 {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
-        {% trans "Courses" %}
+        {% trans "Assignments" %}
       </h2>
-      {% if request.user.is_student or request.user.is_teacher %}
       <div class="btn-toolbar">
-        <div class="btn-group">
-          <a href="{% url 'course_list' %}"
-             role="button"
-             class="btn btn-default
-                    {% if list_type == 'all' %}
-                    active
-                    {% endif %}">All</a>
-          {% if request.user.is_student %}
-          <a href="{% url 'course_list_student' %}"
-             role="button"
-             class="btn btn-default
-                    {% if list_type == 'learning' %}
-                    active
-                    {% endif %}">Learning</a>
-          {% endif %}
-          {% if request.user.is_teacher %}
-          <a href="{% url 'course_list_teacher' %}"
-             role="button"
-             class="btn btn-default
-                    {% if list_type == 'teaching' %}
-                    active
-                    {% endif %}">Teaching</a>
-          {% endif %}
-        </div>
       </div>
-      {% endif %}
       <hr>
     </div>
   </div>
-  {% if course_list_ongoing %}
+  {% if assignment_list_open %}
   <div class="row">
     <div class="col-xs-12">
-      <h3>{% trans "Ongoing" %}</h3>
+      <h3>{% trans "Open assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
+          <th>
+            {% trans "Deadline" %}
+          </th>
           <th></th>
-          <th width="30%">
-            {% trans "Professors" %}
+          <th>
+            {% trans "Course" %}
+          </th>
+          <th>
+            {% trans "State" %}
+          </th>
+          <th>
+            {% trans "Online" %}
           </th>
         </thead>
-        {% for course_offering in course_list_ongoing %}
+        {% for a_s in assignment_list_open %}
         <tr>
           <td>
-            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-              {{ course_offering.course.name }}
-            </a>
+            {{ a_s.assignment.deadline|naturalday:"m E Y" }}
+            {{ a_s.assignment.deadline|time:"H:i" }}
           </td>
           <td>
-            <ul class="list-inline">
-            {% for teacher in course_offering.teachers.all %}
-            {{ teacher.get_full_name }}
-            {% endfor %}
-            </ul>
+            {{ a_s.assignment.title }}
+          </td>
+          <td>
+            {{ a_s.assignment.course_offering.course.name }}
+          </td>
+          <td>
+            {{ a_s.status_display }}
+          </td>
+          <td>
+            {% if a_s.assignment.is_online %}
+            {% trans "Yes" %}
+            {% else %}
+            {% trans "No" %}
+            {% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -70,46 +62,61 @@
     </div>
   </div>
   {% endif %}
-  {% if course_list_archive %}
+  {% if assignment_list_archive %}
   <div class="row">
     <div class="col-xs-12">
       <h3>{% trans "Archive" %}</h3>
-      {% regroup course_list_archive by semester as archive %}
-      {% for semester in archive %}
-      <h4>{{ semester.grouper }}</h4>
       <table class="table" width="100%">
         <thead>
+          <th>
+            {% trans "Deadline" %}
+          </th>
           <th></th>
-          <th width="30%">{% trans "Professors" %}</th>
+          <th>
+            {% trans "Course" %}
+          </th>
+          <th>
+            {% trans "State" %}
+          </th>
+          <th>
+            {% trans "Online" %}
+          </th>
         </thead>
-        {% for course_offering in semester.list %}
+        {% for a_s in assignment_list_archive %}
         <tr>
           <td>
-            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-              {{ course_offering.course.name }}
-            </a>
+            {{ a_s.assignment.deadline|naturalday:"m E Y" }}
+            {{ a_s.assignment.deadline|time:"H:i" }}
           </td>
           <td>
-            <ul class="list-unstyled">
-              {% for teacher in course_offering.teachers.all %}
-              <li>{{ teacher.get_full_name }}</li>
-              {% endfor %}
-            </ul>
+            {{ a_s.assignment.title }}
+          </td>
+          <td>
+            {{ a_s.assignment.course_offering.course.name }}
+          </td>
+          <td>
+            {{ a_s.status_display }}
+          </td>
+          <td>
+            {% if a_s.assignment.is_online %}
+            {% trans "Yes" %}
+            {% else %}
+            {% trans "No" %}
+            {% endif %}
           </td>
         </tr>
         {% endfor %}
       </table>
-      {% endfor %}
     </div>
   </div>
   {% endif %}
 </div>
-{% if not course_list_ongoing and not course_list_archive %}
+{% if not assignment_list_open and not assignment_list_archive %}
 <div class="container">
   <div class="row">
     <div class="col-xs-3"></div>
     <div class="col-xs-6 center-aligned">
-      <h4>{% trans "No courses yet" %}</h4>
+      <h4>{% trans "No assignments yet" %}</h4>
     </div>
     <div class="col-xs-3">
     </div>
