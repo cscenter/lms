@@ -234,7 +234,7 @@ class Assignment(TimeStampedModel):
         verbose_name=_("Assignment|assigned_to"),
         blank=True,
         through='AssignmentStudent')
-    deadline = models.DateField(_("Assignment|deadline"))
+    deadline = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
     title = models.CharField(_("Asssignment|name"),
@@ -260,6 +260,10 @@ class Assignment(TimeStampedModel):
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
+
+    @property
+    def open(self):
+        return self.deadline > datetime.datetime.now()
 
 
 class AssignmentStudent(TimeStampedModel):
