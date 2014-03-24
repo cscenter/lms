@@ -97,7 +97,7 @@ class UserTests(TestCase):
                                  'password': test_password + "BAD"})
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "enter a correct username")
+        self.assertContains(resp, "alert")
         resp = self.client.post(reverse('login'),
                                 {'username': test_user,
                                  'password': test_password})
