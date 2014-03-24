@@ -143,6 +143,8 @@ MENU_URL_NAMES = {
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
 
+    'assignment_list_student': {'parent': 'learning'},
+
     'course_list_student': {'parent': 'learning'},
 
     'timetable_teacher': {'parent': 'teaching'},

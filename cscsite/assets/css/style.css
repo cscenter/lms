@@ -26,11 +26,13 @@ h4.bigger-margin {
 }
 
 .header.lvl1 {
-  width: 100%;
   height: 40px;
-  /* background-color: #2A2A2A; */
   background-color: #262626;
   color: white;
+}
+
+.header.lvl1 .row {
+  background-color: #262626;
 }
 
 .header-lvl2-container {
@@ -41,6 +43,7 @@ h4.bigger-margin {
 
 .header.lvl2 {
   width: 100%;
+  /* width: 960px; */
   height: 40px;
   color: white;
   display: none;
@@ -78,6 +81,9 @@ h4.bigger-margin {
 .header.lvl2 {
   background-color: #3F3F3F;
 }
+.header.lvl2 .row {
+  background-color: #3F3F3F;
+}
 .header li:hover {
   background-color: #2F2F2F;
 }
@@ -86,6 +92,9 @@ h4.bigger-margin {
 }
 
 .header.lvl2.for-students {
+  background-color: #1C42A3;
+}
+.header.lvl2.for-students .row {
   background-color: #1C42A3;
 }
 li.for-students.current {
@@ -101,6 +110,9 @@ li.for-students.current {
 .header.lvl2.for-teachers {
   background-color: #8657AB;
 }
+.header.lvl2.for-teachers .row {
+  background-color: #8657AB;
+}
 li.for-teachers.current {
   background-color: #561788 !important;
 }
@@ -112,6 +124,9 @@ li.for-teachers.current {
 }
 
 .header.lvl2.for-staff {
+  background-color: #C73827;
+}
+.header.lvl2.for-staff .row {
   background-color: #C73827;
 }
 .header.for-staff li:hover {
@@ -297,15 +312,22 @@ li.for-teachers.current {
   margin-top: 20px;
 }
 
-/* .h2-and-buttons button { */
-/*   float: right; */
-/*   margin-left: 10px; */
-/* } */
-
-/* .h2-and-buttons a.btn { */
-/*   margin-top: 20px; */
-/* } */
-
 .h2-and-buttons hr {
   clear: both;
+}
+
+.btn {
+  border-radius: 0px !important;
+}
+
+.csc-well {
+  background-color: #F1F1F1;
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+}
+
+h5.unobtrusive {
+  font-size: 14px;
+  color: #999;
 }

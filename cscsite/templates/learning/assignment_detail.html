@@ -17,29 +17,36 @@
   </div>
   <div class="row">
     <div class="col-xs-9">
-      <div class="ubertext well">
-        {{ a_s.assignment.text|safe }}
+      <div class="csc-well">
+        <div class="ubertext">
+          {{ a_s.assignment.text|safe }}
+        </div>
+      </div>
+      <div class="csc-well">
+
       </div>
     </div>
     <div class="col-xs-3">
-      <h4>{% trans "State" %}</h4>
+      <h5 class="unobtrusive">{% trans "State" %}</h5>
       {{ a_s.status_display }}
       {% if one_teacher %}
-      <h4>{% trans "Professor" %}</h4>
+      <h5 class="unobtrusive">{% trans "Professor" %}</h5>
       {% else %}
-      <h4>{% trans "Professors" %}</h4>
+      <h5 class="unobtrusive">{% trans "Professors" %}</h5>
       {% endif %}
       <ul class="list-unstyled">
         {% for teacher in a_s.assignment.course_offering.teachers.all %}
         <li>{{ teacher.get_full_name }}</li>
         {% endfor %}
       </ul>
-      <h4>{% trans "Deadline" %}</h4>
+      <h5 class="unobtrusive">{% trans "Deadline" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
-      <h4>{% trans "Assignment created" %}</h4>
+      <h5 class="unobtrusive">{% trans "Assignment created" %}</h5>
       {{ a_s.assignment.created|date:"m E Y" }}
       {% if a_s.assignment.is_online %}
-      <h4>{% trans "Can by passed online "%}</h4>
+      <h4>{% trans "Can be passed online "%}</h4>
+      {% else %}
+      <h4>{% trans "Should be passed offline "%}</h4>
       {% endif %}
     </div>
   </div>
