@@ -20,31 +20,35 @@
       <h3>{% trans "Open assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th>
+          <th width="10%">
             {% trans "Deadline" %}
           </th>
           <th></th>
-          <th>
+          <th width="25%">
             {% trans "Course" %}
           </th>
-          <th>
+          <th width="10%">
             {% trans "State" %}
           </th>
-          <th>
+          <th width="5%">
             {% trans "Online" %}
           </th>
         </thead>
         {% for a_s in assignment_list_open %}
         <tr>
           <td>
-            {{ a_s.assignment.deadline|naturalday:"m E Y" }}
+            <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span><br>
             {{ a_s.assignment.deadline|time:"H:i" }}
           </td>
           <td>
-            {{ a_s.assignment.title }}
+            <a href="{% url 'assignment_detail_student' a_s.pk %}">
+              {{ a_s.assignment.title }}
+            </a>
           </td>
           <td>
-            {{ a_s.assignment.course_offering.course.name }}
+            <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
+              {{ a_s.assignment.course_offering.course.name }}
+            </a>
           </td>
           <td>
             {{ a_s.status_display }}
@@ -68,31 +72,35 @@
       <h3>{% trans "Archive" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th>
+          <th width="10%">
             {% trans "Deadline" %}
           </th>
           <th></th>
-          <th>
+          <th width="25%">
             {% trans "Course" %}
           </th>
-          <th>
+          <th width="10%">
             {% trans "State" %}
           </th>
-          <th>
+          <th width="5%">
             {% trans "Online" %}
           </th>
         </thead>
         {% for a_s in assignment_list_archive %}
         <tr>
           <td>
-            {{ a_s.assignment.deadline|naturalday:"m E Y" }}
+            <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span><br>
             {{ a_s.assignment.deadline|time:"H:i" }}
           </td>
           <td>
-            {{ a_s.assignment.title }}
+            <a href="{% url 'assignment_detail_student' a_s.pk %}">
+              {{ a_s.assignment.title }}
+            </a>
           </td>
           <td>
-            {{ a_s.assignment.course_offering.course.name }}
+            <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
+              {{ a_s.assignment.course_offering.course.name }}
+            </a>
           </td>
           <td>
             {{ a_s.status_display }}

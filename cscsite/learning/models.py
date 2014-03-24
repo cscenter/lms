@@ -269,6 +269,7 @@ class Assignment(TimeStampedModel):
 
 class AssignmentStudent(TimeStampedModel):
     STATES = Choices(('not_checked', _("Assignment|not checked")),
+                     ('not_submitted', _("Assignment|not submitted")),
                      ('being_checked', _("Assignment|being checked")),
                      ('unsatisfactory', _("Assignment|unsatisfactory")),
                      ('pass', _("Assignment|pass")),
@@ -301,6 +302,10 @@ class AssignmentStudent(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
+
+    def get_absolute_url(self):
+        return reverse('assignment_detail_student',
+                       args=[self.pk])
 
     @property
     def status_display(self):
