@@ -10,7 +10,7 @@ from users.views import LoginView, LogoutView
 from textpages.views import TextpageOpenView, TextpageStudentView
 from learning.views import \
     TimetableTeacherView, \
-    CourseTeacherListView, CourseUpdateView, \
+    CourseTeacherListView, \
     CourseStudentListView, \
     CourseListView, CourseDetailView, \
     CourseOfferingDetailView, \
@@ -49,8 +49,6 @@ urlpatterns = patterns('',
         name='timetable_teacher'),
     url(r'^teaching/courses/$', CourseTeacherListView.as_view(),
         name='course_list_teacher'),
-    url(r'^teaching/courses/(?P<pk>\d+)/$', CourseUpdateView.as_view(),
-        name='course_edit'),
     url(r'^teaching/add-class/$', CourseClassCreateView.as_view(),
         name='course_class_add'),
     url(r'^teaching/edit-class-(?P<pk>[-\w]+)/$', CourseClassUpdateView.as_view(),
@@ -100,3 +98,6 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if 'rosetta' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('', url(r'^rosetta/', include('rosetta.urls')))
