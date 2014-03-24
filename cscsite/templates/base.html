@@ -93,6 +93,11 @@
               <a href="{% url 'contacts' %}">
                 <li class="{% current 'contacts' %}">{% trans "Contacts" %}</li>
               </a>
+              {% if user.is_staff %}
+              <a href="{% url 'admin:index' %}" target="_blank">
+                <li>{% trans "Admin" %}</li>
+              </a>
+              {% endif %}
             </ul>
           </div>
           <div class="col-xs-3 login">
