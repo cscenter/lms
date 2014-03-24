@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {{ a_s.assignment.title }}
+        <small>{{ a_s.assignment.course_offering }} </small>
+      </h2>
+      <div class="btn-toolbar">
+      </div>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-9">
+      <div class="ubertext well">
+        {{ a_s.assignment.text|safe }}
+      </div>
+    </div>
+    <div class="col-xs-3">
+      <h4>{% trans "State" %}</h4>
+      {{ a_s.status_display }}
+      {% if one_teacher %}
+      <h4>{% trans "Professor" %}</h4>
+      {% else %}
+      <h4>{% trans "Professors" %}</h4>
+      {% endif %}
+      <ul class="list-unstyled">
+        {% for teacher in a_s.assignment.course_offering.teachers.all %}
+        <li>{{ teacher.get_full_name }}</li>
+        {% endfor %}
+      </ul>
+      <h4>{% trans "Deadline" %}</h4>
+      <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
+      <h4>{% trans "Assignment created" %}</h4>
+      {{ a_s.assignment.created|date:"m E Y" }}
+      {% if a_s.assignment.is_online %}
+      <h4>{% trans "Can by passed online "%}</h4>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

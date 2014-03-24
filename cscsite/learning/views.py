@@ -9,7 +9,7 @@ from braces.views import LoginRequiredMixin
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, \
-    Assignment, AssignmentStudent
+    Assignment, AssignmentStudent, AssignmentComment
 from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -278,4 +278,22 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
         archive.reverse()
         context['assignment_list_open'] = open_assignments
         context['assignment_list_archive'] = archive
+        return context
+
+class AssignmentStudentDetailView(StudentOnlyMixin, generic.DetailView):
+    model = AssignmentStudent
+    template_name = "learning/assignment_detail.html"
+    context_object_name = "a_s"
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(AssignmentStudentDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        context['comments'] = (AssignmentComment.objects
+                               .filter(assignment_student=context['a_s'])
+                               .order_by('-created'))
+        context['one_teacher'] = (context['a_s']
+                                  .assignment
+                                  .course_offering
+                                  .teachers
+                                  .count() == 1)
         return context
