@@ -16,14 +16,14 @@
              class="btn btn-default
                     {% if list_type == 'all' %}
                     active
-                    {% endif %}">All</a>
+                    {% endif %}">{% trans "All" %}</a>
           {% if request.user.is_student %}
           <a href="{% url 'course_list_student' %}"
              role="button"
              class="btn btn-default
                     {% if list_type == 'learning' %}
                     active
-                    {% endif %}">Learning</a>
+                    {% endif %}">{% trans "Learning" %}</a>
           {% endif %}
           {% if request.user.is_teacher %}
           <a href="{% url 'course_list_teacher' %}"
@@ -31,7 +31,7 @@
              class="btn btn-default
                     {% if list_type == 'teaching' %}
                     active
-                    {% endif %}">Teaching</a>
+                    {% endif %}">{% trans "Teaching" %}</a>
           {% endif %}
         </div>
       </div>
@@ -58,9 +58,9 @@
             </a>
           </td>
           <td>
-            <ul class="list-inline">
+            <ul class="list-unstyled">
             {% for teacher in course_offering.teachers.all %}
-            {{ teacher.get_full_name }}
+            <li>{{ teacher.get_full_name }}</li>
             {% endfor %}
             </ul>
           </td>

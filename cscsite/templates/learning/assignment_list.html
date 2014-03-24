@@ -27,7 +27,7 @@
           <th width="25%">
             {% trans "Course" %}
           </th>
-          <th width="10%">
+          <th width="15%">
             {% trans "State" %}
           </th>
           <th width="5%">
@@ -51,7 +51,9 @@
             </a>
           </td>
           <td>
-            {{ a_s.status_display }}
+            <span style="white-space: nowrap;">
+              {{ a_s.status_display }}
+            </span>
           </td>
           <td>
             {% if a_s.assignment.is_online %}
@@ -79,7 +81,7 @@
           <th width="25%">
             {% trans "Course" %}
           </th>
-          <th width="10%">
+          <th width="15%">
             {% trans "State" %}
           </th>
           <th width="5%">
@@ -103,7 +105,7 @@
             </a>
           </td>
           <td>
-            {{ a_s.status_display }}
+            <span style="white-space: nowrap;">{{ a_s.status_display }}</span>
           </td>
           <td>
             {% if a_s.assignment.is_online %}

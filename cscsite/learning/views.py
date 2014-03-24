@@ -10,7 +10,7 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, \
     Assignment, AssignmentStudent, AssignmentComment
-from learning.forms import CourseUpdateForm, CourseOfferingPKForm, \
+from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm
@@ -30,13 +30,6 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
         context = (super(TimetableTeacherView, self)
                    .get_context_data(*args, **kwargs))
         return context
-
-
-class CourseUpdateView(TeacherOnlyMixin, generic.UpdateView):
-    model = Course
-    form_class = CourseUpdateForm
-    template_name = "learning/courses_update.html"
-    success_url = reverse_lazy('courses_teacher')
 
 
 class CourseListView(generic.ListView):

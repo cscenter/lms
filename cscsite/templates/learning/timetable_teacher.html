@@ -3,7 +3,6 @@
 
 
 {% block content %}
-{% if object_list %}
 {% regroup object_list by date|date:"l, d F Y" as classes_by_day %}
 <div class="container">
   <div class="row timetable-header-row">
@@ -29,6 +28,7 @@
       </div>
     </div>
   </div>
+  {% if object_list %}
   <div class="row timetable-main-row">
     <div class="col-xs-12">
       {% for day in classes_by_day %}
@@ -82,20 +82,12 @@
       {% endfor %}
     </div>
   </div>
-</div>
-{% else %}
-<div class="container">
+  {% else %}
   <div class="row">
-    <div class="col-xs-3"></div>
-    <div class="col-xs-6 center-aligned">
+    <div class="col-xs-12 center-aligned">
       <h4>{% trans "No classes yet" %}</h4>
     </div>
-    <div class="col-xs-3">
-      <div class="btn-group pull-right">
-        <button type="button" class="btn btn-primary">{% trans 'Add class' %}</button>
-      </div>
-    </div>
   </div>
+  {% endif %}
 </div>
-{% endif %}
 {% endblock content %}
