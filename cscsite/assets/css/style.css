@@ -92,19 +92,19 @@ h4.bigger-margin {
 }
 
 .header.lvl2.for-students {
-  background-color: #1C42A3;
+  background-color: #6FA9EA;
 }
 .header.lvl2.for-students .row {
-  background-color: #1C42A3;
+  background-color: #6FA9EA;
 }
 li.for-students.current {
-  background-color: #0C2A74 !important;
+  background-color: #2E7DDC !important;
 }
 .header.for-students li:hover {
   background-color: #2C52B3;
 }
 .header.for-students li.current {
-  background-color: #0C2A74 !important;
+  background-color: #2E7DDC !important;
 }
 
 .header.lvl2.for-teachers {
