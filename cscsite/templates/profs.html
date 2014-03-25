@@ -12,7 +12,7 @@
         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
         {% endthumbnail %}
         <div class="user-info">
-          <h4>{{ user.get_full_name }}</h4>
+          <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
           <div class="ubertext">{{ user.note|safe }}</div>
         </div>
       </div>

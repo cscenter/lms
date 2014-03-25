@@ -101,7 +101,7 @@ class CourseOffering(TimeStampedModel):
 
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.course),
-                                  smart_text(self.semester))
+                                 smart_text(self.semester))
 
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,

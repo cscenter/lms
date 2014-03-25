@@ -36,7 +36,11 @@
       {% endif %}
       <ul class="list-unstyled">
         {% for teacher in a_s.assignment.course_offering.teachers.all %}
-        <li>{{ teacher.get_full_name }}</li>
+        <li>
+          <a href="{% url 'teacher_detail' teacher.pk %}">
+            {{ teacher.get_full_name }}
+          </a>
+        </li>
         {% endfor %}
       </ul>
       <h5 class="unobtrusive">{% trans "Deadline" %}</h5>

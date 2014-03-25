@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.contrib import admin
 
 from index.views import IndexView, AlumniView, ProfView
-from users.views import LoginView, LogoutView
+from users.views import LoginView, LogoutView, TeacherDetailView
 from textpages.views import TextpageOpenView, TextpageStudentView
 from learning.views import \
     TimetableTeacherView, \
@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
     url(r'^profs/$', ProfView.as_view(), name='profs'),
+    url(r'^profs/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),

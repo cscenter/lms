@@ -1,44 +1,19 @@
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import auth
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import FormView, View, RedirectView
+from django.views.generic import FormView, View, RedirectView, DetailView
 from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden
-from crispy_forms.bootstrap import FormActions
-import floppyforms as forms
 
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        required=True,
-        label=_("Username"),
-        widget=forms.TextInput(attrs={'autofocus': 'autofocus'}))
-    password = forms.CharField(
-        widget=forms.PasswordInput,
-        label=_("Password"))
-
-    def __init__(self, *args, **kwargs):
-        super(LoginForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-xs-2'
-        self.helper.field_class = 'col-xs-7'
-        self.helper.layout = Layout(
-            'username',
-            'password',
-            FormActions(Submit('submit', _("Submit"),
-                               css_class="pull-right")))
+from forms import LoginForm
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
-# TODO: rename all XXXView to just XXX?
 class LoginView(FormView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
     form_class = LoginForm
@@ -78,6 +53,7 @@ class LoginView(FormView):
             self.request.session.set_test_cookie()
             return self.form_invalid(form)
 
+
 class LogoutView(LoginRequiredMixin, RedirectView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
 
@@ -95,3 +71,22 @@ class LogoutView(LoginRequiredMixin, RedirectView):
                 redirect_to = maybe_redirect_to
 
         return redirect_to
+
+
+class TeacherDetailView(DetailView):
+    template_name = "teacher_detail.html"
+    context_object_name = 'teacher'
+
+    def get_queryset(self, *args, **kwargs):
+        return (auth.get_user_model()
+                ._default_manager
+                .all()
+                .prefetch_related('teaching_set',
+                                  'teaching_set__semester',
+                                  'teaching_set__course'))
+
+    def get_object(self, *args, **kwargs):
+        teacher = super(TeacherDetailView, self).get_object(*args, **kwargs)
+        if not teacher.is_teacher:
+            raise Http404
+        return teacher

@@ -60,7 +60,7 @@
           <td>
             <ul class="list-unstyled">
             {% for teacher in course_offering.teachers.all %}
-            <li>{{ teacher.get_full_name }}</li>
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
             {% endfor %}
             </ul>
           </td>
@@ -92,7 +92,11 @@
           <td>
             <ul class="list-unstyled">
               {% for teacher in course_offering.teachers.all %}
-              <li>{{ teacher.get_full_name }}</li>
+              <li>
+                <a href="{% url 'teacher_detail' teacher.pk %}">
+                  {{ teacher.get_full_name }}
+                </a>
+              </li>
               {% endfor %}
             </ul>
           </td>
