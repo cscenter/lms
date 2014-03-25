@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="ubertext">
+        {{ object.text }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>Курсы:</h3>
+      <ul class="list-unstyled">
+        {% for course in courses %}
+        <li><a href="{{ course.get_absolute_url}}">{{ course.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}
