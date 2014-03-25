@@ -19,9 +19,9 @@ from learning.forms import CourseOfferingPKForm, \
 
 import utils
 
-class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
+class TimetableMixin(object):
     model = CourseClass
-    template_name = "learning/timetable_teacher.html"
+    template_name = "learning/timetable.html"
 
     def get_queryset(self):
         semester_qstr = self.request.GET.get('semester')
@@ -29,14 +29,13 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
         if not self.semester_pair:
             self.semester_pair = utils.get_current_semester_pair()
         return (CourseClass.by_semester(self.semester_pair)
-                .filter(course_offering__teachers=self.request.user)
                 .order_by('date', 'starts_at')
                 .select_related('venue', 'course_offering',
                                 'course_offering__course'))
 
     # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
-        context = (super(TimetableTeacherView, self)
+        context = (super(TimetableMixin, self)
                    .get_context_data(*args, **kwargs))
         p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
         year, season = self.semester_pair
@@ -45,6 +44,7 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
         context['next_semester'] = "{0}_{1}".format(n_year, n_season)
         context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
         context['current_semester_obj'] = Semester(year=year, type=season)
+        context['timetable_type'] = self.timetable_type
         return context
 
     def _split_semester(self, semester_string):
@@ -57,6 +57,26 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
             return (int(pair[0]), pair[1])
         except ValueError:
             return None
+
+
+class TimetableTeacherView(TimetableMixin,
+                           TeacherOnlyMixin,
+                           generic.ListView):
+    timetable_type = 'teacher'
+
+    def get_queryset(self):
+        return (super(TimetableTeacherView, self).get_queryset()
+                .filter(course_offering__teachers=self.request.user))
+
+
+class TimetableStudentView(TimetableMixin,
+                           StudentOnlyMixin,
+                           generic.ListView):
+    timetable_type = 'student'
+
+    def get_queryset(self):
+        return (super(TimetableStudentView, self).get_queryset()
+                .filter(course_offering__enrolled_students=self.request.user))
 
 
 class CourseListView(generic.ListView):

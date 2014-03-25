@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+
+{% block content %}
+{% regroup object_list by date|date:"l, d E Y" as classes_by_day %}
+<div class="container">
+  <div class="row timetable-header-row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ current_semester_obj|capfirst }}</h2>
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a href="?semester={{ previous_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?semester={{ next_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+        </div>
+        {% if user.is_teacher and user.is_student %}
+        <div class="btn-group">
+          <a href="{% url 'timetable_student' %}"
+             role="button"
+             class="btn btn-default
+                    {% if timetable_type == 'student' %}
+                    active
+                    {% endif %}">
+            {% trans "Learning" %}
+          </a>
+          <a href="{% url 'timetable_teacher' %}"
+             role="button"
+             class="btn btn-default
+                    {% if timetable_type == 'teacher' %}
+                    active
+                    {% endif %}">
+            {% trans "Teaching" %}
+          </a>
+        </div>
+        {% endif %}
+        <div class="btn-group">
+          <button type="button" class="btn btn-default active">{% trans 'List' %}</button>
+          <button type="button" class="btn btn-default">{% trans 'Calendar' %}</button>
+        </div>
+        {% if user.is_teacher and timetable_type == 'teacher' %}
+        <div class="btn-group">
+          <a href="{% url 'course_class_add' %}?back=timetable" class="btn btn-primary">{% trans 'Add class' %}</a>
+        </div>
+        {% endif %}
+      </div>
+      <hr>
+    </div>
+  </div>
+  {% if object_list %}
+  <div class="row timetable-main-row">
+    <div class="col-xs-12">
+      {% for day in classes_by_day %}
+      <h4>{{ day.grouper }}</h4>
+      <table class="table timetable" width="100%">
+        <thead>
+          <th width="15%">{% trans "Time" %}</th>
+          <th>{% trans "Name" %}</th>
+          <th width="15%">{% trans "Course" %}</th>
+          <th width="12%">{% trans "Venue" %}</th>
+          <th width="10%"></th>
+          <th width="10%">{% trans "Materials" %}</th>
+        </thead>
+        {% for class in day.list %}
+        <tr>
+          <td>{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
+          <td>
+            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
+              {{ class.name }}
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'course_offering_detail' class.course_offering.course.slug class.course_offering.semester.slug %}">
+              {{ class.course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'venue_detail' class.venue.pk %}">
+              {{ class.venue }}
+            </a>
+          </td>
+          <td>
+            {% if class.type == 'lecture'%}
+            <span class="badge lecture">{% trans 'Lecture' %}</span>
+            {% else %}
+            <span class="badge seminar">{% trans 'Seminar' %}</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'course_class_edit' class.pk %}#id_materials">
+            {% if class.materials %}
+            {% trans "Yes" %}
+            {% else %}
+            {% trans "No" %}
+            {% endif %}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col-xs-12 center-aligned">
+      <h4>{% trans "No classes yet" %}</h4>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
