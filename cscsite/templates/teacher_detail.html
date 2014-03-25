@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ teacher.get_full_name }}</h2>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2">
+      {% thumbnail teacher.photo "100x100" crop="center" as im %}
+      <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      {% endthumbnail %}
+    </div>
+    <div class="col-xs-10">
+      <div class="ubertext">{{ teacher.note|safe }}</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>Курсы</h3>
+      <ul class="list-unstyled">
+        {% for course_offering in teacher.teaching_set.all %}
+        <li><a href="{{ course_offering.get_absolute_url }}">{{ course_offering }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}
