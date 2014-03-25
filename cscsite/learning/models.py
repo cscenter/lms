@@ -119,10 +119,10 @@ class CourseOffering(TimeStampedModel):
 
         if (self.semester.type == 'spring' and
             (now >= autumn_term_start or
-             now <= spring_term_start)):
+             now < spring_term_start)):
             return False
         if (self.semester.type == 'autumn' and
-            (now <= autumn_term_start or
+            (now < autumn_term_start or
              now >= next_spring_term_start)):
             return False
         return True
@@ -216,12 +216,47 @@ class CourseClass(TimeStampedModel):
         if self.starts_at >= self.ends_at:
             raise ValidationError(_("Class should end after it's start"))
 
+    # this is needed to properly set up fields for admin page
     def type_display_prop(self):
         return self.TYPES[self.type]
     type_display_prop.short_description = _("Type")
     type_display_prop.admin_order_field = 'type'
-
     type_display = property(type_display_prop)
+
+    # TODO: test this
+    @classmethod
+    def _get_prev_next_semesters(self, (year, season)):
+        if season == 'spring':
+            return [(year-1, 'autumn'), (year, 'autumn')]
+        else:
+            return [(year, 'spring'), (year+1, 'spring')]
+
+    # TODO: test this
+    @classmethod
+    def by_semester(self, current):
+        year, season = current
+        qs = self.objects.filter(
+            course_offering__semester__type=season,
+            course_offering__semester__year=year)
+        prev, next = self._get_prev_next_semesters((year,season))
+        return (prev, current, next, qs)
+
+    # TODO: test this
+    @classmethod
+    def current_semester(self):
+        now = datetime.datetime.now()
+        spring_term_start = dparser.parse(settings.SPRING_TERM_START)
+        autumn_term_start = dparser.parse(settings.AUTUMN_TERM_START)
+        if (spring_term_start <= now < autumn_term_start):
+            current_season = 'spring'
+        else:
+            current_semester = 'autumn'
+        qs = self.objects.filter(
+            course_offering__semester__type=current_season,
+            course_offering__semester__year=now.year)
+        current = (now.year, current_season)
+        prev, next = self._get_prev_next_semesters(current)
+        return (prev, current, next, qs)
 
 
 @python_2_unicode_compatible
