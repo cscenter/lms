@@ -9,7 +9,7 @@ from index.views import IndexView, AlumniView, ProfView
 from users.views import LoginView, LogoutView, TeacherDetailView
 from textpages.views import TextpageOpenView, TextpageStudentView
 from learning.views import \
-    TimetableTeacherView, \
+    TimetableTeacherView, TimetableStudentView, \
     CourseTeacherListView, \
     CourseStudentListView, \
     CourseListView, CourseDetailView, \
@@ -45,6 +45,8 @@ urlpatterns = patterns('',
         name='assignment_list_student'),
     url(r'^learning/assignments/(?P<pk>\d+)/$', AssignmentStudentDetailView.as_view(),
         name='assignment_detail_student'),
+    url(r'^learning/timetable/$', TimetableStudentView.as_view(),
+        name='timetable_student'),
 
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),

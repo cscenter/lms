@@ -162,6 +162,11 @@
                     {% trans "Assignments" %}
                   </li>
                 </a>
+                <a href="{% url 'timetable_student' %}">
+                  <li class="{% current 'timetable_student' %}">
+                    {% trans "Timetable" %}
+                  </li>
+                </a>
                 <li>Задания <span class="badge">3</span></li>
                 <a href="{% url 'course_list_student' %}">
                   <li class="{% current 'course_list_student' %}">
