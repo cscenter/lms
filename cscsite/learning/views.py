@@ -17,21 +17,18 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm
 
+import utils
+
 class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     model = CourseClass
     template_name = "learning/timetable_teacher.html"
 
     def get_queryset(self):
-        semester = self._split_semester(self.request.GET.get("semester"))
-        if semester:
-            prev, current, next, qs = CourseClass.by_semester(semester)
-        else:
-            prev, current, next, qs = CourseClass.current_semester()
-        print prev, current, next
-        self.previous_semester = prev
-        self.current_semester = current
-        self.next_semester = next
-        return (qs
+        semester_qstr = self.request.GET.get('semester')
+        self.semester_pair = self._split_semester(semester_qstr)
+        if not self.semester_pair:
+            self.semester_pair = utils.get_current_semester_pair()
+        return (CourseClass.by_semester(self.semester_pair)
                 .filter(course_offering__teachers=self.request.user)
                 .order_by('date', 'starts_at')
                 .select_related('venue', 'course_offering',
@@ -41,11 +38,12 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableTeacherView, self)
                    .get_context_data(*args, **kwargs))
-        n_year, n_season = self.next_semester
+        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
+        year, season = self.semester_pair
+        p_year, p_season = p
+        n_year, n_season = n
         context['next_semester'] = "{0}_{1}".format(n_year, n_season)
-        p_year, p_season = self.previous_semester
         context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
-        year, season = self.current_semester
         context['current_semester_obj'] = Semester(year=year, type=season)
         return context
 
