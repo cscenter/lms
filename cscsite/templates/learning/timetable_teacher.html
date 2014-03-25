@@ -6,18 +6,13 @@
 {% regroup object_list by date|date:"l, d F Y" as classes_by_day %}
 <div class="container">
   <div class="row timetable-header-row">
-    <div class="col-xs-4">
-      <div class="btn-group">
-        <button type="button" class="btn btn-default">&lt;</button>
-        <button type="button" class="btn btn-default">&gt;</button>
-      </div>
-    </div>
-    <div class="col-xs-4 center">
-      <h2>Spring 2014</h2>
-    </div>
-    <div class="col-xs-4">
-      <div class="btn-toolbar pull-right" role="toolbar">
-
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ current_semester_obj|capfirst }}</h2>
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a href="?semester={{ previous_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?semester={{ next_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+        </div>
         <div class="btn-group">
           <button type="button" class="btn btn-default active">{% trans 'List' %}</button>
           <button type="button" class="btn btn-default">{% trans 'Calendar' %}</button>

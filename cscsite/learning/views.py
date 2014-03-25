@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -8,7 +10,7 @@ from braces.views import LoginRequiredMixin
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, \
+    CourseOfferingNews, Enrollment, Semester, \
     Assignment, AssignmentStudent, AssignmentComment
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
@@ -20,16 +22,43 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.ListView):
     template_name = "learning/timetable_teacher.html"
 
     def get_queryset(self):
-        return (self.model.objects
+        semester = self._split_semester(self.request.GET.get("semester"))
+        if semester:
+            prev, current, next, qs = CourseClass.by_semester(semester)
+        else:
+            prev, current, next, qs = CourseClass.current_semester()
+        print prev, current, next
+        self.previous_semester = prev
+        self.current_semester = current
+        self.next_semester = next
+        return (qs
                 .filter(course_offering__teachers=self.request.user)
                 .order_by('date', 'starts_at')
                 .select_related('venue', 'course_offering',
                                 'course_offering__course'))
 
+    # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableTeacherView, self)
                    .get_context_data(*args, **kwargs))
+        n_year, n_season = self.next_semester
+        context['next_semester'] = "{0}_{1}".format(n_year, n_season)
+        p_year, p_season = self.previous_semester
+        context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
+        year, season = self.current_semester
+        context['current_semester_obj'] = Semester(year=year, type=season)
         return context
+
+    def _split_semester(self, semester_string):
+        if not semester_string:
+            return None
+        pair = semester_string.strip().split("_")
+        if not len(pair) == 2:
+            return None
+        try:
+            return (int(pair[0]), pair[1])
+        except ValueError:
+            return None
 
 
 class CourseListView(generic.ListView):
