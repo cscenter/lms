@@ -20,6 +20,8 @@ from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 
+import utils
+
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
@@ -225,38 +227,10 @@ class CourseClass(TimeStampedModel):
 
     # TODO: test this
     @classmethod
-    def _get_prev_next_semesters(self, (year, season)):
-        if season == 'spring':
-            return [(year-1, 'autumn'), (year, 'autumn')]
-        else:
-            return [(year, 'spring'), (year+1, 'spring')]
-
-    # TODO: test this
-    @classmethod
-    def by_semester(self, current):
-        year, season = current
-        qs = self.objects.filter(
+    def by_semester(self, (year, season)):
+        return self.objects.filter(
             course_offering__semester__type=season,
             course_offering__semester__year=year)
-        prev, next = self._get_prev_next_semesters((year,season))
-        return (prev, current, next, qs)
-
-    # TODO: test this
-    @classmethod
-    def current_semester(self):
-        now = datetime.datetime.now()
-        spring_term_start = dparser.parse(settings.SPRING_TERM_START)
-        autumn_term_start = dparser.parse(settings.AUTUMN_TERM_START)
-        if (spring_term_start <= now < autumn_term_start):
-            current_season = 'spring'
-        else:
-            current_semester = 'autumn'
-        qs = self.objects.filter(
-            course_offering__semester__type=current_season,
-            course_offering__semester__year=now.year)
-        current = (now.year, current_season)
-        prev, next = self._get_prev_next_semesters(current)
-        return (prev, current, next, qs)
 
 
 @python_2_unicode_compatible
