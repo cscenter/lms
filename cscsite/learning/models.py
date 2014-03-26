@@ -257,6 +257,12 @@ class Assignment(TimeStampedModel):
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=_("LaTeX+Markdown+HTML is enabled"))
+    attached_file = models.FileField(
+        upload_to=(lambda instance, filename:
+                       "assignment_{0}/{1}/{2}".format(instance.pk,
+                                                       time.time(),
+                                                       filename)),
+        blank=True)
 
     class Meta:
         ordering = ["created", "course_offering"]
@@ -280,6 +286,12 @@ class Assignment(TimeStampedModel):
     @property
     def is_open(self):
         return self.deadline_at > timezone.now()
+
+    @property
+    def attached_file_name(self):
+        print self.attached_file.name
+        print os.path.basename(self.attached_file.name)
+        return os.path.basename(self.attached_file.name)
 
 
 class AssignmentStudent(TimeStampedModel):
@@ -336,7 +348,7 @@ class AssignmentComment(TimeStampedModel):
         _("AssignmentComment|text"),
         help_text=_("LaTeX+Markdown is enabled"))
     # TODO: test this
-    file = models.FileField(
+    attached_file = models.FileField(
         upload_to=(lambda instance, filename:
                        # TODO: use os.path.join here
                        "user_{0}/assignment_{1}/{2}_{3}".format(

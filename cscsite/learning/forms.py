@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
 
 from learning.models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue
+    CourseClass, Venue, AssignmentComment
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
@@ -134,3 +134,30 @@ class CourseClassForm(forms.ModelForm):
     class Meta:
         model = CourseClass
         fields = '__all__'
+
+
+class AssignmentCommentForm(forms.ModelForm):
+    text = forms.CharField(
+        label=_("Text"),
+        help_text=_("LaTeX+Markdown is enabled"),
+        required=True,
+        widget=forms.Textarea)
+    attached_file = forms.FileField(
+        label="",
+        required=False,
+        widget=forms.FileInput)
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('text'),
+            Div(Div('attached_file',
+                    Div(Submit('save', _('Save')),
+                        css_class='pull-right'),
+                    css_class="form-inline"),
+                css_class="form-group"))
+        super(AssignmentCommentForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AssignmentComment
+        fields = ['text', 'attached_file']

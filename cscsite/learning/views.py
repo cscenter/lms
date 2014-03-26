@@ -15,7 +15,8 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
-    CourseClassForm
+    CourseClassForm, \
+    AssignmentCommentForm
 
 import utils
 
@@ -354,20 +355,33 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                         self.request.user))
 
 
-class AssignmentStudentDetailView(StudentOnlyMixin, generic.DetailView):
-    model = AssignmentStudent
+class AssignmentStudentDetailView(StudentOnlyMixin,
+                                  generic.CreateView):
+    model = AssignmentComment
     template_name = "learning/assignment_detail.html"
-    context_object_name = "a_s"
+    form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentStudentDetailView, self)
                    .get_context_data(*args, **kwargs))
+        pk = self.kwargs.get('pk')
+        a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+        context['a_s'] = a_s
         context['comments'] = (AssignmentComment.objects
-                               .filter(assignment_student=context['a_s'])
+                               .filter(assignment_student=self.object)
                                .order_by('-created'))
-        context['one_teacher'] = (context['a_s']
+        context['one_teacher'] = (a_s
                                   .assignment
                                   .course_offering
                                   .teachers
                                   .count() == 1)
         return context
+
+    def form_valid(self, form):
+        pk = self.kwargs.get('pk')
+        a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+        comment = form.save(commit=False)
+        comment.assignment_student = a_s
+        comment.save()
+        print comment
+        return redirect(a_s.get_absolute_url())
