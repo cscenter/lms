@@ -20,7 +20,7 @@ from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 
-import utils
+from . import utils
 
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
@@ -372,4 +372,4 @@ class Enrollment(TimeStampedModel):
             raise ValidationError(_("Only students can enroll to courses"))
 
 
-import signals
+from . import signals

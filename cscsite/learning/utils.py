@@ -19,7 +19,7 @@ def get_current_semester_pair():
     autumn_term_start = (dparser
                          .parse(settings.AUTUMN_TERM_START)
                          .replace(tzinfo=timezone.utc))
-    if (spring_term_start <= now < autumn_term_start):
+    if spring_term_start <= now < autumn_term_start:
         current_season = 'spring'
     else:
         current_semester = 'autumn'
