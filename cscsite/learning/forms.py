@@ -9,6 +9,12 @@ import floppyforms as forms
 from learning.models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue
 
+CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
+                              onclick='history.go(-1);',
+                              css_class="btn btn-default"),
+                       Submit('save', _('Save')),
+                       css_class="pull-right")
+
 
 class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)
@@ -22,8 +28,9 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.add_input(Submit('save', _('Save'),
-                                     css_class="pull-right"))
+        self.helper.layout = Layout(
+            Div('description'),
+            CANCEL_SAVE_PAIR)
         super(CourseOfferingEditDescrForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -45,8 +52,9 @@ class CourseOfferingNewsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.add_input(Submit('save', _('Save'),
-                                     css_class="pull-right"))
+        self.helper.layout = Layout(
+            Div('title', 'text'),
+            CANCEL_SAVE_PAIR)
         super(CourseOfferingNewsForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -117,12 +125,7 @@ class CourseClassForm(forms.ModelForm):
                     'ends_at',
                     css_class="form-inline"),
                 css_class="form-group"),
-            Div(
-                Button('cancel', _('Cancel'),
-                           onclick='history.go(-1);',
-                           css_class="btn btn-default"),
-                Submit('save', _('Save')),
-                css_class="pull-right"))
+            CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
 
         self.fields['course_offering'].queryset = \
