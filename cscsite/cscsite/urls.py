@@ -25,7 +25,8 @@ from learning.views import \
     CourseClassUpdateView, \
     CourseClassDeleteView, \
     VenueListView, VenueDetailView, \
-    AssignmentStudentListView, AssignmentStudentDetailView
+    AssignmentStudentListView, AssignmentTeacherListView, \
+    AssignmentStudentDetailView
 
 admin.autodiscover()
 
@@ -49,6 +50,8 @@ urlpatterns = patterns('',
     url(r'^learning/timetable/$', TimetableStudentView.as_view(),
         name='timetable_student'),
 
+    url(r'^teaching/assignments/$', AssignmentTeacherListView.as_view(),
+        name='assignment_list_teacher'),
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),
     url(r'^teaching/courses/$', CourseTeacherListView.as_view(),

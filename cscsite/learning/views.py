@@ -292,14 +292,13 @@ class VenueDetailView(generic.DetailView):
     template_name = "learning/venue_detail.html"
 
 
-class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
+class AssignmentListMixin(object):
     model = AssignmentStudent
     template_name = "learning/assignment_list.html"
     context_object_name = 'assignment_list'
 
     def get_queryset(self):
         return (self.model.objects
-                .filter(student=self.request.user)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name')
                 .select_related('assignment',
@@ -307,18 +306,37 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
                                 'assignment__course_offering__course'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentStudentListView, self)
+        context = (super(AssignmentListMixin, self)
                    .get_context_data(*args, **kwargs))
-        open_assignments, archive = [], []
-        for assignment_student in context['assignment_list']:
-            if assignment_student.assignment.is_open:
-                open_assignments.append(assignment_student)
-            else:
-                archive.append(assignment_student)
+        open_, archive = utils.split_list(lambda a_s: a_s.assignment.is_open,
+                                          context['assignment_list'])
         archive.reverse()
-        context['assignment_list_open'] = open_assignments
+        context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
+        context['list_type'] = self.list_type
         return context
+
+
+class AssignmentStudentListView(StudentOnlyMixin,
+                                AssignmentListMixin,
+                                generic.ListView):
+    list_type = 'student'
+
+    def get_queryset(self):
+        return (super(AssignmentStudentListView, self).get_queryset()
+                .filter(student=self.request.user))
+
+
+class AssignmentTeacherListView(TeacherOnlyMixin,
+                                AssignmentListMixin,
+                                generic.ListView):
+    list_type = 'teacher'
+
+    def get_queryset(self):
+        return (super(AssignmentTeacherListView, self).get_queryset()
+                .filter(assignment__course_offering__teachers=
+                        self.request.user))
+
 
 class AssignmentStudentDetailView(StudentOnlyMixin, generic.DetailView):
     model = AssignmentStudent
