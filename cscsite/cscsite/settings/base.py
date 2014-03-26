@@ -152,6 +152,7 @@ MENU_URL_NAMES = {
     'timetable_student': {'parent': 'learning'},
     'course_list_student': {'parent': 'learning'},
 
+    'assignment_list_teacher': {'parent': 'teaching'},
     'timetable_teacher': {'parent': 'teaching'},
     'course_list_teacher': {'parent': 'teaching'},
     # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'

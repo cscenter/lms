@@ -24,3 +24,12 @@ def get_current_semester_pair():
     else:
         current_semester = 'autumn'
     return (now.year, current_season)
+
+def split_list(pred, lst):
+    true_lst, false_lst = [], []
+    for x in lst:
+        if pred(x):
+            true_lst.append(x)
+        else:
+            false_lst.append(x)
+    return true_lst, false_lst
