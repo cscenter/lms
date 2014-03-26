@@ -110,14 +110,20 @@ class CourseOffering(TimeStampedModel):
     # TODO: test this
     @cached_property
     def is_ongoing(self):
-        now = datetime.datetime.now()
+        now = timezone.now()
 
-        spring_term_start = dparser.parse(settings.SPRING_TERM_START)
+        spring_term_start = (dparser
+                             .parse(settings.SPRING_TERM_START)
+                             .replace(tzinfo=timezone.utc))
         next_year = now + datetime.timedelta(days=365)
         # safer against leap years
-        next_spring_term_start = dparser.parse(settings.SPRING_TERM_START,
-                                               default=next_year)
-        autumn_term_start = dparser.parse(settings.AUTUMN_TERM_START)
+        next_spring_term_start = (dparser
+                                  .parse(settings.SPRING_TERM_START,
+                                         default=next_year)
+                                  .replace(tzinfo=timezone.utc))
+        autumn_term_start = (dparser
+                             .parse(settings.AUTUMN_TERM_START)
+                             .replace(tzinfo=timezone.utc))
 
         if (self.semester.type == 'spring' and
             (now >= autumn_term_start or
