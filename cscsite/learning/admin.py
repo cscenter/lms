@@ -19,7 +19,7 @@ class CourseOfferingNewsAdmin(admin.ModelAdmin):
 
 
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'course_offering', 'created', 'deadline']
+    list_display = ['title', 'course_offering', 'created', 'deadline_at']
     list_filter = ['course_offering']
 
     def get_readonly_fields(self, request, obj=None):

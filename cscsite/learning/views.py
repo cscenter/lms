@@ -300,7 +300,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
     def get_queryset(self):
         return (self.model.objects
                 .filter(student=self.request.user)
-                .order_by('assignment__deadline',
+                .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name')
                 .select_related('assignment',
                                 'assignment__course_offering',

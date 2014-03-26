@@ -44,7 +44,7 @@
         {% endfor %}
       </ul>
       <h5 class="unobtrusive">{% trans "Deadline" %}</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
+      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
       <h5 class="unobtrusive">{% trans "Assignment created" %}</h5>
       {{ a_s.assignment.created|date:"m E Y" }}
       {% if a_s.assignment.is_online %}

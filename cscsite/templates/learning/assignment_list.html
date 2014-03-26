@@ -37,8 +37,8 @@
         {% for a_s in assignment_list_open %}
         <tr>
           <td>
-            <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"d E Y" }}</span><br>
-            {{ a_s.assignment.deadline|time:"H:i" }}
+            <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span><br>
+            {{ a_s.assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
             <a href="{% url 'assignment_detail_student' a_s.pk %}">
@@ -91,8 +91,8 @@
         {% for a_s in assignment_list_archive %}
         <tr>
           <td>
-            <span style="white-space: nowrap;">{{ a_s.assignment.deadline|naturalday:"m E Y" }}</span><br>
-            {{ a_s.assignment.deadline|time:"H:i" }}
+            <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span><br>
+            {{ a_s.assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
             <a href="{% url 'assignment_detail_student' a_s.pk %}">
