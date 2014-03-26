@@ -320,6 +320,10 @@ li.for-teachers.current {
   border-radius: 0px !important;
 }
 
+.badge {
+  border-radius: 0px !important;
+}
+
 .csc-well {
   background-color: #F1F1F1;
   min-height: 20px;
