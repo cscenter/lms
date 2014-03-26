@@ -34,7 +34,7 @@ class Course(TimeStampedModel):
         unique=True)
     description = models.TextField(
         _("Course|description"),
-        help_text=(_("LaTeX+Markdown is enabled")))
+        help_text=(_("LaTeX+Markdown+HTML is enabled")))
 
     class Meta:
         ordering = ["name"]
@@ -145,7 +145,7 @@ class CourseOfferingNews(TimeStampedModel):
     title = models.CharField(_("CourseNews|title"), max_length=140)
     text = models.TextField(
         _("CourseNews|text"),
-        help_text=(_("LaTeX+Markdown is enabled")))
+        help_text=(_("LaTeX+Markdown+HTML is enabled")))
 
     class Meta:
         ordering = ["-created"]
@@ -195,11 +195,11 @@ class CourseClass(TimeStampedModel):
     description = models.TextField(
         _("Description"),
         blank=True,
-        help_text=(_("LaTeX+Markdown is enabled")))
+        help_text=(_("LaTeX+Markdown+HTML is enabled")))
     materials = models.TextField(
         _("CourseClass|Materials"),
         blank=True,
-        help_text=(_("LaTeX+Markdown is enabled")))
+        help_text=(_("LaTeX+Markdown+HTML is enabled")))
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
@@ -256,7 +256,7 @@ class Assignment(TimeStampedModel):
     title = models.CharField(_("Asssignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
-                            help_text=_("LaTeX+Markdown is enabled"))
+                            help_text=_("LaTeX+Markdown+HTML is enabled"))
 
     class Meta:
         ordering = ["created", "course_offering"]
