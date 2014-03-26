@@ -18,6 +18,9 @@
           </a>
         </div>
         <div class="btn-group">
+          <a href="{% url 'course_class_add' %}?back=course_offering&course_offering={{ course_offering.pk }}" class="btn btn-primary">{% trans 'Add class' %}</a>
+        </div>
+        <div class="btn-group">
           <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
             {% trans "Edit" %}
           </a>
@@ -49,7 +52,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-4">
+    <div class="col-xs-3">
       <ul>
         {% for teacher in course_offering.teachers.all %}
         <li class="list-unstyled">
@@ -60,7 +63,7 @@
         {% endfor %}
       </ul>
     </div>
-    <div class="col-xs-8">
+    <div class="col-xs-9">
       {% if course_offering.description %}
       <div class="ubertext">
         {{ course_offering.description|safe }}
@@ -73,7 +76,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-4">
+    <div class="col-xs-3">
       <h4>{% trans "Classes" %}</h4>
       {% if course_offering.courseclass_set.all %}
       <ul class="list-unstyled">
@@ -88,7 +91,7 @@
       </ul>
       {% endif %}
     </div>
-    <div class="col-xs-8">
+    <div class="col-xs-9">
       {% for news in course_offering.courseofferingnews_set.all %}
       <h4>{{ news.title }}</h4>
       <div class="ubertext">

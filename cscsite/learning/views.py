@@ -254,12 +254,28 @@ class CourseClassCreateUpdateMixin(object):
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseClassForm
 
+    def get_initial(self, *args, **kwargs):
+        initial = (super(CourseClassCreateUpdateMixin, self)
+                   .get_initial(*args, **kwargs))
+        if self.request.GET.get('back') == 'course_offering':
+            pk = self.request.GET['course_offering']
+            try:
+                pk = int(pk)
+            except ValueError:
+                raise Http404
+            self.course_offering = get_object_or_404(
+                CourseOffering.objects.filter(pk=pk))
+            initial['course_offering'] = self.course_offering
+        return initial
+
     def get_form(self, form_class):
         return form_class(self.request.user, **self.get_form_kwargs())
 
     def get_success_url(self):
         if self.request.GET.get('back') == 'timetable':
             return reverse('timetable_teacher')
+        if self.request.GET.get('back') == 'course_offering':
+            return self.course_offering.get_absolute_url()
         else:
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
