@@ -87,7 +87,7 @@
                 {% endif %}
               {% else %}
                   <a href="{% url 'enrollment' %}">
-                    <li class="{% current 'enrollment' %}">{% trans "Enrollment" %}</li>
+                    <li class="{% current 'enrollment' %}">{% trans "CSC|Enrollment" %}</li>
                   </a>
               {% endif %}
               <a href="{% url 'contacts' %}">
@@ -95,7 +95,7 @@
               </a>
               {% if user.is_staff %}
               <a href="{% url 'admin:index' %}" target="_blank">
-                <li>{% trans "Admin" %}</li>
+                <li>{% trans "Admin page" %}</li>
               </a>
               {% endif %}
             </ul>

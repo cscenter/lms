@@ -10,6 +10,26 @@
         {% trans "Assignments" %}
       </h2>
       <div class="btn-toolbar">
+        {% if user.is_teacher and user.is_student %}
+        <div class="btn-group">
+          <a href="{% url 'assignment_list_student' %}"
+             role="button"
+             class="btn btn-default
+                    {% if list_type == 'student' %}
+                    active
+                    {% endif %}">
+            {% trans "Learning" %}
+          </a>
+          <a href="{% url 'assignment_list_teacher' %}"
+             role="button"
+             class="btn btn-default
+                    {% if list_type == 'teacher' %}
+                    active
+                    {% endif %}">
+            {% trans "Teaching" %}
+          </a>
+        </div>
+        {% endif %}
       </div>
       <hr>
     </div>
