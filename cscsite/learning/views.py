@@ -37,8 +37,8 @@ class TimetableMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableMixin, self)
                    .get_context_data(*args, **kwargs))
-        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
         year, season = self.semester_pair
+        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
         p_year, p_season = p
         n_year, n_season = n
         context['next_semester'] = "{0}_{1}".format(n_year, n_season)
