@@ -272,7 +272,7 @@ class Assignment(TimeStampedModel):
                                   smart_text(self.course_offering))
 
     @property
-    def open(self):
+    def is_open(self):
         return self.deadline_at > timezone.now()
 
 

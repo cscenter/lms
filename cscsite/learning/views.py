@@ -311,7 +311,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
                    .get_context_data(*args, **kwargs))
         open_assignments, archive = [], []
         for assignment_student in context['assignment_list']:
-            if assignment_student.assignment.open:
+            if assignment_student.assignment.is_open:
                 open_assignments.append(assignment_student)
             else:
                 archive.append(assignment_student)
