@@ -16,6 +16,7 @@ class CourseOfferingPKForm(forms.Form):
 
 class CourseOfferingEditDescrForm(forms.ModelForm):
     description = forms.CharField(
+        label=_("Description"),
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
         widget=forms.Textarea)
 
@@ -32,10 +33,13 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
 
 class CourseOfferingNewsForm(forms.ModelForm):
     title = forms.CharField(
+        label=_("Title"),
         required=True,
         widget=forms.TextInput(attrs={'autocomplete': 'off',
                                       'autofocus': 'autofocus'}))
     text = forms.CharField(
+        label=_("Text"),
+        help_text=_("LaTeX+Markdown+HTML is enabled"),
         required=True,
         widget=forms.Textarea)
 
@@ -53,30 +57,48 @@ class CourseOfferingNewsForm(forms.ModelForm):
 class CourseClassForm(forms.ModelForm):
     course_offering = forms.ModelChoiceField(
         CourseOffering.objects.all(),
+        label=_("Course offering"),
         required=True,
         empty_label=None,
         widget=forms.Select(attrs={'autofocus': 'autofocus'}))
     venue = forms.ModelChoiceField(
         Venue.objects.all(),
+        label=_("Venue"),
         required=True,
         empty_label=None)
     type = forms.ChoiceField(
+        label=_("Type"),
         required=True,
         choices=CourseClass.TYPES)
     name = forms.CharField(
+        label=_("Name"),
         required=True,
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     description = forms.CharField(
+        label=_("Description"),
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         widget=forms.Textarea)
     materials = forms.CharField(
+        label=_("Materials"),
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         widget=forms.Textarea)
-    date = forms.DateField(required=True)
-    starts_at = forms.TimeField(required=True)
-    ends_at = forms.TimeField(required=True)
+    date = forms.DateField(
+        required=True,
+        label=_("Date"),
+        help_text=_("Example: 1990-07-13"),
+        widget=forms.DateInput(format="%Y-%m-%d"))
+    starts_at = forms.TimeField(
+        required=True,
+        label=_("Starts at"),
+        help_text=_("Example: 14:00"),
+        widget=forms.TimeInput(format="%H:%M"))
+    ends_at = forms.TimeField(
+        required=True,
+        label=_("Ends at"),
+        help_text=_("Example: 14:40"),
+        widget=forms.TimeInput(format="%H:%M"))
 
     def __init__(self, user, *args, **kwargs):
         self.helper = FormHelper()
