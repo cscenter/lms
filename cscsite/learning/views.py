@@ -3,8 +3,10 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
+from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
 
@@ -16,7 +18,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
-    AssignmentCommentForm
+    AssignmentCommentForm, AssignmentGradeForm
 
 import utils
 
@@ -426,3 +428,28 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                                   AssignmentDetailMixin,
                                   generic.CreateView):
     user_type = 'teacher'
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(AssignmentTeacherDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        initial = {'state': context['a_s'].state}
+        context['grade_form'] = AssignmentGradeForm(initial)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if 'grading_form' in request.POST:
+            form = AssignmentGradeForm(request.POST)
+            pk = self.kwargs.get('pk')
+            a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+            if form.is_valid():
+                a_s.state = form.cleaned_data['state']
+                a_s.save()
+                return redirect(reverse('assignment_detail_teacher', args=[pk]))
+            else:
+                # not sure if we can do anything more meaningful here.
+                # it shoudn't happen, after all.
+                return HttpResponseBadRequest(_("Grading form is invalid")+
+                                              form.errors)
+        else:
+            return (super(AssignmentTeacherDetailView, self)
+                    .post(request, *args, **kwargs))

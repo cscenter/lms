@@ -3,11 +3,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, Button, Div, HTML
-from crispy_forms.bootstrap import FormActions
+from crispy_forms.bootstrap import FormActions, StrictButton
 import floppyforms as forms
 
 from learning.models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, AssignmentComment
+    CourseClass, Venue, AssignmentComment, AssignmentStudent
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
@@ -161,3 +161,22 @@ class AssignmentCommentForm(forms.ModelForm):
     class Meta:
         model = AssignmentComment
         fields = ['text', 'attached_file']
+
+
+class AssignmentGradeForm(forms.Form):
+    state = forms.ChoiceField(
+        label="",
+        required=True,
+        choices=AssignmentStudent.STATES)
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div(Hidden('grading_form', 'true'),
+                Field('state', css_class='input-sm'),
+                # Submit('save', _('Save'))
+                HTML("&nbsp;"),
+                StrictButton('<i class="fa fa-floppy-o"></i>',
+                             css_class="btn-primary",
+                             type="submit"),
+                css_class="form-inline"))
+        super(AssignmentGradeForm, self).__init__(*args, **kwargs)
