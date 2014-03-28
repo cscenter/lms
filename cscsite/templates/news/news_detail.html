@@ -12,7 +12,7 @@
         {{ object.text.content|linebreaks }}
       </div>
 
-      <p class="news-metainfo">{{ news.created|date }} ({{ news.author }})</p>
+      <p class="news-metainfo">{{ news.created|date:"d.m.Y" }} ({{ news.author }})</p>
     </div>
   </div>
 </div>

@@ -30,6 +30,26 @@
           </a>
         </div>
         {% endif %}
+        {% if list_type == 'teacher' %}
+        <div class="btn-group">
+          <a href="{% url 'assignment_list_teacher' %}"
+             role="button"
+             class="btn btn-default
+                    {% if not only_ungraded %}
+                    active
+                    {% endif %}">
+            {% trans "All" %}
+          </a>
+          <a href="{% url 'assignment_list_teacher' %}?only_ungraded=true"
+             role="button"
+             class="btn btn-default
+                    {% if only_ungraded %}
+                    active
+                    {% endif %}">
+            {% trans "Ungraded" %}
+          </a>
+        </div>
+        {% endif %}
       </div>
       <hr>
     </div>
@@ -61,9 +81,15 @@
             {{ a_s.assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
+            {% if user_type == 'student' %}
             <a href="{% url 'assignment_detail_student' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
+            {% else %}
+            <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+              {{ a_s.assignment.title }}
+            </a>
+            {% endif %}
           </td>
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
@@ -111,9 +137,15 @@
             {{ a_s.assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
+            {% if user_type == 'student' %}
             <a href="{% url 'assignment_detail_student' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
+            {% else %}
+            <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+              {{ a_s.assignment.title }}
+            </a>
+            {% endif %}
           </td>
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">

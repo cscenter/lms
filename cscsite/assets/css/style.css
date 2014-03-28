@@ -331,11 +331,33 @@ li.for-teachers.current {
   margin-bottom: 20px;
 }
 
-h5.unobtrusive {
-  font-size: 14px;
-  color: #999;
+h5.assignment {
+  font-weight: bold;
 }
 
 .assignment-attachment {
   color: #999;
+}
+
+.assignment-comment .metainfo {
+  color: #999;
+}
+
+.assignment-comment .metainfo-holder {
+  min-height: 20px;
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0px;
+}
+
+.comment-list li.student {
+  margin-right: 80px;
+  margin-left: 0px;
+}
+
+.comment-list li.teacher {
+  margin-right: 0px;
+  margin-left: 80px;
 }
