@@ -69,13 +69,17 @@
         </ul>
         <div class="csc-well">
         <h4>{% trans "Comment" %}</h4>
-        {% crispy form form.helper %}
+        {% crispy form %}
       </div>
       {% endif %}
     </div>
     <div class="col-xs-3">
       <h5 class="assignment">{% trans "State" %}</h5>
+      {% if user_type == 'teacher' %}
+      {% crispy grade_form %}
+      {% else %}
       {{ a_s.status_display }}
+      {% endif %}
       {% if one_teacher %}
       <h5 class="assignment">{% trans "Professor" %}</h5>
       {% else %}
