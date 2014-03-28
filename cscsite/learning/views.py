@@ -31,8 +31,10 @@ class TimetableMixin(object):
             self.semester_pair = utils.get_current_semester_pair()
         return (CourseClass.by_semester(self.semester_pair)
                 .order_by('date', 'starts_at')
-                .select_related('venue', 'course_offering',
-                                'course_offering__course'))
+                .select_related('venue',
+                                'course_offering',
+                                'course_offering__course',
+                                'course_offering__semester'))
 
     # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
@@ -320,7 +322,8 @@ class AssignmentListMixin(object):
                           'assignment__course_offering__course__name')
                 .select_related('assignment',
                                 'assignment__course_offering',
-                                'assignment__course_offering__course'))
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentListMixin, self)
@@ -350,31 +353,53 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     list_type = 'teacher'
 
     def get_queryset(self):
-        return (super(AssignmentTeacherListView, self).get_queryset()
-                .filter(assignment__course_offering__teachers=
-                        self.request.user))
+        base_qs = (super(AssignmentTeacherListView, self).get_queryset()
+                   .filter(assignment__course_offering__teachers=
+                           self.request.user))
+        if self.request.GET.get('only_ungraded') == 'true':
+            return base_qs.filter(state__in=['not_checked',
+                                             'being_checked'])
+        else:
+            return base_qs
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(AssignmentTeacherListView, self)
+                   .get_context_data(*args, **kwargs))
+        context['only_ungraded'] = (self.request.GET.get('only_ungraded')
+                                    == 'true')
+        return context
 
 
-class AssignmentStudentDetailView(StudentOnlyMixin,
-                                  generic.CreateView):
+
+class AssignmentDetailMixin(object):
     model = AssignmentComment
     template_name = "learning/assignment_detail.html"
     form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentStudentDetailView, self)
+        context = (super(AssignmentDetailMixin, self)
                    .get_context_data(*args, **kwargs))
         pk = self.kwargs.get('pk')
-        a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+        a_s = get_object_or_404(
+            AssignmentStudent
+            .objects
+            .filter(pk=pk)
+            .select_related('assignment',
+                            'student',
+                            'assignment__course_offering',
+                            'assignment__course_offering__course',
+                            'assignment__course_offering__semester')
+            .prefetch_related('assignment__course_offering__teachers'))
         context['a_s'] = a_s
         context['comments'] = (AssignmentComment.objects
-                               .filter(assignment_student=self.object)
-                               .order_by('-created'))
+                               .filter(assignment_student=a_s)
+                               .order_by('created'))
         context['one_teacher'] = (a_s
                                   .assignment
                                   .course_offering
                                   .teachers
                                   .count() == 1)
+        context['user_type'] = self.user_type
         return context
 
     def form_valid(self, form):
@@ -382,6 +407,22 @@ class AssignmentStudentDetailView(StudentOnlyMixin,
         a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
         comment = form.save(commit=False)
         comment.assignment_student = a_s
+        comment.author = self.request.user
         comment.save()
-        print comment
-        return redirect(a_s.get_absolute_url())
+        if self.user_type == 'student':
+            url = reverse('assignment_detail_student', args=[a_s.pk])
+        elif self.user_type == 'teacher':
+            url = reverse('assignment_detail_teacher', args=[a_s.pk])
+        return redirect(url)
+
+
+class AssignmentStudentDetailView(StudentOnlyMixin,
+                                  AssignmentDetailMixin,
+                                  generic.CreateView):
+    user_type = 'student'
+
+
+class AssignmentTeacherDetailView(TeacherOnlyMixin,
+                                  AssignmentDetailMixin,
+                                  generic.CreateView):
+    user_type = 'teacher'

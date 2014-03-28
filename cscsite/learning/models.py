@@ -259,9 +259,11 @@ class Assignment(TimeStampedModel):
                             help_text=_("LaTeX+Markdown+HTML is enabled"))
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
-                       "assignment_{0}/{1}/{2}".format(instance.pk,
-                                                       time.time(),
-                                                       filename)),
+                       ("assignment_{0}/{1}/{2}"
+                        .format(instance.pk,
+                                # somewhat protecting against URL enumeration
+                                int(time.time()) % 30,
+                                filename))),
         blank=True)
 
     class Meta:
@@ -272,10 +274,11 @@ class Assignment(TimeStampedModel):
     def __init__(self, *args, **kwargs):
         super(Assignment, self).__init__(*args, **kwargs)
         if self.pk:
-            self._original_course_offering = self.course_offering
+            self._original_course_offering_id = self.course_offering_id
 
     def clean(self):
-        if self.pk and self._original_course_offering != self.course_offering:
+        if (self.pk and
+            self._original_course_offering_id != self.course_offering_id):
             raise ValidationError(_("Course offering modification "
                                     "is not allowed"))
 
@@ -289,14 +292,12 @@ class Assignment(TimeStampedModel):
 
     @property
     def attached_file_name(self):
-        print self.attached_file.name
-        print os.path.basename(self.attached_file.name)
         return os.path.basename(self.attached_file.name)
 
 
 class AssignmentStudent(TimeStampedModel):
     STATES = Choices(('not_checked', _("Assignment|not checked")),
-                     ('not_submitted', _("Assignment|not submitted")),
+                     # ('not_submitted', _("Assignment|not submitted")),
                      ('being_checked', _("Assignment|being checked")),
                      ('unsatisfactory', _("Assignment|unsatisfactory")),
                      ('pass', _("Assignment|pass")),
@@ -330,10 +331,6 @@ class AssignmentStudent(TimeStampedModel):
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
 
-    def get_absolute_url(self):
-        return reverse('assignment_detail_student',
-                       args=[self.pk])
-
     @property
     def status_display(self):
         return self.STATES[self.state]
@@ -347,21 +344,29 @@ class AssignmentComment(TimeStampedModel):
     text = models.TextField(
         _("AssignmentComment|text"),
         help_text=_("LaTeX+Markdown is enabled"))
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.CASCADE)
     # TODO: test this
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
-                       # TODO: use os.path.join here
-                       "user_{0}/assignment_{1}/{2}_{3}".format(
-                           instance.assignment_student.student.pk,
-                           instance.assignment_student.assignment.pk,
-                           time.time(),
-                           filename)),
+                       ("assignment_{0}/user_{1}/{2}/{3}"
+                        .format(instance.assignment_student.assignment.pk,
+                                instance.assignment_student.student.pk,
+                                # somewhat protecting against URL enumeration
+                                int(time.time()) % 30,
+                                filename))),
         blank=True)
 
     class Meta:
         ordering = ["created"]
         verbose_name = _("Assignment-comment")
         verbose_name_plural = _("Assignment-comments")
+
+    @property
+    def attached_file_name(self):
+        return os.path.basename(self.attached_file.name)
 
 
 class Enrollment(TimeStampedModel):
@@ -382,6 +387,5 @@ class Enrollment(TimeStampedModel):
     def clean(self):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
-
 
 from . import signals
