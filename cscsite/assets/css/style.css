@@ -361,3 +361,19 @@ h5.assignment {
   margin-right: 0px;
   margin-left: 80px;
 }
+
+#div_id_deadline_at {
+  width: 400px;
+}
+
+#div_id_deadline_at input#id_deadline_at_0 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}
+
+#div_id_deadline_at input#id_deadline_at_1 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}

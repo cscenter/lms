@@ -295,6 +295,7 @@ class Assignment(TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
 
+@python_2_unicode_compatible
 class AssignmentStudent(TimeStampedModel):
     STATES = Choices(('not_checked', _("Assignment|not checked")),
                      # ('not_submitted', _("Assignment|not submitted")),
@@ -331,11 +332,16 @@ class AssignmentStudent(TimeStampedModel):
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
 
+    def __str__(self):
+        return "{0} - {1}".format(smart_text(self.assignment),
+                                  smart_text(self.student.get_full_name))
+
     @property
     def status_display(self):
         return self.STATES[self.state]
 
 
+@python_2_unicode_compatible
 class AssignmentComment(TimeStampedModel):
     assignment_student = models.ForeignKey(
         AssignmentStudent,
@@ -363,6 +369,13 @@ class AssignmentComment(TimeStampedModel):
         ordering = ["created"]
         verbose_name = _("Assignment-comment")
         verbose_name_plural = _("Assignment-comments")
+
+    def __str__(self):
+        return ("Comment to {0} by {1}"
+                .format(smart_text(self.assignment_student
+                                   .assignment),
+                        smart_text(self.assignment_student
+                                   .student.get_full_name)))
 
     @property
     def attached_file_name(self):

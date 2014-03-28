@@ -26,7 +26,8 @@ from learning.views import \
     CourseClassDeleteView, \
     VenueListView, VenueDetailView, \
     AssignmentStudentListView, AssignmentTeacherListView, \
-    AssignmentStudentDetailView, AssignmentTeacherDetailView
+    AssignmentStudentDetailView, AssignmentTeacherDetailView, \
+    AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView
 
 admin.autodiscover()
 
@@ -64,6 +65,16 @@ urlpatterns = patterns('',
         name='course_class_delete'),
     url(r'^teaching/assignments/(?P<pk>\d+)/$', AssignmentTeacherDetailView.as_view(),
         name='assignment_detail_teacher'),
+    url(r'^teaching/add-assignment/$',
+        AssignmentCreateView.as_view(),
+        name='assignment_add'),
+    url(r'^teaching/edit-assignment-(?P<pk>[-\w]+)/$',
+        AssignmentUpdateView.as_view(),
+        name='assignment_edit'),
+    url(r'^teaching/delete-assignment-(?P<pk>[-\w]+)/$',
+        AssignmentDeleteView.as_view(),
+        name='assignment_delete'),
+
 
     url(r"^courses/$", CourseListView.as_view(),
         name="course_list"),

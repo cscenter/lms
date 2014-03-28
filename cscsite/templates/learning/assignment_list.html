@@ -32,6 +32,12 @@
         {% endif %}
         {% if list_type == 'teacher' %}
         <div class="btn-group">
+          <a href="{% url 'assignment_add' %}" role="button"
+             class="btn btn-default">
+            {% trans "Create assignment" %}
+          </a>
+        </div>
+        <div class="btn-group">
           <a href="{% url 'assignment_list_teacher' %}"
              role="button"
              class="btn btn-default
@@ -64,7 +70,10 @@
             {% trans "Deadline" %}
           </th>
           <th></th>
-          <th width="25%">
+          {% if list_type == 'teacher' %}
+          <th width="15%">{% trans "Student" %}</th>
+          {% endif %}
+          <th width="20%">
             {% trans "Course" %}
           </th>
           <th width="15%">
@@ -91,6 +100,9 @@
             </a>
             {% endif %}
           </td>
+          {% if list_type == 'teacher' %}
+          <td>{{ a_s.student.get_full_name }}</td>
+          {% endif %}
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
               {{ a_s.assignment.course_offering.course.name }}
@@ -120,7 +132,10 @@
             {% trans "Deadline" %}
           </th>
           <th></th>
-          <th width="25%">
+          {% if list_type == 'teacher' %}
+          <th width="15%">{% trans "Student" %}</th>
+          {% endif %}
+          <th width="20%">
             {% trans "Course" %}
           </th>
           <th width="15%">
@@ -147,6 +162,9 @@
             </a>
             {% endif %}
           </td>
+          {% if list_type == 'teacher' %}
+          <td>{{ a_s.student.get_full_name }}</td>
+          {% endif %}
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
               {{ a_s.assignment.course_offering.course.name }}

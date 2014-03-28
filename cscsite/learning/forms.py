@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import FormActions, StrictButton
 import floppyforms as forms
 
 from learning.models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, AssignmentComment, AssignmentStudent
+    CourseClass, Venue, Assignment,  AssignmentComment, AssignmentStudent
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
@@ -66,21 +66,17 @@ class CourseClassForm(forms.ModelForm):
     course_offering = forms.ModelChoiceField(
         CourseOffering.objects.all(),
         label=_("Course offering"),
-        required=True,
         empty_label=None,
         widget=forms.Select(attrs={'autofocus': 'autofocus'}))
     venue = forms.ModelChoiceField(
         Venue.objects.all(),
         label=_("Venue"),
-        required=True,
         empty_label=None)
     type = forms.ChoiceField(
         label=_("Type"),
-        required=True,
         choices=CourseClass.TYPES)
     name = forms.CharField(
         label=_("Name"),
-        required=True,
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     description = forms.CharField(
         label=_("Description"),
@@ -93,17 +89,14 @@ class CourseClassForm(forms.ModelForm):
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         widget=forms.Textarea)
     date = forms.DateField(
-        required=True,
         label=_("Date"),
         help_text=_("Example: 1990-07-13"),
         widget=forms.DateInput(format="%Y-%m-%d"))
     starts_at = forms.TimeField(
-        required=True,
         label=_("Starts at"),
         help_text=_("Example: 14:00"),
         widget=forms.TimeInput(format="%H:%M"))
     ends_at = forms.TimeField(
-        required=True,
         label=_("Ends at"),
         help_text=_("Example: 14:40"),
         widget=forms.TimeInput(format="%H:%M"))
@@ -140,7 +133,6 @@ class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Text"),
         help_text=_("LaTeX+Markdown is enabled"),
-        required=True,
         widget=forms.Textarea)
     attached_file = forms.FileField(
         label="",
@@ -166,7 +158,6 @@ class AssignmentCommentForm(forms.ModelForm):
 class AssignmentGradeForm(forms.Form):
     state = forms.ChoiceField(
         label="",
-        required=True,
         choices=AssignmentStudent.STATES)
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -180,3 +171,56 @@ class AssignmentGradeForm(forms.Form):
                              type="submit"),
                 css_class="form-inline"))
         super(AssignmentGradeForm, self).__init__(*args, **kwargs)
+
+
+class AssignmentForm(forms.ModelForm):
+    course_offering = forms.ModelChoiceField(
+        CourseOffering.objects.all(),
+        label=_("Course offering"),
+        empty_label=None,
+        widget=forms.Select(attrs={'autofocus': 'autofocus'}))
+    title = forms.CharField(
+        label=_("Title"),
+        widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+    text = forms.CharField(
+        label=_("Text"),
+        help_text=_("LaTeX+Markdown+HTML is enabled"),
+        widget=forms.Textarea)
+    deadline_at = forms.DateTimeField(
+        label=_("Deadline"),
+        # help_text=_("Example: 1990-07-13 12:00"),
+        widget=forms.SplitDateTimeWidget(date_format="%Y-%m-%d",
+                                         time_format="%H:%M"))
+    attached_file = forms.FileField(
+        label=_("Attached file"),
+        required=False,
+        widget=forms.FileInput)
+    is_online = forms.BooleanField(
+        label=_("Can be passed online"),
+        required=False)
+
+    def __init__(self, user, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('course_offering',
+                'title',
+                'text',
+                Div(Div('deadline_at',
+                        'attached_file',
+                        css_class="form-inline"),
+                    css_class="form-group"),
+                'is_online',
+                css_class="form-group"),
+            CANCEL_SAVE_PAIR)
+        super(AssignmentForm, self).__init__(*args, **kwargs)
+        self.fields['course_offering'].queryset = \
+            CourseOffering.objects.all().filter(teachers=user)
+
+    class Meta:
+        model = Assignment
+        fields = ['course_offering',
+                  'title',
+                  'text',
+                  'deadline_at',
+                  'attached_file',
+                  'is_online']
