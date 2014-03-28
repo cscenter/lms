@@ -18,7 +18,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
-    AssignmentCommentForm, AssignmentGradeForm
+    AssignmentCommentForm, AssignmentGradeForm, AssignmentForm
 
 import utils
 
@@ -453,3 +453,36 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         else:
             return (super(AssignmentTeacherDetailView, self)
                     .post(request, *args, **kwargs))
+
+
+class AssignmentCreateUpdateMixin(object):
+    model = Assignment
+    template_name = "learning/simple_crispy_form.html"
+    form_class = AssignmentForm
+
+    def get_form(self, form_class):
+        return form_class(self.request.user, **self.get_form_kwargs())
+
+    def get_success_url(self):
+        return reverse('assignment_detail_teacher', args=[self.object.pk])
+
+
+class AssignmentCreateView(TeacherOnlyMixin,
+                           AssignmentCreateUpdateMixin,
+                           generic.CreateView):
+    pass
+
+
+class AssignmentUpdateView(TeacherOnlyMixin,
+                           AssignmentCreateUpdateMixin,
+                           generic.UpdateView):
+    pass
+
+
+class AssignmentDeleteView(TeacherOnlyMixin,
+                           generic.DeleteView):
+    model = Assignment
+    template_name = "learning/simple_delete_confirmation.html"
+
+    def get_success_url(self):
+        return reverse('assignment_list_teacher')
