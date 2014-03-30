@@ -90,15 +90,15 @@ class CourseClassForm(forms.ModelForm):
         widget=forms.Textarea)
     date = forms.DateField(
         label=_("Date"),
-        help_text=_("Example: 1990-07-13"),
+        # help_text=_("Example: 1990-07-13"),
         widget=forms.DateInput(format="%Y-%m-%d"))
     starts_at = forms.TimeField(
         label=_("Starts at"),
-        help_text=_("Example: 14:00"),
+        # help_text=_("Example: 14:00"),
         widget=forms.TimeInput(format="%H:%M"))
     ends_at = forms.TimeField(
         label=_("Ends at"),
-        help_text=_("Example: 14:40"),
+        # help_text=_("Example: 14:40"),
         widget=forms.TimeInput(format="%H:%M"))
 
     def __init__(self, user, *args, **kwargs):
