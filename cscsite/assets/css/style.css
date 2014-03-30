@@ -129,6 +129,9 @@ li.for-teachers.current {
 .header.lvl2.for-staff .row {
   background-color: #C73827;
 }
+li.for-staff.current {
+  background-color: #E75847 !important;
+}
 .header.for-staff li:hover {
   background-color: #EE8C80
 }
@@ -376,4 +379,63 @@ h5.assignment {
   width: 49%;
   float: left;
   margin-right: 1%;
+}
+
+.marks-table-container {
+  width: 100%;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marks-table .header-vert {
+  vertical-align: top;
+  height: 15em;
+  max-width: 1.5em;
+  overflow: hidden;
+}
+
+.marks-table .header-vert .inner {
+  line-height: 1.5em;
+  width: 15em;
+  text-overflow: ellipsis;
+  text-align: left;
+  overflow: hidden;
+  /* setting background may yield better results in IE text clear type rendering */
+  background: #fff;
+  display: block;
+  white-space: nowrap;
+  padding-left: 3px;
+  /* IE specific rotation code */
+  writing-mode: tb-rl;
+  filter: flipv fliph;
+  /* CSS3 specific totation code */
+  /* translate should have the same negative dimension as head height */
+  transform: rotate(270deg) translate(-15em,0);
+  transform-origin: 0 0;
+  -moz-transform: rotate(270deg) translate(-15em,0);
+  -moz-transform-origin: 0 0;
+  -webkit-transform: rotate(270deg) translate(-15em,0);
+  -webkit-transform-origin: 0 0;
+}
+
+.marks-table td {
+  vertical-align: middle;
+  text-align: center;
+  margin: 10px;
+}
+
+.marks-table td.header {
+  font-weight: bold;
+}
+
+.marks-table td.header-horiz {
+  text-align: right;
+}
+
+.marks-table td.content {
+  padding: 0px 10px;
 }

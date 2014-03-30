@@ -304,6 +304,12 @@ class AssignmentStudent(TimeStampedModel):
                      ('pass', _("Assignment|pass")),
                      ('good', _("Assignment|good")),
                      ('excellent', _("Assignment|excellent")))
+    SHORT_STATES = Choices(('not_checked', "&#8211;"),
+                           ('being_checked', "!"),
+                           ('unsatisfactory', "2"),
+                           ('pass', "3"),
+                           ('good', "4"),
+                           ('excellent', "5"))
 
     assignment = models.ForeignKey(
         Assignment,
@@ -339,6 +345,10 @@ class AssignmentStudent(TimeStampedModel):
     @property
     def status_display(self):
         return self.STATES[self.state]
+
+    @property
+    def status_short(self):
+        return self.SHORT_STATES[self.state]
 
 
 @python_2_unicode_compatible

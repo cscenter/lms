@@ -99,9 +99,11 @@
                   </a>
                 {% endif %}
                 {% if user.is_staff %}
-                  <li>
-                    {% trans "Marks sheet" %} <i class="fa fa-caret-down"></i>
-                  </li>
+                  <a href="{% url 'markssheet_staff' %}">
+                    <li class="{% current 'markssheet_staff' %} for-staff">
+                      {% trans "Marks sheet" %}
+                    </li>
+                  </a>
                 {% endif %}
               {% else %}
                   <a href="{% url 'enrollment' %}">
@@ -216,6 +218,11 @@
                 <a href="{% url 'course_list_teacher' %}">
                   <li class="{% current 'course_list_teacher' %}">
                     {% trans "Courses" %}
+                  </li>
+                </a>
+                <a href="{% url 'markssheet_teacher' %}">
+                  <li class="{% current 'markssheet_teacher' %}">
+                    {% trans "Marks sheet" %}
                   </li>
                 </a>
               </ul>
