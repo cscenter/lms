@@ -4,7 +4,6 @@ from django.dispatch import receiver
 
 from models import Assignment, AssignmentStudent, CourseOffering, Enrollment
 
-
 @receiver(models.signals.post_save, sender=Assignment)
 def populate_assignment_students(sender, instance, created,
                                  *args, **kwargs):
@@ -15,7 +14,6 @@ def populate_assignment_students(sender, instance, created,
             AssignmentStudent(assignment=instance, student=student)
             for student in students)
 
-# TODO: should we delete assignments on unenrolling?
 @receiver(models.signals.post_save, sender=Enrollment)
 def populate_student_assignments(sender, instance, created,
                                  *args, **kwargs):
@@ -25,3 +23,10 @@ def populate_student_assignments(sender, instance, created,
     AssignmentStudent.objects.bulk_create(
         AssignmentStudent(assignment=assignment, student=instance.student)
         for assignment in assignments)
+
+@receiver(models.signals.post_delete, sender=Enrollment)
+def delete_student_assignments(sender, instance, *args, **kwargs):
+    (AssignmentStudent.objects
+     .filter(assignment__course_offering=instance.course_offering,
+             student=instance.student)
+     .delete())
