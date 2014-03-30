@@ -85,14 +85,14 @@
               </a>
               {% if user.is_authenticated %}
                 {% if user.is_student %}
-                  <a href="{% url 'assignment_list_student' %}">
+                  <a href="{% url LEARNING_BASE %}">
                     <li class="{% current 'learning' %} for-students">
                       {% trans "Learning" %} <i class="fa fa-caret-down"></i>
                     </li>
                   </a>
                 {% endif %}
                 {% if user.is_teacher %}
-                  <a href="{% url 'assignment_list_teacher' %}">
+                  <a href="{% url TEACHING_BASE %}">
                     <li class="{% current 'teaching' %} for-teachers">
                       {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
                     </li>
