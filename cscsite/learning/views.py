@@ -372,7 +372,6 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         return context
 
 
-
 class AssignmentDetailMixin(object):
     model = AssignmentComment
     template_name = "learning/assignment_detail.html"
@@ -464,7 +463,7 @@ class AssignmentCreateUpdateMixin(object):
         return form_class(self.request.user, **self.get_form_kwargs())
 
     def get_success_url(self):
-        return reverse('assignment_detail_teacher', args=[self.object.pk])
+        return reverse('assignment_list_teacher')
 
 
 class AssignmentCreateView(TeacherOnlyMixin,
