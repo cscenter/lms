@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load getbykey %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{% trans "Marks sheet" %}</h2>
+      <div class="btn-toolbar">
+      </div>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      {% for offering, header, by_student in structured %}
+      <h3>{{ offering }}</h3>
+      <div class="marks-table-container">
+        <table class="marks-table">
+          <tr>
+            <td></td>
+            {% for assignment in header %}
+            <td class="header header-vert">
+              <div class="inner">
+                {{ assignment.title }}
+              </div>
+            </td>
+            {% endfor %}
+          </tr>
+          {% for student, by_assignment in by_student.iteritems %}
+          <tr>
+            <td class="header header-horiz">{{ student.get_full_name }}</td>
+            {% for assignment, a_s in by_assignment.iteritems %}
+            <td class="content">
+              <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+                {{ a_s.status_short|safe }}
+              </a>
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

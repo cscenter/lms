@@ -159,6 +159,7 @@ MENU_URL_NAMES = {
     'course_list_teacher': {'parent': 'teaching'},
     # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
     'course_edit': {'alias': 'courses_teacher'},
+    'markssheet_teacher': {'parent': 'teaching'},
 
     'contacts': {},
 

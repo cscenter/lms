@@ -1,4 +1,5 @@
 from datetime import datetime
+from collections import OrderedDict
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
 
-from core.views import StudentOnlyMixin, TeacherOnlyMixin
+from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Semester, \
     Assignment, AssignmentStudent, AssignmentComment
@@ -485,3 +486,66 @@ class AssignmentDeleteView(TeacherOnlyMixin,
 
     def get_success_url(self):
         return reverse('assignment_list_teacher')
+
+
+class MarksSheetMixin(object):
+    model = AssignmentStudent
+    template_name = "learning/marks_sheet.html"
+    context_object_name = 'assignment_list'
+
+    def get_queryset(self):
+        return (super(MarksSheetMixin, self).get_queryset()
+                .order_by('assignment__course_offering',
+                          'student',
+                          'assignment')
+                .select_related('assignment',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester',
+                                'student'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(MarksSheetMixin, self)
+                   .get_context_data(*args, **kwargs))
+        data = context[self.context_object_name]
+        # implying that the data is already sorted
+        structured = OrderedDict()
+        for a_s in data:
+            offering = a_s.assignment.course_offering
+            if offering not in structured:
+                structured[offering] = OrderedDict()
+            if a_s.student not in structured[offering]:
+                structured[offering][a_s.student] = OrderedDict()
+            structured[offering][a_s.student][a_s.assignment] = a_s
+        headers = OrderedDict()
+        for offering, by_student in structured.items():
+            header = by_student.values()[0].keys()
+            headers[offering] = header
+            for student, by_assignment in by_student.items():
+                # we should check for "assignment consistency": that all
+                # assignments are similar for all students in particular
+                # course offering
+                assert by_assignment.keys() == header
+        # this is a hack for passing headers "indexed" by offering
+        context['structured'] = [(offering, headers[offering], by_student)
+                                 for offering, by_students
+                                 in structured.items()]
+        context['user_type'] = self.user_type
+        return context
+
+
+class MarksSheetTeacherView(TeacherOnlyMixin,
+                            MarksSheetMixin,
+                            generic.ListView):
+    user_type = 'teacher'
+
+    def get_queryset(self):
+        return (super(MarksSheetTeacherView, self).get_queryset()
+                .filter(assignment__course_offering__teachers=
+                        self.request.user))
+
+
+class MarksSheetStaffView(StaffOnlyMixin,
+                          MarksSheetMixin,
+                          generic.ListView):
+    user_type = 'staff'
