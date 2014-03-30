@@ -86,7 +86,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request'
+    'django.core.context_processors.request',
+
+    'core.context_processors.redirect_bases'
     )
 
 # Database
@@ -167,6 +169,9 @@ MENU_URL_NAMES = {
 LOGIN_URL= "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+# this urls will be used to redirect from '/learning/' and '/teaching/'
+LEARNING_BASE = 'assignment_list_student'
+TEACHING_BASE = 'assignment_list_teacher'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 

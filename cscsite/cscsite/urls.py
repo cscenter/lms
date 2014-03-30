@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 
 from django.contrib import admin
 
@@ -42,6 +43,9 @@ urlpatterns = patterns('',
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
 
+    url(r'^learning/$',
+        RedirectView.as_view(pattern_name=settings.LEARNING_BASE),
+        name='learning_base'),
     url(r'^learning/courses/$', CourseStudentListView.as_view(),
         name='course_list_student'),
     url(r'^learning/assignments/$', AssignmentStudentListView.as_view(),
@@ -51,6 +55,9 @@ urlpatterns = patterns('',
     url(r'^learning/timetable/$', TimetableStudentView.as_view(),
         name='timetable_student'),
 
+    url(r'^teaching/$',
+        RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
+        name='teaching_base'),
     url(r'^teaching/assignments/$', AssignmentTeacherListView.as_view(),
         name='assignment_list_teacher'),
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
