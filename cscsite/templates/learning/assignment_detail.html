@@ -8,6 +8,11 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
+        {% if user_type == 'student' %}
+        <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
+        {% else %}
+        <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
+        {% endif %}
         {{ a_s.assignment.title }}
         <small>{{ a_s.assignment.course_offering }} </small>
       </h2>
