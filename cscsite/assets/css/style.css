@@ -320,6 +320,10 @@ li.for-staff.current {
   clear: both;
 }
 
+.h2-and-buttons small {
+  white-space: nowrap;
+}
+
 .btn {
   border-radius: 0px !important;
 }
