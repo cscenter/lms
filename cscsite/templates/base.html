@@ -187,6 +187,11 @@
                     {% trans "Timetable" %}
                   </li>
                 </a>
+                <a href="{% url 'calendar_full_student' %}">
+                  <li class="{% current 'calendar_full_student' %}">
+                    {% trans "Calendar" %}
+                  </li>
+                </a>
                 <!-- <li>Задания <span class="badge">3</span></li> -->
                 <a href="{% url 'course_list_student' %}">
                   <li class="{% current 'course_list_student' %}">
@@ -213,6 +218,11 @@
                 <a href="{% url 'timetable_teacher' %}">
                   <li class="{% current 'timetable_teacher' %}">
                     {% trans "Timetable" %}
+                  </li>
+                </a>
+                <a href="{% url 'calendar_full_teacher' %}">
+                  <li class="{% current 'calendar_full_teacher' %}">
+                    {% trans "Calendar" %}
                   </li>
                 </a>
                 <a href="{% url 'course_list_teacher' %}">

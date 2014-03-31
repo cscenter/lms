@@ -444,3 +444,48 @@ h5.assignment {
 .marks-table td.content {
   padding: 0px 10px;
 }
+
+.calendar th {
+  width: 134px;
+}
+
+.calendar td {
+  padding: 4px !important;
+  width: 134px;
+}
+
+.calendar td .cell {
+  min-height: 100px;
+  width: 126px;
+}
+
+.calendar .day {
+  font-weight: bold;
+  color: #BBB;
+  text-align: right;
+}
+
+.calendar .class {
+  margin-bottom: 3px;
+  border: 1px solid #D3D3D3;
+}
+
+.calendar .class.lecture {
+  background-color: #F9F9F9;
+}
+
+.calendar .class.seminar {
+  background-color: #E9E9E9;
+}
+
+.calendar .class .times {
+  white-space: nowrap;
+}
+
+.calendar .not-in-semester {
+  background-color: #EEE;
+}
+
+.calendar .not-in-semester .day {
+  color: #CCC;
+}

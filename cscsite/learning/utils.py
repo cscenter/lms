@@ -32,3 +32,7 @@ def split_list(pred, lst):
         else:
             false_lst.append(x)
     return true_lst, false_lst
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)

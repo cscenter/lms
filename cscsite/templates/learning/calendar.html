@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+{% regroup object_list by date|date:"l, d E Y" as classes_by_day %}
+<div class="container">
+  <div class="row timetable-header-row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ current_semester_obj|capfirst }}</h2>
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a href="?semester={{ previous_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?semester={{ next_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+        </div>
+        {% if not user_type == 'full' %}
+          {% if user.is_teacher and user.is_student %}
+          <div class="btn-group">
+            <a href="{% url 'calendar_student' %}"
+               role="button"
+               class="btn btn-default
+                      {% if user_type == 'student' %}
+                      active
+                      {% endif %}">
+              {% trans "Learning" %}
+            </a>
+            <a href="{% url 'calendar_teacher' %}"
+               role="button"
+               class="btn btn-default
+                      {% if user_type == 'teacher' %}
+                      active
+                      {% endif %}">
+              {% trans "Teaching" %}
+            </a>
+          </div>
+          {% endif %}
+          <div class="btn-group">
+            <a href="{% if user_type == 'teacher' %}
+                     {% url 'timetable_teacher' %}
+                     {% else %}
+                     {% url 'timetable_student' %}
+                     {% endif %}"
+               role="button"
+               class="btn btn-default">{% trans 'List' %}</a>
+            <a href="{% if user_type == 'teacher' %}
+                     {% url 'calendar_teacher' %}
+                     {% else %}
+                     {% url 'calendar_student' %}
+                     {% endif %}"
+               role="button"
+               class="btn btn-default active">{% trans 'Calendar' %}</a>
+          </div>
+          {% if user.is_teacher and user_type == 'teacher' %}
+          <div class="btn-group">
+            <a href="{% url 'course_class_add' %}?back=calendar" class="btn btn-primary">{% trans 'Add class' %}</a>
+          </div>
+          {% endif%}
+        {% endif %}
+      </div>
+      <hr>
+    </div>
+  </div>
+  {% for month_date, month in months %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{{ month_date|date:"F Y" }}</h3>
+      <table class="table table-bordered calendar">
+        <tr>
+          <th>{% trans "Monday" %}</th>
+          <th>{% trans "Tuesday" %}</th>
+          <th>{% trans "Wednesday" %}</th>
+          <th>{% trans "Thursday" %}</th>
+          <th>{% trans "Friday" %}</th>
+          <th>{% trans "Saturday" %}</th>
+          <th>{% trans "Sunday" %}</th>
+        </tr>
+        {% for week in month %}
+        <tr>
+          {% for day, classes, in_semester in week %}
+          <td class="{{ in_semester|yesno:'in-semester,not-in-semester' }}">
+            <div class="cell">
+              <div class="day">
+                {{ day|date:"d" }}
+              </div>
+              {% for class in classes %}
+              <div class="class {{ class.type }}"
+                   title="{{ class.name }}">
+                <span class="times">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span>
+                <a href="{{ class.get_absolute_url }}">
+                  {{ class.course_offering.course.name }}
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}
