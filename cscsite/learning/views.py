@@ -1,5 +1,6 @@
 from datetime import datetime
-from collections import OrderedDict
+from calendar import Calendar
+from collections import OrderedDict, defaultdict
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,6 +11,8 @@ from django.views import generic
 from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
+
+from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
@@ -50,7 +53,7 @@ class TimetableMixin(object):
         context['next_semester'] = "{0}_{1}".format(n_year, n_season)
         context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
         context['current_semester_obj'] = Semester(year=year, type=season)
-        context['timetable_type'] = self.timetable_type
+        context['user_type'] = self.user_type
         return context
 
     def _split_semester(self, semester_string):
@@ -65,24 +68,71 @@ class TimetableMixin(object):
             return None
 
 
-class TimetableTeacherView(TimetableMixin,
-                           TeacherOnlyMixin,
+class TimetableTeacherView(TeacherOnlyMixin,
+                           TimetableMixin,
                            generic.ListView):
-    timetable_type = 'teacher'
+    user_type = 'teacher'
 
     def get_queryset(self):
         return (super(TimetableTeacherView, self).get_queryset()
                 .filter(course_offering__teachers=self.request.user))
 
 
-class TimetableStudentView(TimetableMixin,
-                           StudentOnlyMixin,
+class TimetableStudentView(StudentOnlyMixin,
+                           TimetableMixin,
                            generic.ListView):
-    timetable_type = 'student'
+    user_type = 'student'
 
     def get_queryset(self):
         return (super(TimetableStudentView, self).get_queryset()
                 .filter(course_offering__enrolled_students=self.request.user))
+
+
+class CalendarMixin(object):
+    template_name = "learning/calendar.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CalendarMixin, self)
+                   .get_context_data(*args, **kwargs))
+        classes = context['object_list']
+        dates_to_classes = defaultdict(list)
+        for course_class in classes:
+            dates_to_classes[course_class.date].append(course_class)
+        semester = context['current_semester_obj']
+        cal = Calendar(0)
+        months = []
+        current_dt = semester.starts_at
+        start_date = semester.starts_at.date()
+        end_date = semester.ends_at.date()
+        while (current_dt.month <= semester.ends_at.month or
+               current_dt.year < semester.ends_at.year):
+            month_cal = cal.monthdatescalendar(current_dt.year,
+                                               current_dt.month)
+            current_month = [[(day, dates_to_classes[day],
+                               start_date <= day <= end_date)
+                              for day in week]
+                             for week in month_cal]
+            months.append((current_dt, current_month))
+            current_dt += relativedelta(months=+1)
+        context['months'] = months
+        return context
+
+
+class CalendarTeacherView(CalendarMixin,
+                          TimetableTeacherView):
+    pass
+
+
+class CalendarStudentView(CalendarMixin,
+                          TimetableStudentView):
+    pass
+
+
+class CalendarFullView(LoginRequiredMixin,
+                       CalendarMixin,
+                       TimetableMixin,
+                       generic.ListView):
+    user_type = 'full'
 
 
 class CourseListView(generic.ListView):
@@ -282,6 +332,8 @@ class CourseClassCreateUpdateMixin(object):
             return reverse('timetable_teacher')
         if self.request.GET.get('back') == 'course_offering':
             return self.course_offering.get_absolute_url()
+        if self.request.GET.get('back') == 'calendar':
+            return reverse('calendar_teacher')
         else:
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 

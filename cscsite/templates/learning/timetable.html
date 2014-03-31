@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-
 {% block content %}
 {% regroup object_list by date|date:"l, d E Y" as classes_by_day %}
 <div class="container">
@@ -18,7 +17,7 @@
           <a href="{% url 'timetable_student' %}"
              role="button"
              class="btn btn-default
-                    {% if timetable_type == 'student' %}
+                    {% if user_type == 'student' %}
                     active
                     {% endif %}">
             {% trans "Learning" %}
@@ -26,7 +25,7 @@
           <a href="{% url 'timetable_teacher' %}"
              role="button"
              class="btn btn-default
-                    {% if timetable_type == 'teacher' %}
+                    {% if user_type == 'teacher' %}
                     active
                     {% endif %}">
             {% trans "Teaching" %}
@@ -34,10 +33,22 @@
         </div>
         {% endif %}
         <div class="btn-group">
-          <button type="button" class="btn btn-default active">{% trans 'List' %}</button>
-          <button type="button" class="btn btn-default">{% trans 'Calendar' %}</button>
+          <a href="{% if user_type == 'teacher' %}
+                   {% url 'timetable_teacher' %}
+                   {% else %}
+                   {% url 'timetable_student' %}
+                   {% endif %}"
+             role="button"
+             class="btn btn-default active">{% trans 'List' %}</a>
+          <a href="{% if user_type == 'teacher' %}
+                   {% url 'calendar_teacher' %}
+                   {% else %}
+                   {% url 'calendar_student' %}
+                   {% endif %}"
+             role="button"
+             class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>
-        {% if user.is_teacher and timetable_type == 'teacher' %}
+        {% if user.is_teacher and user_type == 'teacher' %}
         <div class="btn-group">
           <a href="{% url 'course_class_add' %}?back=timetable" class="btn btn-primary">{% trans 'Add class' %}</a>
         </div>
@@ -86,7 +97,7 @@
             {% endif %}
           </td>
           <td>
-            {% if timetable_type == 'teacher' %}
+            {% if user_type == 'teacher' %}
             <a href="{% url 'course_class_edit' class.pk %}#id_materials">
               {{ class.materials|yesno:_("Yes,No") }}
             </a>

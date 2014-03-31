@@ -12,6 +12,7 @@ from textpages.views import TextpageOpenView, TextpageStudentView, \
     TextpageSyllabusView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
+    CalendarTeacherView, CalendarStudentView, CalendarFullView, \
     CourseTeacherListView, \
     CourseStudentListView, \
     CourseListView, CourseDetailView, \
@@ -55,6 +56,10 @@ urlpatterns = patterns('',
         name='assignment_detail_student'),
     url(r'^learning/timetable/$', TimetableStudentView.as_view(),
         name='timetable_student'),
+    url(r'^learning/calendar/$', CalendarStudentView.as_view(),
+        name='calendar_student'),
+    url(r'^learning/full-calendar/$', CalendarFullView.as_view(),
+        name='calendar_full_student'),
 
     url(r'^teaching/$',
         RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
@@ -63,6 +68,10 @@ urlpatterns = patterns('',
         name='assignment_list_teacher'),
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),
+    url(r'^teaching/calendar/$', CalendarTeacherView.as_view(),
+        name='calendar_teacher'),
+    url(r'^teaching/full-calendar/$', CalendarFullView.as_view(),
+        name='calendar_full_teacher'),
     url(r'^teaching/courses/$', CourseTeacherListView.as_view(),
         name='course_list_teacher'),
     url(r'^teaching/add-class/$', CourseClassCreateView.as_view(),
