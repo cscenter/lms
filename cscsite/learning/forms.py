@@ -1,4 +1,8 @@
+import dateutil.parser as dparser
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
@@ -127,6 +131,21 @@ class CourseClassForm(forms.ModelForm):
     class Meta:
         model = CourseClass
         fields = '__all__'
+
+    def clean_date(self):
+        date = self.cleaned_data['date']
+        course_offering = self.cleaned_data['course_offering']
+        semester_start = course_offering.semester.starts_at.date()
+        semester_end = course_offering.semester.ends_at.date()
+        assert semester_start <= semester_end
+        if not semester_start <= date <= semester_end:
+            raise ValidationError(
+                _("Incosistent with this course's "
+                  "semester (from %(starts_at)s to %(ends_at)s)"),
+                code='date_out_of_semester',
+                params={'starts_at': semester_start,
+                        'ends_at': semester_end})
+        return date
 
 
 class AssignmentCommentForm(forms.ModelForm):

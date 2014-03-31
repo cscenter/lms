@@ -1,8 +1,7 @@
-from django.utils import timezone
-
 import dateutil.parser as dparser
 
 from django.conf import settings
+from django.utils import timezone
 
 # TODO: test this
 def get_prev_next_semester_pairs((year, season)):

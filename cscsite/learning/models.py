@@ -68,6 +68,30 @@ class Semester(models.Model):
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
 
+    @cached_property
+    def starts_at(self):
+        if self.type == 'spring':
+            start_str = settings.SPRING_TERM_START
+        else:
+            start_str = settings.AUTUMN_TERM_START
+        return (dparser
+                .parse(start_str)
+                .replace(tzinfo=timezone.utc,
+                         year=self.year))
+
+    @cached_property
+    def ends_at(self):
+        if self.type == 'spring':
+            next_start_str = settings.AUTUMN_TERM_START
+            next_year = self.year
+        else:
+            next_start_str = settings.SPRING_TERM_START
+            next_year = self.year + 1
+        return (dparser
+                .parse(next_start_str)
+                .replace(tzinfo=timezone.utc,
+                         year=next_year)) - datetime.timedelta(days=1)
+
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
     course = models.ForeignKey(
