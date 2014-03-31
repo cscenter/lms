@@ -313,6 +313,7 @@ li.for-staff.current {
 .h2-and-buttons .btn-toolbar {
   float: right;
   margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .h2-and-buttons hr {
