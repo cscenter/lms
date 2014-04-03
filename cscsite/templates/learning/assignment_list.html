@@ -15,7 +15,7 @@
           <a href="{% url 'assignment_list_student' %}"
              role="button"
              class="btn btn-default
-                    {% if list_type == 'student' %}
+                    {% if user_type == 'student' %}
                     active
                     {% endif %}">
             {% trans "Learning" %}
@@ -23,14 +23,14 @@
           <a href="{% url 'assignment_list_teacher' %}"
              role="button"
              class="btn btn-default
-                    {% if list_type == 'teacher' %}
+                    {% if user_type == 'teacher' %}
                     active
                     {% endif %}">
             {% trans "Teaching" %}
           </a>
         </div>
         {% endif %}
-        {% if list_type == 'teacher' %}
+        {% if user_type == 'teacher' %}
         <div class="btn-group">
           <a href="{% url 'assignment_add' %}" role="button"
              class="btn btn-default">
@@ -70,7 +70,7 @@
             {% trans "Deadline" %}
           </th>
           <th></th>
-          {% if list_type == 'teacher' %}
+          {% if user_type == 'teacher' %}
           <th width="15%">{% trans "Student" %}</th>
           {% endif %}
           <th width="20%">
@@ -100,7 +100,7 @@
             </a>
             {% endif %}
           </td>
-          {% if list_type == 'teacher' %}
+          {% if user_type == 'teacher' %}
           <td>{{ a_s.student.get_full_name }}</td>
           {% endif %}
           <td>
@@ -132,7 +132,7 @@
             {% trans "Deadline" %}
           </th>
           <th></th>
-          {% if list_type == 'teacher' %}
+          {% if user_type == 'teacher' %}
           <th width="15%">{% trans "Student" %}</th>
           {% endif %}
           <th width="20%">
@@ -162,7 +162,7 @@
             </a>
             {% endif %}
           </td>
-          {% if list_type == 'teacher' %}
+          {% if user_type == 'teacher' %}
           <td>{{ a_s.student.get_full_name }}</td>
           {% endif %}
           <td>
