@@ -388,14 +388,14 @@ class AssignmentListMixin(object):
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
-        context['list_type'] = self.list_type
+        context['user_type'] = self.user_type
         return context
 
 
 class AssignmentStudentListView(StudentOnlyMixin,
                                 AssignmentListMixin,
                                 generic.ListView):
-    list_type = 'student'
+    user_type = 'student'
 
     def get_queryset(self):
         return (super(AssignmentStudentListView, self).get_queryset()
@@ -405,7 +405,7 @@ class AssignmentStudentListView(StudentOnlyMixin,
 class AssignmentTeacherListView(TeacherOnlyMixin,
                                 AssignmentListMixin,
                                 generic.ListView):
-    list_type = 'teacher'
+    user_type = 'teacher'
 
     def get_queryset(self):
         base_qs = (super(AssignmentTeacherListView, self).get_queryset()
