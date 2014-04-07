@@ -20,6 +20,13 @@ CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                        css_class="pull-right")
 
 
+class Ubereditor(forms.Textarea):
+    def __init__(self, *args, **kwargs):
+        # TODO: not sure if this is the best way
+        kwargs.update({'attrs': {'class': 'ubereditor'}})
+        super(Ubereditor, self).__init__(*args, **kwargs)
+
+
 class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)
 
@@ -28,7 +35,7 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
     description = forms.CharField(
         label=_("Description"),
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
-        widget=forms.Textarea)
+        widget=Ubereditor)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -52,7 +59,7 @@ class CourseOfferingNewsForm(forms.ModelForm):
         label=_("Text"),
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         required=True,
-        widget=forms.Textarea)
+        widget=Ubereditor)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -86,12 +93,12 @@ class CourseClassForm(forms.ModelForm):
         label=_("Description"),
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
-        widget=forms.Textarea)
+        widget=Ubereditor)
     materials = forms.CharField(
         label=_("Materials"),
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
-        widget=forms.Textarea)
+        widget=Ubereditor)
     date = forms.DateField(
         label=_("Date"),
         # help_text=_("Example: 1990-07-13"),
@@ -152,7 +159,7 @@ class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Text"),
         help_text=_("LaTeX+Markdown is enabled"),
-        widget=forms.Textarea)
+        widget=Ubereditor)
     attached_file = forms.FileField(
         label="",
         required=False,
@@ -204,7 +211,8 @@ class AssignmentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Text"),
         help_text=_("LaTeX+Markdown+HTML is enabled"),
-        widget=forms.Textarea)
+        widget=Ubereditor)
+
     deadline_at = forms.DateTimeField(
         label=_("Deadline"),
         # help_text=_("Example: 1990-07-13 12:00"),

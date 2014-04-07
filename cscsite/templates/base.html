@@ -30,9 +30,12 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
     <link rel="stylesheet" href="{% static "css/highlight-styles/solarized_light.css" %}">
     <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/marked.js" %}"></script>
     <script type="text/javascript" src="{% static "js/holder.js" %}"></script>
     <script type="text/javascript" src="{% static "js/main.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/EpicEditor-v0.2.2/js/epiceditor.min.js" %}"></script>
+    <!-- custom marked build clashes with the one in EpicEditor, therefore this
+         include should be *after* EpicEditor-->
+    <script type="text/javascript" src="{% static "js/marked.js" %}"></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
