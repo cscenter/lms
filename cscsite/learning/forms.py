@@ -22,8 +22,8 @@ CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
 
 class Ubereditor(forms.Textarea):
     def __init__(self, *args, **kwargs):
-        # TODO: not sure if this is the best way
-        kwargs.update({'attrs': {'class': 'ubereditor'}})
+        kwargs.setdefault("attrs", {})
+        kwargs["attrs"].setdefault("class", "ubereditor")
         super(Ubereditor, self).__init__(*args, **kwargs)
 
 
