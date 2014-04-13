@@ -1,29 +1,55 @@
 from django.contrib import admin
+from django.db import models
 
 from learning.models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
     Enrollment
+from learning.forms import Ubereditor
 
 
-class CourseClassAdmin(admin.ModelAdmin):
+class UbereditorMixin(object):
+    def __init__(self, *args, **kwargs):
+        self.formfield_overrides.update({
+                models.TextField: {'widget': Ubereditor}
+        })
+        super(UbereditorMixin, self).__init__(*args, **kwargs)
+
+
+class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
+    pass
+
+
+class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
+    pass
+
+
+class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['course_offering', 'venue', 'type']
     list_display = ['name', 'course_offering', 'date', 'venue', 'type_display']
 
 
-class CourseOfferingNewsAdmin(admin.ModelAdmin):
+class CourseOfferingNewsAdmin(UbereditorMixin, admin.ModelAdmin):
     date_hierarchy = 'created'
     list_display = ['title', 'course_offering', 'created']
 
 
-class AssignmentAdmin(admin.ModelAdmin):
+class VenueAdmin(UbereditorMixin, admin.ModelAdmin):
+    pass
+
+
+class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
     list_display = ['title', 'course_offering', 'created', 'deadline_at']
     list_filter = ['course_offering']
 
     def get_readonly_fields(self, request, obj=None):
         return ['course_offering'] if obj else []
+
+
+class AssignmentCommentAdmin(UbereditorMixin, admin.ModelAdmin):
+    pass
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
@@ -40,13 +66,13 @@ class AssignmentStudentAdmin(admin.ModelAdmin):
             return ['state_changed']
 
 
-admin.site.register(Course)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester)
-admin.site.register(CourseOffering)
-admin.site.register(Venue)
+admin.site.register(CourseOffering, CourseOfferingAdmin)
+admin.site.register(Venue, VenueAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
-admin.site.register(AssignmentComment)
+admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
