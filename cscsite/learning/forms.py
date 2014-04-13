@@ -26,6 +26,14 @@ class Ubereditor(forms.Textarea):
         kwargs["attrs"].setdefault("class", "ubereditor")
         super(Ubereditor, self).__init__(*args, **kwargs)
 
+    class Media:
+        css = {"all": ["css/highlight-styles/solarized_light.css"]}
+        js = ["//code.jquery.com/jquery-1.10.2.min.js",
+              "js/highlight.pack.js",
+              "js/main.js",
+              "js/EpicEditor-v0.2.2/js/epiceditor.min.js",
+              "js/marked.js"]
+
 
 class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)
