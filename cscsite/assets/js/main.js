@@ -19,6 +19,7 @@ $(document).ready(function () {
         var $container = $("<div/>").insertAfter($textarea);
 
         $textarea.hide();
+        $textarea.removeProp("required");
 
         var editor = new EpicEditor({
             container: $container[0],
