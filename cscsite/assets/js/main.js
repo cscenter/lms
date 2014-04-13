@@ -26,7 +26,11 @@ $(document).ready(function () {
             parser: marked,
             basePath: "/static/js/EpicEditor-v0.2.2",
             clientSideStorage: false,
-            autogrow: {minHeight: 200}
+            autogrow: {minHeight: 200},
+            theme: {
+                base: '/themes/base/epiceditor.css',
+                editor: '/themes/editor/epic-light.css'
+            }
         });
 
         editor.load();
