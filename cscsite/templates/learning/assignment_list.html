@@ -32,12 +32,6 @@
         {% endif %}
         {% if user_type == 'teacher' %}
         <div class="btn-group">
-          <a href="{% url 'assignment_add' %}" role="button"
-             class="btn btn-default">
-            {% trans "Create assignment" %}
-          </a>
-        </div>
-        <div class="btn-group">
           <a href="{% url 'assignment_list_teacher' %}"
              role="button"
              class="btn btn-default
@@ -53,6 +47,12 @@
                     active
                     {% endif %}">
             {% trans "Ungraded" %}
+          </a>
+        </div>
+       <div class="btn-group">
+          <a href="{% url 'assignment_add' %}" role="button"
+             class="btn btn-primary">
+            {% trans "Create assignment" %}
           </a>
         </div>
         {% endif %}
