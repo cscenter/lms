@@ -400,12 +400,12 @@ h5.assignment {
   vertical-align: top;
   height: 15em;
   max-width: 1.5em;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .marks-table .header-vert .inner {
   line-height: 1.5em;
-  width: 15em;
+  width: 20em;
   text-overflow: ellipsis;
   text-align: left;
   overflow: hidden;
@@ -419,11 +419,11 @@ h5.assignment {
   filter: flipv fliph;
   /* CSS3 specific totation code */
   /* translate should have the same negative dimension as head height */
-  transform: rotate(270deg) translate(-15em,0);
+  transform: rotate(315deg) translate(-10em,10em);
   transform-origin: 0 0;
-  -moz-transform: rotate(270deg) translate(-15em,0);
+  -moz-transform: rotate(315deg) translate(-10em,10em);
   -moz-transform-origin: 0 0;
-  -webkit-transform: rotate(270deg) translate(-15em,0);
+  -webkit-transform: rotate(315deg) translate(-10em,10em);
   -webkit-transform-origin: 0 0;
 }
 
