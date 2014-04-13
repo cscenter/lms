@@ -77,7 +77,7 @@
   </div>
   <div class="row">
     <div class="col-xs-3">
-      <h4>{% trans "Classes" %}</h4>
+      <h3>{% trans "Classes" %}</h3>
       {% if course_offering.courseclass_set.all %}
       <ul class="list-unstyled">
         {% for class in course_offering.courseclass_set.all reversed %}
@@ -92,6 +92,8 @@
       {% endif %}
     </div>
     <div class="col-xs-9">
+      {% if course_offering.courseofferingnews_set.all %}
+      <h3>{% trans "News" %}</h3>
       {% for news in course_offering.courseofferingnews_set.all %}
       <h4>{{ news.title }}</h4>
       <div class="ubertext">
@@ -104,6 +106,16 @@
         {% endif %}
         {{ news.created|date }}</p>
       {% endfor %}
+      {% endif %}
+
+      {% if course_offering.assignment_set.all %}
+      <h3>{% trans "Assignments" %}</h3>
+      <ul>
+      {% for assignment in course_offering.assignment_set.all %}
+      <li>{{ assignment.title }}</li>
+      {% endfor %}
+      </ul>
+      {% endif %}
     </div>
   </div>
 </div>
