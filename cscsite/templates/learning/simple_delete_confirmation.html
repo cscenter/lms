@@ -7,6 +7,7 @@
     <div class="col-xs-12">
       <form action="" method="post">{% csrf_token %}
         <p>{% trans "Are you sure you want to delete" %} "{{ object }}"?</p>
+        <input action="action" type="button" class="btn btn-primary" value="{% trans "Cancel" %}" onclick="history.back();" />
         <input type="submit" class="btn btn-danger" value="{% trans "Delete" %}" />
       </form>
     </div>
