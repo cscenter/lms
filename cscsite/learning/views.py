@@ -184,6 +184,16 @@ class CourseStudentListView(StudentOnlyMixin,
                 .get_queryset()
                 .filter(enrolled_students=self.request.user))
 
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CourseStudentListView, self)
+                   .get_context_data(*args, **kwargs))
+        semester_pair = utils.get_current_semester_pair()
+        context['course_list_available'] = (
+            CourseOffering
+            .by_semester(semester_pair)
+            .exclude(enrolled_students=self.request.user))
+        return context
+
 
 class CourseDetailView(LoginRequiredMixin, generic.DetailView):
     model = Course
@@ -275,7 +285,7 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
 
-class CourseOfferingEnrollView(generic.FormView):
+class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
     http_method_names = ['post']
     form_class = CourseOfferingPKForm
 
@@ -285,12 +295,15 @@ class CourseOfferingEnrollView(generic.FormView):
                 pk=form.cleaned_data['course_offering_pk']))
         Enrollment(student=self.request.user,
                    course_offering=course_offering).save()
-        return redirect('course_offering_detail',
-                        course_slug=course_offering.course.slug,
-                        semester_slug=course_offering.semester.slug)
+        if self.request.POST.get('back') == 'course_list_student':
+            return redirect('course_list_student')
+        else:
+            return redirect('course_offering_detail',
+                            course_slug=course_offering.course.slug,
+                            semester_slug=course_offering.semester.slug)
 
 
-class CourseOfferingUnenrollView(generic.FormView):
+class CourseOfferingUnenrollView(StudentOnlyMixin, generic.FormView):
     http_method_names = ['post']
     form_class = CourseOfferingPKForm
 
@@ -302,9 +315,12 @@ class CourseOfferingUnenrollView(generic.FormView):
             Enrollment.objects.filter(student=self.request.user,
                                       course_offering=course_offering))
         enrollment.delete()
-        return redirect('course_offering_detail',
-                        course_slug=course_offering.course.slug,
-                        semester_slug=course_offering.semester.slug)
+        if self.request.POST.get('back') == 'course_list_student':
+            return redirect('course_list_student')
+        else:
+            return redirect('course_offering_detail',
+                            course_slug=course_offering.course.slug,
+                            semester_slug=course_offering.semester.slug)
 
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
