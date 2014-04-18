@@ -135,7 +135,7 @@ class CalendarFullView(LoginRequiredMixin,
     user_type = 'full'
 
 
-class CourseListView(generic.ListView):
+class CourseListMixin(object):
     model = CourseOffering
     template_name = "learning/courses_list.html"
     context_object_name = 'course_list'
@@ -149,21 +149,23 @@ class CourseListView(generic.ListView):
                 .prefetch_related('teachers'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseListView, self)
+        context = (super(CourseListMixin, self)
                    .get_context_data(*args, **kwargs))
-        ongoing, archive = [], []
-        for course in context['course_list']:
-            if course.is_ongoing:
-                ongoing.append(course)
-            else:
-                archive.append(course)
+        ongoing, archive = utils.split_list(lambda course: course.is_ongoing,
+                                            context['course_list'])
         context['course_list_ongoing'] = ongoing
         context['course_list_archive'] = archive
         context['list_type'] = self.list_type
         return context
 
 
-class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
+class CourseListView(CourseListMixin, generic.ListView):
+    pass
+
+
+class CourseTeacherListView(TeacherOnlyMixin,
+                            CourseListMixin,
+                            generic.ListView):
     list_type = 'teaching'
 
     def get_queryset(self):
@@ -172,7 +174,9 @@ class CourseTeacherListView(TeacherOnlyMixin, CourseListView):
                 .filter(teachers=self.request.user))
 
 
-class CourseStudentListView(StudentOnlyMixin, CourseListView):
+class CourseStudentListView(StudentOnlyMixin,
+                            CourseListMixin,
+                            generic.ListView):
     list_type = 'learning'
 
     def get_queryset(self):
