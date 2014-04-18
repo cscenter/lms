@@ -49,8 +49,9 @@
           <th width="30%">
             {% trans "Professors" %}
           </th>
-          <th width="15%">
-          </th>
+          {% if list_type == "learning" %}
+          <th width="15%"></th>
+          {% endif %}
         </thead>
         {% for course_offering in course_list_ongoing %}
         <tr>
@@ -66,6 +67,7 @@
             {% endfor %}
             </ul>
           </td>
+          {% if list_type == "learning" %}
           <td>
             <form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
               {% csrf_token %}
@@ -76,6 +78,7 @@
               </button>
             </form>
           </td>
+          {% endif %}
         </tr>
         {% endfor %}
       </table>
