@@ -21,7 +21,9 @@ class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
 
 
 class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
-    pass
+    list_filter = ['course', 'semester']
+    list_display = ['course', 'semester']
+
 
 
 class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
