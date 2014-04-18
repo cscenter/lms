@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-04-18 20:05+0400\n"
-"PO-Revision-Date: 2014-04-18 20:05+0230\n"
+"PO-Revision-Date: 2014-04-18 21:02+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -395,7 +395,7 @@ msgstr "Список выпускников пуст"
 
 #: templates/base.html:81
 msgid "About CSC"
-msgstr "О CSC"
+msgstr "О Центре"
 
 #: templates/base.html:86 templates/learning/courseoffering_detail.html:96
 msgid "News"
