@@ -193,6 +193,8 @@ class CourseDetailView(LoginRequiredMixin, generic.DetailView):
 
 
 class GetCourseOfferingObjectMixin(object):
+    model = CourseOffering
+
     def get_object(self):
         year, semester_type = self.kwargs['semester_slug'].split("-")
         return get_object_or_404(
@@ -200,16 +202,17 @@ class GetCourseOfferingObjectMixin(object):
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug'])
-            .select_related('course', 'semester')
+            .select_related('course',
+                            'semester')
             .prefetch_related('teachers',
                               'courseclass_set',
-                              'courseofferingnews_set'))
+                              'courseofferingnews_set',
+                              'assignment_set'))
 
 
 class CourseOfferingDetailView(LoginRequiredMixin,
                                GetCourseOfferingObjectMixin,
                                generic.DetailView):
-    model = CourseOffering
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
@@ -227,7 +230,6 @@ class CourseOfferingDetailView(LoginRequiredMixin,
 class CourseOfferingEditDescrView(TeacherOnlyMixin,
                                   GetCourseOfferingObjectMixin,
                                   generic.UpdateView):
-    model = CourseOffering
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingEditDescrForm
 
