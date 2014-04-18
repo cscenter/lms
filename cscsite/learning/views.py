@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
 
@@ -9,6 +9,7 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 
 from braces.views import LoginRequiredMixin
 
@@ -31,11 +32,28 @@ class TimetableMixin(object):
     template_name = "learning/timetable.html"
 
     def get_queryset(self):
-        semester_qstr = self.request.GET.get('semester')
-        self.semester_pair = self._split_semester(semester_qstr)
-        if not self.semester_pair:
-            self.semester_pair = utils.get_current_semester_pair()
-        return (CourseClass.by_semester(self.semester_pair)
+        week_qstr = self.request.GET.get('week')
+        year_qstr = self.request.GET.get('year')
+        try:
+            week = int(week_qstr)
+            year = int(year_qstr)
+        except TypeError as e:
+            # This returns current week number. Beware: the week's number
+            # is as of ISO8601, so 29th of December can be reported as
+            # 1st week of the next year.
+            year, week, _ = now().date().isocalendar()
+        start = utils.iso_to_gregorian(year, week, 1)
+        end = utils.iso_to_gregorian(year, week, 7)
+        next_w_cal = (start + datetime.timedelta(weeks=1)).isocalendar()
+        prev_w_cal = (start + datetime.timedelta(weeks=-1)).isocalendar()
+        self.context_weeks = {'week': week,
+                              'year': year,
+                              'prev_year': prev_w_cal[0],
+                              'prev_week': prev_w_cal[1],
+                              'next_year': next_w_cal[0],
+                              'next_week': next_w_cal[1]}
+        return (CourseClass.objects
+                .filter(date__range=[start, end])
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
@@ -46,13 +64,7 @@ class TimetableMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableMixin, self)
                    .get_context_data(*args, **kwargs))
-        year, season = self.semester_pair
-        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
-        p_year, p_season = p
-        n_year, n_season = n
-        context['next_semester'] = "{0}_{1}".format(n_year, n_season)
-        context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
-        context['current_semester_obj'] = Semester(year=year, type=season)
+        context.update(self.context_weeks)
         context['user_type'] = self.user_type
         return context
 
@@ -89,11 +101,44 @@ class TimetableStudentView(StudentOnlyMixin,
 
 
 class CalendarMixin(object):
+    model = CourseClass
     template_name = "learning/calendar.html"
 
+    def get_queryset(self):
+        semester_qstr = self.request.GET.get('semester')
+        self.semester_pair = self._split_semester(semester_qstr)
+        if not self.semester_pair:
+            self.semester_pair = utils.get_current_semester_pair()
+        return (CourseClass.by_semester(self.semester_pair)
+                .order_by('date', 'starts_at')
+                .select_related('venue',
+                                'course_offering',
+                                'course_offering__course',
+                                'course_offering__semester'))
+
+    def _split_semester(self, semester_string):
+        if not semester_string:
+            return None
+        pair = semester_string.strip().split("_")
+        if not len(pair) == 2:
+            return None
+        try:
+            return (int(pair[0]), pair[1])
+        except ValueError:
+            return None
+
+    # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
+        year, season = self.semester_pair
+        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
+        p_year, p_season = p
+        n_year, n_season = n
+        context['next_semester'] = "{0}_{1}".format(n_year, n_season)
+        context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
+        context['current_semester_obj'] = Semester(year=year, type=season)
+        context['user_type'] = self.user_type
         classes = context['object_list']
         dates_to_classes = defaultdict(list)
         for course_class in classes:
@@ -108,9 +153,12 @@ class CalendarMixin(object):
                current_dt.year < semester.ends_at.year):
             month_cal = cal.monthdatescalendar(current_dt.year,
                                                current_dt.month)
-            current_month = [[(day, dates_to_classes[day],
+            current_month = [(week[0].isocalendar()[1],
+                              any(start_date <= day <= end_date
+                                  for day in week),
+                              [(day, dates_to_classes[day],
                                start_date <= day <= end_date)
-                              for day in week]
+                              for day in week])
                              for week in month_cal]
             months.append((current_dt, current_month))
             current_dt += relativedelta(months=+1)
@@ -118,19 +166,25 @@ class CalendarMixin(object):
         return context
 
 
-class CalendarTeacherView(CalendarMixin,
-                          TimetableTeacherView):
-    pass
+class CalendarTeacherView(TeacherOnlyMixin,
+                          CalendarMixin,
+                          generic.ListView):
+    user_type = 'teacher'
+
+    def get_queryset(self):
+        return (super(CalendarTeacherView, self).get_queryset()
+                .filter(course_offering__teachers=self.request.user))
 
 
 class CalendarStudentView(CalendarMixin,
-                          TimetableStudentView):
-    pass
+                          generic.ListView):
+    def get_queryset(self):
+        return (super(CalendarStudentView, self).get_queryset()
+                .filter(course_offering__enrolled_students=self.request.user))
 
 
 class CalendarFullView(LoginRequiredMixin,
                        CalendarMixin,
-                       TimetableMixin,
                        generic.ListView):
     user_type = 'full'
 

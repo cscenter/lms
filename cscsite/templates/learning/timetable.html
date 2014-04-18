@@ -6,11 +6,11 @@
 <div class="container">
   <div class="row timetable-header-row">
     <div class="col-xs-12 h2-and-buttons">
-      <h2>{{ current_semester_obj|capfirst }}</h2>
+      <h2>{{ year }}, {% trans "week" %} {{ week }}</h2>
       <div class="btn-toolbar">
         <div class="btn-group">
-          <a href="?semester={{ previous_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
-          <a href="?semester={{ next_semester }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+          <a href="?year={{ prev_year }}&week={{ prev_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?year={{ next_year }}&week={{ next_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         {% if user.is_teacher and user.is_student %}
         <div class="btn-group">
@@ -40,11 +40,7 @@
                    {% endif %}"
              role="button"
              class="btn btn-default active">{% trans 'List' %}</a>
-          <a href="{% if user_type == 'teacher' %}
-                   {% url 'calendar_teacher' %}
-                   {% else %}
-                   {% url 'calendar_student' %}
-                   {% endif %}"
+          <a href="{% if user_type == 'teacher' %}{% url 'calendar_teacher' %}{% else %}{% url 'calendar_student' %}{% endif %}#week_{{ week }}"
              role="button"
              class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>

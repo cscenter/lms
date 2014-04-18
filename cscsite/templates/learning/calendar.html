@@ -73,10 +73,17 @@
           <th>{% trans "Saturday" %}</th>
           <th>{% trans "Sunday" %}</th>
         </tr>
-        {% for week in month %}
-        <tr>
+        {% for week_num, week_in_semester, week in month %}
+        <tr id="week_{{week_num}}">
           {% for day, classes, in_semester in week %}
           <td class="{{ in_semester|yesno:'in-semester,not-in-semester' }}">
+            {% if forloop.first and week_in_semester%}
+            <div class="week-num-container">
+              <div class="week-num">
+                <a href="{% if user_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ month_date|date:"Y" }}&week={{ week_num }}">{{ week_num }}</a>
+              </div>
+            </div>
+            {% endif %}
             <div class="cell">
               <div class="day">
                 {{ day|date:"d" }}
