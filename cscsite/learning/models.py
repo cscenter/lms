@@ -59,7 +59,7 @@ class Semester(models.Model):
                        choices_name='TYPES')
 
     class Meta:
-        ordering = ["year", "type"]
+        ordering = ["year", "-type"]
 
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
@@ -130,6 +130,12 @@ class CourseOffering(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
+
+    # TODO: test this
+    @classmethod
+    def by_semester(cls, (year, season)):
+        return cls.objects.filter(semester__type=season,
+                                  semester__year=year)
 
     # TODO: test this
     @cached_property
@@ -257,8 +263,8 @@ class CourseClass(TimeStampedModel):
 
     # TODO: test this
     @classmethod
-    def by_semester(self, (year, season)):
-        return self.objects.filter(
+    def by_semester(cls, (year, season)):
+        return cls.objects.filter(
             course_offering__semester__type=season,
             course_offering__semester__year=year)
 

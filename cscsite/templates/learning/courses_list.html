@@ -42,12 +42,14 @@
   {% if course_list_ongoing %}
   <div class="row">
     <div class="col-xs-12">
-      <h3>{% trans "Ongoing" %}</h3>
+      <h3>{% trans "Ongoing|plural" %}</h3>
       <table class="table" width="100%">
         <thead>
           <th></th>
           <th width="30%">
             {% trans "Professors" %}
+          </th>
+          <th width="15%">
           </th>
         </thead>
         {% for course_offering in course_list_ongoing %}
@@ -63,6 +65,58 @@
             <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
             {% endfor %}
             </ul>
+          </td>
+          <td>
+            <form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
+              {% csrf_token %}
+              <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+              <input type="hidden" name="back" value="course_list_student">
+              <button type="submit" class="btn btn-default">
+                {% trans "Unenroll" %}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if list_type == "learning" and course_list_available %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Available|plural" %}</h3>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">
+            {% trans "Professors" %}
+          </th>
+          <th width="15%"></th>
+        </thead>
+        {% for course_offering in course_list_available %}
+        <tr>
+          <td>
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+              {{ course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+            {% for teacher in course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            {% endfor %}
+            </ul>
+          </td>
+          <td>
+            <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+            <input type="hidden" name="back" value="course_list_student">
+            <button type="submit" class="btn btn-primary">
+              {% trans "Enroll" %}
+            </button>
+          </form>
           </td>
         </tr>
         {% endfor %}
@@ -108,7 +162,7 @@
   </div>
   {% endif %}
 </div>
-{% if not course_list_ongoing and not course_list_archive %}
+{% if not course_list_ongoing and not course_list_archive and not course_list_available %}
 <div class="container">
   <div class="row">
     <div class="col-xs-3"></div>

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-31 16:55+0400\n"
-"PO-Revision-Date: 2014-03-31 16:57+0230\n"
+"POT-Creation-Date: 2014-04-18 20:05+0400\n"
+"PO-Revision-Date: 2014-04-18 20:05+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,21 +18,21 @@ msgstr ""
 "Language: \n"
 "X-Translated-Using: django-rosetta 0.7.3\n"
 
-#: learning/forms.py:16
+#: learning/forms.py:16 templates/learning/simple_delete_confirmation.html:10
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:19 learning/forms.py:166
+#: learning/forms.py:19 learning/forms.py:181
 msgid "Save"
 msgstr "Сохранить"
 
-#: learning/forms.py:29 learning/forms.py:86 learning/models.py:111
-#: learning/models.py:187 learning/models.py:220
+#: learning/forms.py:44 learning/forms.py:101 learning/models.py:111
+#: learning/models.py:193 learning/models.py:226
 #: templates/learning/courseclass_detail.html:38
 msgid "Description"
 msgstr "Описание"
 
-#: learning/forms.py:30 learning/models.py:112
+#: learning/forms.py:45 learning/models.py:112
 msgid ""
 "LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
 " description"
@@ -40,78 +40,78 @@ msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
 
-#: learning/forms.py:47 learning/forms.py:202
+#: learning/forms.py:62 learning/forms.py:217
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:52 learning/forms.py:153 learning/forms.py:205
+#: learning/forms.py:67 learning/forms.py:168 learning/forms.py:220
 msgid "Text"
 msgstr "Текст"
 
-#: learning/forms.py:53 learning/forms.py:88 learning/forms.py:93
-#: learning/forms.py:206 learning/models.py:37 learning/models.py:172
-#: learning/models.py:222 learning/models.py:226 learning/models.py:283
+#: learning/forms.py:68 learning/forms.py:103 learning/forms.py:108
+#: learning/forms.py:221 learning/models.py:37 learning/models.py:178
+#: learning/models.py:228 learning/models.py:232 learning/models.py:289
 msgid "LaTeX+Markdown+HTML is enabled"
 msgstr "доступны LaTeX, Markdown и HTML"
 
-#: learning/forms.py:72 learning/forms.py:198 learning/models.py:123
-#: learning/models.py:167 learning/models.py:209 learning/models.py:270
-#: learning/models.py:426
+#: learning/forms.py:87 learning/forms.py:213 learning/models.py:123
+#: learning/models.py:173 learning/models.py:215 learning/models.py:276
+#: learning/models.py:432
 msgid "Course offering"
 msgstr "Прочтение курса"
 
-#: learning/forms.py:77 learning/models.py:192
+#: learning/forms.py:92 learning/models.py:198
 msgid "Venue"
 msgstr "Место проведения"
 
-#: learning/forms.py:80 learning/models.py:216 learning/models.py:254
+#: learning/forms.py:95 learning/models.py:222 learning/models.py:260
 msgid "Type"
 msgstr "Тип"
 
-#: learning/forms.py:83 learning/models.py:185 learning/models.py:218
-#: templates/learning/timetable.html:57
+#: learning/forms.py:98 learning/models.py:191 learning/models.py:224
+#: templates/learning/timetable.html:68
 msgid "Name"
 msgstr "Имя"
 
-#: learning/forms.py:91 templates/learning/courseclass_detail.html:45
-#: templates/learning/timetable.html:61
+#: learning/forms.py:106 templates/learning/courseclass_detail.html:45
+#: templates/learning/timetable.html:72
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:96 learning/models.py:227
+#: learning/forms.py:111 learning/models.py:233
 msgid "Date"
 msgstr "Дата"
 
-#: learning/forms.py:100 learning/models.py:228
+#: learning/forms.py:115 learning/models.py:234
 msgid "Starts at"
 msgstr "Начало"
 
-#: learning/forms.py:104 learning/models.py:229
+#: learning/forms.py:119 learning/models.py:235
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:143
+#: learning/forms.py:158
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:154 learning/models.py:188 learning/models.py:386
+#: learning/forms.py:169 learning/models.py:194 learning/models.py:392
 #: textpages/models.py:18 users/models.py:35
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
-#: learning/forms.py:209 templates/learning/assignment_detail.html:104
+#: learning/forms.py:225 templates/learning/assignment_detail.html:104
 #: templates/learning/assignment_list.html:70
 #: templates/learning/assignment_list.html:132
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:214
+#: learning/forms.py:230
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:218
+#: learning/forms.py:234
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
@@ -161,7 +161,7 @@ msgstr "Тип"
 
 #: learning/models.py:99 templates/learning/assignment_list.html:77
 #: templates/learning/assignment_list.html:139
-#: templates/learning/timetable.html:58
+#: templates/learning/timetable.html:69
 msgid "Course"
 msgstr "Курс"
 
@@ -181,177 +181,178 @@ msgstr "Записавшиеся студенты"
 msgid "Course offerings"
 msgstr "Прочтения курсов"
 
-#: learning/models.py:169
+#: learning/models.py:175
 msgid "CourseNews|title"
 msgstr "Заголовок"
 
-#: learning/models.py:171
+#: learning/models.py:177
 msgid "CourseNews|text"
 msgstr "Текст"
 
-#: learning/models.py:176
+#: learning/models.py:182
 msgid "Course news-singular"
 msgstr "Новость"
 
-#: learning/models.py:177
+#: learning/models.py:183
 msgid "Course news-plural"
 msgstr "Новости"
 
-#: learning/models.py:193
+#: learning/models.py:199
 msgid "Venues"
 msgstr "Места проведения"
 
-#: learning/models.py:204 templates/learning/timetable.html:83
+#: learning/models.py:210 templates/learning/timetable.html:94
 msgid "Lecture"
 msgstr "Лекция"
 
-#: learning/models.py:205 templates/learning/timetable.html:85
+#: learning/models.py:211 templates/learning/timetable.html:96
 msgid "Seminar"
 msgstr "Семинар"
 
-#: learning/models.py:213
+#: learning/models.py:219
 msgid "CourseClass|Venue"
 msgstr "Место проведения"
 
-#: learning/models.py:224
+#: learning/models.py:230
 msgid "CourseClass|Materials"
 msgstr "Материалы"
 
-#: learning/models.py:233
+#: learning/models.py:239
 msgid "Class"
 msgstr "Занятие"
 
-#: learning/models.py:234 templates/learning/courseoffering_detail.html:80
+#: learning/models.py:240 templates/learning/courseoffering_detail.html:80
 msgid "Classes"
 msgstr "Занятия"
 
-#: learning/models.py:249
+#: learning/models.py:255
 msgid "Class should end after it's start"
 msgstr "Конец занятия должен быть позже начала"
 
-#: learning/models.py:274
+#: learning/models.py:280
 msgid "Assignment|assigned_to"
 msgstr "Задано"
 
-#: learning/models.py:277
+#: learning/models.py:283
 msgid "Assignment|deadline"
 msgstr "Срок сдачи"
 
-#: learning/models.py:278
+#: learning/models.py:284
 msgid "Assignment|can be passed online"
 msgstr "Можно сдать онлайн"
 
-#: learning/models.py:280
+#: learning/models.py:286
 msgid "Asssignment|name"
 msgstr "Название"
 
-#: learning/models.py:282
+#: learning/models.py:288
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: learning/models.py:295
+#: learning/models.py:301
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:296 templates/base.html:182 templates/base.html.py:210
+#: learning/models.py:302 templates/base.html:185 templates/base.html.py:218
 #: templates/learning/assignment_list.html:10
+#: templates/learning/courseoffering_detail.html:112
 msgid "Assignments"
 msgstr "Задания"
 
-#: learning/models.py:306
+#: learning/models.py:312
 msgid "Course offering modification is not allowed"
 msgstr "Модификация прочтения запрещена"
 
-#: learning/models.py:324
+#: learning/models.py:330
 msgid "Assignment|not checked"
 msgstr "Не проверено"
 
-#: learning/models.py:326
+#: learning/models.py:332
 msgid "Assignment|being checked"
 msgstr "На проверке"
 
-#: learning/models.py:327
+#: learning/models.py:333
 msgid "Assignment|unsatisfactory"
 msgstr "Неудовлетворительно"
 
-#: learning/models.py:328
+#: learning/models.py:334
 msgid "Assignment|pass"
 msgstr "Удовлетворительно"
 
-#: learning/models.py:329
+#: learning/models.py:335
 msgid "Assignment|good"
 msgstr "Хорошо"
 
-#: learning/models.py:330
+#: learning/models.py:336
 msgid "Assignment|excellent"
 msgstr "Отлично"
 
-#: learning/models.py:340
+#: learning/models.py:346
 msgid "AssignmentStudent|assignment"
 msgstr "Задание"
 
-#: learning/models.py:344
+#: learning/models.py:350
 msgid "AssignmentStudent|student"
 msgstr "Студент"
 
-#: learning/models.py:348
+#: learning/models.py:354
 msgid "Asssignment|state"
 msgstr "Статус"
 
-#: learning/models.py:352
+#: learning/models.py:358
 msgid "Asssignment|state changed"
 msgstr "Статус изменён"
 
-#: learning/models.py:357
+#: learning/models.py:363
 msgid "Assignment-student"
 msgstr "Выполнение заданий"
 
-#: learning/models.py:358
+#: learning/models.py:364
 msgid "Assignment-students"
 msgstr "Выполнения заданий"
 
-#: learning/models.py:362
+#: learning/models.py:368
 msgid "Student field should point to an actual student"
 msgstr "Поле \"Студент\" должно указывать на студента"
 
-#: learning/models.py:382
+#: learning/models.py:388
 msgid "AssignmentComment|assignment_student"
 msgstr "Выполнение задания"
 
-#: learning/models.py:385
+#: learning/models.py:391
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: learning/models.py:389
+#: learning/models.py:395
 msgid "Author"
 msgstr "Автор"
 
-#: learning/models.py:404
+#: learning/models.py:410
 msgid "Assignment-comment"
 msgstr "Комментарий к заданию"
 
-#: learning/models.py:405
+#: learning/models.py:411
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
-#: learning/models.py:422 templates/learning/assignment_list.html:74
+#: learning/models.py:428 templates/learning/assignment_list.html:74
 #: templates/learning/assignment_list.html:136
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:431
+#: learning/models.py:437
 msgid "Enrollment"
 msgstr "Запись"
 
-#: learning/models.py:432
+#: learning/models.py:438
 msgid "Enrollments"
 msgstr "Записи"
 
-#: learning/models.py:436
+#: learning/models.py:442
 msgid "Only students can enroll to courses"
 msgstr "Только студенты могут записываться на курсы"
 
-#: learning/views.py:451
+#: learning/views.py:519
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -392,79 +393,85 @@ msgstr "Новости"
 msgid "No alumnis yet"
 msgstr "Список выпускников пуст"
 
-#: templates/base.html:78
+#: templates/base.html:81
 msgid "About CSC"
 msgstr "О CSC"
 
-#: templates/base.html:83
+#: templates/base.html:86 templates/learning/courseoffering_detail.html:96
 msgid "News"
 msgstr "Новости"
 
-#: templates/base.html:90 templates/learning/assignment_list.html:21
-#: templates/learning/courses_list.html:26
-#: templates/learning/timetable.html:24
+#: templates/base.html:93 templates/learning/assignment_list.html:21
+#: templates/learning/calendar.html:24 templates/learning/courses_list.html:26
+#: templates/learning/timetable.html:23
 msgid "Learning"
 msgstr "Обучение"
 
-#: templates/base.html:97 templates/learning/assignment_list.html:29
-#: templates/learning/courses_list.html:34
-#: templates/learning/timetable.html:32
+#: templates/base.html:100 templates/learning/assignment_list.html:29
+#: templates/learning/calendar.html:32 templates/learning/courses_list.html:34
+#: templates/learning/timetable.html:31
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:104 templates/base.html.py:225
+#: templates/base.html:107 templates/base.html.py:238
 #: templates/learning/marks_sheet.html:9
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:110
+#: templates/base.html:113
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:114
+#: templates/base.html:117
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:118
+#: templates/base.html:121
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:125
+#: templates/base.html:128
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:128
+#: templates/base.html:131
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:145
+#: templates/base.html:148
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:150 templates/base.html.py:193 templates/base.html:220
+#: templates/base.html:153 templates/base.html.py:201 templates/base.html:233
 #: templates/learning/courses_list.html:9
 msgid "Courses"
 msgstr "Курсы"
 
-#: templates/base.html:155
+#: templates/base.html:158
 msgid "Organizers and staff"
 msgstr "Руководители и организаторы"
 
-#: templates/base.html:160 templates/learning/assignment_detail.html:93
+#: templates/base.html:163 templates/learning/assignment_detail.html:93
 #: templates/learning/courses_list.html:50
-#: templates/learning/courses_list.html:83
+#: templates/learning/courses_list.html:81
+#: templates/learning/courses_list.html:114
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:165
+#: templates/base.html:168
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:187 templates/base.html.py:215
+#: templates/base.html:190 templates/base.html.py:223
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:247
+#: templates/base.html:195 templates/base.html.py:228
+#: templates/learning/calendar.html:50 templates/learning/timetable.html:49
+msgid "Calendar"
+msgstr "Календарь"
+
+#: templates/base.html:260
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
@@ -539,7 +546,7 @@ msgstr "Редактировать"
 
 #: templates/learning/assignment_detail.html:21
 #: templates/learning/courseclass_detail.html:14
-#: templates/learning/simple_delete_confirmation.html:10
+#: templates/learning/simple_delete_confirmation.html:11
 msgid "Delete"
 msgstr "Удалить"
 
@@ -573,18 +580,18 @@ msgstr "Можно сдать онлайн"
 msgid "Should be passed offline "
 msgstr "Должно быть сдано оффлайн"
 
-#: templates/learning/assignment_list.html:37
-msgid "Create assignment"
-msgstr "Создать задание"
-
-#: templates/learning/assignment_list.html:47
+#: templates/learning/assignment_list.html:41
 #: templates/learning/courses_list.html:19
 msgid "All"
 msgstr "Все"
 
-#: templates/learning/assignment_list.html:55
+#: templates/learning/assignment_list.html:49
 msgid "Ungraded"
 msgstr "Без оценки"
+
+#: templates/learning/assignment_list.html:55
+msgid "Create assignment"
+msgstr "Создать задание"
 
 #: templates/learning/assignment_list.html:66
 msgid "Open assignments"
@@ -597,18 +604,56 @@ msgstr "Онлайн"
 
 #: templates/learning/assignment_list.html:117
 #: templates/learning/assignment_list.html:177
-#: templates/learning/timetable.html:91 templates/learning/timetable.html:95
+#: templates/learning/timetable.html:102 templates/learning/timetable.html:106
 msgid "Yes,No"
 msgstr "Да,Нет"
 
 #: templates/learning/assignment_list.html:128
-#: templates/learning/courses_list.html:76
+#: templates/learning/courses_list.html:107
 msgid "Archive"
 msgstr "Архив"
 
 #: templates/learning/assignment_list.html:191
 msgid "No assignments yet"
 msgstr "Список заданий пуст"
+
+#: templates/learning/calendar.html:43 templates/learning/timetable.html:42
+msgid "List"
+msgstr "Список"
+
+#: templates/learning/calendar.html:54
+#: templates/learning/courseoffering_detail.html:21
+#: templates/learning/timetable.html:53
+msgid "Add class"
+msgstr "Добавить занятие"
+
+#: templates/learning/calendar.html:68
+msgid "Monday"
+msgstr "Понедельник"
+
+#: templates/learning/calendar.html:69
+msgid "Tuesday"
+msgstr "Вторник"
+
+#: templates/learning/calendar.html:70
+msgid "Wednesday"
+msgstr "Среда"
+
+#: templates/learning/calendar.html:71
+msgid "Thursday"
+msgstr "Четверг"
+
+#: templates/learning/calendar.html:72
+msgid "Friday"
+msgstr "Пятница"
+
+#: templates/learning/calendar.html:73
+msgid "Saturday"
+msgstr "Суббота"
+
+#: templates/learning/calendar.html:74
+msgid "Sunday"
+msgstr "Воскресенье"
 
 #: templates/learning/course_detail.html:16
 msgid "Course offerings:"
@@ -630,11 +675,6 @@ msgstr "Когда"
 msgid "Add news"
 msgstr "Добавить новость"
 
-#: templates/learning/courseoffering_detail.html:21
-#: templates/learning/timetable.html:42
-msgid "Add class"
-msgstr "Добавить занятие"
-
 #: templates/learning/courseoffering_detail.html:36
 msgid "Unenroll"
 msgstr "Отказаться"
@@ -643,19 +683,23 @@ msgstr "Отказаться"
 msgid "Enroll"
 msgstr "Записаться"
 
-#: templates/learning/courseoffering_detail.html:102
+#: templates/learning/courseoffering_detail.html:104
 msgid "edit"
 msgstr "редактировать"
 
-#: templates/learning/courseoffering_detail.html:103
+#: templates/learning/courseoffering_detail.html:105
 msgid "delete"
 msgstr "удалить"
 
 #: templates/learning/courses_list.html:45
-msgid "Ongoing"
-msgstr "Текущие курсы"
+msgid "Ongoing|plural"
+msgstr "Текущие"
 
-#: templates/learning/courses_list.html:116
+#: templates/learning/courses_list.html:76
+msgid "Available|plural"
+msgstr "Доступные"
+
+#: templates/learning/courses_list.html:147
 msgid "No courses yet"
 msgstr "Список курсов пуст"
 
@@ -663,23 +707,15 @@ msgstr "Список курсов пуст"
 msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
 
-#: templates/learning/timetable.html:37
-msgid "List"
-msgstr "Список"
-
-#: templates/learning/timetable.html:38
-msgid "Calendar"
-msgstr "Календарь"
-
-#: templates/learning/timetable.html:56
+#: templates/learning/timetable.html:67
 msgid "Time"
 msgstr "Время"
 
-#: templates/learning/timetable.html:59
+#: templates/learning/timetable.html:70
 msgid "Venue|short"
 msgstr "Место"
 
-#: templates/learning/timetable.html:108
+#: templates/learning/timetable.html:119
 msgid "No classes yet"
 msgstr "Список занятий пуст"
 
