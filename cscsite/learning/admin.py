@@ -1,19 +1,12 @@
-from django.contrib import admin
-from django.db import models
+from __future__ import absolute_import, unicode_literals
 
-from learning.models import Course, Semester, CourseOffering, Venue, \
+from django.contrib import admin
+
+from core.admin import UbereditorMixin
+from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
     Enrollment
-from learning.forms import Ubereditor
-
-
-class UbereditorMixin(object):
-    def __init__(self, *args, **kwargs):
-        self.formfield_overrides.update({
-                models.TextField: {'widget': Ubereditor}
-        })
-        super(UbereditorMixin, self).__init__(*args, **kwargs)
 
 
 class CourseAdmin(UbereditorMixin, admin.ModelAdmin):

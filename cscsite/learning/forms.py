@@ -1,38 +1,23 @@
-import dateutil.parser as dparser
+from __future__ import absolute_import, unicode_literals
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, Button, Div, HTML
-from crispy_forms.bootstrap import FormActions, StrictButton
+from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 
-from learning.models import Course, CourseOffering, CourseOfferingNews, \
+from core.forms import Ubereditor
+from .models import CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment,  AssignmentComment, AssignmentStudent
+
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
                               css_class="btn btn-default"),
                        Submit('save', _('Save')),
                        css_class="pull-right")
-
-
-class Ubereditor(forms.Textarea):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("attrs", {})
-        kwargs["attrs"].setdefault("class", "ubereditor")
-        super(Ubereditor, self).__init__(*args, **kwargs)
-
-    class Media:
-        css = {"all": ["css/highlight-styles/solarized_light.css"]}
-        js = ["//code.jquery.com/jquery-1.10.2.min.js",
-              "js/highlight.pack.js",
-              "js/main.js",
-              "js/EpicEditor-v0.2.2/js/epiceditor.min.js",
-              "js/marked.js"]
 
 
 class CourseOfferingPKForm(forms.Form):

@@ -1,11 +1,14 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.db import models
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
+
+from .forms import Ubereditor
 
 
 def get_admin_url(instance_or_qs):
@@ -69,3 +72,12 @@ def meta(text=None, **kwargs):
 
         return func
     return decorator
+
+
+class UbereditorMixin(object):
+    def __init__(self, *args, **kwargs):
+        self.formfield_overrides.update({
+                models.TextField: {'widget': Ubereditor}
+        })
+
+        super(UbereditorMixin, self).__init__(*args, **kwargs)
