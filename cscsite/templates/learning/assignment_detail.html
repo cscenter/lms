@@ -16,10 +16,12 @@
         {{ a_s.assignment.title }}
         <small>{{ a_s.assignment.course_offering }} </small>
       </h2>
+      {% if user_type == 'teacher' and is_actual_teacher %}
       <div class="btn-toolbar">
         <a href="{% url 'assignment_edit' a_s.assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
         <a href="{% url 'assignment_delete' a_s.assignment.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
       </div>
+      {% endif %}
       <hr>
     </div>
   </div>
@@ -82,7 +84,7 @@
     </div>
     <div class="col-xs-3">
       <h5 class="assignment">{% trans "State" %}</h5>
-      {% if user_type == 'teacher' %}
+      {% if user_type == 'teacher' and is_actual_teacher %}
       {% crispy grade_form %}
       {% else %}
       {{ a_s.status_display }}
