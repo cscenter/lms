@@ -28,6 +28,7 @@ $(document).ready(function () {
             basePath: "/static/js/EpicEditor-v0.2.2",
             clientSideStorage: false,
             autogrow: {minHeight: 200},
+            button: {bar: "show"},
             theme: {
                 base: '/themes/base/epiceditor.css',
                 editor: '/themes/editor/epic-light.css'
