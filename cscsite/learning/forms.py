@@ -140,6 +140,8 @@ class CourseClassForm(forms.ModelForm):
             CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
 
+        # This is needed to guard against teachers adding classes to
+        # other's courses
         self.fields['course_offering'].queryset = \
             CourseOffering.objects.all().filter(teachers=user)
 

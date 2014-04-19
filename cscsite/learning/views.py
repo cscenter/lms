@@ -4,6 +4,7 @@ from collections import OrderedDict, defaultdict
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
@@ -15,7 +16,8 @@ from braces.views import LoginRequiredMixin
 
 from dateutil.relativedelta import relativedelta
 
-from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin
+from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
+    ProtectedFormMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Semester, \
     Assignment, AssignmentStudent, AssignmentComment
@@ -292,35 +294,47 @@ class CourseOfferingDetailView(LoginRequiredMixin,
                                    .enrolled_on_set
                                    .filter(pk=self.object.pk)
                                    .exists()))
+        context['is_actual_teacher'] = \
+            self.request.user in self.object.teachers.all()
+        print "!!!@@@", context['is_actual_teacher']
         return context
 
 
 class CourseOfferingEditDescrView(TeacherOnlyMixin,
+                                  ProtectedFormMixin,
                                   GetCourseOfferingObjectMixin,
                                   generic.UpdateView):
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingEditDescrForm
 
+    def is_form_allowed(self, user, obj):
+        return user in obj.teachers.all()
+
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin,
+                                   ProtectedFormMixin,
                                    generic.CreateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingNewsForm
 
     def form_valid(self, form):
+        form.instance.course_offering = self.course_offering
+        self.success_url = self.course_offering.get_absolute_url()
+        return super(CourseOfferingNewsCreateView, self).form_valid(form)
+
+    def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-")
-        course_offering = get_object_or_404(
+        self.course_offering = get_object_or_404(
             CourseOffering.objects
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug']))
-        form.instance.course_offering = course_offering
-        self.success_url = course_offering.get_absolute_url()
-        return super(CourseOfferingNewsCreateView, self).form_valid(form)
+        return user in self.course_offering.teachers.all()
 
 
 class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
+                                   ProtectedFormMixin,
                                    generic.UpdateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
@@ -329,14 +343,21 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
     def get_success_url(self):
         return self.object.course_offering.get_absolute_url()
 
+    def is_form_allowed(self, user, obj):
+        return user in obj.course_offering.teachers.all()
+
 
 class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
+                                   ProtectedFormMixin,
                                    generic.DeleteView):
     model = CourseOfferingNews
     template_name = "learning/simple_delete_confirmation.html"
 
     def get_success_url(self):
         return self.object.course_offering.get_absolute_url()
+
+    def is_form_allowed(self, user, obj):
+        return user in obj.course_offering.teachers.all()
 
 
 class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
@@ -380,6 +401,15 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.FormView):
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
     model = CourseClass
 
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CourseClassDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        context['is_actual_teacher'] = (
+            self.request.user in (self.object
+                                  .course_offering
+                                  .teachers.all()))
+        return context
+
 
 class CourseClassCreateUpdateMixin(object):
     model = CourseClass
@@ -414,22 +444,29 @@ class CourseClassCreateUpdateMixin(object):
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
+## No ProtectedFormMixin here because we are filtering out other's courses
+## on form level (see __init__ of CourseClassForm)
 class CourseClassCreateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.CreateView):
     pass
 
-
+## Same here
 class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.UpdateView):
     pass
 
 
-class CourseClassDeleteView(TeacherOnlyMixin, generic.DeleteView):
+class CourseClassDeleteView(TeacherOnlyMixin,
+                            ProtectedFormMixin,
+                            generic.DeleteView):
     model = CourseClass
     template_name = "learning/simple_delete_confirmation.html"
     success_url = reverse_lazy('timetable_teacher')
+
+    def is_form_allowed(self, user, obj):
+        return user in obj.course_offering.teachers.all()
 
 
 class VenueListView(generic.ListView):
@@ -520,6 +557,13 @@ class AssignmentDetailMixin(object):
                             'assignment__course_offering__course',
                             'assignment__course_offering__semester')
             .prefetch_related('assignment__course_offering__teachers'))
+
+        # This should guard against reading other's assignments. Not generic
+        # enough, but can't think of better way
+        if (self.user_type == 'student'
+            and not a_s.student == self.request.user):
+            raise PermissionDenied
+
         context['a_s'] = a_s
         context['comments'] = (AssignmentComment.objects
                                .filter(assignment_student=a_s)
@@ -530,6 +574,11 @@ class AssignmentDetailMixin(object):
                                   .teachers
                                   .count() == 1)
         context['user_type'] = self.user_type
+        context['is_actual_teacher'] = (
+            self.request.user in (a_s
+                                  .assignment
+                                  .course_offering
+                                  .teachers.all()))
         return context
 
     def form_valid(self, form):
@@ -569,6 +618,15 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             form = AssignmentGradeForm(request.POST)
             pk = self.kwargs.get('pk')
             a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+
+            # Too hard to use ProtectedFormMixin here, let's just inline it's
+            # logic. A little drawback is that teachers still can leave
+            # comments under other's teachers assignments, but can not grade,
+            # so it's acceptible, IMO.
+            teachers = a_s.assignment.course_offering.teachers.all()
+            if request.user not in teachers:
+                raise PermissionDenied
+
             if form.is_valid():
                 a_s.state = form.cleaned_data['state']
                 a_s.save()
@@ -594,13 +652,14 @@ class AssignmentCreateUpdateMixin(object):
     def get_success_url(self):
         return reverse('assignment_list_teacher')
 
-
+## No ProtectedFormMixin here because we are filtering out other's courses
+## on form level (see __init__ of AssignmentForm)
 class AssignmentCreateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.CreateView):
     pass
 
-
+## Same here
 class AssignmentUpdateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.UpdateView):
@@ -608,12 +667,16 @@ class AssignmentUpdateView(TeacherOnlyMixin,
 
 
 class AssignmentDeleteView(TeacherOnlyMixin,
+                           ProtectedFormMixin,
                            generic.DeleteView):
     model = Assignment
     template_name = "learning/simple_delete_confirmation.html"
 
     def get_success_url(self):
         return reverse('assignment_list_teacher')
+
+    def is_form_allowed(self, user, obj):
+        return user in obj.course_offering.teachers.all()
 
 
 class MarksSheetMixin(object):
