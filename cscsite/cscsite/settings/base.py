@@ -56,13 +56,15 @@ INSTALLED_APPS = (
     'sorl.thumbnail',
     'crispy_forms',
     'floppyforms',
+    'taggit',
 
     'users',
     'core',
     'news',
     'index',
     'textpages',
-    'learning'
+    'learning',
+    'library',
 )
 
 MIDDLEWARE_CLASSES = (
