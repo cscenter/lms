@@ -140,7 +140,7 @@ urlpatterns = patterns('',
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
 
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^narnia/', include(admin.site.urls)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'rosetta' in settings.INSTALLED_APPS:
