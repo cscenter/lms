@@ -26,14 +26,16 @@ def get_current_semester_pair():
         current_semester = 'autumn'
     return (now.year, current_season)
 
-def split_list(pred, lst):
+
+def split_list(iterable, pred):
     true_lst, false_lst = [], []
-    for x in lst:
+    for x in iterable:
         if pred(x):
             true_lst.append(x)
         else:
             false_lst.append(x)
     return true_lst, false_lst
+
 
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
