@@ -16,12 +16,14 @@
         </div>
         <div class="row">
           <div class="col-xs-12 callout-buttons">
-            <button type="button" class="btn btn-lg btn-info">
+            <a href="{% url 'syllabus' %}"
+               role="button" class="btn btn-lg btn-info">
               {% trans "Learn more" %}
-            </button>
-            <button type="button" class="btn btn-lg btn-primary">
+            </a>
+            <a href="{% url 'enrollment' %}"
+               role="button" class="btn btn-lg btn-primary">
               {% trans "How to enroll" %}
-            </button>
+            </a>
           </div>
         </div>
       </div>
