@@ -219,7 +219,7 @@ li.for-staff.current {
   text-align: right;
 }
 
-.callout-buttons button {
+.callout-buttons a {
   margin: 30px 15px;
 }
 
