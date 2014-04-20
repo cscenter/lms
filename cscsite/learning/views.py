@@ -2,11 +2,9 @@ import datetime
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
@@ -28,6 +26,7 @@ from learning.forms import CourseOfferingPKForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm
 
 import utils
+
 
 class TimetableMixin(object):
     model = CourseClass
@@ -451,6 +450,7 @@ class CourseClassCreateView(TeacherOnlyMixin,
                             generic.CreateView):
     pass
 
+
 ## Same here
 class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
@@ -561,7 +561,7 @@ class AssignmentDetailMixin(object):
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way
         if (self.user_type == 'student'
-            and not a_s.student == self.request.user):
+                and not a_s.student == self.request.user):
             raise PermissionDenied
 
         context['a_s'] = a_s
@@ -592,6 +592,8 @@ class AssignmentDetailMixin(object):
             url = reverse('assignment_detail_student', args=[a_s.pk])
         elif self.user_type == 'teacher':
             url = reverse('assignment_detail_teacher', args=[a_s.pk])
+        else:
+            raise AssertionError
         return redirect(url)
 
 
@@ -634,7 +636,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             else:
                 # not sure if we can do anything more meaningful here.
                 # it shoudn't happen, after all.
-                return HttpResponseBadRequest(_("Grading form is invalid")+
+                return HttpResponseBadRequest(_("Grading form is invalid") +
                                               form.errors)
         else:
             return (super(AssignmentTeacherDetailView, self)
@@ -652,12 +654,14 @@ class AssignmentCreateUpdateMixin(object):
     def get_success_url(self):
         return reverse('assignment_list_teacher')
 
+
 ## No ProtectedFormMixin here because we are filtering out other's courses
 ## on form level (see __init__ of AssignmentForm)
 class AssignmentCreateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.CreateView):
     pass
+
 
 ## Same here
 class AssignmentUpdateView(TeacherOnlyMixin,
@@ -719,7 +723,7 @@ class MarksSheetMixin(object):
                 assert by_assignment.keys() == header
         # this is a hack for passing headers "indexed" by offering
         context['structured'] = [(offering, headers[offering], by_student)
-                                 for offering, by_students
+                                 for offering, by_student
                                  in structured.items()]
         context['user_type'] = self.user_type
         return context

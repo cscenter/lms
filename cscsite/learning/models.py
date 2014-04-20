@@ -20,7 +20,6 @@ from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 
-from . import utils
 
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
@@ -46,6 +45,7 @@ class Course(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('course_detail', args=[self.slug])
+
 
 @python_2_unicode_compatible
 class Semester(models.Model):
@@ -91,6 +91,7 @@ class Semester(models.Model):
                 .parse(next_start_str)
                 .replace(tzinfo=timezone.utc,
                          year=next_year)) - datetime.timedelta(days=1)
+
 
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
@@ -185,6 +186,7 @@ class CourseOfferingNews(TimeStampedModel):
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
+
 
 @python_2_unicode_compatible
 class Venue(models.Model):
@@ -289,11 +291,11 @@ class Assignment(TimeStampedModel):
                             help_text=_("LaTeX+Markdown+HTML is enabled"))
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
-                       ("assignment_{0}/{1}/{2}"
-                        .format(instance.pk,
-                                # somewhat protecting against URL enumeration
-                                int(time.time()) % 30,
-                                filename))),
+                   ("assignment_{0}/{1}/{2}"
+                    .format(instance.pk,
+                            # somewhat protecting against URL enumeration
+                            int(time.time()) % 30,
+                            filename))),
         blank=True)
 
     class Meta:
@@ -308,7 +310,7 @@ class Assignment(TimeStampedModel):
 
     def clean(self):
         if (self.pk and
-            self._original_course_offering_id != self.course_offering_id):
+                self._original_course_offering_id != self.course_offering_id):
             raise ValidationError(_("Course offering modification "
                                     "is not allowed"))
 
@@ -397,12 +399,12 @@ class AssignmentComment(TimeStampedModel):
     # TODO: test this
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
-                       ("assignment_{0}/user_{1}/{2}/{3}"
-                        .format(instance.assignment_student.assignment.pk,
-                                instance.assignment_student.student.pk,
-                                # somewhat protecting against URL enumeration
-                                int(time.time()) % 30,
-                                filename))),
+                   ("assignment_{0}/user_{1}/{2}/{3}"
+                    .format(instance.assignment_student.assignment.pk,
+                            instance.assignment_student.student.pk,
+                            # somewhat protecting against URL enumeration
+                            int(time.time()) % 30,
+                            filename))),
         blank=True)
 
     class Meta:

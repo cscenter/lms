@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.dispatch import receiver
 
-from models import Assignment, AssignmentStudent, CourseOffering, Enrollment
+from models import Assignment, AssignmentStudent, Enrollment
+
 
 @receiver(models.signals.post_save, sender=Assignment)
 def populate_assignment_students(sender, instance, created,
@@ -11,8 +11,9 @@ def populate_assignment_students(sender, instance, created,
         return
     students = instance.course_offering.enrolled_students.all()
     AssignmentStudent.objects.bulk_create(
-            AssignmentStudent(assignment=instance, student=student)
-            for student in students)
+        AssignmentStudent(assignment=instance, student=student)
+        for student in students)
+
 
 @receiver(models.signals.post_save, sender=Enrollment)
 def populate_student_assignments(sender, instance, created,
@@ -23,6 +24,7 @@ def populate_student_assignments(sender, instance, created,
     AssignmentStudent.objects.bulk_create(
         AssignmentStudent(assignment=assignment, student=instance.student)
         for assignment in assignments)
+
 
 @receiver(models.signals.post_delete, sender=Enrollment)
 def delete_student_assignments(sender, instance, *args, **kwargs):

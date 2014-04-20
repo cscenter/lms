@@ -11,7 +11,7 @@ from learning.forms import Ubereditor
 class UbereditorMixin(object):
     def __init__(self, *args, **kwargs):
         self.formfield_overrides.update({
-                models.TextField: {'widget': Ubereditor}
+            models.TextField: {'widget': Ubereditor}
         })
         super(UbereditorMixin, self).__init__(*args, **kwargs)
 
@@ -23,7 +23,6 @@ class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
 class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester']
-
 
 
 class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
