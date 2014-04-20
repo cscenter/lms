@@ -1,16 +1,12 @@
-import dateutil.parser as dparser
-
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, Button, Div, HTML
-from crispy_forms.bootstrap import FormActions, StrictButton
+from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 
-from learning.models import Course, CourseOffering, CourseOfferingNews, \
+from learning.models import CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment,  AssignmentComment, AssignmentStudent
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
@@ -195,6 +191,7 @@ class AssignmentGradeForm(forms.Form):
     state = forms.ChoiceField(
         label="",
         choices=AssignmentStudent.STATES)
+
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
