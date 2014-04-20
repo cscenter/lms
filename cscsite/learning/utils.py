@@ -29,9 +29,9 @@ def get_current_semester_pair():
     return (now.year, current_season)
 
 
-def split_list(pred, lst):
+def split_list(iterable, pred):
     true_lst, false_lst = [], []
-    for x in lst:
+    for x in iterable:
         if pred(x):
             true_lst.append(x)
         else:
