@@ -206,8 +206,8 @@ class CourseListMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseListMixin, self)
                    .get_context_data(*args, **kwargs))
-        ongoing, archive = utils.split_list(lambda course: course.is_ongoing,
-                                            context['course_list'])
+        ongoing, archive = utils.split_list(context['course_list'],
+                                            lambda course: course.is_ongoing)
         context['course_list_ongoing'] = ongoing
         context['course_list_archive'] = archive
         context['list_type'] = self.list_type
@@ -496,8 +496,8 @@ class AssignmentListMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentListMixin, self)
                    .get_context_data(*args, **kwargs))
-        open_, archive = utils.split_list(lambda a_s: a_s.assignment.is_open,
-                                          context['assignment_list'])
+        open_, archive = utils.split_list(context['assignment_list'],
+                                          lambda a_s: a_s.assignment.is_open)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
