@@ -28,14 +28,11 @@
         {% endif %}
         {% if request.user.is_student and course_offering.is_ongoing %}
         <div class="btn-group">
-          {% if is_enrolled%}
-          <form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
-            {% csrf_token %}
-            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-            <button type="submit" class="btn btn-danger">
-              {% trans "Unenroll" %}
-            </button>
-          </form>
+          {% if is_enrolled %}
+          <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
+             class="btn btn-danger">
+            {% trans "Unenroll" %}
+          </a>
           {% else %}
           <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
             {% csrf_token %}
