@@ -69,14 +69,10 @@
           </td>
           {% if list_type == "learning" %}
           <td>
-            <form method="post" action="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}">
-              {% csrf_token %}
-              <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-              <input type="hidden" name="back" value="course_list_student">
-              <button type="submit" class="btn btn-default">
-                {% trans "Unenroll" %}
-              </button>
-            </form>
+            <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}?back=course_list_student"
+               class="btn btn-default">
+              {% trans "Unenroll" %}
+            </a>
           </td>
           {% endif %}
         </tr>

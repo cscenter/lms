@@ -6,9 +6,17 @@
   <div class="row">
     <div class="col-xs-12">
       <form action="" method="post">{% csrf_token %}
+        {% if confirmation_text %}
+        <p>{{ confirmation_text }}</p>
+        {% else %}
         <p>{% trans "Are you sure you want to delete" %} "{{ object }}"?</p>
+        {% endif %}
         <input action="action" type="button" class="btn btn-primary" value="{% trans "Cancel" %}" onclick="history.back();" />
+        {% if confirmation_button_text %}
+                <input type="submit" class="btn btn-danger" value="{{ confirmation_button_text }}" />
+        {% else %}
         <input type="submit" class="btn btn-danger" value="{% trans "Delete" %}" />
+        {% endif %}
       </form>
     </div>
   </div>

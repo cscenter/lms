@@ -357,24 +357,40 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
                             semester_slug=course_offering.semester.slug)
 
 
-class CourseOfferingUnenrollView(StudentOnlyMixin, generic.FormView):
-    http_method_names = ['post']
-    form_class = CourseOfferingPKForm
+class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
+    template_name = "learning/simple_delete_confirmation.html"
 
-    def form_valid(self, form):
+    def get_object(self):
+        year, semester_type = self.kwargs['semester_slug'].split("-")
         course_offering = get_object_or_404(
-            CourseOffering.objects.filter(
-                pk=form.cleaned_data['course_offering_pk']))
+            CourseOffering.objects
+            .filter(semester__type=semester_type,
+                    semester__year=year,
+                    course__slug=self.kwargs['course_slug']))
+        self.course_offering = course_offering
         enrollment = get_object_or_404(
             Enrollment.objects.filter(student=self.request.user,
                                       course_offering=course_offering))
-        enrollment.delete()
-        if self.request.POST.get('back') == 'course_list_student':
-            return redirect('course_list_student')
+        return enrollment
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(CourseOfferingUnenrollView, self)
+                   .get_context_data(*args, **kwargs))
+        context['confirmation_text'] = (
+            _("Are you sure you want to unenroll "
+              "from \"%(course)s\"?")
+            % {'course': self.object.course_offering})
+        context['confirmation_button_text'] = _("Unenroll")
+        return context
+
+    def get_success_url(self):
+        if self.request.GET.get('back') == 'course_list_student':
+            return reverse('course_list_student')
         else:
-            return redirect('course_offering_detail',
-                            course_slug=course_offering.course.slug,
-                            semester_slug=course_offering.semester.slug)
+            c_o = self.course_offering
+            return reverse('course_offering_detail',
+                           kwargs={"course_slug": c_o.course.slug,
+                                   "semester_slug": c_o.semester.slug})
 
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
