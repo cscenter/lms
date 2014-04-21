@@ -629,7 +629,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             if form.is_valid():
                 a_s.state = form.cleaned_data['state']
                 a_s.save()
-                return redirect(reverse('assignment_detail_teacher', args=[pk]))
+                return redirect(reverse('assignment_detail_teacher',
+                                        args=[pk]))
             else:
                 # not sure if we can do anything more meaningful here.
                 # it shoudn't happen, after all.

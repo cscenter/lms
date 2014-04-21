@@ -74,7 +74,7 @@ class Semester(models.Model):
             start_str = settings.SPRING_TERM_START
         else:
             start_str = settings.AUTUMN_TERM_START
-        return (dparser # pylint: disable=maybe-no-member
+        return (dparser  # pylint: disable=maybe-no-member
                 .parse(start_str)
                 .replace(tzinfo=timezone.utc,
                          year=self.year))
@@ -87,7 +87,7 @@ class Semester(models.Model):
         else:
             next_start_str = settings.SPRING_TERM_START
             next_year = self.year + 1
-        return (dparser # pylint: disable=maybe-no-member
+        return (dparser  # pylint: disable=maybe-no-member
                 .parse(next_start_str)
                 .replace(tzinfo=timezone.utc,
                          year=next_year)) - datetime.timedelta(days=1)
@@ -145,16 +145,16 @@ class CourseOffering(TimeStampedModel):
     def is_ongoing(self):
         now = timezone.now()
 
-        spring_term_start = (dparser # pylint: disable=maybe-no-member
+        spring_term_start = (dparser  # pylint: disable=maybe-no-member
                              .parse(settings.SPRING_TERM_START)
                              .replace(tzinfo=timezone.utc))
         next_year = now + datetime.timedelta(days=365)
         # safer against leap years
-        next_spring_term_start = (dparser # pylint: disable=maybe-no-member
+        next_spring_term_start = (dparser  # pylint: disable=maybe-no-member
                                   .parse(settings.SPRING_TERM_START,
                                          default=next_year)
                                   .replace(tzinfo=timezone.utc))
-        autumn_term_start = (dparser # pylint: disable=maybe-no-member
+        autumn_term_start = (dparser  # pylint: disable=maybe-no-member
                              .parse(settings.AUTUMN_TERM_START)
                              .replace(tzinfo=timezone.utc))
 
@@ -446,4 +446,4 @@ class Enrollment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
 
-from . import signals # pylint: disable=unused-import
+from . import signals  # pylint: disable=unused-import

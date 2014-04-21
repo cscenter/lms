@@ -55,7 +55,7 @@ def with_link(field_name, text=None):
     text = text or _(field_name.replace("_", " "))
 
     @meta(text, admin_order_field=field_name, allow_tags=True)
-    def inner(self, instance): # pylint: disable=unused-argument
+    def inner(self, instance):  # pylint: disable=unused-argument
         return urlize(getattr(instance, field_name))
     return inner
 
@@ -78,8 +78,7 @@ def meta(text=None, **kwargs):
 
 class UbereditorMixin(object):
     def __init__(self, *args, **kwargs):
-        self.formfield_overrides.update({
-                models.TextField: {'widget': Ubereditor}
-        })
+        self.formfield_overrides.update(
+            {models.TextField: {'widget': Ubereditor}})
 
         super(UbereditorMixin, self).__init__(*args, **kwargs)

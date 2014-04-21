@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden, Button, Div, HTML
+from crispy_forms.layout import Field, Layout, Submit, Hidden, \
+    Button, Div, HTML
 from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 

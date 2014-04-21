@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 
 from .models import CSCUser
 
+
 class UserTests(TestCase):
     def test_student_should_have_enrollment_year(self):
         """

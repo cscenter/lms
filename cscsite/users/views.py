@@ -15,6 +15,7 @@ from braces.views import LoginRequiredMixin
 
 from .forms import LoginForm
 
+
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
 class LoginView(FormView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
