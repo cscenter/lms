@@ -134,7 +134,8 @@ class CourseOffering(TimeStampedModel):
 
     # TODO: test this
     @classmethod
-    def by_semester(cls, (year, season)):
+    def by_semester(cls, semester):
+        (year, season) = semester
         return cls.objects.filter(semester__type=season,
                                   semester__year=year)
 
@@ -265,7 +266,8 @@ class CourseClass(TimeStampedModel):
 
     # TODO: test this
     @classmethod
-    def by_semester(cls, (year, season)):
+    def by_semester(cls, semester):
+        (year, season) = semesterx
         return cls.objects.filter(
             course_offering__semester__type=season,
             course_offering__semester__year=year)
