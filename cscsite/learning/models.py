@@ -377,7 +377,7 @@ class AssignmentStudent(TimeStampedModel):
                                   smart_text(self.student.get_full_name))
 
     @property
-    def status_display(self):
+    def state_display(self):
         return self.STATES[self.state]
 
     @property

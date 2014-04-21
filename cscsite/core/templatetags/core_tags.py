@@ -6,7 +6,11 @@ register = template.Library()
 
 @register.simple_tag
 def admin_url(instance_or_qs):
-    """A tag for reversing admin site URLs from templates."""
+    """
+    A tag for reversing admin site URLs from templates.
+    """
     return get_admin_url(instance_or_qs)
 
-
+@register.filter
+def to_css(s):
+    return s.replace("_", "-")
