@@ -44,7 +44,7 @@
                    {% endif %}"
              role="button"
              class="btn btn-default active">{% trans 'List' %}</a>
-          <a href="{% if user_type == 'teacher' %}{% url 'calendar_teacher' %}{% else %}{% url 'calendar_student' %}{% endif %}#week_{{ week }}"
+          <a href="{% if user_type == 'teacher' %}{% url 'calendar_teacher' %}{% else %}{% url 'calendar_student' %}{% endif %}?year={{ year }}&month={{ month }}"
              role="button"
              class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>
