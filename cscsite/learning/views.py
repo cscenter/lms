@@ -73,17 +73,6 @@ class TimetableMixin(object):
         context['user_type'] = self.user_type
         return context
 
-    def _split_semester(self, semester_string):
-        if not semester_string:
-            return None
-        pair = semester_string.strip().split("_")
-        if not len(pair) == 2:
-            return None
-        try:
-            return (int(pair[0]), pair[1])
-        except ValueError:
-            return None
-
 
 class TimetableTeacherView(TeacherOnlyMixin,
                            TimetableMixin,
@@ -110,64 +99,49 @@ class CalendarMixin(object):
     template_name = "learning/calendar.html"
 
     def get_queryset(self):
-        semester_qstr = self.request.GET.get('semester')
-        self.semester_pair = self._split_semester(semester_qstr)
-        if not self.semester_pair:
-            self.semester_pair = utils.get_current_semester_pair()
-        return (CourseClass.by_semester(self.semester_pair)
+        year_qstr = self.request.GET.get('year')
+        month_qstr = self.request.GET.get('month')
+        try:
+            year = int(year_qstr)
+            month = int(month_qstr)
+        except TypeError as e:
+            today = now().date()
+            year, month = today.year, today.month
+        self.month_date = datetime.date(year=year, month=month, day=1)
+        return (CourseClass.objects
+                .filter(date__month=month,
+                        date__year=year)
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    def _split_semester(self, semester_string):
-        if not semester_string:
-            return None
-        pair = semester_string.strip().split("_")
-        if not len(pair) == 2:
-            return None
-        try:
-            return (int(pair[0]), pair[1])
-        except ValueError:
-            return None
-
     # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
-        year, season = self.semester_pair
-        p, n = utils.get_prev_next_semester_pairs(self.semester_pair)
-        p_year, p_season = p
-        n_year, n_season = n
-        context['next_semester'] = "{0}_{1}".format(n_year, n_season)
-        context['previous_semester'] = "{0}_{1}".format(p_year, p_season)
-        context['current_semester_obj'] = Semester(year=year, type=season)
+        context['next_date'] = self.month_date + relativedelta(months=1)
+        context['prev_date'] = self.month_date + relativedelta(months=-1)
         context['user_type'] = self.user_type
+
         classes = context['object_list']
         dates_to_classes = defaultdict(list)
         for course_class in classes:
             dates_to_classes[course_class.date].append(course_class)
-        semester = context['current_semester_obj']
+
         cal = Calendar(0)
-        months = []
-        current_dt = semester.starts_at
-        start_date = semester.starts_at.date()
-        end_date = semester.ends_at.date()
-        while (current_dt.month <= semester.ends_at.month or
-               current_dt.year < semester.ends_at.year):
-            month_cal = cal.monthdatescalendar(current_dt.year,
-                                               current_dt.month)
-            current_month = [(week[0].isocalendar()[1],
-                              any(start_date <= day <= end_date
-                                  for day in week),
-                              [(day, dates_to_classes[day],
-                               start_date <= day <= end_date)
-                              for day in week])
-                             for week in month_cal]
-            months.append((current_dt, current_month))
-            current_dt += relativedelta(months=+1)
-        context['months'] = months
+
+        month_cal = cal.monthdatescalendar(self.month_date.year,
+                                           self.month_date.month)
+        month = [(week[0].isocalendar()[1],
+                  [(day, dates_to_classes[day],
+                    day.month == self.month_date.month)
+                   for day in week])
+                 for week in month_cal]
+
+        context['month'] = month
+        context['month_date'] = self.month_date
         return context
 
 
