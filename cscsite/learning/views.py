@@ -297,7 +297,6 @@ class CourseOfferingDetailView(LoginRequiredMixin,
                                    .exists()))
         context['is_actual_teacher'] = \
             self.request.user in self.object.teachers.all()
-        print "!!!@@@", context['is_actual_teacher']
         return context
 
 
