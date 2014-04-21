@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load humanize %}
 {% load crispy_forms_tags %}
+{% load core_tags %}
 
 {% block content %}
 <div class="container">
@@ -87,7 +88,10 @@
       {% if user_type == 'teacher' and is_actual_teacher %}
       {% crispy grade_form %}
       {% else %}
-      {{ a_s.state_display }}
+      <span style="white-space: nowrap;"
+            class="badge assignment-status {{ a_s.state|to_css }}">
+        {{ a_s.state_display }}
+      </span>
       {% endif %}
       {% if one_teacher %}
       <h5 class="assignment">{% trans "Professor" %}</h5>
