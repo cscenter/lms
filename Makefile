@@ -23,4 +23,5 @@ test_nocoverage:
 	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test_nocover
 
 stylecheck:
-	PYTHONPATH=cscsite pylint --load-plugins pylint_django --rcfile=pylint.config learning core
+	pep8 cscsite
+	PYTHONPATH=cscsite pylint -rn --load-plugins pylint_django --rcfile=pylint.config learning core
