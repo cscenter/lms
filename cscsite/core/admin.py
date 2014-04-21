@@ -12,7 +12,8 @@ from .forms import Ubereditor
 
 
 def get_admin_url(instance_or_qs):
-    """A function for extracting admin URL for an object.
+    """
+    A function for extracting admin URL for an object.
 
     Not all possible URL names are supported, see section
     "Reversing admin URLs" at
@@ -33,9 +34,9 @@ def get_admin_url(instance_or_qs):
                          .format(instance_or_qs))
 
 
-
 def urlize(instance, text=None):
-    """Returns an edit link for a given object.
+    """
+    Returns an edit link for a given object.
 
     :param instance: a model instance to urlize.
     :param text: optional link text, :func:`force_text` is
@@ -54,13 +55,14 @@ def with_link(field_name, text=None):
     text = text or _(field_name.replace("_", " "))
 
     @meta(text, admin_order_field=field_name, allow_tags=True)
-    def inner(self, instance):
+    def inner(self, instance): # pylint: disable=unused-argument
         return urlize(getattr(instance, field_name))
     return inner
 
 
 def meta(text=None, **kwargs):
-    """Decorator function, setting Django admin metadata.
+    """
+    Decorator function, setting Django admin metadata.
 
     :param text: short description of the wrapped method,
                  populated from ``func.__name__`` if omitted.

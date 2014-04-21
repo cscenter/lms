@@ -74,7 +74,7 @@ class Semester(models.Model):
             start_str = settings.SPRING_TERM_START
         else:
             start_str = settings.AUTUMN_TERM_START
-        return (dparser
+        return (dparser # pylint: disable=maybe-no-member
                 .parse(start_str)
                 .replace(tzinfo=timezone.utc,
                          year=self.year))
@@ -87,7 +87,7 @@ class Semester(models.Model):
         else:
             next_start_str = settings.SPRING_TERM_START
             next_year = self.year + 1
-        return (dparser
+        return (dparser # pylint: disable=maybe-no-member
                 .parse(next_start_str)
                 .replace(tzinfo=timezone.utc,
                          year=next_year)) - datetime.timedelta(days=1)
@@ -110,7 +110,8 @@ class CourseOffering(TimeStampedModel):
         on_delete=models.PROTECT)
     description = models.TextField(
         _("Description"),
-        help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
+        help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
+                    "will be replaced by course description"),
         blank=True)
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -144,16 +145,16 @@ class CourseOffering(TimeStampedModel):
     def is_ongoing(self):
         now = timezone.now()
 
-        spring_term_start = (dparser
+        spring_term_start = (dparser # pylint: disable=maybe-no-member
                              .parse(settings.SPRING_TERM_START)
                              .replace(tzinfo=timezone.utc))
         next_year = now + datetime.timedelta(days=365)
         # safer against leap years
-        next_spring_term_start = (dparser
+        next_spring_term_start = (dparser # pylint: disable=maybe-no-member
                                   .parse(settings.SPRING_TERM_START,
                                          default=next_year)
                                   .replace(tzinfo=timezone.utc))
-        autumn_term_start = (dparser
+        autumn_term_start = (dparser # pylint: disable=maybe-no-member
                              .parse(settings.AUTUMN_TERM_START)
                              .replace(tzinfo=timezone.utc))
 
@@ -209,7 +210,7 @@ class Venue(models.Model):
 
 
 @python_2_unicode_compatible
-class CourseClass(TimeStampedModel):
+class CourseClass(TimeStampedModel, object):
     TYPES = Choices(('lecture', _("Lecture")),
                     ('seminar', _("Seminar")))
 
@@ -267,14 +268,14 @@ class CourseClass(TimeStampedModel):
     # TODO: test this
     @classmethod
     def by_semester(cls, semester):
-        (year, season) = semesterx
+        (year, season) = semester
         return cls.objects.filter(
             course_offering__semester__type=season,
             course_offering__semester__year=year)
 
 
 @python_2_unicode_compatible
-class Assignment(TimeStampedModel):
+class Assignment(TimeStampedModel, object):
     course_offering = models.ForeignKey(
         CourseOffering,
         verbose_name=_("Course offering"),
@@ -445,4 +446,4 @@ class Enrollment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
 
-from . import signals
+from . import signals # pylint: disable=unused-import

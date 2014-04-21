@@ -5,6 +5,7 @@ from django.dispatch import receiver
 
 from .models import Assignment, AssignmentStudent, Enrollment
 
+# pylint: disable=unused-argument
 
 @receiver(models.signals.post_save, sender=Assignment)
 def populate_assignment_students(sender, instance, created,
