@@ -6,12 +6,14 @@ from django.utils.encoding import smart_text
 
 from news.models import News
 
+
 class assertItemsEqualMixin(object):
     def assertItemsEqual(self, a, b):
         """
         This is needed because assertItemsEqual doesn't exist in Python 3
         """
         return self.assertEqual(len(set(a) ^ set(b)), 0)
+
 
 class IndexTests(assertItemsEqualMixin, TestCase):
     def test_no_news(self):

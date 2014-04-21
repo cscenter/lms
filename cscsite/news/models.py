@@ -10,8 +10,8 @@ from model_utils.fields import SplitField, \
     SPLIT_MARKER, SPLIT_DEFAULT_PARAGRAPHS
 from model_utils.managers import QueryManager
 
-# TODO: "published" should be a date in future
 
+# TODO: "published" should be a date in future
 class News(TimeStampedModel):
     author = models.ForeignKey(settings.AUTH_USER_MODEL,
                                verbose_name=_("News|author"),
@@ -31,12 +31,12 @@ class News(TimeStampedModel):
                                         "test.com/news/<b>some-news</b>/"),
                             unique=True)
 
-    text = SplitField(_("News|text"),
-                      help_text=(_("First %s paragraphs or anything "
-                                   "before %s will serve as excerpt; "
-                                   "LaTeX+Markdown is enabled") % \
-                                     (SPLIT_DEFAULT_PARAGRAPHS,
-                                      escape(SPLIT_MARKER))))
+    text = SplitField(
+        _("News|text"),
+        help_text=(_("First %s paragraphs or anything "
+                     "before %s will serve as excerpt; "
+                     "LaTeX+Markdown is enabled") % (SPLIT_DEFAULT_PARAGRAPHS,
+                                                     escape(SPLIT_MARKER))))
 
     class Meta(object):
         ordering = ["-created", "author"]

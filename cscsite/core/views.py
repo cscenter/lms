@@ -5,6 +5,7 @@ from django.views import generic
 
 from braces.views import UserPassesTestMixin
 
+
 class StudentOnlyMixin(UserPassesTestMixin):
     def test_func(self, user):
         return user.is_authenticated() and user.is_student
@@ -39,6 +40,7 @@ class ProtectedFormMixin(object):
             obj = self._cached_object = self.get_object()
         # This is a very hacky monkey-patching to avoid refetching of object
         # inside BaseUpdateView's get/post.
+
         def _temp_get_object(inner_self, qs=None):
             if qs is None:
                 return inner_self._cached_object

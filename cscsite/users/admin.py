@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from sorl.thumbnail.admin import AdminImageMixin
 
-from users.models import CSCUser #, Enrollment
+from users.models import CSCUser
 
 
 class CSCUserCreationForm(UserCreationForm):

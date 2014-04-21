@@ -6,6 +6,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden
 from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
 
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         required=True,

@@ -16,6 +16,7 @@ import logging
 
 from learning.models import CourseOffering
 
+
 @python_2_unicode_compatible
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1

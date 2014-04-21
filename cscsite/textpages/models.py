@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from model_utils.models import TimeStampedModel
 
+
 class Textpage(TimeStampedModel):
     url_name = models.CharField(_("Textpage|url_name"),
                                 max_length=100,
