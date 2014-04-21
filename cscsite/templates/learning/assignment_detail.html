@@ -87,7 +87,7 @@
       {% if user_type == 'teacher' and is_actual_teacher %}
       {% crispy grade_form %}
       {% else %}
-      {{ a_s.status_display }}
+      {{ a_s.state_display }}
       {% endif %}
       {% if one_teacher %}
       <h5 class="assignment">{% trans "Professor" %}</h5>

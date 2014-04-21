@@ -500,3 +500,28 @@ h5.assignment {
 .calendar .not-in-semester .day {
   color: #CCC;
 }
+
+.assignment-status {
+  color: black;
+  border: 1px solid #D3D3D3;
+  font-weight: normal;
+  border-radius: 5px;
+}
+.assignment-status.not-checked {
+  background-color: #E9E9E9;
+}
+.assignment-status.being-checked {
+  background-color: #F39700;
+}
+.assignment-status.unsatisfactory {
+  background-color: #FF6B78;
+}
+.assignment-status.pass {
+  background-color: #8CE087;
+}
+.assignment-status.good {
+  background-color: #8CE087;
+}
+.assignment-status.excellent {
+  background-color: #8CE087;
+}
