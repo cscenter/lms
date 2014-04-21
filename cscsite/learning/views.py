@@ -19,7 +19,7 @@ from dateutil.relativedelta import relativedelta
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, Semester, \
+    CourseOfferingNews, Enrollment, \
     Assignment, AssignmentStudent, AssignmentComment
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
@@ -40,7 +40,7 @@ class TimetableMixin(object):
         try:
             week = int(week_qstr)
             year = int(year_qstr)
-        except TypeError as e:
+        except TypeError:
             # This returns current week number. Beware: the week's number
             # is as of ISO8601, so 29th of December can be reported as
             # 1st week of the next year.
@@ -105,7 +105,7 @@ class CalendarMixin(object):
         try:
             year = int(year_qstr)
             month = int(month_qstr)
-        except TypeError as e:
+        except TypeError:
             today = now().date()
             year, month = today.year, today.month
         self.month_date = datetime.date(year=year, month=month, day=1)
@@ -237,7 +237,8 @@ class CourseDetailView(LoginRequiredMixin, generic.DetailView):
     context_object_name = 'course'
 
     def get_context_data(self, *args, **kwargs):
-        context = super(CourseDetailView, self).get_context_data(*args, **kwargs)
+        context = (super(CourseDetailView, self)
+                   .get_context_data(*args, **kwargs))
         context['offerings'] = self.object.courseoffering_set.all()
         return context
 
@@ -360,7 +361,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
 class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
     template_name = "learning/simple_delete_confirmation.html"
 
-    def get_object(self):
+    def get_object(self, _=None):
         year, semester_type = self.kwargs['semester_slug'].split("-")
         course_offering = get_object_or_404(
             CourseOffering.objects
@@ -643,12 +644,10 @@ class AssignmentCreateUpdateMixin(object):
     model = Assignment
     template_name = "learning/simple_crispy_form.html"
     form_class = AssignmentForm
+    success_url = reverse_lazy('assignment_list_teacher')
 
     def get_form(self, form_class):
         return form_class(self.request.user, **self.get_form_kwargs())
-
-    def get_success_url(self):
-        return reverse('assignment_list_teacher')
 
 
 ## No ProtectedFormMixin here because we are filtering out other's courses
@@ -712,7 +711,7 @@ class MarksSheetMixin(object):
         for offering, by_student in structured.items():
             header = by_student.values()[0].keys()
             headers[offering] = header
-            for student, by_assignment in by_student.items():
+            for _, by_assignment in by_student.items():
                 # we should check for "assignment consistency": that all
                 # assignments are similar for all students in particular
                 # course offering

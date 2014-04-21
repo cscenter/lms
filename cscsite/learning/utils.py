@@ -17,10 +17,10 @@ def get_prev_next_semester_pairs(semester):
 
 def get_current_semester_pair():
     now = timezone.now()
-    spring_term_start = (dparser
+    spring_term_start = (dparser # pylint: disable=maybe-no-member
                          .parse(settings.SPRING_TERM_START)
                          .replace(tzinfo=timezone.utc))
-    autumn_term_start = (dparser
+    autumn_term_start = (dparser # pylint: disable=maybe-no-member
                          .parse(settings.AUTUMN_TERM_START)
                          .replace(tzinfo=timezone.utc))
     if spring_term_start <= now < autumn_term_start:

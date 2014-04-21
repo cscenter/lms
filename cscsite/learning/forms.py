@@ -10,7 +10,7 @@ import floppyforms as forms
 
 from core.forms import Ubereditor
 from .models import CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, Assignment,  AssignmentComment, AssignmentStudent
+    CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent
 
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
@@ -27,7 +27,8 @@ class CourseOfferingPKForm(forms.Form):
 class CourseOfferingEditDescrForm(forms.ModelForm):
     description = forms.CharField(
         label=_("Description"),
-        help_text=_("LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description"),
+        help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
+                    "will be replaced by course description"),
         widget=Ubereditor)
 
     def __init__(self, *args, **kwargs):
