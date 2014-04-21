@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 import datetime
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
@@ -25,7 +27,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseClassForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm
 
-import utils
+import learning.utils
 
 
 class TimetableMixin(object):

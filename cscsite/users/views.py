@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 from django.conf import settings
 from django.contrib import auth
 from django.http import HttpResponseRedirect, Http404
@@ -11,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
 
-from forms import LoginForm
+from .forms import LoginForm
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
 class LoginView(FormView):

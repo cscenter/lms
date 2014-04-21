@@ -7,7 +7,8 @@ from django.utils import timezone
 
 
 # TODO: test this
-def get_prev_next_semester_pairs((year, season)):
+def get_prev_next_semester_pairs(semester):
+    (year, season) = semester
     if season == 'spring':
         return [(year-1, 'autumn'), (year, 'autumn')]
     else:
