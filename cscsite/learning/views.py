@@ -48,6 +48,8 @@ class TimetableMixin(object):
         next_w_cal = (start + datetime.timedelta(weeks=1)).isocalendar()
         prev_w_cal = (start + datetime.timedelta(weeks=-1)).isocalendar()
         self.context_weeks = {'week': week,
+                              'week_start': start,
+                              'week_end': end,
                               'year': year,
                               'prev_year': prev_w_cal[0],
                               'prev_week': prev_w_cal[1],

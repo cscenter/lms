@@ -6,7 +6,11 @@
 <div class="container">
   <div class="row timetable-header-row">
     <div class="col-xs-12 h2-and-buttons">
-      <h2>{{ year }}, {% trans "week" %} {{ week }}</h2>
+      {% if week_start.month == week_end.month %}
+      <h2>{{ week_start|date:"d" }}–{{ week_end|date:"d E" }} {{ year }}</h2>
+      {% else %}
+      <h2>{{ week_start|date:"d b" }}–{{ week_end|date:"d b" }} {{ year }}</h2>
+      {% endif %}
       <div class="btn-toolbar">
         <div class="btn-group">
           <a href="?year={{ prev_year }}&week={{ prev_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
