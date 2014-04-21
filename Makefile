@@ -19,5 +19,5 @@ loaddemo:
 test:
 	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test
 
-test_nocover:
+test_nocoverage:
 	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test_nocover
