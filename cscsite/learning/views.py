@@ -27,7 +27,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseClassForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm
 
-import learning.utils
+from . import utils
 
 
 class TimetableMixin(object):
@@ -52,6 +52,7 @@ class TimetableMixin(object):
         self.context_weeks = {'week': week,
                               'week_start': start,
                               'week_end': end,
+                              'month': start.month,
                               'year': year,
                               'prev_year': prev_w_cal[0],
                               'prev_week': prev_w_cal[1],
@@ -157,6 +158,8 @@ class CalendarTeacherView(TeacherOnlyMixin,
 
 class CalendarStudentView(CalendarMixin,
                           generic.ListView):
+    user_type = "student"
+
     def get_queryset(self):
         return (super(CalendarStudentView, self).get_queryset()
                 .filter(course_offering__enrolled_students=self.request.user))
