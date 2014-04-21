@@ -6,4 +6,4 @@ env:
   - DJANGO=1.6
 install:
   - pip install -r requirements.txt
-script: make test
+script: make test_nocoverage
