@@ -55,7 +55,7 @@ def with_link(field_name, text=None):
     text = text or _(field_name.replace("_", " "))
 
     @meta(text, admin_order_field=field_name, allow_tags=True)
-    def inner(self, instance):  # pylint: disable=unused-argument
+    def inner(self, instance):
         return urlize(getattr(instance, field_name))
     return inner
 

@@ -7,7 +7,7 @@ class Ubereditor(forms.Textarea, object):
         kwargs["attrs"].setdefault("class", "ubereditor")
         super(Ubereditor, self).__init__(*args, **kwargs)
 
-    class Media:  # pylint: disable=no-init,old-style-class
+    class Media:
         css = {"all": ["css/highlight-styles/solarized_light.css"]}
         js = ["//code.jquery.com/jquery-1.10.2.min.js",
               "js/highlight.pack.js",
