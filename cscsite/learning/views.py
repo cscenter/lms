@@ -247,7 +247,7 @@ class GetCourseOfferingObjectMixin(object):
     model = CourseOffering
 
     def get_object(self):
-        year, semester_type = self.kwargs['semester_slug'].split("-")
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         return get_object_or_404(
             self.model.objects
             .filter(semester__type=semester_type,
@@ -304,7 +304,7 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
         return super(CourseOfferingNewsCreateView, self).form_valid(form)
 
     def is_form_allowed(self, user, obj):
-        year, semester_type = self.kwargs['semester_slug'].split("-")
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         self.course_offering = get_object_or_404(
             CourseOffering.objects
             .filter(semester__type=semester_type,
@@ -362,7 +362,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
     template_name = "learning/simple_delete_confirmation.html"
 
     def get_object(self, _=None):
-        year, semester_type = self.kwargs['semester_slug'].split("-")
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         course_offering = get_object_or_404(
             CourseOffering.objects
             .filter(semester__type=semester_type,
