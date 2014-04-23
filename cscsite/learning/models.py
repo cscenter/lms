@@ -375,7 +375,7 @@ class AssignmentStudent(TimeStampedModel):
 
     def __str__(self):
         return "{0} - {1}".format(smart_text(self.assignment),
-                                  smart_text(self.student.get_full_name))
+                                  smart_text(self.student.get_full_name()))
 
     @property
     def state_display(self):
