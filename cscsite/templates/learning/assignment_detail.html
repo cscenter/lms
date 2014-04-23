@@ -72,7 +72,6 @@
                 {{ comment.created|date:"d.m.Y H:i" }}
               </span>
             </div>
-
           </div>
         </li>
         {% endfor %}
@@ -84,6 +83,13 @@
       {% endif %}
     </div>
     <div class="col-xs-3">
+      {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
+      <a href="{% url 'assignment_detail_teacher' next_a_s_pk %}"
+         class="btn btn-default">
+        {% trans "Next unchecked[assignment]" %}
+        <i class="fa fa-angle-right"></i>
+      </a>
+      {% endif %}
       <h5 class="assignment">{% trans "State" %}</h5>
       {% if user_type == 'teacher' and is_actual_teacher %}
       {% crispy grade_form %}
