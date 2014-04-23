@@ -30,7 +30,6 @@ class ProtectedFormMixin(object):
                 self.__class__.__name__))
 
     def dispatch(self, request, *args, **kwargs):
-        # pylint: disable=protected-access,attribute-defined-outside-init
         # This is needed because BaseCreateView doesn't call get_object,
         # setting self.object to None instead. Of course, this hack is fragile,
         # but, anyway, it will crash instead of letting do wrong things.

@@ -9,7 +9,6 @@ register = template.Library()
 logger = logging.getLogger(__name__)
 
 
-# pylint: disable=unused-argument
 @register.simple_tag(takes_context=True)
 def current(context, url_name, return_value='current', **kwargs):
     current_url_name = context['request'].resolver_match.url_name
