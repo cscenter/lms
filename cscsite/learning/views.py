@@ -484,11 +484,13 @@ class AssignmentListMixin(object):
     def get_queryset(self):
         return (self.model.objects
                 .order_by('assignment__deadline_at',
-                          'assignment__course_offering__course__name')
+                          'assignment__course_offering__course__name',
+                          'pk')
                 .select_related('assignment',
                                 'assignment__course_offering',
                                 'assignment__course_offering__course',
-                                'assignment__course_offering__semester'))
+                                'assignment__course_offering__semester',
+                                'student'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentListMixin, self)
@@ -571,11 +573,6 @@ class AssignmentDetailMixin(object):
                                   .teachers
                                   .count() == 1)
         context['user_type'] = self.user_type
-        context['is_actual_teacher'] = (
-            self.request.user in (a_s
-                                  .assignment
-                                  .course_offering
-                                  .teachers.all()))
         return context
 
     def form_valid(self, form):
@@ -608,8 +605,22 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
-        initial = {'state': context['a_s'].state}
+        a_s = context['a_s']
+        initial = {'state': a_s.state}
+        context['is_actual_teacher'] = (
+            self.request.user in (a_s
+                                  .assignment
+                                  .course_offering
+                                  .teachers.all()))
         context['grade_form'] = AssignmentGradeForm(initial)
+        base = (AssignmentStudent.objects
+                .filter(state='not_checked')
+                .order_by('assignment__deadline_at',
+                          'assignment__course_offering__course__name',
+                          'pk'))
+        next_a_s = (base.filter(pk__gt=a_s.pk).first() or
+                    base.filter(pk__lt=a_s.pk).first())
+        context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
         return context
 
     def post(self, request, *args, **kwargs):
