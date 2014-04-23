@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from core.admin import UbereditorMixin
 from .models import Course, Semester, CourseOffering, Venue, \
-    CourseClass, CourseOfferingNews, \
+    CourseClass, CourseOfferingNews, CourseOfferingStudent, \
     Assignment, AssignmentStudent, AssignmentComment, \
     Enrollment
 
@@ -16,6 +16,16 @@ class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
 class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester']
+
+
+class CourseOfferingStudentAdmin(admin.ModelAdmin):
+    list_display = ['student', 'course_offering', 'state', 'state_changed']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ['course_offering', 'student', 'state_changed']
+        else:
+            return ['state_changed']
 
 
 class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -63,6 +73,7 @@ class AssignmentStudentAdmin(admin.ModelAdmin):
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester)
 admin.site.register(CourseOffering, CourseOfferingAdmin)
+admin.site.register(CourseOfferingStudent, CourseOfferingStudentAdmin)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
