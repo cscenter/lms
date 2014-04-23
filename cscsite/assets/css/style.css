@@ -525,3 +525,13 @@ h5.assignment {
 .assignment-status.excellent {
   background-color: #8CE087;
 }
+
+.assignment-date.tomorrow {
+  color: #FF6B78;
+}
+.assignment-date.today {
+  color: #FF6B78;
+}
+.assignment-date.day-after-tomorrow {
+  color: #F39700;
+}
