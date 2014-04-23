@@ -178,7 +178,10 @@
             </a>
           </td>
           <td>
-            <span style="white-space: nowrap;">{{ a_s.status_display }}</span>
+            <span style="white-space: nowrap;"
+                  class="badge assignment-status {{ a_s.state|to_css }}">
+              {{ a_s.state_display }}
+            </span>
           </td>
           <td>
             {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
