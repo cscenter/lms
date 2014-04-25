@@ -543,11 +543,23 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     template_name = "learning/assignment_detail.html"
     context_object_name = 'assignment'
 
+    def get_queryset(self):
+        return (self.model.objects
+                .select_related('course_offering',
+                                'course_offering__course',
+                                'course_offering__semester'))
+
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
-        context['a_s_list'] = (AssignmentStudent.objects
-                               .filter(assignment__pk=self.object.pk))
+        context['a_s_list'] = \
+            (AssignmentStudent.objects
+             .filter(assignment__pk=self.object.pk)
+             .select_related('assignment',
+                             'assignment__course_offering',
+                             'assignment__course_offering__course',
+                             'assignment__course_offering__semester',
+                             'student'))
         return context
 
 
