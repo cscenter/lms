@@ -427,7 +427,14 @@ class AssignmentComment(TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
 
+@python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
+    STATES = Choices(('not_graded', _("Not graded")),
+                     ('unsatisfactory', _("Unsatisfactory")),
+                     ('pass', _("Pass")),
+                     ('good', _("Good")),
+                     ('excellent', _("Excellent")))
+
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
@@ -436,6 +443,13 @@ class Enrollment(TimeStampedModel):
         CourseOffering,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
+    state = StatusField(
+        verbose_name=_("Enrollment|state"),
+        choices_name='STATES',
+        default='not_graded')
+    state_changed = MonitorField(
+        verbose_name=_("Enrollment|state changed"),
+        monitor='state')
 
     class Meta:
         ordering = ["student", "course_offering"]
@@ -445,5 +459,14 @@ class Enrollment(TimeStampedModel):
     def clean(self):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
+
+    def __str__(self):
+        return "{0} - {1}".format(smart_text(self.course_offering),
+                                  smart_text(self.student.get_full_name()))
+
+    @property
+    def state_display(self):
+        return self.STATES[self.state]
+
 
 from . import signals

@@ -62,9 +62,14 @@ class CSCUser(AbstractUser):
                                         " provided for graduates"))
 
     def get_full_name(self):
-        return smart_text("{0} {1} {2}".format(self.last_name,
-                                               self.first_name,
-                                               self.patronymic).strip())
+        full_name = smart_text("{0} {1} {2}"
+                               .format(self.last_name,
+                                       self.first_name,
+                                       self.patronymic)
+                               .strip())
+        return full_name or self.username
+
+
 
     def __str__(self):
         return smart_text(self.get_full_name())
