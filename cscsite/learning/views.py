@@ -532,18 +532,32 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherListView, self)
                    .get_context_data(*args, **kwargs))
-        context['only_ungraded'] = (self.request.GET.get('only_ungraded')
-                                    == 'true')
+        context['only_ungraded'] = \
+            (self.request.GET.get('only_ungraded') == 'true')
         return context
 
 
-class AssignmentDetailMixin(object):
-    model = AssignmentComment
+class AssignmentTeacherDetailView(TeacherOnlyMixin,
+                                  generic.DetailView):
+    model = Assignment
     template_name = "learning/assignment_detail.html"
+    context_object_name = 'assignment'
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(AssignmentTeacherDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        context['a_s_list'] = (AssignmentStudent.objects
+                               .filter(assignment__pk=self.object.pk))
+        return context
+
+
+class AssignmentStudentDetailMixin(object):
+    model = AssignmentComment
+    template_name = "learning/assignment_student_detail.html"
     form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentDetailMixin, self)
+        context = (super(AssignmentStudentDetailMixin, self)
                    .get_context_data(*args, **kwargs))
         pk = self.kwargs.get('pk')
         a_s = get_object_or_404(
@@ -583,27 +597,28 @@ class AssignmentDetailMixin(object):
         comment.author = self.request.user
         comment.save()
         if self.user_type == 'student':
-            url = reverse('assignment_detail_student', args=[a_s.pk])
+            url = reverse('a_s_detail_student', args=[a_s.pk])
         elif self.user_type == 'teacher':
-            url = reverse('assignment_detail_teacher', args=[a_s.pk])
+            url = reverse('a_s_detail_teacher', args=[a_s.pk])
         else:
             raise AssertionError
         return redirect(url)
 
 
-class AssignmentStudentDetailView(StudentOnlyMixin,
-                                  AssignmentDetailMixin,
-                                  generic.CreateView):
+# shitty name :(
+class ASStudentDetailView(StudentOnlyMixin,
+                          AssignmentStudentDetailMixin,
+                          generic.CreateView):
     user_type = 'student'
 
 
-class AssignmentTeacherDetailView(TeacherOnlyMixin,
-                                  AssignmentDetailMixin,
-                                  generic.CreateView):
+class ASTeacherDetailView(TeacherOnlyMixin,
+                          AssignmentStudentDetailMixin,
+                          generic.CreateView):
     user_type = 'teacher'
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentTeacherDetailView, self)
+        context = (super(ASTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
         a_s = context['a_s']
         initial = {'state': a_s.state}
@@ -640,7 +655,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             if form.is_valid():
                 a_s.state = form.cleaned_data['state']
                 a_s.save()
-                return redirect(reverse('assignment_detail_teacher',
+                return redirect(reverse('a_s_detail_teacher',
                                         args=[pk]))
             else:
                 # not sure if we can do anything more meaningful here.
@@ -648,7 +663,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                 return HttpResponseBadRequest(_("Grading form is invalid") +
                                               form.errors)
         else:
-            return (super(AssignmentTeacherDetailView, self)
+            return (super(ASTeacherDetailView, self)
                     .post(request, *args, **kwargs))
 
 

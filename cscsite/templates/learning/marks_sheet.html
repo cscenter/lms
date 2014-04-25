@@ -33,7 +33,7 @@
             <td class="header header-horiz">{{ student.get_full_name }}</td>
             {% for assignment, a_s in by_assignment.iteritems %}
             <td class="content">
-              <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+              <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
                 {{ a_s.status_short|safe }}
               </a>
             </td>
