@@ -47,13 +47,13 @@ class AssignmentCommentAdmin(UbereditorMixin, admin.ModelAdmin):
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'course_offering', 'state', 'state_changed']
+    list_display = ['student', 'course_offering', 'grade', 'grade_changed']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course_offering', 'state_changed']
+            return ['student', 'course_offering', 'grade_changed']
         else:
-            return ['state_changed']
+            return ['grade_changed']
 
 
 class AssignmentStudentAdmin(admin.ModelAdmin):
