@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load core_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {% if user_type == 'student' %}
+        <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
+        {% else %}
+        <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
+        {% endif %}
+        {{ a_s.assignment.title }}
+        <small>{{ a_s.assignment.course_offering }} </small>
+      </h2>
+      {% if user_type == 'teacher' and is_actual_teacher %}
+      <div class="btn-toolbar">
+        <a href="{% url 'assignment_edit' a_s.assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{% url 'assignment_delete' a_s.assignment.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-9">
+      <div class="csc-well">
+        <div class="ubertext">
+          {{ a_s.assignment.text|safe }}
+        </div>
+        {% if a_s.assignment.attached_file %}
+        <span class="assignment-attachment">
+          <i class="fa fa-file"></i>
+          <a href="{{ a_s.assignment.attached_file.url }}">
+            {{ a_s.assignment.attached_file_name }}
+          </a>
+        </span>
+        {% endif %}
+      </div>
+      {% if not comments %}
+      <div class="csc-well">
+        <h4>{% trans "Solution" %}</h4>
+        {% crispy form form.helper %}
+      </div>
+      {% else %}
+        <ul class="comment-list">
+        {% for comment in comments %}
+        <li class="{% if comment.author == a_s.student %}
+                   student
+                   {% else %}
+                   teacher
+                   {% endif %}">
+          <div class="csc-well assignment-comment">
+            <h5 class="assignment">{{ comment.author }}</h5>
+            <div class="ubertext">
+              {{ comment.text }}
+            </div>
+            <div class="metainfo-holder">
+              {% if comment.attached_file %}
+              <span class="assignment-attachment">
+                <i class="fa fa-file"></i>
+                <a href="{{ comment.attached_file.url }}">
+                  {{ comment.attached_file_name }}
+                </a>
+              </span>
+              {% endif %}
+              <span class="metainfo pull-right">
+                {{ comment.created|date:"d.m.Y H:i" }}
+              </span>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+        </ul>
+        <div class="csc-well">
+        <h4>{% trans "Comment" %}</h4>
+        {% crispy form %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-xs-3">
+      {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
+      <a href="{% url 'a_s_detail_teacher' next_a_s_pk %}"
+         class="btn btn-default">
+        {% trans "Next unchecked[assignment]" %}
+        <i class="fa fa-angle-right"></i>
+      </a>
+      {% endif %}
+      <h5 class="assignment">{% trans "State" %}</h5>
+      {% if user_type == 'teacher' and is_actual_teacher %}
+      {% crispy grade_form %}
+      {% else %}
+      <span style="white-space: nowrap;"
+            class="badge assignment-status {{ a_s.state|to_css }}">
+        {{ a_s.state_display }}
+      </span>
+      {% endif %}
+      {% if one_teacher %}
+      <h5 class="assignment">{% trans "Professor" %}</h5>
+      {% else %}
+      <h5 class="assignment">{% trans "Professors" %}</h5>
+      {% endif %}
+      <ul class="list-unstyled">
+        {% for teacher in a_s.assignment.course_offering.teachers.all %}
+        <li>
+          <a href="{% url 'teacher_detail' teacher.pk %}">
+            {{ teacher.get_full_name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <h5 class="assignment">{% trans "Deadline" %}</h5>
+      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
+      <h5 class="assignment">{% trans "Assignment created" %}</h5>
+      {{ a_s.assignment.created|date:"m E Y" }}
+      {% if a_s.assignment.is_online %}
+      <h4>{% trans "Can be passed online "%}</h4>
+      {% else %}
+      <h4>{% trans "Should be passed offline "%}</h4>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

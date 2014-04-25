@@ -97,11 +97,11 @@
           </td>
           <td>
             {% if user_type == 'student' %}
-            <a href="{% url 'assignment_detail_student' a_s.pk %}">
+            <a href="{% url 'a_s_detail_student' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
             {% else %}
-            <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+            <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
             {% endif %}
@@ -160,11 +160,11 @@
           </td>
           <td>
             {% if user_type == 'student' %}
-            <a href="{% url 'assignment_detail_student' a_s.pk %}">
+            <a href="{% url 'a_s_detail_student' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
             {% else %}
-            <a href="{% url 'assignment_detail_teacher' a_s.pk %}">
+            <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
             {% endif %}

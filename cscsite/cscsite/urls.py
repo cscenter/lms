@@ -28,7 +28,7 @@ from learning.views import \
     CourseClassDeleteView, \
     VenueListView, VenueDetailView, \
     AssignmentStudentListView, AssignmentTeacherListView, \
-    AssignmentStudentDetailView, AssignmentTeacherDetailView, \
+    AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     MarksSheetTeacherView, MarksSheetStaffView
 
@@ -52,8 +52,8 @@ urlpatterns = patterns('',
         name='course_list_student'),
     url(r'^learning/assignments/$', AssignmentStudentListView.as_view(),
         name='assignment_list_student'),
-    url(r'^learning/assignments/(?P<pk>\d+)/$', AssignmentStudentDetailView.as_view(),
-        name='assignment_detail_student'),
+    url(r'^learning/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
+        name='a_s_detail_student'),
     url(r'^learning/timetable/$', TimetableStudentView.as_view(),
         name='timetable_student'),
     url(r'^learning/calendar/$', CalendarStudentView.as_view(),
@@ -64,8 +64,6 @@ urlpatterns = patterns('',
     url(r'^teaching/$',
         RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
         name='teaching_base'),
-    url(r'^teaching/assignments/$', AssignmentTeacherListView.as_view(),
-        name='assignment_list_teacher'),
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),
     url(r'^teaching/calendar/$', CalendarTeacherView.as_view(),
@@ -80,8 +78,15 @@ urlpatterns = patterns('',
         name='course_class_edit'),
     url(r'^teaching/delete-class-(?P<pk>[-\w]+)/$', CourseClassDeleteView.as_view(),
         name='course_class_delete'),
-    url(r'^teaching/assignments/(?P<pk>\d+)/$', AssignmentTeacherDetailView.as_view(),
+    url(r'^teaching/assignments/(?P<pk>\d+)/$',
+        AssignmentTeacherDetailView.as_view(),
         name='assignment_detail_teacher'),
+    url(r'^teaching/assignments/submissions/$',
+        AssignmentTeacherListView.as_view(),
+        name='assignment_list_teacher'),
+    url(r'^teaching/assignments/submissions/(?P<pk>\d+)/$',
+        ASTeacherDetailView.as_view(),
+        name='a_s_detail_teacher'),
     url(r'^teaching/add-assignment/$',
         AssignmentCreateView.as_view(),
         name='assignment_add'),
