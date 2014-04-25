@@ -429,7 +429,7 @@ class AssignmentComment(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
-    STATES = Choices(('not_graded', _("Not graded")),
+    GRADES = Choices(('not_graded', _("Not graded")),
                      ('unsatisfactory', _("Unsatisfactory")),
                      ('pass', _("Pass")),
                      ('good', _("Good")),
@@ -443,13 +443,13 @@ class Enrollment(TimeStampedModel):
         CourseOffering,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
-    state = StatusField(
-        verbose_name=_("Enrollment|state"),
-        choices_name='STATES',
+    grade = StatusField(
+        verbose_name=_("Enrollment|grade"),
+        choices_name='GRADES',
         default='not_graded')
-    state_changed = MonitorField(
-        verbose_name=_("Enrollment|state changed"),
-        monitor='state')
+    grade_changed = MonitorField(
+        verbose_name=_("Enrollment|grade changed"),
+        monitor='grade')
 
     class Meta:
         ordering = ["student", "course_offering"]
@@ -465,8 +465,8 @@ class Enrollment(TimeStampedModel):
                                   smart_text(self.student.get_full_name()))
 
     @property
-    def state_display(self):
-        return self.STATES[self.state]
+    def grade_display(self):
+        return self.GRADES[self.grade]
 
 
 from . import signals

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-23 19:26+0400\n"
-"PO-Revision-Date: 2014-04-23 19:30+0230\n"
+"POT-Creation-Date: 2014-04-26 00:19+0400\n"
+"PO-Revision-Date: 2014-04-26 00:20+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -56,7 +56,7 @@ msgstr "доступны LaTeX, Markdown и HTML"
 
 #: learning/forms.py:74 learning/forms.py:203 learning/models.py:125
 #: learning/models.py:176 learning/models.py:219 learning/models.py:281
-#: learning/models.py:437
+#: learning/models.py:444
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -335,20 +335,48 @@ msgstr "Комментарий к заданию"
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
-#: learning/models.py:433 templates/learning/assignment_list.html:75
+#: learning/models.py:432
+msgid "Not graded"
+msgstr "Без оценки"
+
+#: learning/models.py:433
+msgid "Unsatisfactory"
+msgstr "Неудовлетворительно"
+
+#: learning/models.py:434
+msgid "Pass"
+msgstr "Удовлетворительно"
+
+#: learning/models.py:435
+msgid "Good"
+msgstr ""
+
+#: learning/models.py:436
+msgid "Excellent"
+msgstr ""
+
+#: learning/models.py:440 templates/learning/assignment_list.html:75
 #: templates/learning/assignment_list.html:143
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:442
-msgid "Enrollment"
-msgstr "Запись"
-
-#: learning/models.py:443
-msgid "Enrollments"
-msgstr "Записи"
-
 #: learning/models.py:447
+msgid "Enrollment|grade"
+msgstr "Оценка"
+
+#: learning/models.py:451
+msgid "Enrollment|grade changed"
+msgstr "Оценка изменена"
+
+#: learning/models.py:456
+msgid "Enrollment"
+msgstr "Запись на курс"
+
+#: learning/models.py:457
+msgid "Enrollments"
+msgstr "Записи на курсы"
+
+#: learning/models.py:461
 msgid "Only students can enroll to courses"
 msgstr "Только студенты могут записываться на курсы"
 
@@ -362,7 +390,7 @@ msgstr "Вы уверены, что хотите отказаться от \"%(c
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:641
+#: learning/views.py:648
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
