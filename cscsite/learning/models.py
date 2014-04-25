@@ -170,59 +170,6 @@ class CourseOffering(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class CourseOfferingStudent(TimeStampedModel):
-    STATES = Choices(('not_checked', _("Assignment|not checked")),
-                     ('unsatisfactory', _("Assignment|unsatisfactory")),
-                     ('pass', _("Assignment|pass")),
-                     ('good', _("Assignment|good")),
-                     ('excellent', _("Assignment|excellent")))
-    SHORT_STATES = Choices(('not_checked', "&#8211;"),
-                           ('unsatisfactory', "2"),
-                           ('pass', "3"),
-                           ('good', "4"),
-                           ('excellent', "5"))
-
-    course_offering = models.ForeignKey(
-        CourseOffering,
-        verbose_name=_("Course Offering"),
-        on_delete=models.CASCADE)
-    student = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
-        on_delete=models.CASCADE,
-        limit_choices_to={'groups__name': 'Student'})
-    state = StatusField(
-        verbose_name=_("State"),
-        choices_name='STATES',
-        default='not_checked')
-    state_changed = MonitorField(
-        verbose_name=_("State changed"),
-        monitor='state')
-
-    class Meta:
-        ordering = ["course_offering", "student"]
-        verbose_name = _("Course offering-student")
-        verbose_name_plural = _("Course offering-students")
-
-    def clean(self):
-        if not self.student.is_student:
-            raise ValidationError(_("Student field should point to "
-                                    "an actual student"))
-
-    def __str__(self):
-        return "{0} - {1}".format(smart_text(self.course_offering),
-                                  smart_text(self.student.get_full_name()))
-
-    @property
-    def state_display(self):
-        return self.STATES[self.state]
-
-    @property
-    def status_short(self):
-        return self.SHORT_STATES[self.state]
-
-
-@python_2_unicode_compatible
 class CourseOfferingNews(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
