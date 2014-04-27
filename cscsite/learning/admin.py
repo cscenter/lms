@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from core.admin import UbereditorMixin
 from .models import Course, Semester, CourseOffering, Venue, \
-    CourseClass, CourseOfferingNews, \
+    CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
     Enrollment
 
@@ -18,11 +18,22 @@ class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
     list_display = ['course', 'semester']
 
 
+class CourseClassAttachmentAdmin(admin.ModelAdmin):
+    list_filter = ['course_class']
+    list_display = ['course_class', '__str__']
+
+
+class CourseClassAttachmentInline(admin.TabularInline):
+    model = CourseClassAttachment
+
+
 class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['course_offering', 'venue', 'type']
     list_display = ['name', 'course_offering', 'date', 'venue', 'type_display']
+    inlines = [
+        CourseClassAttachmentInline]
 
 
 class CourseOfferingNewsAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -71,6 +82,7 @@ admin.site.register(Semester)
 admin.site.register(CourseOffering, CourseOfferingAdmin)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
+admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
