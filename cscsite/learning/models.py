@@ -345,6 +345,7 @@ class AssignmentStudent(TimeStampedModel):
                            ('pass', "3"),
                            ('good', "4"),
                            ('excellent', "5"))
+    OPEN_STATES = {'not_checked', 'being_checked'}
 
     assignment = models.ForeignKey(
         Assignment,
