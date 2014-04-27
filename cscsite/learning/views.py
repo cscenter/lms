@@ -438,7 +438,6 @@ class CourseClassCreateUpdateMixin(object):
 
     def form_valid(self, form):
         attachments = self.request.FILES.getlist('attachments')
-        print attachments
         if attachments:
             if self.object:
                 # It's an update, we should remove old attachments
