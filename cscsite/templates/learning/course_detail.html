@@ -13,7 +13,7 @@
         {{ course.description|safe }}
       </div>
       <hr>
-      <h4>{% trans 'Course offerings:' %}</h4>
+      <h4>{% trans 'Course offerings:|course-singular' %}</h4>
       <ul>
       {% for offering in offerings %}
       <li>

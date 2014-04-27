@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {% trans "Courses" %}
+      </h2>
+      <hr>
+    </div>
+  </div>
+  {% if course_list_ongoing %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Ongoing|plural" %}</h3>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">
+            {% trans "Professors" %}
+          </th>
+        </thead>
+        {% for course_offering in course_list_ongoing %}
+        <tr>
+          <td>
+            <a href="{% url 'course_detail' course_offering.course.slug %}">
+              {{ course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+            {% for teacher in course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if course_list_archive %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Archive" %}</h3>
+      {% regroup course_list_archive by semester as archive %}
+      {% for semester in archive %}
+      <h4>{{ semester.grouper }}</h4>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">{% trans "Professors" %}</th>
+        </thead>
+        {% for course_offering in semester.list %}
+        <tr>
+          <td>
+            <a href="{% url 'course_detail' course_offering.course.slug %}">
+              {{ course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+              {% for teacher in course_offering.teachers.all %}
+              <li>
+                <a href="{% url 'teacher_detail' teacher.pk %}">
+                  {{ teacher.get_full_name }}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% if not course_list_ongoing and not course_list_archive and not course_list_available %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3"></div>
+    <div class="col-xs-6 center-aligned">
+      <h4>{% trans "No courses yet" %}</h4>
+    </div>
+    <div class="col-xs-3">
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock content %}
