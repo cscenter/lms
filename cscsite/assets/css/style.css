@@ -12,6 +12,12 @@ h4.bigger-margin {
   width: 960px !important;
 }
 
+.container.inner {
+  padding-left: 0px;
+  padding-right: 0px;
+  width: 940px !important;
+}
+
 .logo-cell {
   position: relative;
   margin-left: 25px;

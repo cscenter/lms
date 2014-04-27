@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
+import os
 
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -14,14 +15,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
 from braces.views import LoginRequiredMixin
-
 from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, \
-    Assignment, AssignmentStudent, AssignmentComment
+    Assignment, AssignmentStudent, AssignmentComment, \
+    CourseClassAttachment
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -400,6 +401,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
     model = CourseClass
+    context_object_name = 'course_class'
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseClassDetailView, self)
@@ -408,6 +410,7 @@ class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
             self.request.user in (self.object
                                   .course_offering
                                   .teachers.all()))
+        context['attachments'] = self.object.courseclassattachment_set.all()
         return context
 
 
@@ -432,6 +435,23 @@ class CourseClassCreateUpdateMixin(object):
 
     def get_form(self, form_class):
         return form_class(self.request.user, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        attachments = self.request.FILES.getlist('attachments')
+        print attachments
+        if attachments:
+            if self.object:
+                # It's an update, we should remove old attachments
+                old_attachments = (CourseClassAttachment.objects
+                                   .filter(course_class=self.object))
+                for attachment in old_attachments:
+                    os.remove(attachment.material.path)
+                    attachment.delete()
+            for attachment in attachments:
+                CourseClassAttachment(course_class=self.object,
+                                      material=attachment).save()
+
+        return super(CourseClassCreateUpdateMixin, self).form_valid(form)
 
     def get_success_url(self):
         if self.request.GET.get('back') == 'timetable':

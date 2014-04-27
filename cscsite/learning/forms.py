@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Button, Div, HTML
+    Button, Div, HTML, Fieldset
 from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 
@@ -89,8 +89,18 @@ class CourseClassForm(forms.ModelForm):
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         widget=Ubereditor)
-    materials = forms.CharField(
-        label=_("Materials"),
+    slides = forms.FileField(
+        label=_("Slides"),
+        required=False,
+        widget=forms.ClearableFileInput)
+    attachments = forms.FileField(
+        label=_("Attached files"),
+        required=False,
+        help_text=_("You can select multiple files. New attachments "
+                    "will replace old ones"),
+        widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
+    other_materials = forms.CharField(
+        label=_("Other materials"),
         required=False,
         help_text=_("LaTeX+Markdown+HTML is enabled"),
         widget=Ubereditor)
@@ -110,12 +120,18 @@ class CourseClassForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('course_offering',
-                'venue',
-                'type',
-                'name',
+            Div(Div(
+                    Div('course_offering',
+                        css_class='col-xs-7'),
+                    Div('type',
+                        css_class='col-xs-2'),
+                    Div('venue',
+                        css_class='col-xs-3'),
+
+                    css_class='row'),
+                css_class='container inner'),
+            Div('name',
                 'description',
-                'materials',
                 css_class="form-group"),
             Div(Div('date',
                     HTML("&nbsp;"),
@@ -124,6 +140,14 @@ class CourseClassForm(forms.ModelForm):
                     'ends_at',
                     css_class="form-inline"),
                 css_class="form-group"),
+            Fieldset(_("Materials"),
+                     Div(Div(Div('slides',
+                                 css_class='col-xs-6'),
+                             Div('attachments',
+                                 css_class='col-xs-6'),
+                             css_class='row'),
+                         css_class='container inner'),
+                     'other_materials'),
             CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
 

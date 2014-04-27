@@ -214,6 +214,19 @@ class CourseClass(TimeStampedModel, object):
     TYPES = Choices(('lecture', _("Lecture")),
                     ('seminar', _("Seminar")))
 
+    def _slides_file_name(self, filename):
+        _, ext = os.path.splitext(filename)
+        timestamp = self.date.strftime("%Y_%m_%d")
+        course_offering = ("{0}_{1}"
+                           .format(self.course_offering.course.slug,
+                                   self.course_offering.semester.slug)
+                           .replace("-", "_"))
+        filename = ("{0}_{1}{2}"
+                    .format(timestamp,
+                            course_offering,
+                            ext))
+        return os.path.join('slides', course_offering, filename)
+
     course_offering = models.ForeignKey(
         CourseOffering,
         verbose_name=_("Course offering"),
@@ -230,8 +243,12 @@ class CourseClass(TimeStampedModel, object):
         _("Description"),
         blank=True,
         help_text=(_("LaTeX+Markdown+HTML is enabled")))
-    materials = models.TextField(
-        _("CourseClass|Materials"),
+    slides = models.FileField(
+        _("Slides"),
+        blank=True,
+        upload_to=_slides_file_name)
+    other_materials = models.TextField(
+        _("CourseClass|Other materials"),
         blank=True,
         help_text=(_("LaTeX+Markdown+HTML is enabled")))
     date = models.DateField(_("Date"))
@@ -272,6 +289,31 @@ class CourseClass(TimeStampedModel, object):
         return cls.objects.filter(
             course_offering__semester__type=season,
             course_offering__semester__year=year)
+
+    @property
+    def slides_file_name(self):
+        return os.path.basename(self.slides.name)
+
+
+@python_2_unicode_compatible
+class CourseClassAttachment(TimeStampedModel, object):
+    course_class = models.ForeignKey(
+        CourseClass,
+        verbose_name=_("Class"),
+        on_delete=models.CASCADE)
+    material = models.FileField(upload_to="course_class_attachments")
+
+    class Meta:
+        ordering = ["course_class", "-created"]
+        verbose_name = _("Class attachment")
+        verbose_name_plural = _("Class attachments")
+
+    def __str__(self):
+        return "{0}".format(smart_text(self.material_file_name))
+
+    @property
+    def material_file_name(self):
+        return os.path.basename(self.material.name)
 
 
 @python_2_unicode_compatible
