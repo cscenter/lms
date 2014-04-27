@@ -197,13 +197,14 @@ class CourseListMixin(object):
 
 
 class CourseListView(CourseListMixin, generic.ListView):
-    pass
+    model = CourseOffering
+    template_name = "learning/courses_list_all.html"
 
 
 class CourseTeacherListView(TeacherOnlyMixin,
                             CourseListMixin,
                             generic.ListView):
-    list_type = 'teaching'
+    template_name = "learning/courses_list_teacher.html"
 
     def get_queryset(self):
         return (super(CourseTeacherListView, self)
@@ -214,21 +215,23 @@ class CourseTeacherListView(TeacherOnlyMixin,
 class CourseStudentListView(StudentOnlyMixin,
                             CourseListMixin,
                             generic.ListView):
-    list_type = 'learning'
+    template_name = "learning/courses_list_student.html"
 
     def get_queryset(self):
-        return (super(CourseStudentListView, self)
-                .get_queryset()
-                .filter(enrolled_students=self.request.user))
+        return (CourseOffering
+                .by_semester(utils.get_current_semester_pair())
+                .order_by('semester__year', '-semester__type', 'course__name')
+                .select_related('course', 'semester')
+                .prefetch_related('teachers', 'enrolled_students'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseStudentListView, self)
                    .get_context_data(*args, **kwargs))
-        semester_pair = utils.get_current_semester_pair()
-        context['course_list_available'] = (
-            CourseOffering
-            .by_semester(semester_pair)
-            .exclude(enrolled_students=self.request.user))
+        ongoing, available = utils.split_list(
+            context['course_list'],
+            lambda c_o: self.request.user in c_o.enrolled_students.all())
+        context['course_list_ongoing'] = ongoing
+        context['course_list_available'] = available
         return context
 
 

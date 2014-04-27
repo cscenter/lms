@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {% trans "Courses" %}
+      </h2>
+      <hr>
+    </div>
+  </div>
+  {% if course_list_ongoing or course_list_available %}
+  <div class="row">
+    <div class="col-xs-12">
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="30%">
+            {% trans "Professors" %}
+          </th>
+          <th width="15%"></th>
+        </thead>
+        {% for course_offering in course_list_ongoing %}
+        <tr>
+          <td>
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+              {{ course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+            {% for teacher in course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            {% endfor %}
+            </ul>
+          </td>
+          <td>
+            <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}?back=course_list_student"
+               class="btn btn-default">
+              {% trans "Unenroll" %}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% for course_offering in course_list_available %}
+        <tr>
+          <td>
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+              {{ course_offering.course.name }}
+            </a>
+          </td>
+          <td>
+            <ul class="list-unstyled">
+            {% for teacher in course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            {% endfor %}
+            </ul>
+          </td>
+          <td>
+            <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+            <input type="hidden" name="back" value="course_list_student">
+            <button type="submit" class="btn btn-primary">
+              {% trans "Enroll" %}
+            </button>
+          </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% if not course_list_ongoing and not course_list_available %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3"></div>
+    <div class="col-xs-6 center-aligned">
+      <h4>{% trans "No courses yet" %}</h4>
+    </div>
+    <div class="col-xs-3">
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock content %}
