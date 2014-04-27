@@ -31,7 +31,6 @@
           </a>
         </div>
         {% endif %}
-        {% if user_type == 'teacher' %}
         <div class="btn-group">
           <a href="{% url 'assignment_list_teacher' %}"
              role="button"
@@ -56,7 +55,6 @@
             {% trans "Create assignment" %}
           </a>
         </div>
-        {% endif %}
       </div>
       <hr>
     </div>
@@ -64,16 +62,13 @@
   {% if assignment_list_open %}
   <div class="row">
     <div class="col-xs-12">
-      <h3>{% trans "Open assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
           <th width="10%">
             {% trans "Deadline" %}
           </th>
           <th></th>
-          {% if user_type == 'teacher' %}
           <th width="15%">{% trans "Student" %}</th>
-          {% endif %}
           <th width="20%">
             {% trans "Course" %}
           </th>
@@ -96,19 +91,11 @@
             </div>
           </td>
           <td>
-            {% if user_type == 'student' %}
-            <a href="{% url 'a_s_detail_student' a_s.pk %}">
-              {{ a_s.assignment.title }}
-            </a>
-            {% else %}
             <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
               {{ a_s.assignment.title }}
             </a>
-            {% endif %}
           </td>
-          {% if user_type == 'teacher' %}
           <td>{{ a_s.student.get_full_name }}</td>
-          {% endif %}
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
               {{ a_s.assignment.course_offering.course.name }}
@@ -139,52 +126,31 @@
             {% trans "Deadline" %}
           </th>
           <th></th>
-          {% if user_type == 'teacher' %}
-          <th width="15%">{% trans "Student" %}</th>
-          {% endif %}
-          <th width="20%">
+          <th width="25%">
             {% trans "Course" %}
-          </th>
-          <th width="15%">
-            {% trans "State" %}
           </th>
           <th width="5%">
             {% trans "Online" %}
           </th>
         </thead>
-        {% for a_s in assignment_list_archive %}
+        {% for assignment in assignment_list_archive %}
         <tr>
           <td>
-            <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span><br>
-            {{ a_s.assignment.deadline_at|time:"H:i" }}
+            <span style="white-space: nowrap;">{{ assignment.deadline_at|naturalday:"m E Y" }}</span><br>
+            {{ assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
-            {% if user_type == 'student' %}
-            <a href="{% url 'a_s_detail_student' a_s.pk %}">
-              {{ a_s.assignment.title }}
+            <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
+              {{ assignment.title }}
             </a>
-            {% else %}
-            <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
-              {{ a_s.assignment.title }}
-            </a>
-            {% endif %}
           </td>
-          {% if user_type == 'teacher' %}
-          <td>{{ a_s.student.get_full_name }}</td>
-          {% endif %}
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
-              {{ a_s.assignment.course_offering.course.name }}
+              {{ assignment.course_offering.course.name }}
             </a>
           </td>
           <td>
-            <span style="white-space: nowrap;"
-                  class="badge assignment-status {{ a_s.state|to_css }}">
-              {{ a_s.state_display }}
-            </span>
-          </td>
-          <td>
-            {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
+            {{ assignment.is_online|yesno:_("Yes,No") }}
           </td>
         </tr>
         {% endfor %}

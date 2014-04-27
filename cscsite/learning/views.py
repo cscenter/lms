@@ -6,6 +6,7 @@ from collections import OrderedDict, defaultdict
 
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
@@ -476,13 +477,16 @@ class VenueDetailView(generic.DetailView):
     template_name = "learning/venue_detail.html"
 
 
-class AssignmentListMixin(object):
+class AssignmentStudentListView(StudentOnlyMixin,
+                                generic.ListView):
     model = AssignmentStudent
-    template_name = "learning/assignment_list.html"
     context_object_name = 'assignment_list'
+    template_name = "learning/assignment_list_student.html"
+    user_type = 'student'
 
     def get_queryset(self):
         return (self.model.objects
+                .filter(student=self.request.user)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
@@ -493,7 +497,7 @@ class AssignmentListMixin(object):
                                 'student'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentListMixin, self)
+        context = (super(AssignmentStudentListView, self)
                    .get_context_data(*args, **kwargs))
         open_, archive = utils.split_list(context['assignment_list'],
                                           lambda a_s: a_s.assignment.is_open)
@@ -504,34 +508,48 @@ class AssignmentListMixin(object):
         return context
 
 
-class AssignmentStudentListView(StudentOnlyMixin,
-                                AssignmentListMixin,
-                                generic.ListView):
-    user_type = 'student'
-
-    def get_queryset(self):
-        return (super(AssignmentStudentListView, self).get_queryset()
-                .filter(student=self.request.user))
-
-
 class AssignmentTeacherListView(TeacherOnlyMixin,
-                                AssignmentListMixin,
                                 generic.ListView):
+    model = AssignmentStudent
+    context_object_name = 'assignment_list'
+    template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
 
     def get_queryset(self):
-        base_qs = (super(AssignmentTeacherListView, self).get_queryset()
+        base_qs = (self.model.objects
                    .filter(assignment__course_offering__teachers=
-                           self.request.user))
+                           self.request.user)
+                   .order_by('assignment__deadline_at',
+                             'assignment__course_offering__course__name',
+                             'pk')
+                   .select_related('assignment',
+                                   'assignment__course_offering',
+                                   'assignment__course_offering__course',
+                                   'assignment__course_offering__semester',
+                                   'student'))
         if self.request.GET.get('only_ungraded') == 'true':
-            return base_qs.filter(state__in=['not_checked',
-                                             'being_checked'])
+            return base_qs.filter(state__in=AssignmentStudent.OPEN_STATES)
         else:
             return base_qs
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherListView, self)
                    .get_context_data(*args, **kwargs))
+        open_ = [a_s
+                 for a_s in context['assignment_list']
+                 if (a_s.assignment.is_open or
+                     a_s.state in AssignmentStudent.OPEN_STATES)]
+        archive = (Assignment.objects
+                   .filter(course_offering__teachers = self.request.user)
+                   .order_by('deadline_at',
+                             'course_offering__course__name',
+                             'pk')
+                   .select_related('course_offering',
+                                   'course_offering__course',
+                                   'course_offering__semester'))
+        context['assignment_list_open'] = open_
+        context['assignment_list_archive'] = archive
+        context['user_type'] = self.user_type
         context['only_ungraded'] = \
             (self.request.GET.get('only_ungraded') == 'true')
         return context
