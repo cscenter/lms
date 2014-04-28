@@ -22,6 +22,10 @@ class StaffOnlyMixin(UserPassesTestMixin):
 
 
 class ProtectedFormMixin(object):
+    def __init__(self, *args, **kwargs):
+        self._cached_object = None
+        super(ProtectedFormMixin, self).__init__(*args, **kwargs)
+
     def is_form_allowed(self, user, obj):
         raise NotImplementedError(
             "{0} is missing implementation of the "
@@ -37,9 +41,9 @@ class ProtectedFormMixin(object):
             obj = None
         else:
             obj = self._cached_object = self.get_object()
+
         # This is a very hacky monkey-patching to avoid refetching of object
         # inside BaseUpdateView's get/post.
-
         def _temp_get_object(inner_self, qs=None):
             if qs is None:
                 return inner_self._cached_object

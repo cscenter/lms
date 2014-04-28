@@ -42,7 +42,7 @@ def upload_to_slideshare(handle, title, description, tags):
 
     # Note(lebedev): unfortunately 'slideshare' has no idea about
     # unicode strings, so we have to force everything to be bytes.
-    mimetype, _encoding = mimetypes.guess_type(handle.name)
+    mimetype, _ = mimetypes.guess_type(handle.name)
     srcfile = {
         "filename": force_bytes(os.path.basename(handle.name)),
         "mimetype": mimetype,
@@ -55,7 +55,7 @@ def upload_to_slideshare(handle, title, description, tags):
             slideshow_title=force_bytes(title),
             slideshow_srcfile=srcfile,
             slideshow_description=force_bytes(description),
-            slideshow_tags=map(force_bytes, tags))
+            slideshow_tags=[force_bytes(tag) for tag in tags])
         sl_id = sls["SlideShowUploaded"]["SlideShowID"]
         sl_meta = api.get_slideshow(sl_id)
         html = sl_meta["Slideshow"]["Embed"]

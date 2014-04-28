@@ -120,14 +120,12 @@ class CourseClassForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div(Div(
-                    Div('course_offering',
+            Div(Div(Div('course_offering',
                         css_class='col-xs-7'),
                     Div('type',
                         css_class='col-xs-2'),
                     Div('venue',
                         css_class='col-xs-3'),
-
                     css_class='row'),
                 css_class='container inner'),
             Div('name',
