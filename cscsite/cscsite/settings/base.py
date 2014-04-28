@@ -193,3 +193,5 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # don't know what will happen if we change this when there are models in DB
 SPRING_TERM_START = '10 jan'
 AUTUMN_TERM_START = '10 aug'
+
+THUMBNAIL_DEBUG = False
