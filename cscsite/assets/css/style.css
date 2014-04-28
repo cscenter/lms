@@ -312,6 +312,10 @@ li.for-staff.current {
   text-align: center;
 }
 
+h2 small a {
+  color: #999;
+}
+
 .h2-and-buttons h2 {
   float: left;
 }
