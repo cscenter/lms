@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
-        {{ course_class.name }} <small>{{ course_class.course_offering.course.name }}</small>
+        {{ course_class.name }} <small><a href="{{ course_class.course_offering.get_absolute_url }}">{{ course_class.course_offering.course.name }}</a></small>
       </h2>
       {% if request.user.is_teacher and is_actual_teacher %}
       <div class="btn-toolbar">
