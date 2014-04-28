@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-04-28 02:02+0400\n"
-"PO-Revision-Date: 2014-04-28 02:08+0230\n"
+"PO-Revision-Date: 2014-04-28 18:23+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -907,7 +907,7 @@ msgstr "Имя пользователя"
 
 #: users/forms.py:17
 msgid "Password"
-msgstr "Пароля"
+msgstr "Пароль"
 
 #: users/forms.py:28
 msgid "Submit"
