@@ -17,5 +17,7 @@ python-dateutil==2.2
 pytz==2013.9
 requests==2.2.0
 six==1.5.2
+slideshare==0.1dev
 sorl-thumbnail==11.12.1b
 sqlparse==0.1.11
+yandexwebdav==0.2.11

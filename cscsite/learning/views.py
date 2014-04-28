@@ -36,6 +36,10 @@ class TimetableMixin(object):
     model = CourseClass
     template_name = "learning/timetable.html"
 
+    def __init__(self, *args, **kwargs):
+        self._context_weeks = None
+        super(TimetableMixin, self).__init__(*args, **kwargs)
+
     def get_queryset(self):
         week_qstr = self.request.GET.get('week')
         year_qstr = self.request.GET.get('year')
@@ -51,15 +55,15 @@ class TimetableMixin(object):
         end = utils.iso_to_gregorian(year, week, 7)
         next_w_cal = (start + datetime.timedelta(weeks=1)).isocalendar()
         prev_w_cal = (start + datetime.timedelta(weeks=-1)).isocalendar()
-        self.context_weeks = {'week': week,
-                              'week_start': start,
-                              'week_end': end,
-                              'month': start.month,
-                              'year': year,
-                              'prev_year': prev_w_cal[0],
-                              'prev_week': prev_w_cal[1],
-                              'next_year': next_w_cal[0],
-                              'next_week': next_w_cal[1]}
+        self._context_weeks = {'week': week,
+                               'week_start': start,
+                               'week_end': end,
+                               'month': start.month,
+                               'year': year,
+                               'prev_year': prev_w_cal[0],
+                               'prev_week': prev_w_cal[1],
+                               'next_year': next_w_cal[0],
+                               'next_week': next_w_cal[1]}
         return (CourseClass.objects
                 .filter(date__range=[start, end])
                 .order_by('date', 'starts_at')
@@ -72,7 +76,7 @@ class TimetableMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableMixin, self)
                    .get_context_data(*args, **kwargs))
-        context.update(self.context_weeks)
+        context.update(self._context_weeks)
         context['user_type'] = self.user_type
         return context
 
@@ -101,6 +105,10 @@ class CalendarMixin(object):
     model = CourseClass
     template_name = "learning/calendar.html"
 
+    def __init__(self, *args, **kwargs):
+        self._month_date = None
+        super(CalendarMixin, self).__init__(*args, **kwargs)
+
     def get_queryset(self):
         year_qstr = self.request.GET.get('year')
         month_qstr = self.request.GET.get('month')
@@ -110,7 +118,7 @@ class CalendarMixin(object):
         except TypeError:
             today = now().date()
             year, month = today.year, today.month
-        self.month_date = datetime.date(year=year, month=month, day=1)
+        self._month_date = datetime.date(year=year, month=month, day=1)
         return (CourseClass.objects
                 .filter(date__month=month,
                         date__year=year)
@@ -124,8 +132,8 @@ class CalendarMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
-        context['next_date'] = self.month_date + relativedelta(months=1)
-        context['prev_date'] = self.month_date + relativedelta(months=-1)
+        context['next_date'] = self._month_date + relativedelta(months=1)
+        context['prev_date'] = self._month_date + relativedelta(months=-1)
         context['user_type'] = self.user_type
 
         classes = context['object_list']
@@ -135,16 +143,16 @@ class CalendarMixin(object):
 
         cal = Calendar(0)
 
-        month_cal = cal.monthdatescalendar(self.month_date.year,
-                                           self.month_date.month)
+        month_cal = cal.monthdatescalendar(self._month_date.year,
+                                           self._month_date.month)
         month = [(week[0].isocalendar()[1],
                   [(day, dates_to_classes[day],
-                    day.month == self.month_date.month)
+                    day.month == self._month_date.month)
                    for day in week])
                  for week in month_cal]
 
         context['month'] = month
-        context['month_date'] = self.month_date
+        context['month_date'] = self._month_date
         return context
 
 
@@ -303,19 +311,23 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingNewsForm
 
+    def __init__(self, *args, **kwargs):
+        self._course_offering = None
+        super(CourseOfferingNewsCreateView, self).__init__(*args, **kwargs)
+
     def form_valid(self, form):
-        form.instance.course_offering = self.course_offering
-        self.success_url = self.course_offering.get_absolute_url()
+        form.instance.course_offering = self._course_offering
+        self.success_url = self._course_offering.get_absolute_url()
         return super(CourseOfferingNewsCreateView, self).form_valid(form)
 
     def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        self.course_offering = get_object_or_404(
+        self._course_offering = get_object_or_404(
             CourseOffering.objects
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug']))
-        return user in self.course_offering.teachers.all()
+        return user in self._course_offering.teachers.all()
 
 
 class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
@@ -366,6 +378,10 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
 class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
     template_name = "learning/simple_delete_confirmation.html"
 
+    def __init__(self, *args, **kwargs):
+        self._course_offering = None
+        super(CourseOfferingUnenrollView, self).__init__(*args, **kwargs)
+
     def get_object(self, _=None):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         course_offering = get_object_or_404(
@@ -373,7 +389,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug']))
-        self.course_offering = course_offering
+        self._course_offering = course_offering
         enrollment = get_object_or_404(
             Enrollment.objects.filter(student=self.request.user,
                                       course_offering=course_offering))
@@ -393,7 +409,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
         if self.request.GET.get('back') == 'course_list_student':
             return reverse('course_list_student')
         else:
-            c_o = self.course_offering
+            c_o = self._course_offering
             return reverse('course_offering_detail',
                            kwargs={"course_slug": c_o.course.slug,
                                    "semester_slug": c_o.semester.slug})
@@ -419,6 +435,10 @@ class CourseClassCreateUpdateMixin(object):
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseClassForm
 
+    def __init__(self, *args, **kwargs):
+        self._course_offering = None
+        super(CourseClassCreateUpdateMixin, self).__init__(*args, **kwargs)
+
     def get_initial(self, *args, **kwargs):
         initial = (super(CourseClassCreateUpdateMixin, self)
                    .get_initial(*args, **kwargs))
@@ -428,9 +448,9 @@ class CourseClassCreateUpdateMixin(object):
                 pk = int(pk)
             except ValueError:
                 raise Http404
-            self.course_offering = get_object_or_404(
+            self._course_offering = get_object_or_404(
                 CourseOffering.objects.filter(pk=pk))
-            initial['course_offering'] = self.course_offering
+            initial['course_offering'] = self._course_offering
         return initial
 
     def get_form(self, form_class):
@@ -456,7 +476,7 @@ class CourseClassCreateUpdateMixin(object):
         if self.request.GET.get('back') == 'timetable':
             return reverse('timetable_teacher')
         if self.request.GET.get('back') == 'course_offering':
-            return self.course_offering.get_absolute_url()
+            return self._course_offering.get_absolute_url()
         if self.request.GET.get('back') == 'calendar':
             return reverse('calendar_teacher')
         else:
@@ -562,7 +582,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                  if (a_s.assignment.is_open or
                      a_s.state in AssignmentStudent.OPEN_STATES)]
         archive = (Assignment.objects
-                   .filter(course_offering__teachers = self.request.user)
+                   .filter(course_offering__teachers=self.request.user)
                    .order_by('deadline_at',
                              'course_offering__course__name',
                              'pk')

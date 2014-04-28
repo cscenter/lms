@@ -69,8 +69,6 @@ class CSCUser(AbstractUser):
                                .strip())
         return full_name or self.username
 
-
-
     def __str__(self):
         return smart_text(self.get_full_name())
 
