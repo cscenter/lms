@@ -261,10 +261,30 @@ li.for-staff.current {
   clear: both;
 }
 
+.col-container {
+  width: 940px;
+}
+
+.columns {
+  -webkit-column-count: 2;
+  -webkit-column-gap: 10px;
+  -webkit-column-fill: auto;
+  -moz-column-count: 2;
+  -moz-column-gap: 10px;
+  -moz-column-fill: auto;
+  column-count: 2;
+  column-gap: 10px;
+  column-fill: auto;
+}
+
 .user-tile {
   width: 450px;
   margin: 10px;
-  float: left;
+  display: inline-block;
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;
+  /* float: left; */
 }
 
 .user-tile img {
