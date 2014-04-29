@@ -6,6 +6,10 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
+      <div class="col-container">
+        <div class="columns">
+
+
       {% for user in object_list %}
       <div class="user-tile">
         {% thumbnail user.photo "100x100" crop="center" as im %}
@@ -15,10 +19,17 @@
           <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
           <div class="ubertext">{{ user.note|safe }}</div>
         </div>
+        <div style="clear:both;">
+        </div>
       </div>
       {% empty %}
       {% trans "No alumnis yet" %}
       {% endfor %}
+
+
+        </div>
+      </div>
+
   </div>
 </div>
 {% endblock content %}
