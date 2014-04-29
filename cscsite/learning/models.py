@@ -463,7 +463,7 @@ class AssignmentComment(TimeStampedModel):
                 .format(smart_text(self.assignment_student
                                    .assignment),
                         smart_text(self.assignment_student
-                                   .student.get_full_name)))
+                                   .student.get_full_name())))
 
     @property
     def attached_file_name(self):
