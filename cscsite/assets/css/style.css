@@ -509,6 +509,8 @@ h5.assignment {
 .calendar .class {
   margin-bottom: 3px;
   border: 1px solid #D3D3D3;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendar .class.lecture {
