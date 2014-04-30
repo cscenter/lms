@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from sorl.thumbnail.admin import AdminImageMixin
 
+from core.admin import UbereditorMixin
 from users.models import CSCUser
 
 
@@ -26,7 +27,7 @@ class CSCUserChangeForm(UserChangeForm):
         model = CSCUser
 
 
-class CSCUserAdmin(AdminImageMixin, UserAdmin):
+class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
 
