@@ -151,10 +151,18 @@ MENU_URL_NAMES = {
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
-    # TODO: link-walking!
+    'course_detail': {'alias': 'course_list'},
     'course_offering_detail': {'alias': 'course_list'},
+    'course_class_add': {'alias': 'course_list'},
+    'course_class_edit': {'alias': 'course_list'},
+    'course_class_delete': {'alias': 'course_list'},
+    'course_offering_news_create': {'alias': 'course_list'},
+    'course_offering_news_update': {'alias': 'course_list'},
+    'course_offering_news_delete': {'alias': 'course_list'},
+    'course_offering_edit_descr': {'alias': 'course_list'},
     'orgs': {'parent': 'about'},
     'profs': {'parent': 'about'},
+    'teacher_detail': {'alias': 'profs'},
     'alumni': {'parent': 'about'},
 
     'news_list': {},
@@ -167,11 +175,13 @@ MENU_URL_NAMES = {
     'course_list_student': {'parent': 'learning'},
 
     'assignment_list_teacher': {'parent': 'teaching'},
+    'assignment_add': {'alias': 'assignment_list_teacher'},
+    'assignment_edit': {'alias': 'assignment_list_teacher'},
+    'assignment_delete': {'alias': 'assignment_list_teacher'},
     'timetable_teacher': {'parent': 'teaching'},
     'calendar_teacher': {'alias': 'timetable_teacher'},
     'calendar_full_teacher': {'parent': 'teaching'},
     'course_list_teacher': {'parent': 'teaching'},
-    # TODO: allow link-walking on "alias" for 'alias': 'courses_teacher'
     'course_edit': {'alias': 'courses_teacher'},
     'markssheet_teacher': {'parent': 'teaching'},
 
