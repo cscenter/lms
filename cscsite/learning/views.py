@@ -422,7 +422,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
                                    "semester_slug": c_o.semester.slug})
 
 
-class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
+class CourseClassDetailView(generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
 
@@ -430,6 +430,7 @@ class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
         context = (super(CourseClassDetailView, self)
                    .get_context_data(*args, **kwargs))
         context['is_actual_teacher'] = (
+            self.request.user.is_authenticated() and
             self.request.user in (self.object
                                   .course_offering
                                   .teachers.all()))
