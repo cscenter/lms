@@ -119,9 +119,15 @@ class CalendarMixin(object):
             today = now().date()
             year, month = today.year, today.month
         self._month_date = datetime.date(year=year, month=month, day=1)
+        prev_month_date = self._month_date + relativedelta(months=-1)
+        next_month_date = self._month_date + relativedelta(months=+1)
         return (CourseClass.objects
-                .filter(date__month=month,
-                        date__year=year)
+                .filter(Q(date__month=month,
+                          date__year=year)
+                        | Q(date__month=prev_month_date.month,
+                            date__year=prev_month_date.year)
+                        | Q(date__month=next_month_date.month,
+                            date__year=next_month_date.year))
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
