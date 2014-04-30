@@ -250,7 +250,7 @@ class CourseStudentListView(StudentOnlyMixin,
         return context
 
 
-class CourseDetailView(LoginRequiredMixin, generic.DetailView):
+class CourseDetailView(generic.DetailView):
     model = Course
     template_name = "learning/course_detail.html"
     context_object_name = 'course'
@@ -280,8 +280,7 @@ class GetCourseOfferingObjectMixin(object):
                               'assignment_set'))
 
 
-class CourseOfferingDetailView(LoginRequiredMixin,
-                               GetCourseOfferingObjectMixin,
+class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                generic.DetailView):
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
@@ -289,13 +288,15 @@ class CourseOfferingDetailView(LoginRequiredMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
-        context['is_enrolled'] = (self.request.user.is_student and
+        context['is_enrolled'] = (self.request.user.is_authenticated() and
+                                  self.request.user.is_student and
                                   (self.request.user
                                    .enrolled_on_set
                                    .filter(pk=self.object.pk)
                                    .exists()))
-        context['is_actual_teacher'] = \
-            self.request.user in self.object.teachers.all()
+        context['is_actual_teacher'] = (
+            self.request.user.is_authenticated() and
+            self.request.user in self.object.teachers.all())
         return context
 
 
