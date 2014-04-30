@@ -43,7 +43,11 @@
       </div>
       {% if not comments %}
       <div class="csc-well">
+        {% if user_type == 'teacher' or not a_s.assignment.is_online %}
+        <h4>{% trans "Comment" %}</h4>
+        {% else %}
         <h4>{% trans "Solution" %}</h4>
+        {% endif %}
         {% crispy form form.helper %}
       </div>
       {% else %}
