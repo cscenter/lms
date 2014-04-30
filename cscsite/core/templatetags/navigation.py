@@ -11,6 +11,33 @@ logger = logging.getLogger(__name__)
 
 @register.simple_tag(takes_context=True)
 def current(context, tag_url_name, return_value='current', **kwargs):
+    """
+    In templates we use "current" tag to add css class to DIVs and LIs
+    that are used in navigation (default class name is "current"). This
+    tag is used with url name (as in urls.py) of the page on which it should
+    return "return_value". There are three cases when "return_value" will
+    be returned:
+
+    1. When current URL name matches with provided URL;
+    2. When current URL lists provided URL as a "parent" in
+    settings.MENU_URL_NAMES;
+    3. When current URL is an "alias" (as defined in settings.MENU_URL_NAMES)
+    to an URL that follows one of this three criteria.
+
+    Here is an example:
+
+    ```
+    [first_level_menu_item]
+             ^
+             | parent
+             |                 alias
+    [second_level_menu_item] <-------- [some_url]
+    ```
+
+    If the current URL is "some_url", "return_value" will be returned
+    for {% current "some_url" %}, {% current "second_level_menu_item" %} and
+    {% current "first_level_menu_item" %}.
+    """
     def current_recursive(current_url_name):
         matched_simple = tag_url_name == current_url_name
         if not current_url_name in settings.MENU_URL_NAMES:
