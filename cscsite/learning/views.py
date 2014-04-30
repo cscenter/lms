@@ -591,7 +591,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                      a_s.state in AssignmentStudent.OPEN_STATES)]
         archive = (Assignment.objects
                    .filter(course_offering__teachers=self.request.user)
-                   .order_by('deadline_at',
+                   .order_by('-deadline_at',
                              'course_offering__course__name',
                              'pk')
                    .select_related('course_offering',
