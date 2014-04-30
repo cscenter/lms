@@ -136,7 +136,7 @@
         {% for assignment in assignment_list_archive %}
         <tr>
           <td>
-            <span style="white-space: nowrap;">{{ assignment.deadline_at|naturalday:"m E Y" }}</span><br>
+            <span style="white-space: nowrap;">{{ assignment.deadline_at|naturalday:"d E Y" }}</span><br>
             {{ assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
