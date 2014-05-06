@@ -12,5 +12,8 @@ class Ubereditor(forms.Textarea, object):
         js = ["//code.jquery.com/jquery-1.10.2.min.js",
               "js/highlight.pack.js",
               "js/main.js",
+              # assuming that Django will include JS files in this order,
+              # because Marked creates global object and we need to override
+              # epiceditor's one
               "js/EpicEditor-v0.2.2/js/epiceditor.min.js",
               "js/marked.js"]
