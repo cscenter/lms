@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
 
-from core.admin import UbereditorMixin
+from core.admin import UbereditorMixin, WiderLabelsMixin
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
@@ -13,7 +13,9 @@ class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
     pass
 
 
-class CourseOfferingAdmin(UbereditorMixin, admin.ModelAdmin):
+class CourseOfferingAdmin(UbereditorMixin,
+                          WiderLabelsMixin,
+                          admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester']
 

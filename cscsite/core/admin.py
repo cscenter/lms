@@ -82,3 +82,8 @@ class UbereditorMixin(object):
             {models.TextField: {'widget': Ubereditor}})
 
         super(UbereditorMixin, self).__init__(*args, **kwargs)
+
+
+class WiderLabelsMixin(object):
+    class Media:
+        css = {'all': ["css/admin-wider-fields.css"]}
