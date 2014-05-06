@@ -43,9 +43,9 @@ class UserTests(TestCase):
         """
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
                        patronymic=u"Васильевна")
-        self.assertEqual(user.get_full_name(), u"Иванова Анна Васильевна")
+        self.assertEqual(user.get_full_name(), u"Анна Васильевна Иванова")
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
-        self.assertEqual(user.get_full_name(), u"Иванова Анна")
+        self.assertEqual(user.get_full_name(), u"Анна Иванова")
 
     def test_group_props(self):
         """
