@@ -8,6 +8,7 @@ import os
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
+from django.forms.models import modelform_factory
 from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
@@ -27,7 +28,8 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
-    AssignmentCommentForm, AssignmentGradeForm, AssignmentForm
+    AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
+    MarksSheetGradeForm
 
 from . import utils
 
@@ -813,7 +815,13 @@ class MarksSheetMixin(object):
                 structured[offering] = OrderedDict()
             if a_s.student not in structured[offering]:
                 structured[offering][a_s.student] = OrderedDict()
-            structured[offering][a_s.student][a_s.assignment] = a_s
+            # if assignment is "offline", provide ModelForm instead of
+            # the object itself
+            if a_s.assignment.is_online:
+                cell = a_s
+            else:
+                cell = MarksSheetGradeForm(instance=a_s)
+            structured[offering][a_s.student][a_s.assignment] = cell
         headers = OrderedDict()
         for offering, by_student in structured.items():
             header = by_student.values()[0].keys()

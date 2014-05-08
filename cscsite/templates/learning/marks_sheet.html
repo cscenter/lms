@@ -31,11 +31,15 @@
           {% for student, by_assignment in by_student.iteritems %}
           <tr>
             <td class="header header-horiz">{{ student.get_full_name }}</td>
-            {% for assignment, a_s in by_assignment.iteritems %}
+            {% for assignment, cell in by_assignment.iteritems %}
             <td class="content">
-              <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
-                {{ a_s.status_short|safe }}
+              {% if assignment.is_online %}
+              <a href="{% url 'a_s_detail_teacher' cell.pk %}">
+                {{ cell.status_short|safe }}
               </a>
+              {% else %}
+              {{ cell.as_p }}
+              {% endif %}
             </td>
             {% endfor %}
           </tr>
