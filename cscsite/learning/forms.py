@@ -271,3 +271,19 @@ class AssignmentForm(forms.ModelForm):
                   'deadline_at',
                   'attached_file',
                   'is_online']
+
+
+class MarksSheetGradeForm(forms.ModelForm):
+    # state = forms.ChoiceField(
+    #     label="",
+    #     choices=AssignmentStudent.SHORT_STATES)
+    state = forms.CharField(label="")
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout('state')
+        super(MarksSheetGradeForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AssignmentStudent
+        fields = ['state']
