@@ -449,11 +449,11 @@ h5.assignment {
   filter: flipv fliph;
   /* CSS3 specific totation code */
   /* translate should have the same negative dimension as head height */
-  transform: rotate(315deg) translate(-10em,10em);
+  transform: rotate(315deg) translate(-9em,10em);
   transform-origin: 0 0;
-  -moz-transform: rotate(315deg) translate(-10em,10em);
+  -moz-transform: rotate(315deg) translate(-9em,10em);
   -moz-transform-origin: 0 0;
-  -webkit-transform: rotate(315deg) translate(-10em,10em);
+  -webkit-transform: rotate(315deg) translate(-9em,10em);
   -webkit-transform-origin: 0 0;
 }
 
@@ -473,6 +473,7 @@ h5.assignment {
 
 .marks-table td.content {
   padding: 0px 10px;
+  width: 40px;
 }
 
 .calendar th {

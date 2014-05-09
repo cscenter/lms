@@ -29,7 +29,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetGradeForm
+    MarksSheetFormFabrique
 
 from . import utils
 
@@ -820,7 +820,7 @@ class MarksSheetMixin(object):
             if a_s.assignment.is_online:
                 cell = a_s
             else:
-                cell = MarksSheetGradeForm(instance=a_s)
+                cell = a_s
             structured[offering][a_s.student][a_s.assignment] = cell
         headers = OrderedDict()
         for offering, by_student in structured.items():
@@ -851,6 +851,84 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
 
 class MarksSheetStaffView(StaffOnlyMixin,
-                          MarksSheetMixin,
-                          generic.ListView):
+                          generic.FormView):
     user_type = 'staff'
+    model = AssignmentStudent
+    template_name = "learning/marks_sheet.html"
+    context_object_name = 'assignment_list'
+
+    def __init__(self, *args, **kwargs):
+        self.a_s_list = None
+        self.enrollment_list = None
+        super(MarksSheetStaffView, self).__init__(*args, **kwargs)
+
+    def get_form_class(self):
+        a_s_list = (AssignmentStudent.objects
+                    .order_by('assignment__course_offering',
+                              'student',
+                              'assignment')
+                    .select_related('assignment',
+                                    'assignment__course_offering',
+                                    'assignment__course_offering__course',
+                                    'assignment__course_offering__semester',
+                                    'student'))
+        enrollment_list = (Enrollment.objects
+                           .select_related('course_offering', 'student'))
+        self.a_s_list = a_s_list
+        self.enrollment_list = enrollment_list
+        return (MarksSheetFormFabrique
+                .build_form_class(a_s_list,
+                                  enrollment_list))
+
+    def get_initial(self):
+        return (MarksSheetFormFabrique
+                .transform_to_initial(self.a_s_list, self.enrollment_list))
+
+    def get_context_data(self, *args, **kwargs):
+        def get_a_s_field(a_s_pk):
+            return kwargs['form']['a_s_{0}'.format(a_s_pk)]
+
+        def get_final_grade_field(course_offering_pk, student_pk):
+            key = 'final_grade_{0}_{1}'.format(course_offering_pk, student_pk)
+            return kwargs['form'][key]
+
+        context = (super(MarksSheetStaffView, self)
+                   .get_context_data(*args, **kwargs))
+        data = self.a_s_list
+        # implying that the data is already sorted
+        structured = OrderedDict()
+        for a_s in data:
+            offering = a_s.assignment.course_offering
+            if offering not in structured:
+                structured[offering] = OrderedDict()
+            if a_s.student not in structured[offering]:
+                structured[offering][a_s.student] = OrderedDict()
+            # if assignment is "offline", provide ModelForm instead of
+            # the object itself
+            if a_s.assignment.is_online:
+                cell = a_s
+            else:
+                cell = get_a_s_field(a_s.pk)
+            structured[offering][a_s.student][a_s.assignment] = cell
+
+        headers = OrderedDict()
+        for offering, by_student in structured.items():
+            header = by_student.values()[0].keys()
+            headers[offering] = header
+            for _, by_assignment in by_student.items():
+                # we should check for "assignment consistency": that all
+                # assignments are similar for all students in particular
+                # course offering
+                assert by_assignment.keys() == header
+
+        context['structured'] = [(offering, headers[offering],
+                                  [(student,
+                                    get_final_grade_field(offering.pk,
+                                                          student.pk),
+                                    by_assignment)
+                                   for student, by_assignment
+                                   in by_student.iteritems()])
+                                 for offering, by_student
+                                 in structured.iteritems()]
+        context['user_type'] = self.user_type
+        return context

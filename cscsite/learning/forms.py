@@ -11,7 +11,8 @@ import floppyforms as forms
 
 from core.forms import Ubereditor
 from .models import CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent
+    CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
+    Enrollment
 
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
@@ -273,17 +274,27 @@ class AssignmentForm(forms.ModelForm):
                   'is_online']
 
 
-class MarksSheetGradeForm(forms.ModelForm):
-    # state = forms.ChoiceField(
-    #     label="",
-    #     choices=AssignmentStudent.SHORT_STATES)
-    state = forms.CharField(label="")
+# Hipster factory class!
+class MarksSheetFormFabrique(object):
+    @staticmethod
+    def build_form_class(a_s_list, enrollment_list):
+        fields = {'a_s_{0}'.format(a_s.pk):
+                  forms.ChoiceField(AssignmentStudent.SHORT_STATES)
+                  for a_s in a_s_list
+                  if not a_s.assignment.is_online}
+        fields.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
+                                                    e.student.pk):
+                       forms.ChoiceField(Enrollment.GRADES)
+                       for e in enrollment_list})
+        return type(b'MarksSheetForm', (forms.Form,), fields)
 
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout('state')
-        super(MarksSheetGradeForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = AssignmentStudent
-        fields = ['state']
+    @staticmethod
+    def transform_to_initial(a_s_list, enrollment_list):
+        initial = {'a_s_{0}'.format(a_s.pk): a_s.state
+                   for a_s in a_s_list
+                   if not a_s.assignment.is_online}
+        initial.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
+                                                     e.student.pk):
+                        e.grade
+                        for e in enrollment_list})
+        return initial

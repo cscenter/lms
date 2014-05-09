@@ -28,7 +28,7 @@
             </td>
             {% endfor %}
           </tr>
-          {% for student, by_assignment in by_student.iteritems %}
+          {% for student, final_grade, by_assignment in by_student %}
           <tr>
             <td class="header header-horiz">{{ student.get_full_name }}</td>
             {% for assignment, cell in by_assignment.iteritems %}
@@ -38,10 +38,11 @@
                 {{ cell.status_short|safe }}
               </a>
               {% else %}
-              {{ cell.as_p }}
+              {{ cell }}
               {% endif %}
             </td>
             {% endfor %}
+            <td>{{ final_grade }}</td>
           </tr>
           {% endfor %}
         </table>
