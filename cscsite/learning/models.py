@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import time
@@ -381,8 +382,8 @@ class AssignmentStudent(TimeStampedModel):
                      ('pass', _("Assignment|pass")),
                      ('good', _("Assignment|good")),
                      ('excellent', _("Assignment|excellent")))
-    SHORT_STATES = Choices(('not_checked', "-"),
-                           ('being_checked', "!"),
+    SHORT_STATES = Choices(('not_checked', "—"),
+                           ('being_checked', "…"),
                            ('unsatisfactory', "2"),
                            ('pass', "3"),
                            ('good', "4"),
