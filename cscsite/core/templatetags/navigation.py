@@ -40,7 +40,7 @@ def current(context, tag_url_name, return_value='current', **kwargs):
     """
     def current_recursive(current_url_name):
         matched_simple = tag_url_name == current_url_name
-        if not current_url_name in settings.MENU_URL_NAMES:
+        if current_url_name not in settings.MENU_URL_NAMES:
             logger.warning("can't find url {0} in MENU_URL_NAMES"
                            .format(current_url_name))
             return return_value if matched_simple else ''

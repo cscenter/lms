@@ -493,15 +493,15 @@ class CourseClassCreateUpdateMixin(object):
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
-## No ProtectedFormMixin here because we are filtering out other's courses
-## on form level (see __init__ of CourseClassForm)
+# No ProtectedFormMixin here because we are filtering out other's courses
+# on form level (see __init__ of CourseClassForm)
 class CourseClassCreateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.CreateView):
     pass
 
 
-## Same here
+# Same here
 class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.UpdateView):
@@ -568,17 +568,17 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     user_type = 'teacher'
 
     def get_queryset(self):
-        base_qs = (self.model.objects
-                   .filter(assignment__course_offering__teachers=
-                           self.request.user)
-                   .order_by('assignment__deadline_at',
-                             'assignment__course_offering__course__name',
-                             'pk')
-                   .select_related('assignment',
-                                   'assignment__course_offering',
-                                   'assignment__course_offering__course',
-                                   'assignment__course_offering__semester',
-                                   'student'))
+        base_qs = \
+            (self.model.objects
+             .filter(assignment__course_offering__teachers=self.request.user)
+             .order_by('assignment__deadline_at',
+                       'assignment__course_offering__course__name',
+                       'pk')
+             .select_related('assignment',
+                             'assignment__course_offering',
+                             'assignment__course_offering__course',
+                             'assignment__course_offering__semester',
+                             'student'))
         if self.request.GET.get('only_ungraded') == 'true':
             return base_qs.filter(state__in=AssignmentStudent.OPEN_STATES)
         else:
@@ -759,15 +759,15 @@ class AssignmentCreateUpdateMixin(object):
         return form_class(self.request.user, **self.get_form_kwargs())
 
 
-## No ProtectedFormMixin here because we are filtering out other's courses
-## on form level (see __init__ of AssignmentForm)
+# No ProtectedFormMixin here because we are filtering out other's courses
+# on form level (see __init__ of AssignmentForm)
 class AssignmentCreateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.CreateView):
     pass
 
 
-## Same here
+# Same here
 class AssignmentUpdateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.UpdateView):
@@ -845,9 +845,9 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
     user_type = 'teacher'
 
     def get_queryset(self):
-        return (super(MarksSheetTeacherView, self).get_queryset()
-                .filter(assignment__course_offering__teachers=
-                        self.request.user))
+        return \
+            (super(MarksSheetTeacherView, self).get_queryset()
+             .filter(assignment__course_offering__teachers=self.request.user))
 
 
 class MarksSheetStaffView(StaffOnlyMixin,
