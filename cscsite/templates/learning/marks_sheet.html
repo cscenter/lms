@@ -14,40 +14,43 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      {% for offering, header, by_student in structured %}
-      <h3>{{ offering }}</h3>
-      <div class="marks-table-container">
-        <table class="marks-table">
-          <tr>
-            <td></td>
-            {% for assignment in header %}
-            <td class="header header-vert">
-              <div class="inner">
-                {{ assignment.title }}
-              </div>
-            </td>
+      <form method="post">{% csrf_token %}
+        <button type="submit" class="btn btn-primary pull-right">{% trans "Save" %}</button>
+        {% for offering, header, by_student in structured %}
+        <h3>{{ offering }}</h3>
+        <div class="marks-table-container">
+          <table class="marks-table">
+            <tr>
+              <td></td>
+              {% for assignment in header %}
+              <td class="header header-vert">
+                <div class="inner">
+                  {{ assignment.title }}
+                </div>
+              </td>
+              {% endfor %}
+            </tr>
+            {% for student, final_grade, by_assignment in by_student %}
+            <tr>
+              <td class="header header-horiz">{{ student.get_full_name }}</td>
+              {% for assignment, cell in by_assignment.iteritems %}
+              <td class="content">
+                {% if assignment.is_online %}
+                <a href="{% url 'a_s_detail_teacher' cell.pk %}">
+                  {{ cell.status_short|safe }}
+                </a>
+                {% else %}
+                {{ cell }}
+                {% endif %}
+              </td>
+              {% endfor %}
+              <td>{{ final_grade }}</td>
+            </tr>
             {% endfor %}
-          </tr>
-          {% for student, final_grade, by_assignment in by_student %}
-          <tr>
-            <td class="header header-horiz">{{ student.get_full_name }}</td>
-            {% for assignment, cell in by_assignment.iteritems %}
-            <td class="content">
-              {% if assignment.is_online %}
-              <a href="{% url 'a_s_detail_teacher' cell.pk %}">
-                {{ cell.status_short|safe }}
-              </a>
-              {% else %}
-              {{ cell }}
-              {% endif %}
-            </td>
-            {% endfor %}
-            <td>{{ final_grade }}</td>
-          </tr>
-          {% endfor %}
-        </table>
-      </div>
-      {% endfor %}
+          </table>
+        </div>
+        {% endfor %}
+      </form>
     </div>
   </div>
 </div>

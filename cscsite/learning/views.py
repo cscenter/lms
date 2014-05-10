@@ -792,75 +792,10 @@ class MarksSheetMixin(object):
     template_name = "learning/marks_sheet.html"
     context_object_name = 'assignment_list'
 
-    def get_queryset(self):
-        return (super(MarksSheetMixin, self).get_queryset()
-                .order_by('assignment__course_offering',
-                          'student',
-                          'assignment')
-                .select_related('assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__course',
-                                'assignment__course_offering__semester',
-                                'student'))
-
-    def get_context_data(self, *args, **kwargs):
-        context = (super(MarksSheetMixin, self)
-                   .get_context_data(*args, **kwargs))
-        data = context[self.context_object_name]
-        # implying that the data is already sorted
-        structured = OrderedDict()
-        for a_s in data:
-            offering = a_s.assignment.course_offering
-            if offering not in structured:
-                structured[offering] = OrderedDict()
-            if a_s.student not in structured[offering]:
-                structured[offering][a_s.student] = OrderedDict()
-            # if assignment is "offline", provide ModelForm instead of
-            # the object itself
-            if a_s.assignment.is_online:
-                cell = a_s
-            else:
-                cell = a_s
-            structured[offering][a_s.student][a_s.assignment] = cell
-        headers = OrderedDict()
-        for offering, by_student in structured.items():
-            header = by_student.values()[0].keys()
-            headers[offering] = header
-            for _, by_assignment in by_student.items():
-                # we should check for "assignment consistency": that all
-                # assignments are similar for all students in particular
-                # course offering
-                assert by_assignment.keys() == header
-        # this is a hack for passing headers "indexed" by offering
-        context['structured'] = [(offering, headers[offering], by_student)
-                                 for offering, by_student
-                                 in structured.items()]
-        context['user_type'] = self.user_type
-        return context
-
-
-class MarksSheetTeacherView(TeacherOnlyMixin,
-                            MarksSheetMixin,
-                            generic.ListView):
-    user_type = 'teacher'
-
-    def get_queryset(self):
-        return \
-            (super(MarksSheetTeacherView, self).get_queryset()
-             .filter(assignment__course_offering__teachers=self.request.user))
-
-
-class MarksSheetStaffView(StaffOnlyMixin,
-                          generic.FormView):
-    user_type = 'staff'
-    model = AssignmentStudent
-    template_name = "learning/marks_sheet.html"
-    context_object_name = 'assignment_list'
-
     def __init__(self, *args, **kwargs):
         self.a_s_list = None
         self.enrollment_list = None
-        super(MarksSheetStaffView, self).__init__(*args, **kwargs)
+        super(MarksSheetMixin, self).__init__(*args, **kwargs)
 
     def get_form_class(self):
         a_s_list = (AssignmentStudent.objects
@@ -884,6 +819,24 @@ class MarksSheetStaffView(StaffOnlyMixin,
         return (MarksSheetFormFabrique
                 .transform_to_initial(self.a_s_list, self.enrollment_list))
 
+    def form_valid(self, form):
+        a_s_index, enrollment_index = \
+            MarksSheetFormFabrique.build_indexes(self.a_s_list,
+                                                 self.enrollment_list)
+        for field in form.changed_data:
+            if field in a_s_index:
+                a_s = a_s_index[field]
+                a_s.state = form.cleaned_data[field]
+                a_s.save()
+                continue
+            if field in enrollment_index:
+                enrollment = enrollment_index[field]
+                enrollment.grade = form.cleaned_data[field]
+                enrollment.save()
+                continue
+            assert False  # shouldn't get here
+        return redirect(self.get_success_url())
+
     def get_context_data(self, *args, **kwargs):
         def get_a_s_field(a_s_pk):
             return kwargs['form']['a_s_{0}'.format(a_s_pk)]
@@ -892,7 +845,7 @@ class MarksSheetStaffView(StaffOnlyMixin,
             key = 'final_grade_{0}_{1}'.format(course_offering_pk, student_pk)
             return kwargs['form'][key]
 
-        context = (super(MarksSheetStaffView, self)
+        context = (super(MarksSheetMixin, self)
                    .get_context_data(*args, **kwargs))
         data = self.a_s_list
         # implying that the data is already sorted
@@ -932,3 +885,22 @@ class MarksSheetStaffView(StaffOnlyMixin,
                                  in structured.iteritems()]
         context['user_type'] = self.user_type
         return context
+
+
+class MarksSheetTeacherView(TeacherOnlyMixin,
+                            MarksSheetMixin,
+                            generic.FormView):
+    user_type = 'teacher'
+    success_url = 'markssheet_teacher'
+
+    def get_queryset(self):
+        return \
+            (super(MarksSheetTeacherView, self).get_queryset()
+             .filter(assignment__course_offering__teachers=self.request.user))
+
+
+class MarksSheetStaffView(StaffOnlyMixin,
+                          MarksSheetMixin,
+                          generic.FormView):
+    user_type = 'staff'
+    success_url = 'markssheet_staff'
