@@ -38,7 +38,7 @@ def current(context, tag_url_name, return_value='current', **kwargs):
     for {% current "some_url" %}, {% current "second_level_menu_item" %} and
     {% current "first_level_menu_item" %}.
     """
-    def current_recursive(current_url_name):
+    def inner_recursive(current_url_name):
         matched_simple = tag_url_name == current_url_name
         if current_url_name not in settings.MENU_URL_NAMES:
             logger.warning("can't find url {0} in MENU_URL_NAMES"
@@ -48,9 +48,9 @@ def current(context, tag_url_name, return_value='current', **kwargs):
             return return_value
         url_info = settings.MENU_URL_NAMES[current_url_name]
         if 'alias' in url_info:
-            return current_recursive(url_info['alias'])
+            return inner_recursive(url_info['alias'])
         if 'parent' in url_info:
-            return current_recursive(url_info['parent'])
+            return inner_recursive(url_info['parent'])
         return ''
 
-    return current_recursive(context['request'].resolver_match.url_name)
+    return inner_recursive(context['request'].resolver_match.url_name)
