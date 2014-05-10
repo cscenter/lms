@@ -6,5 +6,6 @@ env:
   - DJANGO=1.6
 install:
   - pip install pep8
+  - pip install pylint
   - pip install -r requirements.txt
-script: make test_nocoverage
+script: make stylecheck test_nocoverage
