@@ -45,8 +45,8 @@ def daterange(start_date, end_date):
         yield start_date + datetime.timedelta(n)
 
 
-## Following two functions are taken from
-## http://stackoverflow.com/a/1700069/275084
+# Following two functions are taken from
+# http://stackoverflow.com/a/1700069/275084
 def iso_year_start(iso_year):
     """
     The gregorian calendar date of the first day of the given ISO year
