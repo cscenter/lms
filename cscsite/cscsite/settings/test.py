@@ -29,3 +29,5 @@ DATABASES = {
         "PORT": ""
         }
     }
+
+SOUTH_TESTS_MIGRATE = False
