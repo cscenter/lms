@@ -80,7 +80,7 @@
           </th>
         </thead>
         {% for a_s in assignment_list_open %}
-        <tr>
+        <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
           <td>
             <div class="assignment-date
                         {{ a_s.assignment.deadline_at|date_soon_css }}">

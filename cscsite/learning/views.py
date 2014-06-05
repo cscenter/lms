@@ -23,7 +23,7 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, \
     Assignment, AssignmentStudent, AssignmentComment, \
-    CourseClassAttachment
+    CourseClassAttachment, AssignmentNotification
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -542,6 +542,8 @@ class AssignmentStudentListView(StudentOnlyMixin,
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
+                # FIXME: this prefetch doesn't seem to work
+                .prefetch_related('assignmentnotification_set')
                 .select_related('assignment',
                                 'assignment__course_offering',
                                 'assignment__course_offering__course',
@@ -652,6 +654,12 @@ class AssignmentStudentDetailMixin(object):
                             'assignment__course_offering__course',
                             'assignment__course_offering__semester')
             .prefetch_related('assignment__course_offering__teachers'))
+
+        # Not sure if it's the best place for this, but it's the simplest one
+        (AssignmentNotification.unread
+         .filter(assignment_student=a_s,
+                 user=self.request.user)
+         .update(is_unread=False))
 
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way

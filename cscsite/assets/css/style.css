@@ -568,3 +568,7 @@ h5.assignment {
 .assignment-date.day-after-tomorrow {
   color: #F39700;
 }
+
+tr.unread {
+  background-color: #E2F9FF;
+}

@@ -19,6 +19,7 @@ from django.utils import timezone
 
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
+from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
 
@@ -421,6 +422,17 @@ class AssignmentStudent(TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.assignment),
                                   smart_text(self.student.get_full_name()))
 
+    def has_passes(self):
+        return ((self.assignmentcomment_set
+                 .filter(author__groups__name='Student')
+                 .exists()) and
+                self.assignment.is_online)
+
+    def has_unread(self):
+        return (self.assignmentnotification_set
+                .filter(is_unread=True)
+                .exists())
+
     @property
     def state_display(self):
         return self.STATES[self.state]
@@ -511,6 +523,42 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_display(self):
         return self.GRADES[self.grade]
+
+
+@python_2_unicode_compatible
+class AssignmentNotification(TimeStampedModel):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("User"),
+        on_delete=models.CASCADE)
+    assignment_student = models.ForeignKey(
+        AssignmentStudent,
+        verbose_name=_("assignment_student"),
+        on_delete=models.CASCADE)
+    is_passed = models.BooleanField(_("About passed assignment"),
+                                    default=False)
+    is_unread = models.BooleanField(_("Unread"),
+                                    default=True)
+    is_notified = models.BooleanField(_("User is notified"),
+                                      default=False)
+
+    objects = models.Manager()
+    unread = QueryManager(is_unread=True)
+
+    class Meta:
+        ordering = ["-created"]
+        verbose_name = _("Assignment notification")
+        verbose_name_plural = _("Assignment notifications")
+
+    def clean(self):
+        if self.user.is_student and self.is_assignment:
+            raise ValidationError(_("Only teachers can receive notifications "
+                                    "of passed assignments"))
+
+    def __str__(self):
+        return ("notification for {0} on {1}"
+                .format(smart_text(self.user.get_full_name()),
+                        smart_text(self.assignment)))
 
 
 from . import signals
