@@ -22,6 +22,8 @@ from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
+from core.notifications import get_unread_notifications_cache
+
 
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
@@ -429,9 +431,11 @@ class AssignmentStudent(TimeStampedModel):
                 self.assignment.is_online)
 
     def has_unread(self):
-        return (self.assignmentnotification_set
-                .filter(is_unread=True)
-                .exists())
+        cache = get_unread_notifications_cache()
+        return self in cache.assignments
+        # return (self.assignmentnotification_set
+        #         .filter(is_unread=True)
+        #         .exists())
 
     @property
     def state_display(self):
@@ -558,7 +562,7 @@ class AssignmentNotification(TimeStampedModel):
     def __str__(self):
         return ("notification for {0} on {1}"
                 .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.assignment)))
+                        smart_text(self.assignment_student)))
 
 
 from . import signals
