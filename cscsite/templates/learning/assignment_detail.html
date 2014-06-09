@@ -57,7 +57,7 @@
               </th>
             </thead>
             {% for a_s in a_s_list %}
-            <tr>
+            <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
               <td>
                 <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
                   {{ a_s.student.get_full_name }}
