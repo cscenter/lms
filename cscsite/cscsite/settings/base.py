@@ -75,6 +75,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'core.notifications.UnreadNotificationsCacheMiddleware'
 )
 
 ROOT_URLCONF = 'cscsite.urls'
