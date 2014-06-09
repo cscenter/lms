@@ -37,6 +37,7 @@ class UnreadNotificationsCacheMiddleware(object):
             cache = UnreadNotificationsCache(
                 (request.user
                  .assignmentnotification_set
-                 .filter(is_unread=True)))
+                 .filter(is_unread=True)
+                 .select_related('assignment_student')))
             _thread_locals.unread_notifications_cache = cache
             setattr(request, 'unread_notifications_cache', cache)

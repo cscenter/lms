@@ -206,6 +206,9 @@
                 <a href="{% url 'assignment_list_teacher' %}">
                   <li class="{% current 'assignment_list_teacher' %}">
                     {% trans "Assignments" %}
+                    <span class="badge">
+                      {{ request.unread_notifications_cache.assignments|length }}
+                    </span>
                   </li>
                 </a>
                 <a href="{% url 'timetable_teacher' %}">
