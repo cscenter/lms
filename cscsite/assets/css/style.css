@@ -165,7 +165,21 @@ li.for-staff.current {
   font-weight: normal;
 }
 
+body {
+  position: relative;
+  padding-bottom: 55px;
+  min-height: 100%;
+}
+
+html {
+  height: 100%;
+}
+
 .footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  margin-bottom: 0;
   background-color: #E6E6E6;
   border-top: 2px solid #9B9B9B;
   line-height: 55px;
