@@ -166,13 +166,13 @@ li.for-staff.current {
 }
 
 body {
-  position: relative;
-  padding-bottom: 55px;
-  min-height: 100%;
+  padding-bottom: 57px;
+  /* min-height: 100%; */
 }
 
 html {
-  height: 100%;
+  position: relative;
+  min-height: 100%;
 }
 
 .footer {
