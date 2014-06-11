@@ -65,9 +65,9 @@
       <h4 class="no-top-margin">Преподаватели:</h4>
       <ul class="list-unstyled">
         {% for teacher in course_offering.teachers.all %}
-        <li >
+        <li>
           <a href="{% url 'teacher_detail' teacher.pk %}">
-          {% thumbnail user.photo "50x50" crop="center" as im %}
+          {% thumbnail teacher.photo "50x50" crop="center" as im %}
           <img src="{{ im.url }}"
                width="{{ im.width }}" height="{{ im.height }}">
           {% endthumbnail %}
