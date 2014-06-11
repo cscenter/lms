@@ -8,6 +8,10 @@ h4.bigger-margin {
   margin-bottom: 20px !important;
 }
 
+h4.no-top-margin {
+  margin-top: 0px !important;
+}
+
 .container {
   width: 960px !important;
 }

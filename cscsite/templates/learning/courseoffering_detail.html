@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load thumbnail %}
 
 {% block content %}
 <div class="container">
@@ -49,18 +50,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-3">
-      <ul>
-        {% for teacher in course_offering.teachers.all %}
-        <li class="list-unstyled">
-          <a href="{% url 'teacher_detail' teacher.pk %}">
-            {{ teacher.get_full_name }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="col-xs-9">
+    <div class="col-xs-8">
       {% if course_offering.description %}
       <div class="ubertext">
         {{ course_offering.description|safe }}
@@ -71,28 +61,107 @@
       </div>
       {% endif %}
     </div>
-  </div>
-  <div class="row">
     <div class="col-xs-3">
-      <h3>{% trans "Classes" %}</h3>
-      {% if course_offering.courseclass_set.all %}
+      <h4 class="no-top-margin">Преподаватели:</h4>
       <ul class="list-unstyled">
-        {% for class in course_offering.courseclass_set.all reversed %}
-        <li>
-          {{ class.date|date:"d.m:" }}
-          <a href="{% url 'class_detail' course_offering.course.slug course_offering.semester.slug class.pk %}">
-            {{ class.name }}
-            </a>
+        {% for teacher in course_offering.teachers.all %}
+        <li >
+          <a href="{% url 'teacher_detail' teacher.pk %}">
+          {% thumbnail user.photo "50x50" crop="center" as im %}
+          <img src="{{ im.url }}"
+               width="{{ im.width }}" height="{{ im.height }}">
+          {% endthumbnail %}
+          {{ teacher.get_full_name }}
+          </a>
         </li>
         {% endfor %}
       </ul>
-      {% endif %}
     </div>
-    <div class="col-xs-9">
-      {% if course_offering.courseofferingnews_set.all %}
+  </div>
+  {% if course_offering.courseclass_set.all %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Classes" %}</h3>
+
+      <table class="table timetable" width="100%">
+        <thead>
+          <th width="10%">{% trans "Date" %}</th>
+          <th width="15%">{% trans "Time" %}</th>
+          <th>{% trans "Class|Name" %}</th>
+          <th width="12%">{% trans "Venue|short" %}</th>
+          <th width="10%"></th>
+          <th width="10%">{% trans "Slides" %}</th>
+        </thead>
+        {% for class in course_offering.courseclass_set.all reversed %}
+        <tr>
+          <td>{{ class.date|date:"d.m.Y" }}</td>
+          <td>{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
+          <td>
+            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
+              {{ class.name }}
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'venue_detail' class.venue.pk %}">
+              {{ class.venue }}
+            </a>
+          </td>
+          <td>
+            {% if class.type == 'lecture'%}
+            <span class="badge lecture">{% trans 'Lecture' %}</span>
+            {% else %}
+            <span class="badge seminar">{% trans 'Seminar' %}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if user_type == 'teacher' %}
+            <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+              {{ class.slides|yesno:_("Yes,No") }}
+            </a>
+            {% else %}
+            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#materials">
+              {{ class.slides|yesno:_("Yes,No") }}
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if user.is_authenticated %}
+    {% if user.is_student or is_actual_teacher %}
+      {% if course_offering.assignment_set.all %}
+      <div class="row">
+        <div class="col-xs-12">
+          <h3>{% trans "Assignments" %}</h3>
+          <ul>
+            {% for assignment in course_offering.assignment_set.all %}
+              {% if is_actual_teacher %}
+              <li>
+                <a href="{% url "assignment_detail_teacher" assignment.pk %}">
+                  {{ assignment.title }}
+                </a>
+              </li>
+              {% else %}
+              <li>
+                {{ assignment.title }}
+              </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+  {% endif%}
+  {% if user.is_authenticated and course_offering.courseofferingnews_set.all %}
+  <div class="row">
+    <div class="col-xs-12">
       <h3>{% trans "News" %}</h3>
       {% for news in course_offering.courseofferingnews_set.all %}
-      <h4>{{ news.title }}</h4>
+      <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
       <div class="ubertext">
         {{ news.text|safe }}
       </div>
@@ -101,19 +170,10 @@
         <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
         <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
         {% endif %}
-        {{ news.created|date }}</p>
+      </p>
       {% endfor %}
-      {% endif %}
-
-      {% if course_offering.assignment_set.all %}
-      <h3>{% trans "Assignments" %}</h3>
-      <ul>
-      {% for assignment in course_offering.assignment_set.all %}
-      <li>{{ assignment.title }}</li>
-      {% endfor %}
-      </ul>
-      {% endif %}
     </div>
   </div>
+  {% endif %}
 </div>
 {% endblock content %}
