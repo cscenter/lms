@@ -73,11 +73,13 @@ $(document).ready(function () {
         //if ($("#id_ends_at").val().length === 0) {
         if (!ends_at_touched) {
             var string_time = $(this).val();
-            var matches = string_time.match("([0-9]{2})([:-])([0-9]{2})");
+            var matches = string_time.match(
+                "([0-9]{2})([:\-])([0-9]{2})([:0-9\-]*)");
             if (matches !== null) {
                 var hours = parseInt(matches[1]);
                 var separator = matches[2];
                 var minutes = parseInt(matches[3]);
+                var maybe_seconds = matches[4];
 
                 var raw_new_minutes = minutes + DELTA_MINUTES;
                 var new_hours = (hours + Math.floor(raw_new_minutes / 60)) % 24;
@@ -85,7 +87,8 @@ $(document).ready(function () {
 
                 $("#id_ends_at").val(pad(new_hours, 2)
                                      + separator
-                                     + pad(new_minutes, 2));
+                                     + pad(new_minutes, 2)
+                                     + maybe_seconds);
             } else {
                 console.log("Can't parse " + string_time);
             }
