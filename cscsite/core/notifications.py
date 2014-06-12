@@ -9,7 +9,9 @@ _installed_middleware = False
 
 
 def get_unread_notifications_cache():
-    assert _installed_middleware, "NotificationsCacheMiddleware not loaded"
+    if not _installed_middleware:
+        raise ImproperlyConfiguredException(
+            "NotificationsCacheMiddleware not loaded")
     assert _thread_locals.unread_notifications_cache, \
         "NotificationsCache isn't initialized. Is user logged in?"
     return _thread_locals.unread_notifications_cache
