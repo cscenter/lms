@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.forms import ValidationError
 
 from sorl.thumbnail.admin import AdminImageMixin
 
@@ -19,7 +20,7 @@ class CSCUserCreationForm(UserCreationForm):
             self._meta.model._default_manager.get(username=username)
         except self._meta.model.DoesNotExist:
             return username
-        raise forms.ValidationError(self.error_messages["duplicate_username"])
+        raise ValidationError(self.error_messages["duplicate_username"])
 
 
 class CSCUserChangeForm(UserChangeForm):
