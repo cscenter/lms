@@ -47,7 +47,7 @@ $(document).ready(function () {
 
         var config = previewer.createElement('script');
         config.type = 'text/x-mathjax-config';
-        config.text = "MathJax.Hub.Config({tex2jax: {inlineMath: [ ['$','$'], ['\\(','\\)'] ], processEscapes: true}});";
+        config.text = "MathJax.Hub.Config({tex2jax: {inlineMath: [ ['$','$'] ], displayMath: [ ['$$','$$'] ], processEscapes: true}});";
         previewer.body.appendChild(config);
 
         editor.on('preview', function() {
