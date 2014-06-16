@@ -13,7 +13,8 @@ class StudentOnlyMixin(UserPassesTestMixin):
 
 class TeacherOnlyMixin(UserPassesTestMixin):
     def test_func(self, user):
-        return user.is_authenticated() and user.is_teacher
+        return user.is_authenticated() and \
+            (user.is_teacher or user.is_superuser)
 
 
 class StaffOnlyMixin(UserPassesTestMixin):

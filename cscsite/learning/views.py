@@ -299,6 +299,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         context['is_actual_teacher'] = (
             self.request.user.is_authenticated() and
             self.request.user in self.object.teachers.all())
+
         return context
 
 
@@ -310,7 +311,8 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
     form_class = CourseOfferingEditDescrForm
 
     def is_form_allowed(self, user, obj):
-        return user in obj.teachers.all()
+        return user.is_superuser or \
+            (user in obj.teachers.all())
 
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin,
@@ -336,7 +338,8 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug']))
-        return user in self._course_offering.teachers.all()
+        return user.is_superuser or \
+            (user in self._course_offering.teachers.all())
 
 
 class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
@@ -350,7 +353,8 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return user in obj.course_offering.teachers.all()
+        return user.is_superuser or \
+            (user in obj.course_offering.teachers.all())
 
 
 class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
@@ -363,7 +367,8 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return user in obj.course_offering.teachers.all()
+        return user.is_superuser or \
+            (user in obj.course_offering.teachers.all())
 
 
 class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
@@ -516,7 +521,8 @@ class CourseClassDeleteView(TeacherOnlyMixin,
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj):
-        return user in obj.course_offering.teachers.all()
+        return user.is_superuser or \
+            (user in obj.course_offering.teachers.all())
 
 
 class VenueListView(generic.ListView):
@@ -792,7 +798,8 @@ class AssignmentDeleteView(TeacherOnlyMixin,
         return reverse('assignment_list_teacher')
 
     def is_form_allowed(self, user, obj):
-        return user in obj.course_offering.teachers.all()
+        return user.is_superuser or \
+            (user in obj.course_offering.teachers.all())
 
 
 class MarksSheetMixin(object):

@@ -12,7 +12,7 @@
         <small>{{ course_offering.semester }}</small>
       </h2>
       <div class="btn-toolbar">
-        {% if request.user.is_teacher and is_actual_teacher %}
+        {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
         <div class="btn-group">
           <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
             {% trans "Add news" %}
@@ -166,7 +166,7 @@
         {{ news.text|safe }}
       </div>
       <p class="news-metainfo">
-        {% if request.user.is_teacher and is_actual_teacher %}
+        {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
         <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
         <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
         {% endif %}
