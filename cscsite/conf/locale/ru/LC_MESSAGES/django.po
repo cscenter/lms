@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-06-12 01:23+0400\n"
-"PO-Revision-Date: 2014-06-12 01:30+0230\n"
+"PO-Revision-Date: 2014-06-17 01:34+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -648,7 +648,7 @@ msgstr "Как поступить"
 
 #: templates/index.html:35
 msgid "CS Center News"
-msgstr "Новости CSC"
+msgstr "Новости CS центра"
 
 #: templates/index.html:44 templates/news/news_list.html:19
 msgid "More…"
