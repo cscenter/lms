@@ -151,9 +151,11 @@ class CourseClassForm(forms.ModelForm):
         super(CourseClassForm, self).__init__(*args, **kwargs)
 
         # This is needed to guard against teachers adding classes to
-        # other's courses
-        self.fields['course_offering'].queryset = \
-            CourseOffering.objects.all().filter(teachers=user)
+        # other's courses. However, no protection is needed if user is
+        # a superuser
+        if not user.is_superuser:
+            self.fields['course_offering'].queryset = \
+                CourseOffering.objects.all().filter(teachers=user)
 
     class Meta:
         model = CourseClass
@@ -261,8 +263,10 @@ class AssignmentForm(forms.ModelForm):
                 css_class="form-group"),
             CANCEL_SAVE_PAIR)
         super(AssignmentForm, self).__init__(*args, **kwargs)
-        self.fields['course_offering'].queryset = \
-            CourseOffering.objects.all().filter(teachers=user)
+        # No protection is needed if user is a superuser
+        if not user.is_superuser:
+            self.fields['course_offering'].queryset = \
+                CourseOffering.objects.all().filter(teachers=user)
 
     class Meta:
         model = Assignment
