@@ -1,10 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
+import itertools
+
 from django.db import models
 from django.dispatch import receiver
 
 from .models import Assignment, AssignmentStudent, Enrollment, \
-    AssignmentComment, AssignmentNotification
+    AssignmentComment, AssignmentNotification, \
+    CourseOfferingNews, CourseOfferingNewsNotification
 
 
 @receiver(models.signals.post_save, sender=Assignment)
@@ -62,4 +65,27 @@ def create_assignment_notification(sender, instance, created,
         student = instance.assignment_student.student
         (AssignmentNotification(user=student,
                                 assignment_student=a_s)
+         .save())
+
+
+@receiver(models.signals.post_save, sender=CourseOfferingNews)
+def create_course_offering_news_notification(sender, instance, created,
+                                             *args, **kwargs):
+    if not created:
+        return
+
+    students = (instance
+                .course_offering
+                .enrolled_students
+                .all())
+    teachers = (instance
+                .course_offering
+                .teachers
+                .exclude(pk=instance.author.pk))
+    # this loop can be optimized using bulk_create at the expence of
+    # pre/post_save signals on CourseOfferingNewsNotification
+    for user in itertools.chain(students, teachers):
+        (CourseOfferingNewsNotification(
+            user=user,
+            course_offering_news=instance)
          .save())

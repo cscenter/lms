@@ -23,13 +23,16 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, \
     Assignment, AssignmentStudent, AssignmentComment, \
-    CourseClassAttachment, AssignmentNotification
+    CourseClassAttachment, AssignmentNotification, \
+    CourseOfferingNewsNotification
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetFormFabrique
+
+from core.notifications import get_unread_notifications_cache
 
 from . import utils
 
@@ -278,6 +281,7 @@ class GetCourseOfferingObjectMixin(object):
                             'semester')
             .prefetch_related('teachers',
                               'courseclass_set',
+                              'courseclass_set__venue',
                               'courseofferingnews_set',
                               'assignment_set'))
 
@@ -299,6 +303,14 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         context['is_actual_teacher'] = (
             self.request.user.is_authenticated() and
             self.request.user in self.object.teachers.all())
+
+        # Not sure if it's the best place for this, but it's the simplest one
+        cache = get_unread_notifications_cache()
+        if self.object in cache.courseoffering_news:
+            (CourseOfferingNewsNotification.unread
+             .filter(course_offering_news__course_offering=self.object,
+                     user=self.request.user)
+             .update(is_unread=False))
 
         return context
 
@@ -329,7 +341,10 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
     def form_valid(self, form):
         form.instance.course_offering = self._course_offering
         self.success_url = self._course_offering.get_absolute_url()
-        return super(CourseOfferingNewsCreateView, self).form_valid(form)
+        self.object = form.save(commit=False)
+        self.object.author = self.request.user
+        self.object.save()
+        return redirect(self.get_success_url())
 
     def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)

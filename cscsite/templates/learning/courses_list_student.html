@@ -23,7 +23,7 @@
           <th width="15%"></th>
         </thead>
         {% for course_offering in course_list_ongoing %}
-        <tr>
+        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
             <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
               {{ course_offering.course.name }}
@@ -45,7 +45,7 @@
         </tr>
         {% endfor %}
         {% for course_offering in course_list_available %}
-        <tr>
+        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
             <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
               {{ course_offering.course.name }}
