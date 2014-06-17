@@ -199,10 +199,14 @@ class Venue(models.Model):
     name = models.CharField(_("Name"), max_length=140)
     description = models.TextField(
         _("Description"),
-        help_text=(_("LaTeX+Markdown is enabled")))
+        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+    is_preferred = models.BooleanField(
+        _("Preferred"),
+        help_text=(_("Will be displayed on top of the venue list")),
+        default=False)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["-is_preferred", "name"]
         verbose_name = _("Venue")
         verbose_name_plural = _("Venues")
 
