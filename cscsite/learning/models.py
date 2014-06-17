@@ -137,6 +137,10 @@ class CourseOffering(TimeStampedModel):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
 
+    def has_unread(self):
+        cache = get_unread_notifications_cache()
+        return self in cache.courseoffering_news
+
     # TODO: test this
     @classmethod
     def by_semester(cls, semester):
@@ -180,6 +184,10 @@ class CourseOfferingNews(TimeStampedModel):
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     title = models.CharField(_("CourseNews|title"), max_length=140)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.PROTECT)
     text = models.TextField(
         _("CourseNews|text"),
         help_text=(_("LaTeX+Markdown+HTML is enabled")))
@@ -437,9 +445,6 @@ class AssignmentStudent(TimeStampedModel):
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.assignments
-        # return (self.assignmentnotification_set
-        #         .filter(is_unread=True)
-        #         .exists())
 
     @property
     def state_display(self):
@@ -567,6 +572,35 @@ class AssignmentNotification(TimeStampedModel):
         return ("notification for {0} on {1}"
                 .format(smart_text(self.user.get_full_name()),
                         smart_text(self.assignment_student)))
+
+
+@python_2_unicode_compatible
+class CourseOfferingNewsNotification(TimeStampedModel):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("User"),
+        on_delete=models.CASCADE)
+    course_offering_news = models.ForeignKey(
+        CourseOfferingNews,
+        verbose_name=_("Course offering news"),
+        on_delete=models.CASCADE)
+    is_unread = models.BooleanField(_("Unread"),
+                                    default=True)
+    is_notified = models.BooleanField(_("User is notified"),
+                                      default=False)
+
+    objects = models.Manager()
+    unread = QueryManager(is_unread=True)
+
+    class Meta:
+        ordering = ["-created"]
+        verbose_name = _("Course offering news notification")
+        verbose_name_plural = _("Course offering news notifications")
+
+    def __str__(self):
+        return ("notification for {0} on {1}"
+                .format(smart_text(self.user.get_full_name()),
+                        smart_text(self.course_offering_news)))
 
 
 from . import signals

@@ -196,6 +196,11 @@
                 <a href="{% url 'course_list_student' %}">
                   <li class="{% current 'course_list_student' %}">
                     {% trans "My courses" %}
+                    {% if request.unread_notifications_cache.courseoffering_news %}
+                    <span class="badge">
+                      {{ request.unread_notifications_cache.courseoffering_news|length }}
+                    </span>
+                    {% endif %}
                   </li>
                 </a>
               </ul>
@@ -233,6 +238,11 @@
                 <a href="{% url 'course_list_teacher' %}">
                   <li class="{% current 'course_list_teacher' %}">
                     {% trans "My courses" %}
+                    {% if request.unread_notifications_cache.courseoffering_news %}
+                    <span class="badge">
+                      {{ request.unread_notifications_cache.courseoffering_news|length }}
+                    </span>
+                    {% endif %}
                   </li>
                 </a>
                 <a href="{% url 'markssheet_teacher' %}">
