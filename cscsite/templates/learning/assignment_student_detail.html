@@ -117,6 +117,8 @@
         </li>
         {% endfor %}
       </ul>
+      <h5 class="assignment">{% trans "Student" %}</h5>
+      {{ a_s.student.get_full_name }}
       <h5 class="assignment">{% trans "Deadline" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline|time:"H:i" }}
       <h5 class="assignment">{% trans "Assignment created" %}</h5>
