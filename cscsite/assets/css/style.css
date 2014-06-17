@@ -559,19 +559,19 @@ h5.assignment {
   border-radius: 5px;
 }
 .assignment-status.not-checked {
-  background-color: #E9E9E9;
+  background-color: #F9F9F9;
 }
 .assignment-status.being-checked {
-  background-color: #F39700;
+  background-color: #E9E9E9;
 }
 .assignment-status.unsatisfactory {
   background-color: #FF6B78;
 }
 .assignment-status.pass {
-  background-color: #8CE087;
+  background-color: #F39700;
 }
 .assignment-status.good {
-  background-color: #8CE087;
+  background-color: #FAEB7D;
 }
 .assignment-status.excellent {
   background-color: #8CE087;
