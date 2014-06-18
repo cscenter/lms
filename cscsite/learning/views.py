@@ -305,12 +305,13 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
             self.request.user in self.object.teachers.all())
 
         # Not sure if it's the best place for this, but it's the simplest one
-        cache = get_unread_notifications_cache()
-        if self.object in cache.courseoffering_news:
-            (CourseOfferingNewsNotification.unread
-             .filter(course_offering_news__course_offering=self.object,
-                     user=self.request.user)
-             .update(is_unread=False))
+        if self.request.user.is_authenticated():
+            cache = get_unread_notifications_cache()
+            if self.object in cache.courseoffering_news:
+                (CourseOfferingNewsNotification.unread
+                 .filter(course_offering_news__course_offering=self.object,
+                         user=self.request.user)
+                 .update(is_unread=False))
 
         return context
 
