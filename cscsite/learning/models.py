@@ -25,6 +25,16 @@ from model_utils.models import TimeStampedModel
 from core.notifications import get_unread_notifications_cache
 
 
+LATEX_MARKDOWN_HTML_ENABLED = _(
+    "LaTeX+"
+    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+"
+    "HTML is enabled")
+LATEX_MARKDOWN_ENABLED = _(
+    "LaTeX+"
+    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
+    " is enabled")
+
+
 @python_2_unicode_compatible
 class Course(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
@@ -37,7 +47,7 @@ class Course(TimeStampedModel):
         unique=True)
     description = models.TextField(
         _("Course|description"),
-        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
 
     class Meta:
         ordering = ["name"]
@@ -190,7 +200,7 @@ class CourseOfferingNews(TimeStampedModel):
         on_delete=models.PROTECT)
     text = models.TextField(
         _("CourseNews|text"),
-        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
 
     class Meta:
         ordering = ["-created"]
@@ -207,7 +217,7 @@ class Venue(models.Model):
     name = models.CharField(_("Name"), max_length=140)
     description = models.TextField(
         _("Description"),
-        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
     is_preferred = models.BooleanField(
         _("Preferred"),
         help_text=(_("Will be displayed on top of the venue list")),
@@ -258,7 +268,7 @@ class CourseClass(TimeStampedModel, object):
     description = models.TextField(
         _("Description"),
         blank=True,
-        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
     slides = models.FileField(
         _("Slides"),
         blank=True,
@@ -266,7 +276,7 @@ class CourseClass(TimeStampedModel, object):
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
-        help_text=(_("LaTeX+Markdown+HTML is enabled")))
+        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
@@ -349,7 +359,7 @@ class Assignment(TimeStampedModel, object):
     title = models.CharField(_("Asssignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
-                            help_text=_("LaTeX+Markdown+HTML is enabled"))
+                            help_text=LATEX_MARKDOWN_HTML_ENABLED)
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
                    ("assignment_{0}/{1}/{2}"

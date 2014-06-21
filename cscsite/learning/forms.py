@@ -12,7 +12,8 @@ import floppyforms as forms
 from core.forms import Ubereditor
 from .models import CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
-    Enrollment
+    Enrollment, \
+    LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
@@ -29,8 +30,9 @@ class CourseOfferingPKForm(forms.Form):
 class CourseOfferingEditDescrForm(forms.ModelForm):
     description = forms.CharField(
         label=_("Description"),
-        help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
-                    "will be replaced by course description"),
+        help_text="{0}; {1}".format(LATEX_MARKDOWN_HTML_ENABLED,
+                                    _("empty description will be "
+                                      "replaced by course description")),
         widget=Ubereditor)
 
     def __init__(self, *args, **kwargs):
@@ -53,7 +55,7 @@ class CourseOfferingNewsForm(forms.ModelForm):
                                       'autofocus': 'autofocus'}))
     text = forms.CharField(
         label=_("Text"),
-        help_text=_("LaTeX+Markdown+HTML is enabled"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         required=True,
         widget=Ubereditor)
 
@@ -88,7 +90,7 @@ class CourseClassForm(forms.ModelForm):
     description = forms.CharField(
         label=_("Description"),
         required=False,
-        help_text=_("LaTeX+Markdown+HTML is enabled"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor)
     slides = forms.FileField(
         label=_("Slides"),
@@ -103,7 +105,7 @@ class CourseClassForm(forms.ModelForm):
     other_materials = forms.CharField(
         label=_("Other materials"),
         required=False,
-        help_text=_("LaTeX+Markdown+HTML is enabled"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor)
     date = forms.DateField(
         label=_("Date"),
@@ -180,7 +182,7 @@ class CourseClassForm(forms.ModelForm):
 class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Text"),
-        help_text=_("LaTeX+Markdown is enabled"),
+        help_text=_(LATEX_MARKDOWN_ENABLED),
         widget=Ubereditor)
     attached_file = forms.FileField(
         label="",
@@ -233,7 +235,7 @@ class AssignmentForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     text = forms.CharField(
         label=_("Text"),
-        help_text=_("LaTeX+Markdown+HTML is enabled"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor)
 
     deadline_at = forms.DateTimeField(
