@@ -39,6 +39,7 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
                                       'graduation_year']}),
         ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions']}),
+        ('External services', {'fields': ['yandex_id', 'stepic_id']}),
         ('Important dates', {'fields': ['last_login', 'date_joined']})]
 
 
