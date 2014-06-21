@@ -272,7 +272,7 @@ class CourseClass(TimeStampedModel, object):
     ends_at = models.TimeField(_("Ends at"))
 
     class Meta:
-        ordering = ["-date", "course_offering", "starts_at"]
+        ordering = ["-date", "course_offering", "-starts_at"]
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
 
