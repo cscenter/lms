@@ -4,7 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -44,6 +44,17 @@ class CSCUser(AbstractUser):
         _("CSCUser|graduation year"),
         blank=True,
         validators=[MinValueValidator(1990)],
+        null=True)
+    yandex_id = models.CharField(
+        _("Yandex ID"),
+        max_length=80,
+        validators=[RegexValidator(regex="^[^@]*$",
+                                   message=_("Only the part before "
+                                             "\"@yandex.ru\" is expected"))],
+        blank=True)
+    stepic_id = models.PositiveSmallIntegerField(
+        _("Stepic ID"),
+        blank=True,
         null=True)
 
     class Meta:
