@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
 from .models import Course, Semester, CourseOffering, Venue, \
@@ -67,6 +68,13 @@ class EnrollmentAdmin(admin.ModelAdmin):
             return ['student', 'course_offering', 'grade_changed']
         else:
             return ['grade_changed']
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'student':
+            kwargs['queryset'] = (get_user_model().objects
+                                  .filter(groups__name='Student'))
+        return (super(EnrollmentAdmin, self)
+                .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
 class AssignmentStudentAdmin(admin.ModelAdmin):
