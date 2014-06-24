@@ -1,0 +1,12 @@
+pep8 cscsite/users cscsite/index cscsite/news cscsite/learning cscsite/textpages cscsite/core --exclude=migrations
+PYTHONPATH=cscsite pylint -rn --load-plugins pylint_django --rcfile=pylint.config learning core
+************* Module cscsite.learning.models
+I:618, 0: Locally disabling cyclic-import (R0401) (locally-disabled)
+************* Module django.views.generic.edit
+W:147, 8: Attribute 'object' defined outside __init__ (attribute-defined-outside-init)
+************* Module cscsite.core.notifications
+E: 13,14: Undefined variable 'ImproperlyConfiguredException' (undefined-variable)
+W: 40, 8: Using the global statement (global-statement)
+R: 43, 4: Method could be a function (no-self-use)
+************* Module cscsite.core.templatetags.__init__
+R:  1, 0: Cyclic import (cscsite.learning.models -> cscsite.learning.signals) (cyclic-import)

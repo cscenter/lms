@@ -1,6 +1,7 @@
 from threading import local
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 
 
@@ -10,7 +11,7 @@ _installed_middleware = False
 
 def get_unread_notifications_cache():
     if not _installed_middleware:
-        raise ImproperlyConfiguredException(
+        raise ImproperlyConfigured(
             "NotificationsCacheMiddleware not loaded")
     assert _thread_locals.unread_notifications_cache, \
         "NotificationsCache isn't initialized. Is user logged in?"

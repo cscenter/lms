@@ -177,12 +177,12 @@ class CourseOffering(TimeStampedModel):
                              .replace(tzinfo=timezone.utc))
 
         if (self.semester.type == 'spring' and
-            (now >= autumn_term_start or
-             now < spring_term_start)):
+                (now >= autumn_term_start or
+                 now < spring_term_start)):
             return False
         if (self.semester.type == 'autumn' and
-            (now < autumn_term_start or
-             now >= next_spring_term_start)):
+                (now < autumn_term_start or
+                 now >= next_spring_term_start)):
             return False
         return True
 
