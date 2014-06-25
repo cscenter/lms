@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load getbykey %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{% trans "Marks sheet" %}</h2>
+      <div class="btn-toolbar">
+      </div>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <form method="post">{% csrf_token %}
+        <button type="submit" class="btn btn-primary pull-right">{% trans "Save" %}</button>
+        <div class="marks-table-container">
+          <table class="marks-table">
+            <tr>
+              <td></td>
+              {% for offering in header %}
+              <td class="header header-vert">
+                <div class="inner">
+                  {{ offering }}
+                </div>
+              </td>
+              {% endfor %}
+            </tr>
+            {% for student, overall_grade, by_offering in structured %}
+            <tr>
+              <td class="header header-horiz">{{ student.get_full_name }}</td>
+              {% for offering, cell in by_offering.iteritems %}
+              <td class="content {{ cell.enrolled|yesno:'enrolled,noop'}}">
+                {{ cell.text }}
+              </td>
+              {% endfor %}
+              <td>{{ overall_grade }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}
