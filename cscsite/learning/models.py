@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
+from annoying.fields import AutoOneToOneField
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
@@ -513,6 +514,11 @@ class Enrollment(TimeStampedModel):
                      ('pass', _("Pass")),
                      ('good', _("Good")),
                      ('excellent', _("Excellent")))
+    SHORT_GRADES = Choices(('not_graded', "—"),
+                           ('unsatisfactory', "2"),
+                           ('pass', "3"),
+                           ('good', "4"),
+                           ('excellent', "5"))
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -546,6 +552,10 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_display(self):
         return self.GRADES[self.grade]
+
+    @property
+    def grade_short(self):
+        return self.SHORT_GRADES[self.grade]
 
 
 @python_2_unicode_compatible
@@ -611,6 +621,45 @@ class CourseOfferingNewsNotification(TimeStampedModel):
         return ("notification for {0} on {1}"
                 .format(smart_text(self.user.get_full_name()),
                         smart_text(self.course_offering_news)))
+
+
+@python_2_unicode_compatible
+class OverallGrade(TimeStampedModel):
+    GRADES = Choices(('not_graded', _("Not graded")),
+                     ('unsatisfactory', _("Unsatisfactory")),
+                     ('pass', _("Pass")),
+                     ('good', _("Good")),
+                     ('excellent', _("Excellent")))
+
+    student = AutoOneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student"),
+        related_name='overall_grade',
+        on_delete=models.CASCADE)
+    grade = StatusField(
+        verbose_name=_("OverallGrade|Grade"),
+        choices_name='GRADES',
+        default='not_graded')
+    grade_changed = MonitorField(
+        verbose_name=_("OverallGrade|Grade changed"),
+        monitor='grade')
+
+    class Meta:
+        ordering = ["student"]
+        verbose_name = _("Overall grade")
+        verbose_name_plural = _("Overall grades")
+
+    def clean(self):
+        if not self.student.is_student:
+            raise ValidationError(_("Only students can be graded"))
+
+    def __str__(self):
+        return ("Overall grade for {0}"
+                .format(smart_text(self.student.get_full_name())))
+
+    @property
+    def grade_display(self):
+        return self.GRADES[self.grade]
 
 
 from . import signals

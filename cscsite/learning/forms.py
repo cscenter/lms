@@ -12,7 +12,7 @@ import floppyforms as forms
 from core.forms import Ubereditor
 from .models import CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
-    Enrollment, \
+    Enrollment, OverallGrade, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
 
@@ -281,7 +281,7 @@ class AssignmentForm(forms.ModelForm):
 
 
 # Hipster factory class!
-class MarksSheetFormFabrique(object):
+class MarksSheetTeacherFormFabrique(object):
     @staticmethod
     def build_form_class(a_s_list, enrollment_list):
         fields = {'a_s_{0}'.format(a_s.pk):
@@ -294,7 +294,7 @@ class MarksSheetFormFabrique(object):
                        forms.ChoiceField(Enrollment.GRADES,
                                          show_hidden_initial=True)
                        for e in enrollment_list})
-        return type(b'MarksSheetForm', (forms.Form,), fields)
+        return type(b'MarksSheetTeacherForm', (forms.Form,), fields)
 
     @staticmethod
     def build_indexes(a_s_list, enrollment_list):
@@ -314,4 +314,28 @@ class MarksSheetFormFabrique(object):
                                                      e.student.pk):
                         e.grade
                         for e in enrollment_list})
+        return initial
+
+
+class MarksSheetStaffFormFabrique(object):
+    @staticmethod
+    def build_form_class(students_list):
+        fields = {'overall_{0}'.format(student.pk):
+                  forms.ChoiceField(OverallGrade.GRADES,
+                                    show_hidden_initial=True)
+                  for student in students_list}
+        return type(b'MarksSheetStaffForm', (forms.Form,), fields)
+
+    @staticmethod
+    def build_indexes(students_list):
+        overalls_index = {'overall_{0}'.format(student.pk):
+                          student.overall_grade
+                          for student in students_list}
+        return overalls_index
+
+    @staticmethod
+    def transform_to_initial(students_list):
+        initial = {'overall_{0}'.format(student.pk):
+                   student.overall_grade.grade
+                   for student in students_list}
         return initial

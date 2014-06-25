@@ -5,6 +5,7 @@ from calendar import Calendar
 from collections import OrderedDict, defaultdict
 import os
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
@@ -21,7 +22,7 @@ from dateutil.relativedelta import relativedelta
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, \
+    CourseOfferingNews, Enrollment, OverallGrade, \
     Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification
@@ -30,7 +31,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetFormFabrique
+    MarksSheetTeacherFormFabrique, MarksSheetStaffFormFabrique
 
 from core.notifications import get_unread_notifications_cache
 
@@ -818,18 +819,22 @@ class AssignmentDeleteView(TeacherOnlyMixin,
             (user in obj.course_offering.teachers.all())
 
 
-class MarksSheetMixin(object):
-    model = AssignmentStudent
-    template_name = "learning/marks_sheet.html"
+class MarksSheetTeacherView(TeacherOnlyMixin,
+                            generic.FormView):
+    user_type = 'teacher'
+    success_url = 'markssheet_teacher'
+    template_name = "learning/markssheet_teacher.html"
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
         self.a_s_list = None
         self.enrollment_list = None
-        super(MarksSheetMixin, self).__init__(*args, **kwargs)
+        super(MarksSheetTeacherView, self).__init__(*args, **kwargs)
 
     def get_form_class(self):
+        user = self.request.user
         a_s_list = (AssignmentStudent.objects
+                    .filter(assignment__course_offering__teachers=user)
                     .order_by('assignment__course_offering',
                               'student',
                               'assignment')
@@ -839,21 +844,22 @@ class MarksSheetMixin(object):
                                     'assignment__course_offering__semester',
                                     'student'))
         enrollment_list = (Enrollment.objects
+                           .filter(course_offering__teachers=user)
                            .select_related('course_offering', 'student'))
         self.a_s_list = a_s_list
         self.enrollment_list = enrollment_list
-        return (MarksSheetFormFabrique
+        return (MarksSheetTeacherFormFabrique
                 .build_form_class(a_s_list,
                                   enrollment_list))
 
     def get_initial(self):
-        return (MarksSheetFormFabrique
+        return (MarksSheetTeacherFormFabrique
                 .transform_to_initial(self.a_s_list, self.enrollment_list))
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
-            MarksSheetFormFabrique.build_indexes(self.a_s_list,
-                                                 self.enrollment_list)
+            MarksSheetTeacherFormFabrique.build_indexes(self.a_s_list,
+                                                        self.enrollment_list)
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
@@ -876,7 +882,7 @@ class MarksSheetMixin(object):
             key = 'final_grade_{0}_{1}'.format(course_offering_pk, student_pk)
             return kwargs['form'][key]
 
-        context = (super(MarksSheetMixin, self)
+        context = (super(MarksSheetTeacherView, self)
                    .get_context_data(*args, **kwargs))
         data = self.a_s_list
         # implying that the data is already sorted
@@ -918,20 +924,88 @@ class MarksSheetMixin(object):
         return context
 
 
-class MarksSheetTeacherView(TeacherOnlyMixin,
-                            MarksSheetMixin,
-                            generic.FormView):
-    user_type = 'teacher'
-    success_url = 'markssheet_teacher'
-
-    def get_queryset(self):
-        return \
-            (super(MarksSheetTeacherView, self).get_queryset()
-             .filter(assignment__course_offering__teachers=self.request.user))
-
-
 class MarksSheetStaffView(StaffOnlyMixin,
-                          MarksSheetMixin,
                           generic.FormView):
     user_type = 'staff'
     success_url = 'markssheet_staff'
+    template_name = "learning/markssheet_staff.html"
+    context_object_name = 'assignment_list'
+
+    def __init__(self, *args, **kwargs):
+        self.enrollment_index = None
+        self.students_list = None
+        self.students_list = None
+        super(MarksSheetStaffView, self).__init__(*args, **kwargs)
+
+    def get_form_class(self):
+        enrollment_index = {(enrollment.student.pk,
+                             enrollment.course_offering.pk):
+                            enrollment
+                            for enrollment in
+                            (Enrollment.objects
+                             .select_related('course_offering', 'student'))}
+        offerings_list = (CourseOffering.objects.all())
+        students_list = (get_user_model().objects
+                         .filter(groups__name='Student')
+                         .select_related('student'))
+        self.enrollment_index = enrollment_index
+        self.offerings_list = offerings_list
+        self.students_list = students_list
+        return (MarksSheetStaffFormFabrique
+                .build_form_class(students_list))
+
+    def get_initial(self):
+        return (MarksSheetStaffFormFabrique
+                .transform_to_initial(self.students_list))
+
+    def form_valid(self, form):
+        overalls_index = \
+            MarksSheetTeacherFormFabrique.build_indexes(self.students_list)
+        for field in form.changed_data:
+            if field in overalls_index:
+                overall = overalls_index[field]
+                overall.grade = form.cleaned_data[field]
+                overall.save()
+                continue
+            assert False  # shouldn't get here
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, *args, **kwargs):
+        def get_overall_grade_field(student_pk):
+            key = 'overall_{0}'.format(student_pk)
+            return kwargs['form'][key]
+
+        context = (super(MarksSheetStaffView, self)
+                   .get_context_data(*args, **kwargs))
+
+        # implying that the data is already sorted
+        structured = OrderedDict()
+        for student in self.students_list:
+            structured[student] = OrderedDict()
+            for offering in self.offerings_list:
+                idx = (student.pk, offering.pk)
+                maybe_enrollment = self.enrollment_index.get(idx)
+                if maybe_enrollment:
+                    cell = {'text': maybe_enrollment.grade_short,
+                            'enrolled': True}
+                else:
+                    cell = {'text': Enrollment.SHORT_GRADES['not_graded'],
+                            'enrolled': False}
+                print cell
+                structured[student][offering] = cell
+
+        header = structured.values()[0].keys()
+        for by_offering in structured.values():
+            # we should check for "assignment consistency": that all
+            # assignments are similar for all students in particular
+            # course offering
+            assert by_offering.keys() == header
+
+        context['structured'] = [(student,
+                                  get_overall_grade_field(student.pk),
+                                  by_offering)
+                                 for student, by_offering
+                                 in structured.iteritems()]
+        context['header'] = header
+        context['user_type'] = self.user_type
+        return context
