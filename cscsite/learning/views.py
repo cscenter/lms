@@ -975,6 +975,24 @@ class MarksSheetStaffView(StaffOnlyMixin,
             key = 'overall_{0}'.format(student_pk)
             return kwargs['form'][key]
 
+        def merge_cells(cell1, cell2):
+            grade_priorities = \
+                {Enrollment.SHORT_GRADES['not_graded']: 0,
+                 Enrollment.SHORT_GRADES['unsatisfactory']: 1,
+                 Enrollment.SHORT_GRADES['pass']: 2,
+                 Enrollment.SHORT_GRADES['good']: 3,
+                 Enrollment.SHORT_GRADES['excellent']: 4}
+            if not cell1:
+                return cell2
+            if not cell2:
+                return cell1
+            return {'grade': (cell1['grade']
+                              if (grade_priorities[cell1['grade']] >
+                                  grade_priorities[cell2['grade']])
+                              else cell2['grade']),
+                    'enrolled': (cell1['enrolled'] or
+                                 cell2['enrolled'])}
+
         context = (super(MarksSheetStaffView, self)
                    .get_context_data(*args, **kwargs))
 
@@ -983,6 +1001,7 @@ class MarksSheetStaffView(StaffOnlyMixin,
         for student in self.students_list:
             structured[student] = OrderedDict()
             for offering in self.offerings_list:
+                maybe_existing_cell = structured[student].get(offering.course)
                 idx = (student.pk, offering.pk)
                 maybe_enrollment = self.enrollment_index.get(idx)
                 if maybe_enrollment:
@@ -991,8 +1010,8 @@ class MarksSheetStaffView(StaffOnlyMixin,
                 else:
                     cell = {'text': Enrollment.SHORT_GRADES['not_graded'],
                             'enrolled': False}
-                print cell
-                structured[student][offering] = cell
+                structured[student][offering.course] = \
+                    merge_cells(maybe_existing_cell, cell)
 
         header = structured.values()[0].keys()
         for by_offering in structured.values():
@@ -1003,8 +1022,8 @@ class MarksSheetStaffView(StaffOnlyMixin,
 
         context['structured'] = [(student,
                                   get_overall_grade_field(student.pk),
-                                  by_offering)
-                                 for student, by_offering
+                                  by_course)
+                                 for student, by_course
                                  in structured.iteritems()]
         context['header'] = header
         context['user_type'] = self.user_type
