@@ -49,7 +49,7 @@
       {% regroup course_list_archive by semester as archive %}
       {% for semester in archive %}
       <h4>{{ semester.grouper }}</h4>
-      <table class="table" width="100%">
+      <table class="table table-condensed" width="100%">
         <thead>
           <th></th>
           <th width="30%">{% trans "Professors" %}</th>
