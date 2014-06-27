@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-27 17:46+0400\n"
-"PO-Revision-Date: 2014-06-27 17:47+0230\n"
+"POT-Creation-Date: 2014-06-27 18:16+0400\n"
+"PO-Revision-Date: 2014-06-27 18:16+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:22 learning/forms.py:221
+#: learning/forms.py:22 learning/forms.py:229
 #: templates/learning/markssheet_staff.html:18
 #: templates/learning/markssheet_teacher.html:18
 msgid "Save"
@@ -38,11 +38,11 @@ msgstr "Описание"
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
 
-#: learning/forms.py:52 learning/forms.py:258
+#: learning/forms.py:52 learning/forms.py:266
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:57 learning/forms.py:208 learning/forms.py:261
+#: learning/forms.py:57 learning/forms.py:216 learning/forms.py:269
 msgid "Text"
 msgstr "Текст"
 
@@ -54,7 +54,7 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:101 learning/forms.py:254 learning/models.py:142
+#: learning/forms.py:101 learning/forms.py:262 learning/models.py:142
 #: learning/models.py:197 learning/models.py:261 learning/models.py:358
 #: learning/models.py:537
 msgid "Course offering"
@@ -75,11 +75,11 @@ msgstr "Имя"
 #: learning/forms.py:120 learning/models.py:276
 #: templates/learning/courseclass_detail.html:37
 #: templates/learning/courseoffering_detail.html:93
-#: templates/learning/timetable.html:72
+#: templates/learning/timetable.html:105 templates/learning/timetable.html:129
 msgid "Slides"
 msgstr "Слайды"
 
-#: learning/forms.py:124 templates/learning/courseclass_detail.html:58
+#: learning/forms.py:124 templates/learning/courseclass_detail.html:65
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
@@ -87,34 +87,43 @@ msgstr "Приложенные файлы"
 msgid "You can select multiple files. New attachments will replace old ones"
 msgstr "Вы можете выбрать несколько файлов. Новые файлы заменяют старые"
 
-#: learning/forms.py:130
+#: learning/forms.py:130 learning/models.py:280
+msgid "CourseClass|Video"
+msgstr "Видео"
+
+#: learning/forms.py:134 learning/models.py:284
+msgid "please insert HTML for embedded video player"
+msgstr "пожалуйста, вставьте HTML для встроенного видеоплеера"
+
+#: learning/forms.py:137
 msgid "Other materials"
 msgstr "Материалы"
 
-#: learning/forms.py:135 learning/models.py:289
+#: learning/forms.py:142 learning/models.py:289
 #: templates/learning/courseoffering_detail.html:88
 msgid "Date"
 msgstr "Дата"
 
-#: learning/forms.py:139 learning/models.py:290
+#: learning/forms.py:146 learning/models.py:290
 msgid "Starts at"
 msgstr "Начало"
 
-#: learning/forms.py:143 learning/models.py:291
+#: learning/forms.py:150 learning/models.py:291
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:168 templates/learning/courseclass_detail.html:51
+#: learning/forms.py:175 templates/learning/courseclass_detail.html:58
+#: templates/learning/timetable.html:72
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:198
+#: learning/forms.py:206
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:266 templates/learning/assignment_detail.html:29
+#: learning/forms.py:274 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:68
@@ -123,11 +132,11 @@ msgstr "Не совпадает с семестром курса (с %(starts_at
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:271
+#: learning/forms.py:279
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:275
+#: learning/forms.py:283
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
@@ -264,14 +273,6 @@ msgstr "Семинар"
 #: learning/models.py:265
 msgid "CourseClass|Venue"
 msgstr "Место проведения"
-
-#: learning/models.py:280
-msgid "CourseClass|Video"
-msgstr "Видео"
-
-#: learning/models.py:284
-msgid "please insert HTML for embedded video player"
-msgstr "пожалуйста, вставьте HTML для встроенного видеоплеера"
 
 #: learning/models.py:286
 msgid "CourseClass|Other materials"
@@ -792,7 +793,6 @@ msgstr "Удалить"
 #: templates/learning/assignment_list_teacher.html:153
 #: templates/learning/courseoffering_detail.html:119
 #: templates/learning/courseoffering_detail.html:123
-#: templates/learning/timetable.html:102 templates/learning/timetable.html:106
 msgid "Yes,No"
 msgstr "Да,Нет"
 
@@ -915,6 +915,11 @@ msgstr "Когда"
 msgid "Where"
 msgstr "Где"
 
+#: templates/learning/courseclass_detail.html:51
+#: templates/learning/timetable.html:112 templates/learning/timetable.html:136
+msgid "Video"
+msgstr "Видео"
+
 #: templates/learning/courseoffering_detail.html:18
 #: templates/learning/courses_list_teacher.html:42
 #: templates/learning/courses_list_teacher.html:84
@@ -968,7 +973,11 @@ msgstr "Список курсов пуст"
 msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
 
-#: templates/learning/timetable.html:119
+#: templates/learning/timetable.html:119 templates/learning/timetable.html:142
+msgid "No"
+msgstr "Нет"
+
+#: templates/learning/timetable.html:157
 msgid "No classes yet"
 msgstr "Список занятий пуст"
 
@@ -1105,6 +1114,3 @@ msgstr "Для выпускника должен быть указан год в
 
 #~ msgid "Yes"
 #~ msgstr "Да"
-
-#~ msgid "No"
-#~ msgstr "Нет"

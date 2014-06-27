@@ -69,7 +69,7 @@
           <th width="15%">{% trans "Course" %}</th>
           <th width="12%">{% trans "Venue|short" %}</th>
           <th width="10%"></th>
-          <th width="10%">{% trans "Slides" %}</th>
+          <th width="10%">{% trans "Materials" %}</th>
         </thead>
         {% for class in day.list %}
         <tr>
@@ -90,7 +90,7 @@
             </a>
           </td>
           <td>
-            {% if class.type == 'lecture'%}
+            {% if class.type == 'lecture' %}
             <span class="badge lecture">{% trans 'Lecture' %}</span>
             {% else %}
             <span class="badge seminar">{% trans 'Seminar' %}</span>
@@ -98,13 +98,51 @@
           </td>
           <td>
             {% if user_type == 'teacher' %}
-            <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
-              {{ class.slides|yesno:_("Yes,No") }}
-            </a>
+            <ul class="list-unstyled no-margin">
+              {% if class.slides %}
+              <li>
+                <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+                  {% trans "Slides" %}
+                </a>
+              </li>
+              {% endif %}
+              {% if class.video %}
+              <li>
+                <a href="{% url 'course_class_edit' class.pk %}#div_id_video">
+                  {% trans "Video" %}
+                </a>
+              </li>
+              {% endif %}
+              {% if not class.slides and not class.video %}
+              <li>
+                <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+                  {% trans "No" %}
+                </a>
+              </li>
+              {% endif %}
+            </ul>
             {% else %}
-            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#materials">
-            {{ class.slides|yesno:_("Yes,No") }}
-            </a>
+            <ul class="list-unstyled no-margin">
+              {% if class.slides %}
+              <li>
+                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#slides">
+                  {% trans "Slides" %}
+                </a>
+              </li>
+              {% endif %}
+              {% if class.video %}
+              <li>
+                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#materials" "{% url 'course_class_edit' class.pk %}#video">
+                  {% trans "Video" %}
+                </a>
+              </li>
+              {% endif %}
+              {% if not class.slides and not class.video %}
+              <li>
+                {% trans "No" %}
+              </li>
+              {% endif %}
+            </ul>
             {% endif %}
           </td>
         </tr>

@@ -126,6 +126,13 @@ class CourseClassForm(forms.ModelForm):
         help_text=_("You can select multiple files. New attachments "
                     "will replace old ones"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
+    video = forms.CharField(
+        label=_("CourseClass|Video"),
+        required=False,
+        help_text=("{0}; {1}"
+                   .format(LATEX_MARKDOWN_HTML_ENABLED,
+                           _("please insert HTML for embedded video player"))),
+        widget=Ubereditor)
     other_materials = forms.CharField(
         label=_("Other materials"),
         required=False,
@@ -172,6 +179,7 @@ class CourseClassForm(forms.ModelForm):
                                  css_class='col-xs-6'),
                              css_class='row'),
                          css_class='container inner'),
+                     'video',
                      'other_materials'),
             CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
