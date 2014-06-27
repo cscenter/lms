@@ -25,7 +25,7 @@
         {% for course_offering in course_list_ongoing %}
         <tr>
           <td>
-            <a href="{% url 'course_detail' course_offering.course.slug %}">
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
               {{ course_offering.course.name }}
             </a>
           </td>
@@ -57,7 +57,7 @@
         {% for course_offering in semester.list %}
         <tr>
           <td>
-            <a href="{% url 'course_detail' course_offering.course.slug %}">
+            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
               {{ course_offering.course.name }}
             </a>
           </td>
