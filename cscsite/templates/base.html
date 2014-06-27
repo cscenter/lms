@@ -73,9 +73,9 @@
                   {% trans "About CSC" %} <i class="fa fa-caret-down"></i>
                 </li>
               </a>
-              <a href="{% url 'news_list' %}">
-                <li class="{% current 'news_list' %}">
-                  {% trans "News" %}
+              <a href="{% url 'online' %}">
+                <li class="{% current 'online' %}">
+                  {% trans "Online" %}
                 </li>
               </a>
               {% if user.is_authenticated %}

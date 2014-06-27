@@ -44,6 +44,15 @@
             "text": "# Licenses\n\nThis is a list of licenses available for Computer Science Center students. **Please change this text**."
         }
     },
+    {
+        "model": "textpages.textpage",
+        "pk": 6,
+        "fields": {
+            "url_name": "online",
+            "name": "Online",
+            "text": "# Online\n\nThis is \"online\" page. **Please change this text**."
+        }
+    },
 {
   "pk": 1,
   "model": "learning.venue",
