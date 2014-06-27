@@ -29,7 +29,7 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
-    CourseClassForm, \
+    CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherFormFabrique, MarksSheetStaffFormFabrique
 
@@ -266,6 +266,17 @@ class CourseDetailView(generic.DetailView):
                    .get_context_data(*args, **kwargs))
         context['offerings'] = self.object.courseoffering_set.all()
         return context
+
+
+class CourseUpdateView(StaffOnlyMixin,
+                       ProtectedFormMixin,
+                       generic.UpdateView):
+    model = Course
+    template_name = "learning/simple_crispy_form.html"
+    form_class = CourseForm
+
+    def is_form_allowed(self, user, obj):
+        return user.is_superuser
 
 
 class GetCourseOfferingObjectMixin(object):

@@ -10,7 +10,7 @@ from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 
 from core.forms import Ubereditor
-from .models import CourseOffering, CourseOfferingNews, \
+from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
     Enrollment, OverallGrade, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
@@ -69,6 +69,30 @@ class CourseOfferingNewsForm(forms.ModelForm):
     class Meta:
         model = CourseOfferingNews
         fields = ['title', 'text']
+
+
+class CourseForm(forms.ModelForm):
+    name = forms.CharField(
+        label=_("Course|name"),
+        required=True,
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'autofocus': 'autofocus'}))
+    description = forms.CharField(
+        label=_("Course|description"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
+        required=True,
+        widget=Ubereditor)
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('name', 'description'),
+            CANCEL_SAVE_PAIR)
+        super(CourseForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Course
+        fields = ['name', 'description']
 
 
 class CourseClassForm(forms.ModelForm):

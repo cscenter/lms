@@ -4,11 +4,20 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-xs-12">
+    <div class="col-xs-12 h2-and-buttons">
       <h2>
         {{ course.name }}
       </h2>
+      {% if user.is_superuser %}
+      <div class="btn-toolbar">
+        <a href="{% url 'course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+      </div>
+      {% endif %}
       <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
       <div class="ubertext">
         {{ course.description|safe }}
       </div>
