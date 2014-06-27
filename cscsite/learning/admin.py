@@ -7,7 +7,7 @@ from core.admin import UbereditorMixin, WiderLabelsMixin
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
-    Enrollment
+    Enrollment, OverallGrade
 
 
 class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -77,6 +77,23 @@ class EnrollmentAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
+class OverallGradeAdmin(admin.ModelAdmin):
+    list_display = ['student', 'grade', 'grade_changed']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ['student', 'grade_changed']
+        else:
+            return ['grade_changed']
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'student':
+            kwargs['queryset'] = (get_user_model().objects
+                                  .filter(groups__name='Student'))
+            return (super(OverallGradeAdmin, self)
+                    .formfield_for_foreignkey(db_field, request, **kwargs))
+
+
 class AssignmentStudentAdmin(admin.ModelAdmin):
     list_display = ['student', 'assignment', 'state', 'state_changed']
 
@@ -98,3 +115,4 @@ admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(OverallGrade, OverallGradeAdmin)
