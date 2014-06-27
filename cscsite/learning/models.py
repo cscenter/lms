@@ -52,8 +52,8 @@ class Course(TimeStampedModel):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = _("course")
-        verbose_name_plural = _("courses")
+        verbose_name = _("Course")
+        verbose_name_plural = _("Courses")
 
     def __str__(self):
         return smart_text(self.name)
@@ -75,6 +75,8 @@ class Semester(models.Model):
 
     class Meta:
         ordering = ["year", "-type"]
+        verbose_name = _("Semester")
+        verbose_name_plural = _("Semesters")
 
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
