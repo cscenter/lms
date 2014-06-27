@@ -33,10 +33,11 @@ class News(TimeStampedModel):
 
     text = SplitField(
         _("News|text"),
-        help_text=(_("First %s paragraphs or anything "
-                     "before %s will serve as excerpt; "
-                     "LaTeX+Markdown is enabled") % (SPLIT_DEFAULT_PARAGRAPHS,
-                                                     escape(SPLIT_MARKER))))
+        help_text=(_("First {n_par} paragraphs or anything "
+                     "before {marker} will serve as excerpt; "
+                     "LaTeX+Markdown is enabled")
+                   .format(n_par=SPLIT_DEFAULT_PARAGRAPHS,
+                           marker=escape(SPLIT_MARKER))))
 
     class Meta(object):
         ordering = ["-created", "author"]

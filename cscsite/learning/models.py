@@ -276,6 +276,12 @@ class CourseClass(TimeStampedModel, object):
         _("Slides"),
         blank=True,
         upload_to=_slides_file_name)
+    video = models.TextField(
+        _("CourseClass|Video"),
+        blank=True,
+        help_text=("{0}; {1}"
+                   .format(LATEX_MARKDOWN_HTML_ENABLED,
+                           _("please insert HTML for embedded video player"))))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,

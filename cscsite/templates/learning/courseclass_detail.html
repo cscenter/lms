@@ -48,6 +48,13 @@
       {% endif %}
 
       {% if course_class.other_materials %}
+      <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
+      <div class="ubertext">
+        {{ course_class.video|safe }}
+      </div>
+      {% endif %}
+
+      {% if course_class.other_materials %}
       <h4 class="bigger-margin" id="materials">{% trans "Materials" %}</h4>
       <div class="ubertext">
         {{ course_class.other_materials|safe }}

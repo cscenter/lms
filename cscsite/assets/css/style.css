@@ -594,3 +594,7 @@ tr.unread {
 .marks-table .enrolled {
   background-color: #E2F9FF;
 }
+
+.list-unstyled.no-margin {
+  margin-bottom: 0px !important;
+}
