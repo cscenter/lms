@@ -15,7 +15,7 @@ from learning.views import \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
     CourseTeacherListView, \
     CourseStudentListView, \
-    CourseListView, CourseDetailView, \
+    CourseListView, CourseDetailView, CourseUpdateView, \
     CourseOfferingDetailView, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
@@ -105,6 +105,8 @@ urlpatterns = patterns('',
         name="course_list"),
     url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
         name="course_detail"),
+    url(r"^courses/(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
+        name="course_edit"),
 
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
         CourseOfferingDetailView.as_view(),
