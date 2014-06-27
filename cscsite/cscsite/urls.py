@@ -44,6 +44,7 @@ urlpatterns = patterns('',
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
+    url(r'^online/$', TextpageOpenView.as_view(), name='online'),
 
     url(r'^learning/$',
         RedirectView.as_view(pattern_name=settings.LEARNING_BASE),
