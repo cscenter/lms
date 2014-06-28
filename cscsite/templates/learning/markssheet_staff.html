@@ -15,7 +15,7 @@
   <div class="row">
     <div class="col-xs-12">
       <form method="post">{% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right">{% trans "Save" %}</button>
+        <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
         <div class="marks-table-container">
           <table class="marks-table">
             <tr>
@@ -36,7 +36,11 @@
                 {{ cell.text }}
               </td>
               {% endfor %}
-              <td>{{ overall_grade }}</td>
+              <td>
+                <span class="marks-sheet-form-cell">
+                  {{ overall_grade }}
+                </span>
+              </td>
             </tr>
             {% endfor %}
           </table>
