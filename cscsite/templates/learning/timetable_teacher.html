@@ -6,15 +6,11 @@
 <div class="container">
   <div class="row timetable-header-row">
     <div class="col-xs-12 h2-and-buttons">
-      {% if week_start.month == week_end.month %}
-      <h2>{{ week_start|date:"d" }}–{{ week_end|date:"d E" }} {{ year }}</h2>
-      {% else %}
-      <h2>{{ week_start|date:"d b" }}–{{ week_end|date:"d b" }} {{ year }}</h2>
-      {% endif %}
+      <h2>{{ current_date|date:"F, Y" }}</h2>
       <div class="btn-toolbar">
         <div class="btn-group">
-          <a href="?year={{ prev_year }}&week={{ prev_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
-          <a href="?year={{ next_year }}&week={{ next_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+          <a href="?year={{ prev_date.year }}&month={{ prev_date.month }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?year={{ next_date.year }}&month={{ next_date.month }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         {% if user.is_teacher and user.is_student %}
         <div class="btn-group">
@@ -97,7 +93,6 @@
             {% endif %}
           </td>
           <td>
-            {% if user_type == 'teacher' %}
             <ul class="list-unstyled no-margin">
               {% if class.slides %}
               <li>
@@ -121,29 +116,6 @@
               </li>
               {% endif %}
             </ul>
-            {% else %}
-            <ul class="list-unstyled no-margin">
-              {% if class.slides %}
-              <li>
-                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#slides">
-                  {% trans "Slides" %}
-                </a>
-              </li>
-              {% endif %}
-              {% if class.video %}
-              <li>
-                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#materials" "{% url 'course_class_edit' class.pk %}#video">
-                  {% trans "Video" %}
-                </a>
-              </li>
-              {% endif %}
-              {% if not class.slides and not class.video %}
-              <li>
-                {% trans "No" %}
-              </li>
-              {% endif %}
-            </ul>
-            {% endif %}
           </td>
         </tr>
         {% endfor %}
