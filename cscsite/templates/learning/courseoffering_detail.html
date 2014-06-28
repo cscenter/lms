@@ -131,14 +131,14 @@
   </div>
   {% endif %}
   {% if user.is_authenticated %}
-    {% if user.is_student or is_actual_teacher %}
+    {% if user.is_student or is_actual_teacher or user.is_superuser %}
       {% if course_offering.assignment_set.all %}
       <div class="row">
         <div class="col-xs-12">
           <h3>{% trans "Assignments" %}</h3>
           <ul>
             {% for assignment in course_offering.assignment_set.all %}
-              {% if is_actual_teacher %}
+              {% if is_actual_teacher or user.is_superuser %}
               <li>
                 <a href="{% url "assignment_detail_teacher" assignment.pk %}">
                   {{ assignment.title }}
