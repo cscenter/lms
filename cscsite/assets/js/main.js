@@ -1,4 +1,5 @@
 var ends_at_touched = false;
+var marks_sheet_unsaved = 0;
 
 $(document).ready(function () {
     hljs.configure({tabReplace: '    '});
@@ -91,6 +92,29 @@ $(document).ready(function () {
                                      + maybe_seconds);
             } else {
                 console.log("Can't parse " + string_time);
+            }
+        }
+    });
+
+    if (marks_sheet_unsaved == 0) {
+        $("#marks-sheet-save").attr("disabled", "disabled");
+    }
+
+    $(".marks-sheet-form-cell select").change(function() {
+        $this = $(this);
+        var current_value = $this.val();
+        var saved_value = $this.next("input[type=hidden]").val();
+        if (current_value != saved_value) {
+            $this.parent().addClass("marks-sheet-unsaved-cell");
+            marks_sheet_unsaved++;
+            if (marks_sheet_unsaved > 0) {
+                $("#marks-sheet-save").removeAttr("disabled");
+            }
+        } else {
+            $this.parent().removeClass("marks-sheet-unsaved-cell");
+            marks_sheet_unsaved--;
+            if (marks_sheet_unsaved == 0) {
+                $("#marks-sheet-save").attr("disabled", "disabled");
             }
         }
     });

@@ -598,3 +598,9 @@ tr.unread {
 .list-unstyled.no-margin {
   margin-bottom: 0px !important;
 }
+
+.marks-sheet-unsaved-cell {
+  border-left: 2px solid #428bca;
+  padding-left: 3px;
+  margin-left: -3px;
+}
