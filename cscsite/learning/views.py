@@ -14,7 +14,7 @@ from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware, utc
 
 from braces.views import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
@@ -38,13 +38,61 @@ from core.notifications import get_unread_notifications_cache
 from . import utils
 
 
-class TimetableMixin(object):
+class TimetableTeacherView(TeacherOnlyMixin,
+                           generic.ListView):
     model = CourseClass
-    template_name = "learning/timetable.html"
+    user_type = 'teacher'
+    template_name = "learning/timetable_teacher.html"
 
     def __init__(self, *args, **kwargs):
         self._context_weeks = None
-        super(TimetableMixin, self).__init__(*args, **kwargs)
+        super(TimetableTeacherView, self).__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        month_qstr = self.request.GET.get('month')
+        year_qstr = self.request.GET.get('year')
+        try:
+            year = int(year_qstr)
+            month = int(month_qstr)
+        except TypeError:
+            today = now().date()
+            year, month = today.year, today.month
+        choosen_month_date = datetime.date(year=year, month=month, day=1)
+        prev_month_date = choosen_month_date + relativedelta(months=-1)
+        next_month_date = choosen_month_date + relativedelta(months=+1)
+        self._context_dates = {'month': month,
+                               'year': year,
+                               'current_date': choosen_month_date,
+                               'prev_date': prev_month_date,
+                               'next_date': next_month_date}
+        return (CourseClass.objects
+                .filter(date__month=month,
+                        date__year=year,
+                        course_offering__teachers=self.request.user)
+                .order_by('date', 'starts_at')
+                .select_related('venue',
+                                'course_offering',
+                                'course_offering__course',
+                                'course_offering__semester'))
+
+    # TODO: test "pagination"
+    def get_context_data(self, *args, **kwargs):
+        context = (super(TimetableTeacherView, self)
+                   .get_context_data(*args, **kwargs))
+        context.update(self._context_dates)
+        context['user_type'] = self.user_type
+        return context
+
+
+class TimetableStudentView(StudentOnlyMixin,
+                           generic.ListView):
+    model = CourseClass
+    user_type = 'student'
+    template_name = "learning/timetable_student.html"
+
+    def __init__(self, *args, **kwargs):
+        self._context_weeks = None
+        super(TimetableStudentView, self).__init__(*args, **kwargs)
 
     def get_queryset(self):
         week_qstr = self.request.GET.get('week')
@@ -71,7 +119,8 @@ class TimetableMixin(object):
                                'next_year': next_w_cal[0],
                                'next_week': next_w_cal[1]}
         return (CourseClass.objects
-                .filter(date__range=[start, end])
+                .filter(date__range=[start, end],
+                        course_offering__enrolled_students=self.request.user)
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
@@ -80,31 +129,11 @@ class TimetableMixin(object):
 
     # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
-        context = (super(TimetableMixin, self)
+        context = (super(TimetableStudentView, self)
                    .get_context_data(*args, **kwargs))
         context.update(self._context_weeks)
         context['user_type'] = self.user_type
         return context
-
-
-class TimetableTeacherView(TeacherOnlyMixin,
-                           TimetableMixin,
-                           generic.ListView):
-    user_type = 'teacher'
-
-    def get_queryset(self):
-        return (super(TimetableTeacherView, self).get_queryset()
-                .filter(course_offering__teachers=self.request.user))
-
-
-class TimetableStudentView(StudentOnlyMixin,
-                           TimetableMixin,
-                           generic.ListView):
-    user_type = 'student'
-
-    def get_queryset(self):
-        return (super(TimetableStudentView, self).get_queryset()
-                .filter(course_offering__enrolled_students=self.request.user))
 
 
 class CalendarMixin(object):
