@@ -1001,7 +1001,7 @@ class MarksSheetStaffView(StaffOnlyMixin,
 
     def form_valid(self, form):
         overalls_index = \
-            MarksSheetTeacherFormFabrique.build_indexes(self.students_list)
+            MarksSheetStaffFormFabrique.build_indexes(self.students_list)
         for field in form.changed_data:
             if field in overalls_index:
                 overall = overalls_index[field]
