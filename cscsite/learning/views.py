@@ -625,8 +625,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                    .get_context_data(*args, **kwargs))
         open_ = [a_s
                  for a_s in context['assignment_list']
-                 if (a_s.assignment.is_open or
-                     a_s.state in AssignmentStudent.OPEN_STATES)]
+                 if (a_s.has_unread() or
+                     (a_s.state in AssignmentStudent.OPEN_STATES and
+                      a_s.has_passes))]
         archive = (Assignment.objects
                    .filter(course_offering__teachers=self.request.user)
                    .order_by('-deadline_at',
