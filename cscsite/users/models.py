@@ -35,8 +35,8 @@ class CSCUser(AbstractUser):
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
-    enrolment_year = models.PositiveSmallIntegerField(
-        _("CSCUser|enrolment year"),
+    enrollment_year = models.PositiveSmallIntegerField(
+        _("CSCUser|enrollment year"),
         validators=[MinValueValidator(1990)],
         blank=True,
         null=True)
@@ -65,8 +65,8 @@ class CSCUser(AbstractUser):
         # avoid checking if the model wasn't yet saved, otherwise exception
         # will be thrown about missing many-to-many relation
         if self.pk:
-            if self.is_student and self.enrolment_year is None:
-                raise ValidationError(_("CSCUser|enrolment year should be "
+            if self.is_student and self.enrollment_year is None:
+                raise ValidationError(_("CSCUser|enrollment year should be "
                                         "provided for students"))
             if self.is_graduate and self.graduation_year is None:
                 raise ValidationError(_("CSCUser|graduation year should be "

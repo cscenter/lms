@@ -21,7 +21,7 @@ class UserTests(TestCase):
         user.save()
         user.groups = [user.IS_STUDENT_PK]
         self.assertRaises(ValidationError, user.clean)
-        user.enrolment_year = 2010
+        user.enrollment_year = 2010
         self.assertIsNone(user.clean())
 
     def test_graduate_should_have_graduation_year(self):
