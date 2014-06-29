@@ -17,6 +17,7 @@ MySQL-python==1.2.5
 pylint-django==0.3
 python-dateutil==2.2
 pytz==2013.9
+raven==5.0.0
 requests==2.2.0
 six==1.5.2
 slideshare==0.1dev
