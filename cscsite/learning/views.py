@@ -1054,12 +1054,15 @@ class MarksSheetStaffView(StaffOnlyMixin,
                 structured[student][offering.course] = \
                     merge_cells(maybe_existing_cell, cell)
 
-        header = structured.values()[0].keys()
-        for by_offering in structured.values():
-            # we should check for "assignment consistency": that all
-            # assignments are similar for all students in particular
-            # course offering
-            assert by_offering.keys() == header
+        if (len(structured.values()) > 0):
+            header = structured.values()[0].keys()
+            for by_offering in structured.values():
+                # we should check for "assignment consistency": that all
+                # assignments are similar for all students in particular
+                # course offering
+                assert by_offering.keys() == header
+        else:
+            header = []
 
         context['structured'] = [(student,
                                   get_overall_grade_field(student.pk),
