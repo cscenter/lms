@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-29 19:09+0400\n"
-"PO-Revision-Date: 2014-06-29 19:10+0230\n"
+"POT-Creation-Date: 2014-06-29 20:00+0400\n"
+"PO-Revision-Date: 2014-06-29 20:05+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -180,7 +180,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:56 templates/base.html:145
+#: learning/models.py:56 templates/base.html:145 templates/user_detail.html:77
 #: templates/learning/courses_list_all.html:9
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
@@ -433,7 +433,7 @@ msgstr "Отлично"
 #: learning/models.py:533 learning/models.py:644
 #: templates/learning/assignment_detail.html:54
 #: templates/learning/assignment_list_teacher.html:71
-#: templates/learning/assignment_student_detail.html:120
+#: templates/learning/assignment_student_detail.html:120 users/views.py:123
 msgid "Student"
 msgstr "Студент"
 
@@ -782,6 +782,34 @@ msgstr "Информация о поступлении"
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
+#: templates/user_detail.html:29
+msgid "student"
+msgstr "студент"
+
+#: templates/user_detail.html:30
+msgid "enrolled in"
+msgstr "год поступления"
+
+#: templates/user_detail.html:30
+msgid "courseoffering|took"
+msgstr "курсы"
+
+#: templates/user_detail.html:48
+msgid "graduate"
+msgstr "выпускник"
+
+#: templates/user_detail.html:49
+msgid "graduated in"
+msgstr "год выпуска"
+
+#: templates/user_detail.html:56
+msgid "teacher"
+msgstr "преподаватель"
+
+#: templates/user_detail.html:56
+msgid "courses"
+msgstr "курсы"
+
 #: templates/learning/assignment_detail.html:17
 #: templates/learning/assignment_student_detail.html:22
 #: templates/learning/course_detail.html:13
@@ -1101,14 +1129,19 @@ msgstr "Для студента должен быть указан год пос
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
+#: users/views.py:125
+msgid "Teacher"
+msgstr "Преподаватель"
+
+#: users/views.py:127
+msgid "Graduate"
+msgstr "Выпускник"
+
 #~ msgid "Available|plural"
 #~ msgstr "Доступные"
 
 #~ msgid "course"
 #~ msgstr "Курс"
-
-#~ msgid "courses"
-#~ msgstr "Курсы"
 
 #~ msgid "LaTeX+Markdown+HTML is enabled"
 #~ msgstr "доступны LaTeX, Markdown и HTML"

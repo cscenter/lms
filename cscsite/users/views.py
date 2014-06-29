@@ -7,17 +7,18 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import FormView, View, RedirectView, DetailView
+from django.views import generic
 from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
 from braces.views import LoginRequiredMixin
 
-from .forms import LoginForm
+from .models import CSCUser
+from .forms import LoginForm, UserProfileForm
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
-class LoginView(FormView):
+class LoginView(generic.FormView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
     form_class = LoginForm
     template_name = "login.html"
@@ -57,7 +58,8 @@ class LoginView(FormView):
             return self.form_invalid(form)
 
 
-class LogoutView(LoginRequiredMixin, RedirectView):
+class LogoutView(LoginRequiredMixin,
+                 generic.RedirectView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
 
     def get(self, request, *args, **kwargs):
@@ -76,7 +78,7 @@ class LogoutView(LoginRequiredMixin, RedirectView):
         return redirect_to
 
 
-class TeacherDetailView(DetailView):
+class TeacherDetailView(generic.DetailView):
     template_name = "teacher_detail.html"
     context_object_name = 'teacher'
 
@@ -93,3 +95,45 @@ class TeacherDetailView(DetailView):
         if not teacher.is_teacher:
             raise Http404
         return teacher
+
+
+class UserDetailView(generic.DetailView):
+    template_name = "user_detail.html"
+    context_object_name = 'user_object'
+
+    def get_queryset(self, *args, **kwargs):
+        return (auth.get_user_model()
+                ._default_manager
+                .all()
+                .select_related('overall_grade')
+                .prefetch_related('teaching_set',
+                                  'teaching_set__semester',
+                                  'teaching_set__course',
+                                  'enrollment_set',
+                                  'enrollment_set__course_offering',
+                                  'enrollment_set__course_offering__semester',
+                                  'enrollment_set__course_offering__course'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(UserDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        context['is_extended_profile_available'] = \
+            (self.request.user == self.object or
+             self.request.user.is_superuser)
+        context['is_editing_allowed'] = \
+            context['is_extended_profile_available']
+        return context
+
+
+class UserUpdateView(generic.UpdateView):
+    model = CSCUser
+    template_name = "learning/simple_crispy_form.html"
+    form_class = UserProfileForm
+
+    def get_success_url(self):
+        return self.object.get_absolute_url()
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(UserUpdateView, self)
+                   .get_context_data(*args, **kwargs))
+        return context
