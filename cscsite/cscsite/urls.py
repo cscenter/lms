@@ -10,7 +10,7 @@ from index.views import IndexView, AlumniView, ProfView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
-    TextpageSyllabusView
+    TextpageSyllabusView, CustomTextpageOpenView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
@@ -146,6 +146,9 @@ urlpatterns = patterns('',
         name="venue_detail"),
 
     url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
+
+    url(r'^pages/(?P<slug>[-\w]+)$', CustomTextpageOpenView.as_view(),
+        name='custom_text_page'),
 
     url(r'^library/', include("library.urls")),
 

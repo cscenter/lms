@@ -65,9 +65,9 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course_offering', 'grade_changed']
+            return ['student', 'course_offering', 'grade_changed', 'modified']
         else:
-            return ['grade_changed']
+            return ['grade_changed', 'modified']
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':

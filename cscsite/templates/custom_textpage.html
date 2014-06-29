@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ object.name|safe }}</h2>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="ubertext">
+        {{ object.text|safe }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
