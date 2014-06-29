@@ -5,7 +5,7 @@ import logging
 from django.http import Http404
 from django.views.generic import DetailView
 
-from textpages.models import Textpage
+from textpages.models import Textpage, CustomTextpage
 
 from braces.views import GroupRequiredMixin
 
@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 class TextpageOpenView(DetailView):
     model = Textpage
-
     template_name = "textpage.html"
 
     def get_object(self):
@@ -26,6 +25,22 @@ class TextpageOpenView(DetailView):
         except self.model.DoesNotExist:
             logger.warning(
                 "can't find {0} as a textpage".format(requested_url_name))
+            raise Http404
+
+
+class CustomTextpageOpenView(DetailView):
+    model = CustomTextpage
+    template_name = "custom_textpage.html"
+
+    def get_object(self):
+        try:
+            slug = self.kwargs.get('slug')
+            if not slug:
+                raise Http404
+            return self.model.objects.get(slug=slug)
+        except self.model.DoesNotExist:
+            logger.warning("can't find {0} as a custom textpage"
+                           .format(self.kwargs.get('slug')))
             raise Http404
 
 

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-29 20:00+0400\n"
-"PO-Revision-Date: 2014-06-29 20:05+0230\n"
+"POT-Creation-Date: 2014-06-29 21:27+0400\n"
+"PO-Revision-Date: 2014-06-29 21:28+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr "Сохранить"
 
 #: learning/forms.py:32 learning/forms.py:115 learning/models.py:129
 #: learning/models.py:222 learning/models.py:272
-#: templates/learning/courseclass_detail.html:44
+#: templates/learning/courseclass_detail.html:44 users/forms.py:43
 msgid "Description"
 msgstr "Описание"
 
@@ -158,7 +158,7 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
-#: learning/models.py:43 news/models.py:27
+#: learning/models.py:43 news/models.py:27 textpages/models.py:40
 msgid "News|slug"
 msgstr "Имя для URL"
 
@@ -180,7 +180,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:56 templates/base.html:145 templates/user_detail.html:77
+#: learning/models.py:56 templates/base.html:145
 #: templates/learning/courses_list_all.html:9
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
@@ -398,7 +398,7 @@ msgstr "Выполнение задания"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: learning/models.py:485 textpages/models.py:19 users/models.py:36
+#: learning/models.py:485 users/models.py:37
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -433,7 +433,7 @@ msgstr "Отлично"
 #: learning/models.py:533 learning/models.py:644
 #: templates/learning/assignment_detail.html:54
 #: templates/learning/assignment_list_teacher.html:71
-#: templates/learning/assignment_student_detail.html:120 users/views.py:123
+#: templates/learning/assignment_student_detail.html:120
 msgid "Student"
 msgstr "Студент"
 
@@ -595,7 +595,7 @@ msgstr "Заголовок"
 msgid "News|published"
 msgstr "Опубликовано"
 
-#: news/models.py:35 textpages/models.py:18
+#: news/models.py:35 textpages/models.py:23 textpages/models.py:50
 msgid "News|text"
 msgstr "Текст"
 
@@ -782,41 +782,41 @@ msgstr "Информация о поступлении"
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
-#: templates/user_detail.html:29
-msgid "student"
-msgstr "студент"
-
-#: templates/user_detail.html:30
-msgid "enrolled in"
-msgstr "год поступления"
-
-#: templates/user_detail.html:30
-msgid "courseoffering|took"
-msgstr "курсы"
-
-#: templates/user_detail.html:48
-msgid "graduate"
-msgstr "выпускник"
-
-#: templates/user_detail.html:49
-msgid "graduated in"
-msgstr "год выпуска"
-
-#: templates/user_detail.html:56
-msgid "teacher"
-msgstr "преподаватель"
-
-#: templates/user_detail.html:56
-msgid "courses"
-msgstr "курсы"
-
-#: templates/learning/assignment_detail.html:17
+#: templates/user_detail.html:12 templates/learning/assignment_detail.html:17
 #: templates/learning/assignment_student_detail.html:22
 #: templates/learning/course_detail.html:13
 #: templates/learning/courseclass_detail.html:13
 #: templates/learning/courseoffering_detail.html:26
 msgid "Edit"
 msgstr "Редактировать"
+
+#: templates/user_detail.html:26
+msgid "student"
+msgstr "студент"
+
+#: templates/user_detail.html:27
+msgid "enrolled in"
+msgstr "год поступления"
+
+#: templates/user_detail.html:27
+msgid "courseoffering|took"
+msgstr "курсы"
+
+#: templates/user_detail.html:45
+msgid "graduate"
+msgstr "выпускник"
+
+#: templates/user_detail.html:46
+msgid "graduated in"
+msgstr "год выпуска"
+
+#: templates/user_detail.html:53
+msgid "teacher"
+msgstr "преподаватель"
+
+#: templates/user_detail.html:53
+msgid "courses"
+msgstr "курсы"
 
 #: templates/learning/assignment_detail.html:18
 #: templates/learning/assignment_student_detail.html:23
@@ -1053,89 +1053,103 @@ msgstr ""
 msgid "Book|number of copies left"
 msgstr "Количество оставшихся копий"
 
-#: textpages/models.py:11
+#: textpages/models.py:14
 msgid "Textpage|url_name"
 msgstr "url_name"
 
-#: textpages/models.py:15
+#: textpages/models.py:19 textpages/models.py:47
 msgid "Textpage|name"
 msgstr "Имя"
 
-#: textpages/models.py:23
+#: textpages/models.py:28
 msgid "Textpage|page"
 msgstr "Страница"
 
-#: textpages/models.py:24
+#: textpages/models.py:29
 msgid "Textpage|pages"
 msgstr "Страницы"
 
-#: users/forms.py:13
+#: textpages/models.py:42
+msgid ""
+"Short dash-separated string for human-readable URLs, as in "
+"compscicenter.ru/pages/<b>some-news</b>/"
+msgstr ""
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
+"compscicenter.ru/pages/<b>some-news</b>/"
+
+#: textpages/models.py:55
+msgid "Textpage|Custom page"
+msgstr "Дополнительная страница"
+
+#: textpages/models.py:56
+msgid "Textpage|Custom pages"
+msgstr "Дополнительные страницы"
+
+#: users/forms.py:22
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: users/forms.py:17
+#: users/forms.py:26
 msgid "Password"
 msgstr "Пароль"
 
-#: users/forms.py:28
+#: users/forms.py:37
 msgid "Submit"
 msgstr "Отправить"
 
-#: users/models.py:27
+#: users/models.py:28
 msgid "CSCUser|patronymic"
 msgstr "Отчество"
 
-#: users/models.py:31
+#: users/models.py:32
 msgid "CSCUser|photo"
 msgstr "Фото"
 
-#: users/models.py:35
+#: users/models.py:36
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
-#: users/models.py:39
+#: users/models.py:40
 msgid "CSCUser|enrollment year"
 msgstr "Год поступления"
 
-#: users/models.py:44
+#: users/models.py:45
 msgid "CSCUser|graduation year"
 msgstr "Год выпуска"
 
-#: users/models.py:49
+#: users/models.py:50
 msgid "Yandex ID"
 msgstr "Yandex ID"
 
-#: users/models.py:52
+#: users/models.py:53
 msgid "Only the part before \"@yandex.ru\" is expected"
 msgstr "Ожидается часть до «@yandex.ru»"
 
-#: users/models.py:56
+#: users/models.py:57
 msgid "Stepic ID"
 msgstr "Stepic ID"
 
-#: users/models.py:61
+#: users/models.py:62
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: users/models.py:62
+#: users/models.py:63
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:69
+#: users/models.py:70
 msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
-#: users/models.py:72
+#: users/models.py:73
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
-#: users/views.py:125
-msgid "Teacher"
-msgstr "Преподаватель"
+#~ msgid "Teacher"
+#~ msgstr "Преподаватель"
 
-#: users/views.py:127
-msgid "Graduate"
-msgstr "Выпускник"
+#~ msgid "Graduate"
+#~ msgstr "Выпускник"
 
 #~ msgid "Available|plural"
 #~ msgstr "Доступные"
