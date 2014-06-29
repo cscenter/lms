@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{{ user_object.get_full_name }}</h2>
+      {% if is_editing_allowed %}
+      <div class="btn-toolbar">
+        <a href="{% url 'user_update' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-9">
+      {% if user_object.note %}
+      <div class="ubertext">{{ user_object.note }}</div>
+      {% endif %}
+      <ul class="">
+        {% if user_object.is_student %}
+        <li>
+          {% trans "student" %},
+          {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% if user_object.enrollment_set.all %}, {% trans "courseoffering|took" %}:
+          <ul>
+            {% for enrollment in user_object.enrollment_set.all %}
+            <li>
+              <a href="{% url 'course_offering_detail' enrollment.course_offering.course.slug enrollment.course_offering.semester.slug %}">
+                {{ enrollment.course_offering }}
+              </a>
+              {% if is_extended_profile_available %}
+              ({{ enrollment.grade_display|lower }})
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </li>
+        {% endif %}
+        {% if user_object.is_graduate %}
+        <li>
+          {% trans "graduate" %},
+          {% trans "graduated in" %} {{ user_object.graduation_year }}
+          {% if is_extended_profile_available %}
+          ({{ user_object.overall_grade.grade_display|lower }})
+          {% endif %}
+        </li>
+        {% endif %}
+        {% if user_object.is_teacher %}
+        <li>{% trans "teacher" %}, {% trans "courses" %}:
+          <ul class="">
+            {% for courseoffering in user_object.teaching_set.all %}
+            <li>
+              <a href="{% url 'course_offering_detail' courseoffering.course.slug courseoffering.semester.slug %}">
+                {{ courseoffering }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+      </ul>
+      {% endif %}
+    </div>
+    <div class="col-xs-3">
+      {% thumbnail user_object.photo "200x200" crop="center" as im %}
+      <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      {% endthumbnail %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

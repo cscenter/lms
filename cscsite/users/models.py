@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -83,6 +84,9 @@ class CSCUser(AbstractUser):
 
     def __str__(self):
         return smart_text(self.get_full_name())
+
+    def get_absolute_url(self):
+        return reverse('user_detail', args=[self.pk])
 
     @cached_property
     def _cs_group_pks(self):
