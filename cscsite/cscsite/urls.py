@@ -104,7 +104,6 @@ urlpatterns = patterns('',
         MarksSheetTeacherView.as_view(),
         name='markssheet_teacher'),
 
-
     url(r"^courses/$", CourseListView.as_view(),
         name="course_list"),
     url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),

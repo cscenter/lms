@@ -23,16 +23,22 @@
             <tr>
               <td></td>
               {% for assignment in header %}
-              <td class="header header-vert">
+              <td class="marks-header marks-header-vert">
                 <div class="inner">
-                  {{ assignment.title }}
+                  <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
+                    {{ assignment.title }}
+                  </a>
                 </div>
               </td>
               {% endfor %}
             </tr>
             {% for student, final_grade, by_assignment in by_student %}
             <tr>
-              <td class="header header-horiz">{{ student.get_full_name }}</td>
+              <td class="marks-header marks-header-horiz">
+                <a href="{{ student.get_absolute_url }}">
+                  {{ student.get_full_name }}
+                </a>
+              </td>
               {% for assignment, cell in by_assignment.iteritems %}
               <td class="content">
                 {% if assignment.is_online %}
