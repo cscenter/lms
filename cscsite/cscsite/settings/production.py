@@ -15,7 +15,7 @@ RAVEN_CONFIG = {
     "dsn": "https://7d2d63dd1ba84e149d2cf42e21179dfb:825f3d7218284ab3a7334ff5d2077e02@app.getsentry.com/13763"
 }
 
-INSTALLED_APPS = ('raven.contrib.django.raven_compat', ) + INSTALLED_APPS
+INSTALLED_APPS += ('raven.contrib.django.raven_compat', )
 
 LOGGING = {
     'version': 1,
@@ -45,6 +45,11 @@ LOGGING = {
             'level': 'ERROR',
             'handlers': ['console'],
             'propagate': False,
+        },
+        'django.request': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': True,
         },
         'raven': {
             'level': 'DEBUG',
