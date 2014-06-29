@@ -188,6 +188,10 @@ MENU_URL_NAMES = {
     'course_edit': {'alias': 'courses_teacher'},
     'markssheet_teacher': {'parent': 'teaching'},
 
+    'markssheet_staff': {},
+    'user_detail': {},
+    'custom_text_page': {},
+
     'a_s_detail_teacher': {'alias': 'assignment_list_teacher'},
     'a_s_detail_student': {'alias': 'assignment_list_student'},
 
