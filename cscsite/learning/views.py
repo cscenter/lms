@@ -979,7 +979,6 @@ class MarksSheetStaffView(StaffOnlyMixin,
         super(MarksSheetStaffView, self).__init__(*args, **kwargs)
 
     def get_form_class(self):
-        self.foobar()
         enrollment_index = {(enrollment.student.pk,
                              enrollment.course_offering.pk):
                             enrollment
