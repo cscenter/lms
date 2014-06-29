@@ -21,16 +21,22 @@
             <tr>
               <td></td>
               {% for course in header %}
-              <td class="header header-vert">
+              <td class="marks-header marks-header-vert">
                 <div class="inner">
-                  {{ course }}
+                  <a href="{{ course.get_absolute_url }}">
+                    {{ course }}
+                  </a>
                 </div>
               </td>
               {% endfor %}
             </tr>
             {% for student, overall_grade, by_course in structured %}
             <tr>
-              <td class="header header-horiz">{{ student.get_full_name }}</td>
+              <td class="marks-header marks-header-horiz">
+                <a href="{{ student.get_absolute_url }}">
+                  {{ student.get_full_name }}
+                </a>
+              </td>
               {% for course, cell in by_course.iteritems %}
               <td class="content {{ cell.enrolled|yesno:'enrolled,noop'}}">
                 {{ cell.text }}

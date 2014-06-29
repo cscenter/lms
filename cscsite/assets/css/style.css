@@ -444,14 +444,14 @@ h5.assignment {
   -webkit-overflow-scrolling: touch;
 }
 
-.marks-table .header-vert {
+.marks-table .marks-header-vert {
   vertical-align: top;
   height: 15em;
   max-width: 1.5em;
   /* overflow: hidden; */
 }
 
-.marks-table .header-vert .inner {
+.marks-table .marks-header-vert .inner {
   line-height: 1.5em;
   width: 20em;
   text-overflow: ellipsis;
@@ -481,11 +481,11 @@ h5.assignment {
   margin: 10px;
 }
 
-.marks-table td.header {
+.marks-table td.marks-header {
   font-weight: bold;
 }
 
-.marks-table td.header-horiz {
+.marks-table td.marks-header-horiz {
   text-align: right;
 }
 
