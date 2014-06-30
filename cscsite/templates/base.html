@@ -117,7 +117,7 @@
           </div>
           <div class="col-xs-3 login">
             {% if user.is_authenticated %}
-            <i class="fa fa-user"></i>&nbsp;{{ user.username }}&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
+            <i class="fa fa-user"></i>&nbsp;<a href="{{ user.get_absolute_url }}">{{ user.username }}</a>&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
             {% else %}
             <a href="{% url 'login' %}">
               {% trans "Login" %}
