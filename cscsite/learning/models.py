@@ -161,7 +161,6 @@ class CourseOffering(TimeStampedModel):
         return cls.objects.filter(semester__type=season,
                                   semester__year=year)
 
-    # TODO: test this
     @cached_property
     def is_ongoing(self):
         now = timezone.now()
@@ -179,6 +178,8 @@ class CourseOffering(TimeStampedModel):
                              .parse(settings.AUTUMN_TERM_START)
                              .replace(tzinfo=timezone.utc))
 
+        if self.semester.year != now.year:
+            return False
         if (self.semester.type == 'spring' and
                 (now >= autumn_term_start or
                  now < spring_term_start)):
