@@ -151,10 +151,13 @@ AUTH_USER_MODEL = "users.CSCUser"
 
 MENU_URL_NAMES = {
     'index': {},
+    'about': {},
+    'online': {},
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
     'course_detail': {'alias': 'course_list'},
+    'class_detail': {'alias': 'course_list'},
     'course_offering_detail': {'alias': 'course_list'},
     'course_class_add': {'alias': 'course_list'},
     'course_class_edit': {'alias': 'course_list'},
@@ -197,6 +200,8 @@ MENU_URL_NAMES = {
 
     'contacts': {},
 
+    'user_detail': {},
+    'user_update': {},
     'login': {},
     'logout': {}
     }
