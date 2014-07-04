@@ -153,6 +153,9 @@ MENU_URL_NAMES = {
     'index': {},
     'about': {},
     'online': {},
+    'teaching': {},
+    'learning': {},
+    'enrollment': {},
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
