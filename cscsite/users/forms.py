@@ -43,14 +43,20 @@ class UserProfileForm(forms.ModelForm):
         label=_("Description"),
         help_text=LATEX_MARKDOWN_ENABLED,
         widget=Ubereditor)
+    yandex_id = forms.CharField(
+        label=_("Yandex ID"),
+        help_text=_("<b>YANDEX.ID</b>@yandex.ru"))
+    stepic_id = forms.IntegerField(
+        label=_("Stepic ID"),
+        help_text=_("stepic.org/users/<b>424242</b>"))
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('note'),
+            Div('note', 'yandex_id', 'stepic_id'),
             CANCEL_SAVE_PAIR)
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = CSCUser
-        fields = ['note']
+        fields = ['note', 'yandex_id', 'stepic_id']
