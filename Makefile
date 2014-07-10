@@ -30,3 +30,6 @@ init:
 stylecheck:
 	pep8 cscsite/users cscsite/index cscsite/news cscsite/learning cscsite/textpages cscsite/core --exclude=migrations
 #PYTHONPATH=cscsite pylint -rn --load-plugins pylint_django --rcfile=pylint.config learning core
+
+localmail:
+	python -m smtpd -n -c DebuggingServer localhost:1025
