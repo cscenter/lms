@@ -59,6 +59,7 @@ class CSCUser(AbstractUser):
         null=True)
 
     class Meta:
+        ordering = ['last_name', 'first_name']
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
