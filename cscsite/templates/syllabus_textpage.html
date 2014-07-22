@@ -11,8 +11,8 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <h3>Курсы:</h3>
-      <ul class="list-unstyled">
+      <h3>Все курсы, читаемые в CS центре:</h3>
+      <ul id="course-list" class="list-inline">
         {% for course in courses %}
         <li><a href="{{ course.get_absolute_url}}">{{ course.name }}</a></li>
         {% endfor %}
