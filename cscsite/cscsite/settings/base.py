@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'textpages',
     'learning',
     'library',
+    'crutches',
 )
 
 MIDDLEWARE_CLASSES = (
