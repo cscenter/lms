@@ -4,6 +4,7 @@ import csv
 from datetime import date
 
 from django.core.management import BaseCommand, CommandError
+from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_text
 
 from users.models import CSCUser
@@ -14,7 +15,7 @@ class Command(BaseCommand):
     To generate the CSV execute the following command:
 
       $ mysql -B -uroot -p cscenter -e "
-      > SELECT username, password, email, is_active,
+      > SELECT username, password, email, is_active, date_joined,
       >        c_auth_userprofile.*, c_auth_studentprofile.*
       > FROM c_auth_userprofile
       > INNER JOIN auth_user ON auth_user.id = c_auth_userprofile.user_id
@@ -42,7 +43,8 @@ class Command(BaseCommand):
                 email=row["email"], username=row["username"])
             user.first_name = force_text(row["first_name"])
             user.last_name = force_text(row["last_name"])
-            user.patronymic=force_text(row["middle_name"])
+            user.patronymic = force_text(row["middle_name"])
+            user.date_joined = parse_datetime(row["date_joined"])
             user.password = row["password"]
 
             current_year = date.today().year
