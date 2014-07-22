@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import logging
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -12,8 +14,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
-
-import logging
 
 from learning.models import CourseOffering
 
@@ -75,9 +75,7 @@ class CSCUser(AbstractUser):
                                         " provided for graduates"))
 
     def get_full_name(self):
-        parts = [self.first_name,
-                 self.patronymic,
-                 self.last_name]
+        parts = [self.first_name, self.patronymic, self.last_name]
         full_name = smart_text(" "
                                .join(part for part in parts if part)
                                .strip())
