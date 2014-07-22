@@ -221,7 +221,7 @@ html {
   margin-top: -60px;
   width: 980px;
   /* height: 380px; */
-  background-image:url();
+  background-image:url("");
   border-bottom: 2px solid #9B9B9B;
 }
 
@@ -604,3 +604,5 @@ tr.unread {
   padding-left: 3px;
   margin-left: -3px;
 }
+
+#course-list > li:first-child { padding-left: 5px !important; }
