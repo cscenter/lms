@@ -36,15 +36,16 @@ class Command(BaseCommand):
             raise CommandError("CSV wher art thou?")
 
         for row in data:
-            if row["is_active"] != "1":
+            if row["is_active"] != "1" or not row["email"]:
                 continue
 
-            user, _ = CSCUser.objects.get_or_create(
-                email=row["email"], username=row["username"])
+            username, domain = row["email"].split("@")
+            user, _ = CSCUser.objects.get_or_create(username=username)
             user.first_name = force_text(row["first_name"])
             user.last_name = force_text(row["last_name"])
             user.patronymic = force_text(row["middle_name"])
             user.date_joined = parse_datetime(row["date_joined"])
+            user.email = row["email"]
             user.password = row["password"]
 
             current_year = date.today().year
@@ -54,6 +55,7 @@ class Command(BaseCommand):
 
             if row["status"] == "graduated":
                 user.graduation_year = current_year  # unsure about this.
+
             user.save()
 
             user.groups.add(CSCUser.IS_STUDENT_PK)

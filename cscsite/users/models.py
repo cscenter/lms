@@ -1,22 +1,19 @@
 from __future__ import unicode_literals
 
-import logging
-
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.core.urlresolvers import reverse
-from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
 from sorl.thumbnail import ImageField
 
-from learning.models import CourseOffering
-
+# See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
+YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
+                  "yandex.by", "yandex.kz", "ya.ru", "yandex.com"]
 
 @python_2_unicode_compatible
 class CSCUser(AbstractUser):
@@ -73,6 +70,14 @@ class CSCUser(AbstractUser):
             if self.is_graduate and self.graduation_year is None:
                 raise ValidationError(_("CSCUser|graduation year should be "
                                         " provided for graduates"))
+
+    def save(self, **kwargs):
+        if self.email and not self.yandex_id:
+            username, domain = self.email.split("@")
+            if domain in YANDEX_DOMAINS:
+                self.yandex_id = username
+
+        super(CSCUser, self).save(**kwargs)
 
     def get_full_name(self):
         parts = [self.first_name, self.patronymic, self.last_name]
