@@ -15,7 +15,7 @@
             {% endthumbnail %}
             <div class="user-info">
               <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
-              <div class="ubertext">{{ user.note|safe }}</div>
+              <div class="ubertext">{{ user.get_short_note|safe }}</div>
             </div>
             <div style="clear:both;"></div>
           </div>

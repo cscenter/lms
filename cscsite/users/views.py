@@ -6,11 +6,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
 from django.views import generic
 from django.utils.http import is_safe_url
-from django.utils.translation import ugettext_lazy as _
-
 from braces.views import LoginRequiredMixin
 
 from .models import CSCUser
