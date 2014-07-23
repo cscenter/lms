@@ -21,11 +21,11 @@ STATIC_ROOT = PROJECT_DIR.child("static")
 
 STATICFILES_DIRS = (
     PROJECT_DIR.child("assets"),
-    )
+)
 
 TEMPLATE_DIRS = (
     PROJECT_DIR.child("templates"),
-    )
+)
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,6 +58,7 @@ INSTALLED_APPS = (
     'floppyforms',
     'taggit',
     'south',
+    'rosetta',
 
     'users',
     'core',
@@ -204,7 +205,6 @@ MENU_URL_NAMES = {
 
     'contacts': {},
 
-    'user_detail': {},
     'user_update': {},
     'login': {},
     'logout': {}
