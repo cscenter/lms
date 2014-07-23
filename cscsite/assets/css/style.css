@@ -447,7 +447,7 @@ h5.assignment {
 .marks-table .marks-header-vert {
   vertical-align: top;
   height: 15em;
-  max-width: 1.5em;
+  max-width: 1.7em;
   /* overflow: hidden; */
 }
 
@@ -487,6 +487,7 @@ h5.assignment {
 
 .marks-table td.marks-header-horiz {
   text-align: right;
+  white-space: nowrap;
 }
 
 .marks-table td.content {

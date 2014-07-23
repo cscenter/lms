@@ -981,7 +981,8 @@ class MarksSheetStaffView(StaffOnlyMixin,
                             (Enrollment.objects
                              .select_related('course_offering', 'student'))}
         offerings_list = (CourseOffering.objects
-                          .select_related('course'))
+                          .select_related('course')
+                          .order_by('course__name'))
         students_list = (get_user_model().objects
                          .filter(groups__name='Student')
                          .select_related('student',
