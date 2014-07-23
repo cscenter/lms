@@ -10,7 +10,7 @@ from index.views import IndexView, AlumniView, ProfView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
-    TextpageSyllabusView, CustomTextpageOpenView
+    CustomTextpageOpenView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
@@ -37,7 +37,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^syllabus/$', TextpageSyllabusView.as_view(), name='syllabus'),
+    url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
     url(r'^profs/$', ProfView.as_view(), name='profs'),
     url(r'^profs/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
