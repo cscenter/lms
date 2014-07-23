@@ -224,7 +224,9 @@ class SemesterListView(generic.ListView):
     def get_queryset(self):
         return (self.model.objects
                 .order_by("-year", "type")
-                .prefetch_related())
+                .prefetch_related("courseoffering_set",
+                                  "courseoffering_set__course",
+                                  "courseoffering_set__teachers"))
 
     def get_context_data(self, **kwargs):
         context = (super(SemesterListView, self)
