@@ -268,7 +268,7 @@ class CourseClass(TimeStampedModel, object):
     type = StatusField(
         _("Type"),
         choices_name='TYPES')
-    name = models.CharField(_("Name"), max_length=140)
+    name = models.CharField(_("Name"), max_length=255)
     description = models.TextField(
         _("Description"),
         blank=True,

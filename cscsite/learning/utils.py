@@ -64,6 +64,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return year_start + datetime.timedelta(days=iso_day - 1,
                                            weeks=iso_week - 1)
 
+
 def grouper(iterable, n, fillvalue=None):
     "Collect data into fixed-length chunks or blocks"
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
