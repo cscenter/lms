@@ -296,23 +296,10 @@ html {
 }
 
 .user-tile {
-  width: 450px;
-  margin: 10px;
-  display: inline-block;
   -webkit-column-break-inside: avoid;
   -moz-column-break-inside: avoid;
   column-break-inside: avoid;
-  /* float: left; */
-}
-
-.user-tile img {
-  float: left;
-}
-
-.user-tile .user-info {
-  float: left;
-  padding: 10px;
-  width: 350px;
+  margin-bottom: 10px;
 }
 
 .user-tile .user-info h4 {
