@@ -39,7 +39,7 @@
               </td>
               {% for course, cell in by_course.iteritems %}
               <td class="content {{ cell.enrolled|yesno:'enrolled,noop'}}">
-                {{ cell.text }}
+                {{ cell.grade }}
               </td>
               {% endfor %}
               <td>
