@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container">
+  {% for user in object_list %}
+  {% if forloop.counter0|divisibleby:2 %}
+  <div class="row">
+  {% endif %}
+    <div class="col-xs-6 user-tile">
+      {% thumbnail user.photo "100x100" crop="center" as im %}
+        <img class="col-xs-3"
+             src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      {% endthumbnail %}
+      <div class="col-xs-9">
+        <h4>{% block name %}{% endblock %}</h4>
+        <div class="ubertext">{{ user.get_short_note|safe }}</div>
+      </div>
+    </div>
+  {% if not forloop.counter0|divisibleby:2 %}
+  </div>
+  {% endif %}
+  {% empty %}
+    {% block empty %}{% endblock %}
+  {% endfor %}
+</div>
+{% endblock content %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-24 00:47+0400\n"
+"POT-Creation-Date: 2014-07-24 01:42+0400\n"
 "PO-Revision-Date: 2014-06-29 21:28+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -397,7 +397,7 @@ msgstr "Выполнение задания"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: learning/models.py:486 users/models.py:35
+#: learning/models.py:486 users/models.py:36
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -615,8 +615,8 @@ msgstr "Новость"
 msgid "News|news-plural"
 msgstr "Новости"
 
-#: templates/alumni.html:23
-msgid "No alumnis yet"
+#: templates/alumni.html:7
+msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
 #: templates/base.html:73
@@ -775,7 +775,7 @@ msgstr "CSC будет рад новым людям с хорошей насле
 msgid "Enrollment information"
 msgstr "Информация о поступлении"
 
-#: templates/profs.html:23
+#: templates/profs.html:9
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
@@ -1094,7 +1094,7 @@ msgstr "Пароль"
 msgid "Submit"
 msgstr "Отправить"
 
-#: users/forms.py:47 users/models.py:48
+#: users/forms.py:47 users/models.py:49
 msgid "Yandex ID"
 msgstr "Yandex ID"
 
@@ -1102,7 +1102,7 @@ msgstr "Yandex ID"
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr ""
 
-#: users/forms.py:50 users/models.py:55
+#: users/forms.py:50 users/models.py:56
 msgid "Stepic ID"
 msgstr "Stepic ID"
 
@@ -1110,43 +1110,43 @@ msgstr "Stepic ID"
 msgid "stepic.org/users/<b>424242</b>"
 msgstr ""
 
-#: users/models.py:26
+#: users/models.py:27
 msgid "CSCUser|patronymic"
 msgstr "Отчество"
 
-#: users/models.py:30
+#: users/models.py:31
 msgid "CSCUser|photo"
 msgstr "Фото"
 
-#: users/models.py:34
+#: users/models.py:35
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
-#: users/models.py:38
+#: users/models.py:39
 msgid "CSCUser|enrollment year"
 msgstr "Год поступления"
 
-#: users/models.py:43
+#: users/models.py:44
 msgid "CSCUser|graduation year"
 msgstr "Год выпуска"
 
-#: users/models.py:51
+#: users/models.py:52
 msgid "Only the part before \"@yandex.ru\" is expected"
 msgstr "Ожидается часть до «@yandex.ru»"
 
-#: users/models.py:61
+#: users/models.py:62
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: users/models.py:62
+#: users/models.py:63
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:69
+#: users/models.py:70
 msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
-#: users/models.py:72
+#: users/models.py:73
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
