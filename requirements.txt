@@ -1,4 +1,4 @@
-Django==1.6.1
+Django==1.6.5
 Pillow==2.3.0
 Unipath==1.0
 beautifulsoup4==4.3.2
