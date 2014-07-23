@@ -15,6 +15,7 @@ from sorl.thumbnail import ImageField
 YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
                   "yandex.by", "yandex.kz", "ya.ru", "yandex.com"]
 
+
 @python_2_unicode_compatible
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
