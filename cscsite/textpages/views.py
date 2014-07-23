@@ -44,15 +44,5 @@ class CustomTextpageOpenView(DetailView):
             raise Http404
 
 
-class TextpageSyllabusView(TextpageOpenView):
-    template_name = "syllabus_textpage.html"
-
-    def get_context_data(self, *args, **kwargs):
-        context = (super(TextpageSyllabusView, self)
-                   .get_context_data(*args, **kwargs))
-        context['courses'] = Course.objects.all()
-        return context
-
-
 class TextpageStudentView(GroupRequiredMixin, TextpageOpenView):
     group_required = 'Student'
