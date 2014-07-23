@@ -1048,15 +1048,15 @@ class MarksSheetStaffView(StaffOnlyMixin,
                 idx = (student.pk, offering.pk)
                 maybe_enrollment = self.enrollment_index.get(idx)
                 if maybe_enrollment:
-                    cell = {'text': maybe_enrollment.grade_short,
+                    cell = {'grade': maybe_enrollment.grade_short,
                             'enrolled': True}
                 else:
-                    cell = {'text': Enrollment.SHORT_GRADES['not_graded'],
+                    cell = {'grade': Enrollment.SHORT_GRADES['not_graded'],
                             'enrolled': False}
                 structured[student][offering.course] = \
                     merge_cells(maybe_existing_cell, cell)
 
-        if (len(structured.values()) > 0):
+        if structured.values():
             header = structured.values()[0].keys()
             for by_offering in structured.values():
                 # we should check for "assignment consistency": that all
