@@ -8,10 +8,19 @@ The power of Django! [![Build Status](https://magnum.travis-ci.com/cscenter/site
 Installation
 ============
 
-```
-python manage.py syncdb --all --settings=cscsite.settings.local
-python manage.py migrate --fake --settings=cscsite.settings.local
-python manage.py loaddata --settings=cscsite.settings.local fixtures/demo_data.json
+Setup MySQL database:
+
+```bash
+$ mysql -u root -p
+> CREATE DATABASE cscdb CHARACTER SET utf8;
+> CREATE USER 'csc'@'localhost' IDENTIFIED BY 'FooBar';
+> GRANT ALL ON cscdb.* TO 'csc'@'localhost';
+^D
 ```
 
-NB: `CREATE DATABASE my_database CHARACTER SET utf8;`
+Do the Django part of the database configuration:
+
+```bash
+$ python cscsite/manage.py syncdb --all --settings=cscsite.settings.local
+$ python cscsite/manage.py migrate --settings=cscsite.settings.local --no-initial-data
+```
