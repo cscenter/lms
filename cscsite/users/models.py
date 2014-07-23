@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
 from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.text import normalize_newlines
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
@@ -92,6 +93,12 @@ class CSCUser(AbstractUser):
                                .join(part for part in parts if part)
                                .strip())
         return full_name or self.username
+
+    def get_short_note(self):
+        """Returns only the first paragraph from the note."""
+        normalized_note = normalize_newlines(self.note)
+        lf = normalized_note.find("\n")
+        return self.note if lf == -1 else normalized_note[:lf]
 
     @cached_property
     def _cs_group_pks(self):
