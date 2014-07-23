@@ -79,18 +79,18 @@ class CSCUser(AbstractUser):
 
         super(CSCUser, self).save(**kwargs)
 
+    def __str__(self):
+        return smart_text(self.get_full_name())
+
+    def get_absolute_url(self):
+        return reverse('user_detail', args=[self.pk])
+
     def get_full_name(self):
         parts = [self.first_name, self.patronymic, self.last_name]
         full_name = smart_text(" "
                                .join(part for part in parts if part)
                                .strip())
         return full_name or self.username
-
-    def __str__(self):
-        return smart_text(self.get_full_name())
-
-    def get_absolute_url(self):
-        return reverse('user_detail', args=[self.pk])
 
     @cached_property
     def _cs_group_pks(self):
