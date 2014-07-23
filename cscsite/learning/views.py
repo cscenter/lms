@@ -22,7 +22,7 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
-    CourseOfferingNewsNotification
+    CourseOfferingNewsNotification, Semester
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -217,6 +217,34 @@ class CalendarFullView(LoginRequiredMixin,
     user_type = 'full'
 
 
+class SemesterListView(generic.ListView):
+    model = Semester
+    template_name = "learning/semester_list.html"
+
+    def get_queryset(self):
+        return (self.model.objects
+                .order_by("-year", "type")
+                .prefetch_related())
+
+    def get_context_data(self, **kwargs):
+        context = (super(SemesterListView, self)
+                   .get_context_data(**kwargs))
+        semester_list = list(context["semester_list"])
+        if not semester_list:
+            return context
+
+        # Check if we only have the fall semester for the ongoing year.
+        current = semester_list[0]
+        if current.type == Semester.TYPES.autumn:
+            semester_list.insert(0, Semester(type=Semester.TYPES.spring,
+                                             year=current.year + 1))
+
+        context["semester_list"] = [
+            (a, s) for s, a in utils.grouper(semester_list, 2)
+        ]
+        return context
+
+
 class CourseListMixin(object):
     model = CourseOffering
     template_name = "learning/courses_list.html"
@@ -230,20 +258,15 @@ class CourseListMixin(object):
                 .select_related('course', 'semester')
                 .prefetch_related('teachers'))
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         context = (super(CourseListMixin, self)
-                   .get_context_data(*args, **kwargs))
+                   .get_context_data(**kwargs))
         ongoing, archive = utils.split_list(context['course_list'],
                                             lambda course: course.is_ongoing)
         context['course_list_ongoing'] = ongoing
         context['course_list_archive'] = archive
         context['list_type'] = self.list_type
         return context
-
-
-class CourseListView(CourseListMixin, generic.ListView):
-    model = CourseOffering
-    template_name = "learning/courses_list_all.html"
 
 
 class CourseTeacherListView(TeacherOnlyMixin,
@@ -269,9 +292,9 @@ class CourseStudentListView(StudentOnlyMixin,
                 .select_related('course', 'semester')
                 .prefetch_related('teachers', 'enrolled_students'))
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         context = (super(CourseStudentListView, self)
-                   .get_context_data(*args, **kwargs))
+                   .get_context_data(**kwargs))
         ongoing, available = utils.split_list(
             context['course_list'],
             lambda c_o: self.request.user in c_o.enrolled_students.all())
@@ -285,9 +308,9 @@ class CourseDetailView(generic.DetailView):
     template_name = "learning/course_detail.html"
     context_object_name = 'course'
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         context = (super(CourseDetailView, self)
-                   .get_context_data(*args, **kwargs))
+                   .get_context_data(**kwargs))
         context['offerings'] = self.object.courseoffering_set.all()
         return context
 

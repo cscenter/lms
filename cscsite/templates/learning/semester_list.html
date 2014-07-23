@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{% trans "Courses" %}</h2>
+      <hr />
+    </div>
+  </div>
+
+  {% if semester_list %}
+  <div class="row">
+    <div class="col-xs-12">
+    {% for autumn_spring in semester_list %}
+      {% if forloop.first %}
+        <h3>{% trans "Current" %}</h3>
+      {% elif forloop.counter == 2 %}
+        <h3>{% trans "Archive" %}</h3>
+      {% endif %}
+
+      <table class="table table-stripped">
+        <tr>
+        {% for semester in autumn_spring %}
+          <th width="50%">{{ semester|title }}</th>
+        {% endfor %}
+        </tr>
+        <tr>
+        {% for semester in autumn_spring %}
+          <td class="semester-course-list">
+            <ul>
+            {% for course_offering in semester.courseoffering_set.all %}
+              <li>
+                <a href="{{ course_offering.get_absolute_url }}">
+                  {{ course_offering.course.name }}
+                </a>
+                {% comment %}
+                Note(lebedev): because crappy Django doesn't have proper
+                whitespace stripping, like {%- in Jinja.
+                {% endcomment %}
+                ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.get_absolute_url }}">{{ teacher.last_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+              </li>
+            {% endfor %}
+            </ul>
+          </td>
+        {% endfor %}
+        </tr>
+      </table>
+    {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-3"></div>
+      <div class="col-xs-6 center-aligned">
+        <h4>{% trans "No courses yet" %}</h4>
+      </div>
+      <div class="col-xs-3">
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endblock content %}

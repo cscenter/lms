@@ -1,7 +1,7 @@
 import datetime
+import itertools
 
 import dateutil.parser as dparser
-
 from django.conf import settings
 from django.utils import timezone
 
@@ -63,3 +63,9 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     year_start = iso_year_start(iso_year)
     return year_start + datetime.timedelta(days=iso_day - 1,
                                            weeks=iso_week - 1)
+
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    args = [iter(iterable)] * n
+    return itertools.izip_longest(fillvalue=fillvalue, *args)
