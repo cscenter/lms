@@ -1,29 +1,26 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import os
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
-import os
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
-from django.forms.models import modelform_factory
 from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now, make_aware, utc
-
+from django.utils.timezone import now
 from braces.views import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, OverallGrade, \
-    Assignment, AssignmentStudent, AssignmentComment, \
+    CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification
 from learning.forms import CourseOfferingPKForm, \
@@ -32,9 +29,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherFormFabrique, MarksSheetStaffFormFabrique
-
 from core.notifications import get_unread_notifications_cache
-
 from . import utils
 
 
@@ -231,7 +226,7 @@ class CourseListMixin(object):
 
     def get_queryset(self):
         return (self.model.objects
-                .order_by('semester__year', '-semester__type', 'course__name')
+                .order_by('-semester__year', '-semester__type', 'course__name')
                 .select_related('course', 'semester')
                 .prefetch_related('teachers'))
 
@@ -801,7 +796,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
             # Too hard to use ProtectedFormMixin here, let's just inline it's
             # logic. A little drawback is that teachers still can leave
             # comments under other's teachers assignments, but can not grade,
-            # so it's acceptible, IMO.
+            # so it's acceptable, IMO.
             teachers = a_s.assignment.course_offering.teachers.all()
             if request.user not in teachers:
                 raise PermissionDenied
