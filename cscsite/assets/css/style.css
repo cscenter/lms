@@ -367,6 +367,8 @@ h2 small a {
   border-radius: 0px !important;
 }
 
+.badge.lecture, .badge.seminar { width: 6em; }
+
 .csc-well {
   background-color: #F1F1F1;
   min-height: 20px;
