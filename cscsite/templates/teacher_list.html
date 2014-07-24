@@ -15,7 +15,7 @@
              src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
       {% endthumbnail %}
       <div class="col-xs-9">
-        <h4>{% block name %}{% endblock %}</h4>
+        <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
         <div class="ubertext">{{ user.get_short_note|safe }}</div>
       </div>
     </div>
@@ -23,7 +23,7 @@
   </div>
   {% endif %}
   {% empty %}
-    {% block empty %}{% endblock %}
+    {% trans "No professors yet" %}
   {% endfor %}
 </div>
 {% endblock content %}
