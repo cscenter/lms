@@ -23,7 +23,9 @@ class AlumniView(ListView):
     def get_queryset(self):
         user_model = get_user_model()
         graduate_pk = user_model.IS_GRADUATE_PK
-        return user_model.objects.filter(groups__pk=graduate_pk)
+        return (user_model.objects
+                .filter(groups__pk=graduate_pk)
+                .order_by("-graduation_year", "last_name", "first_name"))
 
 
 # TODO: this view should make a distinction between professors that have active
