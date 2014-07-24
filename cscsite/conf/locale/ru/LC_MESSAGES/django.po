@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-24 01:42+0400\n"
+"POT-Creation-Date: 2014-07-25 01:13+0400\n"
 "PO-Revision-Date: 2014-06-29 21:28+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,7 +182,6 @@ msgstr "Курс"
 #: learning/models.py:56 templates/base.html:145
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
-#: templates/learning/semester_list.html:8
 msgid "Courses"
 msgstr "Курсы"
 
@@ -615,7 +614,7 @@ msgstr "Новость"
 msgid "News|news-plural"
 msgstr "Новости"
 
-#: templates/alumni.html:7
+#: templates/alumni_list.html:30
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
@@ -775,7 +774,7 @@ msgstr "CSC будет рад новым людям с хорошей насле
 msgid "Enrollment information"
 msgstr "Информация о поступлении"
 
-#: templates/profs.html:9
+#: templates/teacher_list.html:26
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
@@ -847,7 +846,7 @@ msgstr "Открытые задания"
 #: templates/learning/assignment_list_student.html:97
 #: templates/learning/assignment_list_teacher.html:122
 #: templates/learning/courses_list_teacher.html:54
-#: templates/learning/semester_list.html:20
+#: templates/learning/semester_list.html:13
 msgid "Archive"
 msgstr "Архив"
 
@@ -1002,12 +1001,12 @@ msgstr "удалить"
 
 #: templates/learning/courses_list_student.html:83
 #: templates/learning/courses_list_teacher.html:100
-#: templates/learning/semester_list.html:57
+#: templates/learning/semester_list.html:49
 msgid "No courses yet"
 msgstr "Список курсов пуст"
 
 #: templates/learning/courses_list_teacher.html:17
-#: templates/learning/semester_list.html:18
+#: templates/learning/semester_list.html:11
 msgid "Ongoing|plural"
 msgstr "Текущие"
 

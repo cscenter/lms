@@ -1,9 +1,0 @@
-{% extends "user_list.html" %}
-
-{% load i18n %}
-
-{% block name %}
-<a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a>
-{% endblock %}
-
-{% block empty %}{% trans "No professors yet" %}{% endblock %}

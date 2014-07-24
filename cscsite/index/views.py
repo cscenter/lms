@@ -18,7 +18,7 @@ class IndexView(TemplateView):
 
 # TODO: test it
 class AlumniView(ListView):
-    template_name = "alumni.html"
+    template_name = "alumni_list.html"
 
     def get_queryset(self):
         user_model = get_user_model()
@@ -30,7 +30,7 @@ class AlumniView(ListView):
 #       courses and that who don't
 # TODO: test it
 class ProfView(ListView):
-    template_name = "profs.html"
+    template_name = "teacher_list.html"
 
     def get_queryset(self):
         user_model = get_user_model()
