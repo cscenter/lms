@@ -61,15 +61,14 @@
       </div>
       {% endif %}
     </div>
-    <div class="col-xs-3">
+    <div class="col-xs-4 course-offering-profs">
       <h4 class="no-top-margin">Преподаватели:</h4>
       <ul class="list-unstyled">
         {% for teacher in course_offering.teachers.all %}
         <li>
           <a href="{% url 'teacher_detail' teacher.pk %}">
           {% thumbnail teacher.photo "50x50" crop="center" as im %}
-          <img src="{{ im.url }}"
-               width="{{ im.width }}" height="{{ im.height }}">
+          <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
           {% endthumbnail %}
           {{ teacher.get_full_name }}
           </a>
