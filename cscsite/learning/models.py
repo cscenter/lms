@@ -48,7 +48,7 @@ class Course(TimeStampedModel):
         unique=True)
     description = models.TextField(
         _("Course|description"),
-        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
 
     class Meta:
         ordering = ["name"]
@@ -74,7 +74,7 @@ class Semester(models.Model):
                        choices_name='TYPES')
 
     class Meta:
-        ordering = ["year", "-type"]
+        ordering = ["-year", "type"]
         verbose_name = _("Semester")
         verbose_name_plural = _("Semesters")
 
