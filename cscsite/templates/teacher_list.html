@@ -19,7 +19,7 @@
         <div class="ubertext">{{ user.get_short_note|safe }}</div>
       </div>
     </div>
-  {% if not forloop.counter0|divisibleby:2 %}
+  {% if not forloop.counter0|divisibleby:2 or forloop.last %}
   </div>
   {% endif %}
   {% empty %}
