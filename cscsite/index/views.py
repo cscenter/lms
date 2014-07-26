@@ -31,7 +31,7 @@ class AlumniView(ListView):
 # TODO: this view should make a distinction between professors that have active
 #       courses and that who don't
 # TODO: test it
-class ProfView(ListView):
+class TeachersView(ListView):
     template_name = "teacher_list.html"
 
     def get_queryset(self):
