@@ -14,10 +14,11 @@
       <div class="row">
       {% endif %}
         <div class="col-xs-6 user-tile">
+          <div class="col-xs-3">
           {% thumbnail alumni.photo "100x100" crop="center" as im %}
-            <img class="col-xs-3"
-                 src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
           {% endthumbnail %}
+          </div>
           <div class="col-xs-9">
             <h4>{{ alumni.first_name }} {{ alumni.last_name }}</h4>
             <div class="ubertext">{{ alumni.get_short_note|safe }}</div>
