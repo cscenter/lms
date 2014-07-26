@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-25 01:13+0400\n"
+"POT-Creation-Date: 2014-07-26 22:46+0400\n"
 "PO-Revision-Date: 2014-06-29 21:28+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,7 +74,7 @@ msgstr "Имя"
 
 #: learning/forms.py:120 learning/models.py:277
 #: templates/learning/courseclass_detail.html:37
-#: templates/learning/courseoffering_detail.html:93
+#: templates/learning/courseoffering_detail.html:92
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:100
 msgid "Slides"
@@ -101,7 +101,7 @@ msgid "Other materials"
 msgstr "Материалы"
 
 #: learning/forms.py:142 learning/models.py:290
-#: templates/learning/courseoffering_detail.html:88
+#: templates/learning/courseoffering_detail.html:87
 msgid "Date"
 msgstr "Дата"
 
@@ -261,13 +261,13 @@ msgstr "Отображается  в начале списка мест пров
 msgid "Venues"
 msgstr "Места проведения"
 
-#: learning/models.py:244 templates/learning/courseoffering_detail.html:111
+#: learning/models.py:244 templates/learning/courseoffering_detail.html:110
 #: templates/learning/timetable_student.html:89
 #: templates/learning/timetable_teacher.html:90
 msgid "Lecture"
 msgstr "Лекция"
 
-#: learning/models.py:245 templates/learning/courseoffering_detail.html:113
+#: learning/models.py:245 templates/learning/courseoffering_detail.html:112
 #: templates/learning/timetable_student.html:91
 #: templates/learning/timetable_teacher.html:92
 msgid "Seminar"
@@ -285,7 +285,7 @@ msgstr "Другие материалы"
 msgid "Class"
 msgstr "Занятие"
 
-#: learning/models.py:297 templates/learning/courseoffering_detail.html:84
+#: learning/models.py:297 templates/learning/courseoffering_detail.html:83
 msgid "Classes"
 msgstr "Занятия"
 
@@ -328,7 +328,7 @@ msgstr "Задание"
 #: learning/models.py:385 templates/base.html:177 templates/base.html.py:220
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
-#: templates/learning/courseoffering_detail.html:138
+#: templates/learning/courseoffering_detail.html:137
 msgid "Assignments"
 msgstr "Задания"
 
@@ -519,17 +519,17 @@ msgstr "Общие оценки"
 msgid "Only students can be graded"
 msgstr "Только студенты могут получить общую оценку"
 
-#: learning/views.py:493
+#: learning/views.py:492
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:496 templates/learning/courseoffering_detail.html:35
+#: learning/views.py:495 templates/learning/courseoffering_detail.html:35
 #: templates/learning/courses_list_student.html:42
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:837
+#: learning/views.py:836
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -614,7 +614,7 @@ msgstr "Новость"
 msgid "News|news-plural"
 msgstr "Новости"
 
-#: templates/alumni_list.html:30
+#: templates/alumni_list.html:33
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
@@ -677,8 +677,8 @@ msgid "Syllabus"
 msgstr "Программа"
 
 #: templates/base.html:150
-msgid "Organizers and staff"
-msgstr "Руководители и организаторы"
+msgid "Organizers"
+msgstr "Организаторы"
 
 #: templates/base.html:155
 #: templates/learning/assignment_student_detail.html:109
@@ -711,51 +711,51 @@ msgstr "Мои курсы"
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
-#: templates/index.html:21
+#: templates/index.html:22
 msgid "Learn more"
 msgstr "Узнать больше"
 
-#: templates/index.html:25 templates/index.html.py:90
+#: templates/index.html:26 templates/index.html.py:91
 msgid "How to enroll"
 msgstr "Как поступить"
 
-#: templates/index.html:35
+#: templates/index.html:36
 msgid "CS Center News"
 msgstr "Новости CS центра"
 
-#: templates/index.html:44 templates/news/news_list.html:19
+#: templates/index.html:45 templates/news/news_list.html:19
 msgid "More…"
 msgstr "Далее…"
 
-#: templates/index.html:50
+#: templates/index.html:51
 msgid "All news"
 msgstr "Все новости"
 
-#: templates/index.html:53 templates/news/news_list.html:27
+#: templates/index.html:54 templates/news/news_list.html:27
 msgid "No news yet"
 msgstr "Список новостей пуст"
 
-#: templates/index.html:61
+#: templates/index.html:62
 msgid "Supported by"
 msgstr "При поддержке"
 
-#: templates/index.html:66
+#: templates/index.html:67
 msgid "Yandex School of Data Analysis"
 msgstr "Яндекс ШАД"
 
-#: templates/index.html:72
+#: templates/index.html:73
 msgid "JetBrains"
 msgstr "JetBrains"
 
-#: templates/index.html:78
+#: templates/index.html:79
 msgid "Computer Science Club"
 msgstr "Computer Science Club"
 
-#: templates/index.html:84
+#: templates/index.html:85
 msgid "FML #239"
 msgstr "ФМЛ №239"
 
-#: templates/index.html:91
+#: templates/index.html:92
 msgid ""
 "Warning: to enroll, you should provide all information about your family for "
 "at least 3 centuries. If such information is not available, please "
@@ -765,16 +765,16 @@ msgstr ""
 "семье за последние 3 столетия. Если вы не можете предоставить такую "
 "информацию, пожалуйста, откажитесь от поступления."
 
-#: templates/index.html:92
+#: templates/index.html:93
 msgid ""
 "Computer Science Center will be glad to see new people with decent heritage."
 msgstr "CSC будет рад новым людям с хорошей наследственностью."
 
-#: templates/index.html:93
+#: templates/index.html:94
 msgid "Enrollment information"
 msgstr "Информация о поступлении"
 
-#: templates/teacher_list.html:26
+#: templates/teacher_list.html:27
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
@@ -826,8 +826,8 @@ msgstr "Удалить"
 #: templates/learning/assignment_list_student.html:137
 #: templates/learning/assignment_list_teacher.html:111
 #: templates/learning/assignment_list_teacher.html:153
-#: templates/learning/courseoffering_detail.html:119
-#: templates/learning/courseoffering_detail.html:123
+#: templates/learning/courseoffering_detail.html:118
+#: templates/learning/courseoffering_detail.html:122
 msgid "Yes,No"
 msgstr "Да,Нет"
 
@@ -846,7 +846,7 @@ msgstr "Открытые задания"
 #: templates/learning/assignment_list_student.html:97
 #: templates/learning/assignment_list_teacher.html:122
 #: templates/learning/courses_list_teacher.html:54
-#: templates/learning/semester_list.html:13
+#: templates/learning/semester_list.html:14
 msgid "Archive"
 msgstr "Архив"
 
@@ -969,44 +969,44 @@ msgstr "Добавить новость"
 msgid "Enroll"
 msgstr "Записаться"
 
-#: templates/learning/courseoffering_detail.html:89
+#: templates/learning/courseoffering_detail.html:88
 #: templates/learning/timetable_student.html:62
 #: templates/learning/timetable_teacher.html:63
 msgid "Time"
 msgstr "Время"
 
-#: templates/learning/courseoffering_detail.html:90
+#: templates/learning/courseoffering_detail.html:89
 #: templates/learning/timetable_student.html:63
 #: templates/learning/timetable_teacher.html:64
 msgid "Class|Name"
 msgstr "Название"
 
-#: templates/learning/courseoffering_detail.html:91
+#: templates/learning/courseoffering_detail.html:90
 #: templates/learning/timetable_student.html:65
 #: templates/learning/timetable_teacher.html:66
 msgid "Venue|short"
 msgstr "Место"
 
-#: templates/learning/courseoffering_detail.html:162
+#: templates/learning/courseoffering_detail.html:161
 msgid "News"
 msgstr "Новости"
 
-#: templates/learning/courseoffering_detail.html:170
+#: templates/learning/courseoffering_detail.html:169
 msgid "edit"
 msgstr "редактировать"
 
-#: templates/learning/courseoffering_detail.html:171
+#: templates/learning/courseoffering_detail.html:170
 msgid "delete"
 msgstr "удалить"
 
 #: templates/learning/courses_list_student.html:83
 #: templates/learning/courses_list_teacher.html:100
-#: templates/learning/semester_list.html:49
+#: templates/learning/semester_list.html:50
 msgid "No courses yet"
 msgstr "Список курсов пуст"
 
 #: templates/learning/courses_list_teacher.html:17
-#: templates/learning/semester_list.html:11
+#: templates/learning/semester_list.html:12
 msgid "Ongoing|plural"
 msgstr "Текущие"
 
