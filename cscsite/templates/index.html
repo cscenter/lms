@@ -61,30 +61,30 @@
     <div class="col-xs-10">
       <h1 class="bigger-margin">{% trans "Supported by" %}</h1>
       <ul class="supported-by">
-        <a href="http://shad.yandex.ru/" target="_blank">
-          <li>
-            <img src="holder.js/100x40">
-            <p>{% trans "Yandex School of Data Analysis" %}</p>
-          </li>
-        </a>
-        <a href="http://www.jetbrains.com/" target="_blank">
-          <li>
-            <img src="holder.js/100x40">
-            <p>{% trans "JetBrains" %}</p>
-          </li>
-        </a>
-        <a href="http://compsciclub.ru/" target="_blank">
-          <li>
-            <img src="holder.js/100x40">
-            <p>{% trans "Computer Science Club" %}</p>
-          </li>
-        </a>
-        <a href="http://239.ru/" target="_blank">
-          <li>
-            <img src="holder.js/100x40">
-            <p>{% trans "FML #239" %}</p>
-          </li>
-        </a>
+        <li>
+          <a href="http://shad.yandex.ru/" target="_blank">
+            <img src="{% static "img/sda.png" %}"
+                 alt="{% trans "Yandex School of Data Analysis" %}">
+          </a>
+        </li>
+        <li>
+          <a href="http://www.jetbrains.com/" target="_blank">
+            <img src="{% static "img/jetbrains.png" %}"
+                 alt="{% trans "JetBrains" %}">
+          </a>
+        </li>
+        <li>
+          <a href="http://compsciclub.ru/" target="_blank">
+            <img src="{% static "img/csclub.png" %}"
+                 alt={% trans "Computer Science Club" %}>
+          </a>
+        </li>
+        <li>
+          <a href="http://239.ru/" target="_blank">
+            <img src="{% static "img/239.png" %}"
+                 alt="{% trans "FML #239" %}">
+          </a>
+        </li>
       </ul>
     </div>
     <!-- <div class="col-xs-4"> -->
