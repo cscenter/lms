@@ -172,8 +172,8 @@ MENU_URL_NAMES = {
     'course_offering_news_delete': {'alias': 'course_list'},
     'course_offering_edit_descr': {'alias': 'course_list'},
     'orgs': {'parent': 'about'},
-    'profs': {'parent': 'about'},
-    'teacher_detail': {'alias': 'profs'},
+    'teachers': {'parent': 'about'},
+    'teacher_detail': {'alias': 'teachers'},
     'alumni': {'parent': 'about'},
 
     'news_list': {},

@@ -6,7 +6,7 @@ from django.views.generic.base import RedirectView
 
 from django.contrib import admin
 
-from index.views import IndexView, AlumniView, ProfView
+from index.views import IndexView, AlumniView, TeachersView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
@@ -39,8 +39,8 @@ urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
-    url(r'^profs/$', ProfView.as_view(), name='profs'),
-    url(r'^profs/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
+    url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
+    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(), name='user_detail'),
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(), name='user_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
