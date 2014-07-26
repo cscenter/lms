@@ -234,6 +234,14 @@ class SemesterListView(generic.ListView):
         if not semester_list:
             return context
 
+        for semester in semester_list:
+            # HACK(lebedev): since we don't have a 'Prefetch' object
+            # yet, there's no way to impose ordering on the related
+            # table.
+            semester.courseofferings = sorted(
+                semester.courseoffering_set.all(),
+                key=lambda co: co.course.name)
+
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
         if current.type == Semester.TYPES.autumn:
