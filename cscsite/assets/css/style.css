@@ -265,6 +265,12 @@ html {
   color: #B5B5B5;
 }
 
+.supported-by {
+    line-height: 50px;
+    padding-left: 0;
+    overflow: hidden;
+}
+
 .supported-by li {
   list-style: none;
   display: block;
