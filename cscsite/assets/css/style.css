@@ -1,3 +1,17 @@
+/* Bootstrap overrides. */
+
+.btn-primary {
+  background-color: #678D9E;
+  border-color: #437185;
+}
+
+.btn-primary:hover {
+  background-color: #437185;
+}
+
+
+/* Local styles. */
+
 h1.bigger-margin {
   margin-top: 40px !important;
   margin-bottom: 20px !important;
