@@ -24,7 +24,7 @@
         {% for semester in autumn_spring %}
           <td class="semester-course-list">
             <ul>
-            {% for course_offering in semester.courseoffering_set.all %}
+            {% for course_offering in semester.courseofferings %}
               <li>
                 {% comment %}
                 Note(lebedev): because crappy Django doesn't have proper
