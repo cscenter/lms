@@ -39,24 +39,21 @@ class LoginForm(AuthenticationForm):
 
 
 class UserProfileForm(forms.ModelForm):
-    note = forms.CharField(
-        label=_("Description"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        widget=Ubereditor)
-    yandex_id = forms.CharField(
-        label=_("Yandex ID"),
-        help_text=_("<b>YANDEX.ID</b>@yandex.ru"))
-    stepic_id = forms.IntegerField(
-        label=_("Stepic ID"),
-        help_text=_("stepic.org/users/<b>424242</b>"))
-
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('note', 'yandex_id', 'stepic_id'),
+            Div('photo', 'note', 'yandex_id', 'stepic_id'),
             CANCEL_SAVE_PAIR)
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = CSCUser
-        fields = ['note', 'yandex_id', 'stepic_id']
+        fields = ['photo', 'note', 'yandex_id', 'stepic_id']
+        widgets = {
+            "note": Ubereditor
+        }
+        help_texts = {
+            "note": LATEX_MARKDOWN_ENABLED,
+            "yandex_id": _("<b>YANDEX.ID</b>@yandex.ru"),
+            "stepid_id": _("stepic.org/users/<b>424242</b>")
+        }
