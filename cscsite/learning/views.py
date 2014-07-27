@@ -52,12 +52,12 @@ class TimetableTeacherView(TeacherOnlyMixin,
         except TypeError:
             today = now().date()
             year, month = today.year, today.month
-        choosen_month_date = datetime.date(year=year, month=month, day=1)
-        prev_month_date = choosen_month_date + relativedelta(months=-1)
-        next_month_date = choosen_month_date + relativedelta(months=+1)
+        chosen_month_date = datetime.date(year=year, month=month, day=1)
+        prev_month_date = chosen_month_date + relativedelta(months=-1)
+        next_month_date = chosen_month_date + relativedelta(months=+1)
         self._context_dates = {'month': month,
                                'year': year,
-                               'current_date': choosen_month_date,
+                               'current_date': chosen_month_date,
                                'prev_date': prev_month_date,
                                'next_date': next_month_date}
         return (CourseClass.objects

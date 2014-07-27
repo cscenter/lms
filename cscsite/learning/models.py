@@ -204,7 +204,7 @@ class CourseOfferingNews(TimeStampedModel):
         on_delete=models.PROTECT)
     text = models.TextField(
         _("CourseNews|text"),
-        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
 
     class Meta:
         ordering = ["-created"]
@@ -221,7 +221,7 @@ class Venue(models.Model):
     name = models.CharField(_("Name"), max_length=140)
     description = models.TextField(
         _("Description"),
-        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
     is_preferred = models.BooleanField(
         _("Preferred"),
         help_text=(_("Will be displayed on top of the venue list")),
@@ -272,7 +272,7 @@ class CourseClass(TimeStampedModel, object):
     description = models.TextField(
         _("Description"),
         blank=True,
-        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
     slides = models.FileField(
         _("Slides"),
         blank=True,
