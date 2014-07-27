@@ -60,7 +60,7 @@ def upload_to_slideshare(handle, title, description, tags):
         sl_meta = api.get_slideshow(sl_id)
         html = sl_meta["Slideshow"]["Embed"]
 
-        # Slideshare adds an extra link to the embed HTML, we don't
+        # SlideShare adds an extra link to the embed HTML, we don't
         # need it.
         return re.sub(r"<div[^>]+>.+$", "", html)
     except (SlideShareServiceError, urllib2.URLError) as e:
