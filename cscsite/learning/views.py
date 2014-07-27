@@ -565,11 +565,14 @@ class CourseClassCreateUpdateMixin(object):
                 for attachment in old_attachments:
                     os.remove(attachment.material.path)
                     attachment.delete()
+            self.object = form.save()
             for attachment in attachments:
                 CourseClassAttachment(course_class=self.object,
                                       material=attachment).save()
+        else:
+            self.object = form.save()
 
-        return super(CourseClassCreateUpdateMixin, self).form_valid(form)
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         if self.request.GET.get('back') == 'timetable':
