@@ -65,7 +65,7 @@
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}
-      <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      <img class="pull-right" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
       {% endthumbnail %}
     </div>
   </div>

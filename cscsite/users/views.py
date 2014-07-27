@@ -127,9 +127,6 @@ class UserUpdateView(generic.UpdateView):
     template_name = "learning/simple_crispy_form.html"
     form_class = UserProfileForm
 
-    def get_success_url(self):
-        return self.object.get_absolute_url()
-
     def get_context_data(self, *args, **kwargs):
         context = (super(UserUpdateView, self)
                    .get_context_data(*args, **kwargs))
