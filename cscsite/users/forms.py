@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
@@ -27,6 +28,11 @@ class LoginForm(AuthenticationForm):
 
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
+        # NOTE(Dmitry): this should be done after Users app is loaded
+        # because of URL name resolutions quirks
+        self.fields['password'].help_text = (
+            _("You can also <a href=\"{0}\">reset your password</a>")
+            .format(reverse('password_reset')))
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-xs-2'
@@ -34,8 +40,8 @@ class LoginForm(AuthenticationForm):
         self.helper.layout = Layout(
             'username',
             'password',
-            FormActions(Submit('submit', _("Submit"),
-                               css_class="pull-right")))
+            FormActions(Div(Submit('submit', _("Submit")),
+                            css_class="pull-right")))
 
 
 class UserProfileForm(forms.ModelForm):
