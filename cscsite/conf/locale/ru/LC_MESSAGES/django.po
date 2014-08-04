@@ -2,20 +2,20 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-26 22:46+0400\n"
-"PO-Revision-Date: 2014-06-29 21:28+0230\n"
-"Last-Translator:   <>\n"
+"POT-Creation-Date: 2014-08-04 14:36+0400\n"
+"PO-Revision-Date: 2014-08-04 14:39+0230\n"
+"Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.3\n"
 
 #: learning/forms.py:19 templates/learning/simple_delete_confirmation.html:14
@@ -30,7 +30,7 @@ msgstr "Сохранить"
 
 #: learning/forms.py:32 learning/forms.py:115 learning/models.py:129
 #: learning/models.py:223 learning/models.py:273
-#: templates/learning/courseclass_detail.html:44 users/forms.py:43
+#: templates/learning/courseclass_detail.html:44 users/forms.py:49
 msgid "Description"
 msgstr "Описание"
 
@@ -144,18 +144,19 @@ msgstr "Можно сдать онлайн"
 
 #: learning/models.py:30
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
-"enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
+" enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
-"+HTML"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
 
 #: learning/models.py:34
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: learning/models.py:43 news/models.py:27 textpages/models.py:40
 msgid "News|slug"
@@ -163,11 +164,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:45 news/models.py:29
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/"
-"<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
+">some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
-"com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
+"test.com/news/<b>some-news</b>/"
 
 #: learning/models.py:55 learning/models.py:117
 #: templates/learning/assignment_list_student.html:49
@@ -215,8 +216,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:130
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
-"description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
+" description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -519,17 +520,17 @@ msgstr "Общие оценки"
 msgid "Only students can be graded"
 msgstr "Только студенты могут получить общую оценку"
 
-#: learning/views.py:492
+#: learning/views.py:500
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:495 templates/learning/courseoffering_detail.html:35
+#: learning/views.py:503 templates/learning/courseoffering_detail.html:35
 #: templates/learning/courses_list_student.html:42
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:836
+#: learning/views.py:847
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -757,8 +758,8 @@ msgstr "ФМЛ №239"
 
 #: templates/index.html:92
 msgid ""
-"Warning: to enroll, you should provide all information about your family for "
-"at least 3 centuries. If such information is not available, please "
+"Warning: to enroll, you should provide all information about your family for"
+" at least 3 centuries. If such information is not available, please "
 "reconsider enrollment."
 msgstr ""
 "Внимание: чтобы поступить, вы должны предоставить всю информацию о вашей "
@@ -786,31 +787,39 @@ msgstr "Преподавателей ещё нет"
 msgid "Edit"
 msgstr "Редактировать"
 
-#: templates/user_detail.html:26
+#: templates/user_detail.html:15
+#: templates/registration/password_change_form.html:5
+#: templates/registration/password_change_form.html:16
+#: templates/registration/password_reset_confirm.html:5
+#: templates/registration/password_reset_confirm.html:16
+msgid "Change password"
+msgstr "Сменить пароль"
+
+#: templates/user_detail.html:29
 msgid "student"
 msgstr "студент"
 
-#: templates/user_detail.html:27
+#: templates/user_detail.html:30
 msgid "enrolled in"
 msgstr "год поступления"
 
-#: templates/user_detail.html:27
+#: templates/user_detail.html:30
 msgid "courseoffering|took"
 msgstr "курсы"
 
-#: templates/user_detail.html:45
+#: templates/user_detail.html:48
 msgid "graduate"
 msgstr "выпускник"
 
-#: templates/user_detail.html:46
+#: templates/user_detail.html:49
 msgid "graduated in"
 msgstr "год выпуска"
 
-#: templates/user_detail.html:53
+#: templates/user_detail.html:56
 msgid "teacher"
 msgstr "преподаватель"
 
-#: templates/user_detail.html:53
+#: templates/user_detail.html:56
 msgid "courses"
 msgstr "курсы"
 
@@ -1049,6 +1058,23 @@ msgstr ""
 msgid "Book|number of copies left"
 msgstr "Количество оставшихся копий"
 
+#: templates/registration/password_change_done.html:5
+#: templates/registration/password_reset_complete.html:5
+#: templates/registration/password_reset_done.html:5
+#: templates/registration/password_reset_form.html:5
+#: templates/registration/password_reset_form.html:16
+msgid "Reset password"
+msgstr "Сменить пароль"
+
+#: templates/registration/password_change_done.html:11
+#: templates/registration/password_reset_complete.html:11
+msgid "Password changed"
+msgstr "Пароль изменён"
+
+#: templates/registration/password_reset_done.html:11
+msgid "An email with instructions for setting a new password has been sent"
+msgstr "Инструкции по смене пароля были высланы на указанный почтовый адрес"
+
 #: textpages/models.py:14
 msgid "Textpage|url_name"
 msgstr "url_name"
@@ -1067,8 +1093,8 @@ msgstr "Страницы"
 
 #: textpages/models.py:42
 msgid ""
-"Short dash-separated string for human-readable URLs, as in compscicenter.ru/"
-"pages/<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in "
+"compscicenter.ru/pages/<b>some-news</b>/"
 msgstr ""
 "Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
 "compscicenter.ru/pages/<b>some-news</b>/"
@@ -1081,33 +1107,38 @@ msgstr "Дополнительная страница"
 msgid "Textpage|Custom pages"
 msgstr "Дополнительные страницы"
 
-#: users/forms.py:22
+#: users/forms.py:23
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: users/forms.py:26
+#: users/forms.py:27
 msgid "Password"
 msgstr "Пароль"
 
-#: users/forms.py:37
+#: users/forms.py:34
+#, python-brace-format
+msgid "You can also <a href=\"{0}\">reset your password</a>"
+msgstr "Вы также можете <a href=\"{0}\">сменить ваш пароль</a>"
+
+#: users/forms.py:43
 msgid "Submit"
 msgstr "Отправить"
 
-#: users/forms.py:47 users/models.py:49
+#: users/forms.py:53 users/models.py:49
 msgid "Yandex ID"
 msgstr "Yandex ID"
 
-#: users/forms.py:48
+#: users/forms.py:54
 msgid "<b>YANDEX.ID</b>@yandex.ru"
-msgstr ""
+msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: users/forms.py:50 users/models.py:56
+#: users/forms.py:56 users/models.py:56
 msgid "Stepic ID"
 msgstr "Stepic ID"
 
-#: users/forms.py:51
+#: users/forms.py:57
 msgid "stepic.org/users/<b>424242</b>"
-msgstr ""
+msgstr "stepic.org/users/<b>424242</b>"
 
 #: users/models.py:27
 msgid "CSCUser|patronymic"
