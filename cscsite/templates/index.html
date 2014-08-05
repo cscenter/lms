@@ -42,7 +42,7 @@
           <span class="date">{{ news.created|date }}</span>
           <h3><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h3>
           <div class="ubertext">
-            {{ news.text.excerpt }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>
+            {{ news.text.excerpt|safe }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>
           {% endif %}
           </div>
         </li>

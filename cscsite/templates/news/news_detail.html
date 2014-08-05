@@ -9,7 +9,7 @@
       </h2>
 
       <div class="ubertext">
-        {{ object.text.content|linebreaks }}
+        {{ object.text.content|safe|linebreaks }}
       </div>
 
       <p class="news-metainfo">{{ news.created|date:"d.m.Y" }} ({{ news.author }})</p>
