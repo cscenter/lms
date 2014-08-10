@@ -20,7 +20,7 @@
           {% endthumbnail %}
           </div>
           <div class="col-xs-9">
-            <h4>{{ alumni.first_name }} {{ alumni.last_name }}</h4>
+            <h4><a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a></h4>
             <div class="ubertext">{{ alumni.get_short_note|safe }}</div>
           </div>
         </div>

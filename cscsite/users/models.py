@@ -56,6 +56,10 @@ class CSCUser(AbstractUser):
         _("Stepic ID"),
         blank=True,
         null=True)
+    csc_review = models.TextField(
+        _("CSC review"),
+        help_text=_("LaTeX+Markdown is enabled"),
+        blank=True)
 
     class Meta:
         ordering = ['last_name', 'first_name']

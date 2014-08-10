@@ -65,6 +65,10 @@
           </ul>
       </ul>
       {% endif %}
+      {% if user_object.csc_review %}
+      <h4>{% trans "CSC review" %}:</h4>
+      {{ user_object.csc_review }}
+      {% endif %}
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}
