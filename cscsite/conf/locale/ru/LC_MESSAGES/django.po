@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-04 14:36+0400\n"
-"PO-Revision-Date: 2014-08-04 14:39+0230\n"
+"POT-Creation-Date: 2014-08-10 17:37+0400\n"
+"PO-Revision-Date: 2014-08-10 17:37+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr "Сохранить"
 
 #: learning/forms.py:32 learning/forms.py:115 learning/models.py:129
 #: learning/models.py:223 learning/models.py:273
-#: templates/learning/courseclass_detail.html:44 users/forms.py:49
+#: templates/learning/courseclass_detail.html:44
 msgid "Description"
 msgstr "Описание"
 
@@ -180,7 +180,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:56 templates/base.html:145
+#: learning/models.py:56 templates/base.html:141
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 msgid "Courses"
@@ -326,7 +326,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:385 templates/base.html:177 templates/base.html.py:220
+#: learning/models.py:385 templates/base.html:173 templates/base.html.py:216
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:137
@@ -397,7 +397,7 @@ msgstr "Выполнение задания"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: learning/models.py:486 users/models.py:36
+#: learning/models.py:486 users/models.py:36 users/models.py:61
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -619,11 +619,11 @@ msgstr "Новости"
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
-#: templates/base.html:73
+#: templates/base.html:69
 msgid "About CSC"
 msgstr "О Центре"
 
-#: templates/base.html:78 templates/learning/assignment_detail.html:34
+#: templates/base.html:74 templates/learning/assignment_detail.html:34
 #: templates/learning/assignment_list_student.html:55
 #: templates/learning/assignment_list_student.html:111
 #: templates/learning/assignment_list_teacher.html:79
@@ -631,7 +631,7 @@ msgstr "О Центре"
 msgid "Online"
 msgstr "Онлайн"
 
-#: templates/base.html:85 templates/learning/assignment_list_student.html:22
+#: templates/base.html:81 templates/learning/assignment_list_student.html:22
 #: templates/learning/assignment_list_teacher.html:22
 #: templates/learning/calendar.html:24
 #: templates/learning/timetable_student.html:27
@@ -639,7 +639,7 @@ msgstr "Онлайн"
 msgid "Learning"
 msgstr "Обучение"
 
-#: templates/base.html:92 templates/learning/assignment_list_student.html:30
+#: templates/base.html:88 templates/learning/assignment_list_student.html:30
 #: templates/learning/assignment_list_teacher.html:30
 #: templates/learning/calendar.html:32
 #: templates/learning/timetable_student.html:35
@@ -647,41 +647,41 @@ msgstr "Обучение"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:99 templates/base.html.py:250
+#: templates/base.html:95 templates/base.html.py:246
 #: templates/learning/markssheet_staff.html:9
 #: templates/learning/markssheet_teacher.html:9
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:105
+#: templates/base.html:101
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:109
+#: templates/base.html:105
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:113
+#: templates/base.html:109
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:120
+#: templates/base.html:116
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:123
+#: templates/base.html:119
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:140
+#: templates/base.html:136
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:150
+#: templates/base.html:146
 msgid "Organizers"
 msgstr "Организаторы"
 
-#: templates/base.html:155
+#: templates/base.html:151
 #: templates/learning/assignment_student_detail.html:109
 #: templates/learning/courses_list_student.html:21
 #: templates/learning/courses_list_teacher.html:22
@@ -689,26 +689,26 @@ msgstr "Организаторы"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:160
+#: templates/base.html:156
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:187 templates/base.html.py:230
+#: templates/base.html:183 templates/base.html.py:226
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:192 templates/base.html.py:235
+#: templates/base.html:188 templates/base.html.py:231
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:198 templates/base.html.py:240
+#: templates/base.html:194 templates/base.html.py:236
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:273
+#: templates/base.html:269
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
@@ -822,6 +822,10 @@ msgstr "преподаватель"
 #: templates/user_detail.html:56
 msgid "courses"
 msgstr "курсы"
+
+#: templates/user_detail.html:69 users/models.py:60
+msgid "CSC review"
+msgstr "Отзыв о CSC"
 
 #: templates/learning/assignment_detail.html:18
 #: templates/learning/assignment_student_detail.html:23
@@ -1124,19 +1128,11 @@ msgstr "Вы также можете <a href=\"{0}\">сменить ваш па�
 msgid "Submit"
 msgstr "Отправить"
 
-#: users/forms.py:53 users/models.py:49
-msgid "Yandex ID"
-msgstr "Yandex ID"
-
-#: users/forms.py:54
+#: users/forms.py:74
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: users/forms.py:56 users/models.py:56
-msgid "Stepic ID"
-msgstr "Stepic ID"
-
-#: users/forms.py:57
+#: users/forms.py:75
 msgid "stepic.org/users/<b>424242</b>"
 msgstr "stepic.org/users/<b>424242</b>"
 
@@ -1160,23 +1156,31 @@ msgstr "Год поступления"
 msgid "CSCUser|graduation year"
 msgstr "Год выпуска"
 
+#: users/models.py:49
+msgid "Yandex ID"
+msgstr "Yandex ID"
+
 #: users/models.py:52
 msgid "Only the part before \"@yandex.ru\" is expected"
 msgstr "Ожидается часть до «@yandex.ru»"
 
-#: users/models.py:62
+#: users/models.py:56
+msgid "Stepic ID"
+msgstr "Stepic ID"
+
+#: users/models.py:66
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: users/models.py:63
+#: users/models.py:67
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:70
+#: users/models.py:74
 msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
-#: users/models.py:73
+#: users/models.py:77
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 

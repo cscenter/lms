@@ -47,19 +47,30 @@ class LoginForm(AuthenticationForm):
 class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
+        if kwargs['instance'].is_graduate:
+            show_fields = ['photo', 'note', 'csc_review',
+                           'yandex_id', 'stepic_id']
+        else:
+            show_fields = ['photo', 'note', 'yandex_id', 'stepic_id']
         self.helper.layout = Layout(
-            Div('photo', 'note', 'yandex_id', 'stepic_id'),
+            Div(*show_fields),
             CANCEL_SAVE_PAIR)
+
         super(UserProfileForm, self).__init__(*args, **kwargs)
+
+        if 'csc_review' not in show_fields:
+            del self.fields['csc_review']
 
     class Meta:
         model = CSCUser
-        fields = ['photo', 'note', 'yandex_id', 'stepic_id']
+        fields = ['photo', 'note', 'yandex_id', 'stepic_id', 'csc_review']
         widgets = {
-            "note": Ubereditor
+            'note': Ubereditor,
+            'csc_review': Ubereditor
         }
         help_texts = {
-            "note": LATEX_MARKDOWN_ENABLED,
-            "yandex_id": _("<b>YANDEX.ID</b>@yandex.ru"),
-            "stepid_id": _("stepic.org/users/<b>424242</b>")
+            'note': LATEX_MARKDOWN_ENABLED,
+            'csc_review': LATEX_MARKDOWN_ENABLED,
+            'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
+            'stepid_id': _("stepic.org/users/<b>424242</b>")
         }
