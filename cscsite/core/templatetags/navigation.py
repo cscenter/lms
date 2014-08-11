@@ -42,7 +42,8 @@ def current(context, tag_url_name, return_value='current', **kwargs):
         matched_simple = tag_url_name == current_url_name
         if current_url_name not in settings.MENU_URL_NAMES:
             logger.warning("can't find url {0} in MENU_URL_NAMES"
-                           .format(current_url_name))
+                           .format(current_url_name),
+                           extra={"request": context["request"]})
             return return_value if matched_simple else ''
         if matched_simple:
             return return_value
