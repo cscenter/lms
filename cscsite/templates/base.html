@@ -1,6 +1,9 @@
-{% load staticfiles %}
-{% load current from navigation %}
 {% load i18n %}
+{% load staticfiles %}
+
+{% load current from navigation %}
+
+{% load sitemetrics %}
 
 <!DOCTYPE html>
 <html>
@@ -279,5 +282,7 @@
     </div>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+    {% sitemetrics by yandex for "22468006" %}
   </body>
 </html>

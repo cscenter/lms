@@ -63,6 +63,7 @@ INSTALLED_APPS = (
     'taggit',
     'south',
     'rosetta',
+    'sitemetrics',
 
     'users',
     'core',
