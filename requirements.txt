@@ -13,6 +13,7 @@ django-fixture-media==0.1.4
 django-floppyforms==1.1.1
 django-model-utils==2.0
 django-rosetta==0.7.3
+django-sitemetrics==0.4.2
 django-taggit==0.10
 MySQL-python==1.2.5
 pylint-django==0.3
