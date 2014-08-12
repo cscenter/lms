@@ -211,9 +211,6 @@ html {
 }
 
 .footer .social a {
-  width: 20%;
-  display: block;
-  float: left;
   text-align: center;
   color: #9B9B9B;
 }
