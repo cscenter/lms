@@ -211,10 +211,18 @@ MENU_URL_NAMES = {
     'a_s_detail_student': {'alias': 'assignment_list_student'},
 
     'contacts': {},
+    'venue_detail': {},
 
     'user_update': {},
     'login': {},
-    'logout': {}
+    'logout': {},
+
+    'password_change_complete': {},
+    'password_reset_complete': {},
+    'password_reset_confirm': {},
+    'password_reset_done': {},
+    'password_reset': {},
+    'password_change': {}
     }
 
 LOGIN_URL= "/login"
