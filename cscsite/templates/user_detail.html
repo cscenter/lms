@@ -67,7 +67,9 @@
       {% endif %}
       {% if user_object.csc_review %}
       <h4>{% trans "CSC review" %}:</h4>
-      {{ user_object.csc_review }}
+      <div class="ubertext">
+        {{ user_object.csc_review }}
+      </div>
       {% endif %}
     </div>
     <div class="col-xs-3">
