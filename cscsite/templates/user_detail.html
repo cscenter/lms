@@ -45,15 +45,11 @@
         {% endif %}
         {% if user_object.is_graduate %}
         <li>
-          {% trans "graduate" %},
-          {% trans "graduated in" %} {{ user_object.graduation_year }}
-          {% if is_extended_profile_available %}
-          ({{ user_object.overall_grade.grade_display|lower }})
-          {% endif %}
+          {% blocktrans with year=user_object.graduation_year %}graduated in {{ year }}{% endblocktrans %}
         </li>
         {% endif %}
         {% if user_object.is_teacher %}
-        <li>{% trans "teacher" %}, {% trans "courses" %}:
+        <li>{% trans "teacher" %}{% if user_object.teaching_set.all %}:{% endif %}
           <ul class="">
             {% for courseoffering in user_object.teaching_set.all %}
             <li>
@@ -67,7 +63,7 @@
         {% endif %}
       </ul>
       {% if user_object.csc_review %}
-      <h4>{% trans "CSC review" %}:</h4>
+      <h4>{% blocktrans with name=user_object.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
       <div class="ubertext">
         {{ user_object.csc_review }}
       </div>
