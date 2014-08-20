@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-15 01:47+0400\n"
-"PO-Revision-Date: 2014-08-15 02:11+0230\n"
+"POT-Creation-Date: 2014-08-20 11:23+0400\n"
+"PO-Revision-Date: 2014-08-20 11:23+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -789,24 +789,18 @@ msgid "courseoffering|took"
 msgstr "курсы"
 
 #: templates/user_detail.html:48
-msgid "graduate"
-msgstr "выпускник"
+#, python-format
+msgid "graduated in %(year)s"
+msgstr "выпускник %(year)s года"
 
-#: templates/user_detail.html:49
-msgid "graduated in"
-msgstr "год выпуска"
-
-#: templates/user_detail.html:56
+#: templates/user_detail.html:52
 msgid "teacher"
 msgstr "преподаватель"
 
-#: templates/user_detail.html:56
-msgid "courses"
-msgstr "курсы"
-
-#: templates/user_detail.html:69 users/models.py:60
-msgid "CSC review"
-msgstr "Отзыв о CSC"
+#: templates/user_detail.html:66
+#, python-format
+msgid "%(name)s about CSC"
+msgstr "%(name)s о Центре"
 
 #: templates/learning/assignment_detail.html:18
 #: templates/learning/assignment_student_detail.html:23
@@ -1153,6 +1147,10 @@ msgstr "Ожидается часть до «@yandex.ru»"
 msgid "Stepic ID"
 msgstr "Stepic ID"
 
+#: users/models.py:60
+msgid "CSC review"
+msgstr "Отзыв о CSC"
+
 #: users/models.py:66
 msgid "CSCUser|user"
 msgstr "Пользователь"
@@ -1168,6 +1166,12 @@ msgstr "Для студента должен быть указан год пос
 #: users/models.py:77
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
+
+#~ msgid "courses"
+#~ msgstr "курсы"
+
+#~ msgid "graduate"
+#~ msgstr "выпускник"
 
 #~ msgid ""
 #~ "Warning: to enroll, you should provide all information about your family for"
