@@ -47,6 +47,15 @@ class UserTests(TestCase):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_full_name(), u"Анна Иванова")
 
+    def test_abbreviated_name(self):
+        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
+                       patronymic=u"Васильевна")
+        self.assertEqual(user.get_abbreviated_name(),
+                         u"А.В.Иванова")
+        user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
+        self.assertEqual(user.get_abbreviated_name(),
+                         u"А.Иванова")
+
     def test_group_props(self):
         """
         Tests properties based on groups (is_student, is_graduate, is_teacher)
