@@ -98,6 +98,15 @@ class CSCUser(AbstractUser):
                                .strip())
         return full_name or self.username
 
+    def get_abbreviated_name(self):
+        parts = [self.first_name[:1],
+                 self.patronymic[:1],
+                 self.last_name]
+        abbrev_name = smart_text("."
+                                 .join(part for part in parts if part)
+                                 .strip())
+        return abbrev_name or self.username
+
     def get_short_note(self):
         """Returns only the first paragraph from the note."""
         normalized_note = normalize_newlines(self.note)
