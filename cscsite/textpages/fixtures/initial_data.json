@@ -39,8 +39,8 @@
         "model": "textpages.textpage",
         "pk": 5,
         "fields": {
-            "url_name": "licenses",
-            "name": "Licenses",
+            "url_name": "useful_stuff",
+            "name": "Useful stuff",
             "text": "# Licenses\n\nThis is a list of licenses available for Computer Science Center students. **Please change this text**."
         }
     },
