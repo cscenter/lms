@@ -191,7 +191,6 @@
                     {% trans "Calendar" %}
                   </li>
                 </a>
-                <!-- <li>Задания <span class="badge">3</span></li> -->
                 <a href="{% url 'course_list_student' %}">
                   <li class="{% current 'course_list_student' %}">
                     {% trans "My courses" %}
@@ -200,6 +199,11 @@
                       {{ request.unread_notifications_cache.courseoffering_news|length }}
                     </span>
                     {% endif %}
+                  </li>
+                </a>
+               <a href="{% url 'useful_stuff' %}">
+                  <li class="{% current 'useful_stuff' %}">
+                    {% trans "Useful stuff" %}
                   </li>
                 </a>
               </ul>
