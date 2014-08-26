@@ -46,6 +46,13 @@ ALLOWED_HOSTS = []
 
 SITE_ID = 1
 
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_HOST_USER = 'curators@compscicenter.ru'
+EMAIL_HOST_PASSWORD = 'vorobey'
+EMAIL_PORT = 465
+# XXX remove after Django 1.7 is out.
+EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -103,7 +110,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
 
     'core.context_processors.redirect_bases'
-    )
+)
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
