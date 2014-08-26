@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
-
 from django.contrib import admin
 
 from index.views import IndexView, AlumniView, TeachersView
@@ -33,6 +31,7 @@ from learning.views import \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     MarksSheetTeacherView, MarksSheetStaffView
 
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -40,9 +39,12 @@ urlpatterns = patterns('',
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
-    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
-    url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(), name='user_detail'),
-    url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(), name='user_update'),
+    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
+        name='teacher_detail'),
+    url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
+        name='user_detail'),
+    url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
+        name='user_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
