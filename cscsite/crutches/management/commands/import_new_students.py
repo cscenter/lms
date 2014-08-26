@@ -94,7 +94,6 @@ class Command(BaseCommand):
                     enrollment_year=today.year, stepic_id=stepic_id)
                 user.groups.add(CSCUser.IS_STUDENT_PK)
                 users.append(user)
-                break
 
         # b) send password reset notifications
         for user in users:
