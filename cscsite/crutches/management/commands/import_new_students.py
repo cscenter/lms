@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import csv
 from datetime import date
@@ -82,8 +82,12 @@ class Command(BaseCommand):
         with transaction.atomic():
             # a) create users
             for row in students:
-                print(row["email"])
+                print(row["email"], end=" ")
                 username, domain = row["email"].split("@", 1)
+                if CSCUser.objects.filter(username=username):
+                    print(" [skipping]")
+                    continue
+
                 stepic_id = stepic_ids.get(row["user"])
                 user = CSCUser.objects.create_user(
                     username, row["email"],
@@ -94,6 +98,7 @@ class Command(BaseCommand):
                     enrollment_year=today.year, stepic_id=stepic_id)
                 user.groups.add(CSCUser.IS_STUDENT_PK)
                 users.append(user)
+                print("ok")
 
         # b) send password reset notifications
         for user in users:
