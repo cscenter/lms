@@ -202,7 +202,8 @@ class CalendarTeacherView(TeacherOnlyMixin,
                 .filter(course_offering__teachers=self.request.user))
 
 
-class CalendarStudentView(CalendarMixin,
+class CalendarStudentView(StudentOnlyMixin,
+                          CalendarMixin,
                           generic.ListView):
     user_type = "student"
 
