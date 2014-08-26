@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 print(row["email"], end=" ")
                 username, domain = row["email"].split("@", 1)
                 if CSCUser.objects.filter(username=username):
-                    print(" [skipping]")
+                    print("[skipping]")
                     continue
 
                 stepic_id = stepic_ids.get(row["user"])
@@ -102,6 +102,7 @@ class Command(BaseCommand):
 
         # b) send password reset notifications
         for user in users:
+            print("emailing " + user.email, end=" ")
             context = {
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'user': user,
@@ -110,6 +111,7 @@ class Command(BaseCommand):
             email = Template(EMAIL_TEMPLATE).render(Context(context))
             send_mail("Скоро начало первого семестра в CS центре",
                       email, "curators@compscicenter.ru", [user.email])
+            print("ok")
 
 
 
