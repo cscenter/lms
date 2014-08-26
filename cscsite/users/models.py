@@ -52,7 +52,7 @@ class CSCUser(AbstractUser):
                                    message=_("Only the part before "
                                              "\"@yandex.ru\" is expected"))],
         blank=True)
-    stepic_id = models.PositiveSmallIntegerField(
+    stepic_id = models.PositiveIntegerField(
         _("Stepic ID"),
         blank=True,
         null=True)
@@ -79,7 +79,7 @@ class CSCUser(AbstractUser):
 
     def save(self, **kwargs):
         if self.email and not self.yandex_id:
-            username, domain = self.email.split("@")
+            username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
 
