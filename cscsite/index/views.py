@@ -1,7 +1,4 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import F
-from django.shortcuts import render
 from django.views.generic import TemplateView, ListView
 
 from news.models import News
