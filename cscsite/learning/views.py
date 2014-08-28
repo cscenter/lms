@@ -340,7 +340,11 @@ class GetCourseOfferingObjectMixin(object):
     model = CourseOffering
 
     def get_object(self):
-        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+        try:
+            year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+        except ValueError:
+            raise Http404
+
         return get_object_or_404(
             self.model.objects
             .filter(semester__type=semester_type,
