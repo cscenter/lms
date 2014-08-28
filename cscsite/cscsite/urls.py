@@ -66,7 +66,7 @@ urlpatterns = patterns('',
         name='calendar_student'),
     url(r'^learning/full-calendar/$', CalendarFullView.as_view(),
         name='calendar_full_student'),
-    url(r'^useful/$', TextpageOpenView.as_view(), name='useful_stuff'),
+    url(r'^useful/$', TextpageStudentView.as_view(), name='useful_stuff'),
 
     url(r'^teaching/$',
         RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
@@ -147,8 +147,6 @@ urlpatterns = patterns('',
         name="venue_list"),
     url(r"^venues/(?P<pk>[-\w]+)/$", VenueDetailView.as_view(),
         name="venue_detail"),
-
-    url(r'^licenses/$', TextpageStudentView.as_view(), name='licenses'),
 
     url(r'^pages/(?P<slug>[-\w]+)$', CustomTextpageOpenView.as_view(),
         name='custom_text_page'),
