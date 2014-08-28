@@ -52,7 +52,7 @@ EMAIL_HOST_PASSWORD = 'vorobey'
 EMAIL_PORT = 465
 # XXX remove after Django 1.7 is out.
 EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@comscicenter.ru'
+DEFAULT_FROM_EMAIL = 'noreply@compscicenter.ru'
 
 # Application definition
 
