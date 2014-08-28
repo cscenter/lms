@@ -6,7 +6,6 @@ import os.path
 import datetime
 
 import dateutil.parser as dparser
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -16,7 +15,6 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-
 from annoying.fields import AutoOneToOneField
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField
@@ -669,6 +667,3 @@ class OverallGrade(TimeStampedModel):
     @property
     def grade_display(self):
         return self.GRADES[self.grade]
-
-
-from . import signals
