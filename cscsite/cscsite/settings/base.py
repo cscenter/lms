@@ -47,12 +47,11 @@ ALLOWED_HOSTS = []
 SITE_ID = 1
 
 EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_HOST_USER = 'curators@compscicenter.ru'
-EMAIL_HOST_PASSWORD = 'vorobey'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
+EMAIL_HOST_PASSWORD = 'P@ssw0rd238'
 EMAIL_PORT = 465
 # XXX remove after Django 1.7 is out.
 EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@compscicenter.ru'
 
 # Application definition
 
