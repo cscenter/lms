@@ -150,9 +150,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Custom user model
-
 AUTH_USER_MODEL = "users.CSCUser"
+AUTHENTICATION_BACKENDS = (
+    "crutches.compat.EmailOrUsernameModelBackend",
+)
 
 # URL names info for top menu. Possible keys:
 # "parent": name of "parent" menu item, as if in submenu
