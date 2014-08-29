@@ -1,19 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
-
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden, Button, Div
+from crispy_forms.layout import Layout, Submit, Div
 from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
 
 from core.forms import Ubereditor
 from learning.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
-
 from .models import CSCUser
 
 
