@@ -667,3 +667,8 @@ class OverallGrade(TimeStampedModel):
     @property
     def grade_display(self):
         return self.GRADES[self.grade]
+
+
+# XXX this is a gross hack of course. A better solution imo would be
+# to put signal handlers right next to the models.
+from .signals import *
