@@ -250,3 +250,7 @@ SLIDESHARE_API_KEY = "E3GDS7t4"
 SLIDESHARE_SECRET = "fnk6fOLp"
 SLIDESHARE_USERNAME = "compscicenter"
 SLIDESHARE_PASSWORD = "vorobey"
+
+SOUTH_MIGRATION_MODULES = {
+    'taggit': 'taggit.south_migrations',
+}
