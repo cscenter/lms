@@ -95,13 +95,13 @@ class OverallGradeAdmin(admin.ModelAdmin):
 
 
 class AssignmentStudentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'assignment', 'state', 'state_changed']
+    list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'assignment', 'state_changed']
+            return ['student', 'assignment', 'grade_changed', 'state']
         else:
-            return ['state_changed']
+            return ['grade_changed', 'state']
 
 
 admin.site.register(Course, CourseAdmin)

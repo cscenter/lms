@@ -8,7 +8,7 @@ import datetime
 import dateutil.parser as dparser
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
@@ -376,6 +376,14 @@ class Assignment(TimeStampedModel, object):
                             int(time.time()) % 30,
                             filename))),
         blank=True)
+    grade_min = models.PositiveSmallIntegerField(
+        _("Assignment|grade_min"),
+        default=2,
+        validators=[MaxValueValidator(1000)])
+    grade_max = models.PositiveSmallIntegerField(
+        _("Assignment|grade_max"),
+        default=5,
+        validators=[MaxValueValidator(1000)])
 
     class Meta:
         ordering = ["created", "course_offering"]
@@ -392,6 +400,9 @@ class Assignment(TimeStampedModel, object):
                 self._original_course_offering_id != self.course_offering_id):
             raise ValidationError(_("Course offering modification "
                                     "is not allowed"))
+        if self.grade_min >= self.grade_max:
+            raise ValidationError(_("Mininum grade should be lesser than "
+                                    "maximum one"))
 
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
@@ -408,20 +419,18 @@ class Assignment(TimeStampedModel, object):
 
 @python_2_unicode_compatible
 class AssignmentStudent(TimeStampedModel):
-    STATES = Choices(('not_checked', _("Assignment|not checked")),
-                     # ('not_submitted', _("Assignment|not submitted")),
-                     ('being_checked', _("Assignment|being checked")),
+    STATES = Choices(('not_submitted', _("Assignment|not submitted")),
+                     ('not_checked', _("Assignment|not checked")),
                      ('unsatisfactory', _("Assignment|unsatisfactory")),
                      ('pass', _("Assignment|pass")),
                      ('good', _("Assignment|good")),
                      ('excellent', _("Assignment|excellent")))
-    SHORT_STATES = Choices(('not_checked', "—"),
-                           ('being_checked', "…"),
+    SHORT_STATES = Choices(('not_submitted', "—"),
+                           ('not_checked', "…"),
                            ('unsatisfactory', "2"),
                            ('pass', "3"),
                            ('good', "4"),
                            ('excellent', "5"))
-    OPEN_STATES = {'not_checked', 'being_checked'}
 
     assignment = models.ForeignKey(
         Assignment,
@@ -432,13 +441,13 @@ class AssignmentStudent(TimeStampedModel):
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
         limit_choices_to={'groups__name': 'Student'})
-    state = StatusField(
-        verbose_name=_("Asssignment|state"),
-        choices_name='STATES',
-        default='not_checked')
-    state_changed = MonitorField(
-        verbose_name=_("Asssignment|state changed"),
-        monitor='state')
+    grade = models.PositiveSmallIntegerField(
+        verbose_name=_("Grade"),
+        null=True,
+        blank=True)
+    grade_changed = MonitorField(
+        verbose_name=_("Assignment|grade changed"),
+        monitor='grade')
 
     class Meta:
         ordering = ["assignment", "student"]
@@ -449,6 +458,10 @@ class AssignmentStudent(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
+        if self.grade > self.assignment.max_grade:
+            raise ValidationError(_("Grade can't be larger than maximum "
+                                    "one ({0})")
+                                  .format(self.assignment.max_grade))
 
     def __str__(self):
         return "{0} - {1}".format(smart_text(self.assignment),
@@ -464,12 +477,37 @@ class AssignmentStudent(TimeStampedModel):
         cache = get_unread_notifications_cache()
         return self in cache.assignments
 
-    @property
-    def state_display(self):
-        return self.STATES[self.state]
+    @cached_property
+    def state(self):
+        grade_min = self.assignment.grade_min
+        grade_max = self.assignment.grade_max
+        grade_range = grade_max - grade_min
+        if self.grade is None:
+            if not self.assignment.is_online or self.has_passes():
+                return 'not_checked'
+            else:
+                return 'not_submitted'
+        else:
+            if self.grade < grade_min:
+                return 'unsatisfactory'
+            elif self.grade < grade_min + 0.4 * grade_range:
+                return 'pass'
+            elif self.grade < grade_min + 0.8 * grade_range:
+                return 'good'
+            else:
+                return 'excellent'
 
     @property
-    def status_short(self):
+    def state_display(self):
+        if self.grade:
+            return "{0} ({1}/{2})".format(self.STATES[self.state],
+                                          self.grade,
+                                          self.assignment.grade_max)
+        else:
+            return self.STATES[self.state]
+
+    @property
+    def state_short(self):
         return self.SHORT_STATES[self.state]
 
 

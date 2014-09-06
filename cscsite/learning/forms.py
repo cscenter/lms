@@ -238,21 +238,25 @@ class AssignmentCommentForm(forms.ModelForm):
 
 
 class AssignmentGradeForm(forms.Form):
-    state = forms.ChoiceField(
+    grade = forms.IntegerField(
+        required=False,
         label="",
-        choices=AssignmentStudent.STATES)
+        widget=forms.NumberInput(attrs={'min': 0, 'step': 1}))
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(Hidden('grading_form', 'true'),
-                Field('state', css_class='input-sm'),
-                # Submit('save', _('Save'))
-                HTML("&nbsp;"),
+                Field('grade', css_class='input-grade'),
+                HTML("/" + str(kwargs.get('grade_max'))),
+                HTML("&nbsp;&nbsp;"),
                 StrictButton('<i class="fa fa-floppy-o"></i>',
                              css_class="btn-primary",
                              type="submit"),
                 css_class="form-inline"))
+        if 'grade_max' in kwargs:
+            self.helper['grade'].update_attributes(max=kwargs['grade_max'])
+            del kwargs['grade_max']
         super(AssignmentGradeForm, self).__init__(*args, **kwargs)
 
 
@@ -282,6 +286,12 @@ class AssignmentForm(forms.ModelForm):
     is_online = forms.BooleanField(
         label=_("Can be passed online"),
         required=False)
+    grade_min = forms.IntegerField(
+        label=_("Assignment|grade_min"),
+        initial=2)
+    grade_max = forms.IntegerField(
+        label=_("Assignment|grade_max"),
+        initial=5)
 
     def __init__(self, user, *args, **kwargs):
         self.helper = FormHelper()
@@ -291,6 +301,10 @@ class AssignmentForm(forms.ModelForm):
                 'text',
                 Div(Div('deadline_at',
                         'attached_file',
+                        css_class="form-inline"),
+                    css_class="form-group"),
+                Div(Div('grade_min',
+                        'grade_max',
                         css_class="form-inline"),
                     css_class="form-group"),
                 'is_online',
@@ -309,7 +323,9 @@ class AssignmentForm(forms.ModelForm):
                   'text',
                   'deadline_at',
                   'attached_file',
-                  'is_online']
+                  'is_online',
+                  'grade_min',
+                  'grade_max']
 
 
 # Hipster factory class!
