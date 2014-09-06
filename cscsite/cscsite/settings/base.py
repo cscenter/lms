@@ -182,6 +182,7 @@ MENU_URL_NAMES = {
     'course_offering_news_update': {'alias': 'course_list'},
     'course_offering_news_delete': {'alias': 'course_list'},
     'course_offering_edit_descr': {'alias': 'course_list'},
+    'course_offering_unenroll': {},
     'orgs': {'parent': 'about'},
     'teachers': {'parent': 'about'},
     'teacher_detail': {'alias': 'teachers'},
@@ -198,6 +199,7 @@ MENU_URL_NAMES = {
     'useful_stuff': {'parent': 'learning'},
 
     'assignment_list_teacher': {'parent': 'teaching'},
+    'assignment_detail_teacher': {'alias': 'assignment_list_teacher'},
     'assignment_add': {'alias': 'assignment_list_teacher'},
     'assignment_edit': {'alias': 'assignment_list_teacher'},
     'assignment_delete': {'alias': 'assignment_list_teacher'},
