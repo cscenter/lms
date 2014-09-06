@@ -680,7 +680,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                              'assignment__course_offering__semester',
                              'student'))
         if self.request.GET.get('only_ungraded') == 'true':
-            return base_qs.filter(state__in=AssignmentStudent.OPEN_STATES)
+            return base_qs.filter(grade__isnull=True)
         else:
             return base_qs
 
@@ -689,9 +689,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                    .get_context_data(*args, **kwargs))
         open_ = [a_s
                  for a_s in context['assignment_list']
-                 if (a_s.has_unread() or
-                     (a_s.state in AssignmentStudent.OPEN_STATES and
-                      a_s.has_passes))]
+                 if (a_s.has_unread() or (not a_s.grade and a_s.has_passes))]
         archive = (Assignment.objects
                    .filter(course_offering__teachers=self.request.user)
                    .order_by('-deadline_at',
@@ -810,15 +808,16 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         context = (super(ASTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
         a_s = context['a_s']
-        initial = {'state': a_s.state}
+        initial = {'grade': a_s.grade}
         context['is_actual_teacher'] = (
             self.request.user in (a_s
                                   .assignment
                                   .course_offering
                                   .teachers.all()))
-        context['grade_form'] = AssignmentGradeForm(initial)
+        context['grade_form'] = AssignmentGradeForm(
+            initial, grade_max=a_s.assignment.grade_max)
         base = (AssignmentStudent.objects
-                .filter(state='not_checked')
+                .filter(grade__isnull=True)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk'))
@@ -842,10 +841,9 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                 raise PermissionDenied
 
             if form.is_valid():
-                a_s.state = form.cleaned_data['state']
+                a_s.grade = form.cleaned_data['grade']
                 a_s.save()
-                return redirect(reverse('a_s_detail_teacher',
-                                        args=[pk]))
+                return redirect(reverse('a_s_detail_teacher', args=[pk]))
             else:
                 # not sure if we can do anything more meaningful here.
                 # it shoudn't happen, after all.

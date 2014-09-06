@@ -616,3 +616,11 @@ tr.unread {
 .semester-course-list ul { padding-left: 15px; }
 
 .course-offering-profs ul > li { padding-bottom: 10px; }
+
+.input-grade {
+  width: 100px !important;
+}
+
+.form-group div.controls {
+  margin-right: 1%;
+}

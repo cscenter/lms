@@ -43,7 +43,7 @@
               <td class="content">
                 {% if assignment.is_online %}
                 <a href="{% url 'a_s_detail_teacher' cell.pk %}">
-                  {{ cell.status_short|safe }}
+                  {{ cell.state_short|safe }}
                 </a>
                 {% else %}
                 <span class="marks-sheet-form-cell">
