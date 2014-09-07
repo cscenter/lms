@@ -8,7 +8,7 @@ from index.views import IndexView, AlumniView, TeachersView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
-    CustomTextpageOpenView, TextpageLoggedInView
+    CustomTextpageOpenView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
@@ -66,7 +66,8 @@ urlpatterns = patterns('',
         name='calendar_student'),
     url(r'^learning/full-calendar/$', CalendarFullView.as_view(),
         name='calendar_full_student'),
-    url(r'^useful/$', TextpageLoggedInView.as_view(), name='useful_stuff'),
+    url(r'^learning/useful/$', TextpageStudentView.as_view(),
+        name='useful_stuff'),
 
     url(r'^teaching/$',
         RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
