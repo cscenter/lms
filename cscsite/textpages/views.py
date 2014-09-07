@@ -7,7 +7,7 @@ from django.views.generic import DetailView
 
 from textpages.models import Textpage, CustomTextpage
 
-from braces.views import GroupRequiredMixin
+from braces.views import GroupRequiredMixin, LoginRequiredMixin
 
 from learning.models import Course
 
@@ -46,3 +46,7 @@ class CustomTextpageOpenView(DetailView):
 
 class TextpageStudentView(GroupRequiredMixin, TextpageOpenView):
     group_required = 'Student'
+
+
+class TextpageLoggedInView(LoginRequiredMixin, TextpageOpenView):
+    pass
