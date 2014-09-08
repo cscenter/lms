@@ -66,7 +66,7 @@ urlpatterns = patterns('',
         name='calendar_student'),
     url(r'^learning/full-calendar/$', CalendarFullView.as_view(),
         name='calendar_full_student'),
-    url(r'^useful/$', TextpageStudentView.as_view(),
+    url(r'^learning/useful/$', TextpageStudentView.as_view(),
         name='useful_stuff'),
 
     url(r'^teaching/$',
