@@ -122,6 +122,8 @@ class Command(BaseCommand):
                        'courseoffering_name':
                        smart_text(course_offering.course),
                        'courseoffering_news_name':
-                       notification.course_offering_news.title}
+                       notification.course_offering_news.title,
+                       'courseoffering_news_text':
+                       notification.course_offering_news.text}
 
             notify(notification, name, context)
