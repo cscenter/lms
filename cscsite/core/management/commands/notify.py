@@ -36,8 +36,8 @@ def notify(notification, name, context):
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send()
     print "sending {0} ({1})".format(notification, name)
+    msg.send()
     notification.is_notified = True
     notification.save()
 
