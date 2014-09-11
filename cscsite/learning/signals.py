@@ -81,7 +81,7 @@ def create_course_offering_news_notification(sender, instance, created,
     teachers = (instance
                 .course_offering
                 .teachers
-                .exclude(pk=instance.author.pk))
+                .all())
     # this loop can be optimized using bulk_create at the expence of
     # pre/post_save signals on CourseOfferingNewsNotification
     for user in itertools.chain(students, teachers):
