@@ -10,7 +10,8 @@ from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
 from django.utils.html import strip_tags
 
-from learning.models import AssignmentNotification
+from learning.models import AssignmentNotification, \
+    CourseOfferingNewsNotification
 
 # import cscsite.urls
 
@@ -20,14 +21,32 @@ EMAILS = {'new_comment_for_student':
            'template': "emails/new_comment_for_student.html"},
           'new_comment_for_teacher':
           {'title': "Студент оставил комментарий к решению задания",
-           'template': "emails/new_comment_for_teacher.html"}}
+           'template': "emails/new_comment_for_teacher.html"},
+          'new_courseoffering_news':
+          {'title': "Добавлена новость к курсу",
+           'template': "emails/new_courseoffering_news.html"}}
+
+
+def notify(notification, name, context):
+    html_content = render_to_string(EMAILS[name]['template'], context)
+    text_content = strip_tags(html_content)
+
+    msg = EmailMultiAlternatives(EMAILS[name]['title'],
+                                 text_content,
+                                 settings.DEFAULT_FROM_EMAIL,
+                                 [notification.user.email])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
+    print "sending {0} ({1})".format(notification, name)
+    notification.is_notified = True
+    notification.save()
 
 
 class Command(BaseCommand):
     help = 'Sends notifications through email'
 
     def handle(self, *args, **options):
-        notifications \
+        notifications_assignments \
             = (AssignmentNotification.objects
                .filter(is_unread=True, is_notified=False)
                .prefetch_related(
@@ -38,7 +57,7 @@ class Command(BaseCommand):
                    'assignment_student__assignment__course_offering__course',
                    'assignment_student__student'))
 
-        for notification in notifications:
+        for notification in notifications_assignments:
             if notification.user == notification.assignment_student.student:
                 name = 'new_comment_for_student'
                 context = {'a_s_link':
@@ -71,14 +90,30 @@ class Command(BaseCommand):
                            'assignment_name':
                            smart_text(notification.assignment_student)}
 
-            html_content = render_to_string(EMAILS[name]['template'], context)
-            text_content = strip_tags(html_content)
+            notify(notification, name, context)
 
-            msg = EmailMultiAlternatives(EMAILS[name]['title'],
-                                         text_content,
-                                         settings.DEFAULT_FROM_EMAIL,
-                                         [notification.user.email])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
-            notification.is_notified = True
-            notification.save()
+        notifications_courseoffering_news \
+            = (CourseOfferingNewsNotification.objects
+               .filter(is_unread=True, is_notified=False)
+               .prefetch_related(
+                   'user',
+                   'course_offering_news',
+                   'course_offering_news__course_offering',
+                   'course_offering_news__course_offering__course',
+                   'course_offering_news__course_offering__semester'))
+
+        for notification in notifications_courseoffering_news:
+            course_offering = notification.course_offering_news.course_offering
+
+            name = 'new_courseoffering_news'
+            context = {'courseoffering_link':
+                       # FIXME: see above for a note about 'reverse'
+                       ("http://compscicenter.ru/courses/{0}/{1}/"
+                        .format(course_offering.course.slug,
+                                course_offering.semester.slug)),
+                       'courseoffering_name':
+                       smart_text(course_offering.course),
+                       'courseoffering_news_name':
+                       notification.course_offering_news.title}
+
+            notify(notification, name, context)
