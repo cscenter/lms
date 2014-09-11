@@ -29,7 +29,8 @@ EMAILS = {'new_comment_for_student':
 
 def notify(notification, name, context):
     if not notification.user.email:
-        print "user {0} doesn't have an email".format(notification.user)
+        print ("user {0} doesn't have an email"
+               .format(smart_text(notification.user)))
         return
 
     html_content = render_to_string(EMAILS[name]['template'], context)
@@ -40,7 +41,8 @@ def notify(notification, name, context):
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
-    print "sending {0} ({1})".format(notification, name)
+    print "sending {0} ({1})".format(smart_text(notification),
+                                     smart_text(name))
     msg.send()
     notification.is_notified = True
     notification.save()
