@@ -31,6 +31,8 @@ def notify(notification, name, context):
     if not notification.user.email:
         print ("user {0} doesn't have an email"
                .format(smart_text(notification.user)))
+        notification.is_notified = True
+        notification.save()
         return
 
     html_content = render_to_string(EMAILS[name]['template'], context)
