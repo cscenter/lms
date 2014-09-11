@@ -1039,7 +1039,7 @@ msgstr "Места проведения занятий CSC"
 
 #: templates/library/book_detail.html:30 templates/library/book_list.html:30
 msgid "Book|read by"
-msgstr "Прочитано"
+msgstr "Читают"
 
 #: templates/library/book_list.html:11
 msgid "library"
