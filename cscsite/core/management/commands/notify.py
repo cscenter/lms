@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
-from django.utils.html import strip_tags
+from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
@@ -35,7 +35,8 @@ def notify(notification, name, context):
         notification.save()
         return
 
-    html_content = render_to_string(EMAILS[name]['template'], context)
+    html_content = linebreaks(
+        render_to_string(EMAILS[name]['template'], context))
     text_content = strip_tags(html_content)
 
     msg = EmailMultiAlternatives(EMAILS[name]['title'],
