@@ -34,7 +34,8 @@
         {% trans "Online" %}:
         {{ assignment.is_online|yesno:_("Yes,No") }}
       </p>
-      {% if a_s.assignment.attached_file %}
+      {% if assignment.attached_file %}
+      {% trans "Attached file" %}:
       <span class="assignment-attachment">
         <i class="fa fa-file"></i>
         <a href="{{ assignment.attached_file.url }}">
