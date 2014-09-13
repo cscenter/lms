@@ -46,7 +46,7 @@ def create_assignment_notification(sender, instance, created,
     if not created:
         return
     a_s = instance.assignment_student
-    if instance.author.is_student:
+    if instance.author.pk == a_s.student.pk:
         teachers = (instance
                     .assignment_student
                     .assignment
@@ -61,7 +61,7 @@ def create_assignment_notification(sender, instance, created,
                                     assignment_student=a_s,
                                     is_passed=is_passed)
              .save())
-    elif instance.author.is_teacher:
+    else:
         student = instance.assignment_student.student
         (AssignmentNotification(user=student,
                                 assignment_student=a_s)
