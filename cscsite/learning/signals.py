@@ -16,9 +16,18 @@ def populate_assignment_students(sender, instance, created,
     if not created:
         return
     students = instance.course_offering.enrolled_students.all()
-    AssignmentStudent.objects.bulk_create(
-        AssignmentStudent(assignment=instance, student=student)
-        for student in students)
+    for student in students:
+        a_s = AssignmentStudent.objects.create(assignment=instance,
+                                               student=student)
+        # Note(Dmitry): we create notifications here instead of a separate
+        #               receiver because it's much more efficient than getting
+        #               AssignmentStudent objects back one by one. It seems
+        #               reasonable that 2*N INSERTs are better than bulk_create
+        #               + N SELECTs + N INSERTs.
+        (AssignmentNotification(user=student,
+                                assignment_student=a_s,
+                                is_about_creation=True)
+         .save())
 
 
 @receiver(models.signals.post_save, sender=Enrollment)
@@ -41,8 +50,8 @@ def delete_student_assignments(sender, instance, *args, **kwargs):
 
 
 @receiver(models.signals.post_save, sender=AssignmentComment)
-def create_assignment_notification(sender, instance, created,
-                                   *args, **kwargs):
+def create_assignment_comment_notification(sender, instance, created,
+                                           *args, **kwargs):
     if not created:
         return
     a_s = instance.assignment_student
@@ -89,3 +98,19 @@ def create_course_offering_news_notification(sender, instance, created,
             user=user,
             course_offering_news=instance)
          .save())
+
+
+@receiver(models.signals.post_save, sender=Assignment)
+def create_deadline_change_notification(sender, instance, created,
+                                        *args, **kwargs):
+    if created:
+        return
+    if 'deadline_at' in instance.tracker.changed():
+        students = instance.course_offering.enrolled_students.all()
+        for student in students:
+            a_s = AssignmentStudent.objects.get(student=student,
+                                                assignment=instance)
+            (AssignmentNotification(user=student,
+                                    assignment_student=a_s,
+                                    is_about_deadline=True)
+             .save())

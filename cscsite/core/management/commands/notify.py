@@ -7,6 +7,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from django.utils import translation
 from django.utils.encoding import smart_text
 from django.utils.html import strip_tags, linebreaks
 
@@ -24,7 +25,13 @@ EMAILS = {'new_comment_for_student':
            'template': "emails/new_comment_for_teacher.html"},
           'new_courseoffering_news':
           {'title': "Добавлена новость к курсу",
-           'template': "emails/new_courseoffering_news.html"}}
+           'template': "emails/new_courseoffering_news.html"},
+          'deadline_changed':
+          {'title': "Изменился срок сдачи домашнего задания",
+           'template': "emails/deadline_changed.html"},
+          'new_assignment':
+          {'title': "Появилось новое домашнее задание",
+           'template': "emails/new_assignment.html"}}
 
 
 def notify(notification, name, context):
@@ -53,8 +60,12 @@ def notify(notification, name, context):
 
 class Command(BaseCommand):
     help = 'Sends notifications through email'
+    can_import_settings = True
 
     def handle(self, *args, **options):
+        from django.conf import settings
+        translation.activate(settings.LANGUAGE_CODE)
+
         notifications_assignments \
             = (AssignmentNotification.objects
                .filter(is_unread=True, is_notified=False)
@@ -67,37 +78,34 @@ class Command(BaseCommand):
                    'assignment_student__student'))
 
         for notification in notifications_assignments:
-            if notification.user == notification.assignment_student.student:
-                name = 'new_comment_for_student'
-                context = {'a_s_link':
-                           ("http://compscicenter.ru/learning/assignments/{0}/"
-                            .format(notification.assignment_student.pk)),
-                           # reverse('a_s_detail_student',
-                           #         notification.assignment_student.pk),
-                           'assignment_name':
-                           smart_text(notification.assignment_student)}
+            a_s = notification.assignment_student
+            # FIXME: reverse doesn't work in management,
+            # investigate, hardcode for now
+            context = {'a_s_link_student':
+                       ("http://compscicenter.ru/learning/assignments/{0}/"
+                        .format(a_s.pk)),
+                       'a_s_link_teacher':
+                       ("http://compscicenter.ru/"
+                        "teaching/assignments/submissions/{0}/"
+                        .format(a_s.pk)),
+                       'assignment_link':
+                       ("http://compscicenter.ru/teaching/assignments/{0}/"
+                        .format(a_s.assignment.pk)),
+                       'assignment_name':
+                       smart_text(a_s.assignment),
+                       'student_name':
+                       smart_text(a_s.student),
+                       'deadline_at':
+                       a_s.assignment.deadline_at}
+            if notification.is_about_creation:
+                name = 'new_assignment'
+            elif notification.is_about_deadline:
+                name = 'deadline_changed'
             else:
-                student = notification.assignment_student.student
-
-                name = 'new_comment_for_teacher'
-                context = {'student_name': smart_text(student),
-                           'a_s_link':
-                           # FIXME: reverse doesn't work in management,
-                           # investigate, hardcode for now
-                           ("http://compscicenter.ru/"
-                            "teaching/assignments/submissions/{0}/"
-                            .format(notification.assignment_student.pk)),
-                           # reverse('a_s_detail_teacher',
-                           #         notification.assignment_student.pk),
-                           'assignment_link':
-                           ("http://compscicenter.ru/teaching/assignments/{0}/"
-                            .format(notification.assignment_student
-                                    .assignment.pk)),
-                           # reverse('assignment_detail_teacher',
-                           #         notification.assignment_student
-                           #         .assignment.pk),
-                           'assignment_name':
-                           smart_text(notification.assignment_student)}
+                if notification.user == a_s.student:
+                    name = 'new_comment_for_student'
+                else:
+                    name = 'new_comment_for_teacher'
 
             notify(notification, name, context)
 
@@ -128,3 +136,5 @@ class Command(BaseCommand):
                        notification.course_offering_news.text}
 
             notify(notification, name, context)
+
+        translation.deactivate()

@@ -16,7 +16,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from annoying.fields import AutoOneToOneField
-from model_utils import Choices
+from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
@@ -385,6 +385,8 @@ class Assignment(TimeStampedModel, object):
         default=5,
         validators=[MaxValueValidator(1000)])
 
+    tracker = FieldTracker(fields=['deadline_at'])
+
     class Meta:
         ordering = ["created", "course_offering"]
         verbose_name = _("Assignment")
@@ -613,8 +615,12 @@ class AssignmentNotification(TimeStampedModel):
         AssignmentStudent,
         verbose_name=_("assignment_student"),
         on_delete=models.CASCADE)
-    is_passed = models.BooleanField(_("About passed assignment"),
-                                    default=False)
+    is_about_passed = models.BooleanField(_("About passed assignment"),
+                                          default=False)
+    is_about_creation = models.BooleanField(_("About created assignment"),
+                                            default=False)
+    is_about_deadline = models.BooleanField(_("About change of deadline"),
+                                            default=False)
     is_unread = models.BooleanField(_("Unread"),
                                     default=True)
     is_notified = models.BooleanField(_("User is notified"),
