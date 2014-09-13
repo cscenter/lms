@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from datetime import datetime
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
@@ -34,9 +36,13 @@ EMAILS = {'new_comment_for_student':
            'template': "emails/new_assignment.html"}}
 
 
+def report(s):
+    print("{0} {1}".format(datetime.now().strftime("%Y.%m.%d %H:%M:%S"), s))
+
+
 def notify(notification, name, context):
     if not notification.user.email:
-        print ("user {0} doesn't have an email"
+        report("user {0} doesn't have an email"
                .format(smart_text(notification.user)))
         notification.is_notified = True
         notification.save()
@@ -51,8 +57,8 @@ def notify(notification, name, context):
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
-    print "sending {0} ({1})".format(smart_text(notification),
-                                     smart_text(name))
+    report("sending {0} ({1})".format(smart_text(notification),
+                                      smart_text(name)))
     msg.send()
     notification.is_notified = True
     notification.save()
