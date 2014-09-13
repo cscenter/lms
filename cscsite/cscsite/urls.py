@@ -25,6 +25,7 @@ from learning.views import \
     CourseClassCreateView, \
     CourseClassUpdateView, \
     CourseClassDeleteView, \
+    CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
     AssignmentStudentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
@@ -82,9 +83,12 @@ urlpatterns = patterns('',
         name='course_list_teacher'),
     url(r'^teaching/add-class/$', CourseClassCreateView.as_view(),
         name='course_class_add'),
-    url(r'^teaching/edit-class-(?P<pk>[-\w]+)/$', CourseClassUpdateView.as_view(),
+    url(r'^teaching/edit-class-(?P<pk>\d+)/$', CourseClassUpdateView.as_view(),
         name='course_class_edit'),
-    url(r'^teaching/delete-class-(?P<pk>[-\w]+)/$', CourseClassDeleteView.as_view(),
+    url(r'^teaching/edit-class-(?P<class_pk>\d+)/remove-(?P<pk>\d+)/$',
+        CourseClassAttachmentDeleteView.as_view(),
+        name='course_class_attachment_delete'),
+    url(r'^teaching/delete-class-(?P<pk>\d+)/$', CourseClassDeleteView.as_view(),
         name='course_class_delete'),
     url(r'^teaching/assignments/(?P<pk>\d+)/$',
         AssignmentTeacherDetailView.as_view(),

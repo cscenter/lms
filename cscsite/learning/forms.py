@@ -123,8 +123,7 @@ class CourseClassForm(forms.ModelForm):
     attachments = forms.FileField(
         label=_("Attached files"),
         required=False,
-        help_text=_("You can select multiple files. New attachments "
-                    "will replace old ones"),
+        help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
     video = forms.CharField(
         label=_("CourseClass|Video"),
@@ -152,6 +151,8 @@ class CourseClassForm(forms.ModelForm):
         widget=forms.TimeInput(format="%H:%M"))
 
     def __init__(self, user, *args, **kwargs):
+        remove_links = kwargs.get('remove_links', "")
+        del kwargs['remove_links']
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(Div(Div('course_offering',
@@ -176,6 +177,7 @@ class CourseClassForm(forms.ModelForm):
                      Div(Div(Div('slides',
                                  css_class='col-xs-6'),
                              Div('attachments',
+                                 HTML(remove_links),
                                  css_class='col-xs-6'),
                              css_class='row'),
                          css_class='container inner'),

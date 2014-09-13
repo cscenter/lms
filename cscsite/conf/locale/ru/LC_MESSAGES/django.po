@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-13 19:50+0400\n"
-"PO-Revision-Date: 2014-09-13 19:50+0230\n"
+"POT-Creation-Date: 2014-09-13 20:45+0400\n"
+"PO-Revision-Date: 2014-09-13 20:46+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:22 learning/forms.py:229
+#: learning/forms.py:22 learning/forms.py:232
 #: templates/learning/markssheet_staff.html:18
 #: templates/learning/markssheet_teacher.html:18
 msgid "Save"
@@ -38,11 +38,11 @@ msgstr "Описание"
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
 
-#: learning/forms.py:52 learning/forms.py:270
+#: learning/forms.py:52 learning/forms.py:273
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:57 learning/forms.py:216 learning/forms.py:273
+#: learning/forms.py:57 learning/forms.py:219 learning/forms.py:276
 msgid "Text"
 msgstr "Текст"
 
@@ -54,7 +54,7 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:101 learning/forms.py:266 learning/models.py:140
+#: learning/forms.py:101 learning/forms.py:269 learning/models.py:140
 #: learning/models.py:196 learning/models.py:260 learning/models.py:357
 #: learning/models.py:576
 msgid "Course offering"
@@ -85,47 +85,47 @@ msgid "Attached files"
 msgstr "Приложенные файлы"
 
 #: learning/forms.py:126
-msgid "You can select multiple files. New attachments will replace old ones"
-msgstr "Вы можете выбрать несколько файлов. Новые файлы заменяют старые"
+msgid "You can select multiple files"
+msgstr "Вы можете выбрать несколько файлов"
 
-#: learning/forms.py:130 learning/models.py:279
+#: learning/forms.py:129 learning/models.py:279
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: learning/forms.py:134 learning/models.py:283
+#: learning/forms.py:133 learning/models.py:283
 msgid "please insert HTML for embedded video player"
 msgstr "пожалуйста, вставьте HTML для встроенного видеоплеера"
 
-#: learning/forms.py:137
+#: learning/forms.py:136
 msgid "Other materials"
 msgstr "Материалы"
 
-#: learning/forms.py:142 learning/models.py:288
+#: learning/forms.py:141 learning/models.py:288
 #: templates/learning/courseoffering_detail.html:92
 msgid "Date"
 msgstr "Дата"
 
-#: learning/forms.py:146 learning/models.py:289
+#: learning/forms.py:145 learning/models.py:289
 msgid "Starts at"
 msgstr "Начало"
 
-#: learning/forms.py:150 learning/models.py:290
+#: learning/forms.py:149 learning/models.py:290
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:175 templates/learning/courseclass_detail.html:58
+#: learning/forms.py:176 templates/learning/courseclass_detail.html:58
 #: templates/learning/timetable_student.html:67
 #: templates/learning/timetable_teacher.html:68
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:206
+#: learning/forms.py:209
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:278 templates/learning/assignment_detail.html:29
+#: learning/forms.py:281 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:68
@@ -134,20 +134,20 @@ msgstr "Не совпадает с семестром курса (с %(starts_at
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:283 templates/learning/assignment_detail.html:38
+#: learning/forms.py:286 templates/learning/assignment_detail.html:38
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:287
+#: learning/forms.py:290
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
-#: learning/forms.py:290 learning/models.py:380
+#: learning/forms.py:293 learning/models.py:380
 #: templates/learning/assignment_student_detail.html:124
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
-#: learning/forms.py:293 learning/models.py:384
+#: learning/forms.py:296 learning/models.py:384
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
@@ -492,7 +492,7 @@ msgstr "О сданном задании"
 
 #: learning/models.py:622
 msgid "About change of deadline"
-msgstr ""
+msgstr "О смене времени сдачи"
 
 #: learning/models.py:624 learning/models.py:658
 msgid "Unread"
@@ -546,17 +546,17 @@ msgstr "Общие оценки"
 msgid "Only students can be graded"
 msgstr "Только студенты могут получить общую оценку"
 
-#: learning/views.py:505
+#: learning/views.py:506
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:508 templates/learning/courseoffering_detail.html:40
+#: learning/views.py:509 templates/learning/courseoffering_detail.html:40
 #: templates/learning/courses_list_student.html:42
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:850
+#: learning/views.py:884
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -1203,6 +1203,9 @@ msgstr "Для студента должен быть указан год пос
 #: users/models.py:77
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
+
+#~ msgid "You can select multiple files. New attachments will replace old ones"
+#~ msgstr "Вы можете выбрать несколько файлов. Новые файлы заменяют старые"
 
 #~ msgid "Assignment|being checked"
 #~ msgstr "На проверке"
