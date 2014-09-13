@@ -120,11 +120,11 @@
       <h5 class="assignment">{% trans "Student" %}</h5>
       {{ a_s.student.get_full_name }}
       <h5 class="assignment">{% trans "Deadline" %}</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"m E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
+      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
       <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
       <h5 class="assignment">{% trans "Assignment created" %}</h5>
-      {{ a_s.assignment.created|date:"m E Y" }}
+      {{ a_s.assignment.created|date:"d E Y" }}
       {% if a_s.assignment.is_online %}
       <h4>{% trans "Can be passed online "%}</h4>
       {% else %}
