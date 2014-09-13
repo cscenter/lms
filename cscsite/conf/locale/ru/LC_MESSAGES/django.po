@@ -2,14 +2,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-06 23:10+0400\n"
-"PO-Revision-Date: 2014-09-06 23:11+0230\n"
+"POT-Creation-Date: 2014-09-13 15:34+0400\n"
+"PO-Revision-Date: 2014-09-13 15:35+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -38,11 +38,11 @@ msgstr "Описание"
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
 
-#: learning/forms.py:52 learning/forms.py:266
+#: learning/forms.py:52 learning/forms.py:270
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:57 learning/forms.py:216 learning/forms.py:269
+#: learning/forms.py:57 learning/forms.py:216 learning/forms.py:273
 msgid "Text"
 msgstr "Текст"
 
@@ -54,7 +54,7 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:101 learning/forms.py:262 learning/models.py:140
+#: learning/forms.py:101 learning/forms.py:266 learning/models.py:140
 #: learning/models.py:196 learning/models.py:260 learning/models.py:357
 #: learning/models.py:574
 msgid "Course offering"
@@ -125,7 +125,7 @@ msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:274 templates/learning/assignment_detail.html:29
+#: learning/forms.py:278 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:68
@@ -134,13 +134,22 @@ msgstr "Не совпадает с семестром курса (с %(starts_at
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:279
+#: learning/forms.py:283
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:283
+#: learning/forms.py:287
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
+
+#: learning/forms.py:290 learning/models.py:380
+#: templates/learning/assignment_student_detail.html:124
+msgid "Assignment|grade_min"
+msgstr "Проходной балл"
+
+#: learning/forms.py:293 learning/models.py:384
+msgid "Assignment|grade_max"
+msgstr "Максимальный балл"
 
 #: learning/models.py:28
 msgid ""
@@ -322,14 +331,6 @@ msgstr "Название"
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: learning/models.py:380
-msgid "Assignment|grade_min"
-msgstr "Проходной балл"
-
-#: learning/models.py:384
-msgid "Assignment|grade_max"
-msgstr "Максимальный балл"
-
 #: learning/models.py:390
 msgid "Assignment"
 msgstr "Задание"
@@ -381,7 +382,7 @@ msgstr "Задание"
 msgid "AssignmentStudent|student"
 msgstr "Студент"
 
-#: learning/models.py:445
+#: learning/models.py:445 templates/learning/assignment_student_detail.html:97
 msgid "Grade"
 msgstr "Оценка"
 
@@ -710,9 +711,9 @@ msgstr "Преподаватели"
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:186 templates/base.html.py:233
-msgid "Timetable"
-msgstr "Расписание"
+#: templates/base.html:186
+msgid "My timetable"
+msgstr "Моё расписание"
 
 #: templates/base.html:191 templates/base.html.py:238
 #: templates/learning/calendar.html:50
@@ -728,6 +729,10 @@ msgstr "Мои курсы"
 #: templates/base.html:206
 msgid "Useful stuff"
 msgstr "Полезное"
+
+#: templates/base.html:233
+msgid "Timetable"
+msgstr "Расписание"
 
 #: templates/base.html:276
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
@@ -844,7 +849,6 @@ msgstr "Да,Нет"
 #: templates/learning/assignment_list_student.html:52
 #: templates/learning/assignment_list_student.html:108
 #: templates/learning/assignment_list_teacher.html:76
-#: templates/learning/assignment_student_detail.html:97
 msgid "State"
 msgstr "Статус"
 
@@ -893,15 +897,15 @@ msgstr "Следующее непроверенное"
 msgid "Professor"
 msgstr "Преподаватель"
 
-#: templates/learning/assignment_student_detail.html:124
+#: templates/learning/assignment_student_detail.html:126
 msgid "Assignment created"
 msgstr "Задание добавлено"
 
-#: templates/learning/assignment_student_detail.html:127
+#: templates/learning/assignment_student_detail.html:129
 msgid "Can be passed online "
 msgstr "Можно сдать онлайн"
 
-#: templates/learning/assignment_student_detail.html:129
+#: templates/learning/assignment_student_detail.html:131
 msgid "Should be passed offline "
 msgstr "Должно быть сдано оффлайн"
 
@@ -1052,10 +1056,7 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
-"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
-"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
-"сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
