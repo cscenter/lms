@@ -14,6 +14,11 @@
       <div class="btn-toolbar">
         {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
         <div class="btn-group">
+          <a href="{% url 'assignment_add' %}?co={{ course_offering.pk }}" class="btn btn-primary" role="button">
+            {% trans "Add assignment" %}
+          </a>
+        </div>
+        <div class="btn-group">
           <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
             {% trans "Add news" %}
           </a>

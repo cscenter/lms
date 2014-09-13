@@ -6,7 +6,8 @@ from calendar import Calendar
 from collections import OrderedDict, defaultdict
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
 from django.http import HttpResponseBadRequest, Http404
@@ -869,7 +870,15 @@ class AssignmentCreateUpdateMixin(object):
 class AssignmentCreateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.CreateView):
-    pass
+    def get_initial(self):
+        initial = super(AssignmentCreateView, self).get_initial()
+        try:
+            course_offering = (CourseOffering.objects
+                               .get(pk=self.request.GET.get('co')))
+            initial.update({'course_offering': course_offering})
+        except ObjectDoesNotExist:
+            pass
+        return initial
 
 
 # Same here
