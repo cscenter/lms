@@ -559,18 +559,26 @@ class CourseClassCreateUpdateMixin(object):
         return initial
 
     def get_form(self, form_class):
-        return form_class(self.request.user, **self.get_form_kwargs())
+        # NOTE(Dmitry): dirty, but I don't see a better way given
+        #               that forms are generated in code
+        remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
+            "".join("<li>"
+                    "<i class=\"fa fa-times\"></i>&nbsp;"
+                    "<a href=\"{0}\">{1}</a>"
+                    "</li>"
+                    .format(reverse('course_class_attachment_delete',
+                                    args=(self.object.pk,
+                                          attachment.pk)),
+                            attachment.material_file_name)
+                    for attachment
+                    in self.object.courseclassattachment_set.all()))
+        return form_class(self.request.user,
+                          remove_links=remove_links,
+                          **self.get_form_kwargs())
 
     def form_valid(self, form):
         attachments = self.request.FILES.getlist('attachments')
         if attachments:
-            if self.object:
-                # It's an update, we should remove old attachments
-                old_attachments = (CourseClassAttachment.objects
-                                   .filter(course_class=self.object))
-                for attachment in old_attachments:
-                    os.remove(attachment.material.path)
-                    attachment.delete()
             self.object = form.save()
             for attachment in attachments:
                 CourseClassAttachment(course_class=self.object,
@@ -604,6 +612,26 @@ class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.UpdateView):
     pass
+
+
+class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
+                                      ProtectedFormMixin,
+                                      generic.DeleteView):
+    model = CourseClassAttachment
+    template_name = "learning/simple_delete_confirmation.html"
+
+    def is_form_allowed(self, user, obj):
+        return user.is_superuser or \
+            (user in obj.course_class.course_offering.teachers.all())
+
+    def get_success_url(self):
+        return reverse('course_class_edit', args=[self.object.course_class.pk])
+
+    def delete(self, request, *args, **kwargs):
+        resp = (super(CourseClassAttachmentDeleteView, self)
+                .delete(request, *args, **kwargs))
+        os.remove(self.object.material.path)
+        return resp
 
 
 class CourseClassDeleteView(TeacherOnlyMixin,
