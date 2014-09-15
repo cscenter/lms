@@ -196,6 +196,8 @@ MENU_URL_NAMES = {
     'calendar_student': {'alias': 'timetable_student'},
     'calendar_full_student': {'parent': 'learning'},
     'course_list_student': {'parent': 'learning'},
+    'library_book_list': {'parent': 'learning'},
+    'library_book_detail': {'parent': 'library_book_list'},
     'useful_stuff': {'parent': 'learning'},
 
     'assignment_list_teacher': {'parent': 'teaching'},

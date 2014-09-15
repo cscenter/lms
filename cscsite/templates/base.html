@@ -201,6 +201,11 @@
                     {% endif %}
                   </li>
                 </a>
+              <a href="{% url 'library_book_list' %}">
+                  <li class="{% current 'library_book_list' %}">
+                    {% trans "Library" %}
+                  </li>
+                </a>
                <a href="{% url 'useful_stuff' %}">
                   <li class="{% current 'useful_stuff' %}">
                     {% trans "Useful stuff" %}
