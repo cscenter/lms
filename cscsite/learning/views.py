@@ -559,19 +559,22 @@ class CourseClassCreateUpdateMixin(object):
         return initial
 
     def get_form(self, form_class):
-        # NOTE(Dmitry): dirty, but I don't see a better way given
-        #               that forms are generated in code
-        remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
-            "".join("<li>"
-                    "<i class=\"fa fa-times\"></i>&nbsp;"
-                    "<a href=\"{0}\">{1}</a>"
-                    "</li>"
-                    .format(reverse('course_class_attachment_delete',
-                                    args=(self.object.pk,
-                                          attachment.pk)),
-                            attachment.material_file_name)
-                    for attachment
-                    in self.object.courseclassattachment_set.all()))
+        if self.object is not None:
+            # NOTE(Dmitry): dirty, but I don't see a better way given
+            #               that forms are generated in code
+            remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
+                "".join("<li>"
+                        "<i class=\"fa fa-times\"></i>&nbsp;"
+                        "<a href=\"{0}\">{1}</a>"
+                        "</li>"
+                        .format(reverse('course_class_attachment_delete',
+                                        args=(self.object.pk,
+                                              attachment.pk)),
+                                attachment.material_file_name)
+                        for attachment
+                        in self.object.courseclassattachment_set.all()))
+        else:
+            remove_links = ""
         return form_class(self.request.user,
                           remove_links=remove_links,
                           **self.get_form_kwargs())
