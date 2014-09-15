@@ -2,27 +2,27 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-13 20:45+0400\n"
+"POT-Creation-Date: 2014-09-15 18:59+0400\n"
 "PO-Revision-Date: 2014-09-13 20:46+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.3\n"
 
 #: learning/forms.py:19 templates/learning/simple_delete_confirmation.html:14
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:22 learning/forms.py:232
+#: learning/forms.py:22 learning/forms.py:231
 #: templates/learning/markssheet_staff.html:18
 #: templates/learning/markssheet_teacher.html:18
 msgid "Save"
@@ -38,11 +38,11 @@ msgstr "Описание"
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
 
-#: learning/forms.py:52 learning/forms.py:273
+#: learning/forms.py:52 learning/forms.py:272
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:57 learning/forms.py:219 learning/forms.py:276
+#: learning/forms.py:57 learning/forms.py:218 learning/forms.py:275
 msgid "Text"
 msgstr "Текст"
 
@@ -54,7 +54,7 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:101 learning/forms.py:269 learning/models.py:140
+#: learning/forms.py:101 learning/forms.py:268 learning/models.py:140
 #: learning/models.py:196 learning/models.py:260 learning/models.py:357
 #: learning/models.py:576
 msgid "Course offering"
@@ -119,13 +119,13 @@ msgstr "Конец"
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:209
+#: learning/forms.py:208
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:281 templates/learning/assignment_detail.html:29
+#: learning/forms.py:280 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:68
@@ -134,38 +134,37 @@ msgstr "Не совпадает с семестром курса (с %(starts_at
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:286 templates/learning/assignment_detail.html:38
+#: learning/forms.py:285 templates/learning/assignment_detail.html:38
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:290
+#: learning/forms.py:289
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
-#: learning/forms.py:293 learning/models.py:380
+#: learning/forms.py:292 learning/models.py:380
 #: templates/learning/assignment_student_detail.html:124
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
-#: learning/forms.py:296 learning/models.py:384
+#: learning/forms.py:295 learning/models.py:384
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
 #: learning/models.py:28
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
-" enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
+"enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"+HTML"
 
 #: learning/models.py:32
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: learning/models.py:41 news/models.py:27 textpages/models.py:40
 msgid "News|slug"
@@ -173,11 +172,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:43 news/models.py:29
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
-">some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/"
+"<b>some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
-"test.com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
+"com/news/<b>some-news</b>/"
 
 #: learning/models.py:53 learning/models.py:115
 #: templates/learning/assignment_list_student.html:49
@@ -225,8 +224,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:128
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
-" description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
+"description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -335,7 +334,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:393 templates/base.html:176 templates/base.html.py:223
+#: learning/models.py:393 templates/base.html:176 templates/base.html.py:228
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:142
@@ -556,7 +555,7 @@ msgstr "Вы уверены, что хотите отказаться от \"%(c
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:884
+#: learning/views.py:882
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -673,7 +672,7 @@ msgstr "Обучение"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:98 templates/base.html.py:253
+#: templates/base.html:98 templates/base.html.py:258
 #: templates/learning/markssheet_staff.html:9
 #: templates/learning/markssheet_teacher.html:9
 msgid "Marks sheet"
@@ -723,26 +722,30 @@ msgstr "Выпускники"
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:191 templates/base.html.py:238
+#: templates/base.html:191 templates/base.html.py:243
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:196 templates/base.html.py:243
+#: templates/base.html:196 templates/base.html.py:248
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:206
+#: templates/base.html:206 templates/library/book_list.html:11
+msgid "library"
+msgstr "Библиотека"
+
+#: templates/base.html:211
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:233
+#: templates/base.html:238
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:276
+#: templates/base.html:281
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
@@ -1057,10 +1060,6 @@ msgstr "Места проведения занятий CSC"
 msgid "Book|read by"
 msgstr "Читают"
 
-#: templates/library/book_list.html:11
-msgid "library"
-msgstr "Библиотека"
-
 #: templates/library/book_list.html:20
 msgid ""
 "\n"
@@ -1068,7 +1067,10 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
+"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
+"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
+"сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
@@ -1113,8 +1115,8 @@ msgstr "Страницы"
 
 #: textpages/models.py:42
 msgid ""
-"Short dash-separated string for human-readable URLs, as in "
-"compscicenter.ru/pages/<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in compscicenter.ru/"
+"pages/<b>some-news</b>/"
 msgstr ""
 "Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
 "compscicenter.ru/pages/<b>some-news</b>/"
@@ -1204,6 +1206,9 @@ msgstr "Для студента должен быть указан год пос
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
+#~ msgid "Library"
+#~ msgstr "Библиотека"
+
 #~ msgid "You can select multiple files. New attachments will replace old ones"
 #~ msgstr "Вы можете выбрать несколько файлов. Новые файлы заменяют старые"
 
@@ -1220,8 +1225,8 @@ msgstr "Для выпускника должен быть указан год в
 #~ msgstr "выпускник"
 
 #~ msgid ""
-#~ "Warning: to enroll, you should provide all information about your family for"
-#~ " at least 3 centuries. If such information is not available, please "
+#~ "Warning: to enroll, you should provide all information about your family "
+#~ "for at least 3 centuries. If such information is not available, please "
 #~ "reconsider enrollment."
 #~ msgstr ""
 #~ "Внимание: чтобы поступить, вы должны предоставить всю информацию о вашей "
@@ -1229,7 +1234,8 @@ msgstr "Для выпускника должен быть указан год в
 #~ "информацию, пожалуйста, откажитесь от поступления."
 
 #~ msgid ""
-#~ "Computer Science Center will be glad to see new people with decent heritage."
+#~ "Computer Science Center will be glad to see new people with decent "
+#~ "heritage."
 #~ msgstr "CSC будет рад новым людям с хорошей наследственностью."
 
 #~ msgid "Enrollment information"
