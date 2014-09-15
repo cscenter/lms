@@ -469,8 +469,8 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         course_offering = get_object_or_404(
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
-        Enrollment(student=self.request.user,
-                   course_offering=course_offering).save()
+        Enrollment.objects.get_or_create(
+            student=self.request.user, course_offering=course_offering)
         if self.request.POST.get('back') == 'course_list_student':
             return redirect('course_list_student')
         else:
