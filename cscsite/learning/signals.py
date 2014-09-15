@@ -62,13 +62,13 @@ def create_assignment_comment_notification(sender, instance, created,
                     .course_offering
                     .teachers
                     .all())
-        is_passed = not instance.assignment_student.has_passes()
+        is_about_passed = not instance.assignment_student.has_passes()
         # this loop can be optimized using bulk_create at the expence of
         # pre/post_save signals on AssigmentNotification
         for teacher in teachers:
             (AssignmentNotification(user=teacher,
                                     assignment_student=a_s,
-                                    is_passed=is_passed)
+                                    is_about_passed=is_about_passed)
              .save())
     else:
         student = instance.assignment_student.student
