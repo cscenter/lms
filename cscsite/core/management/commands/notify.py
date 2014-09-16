@@ -99,6 +99,8 @@ class Command(BaseCommand):
                         .format(a_s.assignment.pk)),
                        'assignment_name':
                        smart_text(a_s.assignment),
+                       'assignment_text':
+                       smart_text(a_s.assignment.text),
                        'student_name':
                        smart_text(a_s.student),
                        'deadline_at':
