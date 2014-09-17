@@ -10,7 +10,7 @@ class Command(BaseCommand):
         current_semester = Semester.objects.first()
         for course_offering in current_semester.courseoffering_set.all():
             course_classes = course_offering.courseclass_set \
-                .exclude(slides="").filter(other_matrial="")
+                .exclude(slides="").filter(other_materials="")
 
             for course_class in course_classes:
                 print(course_class)
