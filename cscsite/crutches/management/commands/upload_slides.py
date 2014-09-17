@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         current_semester = Semester.objects.first()
         for course_offering in current_semester.courseoffering_set.all():
-            course_classes = course_offering.course_class_set \
+            course_classes = course_offering.courseclass_set \
                 .exclude(slides="").filter(other_matrial="")
 
             for course_class in course_classes:
