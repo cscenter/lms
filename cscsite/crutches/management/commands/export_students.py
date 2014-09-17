@@ -20,8 +20,8 @@ class Command(BaseCommand):
         w = csv.writer(sys.stdout)
 
         current_semester = Semester.objects.first()
-        course_offerings = current_semester.courseoffering_set \
-            .values_list("course__name", flat=True)
+        course_offerings = list(current_semester.courseoffering_set
+                                .values_list("course__name", flat=True))
         course_offerings.sort()
 
         w.writerow(["ФИО", "Год поступления"] + course_offerings)
