@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
-import time
-import os.path
+from __future__ import absolute_import, unicode_literals
+
 import datetime
+import os.path
+import posixpath
+import time
 
 import dateutil.parser as dparser
+from annoying.fields import AutoOneToOneField
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
-from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
-from annoying.fields import AutoOneToOneField
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
 from core.notifications import get_unread_notifications_cache
+from .slides import upload_to_slideshare, upload_to_yandex
 
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
@@ -284,7 +286,7 @@ class CourseClass(TimeStampedModel, object):
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
-        help_text=(LATEX_MARKDOWN_HTML_ENABLED))
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
@@ -295,7 +297,7 @@ class CourseClass(TimeStampedModel, object):
         verbose_name_plural = _("Classes")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.name))
+        return smart_text(self.name)
 
     def get_absolute_url(self):
         return reverse('class_detail',
@@ -327,6 +329,20 @@ class CourseClass(TimeStampedModel, object):
     @property
     def slides_file_name(self):
         return os.path.basename(self.slides.name)
+
+    def upload_slides(self):
+        course_offering = self.course_offering
+        title = "{0}: {1}".format(course_offering, self)
+        course = course_offering.course
+
+        # a) SlideShare
+        self.other_materials = upload_to_slideshare(
+            self.slides.file, title, self.description, tags=[course.slug])
+        self.save()
+
+        # b) Yandex.Disk
+        yandex_path = posixpath.join(course.slug, self.slides_file_name)
+        upload_to_yandex(self.slides.file, yandex_path)
 
 
 @python_2_unicode_compatible
