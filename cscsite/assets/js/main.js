@@ -27,7 +27,7 @@ $(document).ready(function () {
         var editor = new EpicEditor({
             container: $container[0],
             textarea: $textarea[0],
-            parser: marked,
+            parser: null,
             basePath: "/static/js/EpicEditor-v0.2.2",
             clientSideStorage: false,
             autogrow: {minHeight: 200},
@@ -40,20 +40,22 @@ $(document).ready(function () {
 
         editor.load();
 
-        previewer = editor.getElement("previewer");
+        var previewer = editor.getElement("previewer");
         var mathjax = previewer.createElement('script');
         mathjax.type = 'text/javascript';
         mathjax.src = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
         previewer.body.appendChild(mathjax);
-
-        var config = previewer.createElement('script');
-        config.type = 'text/x-mathjax-config';
-        config.text = "MathJax.Hub.Config({tex2jax: {inlineMath: [ ['$','$'] ], displayMath: [ ['$$','$$'] ], processEscapes: true}});";
-        previewer.body.appendChild(config);
+        previewer.body.appendChild(
+            // re-use config from the top-level document.
+            $("[type^='text/x-mathjax-config']").get(0));
 
         editor.on('preview', function() {
-            editor.getElement('previewerIframe').contentWindow.eval(
-                'MathJax.Hub.Queue(["Typeset", MathJax.Hub]);');
+            var contentDocument
+                = editor.getElement('previewerIframe').contentDocument;
+            var target = $("#epiceditor-preview", contentDocument).get(0);
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
+                target.innerHTML = marked(target.innerHTML);
+            }]);
         });
     });
 
