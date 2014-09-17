@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from django.core.management import BaseCommand
 
 from learning.models import Semester
@@ -13,7 +15,7 @@ class Command(BaseCommand):
                 .exclude(slides="").filter(other_materials="")
 
             for course_class in course_classes:
-                print(course_class)
+                print(course_offering, course_class, sep=":")
                 course_class.upload_slides()
 
 
