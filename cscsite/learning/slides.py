@@ -68,7 +68,7 @@ def upload_to_slideshare(handle, title, description, tags):
         return ""
 
 
-def upload_to_yandex(handle, path):
+def upload_to_yandex(handle, path, retries=5):
     def mkdirs(config, path):
         if path == posixpath.sep:
             return
@@ -88,10 +88,16 @@ def upload_to_yandex(handle, path):
 
     path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT, path)
 
-    try:
-        mkdirs(config, path)
+    exc = None
+    for i in range(retries):
+        try:
+            mkdirs(config, path)
 
-        # FIXME(lebedev): check if file exists.
-        config.upload(handle.name, path)
-    except yandexwebdav.ConnectionException as e:
-        logger.error(e)
+            # FIXME(lebedev): check if file exists.
+            config.upload(handle.name, path)
+        except yandexwebdav.ConnectionException as connection_exc:
+            exc = connection_exc
+        else:
+            return
+
+    logger.error(exc)
