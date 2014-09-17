@@ -20,7 +20,6 @@
       {% if user.is_superuser or user_type == 'teacher' and is_actual_teacher %}
       <div class="btn-toolbar">
         <a href="{% url 'assignment_edit' a_s.assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-        <a href="{% url 'assignment_delete' a_s.assignment.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
       </div>
       {% endif %}
       <hr>
