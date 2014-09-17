@@ -1,9 +1,6 @@
-import posixpath
-
 from django.core.management import BaseCommand
 
 from learning.models import Semester
-from learning.slides import upload_to_slideshare, upload_to_yandex
 
 
 class Command(BaseCommand):
