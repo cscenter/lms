@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_save
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -344,6 +345,12 @@ class CourseClass(TimeStampedModel, object):
         # b) Yandex.Disk
         yandex_path = posixpath.join(course.slug, self.slides_file_name)
         upload_to_yandex(self.slides.file, yandex_path)
+
+
+@receiver(post_save, sender=CourseClass)
+def maybe_upload_slides(sender, instance, **kwargs):
+    if instance.slides and not instance.other_materials:
+        instance.upload_slides()
 
 
 @python_2_unicode_compatible
