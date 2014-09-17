@@ -68,7 +68,7 @@ def upload_to_slideshare(handle, title, description, tags):
         return ""
 
 
-def upload_to_yandex(handle):
+def upload_to_yandex(handle, path):
     def mkdirs(config, path):
         if path == posixpath.sep:
             return
@@ -86,12 +86,7 @@ def upload_to_yandex(handle):
         "password": settings.YANDEX_DISK_PASSWORD
     })
 
-    # FIXME(lebedev): this won't work with custom storage.
-    # We expect handle path to be of form '.../<course>/<slides.pdf>'.
-    course_uri = os.path.basename(os.path.dirname(handle.name))
-    file_name = os.path.basename(handle.name)
-    path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT,
-                          course_uri, file_name)
+    path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT, path)
 
     try:
         mkdirs(config, path)
