@@ -12,19 +12,11 @@
     <!-- Bootstrap -->
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
     <!-- TODO: fix variables in bootstrap -->
     <link href="{% static "css/style.css" %}" rel="stylesheet">
     <link href="{% static "img/fav.png" %}" rel="icon">
-    {% include "mathjax.html" %}
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-    <link rel="stylesheet" href="{% static "css/highlight-styles/solarized_light.css" %}">
-    <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/holder.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/main.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/EpicEditor-v0.2.2/js/epiceditor.min.js" %}"></script>
-    <!-- custom marked build clashes with the one in EpicEditor, therefore this
-         include should be *after* EpicEditor-->
-    <script type="text/javascript" src="{% static "js/marked.js" %}"></script>
+    <link href="{% static "css/highlight-styles/solarized_light.css" %}" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -42,7 +34,6 @@
     </script>
   </head>
   <body class="tex2jax_ignore">
-
     <div class="header lvl1">
       <div class="container">
         <div class="row">
@@ -275,7 +266,18 @@
       </div>
     </div>
     </div>
+
     <!-- Include all compiled plugins (below), or include individual files as needed -->
+    {% include "mathjax.html" %}
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/holder.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/main.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/EpicEditor-v0.2.2/js/epiceditor.min.js" %}"></script>
+    <!-- custom marked build clashes with the one in EpicEditor, therefore this
+         include should be *after* EpicEditor-->
+    <script type="text/javascript" src="{% static "js/marked.js" %}"></script>
+
     <script src="{% static "js/bootstrap.min.js" %}"></script>
 
     {% sitemetrics by yandex for "25844420" %}
