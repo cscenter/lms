@@ -6,7 +6,9 @@ $(document).ready(function () {
 
     marked.setOptions({
         highlight: function (code, lang) {
-            return hljs.highlight(lang, code).value;
+            return typeof lang != "undefined"
+                ? hljs.highlight(lang, code).value
+                : code;
         },
         smartypants: true
     });
@@ -17,7 +19,7 @@ $(document).ready(function () {
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             target.innerHTML = marked(jQuery.trim(target.innerHTML));
-            $target.find("pre").addClass("hljs")
+            $target.find("pre").addClass("hljs");
         }]);
     });
 
