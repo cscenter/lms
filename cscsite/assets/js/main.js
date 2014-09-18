@@ -43,19 +43,20 @@ $(document).ready(function () {
         var previewer = editor.getElement("previewer");
         var mathjax = previewer.createElement('script');
         mathjax.type = 'text/javascript';
-        mathjax.src = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+        mathjax.src = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
         previewer.body.appendChild(mathjax);
         previewer.body.appendChild(
-            // re-use config from the top-level document.
+            // re-use config from the top-level document
             $("[type^='text/x-mathjax-config']").get(0));
 
         editor.on('preview', function() {
             var contentDocument
                 = editor.getElement('previewerIframe').contentDocument;
             var target = $("#epiceditor-preview", contentDocument).get(0);
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
-                target.innerHTML = marked(target.innerHTML);
-            }]);
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target],
+                              [function() {
+                                  target.innerHTML = marked(target.innerHTML);
+                              }]);
         });
     });
 

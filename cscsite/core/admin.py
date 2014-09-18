@@ -77,6 +77,8 @@ def meta(text=None, **kwargs):
 
 
 class UbereditorMixin(object):
+    change_form_template = "admin/ubereditor_change_form.html"
+
     def __init__(self, *args, **kwargs):
         self.formfield_overrides.update(
             {models.TextField: {'widget': Ubereditor}})
