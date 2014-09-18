@@ -11,10 +11,14 @@ $(document).ready(function () {
         smartypants: true
     });
 
-    $("div.ubertext").each(function(i) {
-        var $e = $(this);
-        $e.html(marked(jQuery.trim($e.html())));
-        $e.find("pre").addClass("hljs");
+    $("div.ubertext").each(function() {
+        var target = this
+          , $target = $(this);
+
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
+            target.innerHTML = marked(jQuery.trim(target.innerHTML));
+            $target.find("pre").addClass("hljs")
+        }]);
     });
 
     $("textarea.ubereditor").each(function(i) {
