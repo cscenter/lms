@@ -15,19 +15,7 @@
     <!-- TODO: fix variables in bootstrap -->
     <link href="{% static "css/style.css" %}" rel="stylesheet">
     <link href="{% static "img/fav.png" %}" rel="icon">
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'] ],
-          displayMath: [ ['$$','$$'] ],
-          processEscapes: true,
-          processClass: "ubertext"
-        }
-      });
-    </script>
-    <script type="text/javascript"
-            src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
+    {% include "mathjax.html" %}
     <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
     <link rel="stylesheet" href="{% static "css/highlight-styles/solarized_light.css" %}">
     <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
