@@ -22,6 +22,9 @@ from learning.models import AssignmentNotification, \
 EMAILS = {'new_comment_for_student':
           {'title': "Преподаватель оставил комментарий к решению задания",
            'template': "emails/new_comment_for_student.html"},
+          'assignment_passed':
+          {'title': "Студент сдал домашнее задание",
+           'template': "emails/assignment_passed.html"},
           'new_comment_for_teacher':
           {'title': "Студент оставил комментарий к решению задания",
            'template': "emails/new_comment_for_teacher.html"},
@@ -94,6 +97,8 @@ class Command(BaseCommand):
                        ("http://compscicenter.ru/"
                         "teaching/assignments/submissions/{0}/"
                         .format(a_s.pk)),
+                       'a_s_created':
+                       a_s.created,
                        'assignment_link':
                        ("http://compscicenter.ru/teaching/assignments/{0}/"
                         .format(a_s.assignment.pk)),
@@ -112,6 +117,8 @@ class Command(BaseCommand):
             else:
                 if notification.user == a_s.student:
                     name = 'new_comment_for_student'
+                elif notification.is_about_passed:
+                    name = 'assignment_passed'
                 else:
                     name = 'new_comment_for_teacher'
 
