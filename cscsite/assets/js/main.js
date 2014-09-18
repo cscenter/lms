@@ -53,7 +53,7 @@ $(document).ready(function () {
         previewer.body.appendChild(mathjax);
         previewer.body.appendChild(
             // re-use config from the top-level document
-            $("[type^='text/x-mathjax-config']").get(0));
+            $("[type^='text/x-mathjax-config']").clone().get(0));
 
         editor.on('preview', function() {
             var contentDocument
