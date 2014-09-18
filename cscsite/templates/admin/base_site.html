@@ -1,10 +1,13 @@
 {% extends "admin/base.html" %}
 
 {% load i18n %}
+{% load static %}
 
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 
 {% block extrahead %}
+  <link href="{% static "img/fav.png" %}" rel="icon">
+
   {% include "mathjax.html" %}
 {% endblock %}
 
