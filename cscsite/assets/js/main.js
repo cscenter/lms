@@ -53,10 +53,9 @@ $(document).ready(function () {
             var contentDocument
                 = editor.getElement('previewerIframe').contentDocument;
             var target = $("#epiceditor-preview", contentDocument).get(0);
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target],
-                              [function() {
-                                  target.innerHTML = marked(target.innerHTML);
-                              }]);
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
+                target.innerHTML = marked(target.innerHTML);
+            }]);
         });
     });
 
