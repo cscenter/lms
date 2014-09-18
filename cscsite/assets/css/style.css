@@ -90,7 +90,7 @@ h4.no-top-margin {
 }
 
 .header a:hover {
-  decoration: none;
+  text-decoration: none;
 }
 
 .header li {
