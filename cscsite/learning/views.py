@@ -753,6 +753,13 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
+
+        is_actual_teacher = (
+            self.request.user in (self.object
+                                  .course_offering
+                                  .teachers.all()))
+        if not is_actual_teacher and not self.request.user.is_superuser:
+            raise PermissionDenied
         context['a_s_list'] = \
             (AssignmentStudent.objects
              .filter(assignment__pk=self.object.pk)
@@ -841,11 +848,14 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                    .get_context_data(*args, **kwargs))
         a_s = context['a_s']
         initial = {'grade': a_s.grade}
-        context['is_actual_teacher'] = (
+        is_actual_teacher = (
             self.request.user in (a_s
                                   .assignment
                                   .course_offering
                                   .teachers.all()))
+        if not is_actual_teacher and not self.request.user.is_superuser:
+            raise PermissionDenied
+        context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
             initial, grade_max=a_s.assignment.grade_max)
         base = (AssignmentStudent.objects
