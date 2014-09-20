@@ -229,10 +229,8 @@ html {
 }
 
 .index-image-container {
-  margin-top: -60px;
-  width: 980px;
-  /* height: 380px; */
-  background: url("") no-repeat;
+  margin-top: -40px;
+  background: url("") repeat-x;
 }
 
 .callout h1 {
