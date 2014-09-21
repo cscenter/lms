@@ -35,3 +35,13 @@ class TeachersView(ListView):
         user_model = get_user_model()
         teacher_pk = user_model.IS_TEACHER_PK
         return user_model.objects.filter(groups__pk=teacher_pk)
+
+
+class RobotsView(TemplateView):
+    template_name = "robots.txt"
+
+    def render_to_response(self, context, **kwargs):
+        return (super(RobotsView, self)
+                .render_to_response(context,
+                                    content_type='text/plain',
+                                    **kwargs))
