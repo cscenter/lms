@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
 from django.contrib import admin
 
-from index.views import IndexView, AlumniView, TeachersView
+from index.views import IndexView, AlumniView, TeachersView, RobotsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
@@ -36,6 +36,7 @@ from learning.views import \
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
