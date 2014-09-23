@@ -799,8 +799,9 @@ class AssignmentStudentDetailMixin(object):
 
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way
-        if (self.user_type == 'student'
-                and not a_s.student == self.request.user):
+        if (not self.request.user.is_superuser
+            and (self.user_type == 'student'
+                 and not a_s.student == self.request.user)):
             raise PermissionDenied
 
         context['a_s'] = a_s
