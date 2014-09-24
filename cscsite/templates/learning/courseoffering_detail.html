@@ -141,18 +141,12 @@
         <div class="col-xs-12">
           <h3>{% trans "Assignments" %}</h3>
           <ul>
-            {% for assignment in course_offering.assignment_set.all %}
-              {% if is_actual_teacher or user.is_superuser %}
+            {% for assignment in assignments %}
               <li>
-                <a href="{% url "assignment_detail_teacher" assignment.pk %}">
+                <a href="{{ assignment.magic_link }}">
                   {{ assignment.title }}
                 </a>
               </li>
-              {% else %}
-              <li>
-                {{ assignment.title }}
-              </li>
-              {% endif %}
             {% endfor %}
           </ul>
         </div>
