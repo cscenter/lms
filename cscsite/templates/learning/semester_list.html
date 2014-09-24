@@ -17,7 +17,7 @@
       <table class="table table-stripped">
         <tr>
         {% for semester in autumn_spring %}
-          <th width="50%">{{ semester|title }}</th>
+          <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
         {% endfor %}
         </tr>
         <tr>
