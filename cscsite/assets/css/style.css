@@ -617,6 +617,10 @@ tr.unread {
   margin-left: -3px;
 }
 
+.final-grade-cell {
+  margin-left: 3px;
+}
+
 #course-list > li:first-child { padding-left: 5px !important; }
 
 .semester-course-list ul { padding-left: 15px; }
