@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import logging
 import os
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
@@ -32,6 +33,9 @@ from learning.forms import CourseOfferingPKForm, \
     MarksSheetTeacherFormFabrique, MarksSheetStaffFormFabrique
 from core.notifications import get_unread_notifications_cache
 from . import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 class TimetableTeacherView(TeacherOnlyMixin,
@@ -368,15 +372,34 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
-        context['is_enrolled'] = (self.request.user.is_authenticated() and
-                                  self.request.user.is_student and
-                                  (self.request.user
-                                   .enrolled_on_set
-                                   .filter(pk=self.object.pk)
-                                   .exists()))
-        context['is_actual_teacher'] = (
-            self.request.user.is_authenticated() and
-            self.request.user in self.object.teachers.all())
+        is_enrolled = (self.request.user.is_authenticated() and
+                       self.request.user.is_student and
+                       (self.request.user
+                        .enrolled_on_set
+                        .filter(pk=self.object.pk)
+                        .exists()))
+        context['is_enrolled'] = is_enrolled
+        is_actual_teacher = (self.request.user.is_authenticated() and
+                             self.request.user in self.object.teachers.all())
+        context['is_actual_teacher'] = is_actual_teacher
+        assignments = self.object.assignment_set.all().order_by('created')
+        for assignment in assignments:
+            if is_actual_teacher or self.request.user.is_superuser:
+                setattr(assignment, 'magic_link',
+                        reverse("assignment_detail_teacher",
+                                args=[assignment.pk]))
+            elif is_enrolled:
+                try:
+                    a_s = get_object_or_404(AssignmentStudent.objects
+                                            .filter(assignment=assignment,
+                                                    student=self.request.user))
+                    setattr(assignment, 'magic_link',
+                            reverse("a_s_detail_student", args=[a_s.pk]))
+                except ObjectDoesNotExist:
+                    logger.error("can't find AssignmentStudent for "
+                                 "student ID {0}, assignment ID {1}"
+                                 .format(self.request.user.pk, assignment.pk))
+        context['assignments'] = assignments
 
         # Not sure if it's the best place for this, but it's the simplest one
         if self.request.user.is_authenticated():
