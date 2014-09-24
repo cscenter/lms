@@ -143,9 +143,13 @@
           <ul>
             {% for assignment in assignments %}
               <li>
+                {% if assignment.magic_link %}
                 <a href="{{ assignment.magic_link }}">
                   {{ assignment.title }}
                 </a>
+                {% else %}
+                {{ assignment.title }}
+                {% endif %}
               </li>
             {% endfor %}
           </ul>
