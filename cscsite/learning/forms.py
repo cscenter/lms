@@ -217,6 +217,7 @@ class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Text"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
+        required=False,
         widget=Ubereditor)
     attached_file = forms.FileField(
         label="",
@@ -237,6 +238,15 @@ class AssignmentCommentForm(forms.ModelForm):
     class Meta:
         model = AssignmentComment
         fields = ['text', 'attached_file']
+
+    def clean(self):
+        cleaned_data = super(AssignmentCommentForm, self).clean()
+        if (not cleaned_data.get("text")
+                and not cleaned_data.get("attached_file")):
+            raise forms.ValidationError(
+                _("Either text or file should be non-empty"))
+
+        return cleaned_data
 
 
 class AssignmentGradeForm(forms.Form):
