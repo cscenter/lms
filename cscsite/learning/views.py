@@ -993,6 +993,11 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                     'student'))
         enrollment_list = (Enrollment.objects
                            .filter(course_offering__teachers=user)
+                           .order_by('course_offering__semester__year',
+                                     'course_offering__semester__type',
+                                     'course_offering',
+                                     'student__last_name',
+                                     'student__first_name')
                            .select_related('course_offering', 'student'))
         self.a_s_list = a_s_list
         self.enrollment_list = enrollment_list
@@ -1035,12 +1040,15 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         data = self.a_s_list
         # implying that the data is already sorted
         structured = OrderedDict()
-        for a_s in data:
-            offering = a_s.assignment.course_offering
+        for enrollment in self.enrollment_list:
+            offering = enrollment.course_offering
+            student = enrollment.student
             if offering not in structured:
                 structured[offering] = OrderedDict()
-            if a_s.student not in structured[offering]:
-                structured[offering][a_s.student] = OrderedDict()
+            if student not in structured[offering]:
+                structured[offering][student] = OrderedDict()
+        for a_s in data:
+            offering = a_s.assignment.course_offering
             # if assignment is "offline", provide ModelForm instead of
             # the object itself
             if a_s.assignment.is_online:
