@@ -7,7 +7,8 @@ from calendar import Calendar
 from collections import OrderedDict, defaultdict
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
+    MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q
@@ -397,6 +398,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                             reverse("a_s_detail_student", args=[a_s.pk]))
                 except ObjectDoesNotExist:
                     logger.error("can't find AssignmentStudent for "
+                                 "student ID {0}, assignment ID {1}"
+                                 .format(self.request.user.pk, assignment.pk))
+                except MultipleObjectsReturned:
+                    logger.error("more than one AssignmentStudent for "
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
