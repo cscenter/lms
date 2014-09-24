@@ -546,7 +546,8 @@ class AssignmentComment(TimeStampedModel):
         on_delete=models.CASCADE)
     text = models.TextField(
         _("AssignmentComment|text"),
-        help_text=_("LaTeX+Markdown is enabled"))
+        help_text=_("LaTeX+Markdown is enabled"),
+        blank=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
