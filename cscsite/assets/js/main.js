@@ -4,7 +4,13 @@ var marks_sheet_unsaved = 0;
 $(document).ready(function () {
     hljs.configure({tabReplace: '    '});
 
+    var renderer = new marked.Renderer();
+    renderer.codespan = function (code) {
+        return _.unescape(code);
+    };
+
     marked.setOptions({
+        renderer: renderer,
         highlight: function (code, lang) {
             var unescaped = _.unescape(code);
             return typeof lang != "undefined"
