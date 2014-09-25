@@ -6,9 +6,10 @@ $(document).ready(function () {
 
     marked.setOptions({
         highlight: function (code, lang) {
+            var unescaped = _.unescape(code);
             return typeof lang != "undefined"
-                ? hljs.highlight(lang, code).value
-                : code;
+                ? hljs.highlight(lang, unescaped).value
+                : unescaped;
         },
         smartypants: true
     });
