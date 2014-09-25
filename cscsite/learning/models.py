@@ -480,6 +480,7 @@ class AssignmentStudent(TimeStampedModel):
         ordering = ["assignment", "student"]
         verbose_name = _("Assignment-student")
         verbose_name_plural = _("Assignment-students")
+        unique_together = [['assignment', 'student']]
 
     def clean(self):
         if not self.student.is_student:
