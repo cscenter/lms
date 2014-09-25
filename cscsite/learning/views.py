@@ -1021,7 +1021,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
-                a_s.state = form.cleaned_data[field]
+                a_s.grade = form.cleaned_data[field]
                 a_s.save()
                 continue
             if field in enrollment_index:

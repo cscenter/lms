@@ -108,7 +108,7 @@ $(document).ready(function () {
         $("#marks-sheet-save").attr("disabled", "disabled");
     }
 
-    $(".marks-sheet-form-cell select").change(function() {
+    $(".marks-sheet-form-cell input,.marks-sheet-form-cell select").change(function() {
         $this = $(this);
         var current_value = $this.val();
         var saved_value = $this.next("input[type=hidden]").val();
