@@ -6,7 +6,7 @@ $(document).ready(function () {
 
     var renderer = new marked.Renderer();
     renderer.codespan = function (code) {
-        return _.unescape(code);
+        return "<code>" + _.unescape(code) + "</code>";
     };
 
     marked.setOptions({
