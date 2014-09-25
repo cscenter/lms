@@ -535,7 +535,11 @@ class AssignmentStudent(TimeStampedModel):
 
     @property
     def state_short(self):
-        return self.SHORT_STATES[self.state]
+        if self.grade:
+            return "{0}/{1}".format(self.grade,
+                                    self.assignment.grade_max)
+        else:
+            return self.SHORT_STATES[self.state]
 
 
 @python_2_unicode_compatible

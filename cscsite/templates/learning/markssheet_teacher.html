@@ -43,7 +43,7 @@
               <td class="content">
                 {% if assignment.is_online %}
                 <a href="{% url 'a_s_detail_teacher' cell.pk %}">
-                  {{ cell.state_short|safe }}
+                  {{ cell.state_short }}
                 </a>
                 {% else %}
                 <span class="marks-sheet-form-cell">
@@ -59,6 +59,14 @@
               </td>
             </tr>
             {% endfor %}
+            <tr>
+              <td></td>
+              {% for assignment in header %}
+              <td>
+                {{ assignment.grade_min }}–{{ assignment.grade_max }}
+              </td>
+              {% endfor %}
+            </tr>
           </table>
         </div>
         {% endfor %}

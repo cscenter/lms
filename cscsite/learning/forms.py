@@ -345,8 +345,9 @@ class MarksSheetTeacherFormFabrique(object):
     @staticmethod
     def build_form_class(a_s_list, enrollment_list):
         fields = {'a_s_{0}'.format(a_s.pk):
-                  forms.ChoiceField(AssignmentStudent.SHORT_STATES,
-                                    show_hidden_initial=True)
+                  forms.IntegerField(show_hidden_initial=True,
+                                     min_value=a_s.assignment.grade_min,
+                                     max_value=a_s.assignment.grade_max)
                   for a_s in a_s_list
                   if not a_s.assignment.is_online}
         fields.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
@@ -367,7 +368,7 @@ class MarksSheetTeacherFormFabrique(object):
 
     @staticmethod
     def transform_to_initial(a_s_list, enrollment_list):
-        initial = {'a_s_{0}'.format(a_s.pk): a_s.state
+        initial = {'a_s_{0}'.format(a_s.pk): a_s.grade
                    for a_s in a_s_list
                    if not a_s.assignment.is_online}
         initial.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
