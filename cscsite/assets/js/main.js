@@ -126,4 +126,12 @@ $(document).ready(function () {
             }
         }
     });
+
+    // see this http://stackoverflow.com/a/8641208 for discussion
+    // about the following hack
+    $('.marks-table tr').each(function() {
+        $(this).find('td').each(function(i) {
+            $(this).find('input,select').attr('tabindex', i + 1000);
+        });
+    });
 });
