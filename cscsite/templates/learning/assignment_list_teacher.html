@@ -35,18 +35,18 @@
           <a href="{% url 'assignment_list_teacher' %}"
              role="button"
              class="btn btn-default
-                    {% if not only_ungraded %}
+                    {% if not show_all %}
+                    active
+                    {% endif %}">
+            {% trans "Passed online" %}
+          </a>
+          <a href="{% url 'assignment_list_teacher' %}?show_all=true"
+             role="button"
+             class="btn btn-default
+                    {% if show_all %}
                     active
                     {% endif %}">
             {% trans "All" %}
-          </a>
-          <a href="{% url 'assignment_list_teacher' %}?only_ungraded=true"
-             role="button"
-             class="btn btn-default
-                    {% if only_ungraded %}
-                    active
-                    {% endif %}">
-            {% trans "Ungraded" %}
           </a>
         </div>
        <div class="btn-group">
@@ -62,6 +62,7 @@
   {% if assignment_list_open %}
   <div class="row">
     <div class="col-xs-12">
+      <h3>{% trans "Without grades" %}</h3>
       <table class="table" width="100%">
         <thead>
           <th width="10%">
@@ -72,11 +73,8 @@
           <th width="20%">
             {% trans "Course" %}
           </th>
-          <th width="15%">
+          <th width="13%">
             {% trans "State" %}
-          </th>
-          <th width="5%">
-            {% trans "Online" %}
           </th>
         </thead>
         {% for a_s in assignment_list_open %}
@@ -107,9 +105,6 @@
               {{ a_s.state_display }}
             </span>
           </td>
-          <td>
-            {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
-          </td>
         </tr>
         {% endfor %}
       </table>
@@ -119,17 +114,17 @@
   {% if assignment_list_archive %}
   <div class="row">
     <div class="col-xs-12">
-      <h3>{% trans "Archive" %}</h3>
+      <h3>{% trans "All assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
           <th width="10%">
             {% trans "Deadline" %}
           </th>
           <th></th>
-          <th width="25%">
+          <th width="23%">
             {% trans "Course" %}
           </th>
-          <th width="5%">
+          <th width="10%">
             {% trans "Online" %}
           </th>
         </thead>

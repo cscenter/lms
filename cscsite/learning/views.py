@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, F
 from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
@@ -730,26 +730,38 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     def get_queryset(self):
         base_qs = \
             (self.model.objects
-             .filter(assignment__course_offering__teachers=self.request.user)
-             .order_by('assignment__deadline_at',
+             .filter(assignment__course_offering__teachers=self.request.user,
+                     grade__isnull=True)
+             .order_by('-assignment__deadline_at',
                        'assignment__course_offering__course__name',
+                       'student__first_name',
                        'pk')
              .select_related('assignment',
                              'assignment__course_offering',
                              'assignment__course_offering__course',
                              'assignment__course_offering__semester',
                              'student'))
-        if self.request.GET.get('only_ungraded') == 'true':
-            return base_qs.filter(grade__isnull=True)
-        else:
+        if self.request.GET.get('show_all') == 'true':
             return base_qs
+        else:
+            return base_qs.filter(assignment__is_online=True,
+                                  grade__isnull=True)
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherListView, self)
                    .get_context_data(*args, **kwargs))
-        open_ = [a_s
-                 for a_s in context['assignment_list']
-                 if (a_s.has_unread() or (not a_s.grade and a_s.has_passes))]
+        if self.request.GET.get('show_all') == 'true':
+            open_ = context['assignment_list']
+        else:
+            a_s_pks = [a_s.pk for a_s in context['assignment_list']]
+            passed_set = set((AssignmentComment.objects
+                              .filter(assignment_student__in=a_s_pks,
+                                      author=F('assignment_student__student'))
+                              .values_list('assignment_student__pk',
+                                           flat=True)))
+            open_ = [a_s
+                     for a_s in context['assignment_list']
+                     if a_s.pk in passed_set]
         archive = (Assignment.objects
                    .filter(course_offering__teachers=self.request.user)
                    .order_by('-deadline_at',
@@ -761,8 +773,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
         context['user_type'] = self.user_type
-        context['only_ungraded'] = \
-            (self.request.GET.get('only_ungraded') == 'true')
+        context['show_all'] = \
+            (self.request.GET.get('show_all') == 'true')
         return context
 
 

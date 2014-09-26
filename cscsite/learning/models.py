@@ -496,8 +496,9 @@ class AssignmentStudent(TimeStampedModel):
                                   smart_text(self.student.get_full_name()))
 
     def has_passes(self):
+        # TODO(Dmitry): this can be replaced with explicit field on AS object
         return ((self.assignmentcomment_set
-                 .filter(author__groups__name='Student')
+                 .filter(author=self.student)
                  .exists()) and
                 self.assignment.is_online)
 
