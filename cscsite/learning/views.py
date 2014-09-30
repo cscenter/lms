@@ -734,8 +734,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                      grade__isnull=True)
              .order_by('-assignment__deadline_at',
                        'assignment__course_offering__course__name',
-                       'student__first_name',
-                       'pk')
+                       'assignment__pk',
+                       'student__last_name')
              .select_related('assignment',
                              'assignment__course_offering',
                              'assignment__course_offering__course',
