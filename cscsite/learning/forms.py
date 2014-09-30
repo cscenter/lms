@@ -109,7 +109,7 @@ class CourseClassForm(forms.ModelForm):
         label=_("Type"),
         choices=CourseClass.TYPES)
     name = forms.CharField(
-        label=_("Name"),
+        label=_("CourseClass|Name"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     description = forms.CharField(
         label=_("Description"),

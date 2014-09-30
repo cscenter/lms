@@ -221,7 +221,7 @@ class CourseOfferingNews(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Venue(models.Model):
-    name = models.CharField(_("Name"), max_length=140)
+    name = models.CharField(_("Venue|Name"), max_length=140)
     description = models.TextField(
         _("Description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
@@ -271,7 +271,7 @@ class CourseClass(TimeStampedModel, object):
     type = StatusField(
         _("Type"),
         choices_name='TYPES')
-    name = models.CharField(_("Name"), max_length=255)
+    name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
         _("Description"),
         blank=True,
