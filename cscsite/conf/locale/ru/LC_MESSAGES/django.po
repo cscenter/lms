@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-26 21:46+0400\n"
-"PO-Revision-Date: 2014-09-26 21:47+0230\n"
+"POT-Creation-Date: 2014-09-30 21:25+0400\n"
+"PO-Revision-Date: 2014-09-30 21:27+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -68,9 +68,9 @@ msgstr "Место проведения"
 msgid "Type"
 msgstr "Тип"
 
-#: learning/forms.py:112 learning/models.py:224 learning/models.py:274
-msgid "Name"
-msgstr "Имя"
+#: learning/forms.py:112 learning/models.py:274
+msgid "CourseClass|Name"
+msgstr "Название"
 
 #: learning/forms.py:120 learning/models.py:280
 #: templates/learning/courseclass_detail.html:37
@@ -262,6 +262,10 @@ msgstr "Новость"
 #: learning/models.py:215
 msgid "Course news-plural"
 msgstr "Новости"
+
+#: learning/models.py:224
+msgid "Venue|Name"
+msgstr "Название"
 
 #: learning/models.py:229
 msgid "Preferred"
@@ -560,7 +564,7 @@ msgstr "Вы уверены, что хотите отказаться от \"%(c
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:927
+#: learning/views.py:933
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -1117,7 +1121,7 @@ msgstr "url_name"
 
 #: textpages/models.py:19 textpages/models.py:47
 msgid "Textpage|name"
-msgstr "Имя"
+msgstr "Название"
 
 #: textpages/models.py:28
 msgid "Textpage|page"
@@ -1219,6 +1223,9 @@ msgstr "Для студента должен быть указан год пос
 #: users/models.py:77
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
+
+#~ msgid "Name"
+#~ msgstr "Имя"
 
 #~ msgid "Ungraded"
 #~ msgstr "Без оценки"
