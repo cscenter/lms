@@ -7,6 +7,7 @@ from django.test import TestCase
 
 from .models import Course, Semester, CourseOffering, Assignment, \
     AssignmentStudent
+from users.models import CSCUser
 
 
 class CourseOfferingTests(TestCase):
@@ -28,17 +29,23 @@ class CourseOfferingTests(TestCase):
 
 class AssignmentStudentTests(TestCase):
     def test_state(self):
+        student = CSCUser()
+        student.save()
+        student.groups = [student.IS_STUDENT_PK]
+        student.save()
         a_online = Assignment(grade_min=5, grade_max=10, is_online=True)
-        a_offline = Assignment(grade_min=5, grade_max=10, is_online=False)
-        a_s = AssignmentStudent(assignment=a_online, grade=0)
+        ctx = {'student': student, 'assignment': a_online}
+        a_s = AssignmentStudent(grade=0, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
-        a_s = AssignmentStudent(assignment=a_online, grade=4)
+        a_s = AssignmentStudent(grade=4, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
-        a_s = AssignmentStudent(assignment=a_online, grade=5)
+        a_s = AssignmentStudent(grade=5, **ctx)
         self.assertEqual(a_s.state, 'pass')
-        a_s = AssignmentStudent(assignment=a_online, grade=10)
+        a_s = AssignmentStudent(grade=10, **ctx)
         self.assertEqual(a_s.state, 'excellent')
-        a_s = AssignmentStudent(assignment=a_online)
+        a_s = AssignmentStudent(**ctx)
         self.assertEqual(a_s.state, 'not_submitted')
-        a_s = AssignmentStudent(assignment=a_offline)
+        a_offline = Assignment(grade_min=5, grade_max=10, is_online=False)
+        ctx['assignment'] = a_offline
+        a_s = AssignmentStudent(**ctx)
         self.assertEqual(a_s.state, 'not_checked')
