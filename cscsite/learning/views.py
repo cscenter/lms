@@ -348,6 +348,7 @@ class GetCourseOfferingObjectMixin(object):
     def get_object(self):
         try:
             year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+            year = int(year)
         except ValueError:
             raise Http404
 
