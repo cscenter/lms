@@ -347,7 +347,8 @@ class MarksSheetTeacherFormFabrique(object):
         fields = {'a_s_{0}'.format(a_s.pk):
                   forms.IntegerField(show_hidden_initial=True,
                                      min_value=a_s.assignment.grade_min,
-                                     max_value=a_s.assignment.grade_max)
+                                     max_value=a_s.assignment.grade_max,
+                                     required=False)
                   for a_s in a_s_list
                   if not a_s.assignment.is_online}
         fields.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
