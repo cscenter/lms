@@ -395,10 +395,9 @@ class Assignment(TimeStampedModel, object):
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
-                   ("assignment_{0}/{1}/{2}"
-                    .format(instance.pk,
-                            # somewhat protecting against URL enumeration
-                            int(time.time()) % 30,
+                   ("assignments/{0}/{1}"
+                    # somewhat protecting against URL enumeration
+                    .format(int(time.time()) % 30,
                             filename))),
         blank=True)
     grade_min = models.PositiveSmallIntegerField(
