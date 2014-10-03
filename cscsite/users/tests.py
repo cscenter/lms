@@ -8,9 +8,19 @@ from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_text
 
 from bs4 import BeautifulSoup
+import factory
 
 from .models import CSCUser
 from .admin import CSCUserCreationForm
+
+
+class UserFactory(factory.Factory):
+    class Meta:
+        model = CSCUser
+
+    username = "testuser"
+    password = "test123foobar@!"
+    email = "foo@bar.net"
 
 
 class UserTests(TestCase):
@@ -104,34 +114,25 @@ class UserTests(TestCase):
         self.assertEqual(len(form.select('input[type="submit"]')), 1)
 
     def test_login_works(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
-        CSCUser.objects.create_user(test_user, test_email, test_password)
+        CSCUser.objects.create_user(**UserFactory.attributes())
         self.assertNotIn('_auth_user_id', self.client.session)
+        bad_user = UserFactory.attributes()
+        bad_user['password'] = "BAD"
         resp = self.client.post(reverse('login'),
-                                {'username': test_user,
-                                 'password': test_password + "BAD"})
+                                bad_user)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "alert")
         resp = self.client.post(reverse('login'),
-                                {'username': test_user,
-                                 'password': test_password})
+                                UserFactory.attributes())
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
 
     def test_auth_restriction_works(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
-        user = CSCUser.objects.create_user(test_user, test_email,
-                                           test_password)
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('assignment_list_teacher'))
         self.assertEqual(resp.status_code, 403)
-        self.client.post(reverse('login'),
-                         {'username': test_user,
-                          'password': test_password})
+        self.client.post(reverse('login'), UserFactory.attributes())
         resp = self.client.get(reverse('assignment_list_teacher'))
         self.assertEqual(resp.status_code, 403)
         user.groups = [user.IS_STUDENT_PK]
@@ -144,12 +145,8 @@ class UserTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
-        CSCUser.objects.create_user(test_user, test_email, test_password)
-        login = self.client.login(username=test_user,
-                                  password=test_password)
+        CSCUser.objects.create_user(**UserFactory.attributes())
+        login = self.client.login(**UserFactory.attributes())
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
         resp = self.client.get(reverse('logout'))
@@ -158,12 +155,8 @@ class UserTests(TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_logout_redirect_works(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
-        CSCUser.objects.create_user(test_user, test_email, test_password)
-        login = self.client.login(username=test_user,
-                                  password=test_password)
+        CSCUser.objects.create_user(**UserFactory.attributes())
+        login = self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('enrollment')})
         self.assertRedirects(resp, reverse('enrollment'),
@@ -184,8 +177,7 @@ class UserTests(TestCase):
         """
         get_short_note should split note on first paragraph
         """
-        user = CSCUser.objects.create_user("testuser1", "foo@bar.net",
-                                           "test123foobar@!")
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
         user.note = "Some small text"
         self.assertEqual(user.get_short_note(), "Some small text")
         user.note = """Some large text.
@@ -194,8 +186,7 @@ class UserTests(TestCase):
         self.assertEqual(user.get_short_note(), "Some large text.")
 
     def test_teacher_detail_view(self):
-        user = CSCUser.objects.create_user("testuser1", "foo@bar.net",
-                                           "test123foobar@!")
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
         user.groups = [user.IS_TEACHER_PK]
@@ -205,11 +196,7 @@ class UserTests(TestCase):
         self.assertEqual(resp.context['teacher'], user)
 
     def test_user_detail_view(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
-        user = CSCUser.objects.create_user(test_user, test_email,
-                                           test_password)
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['user_object'], user)
@@ -217,43 +204,33 @@ class UserTests(TestCase):
         self.assertFalse(resp.context['is_editing_allowed'])
 
     def test_user_can_update_profile(self):
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
         test_note = "The best user in the world"
-        user = CSCUser.objects.create_user(test_user, test_email,
-                                           test_password)
-        self.client.login(username=test_user,
-                          password=test_password)
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.context['user_object'], user)
         self.assertTrue(resp.context['is_extended_profile_available'])
         self.assertTrue(resp.context['is_editing_allowed'])
-        self.assertIn(reverse('user_update', args=[user.pk]), resp.content)
+        self.assertContains(resp, reverse('user_update', args=[user.pk]))
         resp = self.client.get(reverse('user_update', args=[user.pk]))
-        self.assertIn('note', resp.content)
+        self.assertContains(resp, 'note')
         resp = self.client.post(reverse('user_update', args=[user.pk]),
                                 {'note': test_note})
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
                              status_code=302)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertIn(test_note, resp.content)
+        self.assertContains(resp, test_note)
 
     def test_graduate_can_edit_csc_review(self):
         """
         Only graduates can (and should) have "CSC review" field in their
         profiles
         """
-        test_user = "testuser"
-        test_password = "test123foobar@!"
-        test_email = "foo@bar.net"
         test_review = "CSC are the bollocks"
-        user = CSCUser.objects.create_user(test_user, test_email,
-                                           test_password)
-        self.client.login(username=test_user,
-                          password=test_password)
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('user_update', args=[user.pk]))
-        self.assertNotIn('csc_review', resp.content)
+        self.assertNotContains(resp, 'csc_review')
         user.groups = [user.IS_GRADUATE_PK]
         user.graduation_year = 2014
         user.save()
@@ -264,21 +241,18 @@ class UserTests(TestCase):
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
                              status_code=302)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertIn(test_review, resp.content)
+        self.assertContains(resp, test_review)
 
     def test_duplicate_check(self):
         """
         It should be impossible to create users with equal names
         """
-        CSCUser.objects.create_user("testuser1", "foo@bar.net",
-                                    "test123foobar@!")
-        # user_admin = CSCUserAdmin(CSCUser, AdminSite())
-        form_data = {'username': "testuser1",
+        CSCUser.objects.create_user(**UserFactory.attributes())
+        form_data = {'username': "testuser",
                      'password1': "test123foobar@!",
                      'password2': "test123foobar@!"}
         form = CSCUserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
         form_data.update({'username': 'testuser2'})
         form = CSCUserCreationForm(data=form_data)
-        print form.errors
         self.assertTrue(form.is_valid())

@@ -15,7 +15,7 @@ COVERAGE_REPORT_HTML_OUTPUT_DIR = PROJECT_DIR.child("coverage")
 COVERAGE_USE_STDOUT = True
 COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'common.views.test', '__init__', 'django',
-                            'migrations', '^sorl']
+                            'migrations', '^sorl', '__pycache__']
 COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures']
 
 # In-memory test database
