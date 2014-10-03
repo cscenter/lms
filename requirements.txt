@@ -18,6 +18,7 @@ django-sitemetrics==0.4.2
 django-taggit==0.12.1
 factory_boy==2.4.1
 icalendar==3.8.4
+micawber==0.3.1
 MySQL-python==1.2.5
 mock==1.0.1
 pylint-django==0.3

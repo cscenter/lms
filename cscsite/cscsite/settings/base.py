@@ -74,6 +74,7 @@ INSTALLED_APPS = (
     'south',
     'rosetta',
     'sitemetrics',
+    'micawber.contrib.mcdjango',
 
     'users',
     'core',

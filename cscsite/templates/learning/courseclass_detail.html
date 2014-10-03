@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+
 {% load i18n %}
+
+{% load micawber_tags %}
 
 {% block content %}
 <div class="container">
@@ -47,16 +50,17 @@
       </div>
       {% endif %}
 
-      {% if course_class.video %}
+      {% if course_class.video_url %}
       <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
       <div class="ubertext">
-        {{ course_class.video|safe }}
+        {{ course_class.video_url|oembed }}
       </div>
       {% endif %}
 
-      {% if course_class.other_materials %}
+      {% if course_class.other_materials or course_class.slides_url %}
       <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
       <div class="ubertext">
+        {{ course_class.slides_url|oembed }}
         {{ course_class.other_materials|safe }}
       </div>
       {% endif %}
