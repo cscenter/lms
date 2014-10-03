@@ -34,7 +34,7 @@ class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['course_offering', 'venue', 'type']
-    list_display = ['name', 'course_offering', 'date', 'venue', 'type_display']
+    list_display = ['name', 'course_offering', 'date', 'venue', 'type']
     inlines = [CourseClassAttachmentInline]
 
 

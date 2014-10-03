@@ -331,7 +331,7 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
 
-    # FIXME(Dmitry): refactor this to use Semester object
+    # TODO: test this
     # Note(lebedev): should be a manager, not a class method.
     @classmethod
     def by_semester(cls, semester):
