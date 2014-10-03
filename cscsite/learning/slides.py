@@ -36,9 +36,13 @@ for attr in REQUIRED_SETTINGS:
             "Please add {0!r} to your settings module".format(attr))
 
 
+def get_slideshare():
+    return SlideshareAPI(settings.SLIDESHARE_API_KEY,
+                         settings.SLIDESHARE_SECRET)
+
+
 def upload_to_slideshare(handle, title, description, tags):
-    api = SlideshareAPI(settings.SLIDESHARE_API_KEY,
-                        settings.SLIDESHARE_SECRET)
+    api = get_slideshare()
 
     # Note(lebedev): unfortunately 'slideshare' has no idea about
     # unicode strings, so we have to force everything to be bytes.
