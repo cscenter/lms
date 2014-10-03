@@ -6,9 +6,7 @@ import logging
 import mimetypes
 import os.path
 import posixpath
-import re
 import urllib2
-from cStringIO import StringIO
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -62,11 +60,7 @@ def upload_to_slideshare(handle, title, description, tags):
             slideshow_tags=[force_bytes(tag) for tag in tags])
         sl_id = sls["SlideShowUploaded"]["SlideShowID"]
         sl_meta = api.get_slideshow(sl_id)
-        html = sl_meta["Slideshow"]["Embed"]
-
-        # SlideShare adds an extra link to the embed HTML, we don't
-        # need it.
-        return re.sub(r"<div[^>]+>.+$", "", html)
+        return sl_meta["Slideshow"]["URL"]
     except (SlideShareServiceError, urllib2.URLError) as e:
         logger.error(e)
         return ""

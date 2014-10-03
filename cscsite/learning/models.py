@@ -350,7 +350,7 @@ class CourseClass(TimeStampedModel, object):
         course = course_offering.course
 
         # a) SlideShare
-        self.other_materials = slides.upload_to_slideshare(
+        self.slides_url = slides.upload_to_slideshare(
             self.slides.file, title, self.description, tags=[course.slug])
         self.save()
         # b) Yandex.Disk
