@@ -3,7 +3,8 @@ from .base import *
 # Test settings
 
 #TEST_RUNNER = "discover_runner.DiscoverRunner"
-TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
+#TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
+TEST_RUNNER = 'core.test_runners.ColoredCoverageRunner'
 TEST_DISCOVER_TOP_LEVEL = PROJECT_DIR
 TEST_DISCOVER_ROOT = PROJECT_DIR
 TEST_DISCOVER_PATTERN = "test_*"

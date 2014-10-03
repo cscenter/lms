@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils.models import TimeStampedModel
@@ -9,6 +10,7 @@ from model_utils.models import TimeStampedModel
 from learning.models import LATEX_MARKDOWN_HTML_ENABLED
 
 
+@python_2_unicode_compatible
 class Textpage(TimeStampedModel):
     url_name = models.CharField(
         _("Textpage|url_name"),
@@ -28,13 +30,14 @@ class Textpage(TimeStampedModel):
         verbose_name = _("Textpage|page")
         verbose_name_plural = _("Textpage|pages")
 
-    def __unicode__(self):
-        return unicode(self.name)
+    def __str__(self):
+        return smart_text(self.name)
 
     def get_absolute_url(self):
         return reverse(self.url_name)
 
 
+@python_2_unicode_compatible
 class CustomTextpage(TimeStampedModel):
     slug = models.SlugField(
         _("News|slug"),
@@ -55,8 +58,8 @@ class CustomTextpage(TimeStampedModel):
         verbose_name = _("Textpage|Custom page")
         verbose_name_plural = _("Textpage|Custom pages")
 
-    def __unicode__(self):
-        return unicode(self.name)
+    def __str__(self):
+        return smart_text(self.name)
 
     def get_absolute_url(self):
         return reverse('custom_text_page', args=[self.slug])

@@ -24,7 +24,7 @@ class TextpageOpenView(DetailView):
             return self.model.objects.get(url_name=requested_url_name)
         except self.model.DoesNotExist:
             logger.warning(
-                "can't find {0} as a textpage".format(requested_url_name))
+                "can't find \"{0}\" as a textpage".format(requested_url_name))
             raise Http404
 
 
@@ -35,11 +35,9 @@ class CustomTextpageOpenView(DetailView):
     def get_object(self):
         try:
             slug = self.kwargs.get('slug')
-            if not slug:
-                raise Http404
             return self.model.objects.get(slug=slug)
         except self.model.DoesNotExist:
-            logger.warning("can't find {0} as a custom textpage"
+            logger.warning("can't find \"{0}\" as a custom textpage"
                            .format(self.kwargs.get('slug')))
             raise Http404
 
