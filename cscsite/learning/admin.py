@@ -35,8 +35,7 @@ class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     list_filter = ['course_offering', 'venue', 'type']
     list_display = ['name', 'course_offering', 'date', 'venue', 'type_display']
-    inlines = [
-        CourseClassAttachmentInline]
+    inlines = [CourseClassAttachmentInline]
 
 
 class CourseOfferingNewsAdmin(UbereditorMixin, admin.ModelAdmin):

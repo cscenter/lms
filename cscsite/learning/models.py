@@ -288,12 +288,14 @@ class CourseClass(TimeStampedModel, object):
         _("Slides"),
         blank=True,
         upload_to=_slides_file_name)
+    slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video = models.TextField(
         _("CourseClass|Video"),
         blank=True,
         help_text=("{0}; {1}"
                    .format(LATEX_MARKDOWN_HTML_ENABLED,
                            _("please insert HTML for embedded video player"))))
+    video_url = models.URLField(_("YouTube URL"), blank=True)
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
@@ -320,7 +322,7 @@ class CourseClass(TimeStampedModel, object):
         super(CourseClass, self).clean()
         # ends_at should be later than starts_at
         if self.starts_at >= self.ends_at:
-            raise ValidationError(_("Class should end after it's start"))
+            raise ValidationError(_("Class should end after it started"))
 
     # this is needed to properly set up fields for admin page
     def type_display_prop(self):
@@ -330,6 +332,7 @@ class CourseClass(TimeStampedModel, object):
     type_display = property(type_display_prop)
 
     # FIXME(Dmitry): refactor this to use Semester object
+    # Note(lebedev): should be a manager, not a class method.
     @classmethod
     def by_semester(cls, semester):
         (year, season) = semester

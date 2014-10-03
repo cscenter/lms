@@ -132,7 +132,8 @@ DATABASES = {
 
 LANGUAGE_CODE = 'ru'
 LANGUAGES = (
-    ('ru', "Russian"),)
+    ('ru', "Russian"),
+)
 LOCALE_PATHS = (
     "conf/locale",
 )
