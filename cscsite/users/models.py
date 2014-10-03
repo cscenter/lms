@@ -107,6 +107,7 @@ class CSCUser(AbstractUser):
                                  .strip())
         return abbrev_name or self.username
 
+    # FIXME(Dmitry): this should use model_utils.fields#SplitField
     def get_short_note(self):
         """Returns only the first paragraph from the note."""
         normalized_note = normalize_newlines(self.note)
