@@ -157,7 +157,7 @@ class CourseOffering(TimeStampedModel):
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
 
-    # TODO: test this
+    # FIXME(Dmitry): refactor this to use Semester object
     @classmethod
     def by_semester(cls, semester):
         (year, season) = semester
