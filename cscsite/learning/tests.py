@@ -2,17 +2,20 @@
 from __future__ import unicode_literals, absolute_import
 
 import datetime
+import os
 
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.encoding import smart_text
 from django.utils import timezone
 
 import factory
+from mock import patch
 
 from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
-    Assignment, \
+    Assignment, Venue, CourseClass, \
     AssignmentStudent
 from users.models import CSCUser
 
@@ -80,7 +83,34 @@ class CourseOfferingNewsFactory(factory.DjangoModelFactory):
     text = "Suddenly it turned out that testing can be useful!"
 
 
-class ModelTests(TestCase):
+class VenueFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Venue
+
+    name = "Test venue"
+    description = "This is a special venue for tests"
+
+
+class CourseClassFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseClass
+
+    course_offering = factory.SubFactory(CourseOfferingFactory)
+    venue = factory.SubFactory(VenueFactory)
+    type = 'lecture'
+    name = "Test class"
+    description = "In this class we will test"
+    slides = factory.django.FileField()
+    date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+            + datetime.timedelta(days=3))
+    starts_at = "13:00"
+    ends_at = "13:45"
+
+
+# Model tests
+
+
+class CommonTests(TestCase):
     def test_to_strings(self):
         course = CourseFactory.build()
         self.assertEquals(smart_text(course), course.name)
@@ -93,8 +123,12 @@ class ModelTests(TestCase):
         con = CourseOfferingNewsFactory.build()
         self.assertIn(smart_text(con.title), smart_text(con))
         self.assertIn(smart_text(con.course_offering), smart_text(con))
+        cc = CourseClassFactory.build()
+        self.assertIn(cc.name, smart_text(cc))
 
-    def test_semester_starts_ends(self):
+
+class SemesterTests(TestCase):
+    def test_starts_ends(self):
         spring_date = (datetime.datetime(2015, 4, 8, 0, 0, 0)
                        .replace(tzinfo=timezone.utc))
         autumn_date = (datetime.datetime(2015, 11, 8, 0, 0, 0)
@@ -110,7 +144,9 @@ class ModelTests(TestCase):
         self.assertLess(autumn_date, semester.ends_at)
         self.assertLess(semester.ends_at, next_spring_date)
 
-    def test_courseoffering_by_semester(self):
+
+class CourseOfferingTests(TestCase):
+    def test_by_semester(self):
         course = CourseFactory.create()
         for year in range(2013, 2018):
             CourseOfferingFactory.create(course=course,
@@ -122,7 +158,7 @@ class ModelTests(TestCase):
                                  semester__type='spring')
                          .get())
 
-    def test_courseoffering_is_ongoing(self):
+    def test_is_ongoing(self):
         """
         In near future only one course should be "ongoing".
         """
@@ -149,6 +185,57 @@ class ModelTests(TestCase):
         self.assertEqual(n_ongoing, 1)
         timezone.now = old_now
 
+
+class CourseClassTests(TestCase):
+    def test_slides_file_name(self):
+        slide_fname = "foobar.pdf"
+        cc = CourseClassFactory.build()
+        fname = cc._slides_file_name(slide_fname)
+        co = cc.course_offering
+        self.assertIn(co.course.slug.replace("-", "_"), fname)
+        self.assertIn(co.semester.slug.replace("-", "_"), fname)
+        _, ext = os.path.splitext(slide_fname)
+        self.assertIn(ext, fname)
+
+    def test_start_end_validation(self):
+        time1 = "13:00"
+        time2 = "14:20"
+        cc = CourseClassFactory.build(starts_at=time1, ends_at=time2)
+        self.assertEqual(None, cc.clean())
+        cc = CourseClassFactory.build(starts_at=time2, ends_at=time1)
+        self.assertRaises(ValidationError, cc.clean)
+
+    def test_display_prop(self):
+        cc = CourseClassFactory.build(type='lecture')
+        self.assertEqual("Lecture", cc.type_display)
+
+    def test_by_semester(self):
+        c = CourseFactory.create()
+        for year in range(2013, 2018):
+            CourseClassFactory.create(course_offering__course=c,
+                                      course_offering__semester__year=year,
+                                      course_offering__semester__type='spring',
+                                      slides=None)
+        self.assertEqual(CourseClass.by_semester((2014, 'spring')).get(),
+                         CourseClass.objects
+                         .filter(course_offering__semester__year=2014,
+                                 course_offering__semester__type='spring')
+                         .get())
+
+    @patch('learning.slides.upload_to_slideshare')
+    @patch('learning.slides.upload_to_yandex')
+    def test_slides_file_name(self, upload_to_slideshare, upload_to_yandex):
+        slides_fname = "foobar.pdf"
+        upload_to_slideshare.return_value = "slideshare_embed_code"
+        upload_to_yandex.return_value = "yandex_return"
+        cc = CourseClassFactory.create()
+        self.assertIn("/", cc.slides.name)
+        self.assertNotIn("/", cc.slides_file_name)
+        self.assertTrue(upload_to_slideshare.called)
+        self.assertTrue(upload_to_yandex.called)
+
+
+class AssignmentStudentTests(TestCase):
     def test_assignment_student_state(self):
         """
         Testing AssignmentStudent#state logic (it's nontrivial)
