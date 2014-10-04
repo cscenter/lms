@@ -63,3 +63,15 @@ LOGGING = {
         },
     },
 }
+
+EMAIL_HOST_PASSWORD = 'P@ssw0rd238'
+
+# -- learning
+SLIDESHARE_API_KEY = "E3GDS7t4"
+SLIDESHARE_SECRET = "fnk6fOLp"
+SLIDESHARE_USERNAME = "compscicenter"
+SLIDESHARE_PASSWORD = "vorobey"
+
+YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
+YANDEX_DISK_PASSWORD = "deelthisat"
+YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2014-2015"
