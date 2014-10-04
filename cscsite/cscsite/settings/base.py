@@ -48,7 +48,8 @@ SITE_ID = 1
 
 EMAIL_HOST = 'smtp.yandex.ru'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
-EMAIL_HOST_PASSWORD = '***REMOVED***'
+# use dummy password to avoid accidental messing of real data
+EMAIL_HOST_PASSWORD = 'dummy_password'
 EMAIL_PORT = 465
 # XXX remove after Django 1.7 is out.
 EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
@@ -249,15 +250,15 @@ AUTUMN_TERM_START = '10 aug'
 
 THUMBNAIL_DEBUG = False
 
-# -- learning
-SLIDESHARE_API_KEY = "E3GDS7t4"
-SLIDESHARE_SECRET = "fnk6fOLp"
-SLIDESHARE_USERNAME = "compscicenter"
-SLIDESHARE_PASSWORD = "vorobey"
+# use dummy values to avoid accidental messing of real data
+SLIDESHARE_API_KEY = "dummy_ss_key"
+SLIDESHARE_SECRET = "dummy_ss_secret"
+SLIDESHARE_USERNAME = "dummy_ss_username"
+SLIDESHARE_PASSWORD = "dummy_ss_password"
 
-YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
-YANDEX_DISK_PASSWORD = "***REMOVED***"
-YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2014-2015"
+YANDEX_DISK_USERNAME = "dummy_ya_username"
+YANDEX_DISK_PASSWORD = "dummy_ya_password"
+YANDEX_DISK_SLIDES_ROOT = "dummy_ya_root"
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
