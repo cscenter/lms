@@ -26,7 +26,7 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
 from core.notifications import get_unread_notifications_cache
-from .slides import upload_to_slideshare, upload_to_yandex
+from learning import slides
 
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
@@ -321,7 +321,7 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
 
-    # TODO: test this
+    # FIXME(Dmitry): refactor this to use Semester object
     @classmethod
     def by_semester(cls, semester):
         (year, season) = semester
@@ -339,13 +339,12 @@ class CourseClass(TimeStampedModel, object):
         course = course_offering.course
 
         # a) SlideShare
-        self.other_materials = upload_to_slideshare(
+        self.other_materials = slides.upload_to_slideshare(
             self.slides.file, title, self.description, tags=[course.slug])
         self.save()
-
         # b) Yandex.Disk
         yandex_path = posixpath.join(course.slug, self.slides_file_name)
-        upload_to_yandex(self.slides.file, yandex_path)
+        slides.upload_to_yandex(self.slides.file, yandex_path)
 
 
 @receiver(post_save, sender=CourseClass)
