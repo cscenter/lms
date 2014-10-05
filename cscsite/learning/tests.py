@@ -16,7 +16,8 @@ from mock import patch
 
 from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
-    AssignmentComment, Enrollment
+    AssignmentComment, Enrollment, AssignmentNotification, \
+    CourseOfferingNewsNotification
 from users.models import CSCUser
 
 
@@ -168,6 +169,23 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(UserFactory, groups=['Student'])
     course_offering = factory.SubFactory(CourseOfferingFactory)
 
+
+class AssignmentNotificationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AssignmentNotification
+
+    user = factory.SubFactory(UserFactory)
+    assignment_student = factory.SubFactory(AssignmentStudentFactory)
+
+
+class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseOfferingNewsNotification
+
+    user = factory.SubFactory(UserFactory)
+    course_offering_news = factory.SubFactory(CourseOfferingNewsFactory)
+
+
 # Model tests
 
 
@@ -202,6 +220,15 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(ac.assignment_student
                                  .student.get_full_name()),
                       smart_text(ac))
+        e = EnrollmentFactory.build()
+        self.assertIn(smart_text(e.course_offering), smart_text(e))
+        self.assertIn(smart_text(e.student), smart_text(e))
+        an = AssignmentNotificationFactory.build()
+        self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
+        self.assertIn(smart_text(an.assignment_student), smart_text(an))
+        conn = CourseOfferingNewsNotificationFactory.build()
+        self.assertIn(smart_text(conn.user.get_full_name()), smart_text(conn))
+        self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 
 
 class SemesterTests(TestCase):
@@ -439,5 +466,22 @@ class AssignmentCommentTests(TestCase):
                       ac.attached_file.name)
         self.assertIn(smart_text(ac.assignment_student.student.pk),
                       ac.attached_file.name)
-        self.assertIn("foobar.pdf", ac.attached_file.name)
-        self.assertEqual("foobar.pdf", ac.attached_file_name)
+        self.assertRegexpMatches(ac.attached_file.name, "/foobar(_\d+)?.pdf$")
+        self.assertRegexpMatches(ac.attached_file_name, "^foobar(_\d+)?.pdf$")
+
+
+class EnrollmentTests(TestCase):
+    def test_clean(self):
+        e = EnrollmentFactory.build(student=UserFactory.create())
+        self.assertRaises(ValidationError, e.clean)
+
+
+class AssignmentNotificationTests(TestCase):
+    def test_clean(self):
+        an = AssignmentNotificationFactory.build(
+            user=UserFactory.create(groups=['Student']),
+            is_about_passed=True)
+        self.assertRaises(ValidationError, an.clean)
+
+
+# View tests

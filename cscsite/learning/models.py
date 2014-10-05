@@ -556,7 +556,6 @@ class AssignmentComment(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    # TODO: test this
     attached_file = models.FileField(
         upload_to=(lambda instance, filename:
                    ("assignment_{0}/user_{1}/{2}/{3}"
@@ -665,7 +664,7 @@ class AssignmentNotification(TimeStampedModel):
         verbose_name_plural = _("Assignment notifications")
 
     def clean(self):
-        if self.user.is_student and self.is_assignment:
+        if self.is_about_passed and not self.user.is_teacher:
             raise ValidationError(_("Only teachers can receive notifications "
                                     "of passed assignments"))
 
