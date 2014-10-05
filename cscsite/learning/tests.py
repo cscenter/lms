@@ -15,8 +15,8 @@ import factory
 from mock import patch
 
 from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
-    Assignment, Venue, CourseClass, \
-    AssignmentStudent
+    Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
+    AssignmentComment, Enrollment
 from users.models import CSCUser
 
 
@@ -41,8 +41,8 @@ class CourseFactory(factory.DjangoModelFactory):
     class Meta:
         model = Course
 
-    name = "Test course"
-    slug = "test-course"
+    name = factory.Sequence(lambda n: "Test course %03d" % n)
+    slug = factory.Sequence(lambda n: "test-course-%03d" % n)
     description = "This a course for testing purposes"
 
 
@@ -106,6 +106,67 @@ class CourseClassFactory(factory.DjangoModelFactory):
     starts_at = "13:00"
     ends_at = "13:45"
 
+    @classmethod
+    def build(cls, *args, **kwargs):
+        if all('slides_' not in key for key in kwargs.keys()):
+            kwargs['slides'] = None
+        return super(CourseClassFactory, cls).build(*args, **kwargs)
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        if all('slides_' not in key for key in kwargs.keys()):
+            kwargs['slides'] = None
+        return super(CourseClassFactory, cls).create(*args, **kwargs)
+
+
+class CourseClassAttachmentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseClassAttachment
+
+    course_class = factory.SubFactory(CourseClassFactory)
+    material = factory.django.FileField()
+
+
+class AssignmentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Assignment
+
+    course_offering = factory.SubFactory(CourseOfferingFactory)
+    # TODO(Dmitry): add assigned_to
+    deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+                   + datetime.timedelta(days=1))
+    is_online = True
+    title = factory.Sequence(lambda n: "Test assignment %03d" % n)
+    text = "This is a text for a test assignment"
+    attached_file = factory.django.FileField()
+    grade_min = 10
+    grade_max = 80
+
+
+class AssignmentStudentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AssignmentStudent
+
+    assignment = factory.SubFactory(AssignmentFactory)
+    student = factory.SubFactory(UserFactory, groups=['Student'])
+
+
+class AssignmentCommentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AssignmentComment
+
+    assignment_student = factory.SubFactory(AssignmentStudentFactory)
+    text = factory.Sequence(lambda n: "Test comment %03d" % n)
+    author = factory.SubFactory(UserFactory)
+    attached_file = factory.django.FileField()
+
+
+class EnrollmentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Enrollment
+
+    student = factory.SubFactory(UserFactory, groups=['Student'])
+    course_offering = factory.SubFactory(CourseOfferingFactory)
 
 # Model tests
 
@@ -125,6 +186,22 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(con.course_offering), smart_text(con))
         cc = CourseClassFactory.build()
         self.assertIn(cc.name, smart_text(cc))
+        cca = (CourseClassAttachmentFactory
+               .build(material__filename="foobar.pdf"))
+        self.assertIn("foobar", smart_text(cca))
+        self.assertIn("pdf", smart_text(cca))
+        a = AssignmentFactory.build()
+        self.assertIn(a.title, smart_text(a))
+        self.assertIn(smart_text(a.course_offering), smart_text(a))
+        as_ = AssignmentStudentFactory.build()
+        self.assertIn(smart_text(as_.student), smart_text(as_))
+        self.assertIn(smart_text(as_.assignment), smart_text(as_))
+        ac = AssignmentCommentFactory.create()
+        self.assertIn(smart_text(ac.assignment_student.assignment),
+                      smart_text(ac))
+        self.assertIn(smart_text(ac.assignment_student
+                                 .student.get_full_name()),
+                      smart_text(ac))
 
 
 class SemesterTests(TestCase):
@@ -228,18 +305,92 @@ class CourseClassTests(TestCase):
         slides_fname = "foobar.pdf"
         upload_to_slideshare.return_value = "slideshare_embed_code"
         upload_to_yandex.return_value = "yandex_return"
-        cc = CourseClassFactory.create()
+        cc = CourseClassFactory.create(slides__filename=slides_fname)
         self.assertIn("/", cc.slides.name)
         self.assertNotIn("/", cc.slides_file_name)
         self.assertTrue(upload_to_slideshare.called)
         self.assertTrue(upload_to_yandex.called)
 
 
+class AssignmentTest(TestCase):
+    def test_clean(self):
+        co1 = CourseOfferingFactory.create()
+        co2 = CourseOfferingFactory.create()
+        a = AssignmentFactory.create(course_offering=co1)
+        a_copy = Assignment.objects.filter(pk=a.pk).get()
+        a_copy.course_offering = co2
+        self.assertRaises(ValidationError, a_copy.clean)
+        a_copy.course_offering = co1
+        a_copy.save()
+        a_copy.grade_min = a.grade_max + 1
+        self.assertRaises(ValidationError, a_copy.clean)
+
+    def test_is_open(self):
+        a = AssignmentFactory.create()
+        self.assertTrue(a.is_open)
+        a.deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+                         - datetime.timedelta(days=1))
+        self.assertFalse(a.is_open)
+
+    def test_attached_file_name(self):
+        fname = "foobar.pdf"
+        a = AssignmentFactory.create(attached_file__filename=fname)
+        self.assertRegexpMatches(a.attached_file_name, "^foobar(_\d+)?.pdf$")
+
+
 class AssignmentStudentTests(TestCase):
+    def test_clean(self):
+        u1 = UserFactory.create(groups=['Student'])
+        u2 = UserFactory.create(groups=[])
+        as_ = AssignmentStudentFactory.create(student=u1)
+        as_.student = u2
+        self.assertRaises(ValidationError, as_.clean)
+        as_.student = u1
+        as_.save()
+        as_.grade = as_.assignment.grade_max + 1
+        self.assertRaises(ValidationError, as_.clean)
+        as_.grade = as_.assignment.grade_max
+        as_.save()
+
+    def test_has_passes(self):
+        u_student = UserFactory.create(groups=['Student'])
+        u_teacher = UserFactory.create(groups=['Teacher'])
+        # TODO(Dmitry): enrollment should be correct here
+        as_ = AssignmentStudentFactory(
+            student=u_student,
+            assignment__course_offering__teachers=[u_teacher],
+            assignment__is_online=True)
+        # teacher comments first
+        self.assertFalse(as_.has_passes())
+        AssignmentCommentFactory.create(assignment_student=as_,
+                                        author=u_teacher)
+        self.assertFalse(as_.has_passes())
+        AssignmentCommentFactory.create(assignment_student=as_,
+                                        author=u_student)
+        self.assertTrue(as_.has_passes())
+        # student comments first
+        as_ = AssignmentStudentFactory(
+            student=u_student,
+            assignment__course_offering__teachers=[u_teacher],
+            assignment__is_online=True)
+        self.assertFalse(as_.has_passes())
+        AssignmentCommentFactory.create(assignment_student=as_,
+                                        author=u_student)
+        self.assertTrue(as_.has_passes())
+        AssignmentCommentFactory.create(assignment_student=as_,
+                                        author=u_student)
+        self.assertTrue(as_.has_passes())
+        # assignment is offline
+        as_ = AssignmentStudentFactory(
+            student=u_student,
+            assignment__course_offering__teachers=[u_teacher],
+            assignment__is_online=False)
+        self.assertFalse(as_.has_passes())
+        AssignmentCommentFactory.create(assignment_student=as_,
+                                        author=u_student)
+        self.assertFalse(as_.has_passes())
+
     def test_assignment_student_state(self):
-        """
-        Testing AssignmentStudent#state logic (it's nontrivial)
-        """
         student = CSCUser()
         student.save()
         student.groups = [student.IS_STUDENT_PK]
@@ -252,6 +403,8 @@ class AssignmentStudentTests(TestCase):
         self.assertEqual(a_s.state, 'unsatisfactory')
         a_s = AssignmentStudent(grade=5, **ctx)
         self.assertEqual(a_s.state, 'pass')
+        a_s = AssignmentStudent(grade=8, **ctx)
+        self.assertEqual(a_s.state, 'good')
         a_s = AssignmentStudent(grade=10, **ctx)
         self.assertEqual(a_s.state, 'excellent')
         a_s = AssignmentStudent(**ctx)
@@ -260,3 +413,31 @@ class AssignmentStudentTests(TestCase):
         ctx['assignment'] = a_offline
         a_s = AssignmentStudent(**ctx)
         self.assertEqual(a_s.state, 'not_checked')
+
+    def test_state_display(self):
+        as_ = AssignmentStudentFactory(grade=30,
+                                       assignment__grade_max=50)
+        self.assertIn(smart_text(as_.assignment.grade_max), as_.state_display)
+        self.assertIn(smart_text(as_.grade), as_.state_display)
+        as_ = AssignmentStudentFactory(assignment__grade_max=50)
+        self.assertEqual(as_.STATES['not_submitted'], as_.state_display)
+
+    def test_state_short(self):
+        as_ = AssignmentStudentFactory(grade=30,
+                                       assignment__grade_max=50)
+        self.assertIn(smart_text(as_.assignment.grade_max), as_.state_short)
+        self.assertIn(smart_text(as_.grade), as_.state_short)
+        as_ = AssignmentStudentFactory(assignment__grade_max=50)
+        self.assertEqual(as_.SHORT_STATES['not_submitted'], as_.state_short)
+
+
+class AssignmentCommentTests(TestCase):
+    def test_atttached_file(self):
+        ac = AssignmentCommentFactory.create(
+            attached_file__filename="foobar.pdf")
+        self.assertIn(smart_text(ac.assignment_student.assignment.pk),
+                      ac.attached_file.name)
+        self.assertIn(smart_text(ac.assignment_student.student.pk),
+                      ac.attached_file.name)
+        self.assertIn("foobar.pdf", ac.attached_file.name)
+        self.assertEqual("foobar.pdf", ac.attached_file_name)
