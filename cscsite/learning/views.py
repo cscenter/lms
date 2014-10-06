@@ -76,7 +76,6 @@ class TimetableTeacherView(TeacherOnlyMixin,
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableTeacherView, self)
                    .get_context_data(*args, **kwargs))
@@ -128,7 +127,6 @@ class TimetableStudentView(StudentOnlyMixin,
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(TimetableStudentView, self)
                    .get_context_data(*args, **kwargs))

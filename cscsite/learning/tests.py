@@ -11,6 +11,7 @@ from django.test import TestCase
 from django.utils.encoding import smart_text
 from django.utils import timezone
 
+from dateutil.relativedelta import relativedelta
 import factory
 from mock import patch
 
@@ -36,6 +37,15 @@ class UserFactory(factory.DjangoModelFactory):
         if extracted:
             for group_name in extracted:
                 self.groups.add(Group.objects.get(name=group_name))
+
+    @factory.post_generation
+    def raw_password(self, create, extracted, **kwargs):
+        if not create:
+            return
+        raw_password = self.password
+        self.set_password(raw_password)
+        self.save()
+        self.raw_password = raw_password
 
 
 class CourseFactory(factory.DjangoModelFactory):
@@ -485,3 +495,93 @@ class AssignmentNotificationTests(TestCase):
 
 
 # View tests
+
+
+class MyUtilitiesMixin(object):
+    def assertStatusCode(self, code, url_name):
+        self.assertEqual(code,
+                         self.client.get(reverse(url_name)).status_code)
+
+    def doLogin(self, user):
+        self.assertTrue(self.client.login(username=user.username,
+                                          password=user.raw_password))
+
+
+class GroupSecurityCheckMixin(MyUtilitiesMixin):
+    def test_group_security(self):
+        """
+        Checks if only users in groups listed in self.groups_allowed can
+        access the page which url is stored in self.url_name.
+        Also checks that superuser can access any page
+        """
+        self.assertTrue(self.groups_allowed is not None)
+        self.assertTrue(self.url_name is not None)
+        self.assertStatusCode(403, self.url_name)
+        for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            if any(group in self.groups_allowed for group in groups):
+                self.assertStatusCode(200, self.url_name)
+            else:
+                self.assertStatusCode(403, self.url_name)
+            self.client.logout()
+        self.doLogin(UserFactory.create(is_superuser=True))
+        self.assertStatusCode(200, self.url_name)
+
+
+class TimetableTeacherTests(GroupSecurityCheckMixin,
+                            MyUtilitiesMixin, TestCase):
+    url_name = 'timetable_teacher'
+    groups_allowed = ['Teacher']
+
+    def test_teacher_timetable(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        self.doLogin(teacher)
+        self.assertEqual(0, len(self.client.get(reverse('timetable_teacher'))
+                                .context['object_list']))
+        today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
+        CourseClassFactory.create_batch(3, course_offering__teachers=[teacher],
+                                        date=today_date)
+        resp = self.client.get(reverse('timetable_teacher'))
+        self.assertEqual(3, len(resp.context['object_list']))
+        next_month_qstr = ("?year={0}&month={1}"
+                           .format(resp.context['next_date'].year,
+                                   resp.context['next_date'].month))
+        next_month_url = reverse('timetable_teacher') + next_month_qstr
+        self.assertContains(resp, next_month_qstr)
+        self.assertEqual(0, len(self.client.get(next_month_url)
+                                .context['object_list']))
+        next_month_date = today_date + relativedelta(months=1)
+        CourseClassFactory.create_batch(2, course_offering__teachers=[teacher],
+                                        date=next_month_date)
+        self.assertEqual(2, len(self.client.get(next_month_url)
+                                .context['object_list']))
+
+
+class TimetableStudentTests(GroupSecurityCheckMixin,
+                            MyUtilitiesMixin, TestCase):
+    url_name = 'timetable_student'
+    groups_allowed = ['Student']
+
+    def test_student_timetable(self):
+        student = UserFactory.create(groups=['Student'])
+        self.doLogin(student)
+        co = CourseOfferingFactory.create()
+        e = EnrollmentFactory.create(course_offering=co, student=student)
+        self.assertEqual(0, len(self.client.get(reverse('timetable_student'))
+                                .context['object_list']))
+        today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
+        CourseClassFactory.create_batch(3, course_offering=co, date=today_date)
+        resp = self.client.get(reverse('timetable_student'))
+        self.assertEqual(3, len(resp.context['object_list']))
+        next_week_qstr = ("?year={0}&week={1}"
+                          .format(resp.context['next_year'],
+                                  resp.context['next_week']))
+        next_week_url = reverse('timetable_student') + next_week_qstr
+        self.assertContains(resp, next_week_qstr)
+        self.assertEqual(0, len(self.client.get(next_week_url)
+                                .context['object_list']))
+        next_week_date = today_date + relativedelta(weeks=1)
+        CourseClassFactory.create_batch(2, course_offering=co,
+                                        date=next_week_date)
+        self.assertEqual(2, len(self.client.get(next_week_url)
+                                .context['object_list']))
