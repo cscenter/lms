@@ -17,11 +17,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
-from braces.views import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
-    ProtectedFormMixin
+    ProtectedFormMixin, LoginRequiredMixin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
@@ -168,7 +167,6 @@ class CalendarMixin(object):
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    # TODO: test "pagination"
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
