@@ -3,7 +3,11 @@ import types
 from django.core.exceptions import PermissionDenied
 from django.views import generic
 
-from braces.views import UserPassesTestMixin
+from braces.views import UserPassesTestMixin, LoginRequiredMixin
+
+
+class LoginRequiredMixin(LoginRequiredMixin):
+    raise_exception = True
 
 
 class StudentOnlyMixin(UserPassesTestMixin):

@@ -32,3 +32,11 @@ DATABASES = {
     }
 
 SOUTH_TESTS_MIGRATE = False
+
+# This makes tests almost 2x faster; we don't need strong security and DEBUG
+# during tests
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+DEBUG = False
+TEMPLATE_DEBUG = False
