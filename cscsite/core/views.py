@@ -30,7 +30,7 @@ class StaffOnlyMixin(UserPassesTestMixin):
     raise_exception = True
 
     def test_func(self, user):
-        return user.is_staff
+        return user.is_staff or user.is_superuser
 
 
 class ProtectedFormMixin(object):

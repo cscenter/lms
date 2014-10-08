@@ -2,11 +2,14 @@
 from __future__ import unicode_literals, absolute_import
 
 import datetime
+import logging
 import os
 
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.forms.models import model_to_dict
+from django.test.client import Client
 from django.test import TestCase
 from django.utils.encoding import smart_text
 from django.utils import timezone
@@ -14,11 +17,13 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 import factory
 from mock import patch
+from testfixtures import LogCapture
 
 from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseOfferingNewsNotification
+from .utils import get_current_semester_pair
 from users.models import CSCUser
 
 
@@ -89,9 +94,10 @@ class CourseOfferingNewsFactory(factory.DjangoModelFactory):
         model = CourseOfferingNews
 
     course_offering = factory.SubFactory(CourseOfferingFactory)
-    title = "Imporant news about testing"
+    title = factory.Sequence(lambda n: "Imporant news about testing %03d" % n)
     author = factory.SubFactory(UserFactory, groups=['Teacher'])
-    text = "Suddenly it turned out that testing can be useful!"
+    text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
+                                       "(%03d) can be useful!" % n))
 
 
 class VenueFactory(factory.DjangoModelFactory):
@@ -110,10 +116,11 @@ class CourseClassFactory(factory.DjangoModelFactory):
     venue = factory.SubFactory(VenueFactory)
     type = 'lecture'
     name = factory.Sequence(lambda n: "Test class %03d" % n)
-    description = "In this class we will test"
+    description = factory.Sequence(
+        lambda n: "In this class %03d we will test" % n)
     slides = factory.django.FileField()
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-            + datetime.timedelta(days=3))
+            + datetime.timedelta(days=3)).date()
     starts_at = "13:00"
     ends_at = "13:45"
 
@@ -498,13 +505,23 @@ class AssignmentNotificationTests(TestCase):
 
 
 class MyUtilitiesMixin(object):
-    def assertStatusCode(self, code, url_name):
-        self.assertEqual(code,
-                         self.client.get(reverse(url_name)).status_code)
+    def assertStatusCode(self, code, url_name, make_reverse=True, **kwargs):
+        if make_reverse:
+            url = reverse(url_name, **kwargs)
+        else:
+            url = url_name
+        self.assertEqual(code, self.client.get(url).status_code)
+
+    def assertSameObjects(self, obj_list1, obj_list2):
+        self.assertEqual(set(x.pk for x in obj_list1),
+                         set(x.pk for x in obj_list2))
 
     def doLogin(self, user):
         self.assertTrue(self.client.login(username=user.username,
                                           password=user.raw_password))
+
+    def doLogout(self):
+        self.client.logout()
 
     def calendar_month_to_object_list(self, calendar_month):
         return [x
@@ -699,5 +716,491 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
             self.client.logout()
 
 
+class SemesterListTests(MyUtilitiesMixin, TestCase):
+    def cos_from_semester_list(self, lst):
+        return sum([semester.courseofferings
+                    for pair in lst
+                    for semester in pair
+                    if semester], [])
+
+    def test_semester_list(self):
+        cos = self.cos_from_semester_list(
+            self.client.get(reverse('course_list'))
+            .context['semester_list'])
+        self.assertEqual(0, len(cos))
+        # Microoptimization: avoid creating teachers/courses
+        u = UserFactory.create(groups=['Teacher'])
+        c = CourseFactory.create()
+        for semester_type in ['autumn', 'spring']:
+            for year in range(2012, 2015):
+                s = SemesterFactory.create(type=semester_type,
+                                           year=year)
+                CourseOfferingFactory.create(course=c, semester=s,
+                                             teachers=[u])
+        s = SemesterFactory.create(type='autumn', year=2015)
+        CourseOfferingFactory.create(course=c, semester=s, teachers=[u])
+        resp = self.client.get(reverse('course_list'))
+        self.assertEqual(4, len(resp.context['semester_list']))
+        # dummy semester object should be present for 2016 spring
+        self.assertEqual(0, len(resp.context['semester_list'][0][1]
+                                .courseofferings))
+        cos = self.cos_from_semester_list(resp.context['semester_list'])
+        self.assertEqual(7, len(cos))
+
+
+class CourseListTeacherTests(GroupSecurityCheckMixin,
+                             MyUtilitiesMixin, TestCase):
+    url_name = 'course_list_teacher'
+    groups_allowed = ['Teacher']
+
+    def test_teacher_course_list(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        other_teacher = UserFactory.create(groups=['Teacher'])
+        self.doLogin(teacher)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(0, len(resp.context['course_list_ongoing']))
+        self.assertEqual(0, len(resp.context['course_list_archive']))
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        CourseOfferingFactory.create_batch(
+            3, teachers=[teacher], semester=s)
+        CourseOfferingFactory.create_batch(
+            2, teachers=[teacher, other_teacher], semester=s)
+        CourseOfferingFactory.create_batch(
+            4, teachers=[other_teacher], semester=s)
+        CourseOfferingFactory.create(teachers=[teacher],
+                                     semester__year=now_year-1)
+        resp = self.client.get(reverse(self.url_name))
+        teacher_url = reverse('teacher_detail', args=[teacher.pk])
+        self.assertContains(resp, teacher_url, count=5+1)
+        self.assertEqual(5, len(resp.context['course_list_ongoing']))
+        self.assertEqual(1, len(resp.context['course_list_archive']))
+
+
+class CourseListStudentTests(GroupSecurityCheckMixin,
+                             MyUtilitiesMixin, TestCase):
+    url_name = 'course_list_student'
+    groups_allowed = ['Student']
+
+    def test_student_course_list(self):
+        student = UserFactory.create(groups=['Student'])
+        other_student = UserFactory.create(groups=['Student'])
+        self.doLogin(student)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(0, len(resp.context['course_list_ongoing']))
+        self.assertEqual(0, len(resp.context['course_list_available']))
+        self.assertEqual(0, len(resp.context['course_list_archive']))
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        cos = CourseOfferingFactory.create_batch(4, semester=s)
+        cos_available = cos[:2]
+        cos_enrolled = cos[2:]
+        for co in cos_enrolled:
+            EnrollmentFactory.create(student=student, course_offering=co)
+        cos_archived = CourseOfferingFactory.create_batch(
+            3, semester__year=now_year-1)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertSameObjects(cos_enrolled,
+                               resp.context['course_list_ongoing'])
+        self.assertSameObjects(cos_available,
+                               resp.context['course_list_available'])
+
+
+class CourseDetailTests(MyUtilitiesMixin, TestCase):
+    def test_course_detail(self):
+        c = CourseFactory.create()
+        CourseOfferingFactory.create_batch(2, course=c)
+        resp = self.client.get(c.get_absolute_url())
+        self.assertContains(resp, c.name)
+        self.assertContains(resp, c.description)
+        self.assertSameObjects(resp.context['offerings'],
+                               c.courseoffering_set.all())
+
+
+class CourseUpdateTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        c = CourseFactory.create()
+        url = reverse('course_edit', args=[c.slug])
+        for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEqual(403, self.client.post(url).status_code)
+            self.client.logout()
+        self.doLogin(UserFactory.create(is_superuser=True))
+        self.assertEqual(
+            200, self.client.post(url, {'name': "foobar"}).status_code)
+
+    def test_update(self):
+        c = CourseFactory.create()
+        url = reverse('course_edit', args=[c.slug])
+        self.doLogin(UserFactory.create(is_superuser=True))
+        fields = model_to_dict(c)
+        fields.update({'name': "foobar"})
+        self.assertEqual(302, self.client.post(url, fields).status_code)
+        self.assertEqual("foobar", Course.objects.get(pk=c.pk).name)
+
+
+class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
+    def test_basic_get(self):
+        co = CourseOfferingFactory.create()
+        self.assertEqual(
+            200, self.client.get(co.get_absolute_url()).status_code)
+        url = reverse('course_offering_detail', args=["space-odyssey", "2010"])
+        self.assertEqual(404, self.client.get(url).status_code)
+
+    def test_course_user_relations(self):
+        """
+        Testing is_enrolled and is_actual_teacher here
+        """
+        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create()
+        co_other = CourseOfferingFactory.create()
+        url = co.get_absolute_url()
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        self.doLogin(student)
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        EnrollmentFactory.create(student=student, course_offering=co_other)
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        ctx = self.client.get(url).context
+        self.assertEqual(True, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        self.client.logout()
+        self.doLogin(teacher)
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        co_other.teachers.add(teacher)
+        co_other.save()
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(False, ctx['is_actual_teacher'])
+        co.teachers.add(teacher)
+        co.save()
+        ctx = self.client.get(url).context
+        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(True, ctx['is_actual_teacher'])
+
+    def test_assignment_list(self):
+        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        url = co.get_absolute_url()
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        self.assertNotContains(self.client.get(url), a.title)
+        self.doLogin(student)
+        self.assertContains(self.client.get(url), a.title)
+        a_s = AssignmentStudent.objects.get(assignment=a, student=student)
+        self.assertContains(self.client.get(url),
+                            reverse('a_s_detail_student', args=[a_s.pk]))
+        a_s.delete()
+        with LogCapture(level=logging.INFO) as l:
+            self.assertEqual(200, self.client.get(url).status_code)
+            l.check(('learning.views',
+                     'ERROR',
+                     "can't find AssignmentStudent for "
+                     "student ID {0}, assignment ID {1}"
+                     .format(student.pk, a.pk)))
+        self.client.logout()
+        self.doLogin(teacher)
+        self.assertContains(self.client.get(url), a.title)
+        self.assertContains(self.client.get(url),
+                            reverse('assignment_detail_teacher', args=[a.pk]))
+
+
+class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        teacher_other = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        url = reverse('course_offering_edit_descr',
+                      args=[co.course.slug, co.semester.slug])
+        self.assertStatusCode(403, url, make_reverse=False)
+        self.doLogin(teacher_other)
+        self.assertStatusCode(403, url, make_reverse=False)
+        self.doLogout()
+        self.doLogin(teacher)
+        self.assertStatusCode(200, url, make_reverse=False)
+
+
+class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
+    def setUp(self):
+        self.teacher = UserFactory.create(groups=['Teacher'])
+        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
+        self.url = reverse('course_offering_news_create',
+                           args=[self.co.course.slug,
+                                 self.co.semester.slug])
+        self.n_dict = CourseOfferingNewsFactory.attributes()
+        self.n_dict.update({'course_offering': self.co})
+
+    def test_security(self):
+        self.assertEqual(
+            403, self.client.post(self.url, self.n_dict).status_code)
+        self.doLogin(self.teacher_other)
+        self.assertEqual(
+            403, self.client.post(self.url, self.n_dict).status_code)
+        self.doLogout()
+        self.doLogin(self.teacher)
+        self.assertEqual(
+            302, self.client.post(self.url, self.n_dict).status_code)
+
+    def test_news_creation(self):
+        co_url = self.co.get_absolute_url()
+        self.doLogin(self.teacher)
+        self.assertRedirects(
+            self.client.post(self.url, self.n_dict), co_url)
+        resp = self.client.get(co_url)
+        self.assertContains(resp, self.n_dict['text'])
+        con = resp.context['course_offering'].courseofferingnews_set.all()[0]
+        self.assertEqual(con.author, self.teacher)
+
+
+class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
+    def setUp(self):
+        self.teacher = UserFactory.create(groups=['Teacher'])
+        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
+        self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
+                                                    author=self.teacher)
+        self.url = reverse('course_offering_news_update',
+                           args=[self.co.course.slug,
+                                 self.co.semester.slug,
+                                 self.con.pk])
+        self.con_dict = model_to_dict(self.con)
+        self.con_dict.update({'text': "foobar text"})
+
+    def test_security(self):
+        self.assertEqual(
+            403, self.client.post(self.url, self.con_dict).status_code)
+        self.doLogin(self.teacher_other)
+        self.assertEqual(
+            403, self.client.post(self.url, self.con_dict).status_code)
+        self.doLogout()
+        self.doLogin(self.teacher)
+        self.assertEqual(
+            302, self.client.post(self.url, self.con_dict).status_code)
+
+    def test_news_update(self):
+        self.doLogin(self.teacher)
+        co_url = self.co.get_absolute_url()
+        self.assertRedirects(
+            self.client.post(self.url, self.con_dict), co_url)
+        self.assertContains(self.client.get(co_url), self.con_dict['text'])
+
+
+class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
+    def setUp(self):
+        self.teacher = UserFactory.create(groups=['Teacher'])
+        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
+        self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
+                                                    author=self.teacher)
+        self.url = reverse('course_offering_news_delete',
+                           args=[self.co.course.slug,
+                                 self.co.semester.slug,
+                                 self.con.pk])
+
+    def test_security(self):
+        self.assertEqual(403, self.client.post(self.url).status_code)
+        self.doLogin(self.teacher_other)
+        self.assertEqual(403, self.client.post(self.url).status_code)
+        self.doLogout()
+        self.doLogin(self.teacher)
+        self.assertEqual(302, self.client.post(self.url).status_code)
+
+    def test_news_delete(self):
+        self.doLogin(self.teacher)
+        co_url = self.co.get_absolute_url()
+        self.assertRedirects(self.client.post(self.url), co_url)
+        self.assertNotContains(self.client.get(co_url), self.con.text)
+
+
+class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
+    def test_enrollment(self):
+        s = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create()
+        co_other = CourseOfferingFactory.create()
+        as_ = AssignmentFactory.create_batch(3, course_offering=co)
+        self.doLogin(s)
+        url = reverse('course_offering_enroll',
+                      args=[co.course.slug, co.semester.slug])
+        form = {'course_offering_pk': co.pk}
+        self.assertRedirects(self.client.post(url, form),
+                             co.get_absolute_url())
+        self.assertEquals(1, Enrollment.objects
+                          .filter(student=s, course_offering=co)
+                          .count())
+        self.assertEquals(set((s.pk, a.pk) for a in as_),
+                          set(AssignmentStudent.objects
+                              .filter(student=s)
+                              .values_list('student', 'assignment')))
+        form.update({'back': 'course_list_student'})
+        url = reverse('course_offering_enroll',
+                      args=[co_other.course.slug, co_other.semester.slug])
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('course_list_student'))
+
+    def test_unenrollment(self):
+        s = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create()
+        as_ = AssignmentFactory.create_batch(3, course_offering=co)
+        form = {'course_offering_pk': co.pk}
+        url = reverse('course_offering_unenroll',
+                      args=[co.course.slug, co.semester.slug])
+        self.doLogin(s)
+        self.client.post(reverse('course_offering_enroll',
+                                 args=[co.course.slug, co.semester.slug]),
+                         form)
+        resp = self.client.get(url)
+        self.assertContains(resp, "Unenroll")
+        self.assertContains(resp, smart_text(co))
+        self.client.post(url, form)
+        self.assertEquals(0, Enrollment.objects
+                          .filter(student=s, course_offering=co)
+                          .count())
+        self.assertEquals(0, (AssignmentStudent.objects
+                              .filter(student=s,
+                                      assignment__course_offering=co)
+                              .count()))
+        self.client.post(reverse('course_offering_enroll',
+                                 args=[co.course.slug, co.semester.slug]),
+                         form)
+        url += "?back=course_list_student"
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('course_list_student'))
+
+
+class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
+    def test_is_actual_teacher(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        cc = CourseClassFactory.create()
+        cc_other = CourseClassFactory.create()
+        url = cc.get_absolute_url()
+        self.assertEqual(False, self.client.get(url)
+                         .context['is_actual_teacher'])
+        self.doLogin(teacher)
+        self.assertEqual(False, self.client.get(url)
+                         .context['is_actual_teacher'])
+        cc_other.course_offering.teachers.add(teacher)
+        cc_other.course_offering.save()
+        self.assertEqual(False, self.client.get(url)
+                         .context['is_actual_teacher'])
+        cc.course_offering.teachers.add(teacher)
+        cc.course_offering.save()
+        self.assertEqual(True, self.client.get(url)
+                         .context['is_actual_teacher'])
+
+
+class CourseClassDetailCRUDTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        form = CourseClassFactory.attributes()
+        form.update({'venue': VenueFactory.create().pk})
+        url = reverse('course_class_add')
+        self.assertEqual(403, self.client.get(url).status_code)
+        self.assertEqual(403, self.client.post(url, form).status_code)
+
+    def test_create(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        co_other = CourseOfferingFactory.create(semester=s)
+        form = CourseClassFactory.attributes()
+        form.update({'venue': VenueFactory.create().pk})
+        url = reverse('course_class_add')
+        self.doLogin(teacher)
+        form.update({'course_offering': co_other.pk})
+        # should show an error instead of 302
+        self.assertEqual(200, self.client.post(url, form).status_code)
+        form.update({'course_offering': co.pk})
+        self.assertEqual(302, self.client.post(url, form).status_code)
+        self.assertEqual(CourseClass.objects.get(course_offering=co).name,
+                         form['name'])
+
+    def test_update(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        url = reverse('course_class_edit', args=[cc.pk])
+        self.doLogin(teacher)
+        form = model_to_dict(cc)
+        del form['slides']
+        form['name'] += " foobar"
+        self.assertRedirects(self.client.post(url, form),
+                             cc.get_absolute_url())
+        self.assertEquals(form['name'],
+                          self.client.get(cc.get_absolute_url())
+                          .context['object'].name)
+
+    def test_back_variable(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        base_url = reverse('course_class_edit', args=[cc.pk])
+        self.doLogin(teacher)
+        form = model_to_dict(cc)
+        del form['slides']
+        form['name'] += " foobar"
+        self.assertRedirects(self.client.post(base_url, form),
+                             cc.get_absolute_url())
+        url = ("{}?back=course_offering&course_offering={}"
+               .format(base_url, co.pk))
+        self.assertRedirects(self.client.post(url, form),
+                             co.get_absolute_url())
+        url = ("{}?back=course_offering&course_offering={}"
+               .format(base_url, "foobar"))
+        self.assertEquals(404, self.client.post(url, form).status_code)
+        url = ("{}?back=course_offering&course_offering={}"
+               .format(base_url, 424242))
+        self.assertEquals(404, self.client.post(url, form).status_code)
+        url = "{}?back=calendar".format(base_url, co.pk)
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('calendar_teacher'))
+        url = "{}?back=timetable".format(base_url, co.pk)
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('timetable_teacher'))
+
+    def test_attachment_links(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        cca1 = CourseClassAttachmentFactory.create(
+            course_class=cc, material__filename="foobar1.pdf")
+        cca2 = CourseClassAttachmentFactory.create(
+            course_class=cc, material__filename="foobar2.zip")
+        resp = self.client.get(cc.get_absolute_url())
+        self.assertContains(resp, cca1.material.url)
+        self.assertContains(resp, cca1.material_file_name)
+        self.assertContains(resp, cca2.material.url)
+        self.assertContains(resp, cca2.material_file_name)
+        self.doLogin(teacher)
+        resp = self.client.get(reverse('course_class_edit', args=[cc.pk]))
+        self.assertContains(resp, reverse('course_class_attachment_delete',
+                                          args=[cc.pk, cca1.pk]))
+        self.assertContains(resp, cca1.material_file_name)
+        self.assertContains(resp, reverse('course_class_attachment_delete',
+                                          args=[cc.pk, cca2.pk]))
+        self.assertContains(resp, cca2.material_file_name)
+
+    # TODO: add slides upload check
+
+# TODO: notifications test
 # TODO: smoke test
 # TODO: smoke security test
+# TODO: smoke numquery test

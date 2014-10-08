@@ -199,17 +199,19 @@ class CourseClassForm(forms.ModelForm):
 
     def clean_date(self):
         date = self.cleaned_data['date']
-        course_offering = self.cleaned_data['course_offering']
-        semester_start = course_offering.semester.starts_at.date()
-        semester_end = course_offering.semester.ends_at.date()
-        assert semester_start <= semester_end
-        if not semester_start <= date <= semester_end:
-            raise ValidationError(
-                _("Incosistent with this course's "
-                  "semester (from %(starts_at)s to %(ends_at)s)"),
-                code='date_out_of_semester',
-                params={'starts_at': semester_start,
-                        'ends_at': semester_end})
+        # this should be checked because 'course_offering' can be invalid
+        if 'course_offering' in self.cleaned_data:
+            course_offering = self.cleaned_data['course_offering']
+            semester_start = course_offering.semester.starts_at.date()
+            semester_end = course_offering.semester.ends_at.date()
+            assert semester_start <= semester_end
+            if not semester_start <= date <= semester_end:
+                raise ValidationError(
+                    _("Incosistent with this course's "
+                      "semester (from %(starts_at)s to %(ends_at)s)"),
+                    code='date_out_of_semester',
+                    params={'starts_at': semester_start,
+                            'ends_at': semester_end})
         return date
 
 

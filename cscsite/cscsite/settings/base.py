@@ -210,7 +210,7 @@ MENU_URL_NAMES = {
     'calendar_teacher': {'alias': 'timetable_teacher'},
     'calendar_full_teacher': {'parent': 'teaching'},
     'course_list_teacher': {'parent': 'teaching'},
-    'course_edit': {'alias': 'courses_teacher'},
+    'course_edit': {'alias': 'course_list'},
     'markssheet_teacher': {'parent': 'teaching'},
 
     'markssheet_staff': {},
