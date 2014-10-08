@@ -248,8 +248,10 @@ class SemesterListView(generic.ListView):
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
         if current.type == Semester.TYPES.autumn:
-            semester_list.insert(0, Semester(type=Semester.TYPES.spring,
-                                             year=current.year + 1))
+            semester = Semester(type=Semester.TYPES.spring,
+                                year=current.year + 1)
+            semester.courseofferings = []
+            semester_list.insert(0, semester)
 
         context["semester_list"] = [
             (a, s) for s, a in utils.grouper(semester_list, 2)
@@ -388,17 +390,14 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                 args=[assignment.pk]))
             elif is_enrolled:
                 try:
-                    a_s = get_object_or_404(AssignmentStudent.objects
-                                            .filter(assignment=assignment,
-                                                    student=self.request.user))
+                    a_s = (AssignmentStudent.objects
+                           .filter(assignment=assignment,
+                                   student=self.request.user)
+                           .get())
                     setattr(assignment, 'magic_link',
                             reverse("a_s_detail_student", args=[a_s.pk]))
                 except ObjectDoesNotExist:
                     logger.error("can't find AssignmentStudent for "
-                                 "student ID {0}, assignment ID {1}"
-                                 .format(self.request.user.pk, assignment.pk))
-                except MultipleObjectsReturned:
-                    logger.error("more than one AssignmentStudent for "
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments

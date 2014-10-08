@@ -388,6 +388,7 @@ class Assignment(TimeStampedModel, object):
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
+    # FIXME: rename this to "name"
     title = models.CharField(_("Asssignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
