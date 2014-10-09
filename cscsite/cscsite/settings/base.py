@@ -175,6 +175,7 @@ MENU_URL_NAMES = {
     'course_list': {'parent': 'about'},
     'course_detail': {'alias': 'course_list'},
     'class_detail': {'alias': 'course_list'},
+    'course_class_attachment_delete': {'alias': 'course_list'},
     'course_offering_detail': {'alias': 'course_list'},
     'course_class_add': {'alias': 'course_list'},
     'course_class_edit': {'alias': 'course_list'},
