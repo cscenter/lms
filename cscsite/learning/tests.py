@@ -5,8 +5,11 @@ import datetime
 import logging
 import os
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.test.client import Client
@@ -14,11 +17,13 @@ from django.test import TestCase
 from django.utils.encoding import smart_text
 from django.utils import timezone
 
+from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 import factory
 from mock import patch
 from testfixtures import LogCapture
 
+import cscsite.urls
 from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
@@ -79,6 +84,7 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     description = "This course offering will be very different"
 
     # TODO: add "enrolled students" here
+    # TODO: create course offering for current semester by default
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):
@@ -513,8 +519,7 @@ class MyUtilitiesMixin(object):
         self.assertEqual(code, self.client.get(url).status_code)
 
     def assertSameObjects(self, obj_list1, obj_list2):
-        self.assertEqual(set(x.pk for x in obj_list1),
-                         set(x.pk for x in obj_list2))
+        self.assertEqual(set(obj_list1), set(obj_list2))
 
     def doLogin(self, user):
         self.assertTrue(self.client.login(username=user.username,
@@ -528,6 +533,18 @@ class MyUtilitiesMixin(object):
                 for week in calendar_month
                 for day in week[1]
                 for x in day[1]]
+
+
+class MediaServingMixin(object):
+    def setUp(self):
+        self._original_urls = cscsite.urls.urlpatterns
+        with self.settings(DEBUG=True):
+            s = static(settings.MEDIA_URL,
+                       document_root=settings.MEDIA_ROOT)
+            cscsite.urls.urlpatterns += s
+
+    def tearDown(self):
+        cscsite.urls.urlpatterns = self._original_urls
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
@@ -1099,7 +1116,8 @@ class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
                          .context['is_actual_teacher'])
 
 
-class CourseClassDetailCRUDTests(MyUtilitiesMixin, TestCase):
+class CourseClassDetailCRUDTests(MediaServingMixin,
+                                 MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = UserFactory.create(groups=['Teacher'])
         co = CourseOfferingFactory.create(teachers=[teacher])
@@ -1143,6 +1161,21 @@ class CourseClassDetailCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(form['name'],
                           self.client.get(cc.get_absolute_url())
                           .context['object'].name)
+
+    def test_delete(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        url = reverse('course_class_delete', args=[cc.pk])
+        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertEquals(403, self.client.post(url).status_code)
+        self.doLogin(teacher)
+        self.assertContains(self.client.get(url), smart_text(cc))
+        self.assertRedirects(self.client.post(url),
+                             reverse('timetable_teacher'))
+        self.assertFalse(CourseClass.objects.filter(pk=cc.pk).exists())
 
     def test_back_variable(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -1198,7 +1231,153 @@ class CourseClassDetailCRUDTests(MyUtilitiesMixin, TestCase):
                                           args=[cc.pk, cca2.pk]))
         self.assertContains(resp, cca2.material_file_name)
 
-    # TODO: add slides upload check
+    def test_attachments(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+        f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
+        self.doLogin(teacher)
+        form = model_to_dict(cc)
+        del form['slides']
+        form['attachments'] = [f1, f2]
+        url = reverse('course_class_edit', args=[cc.pk])
+        self.assertRedirects(self.client.post(url, form),
+                             cc.get_absolute_url())
+        # check that files are available from course class page
+        resp = self.client.get(cc.get_absolute_url())
+        spans = (BeautifulSoup(resp.content)
+                 .find_all('span', class_='assignment-attachment'))
+        self.assertEquals(2, len(spans))
+        cca_files = sorted(a.material.path
+                           for a in resp.context['attachments'])
+        # we will delete attachment2.txt
+        cca_to_delete = [a for a in resp.context['attachments']
+                         if a.material.path == cca_files[1]][0]
+        as_ = sorted((span.a.contents[0].strip(),
+                      "".join(self.client.get(span.a['href'])
+                              .streaming_content))
+                     for span in spans)
+        self.assertRegexpMatches(as_[0][0], "attachment1(_\d+)?.txt")
+        self.assertRegexpMatches(as_[1][0], "attachment2(_\d+)?.txt")
+        self.assertEquals(as_[0][1], b"attachment1_content")
+        self.assertEquals(as_[1][1], b"attachment2_content")
+        # delete one of the files, check that it's deleted and other isn't
+        url = reverse('course_class_attachment_delete',
+                      args=[cc.pk, cca_to_delete.pk])
+        # check security just in case
+        self.doLogout()
+        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertEquals(403, self.client.post(url).status_code)
+        self.doLogin(teacher)
+        self.assertContains(self.client.get(url),
+                            cca_to_delete.material_file_name)
+        self.assertRedirects(self.client.post(url),
+                             reverse('course_class_edit', args=[cc.pk]))
+        resp = self.client.get(cc.get_absolute_url())
+        spans = (BeautifulSoup(resp.content)
+                 .find_all('span', class_='assignment-attachment'))
+        self.assertEquals(1, len(spans))
+        self.assertRegexpMatches(spans[0].a.contents[0].strip(),
+                                 "attachment1(_\d+)?.txt")
+        self.assertFalse(os.path.isfile(cca_files[1]))
+
+
+class AssignmentStudentListTests(GroupSecurityCheckMixin,
+                                 MyUtilitiesMixin, TestCase):
+    url_name = 'assignment_list_student'
+    groups_allowed = ['Student']
+
+    def test_list(self):
+        u = UserFactory.create(groups=['Student'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(semester=s)
+        as1 = AssignmentFactory.create_batch(2, course_offering=co)
+        self.doLogin(u)
+        # no assignments yet
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # enroll at course offering, assignments are shown
+        EnrollmentFactory.create(student=u, course_offering=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(2, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # add a few assignments, they should show up
+        as2 = AssignmentFactory.create_batch(3, course_offering=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertSameObjects([(AssignmentStudent.objects
+                                 .get(assignment=a, student=u))
+                                for a in (as1 + as2)],
+                               resp.context['assignment_list_open'])
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # add a few old assignments, they should show up in archive
+        deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+                       - datetime.timedelta(days=1))
+        as3 = AssignmentFactory.create_batch(2, course_offering=co,
+                                             deadline_at=deadline_at)
+        resp = self.client.get(reverse(self.url_name))
+        for a in as1 + as2 + as3:
+            self.assertContains(resp, a.title)
+        self.assertSameObjects([(AssignmentStudent.objects
+                                 .get(assignment=a, student=u))
+                                for a in (as1 + as2)],
+                               resp.context['assignment_list_open'])
+        self.assertSameObjects([(AssignmentStudent.objects
+                                 .get(assignment=a, student=u))
+                                for a in as3],
+                               resp.context['assignment_list_archive'])
+
+
+class AssignmentTeacherListTests(GroupSecurityCheckMixin,
+                                 MyUtilitiesMixin, TestCase):
+    url_name = 'assignment_list_teacher'
+    groups_allowed = ['Teacher']
+
+    def test_list(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(3, groups=['Student'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        # some other teacher's course offering
+        co_other = CourseOfferingFactory.create(semester=s)
+        AssignmentFactory.create_batch(2, course_offering=co_other)
+        self.doLogin(teacher)
+        # no assignments yet
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # assignments should show up in archive
+        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+        as1 = AssignmentFactory.create_batch(2, course_offering=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
+        resp = self.client.get(reverse(self.url_name) + "?show_all=true")
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
+        # enroll at course offering, assignments are shown
+        # EnrollmentFactory.create(student=u, course_offering=co)
+        # resp = self.client.get(reverse(self.url_name))
+        # self.assertEquals(2, len(resp.context['assignment_list_open']))
+        # self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # # add a few assignments, they should show up
+        # as2 = AssignmentFactory.create_batch(3, course_offering=co)
+        # resp = self.client.get(reverse(self.url_name))
+        # self.assertSameObjects(as1+as2, resp.context['assignment_list_open'])
+        # self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # # add a few old assignments, they should show up in archive
+        # deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+        #                - datetime.timedelta(days=1))
+        # as3 = AssignmentFactory.create_batch(2, course_offering=co,
+        #                                      deadline_at=deadline_at)
+        # resp = self.client.get(reverse(self.url_name))
+        # self.assertSameObjects(as1+as2, resp.context['assignment_list_open'])
+        # self.assertSameObjects(as3, resp.context['assignment_list_archive'])
+
 
 # TODO: notifications test
 # TODO: smoke test
