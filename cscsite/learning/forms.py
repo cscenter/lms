@@ -99,8 +99,7 @@ class CourseClassForm(forms.ModelForm):
     course_offering = forms.ModelChoiceField(
         CourseOffering.objects.all(),
         label=_("Course offering"),
-        empty_label=None,
-        widget=forms.Select(attrs={'autofocus': 'autofocus'}))
+        empty_label=None)
     venue = forms.ModelChoiceField(
         Venue.objects.all(),
         label=_("Venue"),
@@ -110,7 +109,8 @@ class CourseClassForm(forms.ModelForm):
         choices=CourseClass.TYPES)
     name = forms.CharField(
         label=_("CourseClass|Name"),
-        widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'autofocus': 'autofocus'}))
     description = forms.CharField(
         label=_("Description"),
         required=False,
@@ -278,11 +278,11 @@ class AssignmentForm(forms.ModelForm):
     course_offering = forms.ModelChoiceField(
         CourseOffering.objects.all(),
         label=_("Course offering"),
-        empty_label=None,
-        widget=forms.Select(attrs={'autofocus': 'autofocus'}))
+        empty_label=None)
     title = forms.CharField(
         label=_("Title"),
-        widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'autofocus': 'autofocus'}))
     text = forms.CharField(
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
