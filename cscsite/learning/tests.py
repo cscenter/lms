@@ -1359,24 +1359,71 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
         resp = self.client.get(reverse(self.url_name) + "?show_all=true")
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        # enroll at course offering, assignments are shown
-        # EnrollmentFactory.create(student=u, course_offering=co)
-        # resp = self.client.get(reverse(self.url_name))
-        # self.assertEquals(2, len(resp.context['assignment_list_open']))
-        # self.assertEquals(0, len(resp.context['assignment_list_archive']))
-        # # add a few assignments, they should show up
-        # as2 = AssignmentFactory.create_batch(3, course_offering=co)
-        # resp = self.client.get(reverse(self.url_name))
-        # self.assertSameObjects(as1+as2, resp.context['assignment_list_open'])
-        # self.assertEquals(0, len(resp.context['assignment_list_archive']))
-        # # add a few old assignments, they should show up in archive
-        # deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-        #                - datetime.timedelta(days=1))
-        # as3 = AssignmentFactory.create_batch(2, course_offering=co,
-        #                                      deadline_at=deadline_at)
-        # resp = self.client.get(reverse(self.url_name))
-        # self.assertSameObjects(as1+as2, resp.context['assignment_list_open'])
-        # self.assertSameObjects(as3, resp.context['assignment_list_archive'])
+        # enroll students, their assignments should show up only in
+        # "show all" mode
+        for student in students:
+            EnrollmentFactory.create(student=student, course_offering=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
+        resp = self.client.get(reverse(self.url_name) + "?show_all=true")
+        self.assertSameObjects([(AssignmentStudent.objects
+                                 .get(student=student,
+                                      assignment=assignment))
+                                for student in students
+                                for assignment in as1],
+                               resp.context['assignment_list_open'])
+        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
+        # teacher commented on an assingnment, it still shouldn't show up
+        a = as1[0]
+        student = students[0]
+        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
+        AssignmentCommentFactory.create(assignment_student=a_s,
+                                        author=teacher)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        # but if student have commented, it should show up
+        AssignmentCommentFactory.create(assignment_student=a_s,
+                                        author=student)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertSameObjects([a_s], resp.context['assignment_list_open'])
+        # if teacher has set a grade, assignment shouldn't show up
+        a_s.grade = 3
+        a_s.save()
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+
+
+class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        a = AssignmentFactory.create(course_offering__teachers=[teacher])
+        url = reverse('assignment_detail_teacher', args=[a.pk])
+        self.assertEquals(403, self.client.get(url).status_code)
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(403, self.client.get(url).status_code)
+            self.doLogout()
+        self.doLogin(teacher)
+        self.assertEquals(200, self.client.get(url).status_code)
+
+    def test_details(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+        a = AssignmentFactory.create(course_offering=co)
+        self.doLogin(teacher)
+        url = reverse('assignment_detail_teacher', args=[a.pk])
+        resp = self.client.get(url)
+        self.assertEquals(a, resp.context['assignment'])
+        self.assertEquals(0, len(resp.context['a_s_list']))
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
+        resp = self.client.get(url)
+        self.assertEquals(a, resp.context['assignment'])
+        self.assertSameObjects([a_s], resp.context['a_s_list'])
 
 
 # TODO: notifications test
