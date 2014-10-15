@@ -255,6 +255,7 @@ class AssignmentGradeForm(forms.Form):
     grade = forms.IntegerField(
         required=False,
         label="",
+        min_value=0,
         widget=forms.NumberInput(attrs={'min': 0, 'step': 1}))
 
     def __init__(self, *args, **kwargs):
@@ -269,14 +270,23 @@ class AssignmentGradeForm(forms.Form):
                              type="submit"),
                 css_class="form-inline"))
         if 'grade_max' in kwargs:
-            self.helper['grade'].update_attributes(max=kwargs['grade_max'])
+            self.grade_max = kwargs['grade_max']
+            self.helper['grade'].update_attributes(max=self.grade_max)
             del kwargs['grade_max']
         super(AssignmentGradeForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(AssignmentGradeForm, self).clean()
+        if cleaned_data['grade'] > self.grade_max:
+            raise forms.ValidationError(_("Grade can't be larger than "
+                                          "maximum one ({0})")
+                                        .format(self.grade_max))
+        return cleaned_data
 
 
 class AssignmentForm(forms.ModelForm):
     course_offering = forms.ModelChoiceField(
-        CourseOffering.objects.all(),
+        queryset=None,
         label=_("Course offering"),
         empty_label=None)
     title = forms.CharField(
@@ -328,7 +338,10 @@ class AssignmentForm(forms.ModelForm):
         # No protection is needed if user is a superuser
         if not user.is_superuser:
             self.fields['course_offering'].queryset = \
-                CourseOffering.objects.all().filter(teachers=user)
+                CourseOffering.objects.filter(teachers=user)
+        else:
+            self.fields['course_offering'].queryset = \
+                CourseOffering.objects.all()
 
     class Meta:
         model = Assignment
