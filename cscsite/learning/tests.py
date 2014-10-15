@@ -555,7 +555,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         Also checks that superuser can access any page
         """
         # TODO: remove return
-        return
+        # return
         self.assertTrue(self.groups_allowed is not None)
         self.assertTrue(self.url_name is not None)
         self.assertStatusCode(403, self.url_name)
@@ -1664,6 +1664,120 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(url), a.title)
         self.assertRedirects(self.client.post(url), list_url)
         self.assertNotContains(self.client.get(list_url), a.title)
+
+
+class MarksSheetTeacherTests(GroupSecurityCheckMixin,
+                             MyUtilitiesMixin, TestCase):
+    url_name = 'markssheet_teacher'
+    groups_allowed = ['Teacher']
+
+    def test_empty_markssheet(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(3, groups=['Student'])
+        co1 = CourseOfferingFactory.create(teachers=[teacher])
+        co2 = CourseOfferingFactory.create(teachers=[teacher])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co1)
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co2)
+        url = reverse(self.url_name)
+        self.doLogin(teacher)
+        resp = self.client.get(url)
+        for student in students:
+            self.assertContains(resp, student.get_full_name(), 2)
+            for co in [co1, co2]:
+                field = 'final_grade_{}_{}'.format(co.pk, student.pk)
+                self.assertIn(field, resp.context['form'].fields)
+
+    def test_nonempty_markssheet(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(3, groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co)
+        as_online = AssignmentFactory.create_batch(
+            2, course_offering=co)
+        as_offline = AssignmentFactory.create_batch(
+            3, course_offering=co, is_online=False)
+        url = reverse(self.url_name)
+        self.doLogin(teacher)
+        resp = self.client.get(url)
+        for student in students:
+            self.assertContains(resp, student.get_full_name())
+        for as_ in as_online:
+            self.assertContains(resp, as_.title)
+            for student in students:
+                a_s = AssignmentStudent.objects.get(student=student,
+                                                    assignment=as_)
+                a_s_url = reverse('a_s_detail_teacher', args=[a_s.pk])
+                self.assertContains(resp, a_s_url)
+        for as_ in as_offline:
+            self.assertContains(resp, as_.title)
+            for student in students:
+                a_s = AssignmentStudent.objects.get(student=student,
+                                                    assignment=as_)
+                self.assertIn('a_s_{}'.format(a_s.pk),
+                              resp.context['form'].fields)
+
+    def test_save_markssheet(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(2, groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co)
+        a1 = AssignmentFactory.create(course_offering=co, is_online=False)
+        a2 = AssignmentFactory.create(course_offering=co, is_online=False)
+        url = reverse(self.url_name)
+        self.doLogin(teacher)
+        form = {}
+        pairs = zip([AssignmentStudent.objects.get(student=student,
+                                                   assignment=a)
+                     for student in students
+                     for a in [a1, a2]],
+                    [2, 3, 4, 5])
+        for a_s, grade in pairs:
+            form['a_s_{}'.format(a_s.pk)] = grade
+        for student in students:
+            field = 'final_grade_{}_{}'.format(co.pk, student.pk)
+            form[field] = 'good'
+        self.assertRedirects(self.client.post(url, form), url)
+        for a_s, grade in pairs:
+            self.assertEqual(grade, (AssignmentStudent.objects
+                                     .get(pk=a_s.pk)
+                                     .grade))
+        for student in students:
+            self.assertEqual('good', (Enrollment.objects
+                                      .get(student=student,
+                                           course_offering=co)
+                                      .grade))
+
+
+class MarksSheetStaffTests(GroupSecurityCheckMixin,
+                           MyUtilitiesMixin, TestCase):
+    url_name = 'markssheet_staff'
+    groups_allowed = []
+
+    def test_nonempty_markssheet(self):
+        students = UserFactory.create_batch(3, groups=['Student'])
+        cos = CourseOfferingFactory.create_batch(2)
+        for student in students:
+            for co in cos:
+                EnrollmentFactory.create(student=student,
+                                         course_offering=co)
+        as_online = AssignmentFactory.create_batch(
+            2, course_offering=co)
+        as_offline = AssignmentFactory.create_batch(
+            3, course_offering=co, is_online=False)
+        url = reverse(self.url_name)
+        self.doLogin(UserFactory.create(is_superuser=True))
+        resp = self.client.get(url)
+        for student in students:
+            self.assertContains(resp, student.get_full_name())
+        for co in cos:
+            self.assertContains(resp, smart_text(co.course))
 
 
 # TODO: notifications test

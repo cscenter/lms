@@ -361,7 +361,7 @@ class MarksSheetTeacherFormFabrique(object):
     def build_form_class(a_s_list, enrollment_list):
         fields = {'a_s_{0}'.format(a_s.pk):
                   forms.IntegerField(show_hidden_initial=True,
-                                     min_value=a_s.assignment.grade_min,
+                                     min_value=0,
                                      max_value=a_s.assignment.grade_max,
                                      required=False)
                   for a_s in a_s_list

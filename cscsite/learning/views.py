@@ -1031,12 +1031,11 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                 a_s.grade = form.cleaned_data[field]
                 a_s.save()
                 continue
-            if field in enrollment_index:
+            elif field in enrollment_index:
                 enrollment = enrollment_index[field]
                 enrollment.grade = form.cleaned_data[field]
                 enrollment.save()
                 continue
-            assert False  # shouldn't get here
         return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
