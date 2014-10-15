@@ -861,10 +861,8 @@ class AssignmentStudentDetailMixin(object):
         comment.save()
         if self.user_type == 'student':
             url = reverse('a_s_detail_student', args=[a_s.pk])
-        elif self.user_type == 'teacher':
-            url = reverse('a_s_detail_teacher', args=[a_s.pk])
         else:
-            raise AssertionError
+            url = reverse('a_s_detail_teacher', args=[a_s.pk])
         return redirect(url)
 
 
@@ -907,9 +905,10 @@ class ASTeacherDetailView(TeacherOnlyMixin,
 
     def post(self, request, *args, **kwargs):
         if 'grading_form' in request.POST:
-            form = AssignmentGradeForm(request.POST)
             pk = self.kwargs.get('pk')
             a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+            form = AssignmentGradeForm(request.POST,
+                                       grade_max=a_s.assignment.grade_max)
 
             # Too hard to use ProtectedFormMixin here, let's just inline it's
             # logic. A little drawback is that teachers still can leave
@@ -927,7 +926,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                 # not sure if we can do anything more meaningful here.
                 # it shoudn't happen, after all.
                 return HttpResponseBadRequest(_("Grading form is invalid") +
-                                              form.errors)
+                                              "{}".format(form.errors))
         else:
             return (super(ASTeacherDetailView, self)
                     .post(request, *args, **kwargs))

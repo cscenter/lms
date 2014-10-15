@@ -1426,6 +1426,246 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         self.assertSameObjects([a_s], resp.context['a_s_list'])
 
 
+class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_student', args=[a_s.pk])
+        self.assertEquals(403, self.client.get(url).status_code)
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(403, self.client.get(url).status_code)
+            self.doLogout()
+        self.doLogin(teacher)
+        self.assertEquals(403, self.client.get(url).status_code)
+        self.doLogout()
+        self.doLogin(student)
+        self.assertEquals(200, self.client.get(url).status_code)
+
+    def test_assignment_contents(self):
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create()
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_student', args=[a_s.pk])
+        self.doLogin(student)
+        self.assertContains(self.client.get(url), a.text)
+
+    def test_comment(self):
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create()
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_student', args=[a_s.pk])
+        comment_dict = {'text': "Test comment without file"}
+        self.doLogin(student)
+        self.assertRedirects(self.client.post(url, comment_dict), url)
+        self.assertContains(self.client.get(url), comment_dict['text'])
+        f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+        comment_dict = {'text': "Test comment with file",
+                        'attached_file': f}
+        self.assertRedirects(self.client.post(url, comment_dict), url)
+        resp = self.client.get(url)
+        self.assertContains(resp, comment_dict['text'])
+        self.assertContains(resp, 'attachment1')
+
+
+class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        self.assertEquals(403, self.client.get(url).status_code)
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(403, self.client.get(url).status_code)
+            self.doLogout()
+        self.doLogin(teacher)
+        self.assertEquals(200, self.client.get(url).status_code)
+        self.doLogout()
+        self.doLogin(student)
+        self.assertEquals(403, self.client.get(url).status_code)
+        self.doLogout()
+        grade_dict = {'grading_form': True,
+                      'grade': 3}
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(
+                403, self.client.post(url, grade_dict).status_code)
+            self.doLogout()
+
+    def test_assignment_contents(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        self.doLogin(teacher)
+        self.assertContains(self.client.get(url), a.text)
+
+    def test_comment(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        comment_dict = {'text': "Test comment without file"}
+        self.doLogin(teacher)
+        self.assertRedirects(self.client.post(url, comment_dict), url)
+        self.assertContains(self.client.get(url), comment_dict['text'])
+        f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+        comment_dict = {'text': "Test comment with file",
+                        'attached_file': f}
+        self.assertRedirects(self.client.post(url, comment_dict), url)
+        resp = self.client.get(url)
+        self.assertContains(resp, comment_dict['text'])
+        self.assertContains(resp, 'attachment1')
+
+    def test_grading(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co,
+                                     grade_max=13)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        grade_dict = {'grading_form': True,
+                      'grade': 11}
+        self.doLogin(teacher)
+        self.assertRedirects(self.client.post(url, grade_dict), url)
+        self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
+        resp = self.client.get(url)
+        self.assertContains(resp, "value=\"11\"")
+        self.assertContains(resp, "/{}".format(13))
+        # wrong grading value can't be set
+        grade_dict['grade'] = 42
+        self.client.post(url, grade_dict)
+        self.assertEqual(400, self.client.post(url, grade_dict).status_code)
+        self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
+
+
+class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        form = AssignmentFactory.attributes()
+        form.update({'course_offering': co.pk,
+                     'attached_file': None})
+        url = reverse('assignment_add')
+        self.assertEqual(403, self.client.get(url).status_code)
+        self.assertEqual(403, self.client.post(url, form).status_code)
+        for groups in [[], ['Student']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(403, self.client.get(url).status_code)
+            self.assertEquals(403, self.client.post(url, form).status_code)
+            self.doLogout()
+        a = AssignmentFactory.create()
+        url = reverse('assignment_edit', args=[a.pk])
+        self.assertEqual(403, self.client.get(url).status_code)
+        self.assertEqual(403, self.client.post(url, form).status_code)
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            if groups and groups[0] != 'Teacher':
+                # NOTE(Dmitry): currently teachers CAN see other's assignments
+                # through the edit form. However, it doesn't seem that bad
+                # to me.
+                self.assertEquals(403, self.client.get(url).status_code)
+            if groups and groups[0] != 'Teacher':
+                self.assertEquals(403, self.client.post(url, form).status_code)
+            elif groups and groups[0] == 'Teacher':
+                # Teacher will get validation error
+                self.assertEquals(200, self.client.post(url, form).status_code)
+            self.doLogout()
+        url = reverse('assignment_delete', args=[a.pk])
+        self.assertEqual(403, self.client.get(url).status_code)
+        self.assertEqual(403, self.client.post(url, form).status_code)
+        for groups in [[], ['Student'], ['Teacher']]:
+            self.doLogin(UserFactory.create(groups=groups))
+            self.assertEquals(403, self.client.get(url).status_code)
+            self.assertEquals(403, self.client.post(url, form).status_code)
+            self.doLogout()
+
+    def test_create(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        CourseOfferingFactory.create_batch(3, teachers=[teacher])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        form = AssignmentFactory.attributes()
+        deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
+        deadline_time = form['deadline_at'].strftime("%H:%M:%S")
+        form.update({'course_offering': co.pk,
+                     'attached_file': None,
+                     'deadline_at_0': deadline_date,
+                     'deadline_at_1': deadline_time})
+        url = reverse('assignment_add')
+        self.doLogin(teacher)
+        self.assertNotContains(self.client.get(url), "selected=\"selected\"")
+        self.assertContains(self.client.get(url + "?co={}".format(co.pk)),
+                            ("option value=\"{}\" selected=\"selected\""
+                             .format(co.pk)))
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('assignment_list_teacher'))
+
+    def test_update(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        a = AssignmentFactory.create(course_offering=co)
+        form = model_to_dict(a)
+        deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
+        deadline_time = form['deadline_at'].strftime("%H:%M:%S")
+        form.update({'title': a.title + " foo42bar",
+                     'course_offering': co.pk,
+                     'attached_file': None,
+                     'deadline_at_0': deadline_date,
+                     'deadline_at_1': deadline_time})
+        url = reverse('assignment_edit', args=[a.pk])
+        list_url = reverse('assignment_list_teacher')
+        self.doLogin(teacher)
+        self.assertNotContains(self.client.get(list_url), form['title'])
+        self.assertRedirects(self.client.post(url, form), list_url)
+        self.assertContains(self.client.get(list_url), form['title'])
+
+    def test_delete(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        a = AssignmentFactory.create(course_offering=co)
+        url = reverse('assignment_delete', args=[a.pk])
+        list_url = reverse('assignment_list_teacher')
+        self.doLogin(teacher)
+        self.assertContains(self.client.get(list_url), a.title)
+        self.assertContains(self.client.get(url), a.title)
+        self.assertRedirects(self.client.post(url), list_url)
+        self.assertNotContains(self.client.get(list_url), a.title)
+
+
 # TODO: notifications test
 # TODO: smoke test
 # TODO: smoke security test
