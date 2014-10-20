@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import absolute_import
 
 import logging
 import mimetypes
@@ -20,10 +20,7 @@ REQUIRED_SETTINGS = [
     "SLIDESHARE_API_KEY",
     "SLIDESHARE_SECRET",
     "SLIDESHARE_USERNAME",
-    "SLIDESHARE_PASSWORD",
-    "YANDEX_DISK_USERNAME",
-    "YANDEX_DISK_PASSWORD",
-    "YANDEX_DISK_SLIDES_ROOT"
+    "SLIDESHARE_PASSWORD"
 ]
 
 for attr in REQUIRED_SETTINGS:
@@ -37,7 +34,7 @@ def get_slideshare():
                          settings.SLIDESHARE_SECRET)
 
 
-def upload_to_slideshare(handle, title, description, tags):
+def upload_slides(handle, title, description, tags):
     api = get_slideshare()
 
     # Note(lebedev): unfortunately 'slideshare' has no idea about
@@ -62,7 +59,3 @@ def upload_to_slideshare(handle, title, description, tags):
     except (SlideShareServiceError, urllib2.URLError) as e:
         logger.error(e)
         return ""
-
-
-def upload_to_yandex(handle, path, retries=5):
-    return yandex_disk.upload(handle, path)
