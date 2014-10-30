@@ -36,6 +36,7 @@ class StaffOnlyMixin(UserPassesTestMixin):
 class ProtectedFormMixin(object):
     def __init__(self, *args, **kwargs):
         self._cached_object = None
+        # Note(lebedev): no point in calling 'super' here.
         super(ProtectedFormMixin, self).__init__(*args, **kwargs)
 
     def is_form_allowed(self, user, obj):
