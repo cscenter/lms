@@ -559,7 +559,7 @@ class CourseClassDetailView(generic.DetailView):
         return context
 
 
-class CourseClassCreateUpdateMixin(object):
+class CourseClassCreateUpdateMixin(ProtectedFormMixin):
     model = CourseClass
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseClassForm
@@ -567,6 +567,9 @@ class CourseClassCreateUpdateMixin(object):
     def __init__(self, *args, **kwargs):
         self._course_offering = None
         super(CourseClassCreateUpdateMixin, self).__init__(*args, **kwargs)
+
+    def is_form_allowed(self, user, obj):
+        return obj is None or user in obj.course_offering.teachers.all()
 
     def get_initial(self, *args, **kwargs):
         initial = (super(CourseClassCreateUpdateMixin, self)
@@ -626,15 +629,12 @@ class CourseClassCreateUpdateMixin(object):
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
-# No ProtectedFormMixin here because we are filtering out other's courses
-# on form level (see __init__ of CourseClassForm)
 class CourseClassCreateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.CreateView):
     pass
 
 
-# Same here
 class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin,
                             generic.UpdateView):
