@@ -10,11 +10,14 @@ from django.views import generic
 from django.utils.http import is_safe_url
 from braces.views import LoginRequiredMixin
 
-from .models import CSCUser
+from core.views import ProtectedFormMixin
 from .forms import LoginForm, UserProfileForm
+from .models import CSCUser
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
+
+
 class LoginView(generic.FormView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
     form_class = LoginForm
@@ -122,10 +125,13 @@ class UserDetailView(generic.DetailView):
         return context
 
 
-class UserUpdateView(generic.UpdateView):
+class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     model = CSCUser
     template_name = "learning/simple_crispy_form.html"
     form_class = UserProfileForm
+
+    def is_form_allowed(self, user, obj):
+        return obj.pk == user.pk
 
     def get_context_data(self, *args, **kwargs):
         context = (super(UserUpdateView, self)
