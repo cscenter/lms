@@ -569,7 +569,9 @@ class CourseClassCreateUpdateMixin(ProtectedFormMixin):
         super(CourseClassCreateUpdateMixin, self).__init__(*args, **kwargs)
 
     def is_form_allowed(self, user, obj):
-        return obj is None or user in obj.course_offering.teachers.all()
+        return (obj is None or
+                user.is_superuser or
+                user in obj.course_offering.teachers.all())
 
     def get_initial(self, *args, **kwargs):
         initial = (super(CourseClassCreateUpdateMixin, self)
