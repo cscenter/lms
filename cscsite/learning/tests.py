@@ -13,6 +13,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.test.client import Client
+from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text
 from django.utils import timezone
@@ -599,6 +600,7 @@ class TimetableTeacherTests(GroupSecurityCheckMixin,
                                 .context['object_list']))
 
 
+@override_settings(TIME_ZONE='Etc/UTC')
 class TimetableStudentTests(GroupSecurityCheckMixin,
                             MyUtilitiesMixin, TestCase):
     url_name = 'timetable_student'
