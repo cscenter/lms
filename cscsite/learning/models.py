@@ -426,9 +426,9 @@ class Assignment(TimeStampedModel, object):
                 self._original_course_offering_id != self.course_offering_id):
             raise ValidationError(_("Course offering modification "
                                     "is not allowed"))
-        if self.grade_min >= self.grade_max:
+        if self.grade_min > self.grade_max:
             raise ValidationError(_("Mininum grade should be lesser than "
-                                    "maximum one"))
+                                    "(or equal to) maximum one"))
 
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
