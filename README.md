@@ -24,3 +24,14 @@ Do the Django part of the database configuration:
 $ python cscsite/manage.py syncdb --all --settings=cscsite.settings.local
 $ python cscsite/manage.py migrate --settings=cscsite.settings.local --no-initial-data
 ```
+
+
+Misc
+====
+
+To test:
+
+```
+pip install gorun
+gorun.py gorun_settings.py
+```
