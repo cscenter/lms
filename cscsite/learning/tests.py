@@ -5,6 +5,8 @@ import datetime
 import logging
 import os
 
+import pytz
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.models import Group
@@ -29,7 +31,7 @@ from .models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseOfferingNewsNotification
-from .utils import get_current_semester_pair
+from .utils import get_current_semester_pair, split_list
 from users.models import CSCUser
 
 
@@ -208,6 +210,29 @@ class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     course_offering_news = factory.SubFactory(CourseOfferingNewsFactory)
+
+
+# Util tests
+
+
+class UtilTests(TestCase):
+    @override_settings(TIME_ZONE='Etc/UTC')
+    @patch('django.utils.timezone.now')
+    def test_get_current_semester_pair(self, now_mock):
+        utc_tz = pytz.timezone("Etc/UTC")
+        now_mock.return_value \
+            = utc_tz.localize(datetime.datetime(2014, 4, 1, 12, 0))
+        self.assertEquals((2014, 'spring'), get_current_semester_pair())
+        now_mock.return_value \
+            = utc_tz.localize(datetime.datetime(2015, 11, 1, 12, 0))
+        self.assertEquals((2014, 'autumn'), get_current_semester_pair())
+
+    def test_split_list(self):
+        xs = [1, 2, 3, 4]
+        self.assertEquals(([1, 3], [2, 4]),
+                          split_list(xs, lambda x: x % 2 != 0))
+        self.assertEquals((xs, []), split_list(xs, lambda x: True))
+        self.assertEquals(([], xs), split_list(xs, lambda x: False))
 
 
 # Model tests

@@ -6,15 +6,6 @@ from django.conf import settings
 from django.utils import timezone
 
 
-# TODO: test this
-def get_prev_next_semester_pairs(semester):
-    (year, season) = semester
-    if season == 'spring':
-        return [(year - 1, 'autumn'), (year, 'autumn')]
-    else:
-        return [(year, 'spring'), (year + 1, 'spring')]
-
-
 def get_current_semester_pair():
     now = timezone.now()
     spring_term_start = (dparser
@@ -38,11 +29,6 @@ def split_list(iterable, pred):
         else:
             false_lst.append(x)
     return true_lst, false_lst
-
-
-def daterange(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + datetime.timedelta(n)
 
 
 # Following two functions are taken from
