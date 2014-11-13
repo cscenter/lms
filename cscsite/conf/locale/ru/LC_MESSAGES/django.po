@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-09 23:11+0300\n"
-"PO-Revision-Date: 2014-11-09 23:11+0230\n"
+"POT-Creation-Date: 2014-11-13 16:05+0300\n"
+"PO-Revision-Date: 2014-11-13 16:05+0230\n"
 "Last-Translator:   <foo@bar.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -56,7 +56,7 @@ msgstr "Описание"
 
 #: learning/forms.py:101 learning/forms.py:290 learning/models.py:145
 #: learning/models.py:201 learning/models.py:265 learning/models.py:381
-#: learning/models.py:606
+#: learning/models.py:607
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -435,122 +435,130 @@ msgstr "Комментарий к заданию"
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
-#: learning/models.py:589 learning/models.py:709
+#: learning/models.py:589 learning/models.py:710
 msgid "Not graded"
 msgstr "Без оценки"
 
-#: learning/models.py:590 learning/models.py:710
-msgid "Unsatisfactory"
-msgstr "Неудовлетворительно"
+#: learning/models.py:590
+msgid "Enrollment|Unsatisfactory"
+msgstr "Незачёт"
 
-#: learning/models.py:591 learning/models.py:711
-msgid "Pass"
-msgstr "Удовлетворительно"
+#: learning/models.py:591
+msgid "Enrollment|Pass"
+msgstr "Зачёт"
 
-#: learning/models.py:592 learning/models.py:712
+#: learning/models.py:592 learning/models.py:713
 msgid "Good"
 msgstr "Хорошо"
 
-#: learning/models.py:593 learning/models.py:713
+#: learning/models.py:593 learning/models.py:714
 msgid "Excellent"
 msgstr "Отлично"
 
-#: learning/models.py:602 learning/models.py:717
+#: learning/models.py:603 learning/models.py:718
 #: templates/learning/assignment_detail.html:55
 #: templates/learning/assignment_list_teacher.html:72
 #: templates/learning/assignment_student_detail.html:119
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:609
+#: learning/models.py:610
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
-#: learning/models.py:613
+#: learning/models.py:614
 msgid "Enrollment|grade changed"
 msgstr "Оценка изменена"
 
-#: learning/models.py:618
+#: learning/models.py:619
 msgid "Enrollment"
 msgstr "Запись на курс"
 
-#: learning/models.py:619
+#: learning/models.py:620
 msgid "Enrollments"
 msgstr "Записи на курсы"
 
-#: learning/models.py:623
+#: learning/models.py:624
 msgid "Only students can enroll to courses"
 msgstr "Только студенты могут записываться на курсы"
 
-#: learning/models.py:642 learning/models.py:682
+#: learning/models.py:643 learning/models.py:683
 msgid "User"
 msgstr "Имя пользователя"
 
-#: learning/models.py:646
+#: learning/models.py:647
 msgid "assignment_student"
 msgstr "Выполнение задания"
 
-#: learning/models.py:648
+#: learning/models.py:649
 msgid "About passed assignment"
 msgstr "О сданном задании"
 
-#: learning/models.py:650
+#: learning/models.py:651
 msgid "About created assignment"
 msgstr "О сданном задании"
 
-#: learning/models.py:652
+#: learning/models.py:653
 msgid "About change of deadline"
 msgstr "О смене времени сдачи"
 
-#: learning/models.py:654 learning/models.py:688
+#: learning/models.py:655 learning/models.py:689
 msgid "Unread"
 msgstr "Не прочтено"
 
-#: learning/models.py:656 learning/models.py:690
+#: learning/models.py:657 learning/models.py:691
 msgid "User is notified"
 msgstr "Пользователь оповещён"
 
-#: learning/models.py:664
+#: learning/models.py:665
 msgid "Assignment notification"
 msgstr "Уведомление о заданиях"
 
-#: learning/models.py:665
+#: learning/models.py:666
 msgid "Assignment notifications"
 msgstr "Уведомления о заданиях"
 
-#: learning/models.py:669
+#: learning/models.py:670
 msgid "Only teachers can receive notifications of passed assignments"
 msgstr "Только преподаватели могут получать оповещения о сданных заданиях"
 
-#: learning/models.py:686
+#: learning/models.py:687
 msgid "Course offering news"
 msgstr "Новости прочтений"
 
-#: learning/models.py:698
+#: learning/models.py:699
 msgid "Course offering news notification"
 msgstr "Оповещение о новостях прочтений"
 
-#: learning/models.py:699
+#: learning/models.py:700
 msgid "Course offering news notifications"
 msgstr "Оповещения о новостях прочтений"
 
-#: learning/models.py:721
+#: learning/models.py:711
+msgid "Unsatisfactory"
+msgstr "Неудовлетворительно"
+
+#: learning/models.py:712
+msgid "Pass"
+msgstr "Удовлетворительно"
+
+#: learning/models.py:722
 msgid "OverallGrade|Grade"
 msgstr "Оценка"
 
-#: learning/models.py:725
+#: learning/models.py:726
 msgid "OverallGrade|Grade changed"
 msgstr "Оценка изменена"
 
-#: learning/models.py:730
+#: learning/models.py:731
 msgid "Overall grade"
 msgstr "Общая оценка"
 
-#: learning/models.py:731
+#: learning/models.py:732
 msgid "Overall grades"
 msgstr "Общие оценки"
 
-#: learning/models.py:735
+#: learning/models.py:736
 msgid "Only students can be graded"
 msgstr "Только студенты могут получить общую оценку"
 

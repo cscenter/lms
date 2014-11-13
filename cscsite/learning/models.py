@@ -587,13 +587,14 @@ class AssignmentComment(TimeStampedModel):
 @python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
     GRADES = Choices(('not_graded', _("Not graded")),
-                     ('unsatisfactory', _("Unsatisfactory")),
-                     ('pass', _("Pass")),
+                     ('unsatisfactory', _("Enrollment|Unsatisfactory")),
+                     ('pass', _("Enrollment|Pass")),
                      ('good', _("Good")),
                      ('excellent', _("Excellent")))
+    # FIXME(Dmitry): don't know how to translate this properly
     SHORT_GRADES = Choices(('not_graded', "—"),
-                           ('unsatisfactory', "2"),
-                           ('pass', "3"),
+                           ('unsatisfactory', "н"),
+                           ('pass', "з"),
                            ('good', "4"),
                            ('excellent', "5"))
 
