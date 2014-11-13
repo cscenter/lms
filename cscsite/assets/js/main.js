@@ -141,4 +141,8 @@ $(document).ready(function () {
             $(this).find('input,select').attr('tabindex', i + 1000);
         });
     });
+
+    $('.marks-table').on('mousewheel', 'input[type=number]', function (e) {
+        this.blur();
+    });
 });
