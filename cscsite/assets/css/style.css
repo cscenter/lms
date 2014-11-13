@@ -510,7 +510,7 @@ h5.assignment {
 }
 
 .marks-table td.marks-header-horiz {
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
   width: 120px;
   padding-right: 10px;
