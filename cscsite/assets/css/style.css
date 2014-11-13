@@ -449,14 +449,23 @@ h5.assignment {
   margin-right: 1%;
 }
 
-.marks-table-container {
-  width: 100%;
+.marks-table-container-outer {
+  width: 920px;
   margin-bottom: 15px;
   padding-bottom: 15px;
+  position: relative;
+}
+
+.marks-table-container-inner {
+  margin-left: 120px;
   overflow-x: scroll;
   overflow-y: hidden;
   -ms-overflow-style: -ms-autohiding-scrollbar;
   -webkit-overflow-scrolling: touch;
+}
+
+.marks-table {
+  table-layout: fixed;
 }
 
 .marks-table .marks-header-vert {
@@ -503,6 +512,12 @@ h5.assignment {
 .marks-table td.marks-header-horiz {
   text-align: right;
   white-space: nowrap;
+  width: 120px;
+  padding-right: 10px;
+  position: absolute;
+  left: 0px;
+  margin-top: 0px;
+  text-overflow: ellipsis;
 }
 
 .marks-table td.content {

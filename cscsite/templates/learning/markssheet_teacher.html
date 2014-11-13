@@ -18,7 +18,8 @@
         <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
         {% for offering, header, by_student in structured %}
         <h3>{{ offering }}</h3>
-        <div class="marks-table-container">
+        <div class="marks-table-container-outer">
+          <div class="marks-table-container-inner">
           <table class="marks-table">
             <tr>
               <td></td>
@@ -31,14 +32,20 @@
                 </div>
               </td>
               {% endfor %}
+              <td></td>
             </tr>
             {% for student, final_grade, by_assignment in by_student %}
             <tr>
               <td class="marks-header marks-header-horiz">
                 <a href="{{ student.get_absolute_url }}">
-                  {{ student.get_full_name }}
+                  {% if student.last_name %}
+                  {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
+                  {% else %}
+                  {{ student.username }}
+                  {% endif %}
                 </a>
               </td>
+
               {% for assignment, cell in by_assignment.iteritems %}
               <td class="content">
                 {% if assignment.is_online %}
@@ -68,6 +75,7 @@
               {% endfor %}
             </tr>
           </table>
+          </div>
         </div>
         {% endfor %}
       </form>
