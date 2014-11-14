@@ -457,8 +457,8 @@ h5.assignment {
 }
 
 .marks-table-container-inner {
-  margin-left: 120px;
-  width: 800px;
+  margin-left: 135px;
+  width: 785px;
   overflow-x: scroll;
   overflow-y: hidden;
   -ms-overflow-style: -ms-autohiding-scrollbar;
@@ -517,11 +517,12 @@ h5.assignment {
 .marks-table td.marks-header-horiz {
   text-align: left;
   white-space: nowrap;
-  width: 120px;
+  width: 135px;
   padding-right: 10px;
   position: absolute;
   left: 0px;
   margin-top: 0px;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
