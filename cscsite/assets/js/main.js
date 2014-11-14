@@ -136,13 +136,25 @@ $(document).ready(function () {
 
     // see this http://stackoverflow.com/a/8641208 for discussion
     // about the following hack
-    $('.marks-table tr').each(function() {
-        $(this).find('td').each(function(i) {
-            $(this).find('input,select').attr('tabindex', i + 1000);
+    $('.marks-table').each(function (i) {
+        $(this).find('tr').each(function() {
+            $(this).find('td').each(function(j) {
+                // order marks sheets for different course offerings properly
+                var idx = j + 1000 * (i + 1);
+                $(this).find('input,select').attr('tabindex', idx);
+            });
         });
     });
 
     $('.marks-table').on('mousewheel', 'input[type=number]', function (e) {
         this.blur();
+    });
+
+    $('.marks-table').on('focus', 'input,select', function (e) {
+        $(this).closest("tr").addClass("active");
+    });
+
+    $('.marks-table').on('blur', 'input,select', function (e) {
+        $(this).closest("tr").removeClass("active");
     });
 });
