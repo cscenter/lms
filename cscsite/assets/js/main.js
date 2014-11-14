@@ -163,6 +163,7 @@ $(document).ready(function () {
     });
 
     $('.marks-table.staff').on('click', 'td.content', function (e) {
+        $(this).closest(".marks-table").addClass("focused");
         $(this).closest(".marks-table").find("td,tr").removeClass("active");
         $(this).closest("tr").addClass("active");
         var tdIdx = $(this).closest("td").index();
