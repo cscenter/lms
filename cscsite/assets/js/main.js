@@ -150,11 +150,24 @@ $(document).ready(function () {
         this.blur();
     });
 
-    $('.marks-table').on('focus', 'input,select', function (e) {
+    $('.marks-table.teacher').on('focus', 'input,select', function (e) {
         $(this).closest("tr").addClass("active");
+        var tdIdx = $(this).closest("td").index();
+        ($(this).closest(".marks-table")
+         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
+         .addClass("active"));
     });
 
-    $('.marks-table').on('blur', 'input,select', function (e) {
-        $(this).closest("tr").removeClass("active");
+    $('.marks-table.teacher').on('blur', 'input,select', function (e) {
+        $(this).closest(".marks-table").find("td,tr").removeClass("active");
+    });
+
+    $('.marks-table.staff').on('click', 'td.content', function (e) {
+        $(this).closest(".marks-table").find("td,tr").removeClass("active");
+        $(this).closest("tr").addClass("active");
+        var tdIdx = $(this).closest("td").index();
+        ($(this).closest(".marks-table")
+         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
+         .addClass("active"));
     });
 });
