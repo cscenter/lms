@@ -458,6 +458,7 @@ h5.assignment {
 
 .marks-table-container-inner {
   margin-left: 120px;
+  width: 800px;
   overflow-x: scroll;
   overflow-y: hidden;
   -ms-overflow-style: -ms-autohiding-scrollbar;
