@@ -504,10 +504,25 @@ h5.assignment {
   vertical-align: middle;
   text-align: center;
   margin: 10px;
+  box-sizing: border-box;
 }
 
-.marks-table tr.active {
+.marks-table.teacher tr.active {
   background-color: #E2F9FF;
+}
+
+.marks-table.teacher td.active {
+  background-color: #E2F9FF;
+}
+
+.marks-table.staff tr.active td.content {
+  border-bottom: solid 1px #BBB;
+  border-top: solid 1px #BBB;
+}
+
+.marks-table.staff td.active {
+  border-left: solid 1px #BBB;
+  border-right: solid 1px #BBB;
 }
 
 .marks-table td.marks-header {
