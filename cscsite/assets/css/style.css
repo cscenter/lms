@@ -506,6 +506,10 @@ h5.assignment {
   margin: 10px;
 }
 
+.marks-table tr.active {
+  background-color: #E9F5FF;
+}
+
 .marks-table td.marks-header {
   font-weight: bold;
 }
