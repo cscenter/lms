@@ -30,7 +30,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetTeacherFormFabrique, MarksSheetStaffFormFabrique
+    MarksSheetTeacherFormFabrique
 from core.notifications import get_unread_notifications_cache
 from . import utils
 
@@ -1094,19 +1094,13 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
 
 class MarksSheetStaffView(StaffOnlyMixin,
-                          generic.FormView):
+                          generic.TemplateView):
     user_type = 'staff'
     success_url = 'markssheet_staff'
     template_name = "learning/markssheet_staff.html"
     context_object_name = 'assignment_list'
 
-    def __init__(self, *args, **kwargs):
-        self.enrollment_index = None
-        self.students_list = None
-        self.students_list = None
-        super(MarksSheetStaffView, self).__init__(*args, **kwargs)
-
-    def get_form_class(self):
+    def get_context_data(self, *args, **kwargs):
         enrollment_index = {(enrollment.student.pk,
                              enrollment.course_offering.pk):
                             enrollment
@@ -1120,32 +1114,6 @@ class MarksSheetStaffView(StaffOnlyMixin,
                          .filter(groups__name='Student')
                          .select_related('student',
                                          'overall_grade'))
-        self.enrollment_index = enrollment_index
-        self.offerings_list = offerings_list
-        self.students_list = students_list
-        return (MarksSheetStaffFormFabrique
-                .build_form_class(students_list))
-
-    def get_initial(self):
-        return (MarksSheetStaffFormFabrique
-                .transform_to_initial(self.students_list))
-
-    def form_valid(self, form):
-        overalls_index = \
-            MarksSheetStaffFormFabrique.build_indexes(self.students_list)
-        for field in form.changed_data:
-            if field in overalls_index:
-                overall = overalls_index[field]
-                overall.grade = form.cleaned_data[field]
-                overall.save()
-                continue
-            assert False  # shouldn't get here
-        return redirect(self.get_success_url())
-
-    def get_context_data(self, *args, **kwargs):
-        def get_overall_grade_field(student_pk):
-            key = 'overall_{0}'.format(student_pk)
-            return kwargs['form'][key]
 
         def merge_cells(cell1, cell2):
             grade_priorities = \
@@ -1170,12 +1138,12 @@ class MarksSheetStaffView(StaffOnlyMixin,
 
         # implying that the data is already sorted
         structured = OrderedDict()
-        for student in self.students_list:
+        for student in students_list:
             structured[student] = OrderedDict()
-            for offering in self.offerings_list:
+            for offering in offerings_list:
                 maybe_existing_cell = structured[student].get(offering.course)
                 idx = (student.pk, offering.pk)
-                maybe_enrollment = self.enrollment_index.get(idx)
+                maybe_enrollment = enrollment_index.get(idx)
                 if maybe_enrollment:
                     cell = {'grade': maybe_enrollment.grade_short,
                             'enrolled': True}
@@ -1196,7 +1164,6 @@ class MarksSheetStaffView(StaffOnlyMixin,
             header = []
 
         context['structured'] = [(student,
-                                  get_overall_grade_field(student.pk),
                                   by_course)
                                  for student, by_course
                                  in structured.iteritems()]

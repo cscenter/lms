@@ -14,45 +14,42 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <form method="post">{% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
-        <div class="marks-table-container-outer">
-          <div class="marks-table-container-inner">
-            <table class="marks-table">
-              <tr>
-                <td></td>
-                {% for course in header %}
-                <td class="marks-header marks-header-vert">
-                  <div class="inner">
-                    <a href="{{ course.get_absolute_url }}">
-                      {{ course }}
-                    </a>
-                  </div>
-                </td>
-                {% endfor %}
-              </tr>
-              {% for student, overall_grade, by_course in structured %}
-              <tr>
-                <td class="marks-header marks-header-horiz">
-                  <a href="{{ student.get_absolute_url }}">
-                    {% if student.last_name %}
-                    {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
-                    {% else %}
-                    {{ student.username }}
-                    {% endif %}
+      <div class="marks-table-container-outer">
+        <div class="marks-table-container-inner">
+          <table class="marks-table">
+            <tr>
+              <td></td>
+              {% for course in header %}
+              <td class="marks-header marks-header-vert">
+                <div class="inner">
+                  <a href="{{ course.get_absolute_url }}">
+                    {{ course }}
                   </a>
-                </td>
-                {% for course, cell in by_course.iteritems %}
-                <td class="content {{ cell.enrolled|yesno:'enrolled,noop'}}">
-                  {{ cell.grade }}
-                </td>
-                {% endfor %}
-              </tr>
+                </div>
+              </td>
               {% endfor %}
-            </table>
-          </div>
+            </tr>
+            {% for student, by_course in structured %}
+            <tr>
+              <td class="marks-header marks-header-horiz">
+                <a href="{{ student.get_absolute_url }}">
+                  {% if student.last_name %}
+                  {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
+                  {% else %}
+                  {{ student.username }}
+                  {% endif %}
+                </a>
+              </td>
+              {% for course, cell in by_course.iteritems %}
+              <td class="content {{ cell.enrolled|yesno:'enrolled,noop'}}">
+                {{ cell.grade }}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

@@ -705,45 +705,6 @@ class CourseOfferingNewsNotification(TimeStampedModel):
                         smart_text(self.course_offering_news)))
 
 
-@python_2_unicode_compatible
-class OverallGrade(TimeStampedModel):
-    GRADES = Choices(('not_graded', _("Not graded")),
-                     ('unsatisfactory', _("Unsatisfactory")),
-                     ('pass', _("Pass")),
-                     ('good', _("Good")),
-                     ('excellent', _("Excellent")))
-
-    student = AutoOneToOneField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
-        related_name='overall_grade',
-        on_delete=models.CASCADE)
-    grade = StatusField(
-        verbose_name=_("OverallGrade|Grade"),
-        choices_name='GRADES',
-        default='not_graded')
-    grade_changed = MonitorField(
-        verbose_name=_("OverallGrade|Grade changed"),
-        monitor='grade')
-
-    class Meta:
-        ordering = ["student"]
-        verbose_name = _("Overall grade")
-        verbose_name_plural = _("Overall grades")
-
-    def clean(self):
-        if not self.student.is_student:
-            raise ValidationError(_("Only students can be graded"))
-
-    def __str__(self):
-        return ("Overall grade for {0}"
-                .format(smart_text(self.student.get_full_name())))
-
-    @property
-    def grade_display(self):
-        return self.GRADES[self.grade]
-
-
 # XXX this is a gross hack of course. A better solution imo would be
 # to put signal handlers right next to the models.
 from .signals import *

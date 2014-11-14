@@ -12,7 +12,7 @@ import floppyforms as forms
 from core.forms import Ubereditor
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
-    Enrollment, OverallGrade, \
+    Enrollment, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
 
@@ -391,28 +391,4 @@ class MarksSheetTeacherFormFabrique(object):
                                                      e.student.pk):
                         e.grade
                         for e in enrollment_list})
-        return initial
-
-
-class MarksSheetStaffFormFabrique(object):
-    @staticmethod
-    def build_form_class(students_list):
-        fields = {'overall_{0}'.format(student.pk):
-                  forms.ChoiceField(OverallGrade.GRADES,
-                                    show_hidden_initial=True)
-                  for student in students_list}
-        return type(b'MarksSheetStaffForm', (forms.Form,), fields)
-
-    @staticmethod
-    def build_indexes(students_list):
-        overalls_index = {'overall_{0}'.format(student.pk):
-                          student.overall_grade
-                          for student in students_list}
-        return overalls_index
-
-    @staticmethod
-    def transform_to_initial(students_list):
-        initial = {'overall_{0}'.format(student.pk):
-                   student.overall_grade.grade
-                   for student in students_list}
         return initial
