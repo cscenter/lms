@@ -895,11 +895,13 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
             initial, grade_max=a_s.assignment.grade_max)
-        base = (AssignmentStudent.objects
-                .filter(grade__isnull=True)
-                .order_by('assignment__deadline_at',
-                          'assignment__course_offering__course__name',
-                          'pk'))
+        base = (
+            AssignmentStudent.objects
+            .filter(grade__isnull=True,
+                    assignment__course_offering__teachers=self.request.user)
+            .order_by('assignment__deadline_at',
+                      'assignment__course_offering__course__name',
+                      'pk'))
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None

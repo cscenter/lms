@@ -1049,6 +1049,30 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(400, self.client.post(url, grade_dict).status_code)
         self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
 
+    def test_next_unchecked(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        co_other = CourseOfferingFactory.create()
+        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course_offering=co_other)
+        a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
+        a_other = AssignmentFactory.create(course_offering=co_other)
+        a_s1 = (AssignmentStudent.objects
+                .filter(assignment=a1, student=student)
+                .get())
+        a_s2 = (AssignmentStudent.objects
+                .filter(assignment=a2, student=student)
+                .get())
+        a_s_other = (AssignmentStudent.objects
+                     .filter(assignment=a_other, student=student)
+                     .get())
+        url1 = reverse('a_s_detail_teacher', args=[a_s1.pk])
+        url2 = reverse('a_s_detail_teacher', args=[a_s2.pk])
+        self.doLogin(teacher)
+        self.assertEqual(a_s2.pk, self.client.get(url1).context['next_a_s_pk'])
+        self.assertEqual(a_s1.pk, self.client.get(url2).context['next_a_s_pk'])
+
 
 class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
