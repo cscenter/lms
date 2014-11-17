@@ -31,6 +31,7 @@ class CSCUserChangeForm(UserChangeForm):
 class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
+    ordering = ['last_name', 'first_name']
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
