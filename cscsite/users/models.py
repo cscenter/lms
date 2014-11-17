@@ -86,13 +86,16 @@ class CSCUser(AbstractUser):
         super(CSCUser, self).save(**kwargs)
 
     def __str__(self):
-        return smart_text(self.get_full_name())
+        return smart_text(self.get_full_name(True))
 
     def get_absolute_url(self):
         return reverse('user_detail', args=[self.pk])
 
-    def get_full_name(self):
-        parts = [self.first_name, self.patronymic, self.last_name]
+    def get_full_name(self, last_name_first=False):
+        if last_name_first:
+            parts = [self.last_name, self.first_name, self.patronymic]
+        else:
+            parts = [self.first_name, self.patronymic, self.last_name]
         full_name = smart_text(" "
                                .join(part for part in parts if part)
                                .strip())

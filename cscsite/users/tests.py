@@ -57,6 +57,7 @@ class UserTests(TestCase):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
                        patronymic=u"Васильевна")
         self.assertEqual(user.get_full_name(), u"Анна Васильевна Иванова")
+        self.assertEqual(user.get_full_name(True), u"Иванова Анна Васильевна")
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_full_name(), u"Анна Иванова")
 
@@ -72,7 +73,7 @@ class UserTests(TestCase):
     def test_to_string(self):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
                        patronymic=u"Васильевна")
-        self.assertEqual(smart_text(user), user.get_full_name())
+        self.assertEqual(smart_text(user), user.get_full_name(True))
 
     def test_group_props(self):
         """

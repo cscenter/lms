@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 
@@ -14,11 +15,23 @@ class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
     pass
 
 
+class CourseOfferingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CourseOfferingForm, self).__init__(*args, **kwargs)
+        qs = self.fields['teachers'].queryset
+        self.fields['teachers'].queryset \
+            = qs.order_by('last_name', 'first_name')
+
+    class Meta:
+        model = CourseOffering
+
+
 class CourseOfferingAdmin(UbereditorMixin,
                           WiderLabelsMixin,
                           admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester']
+    form = CourseOfferingForm
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
