@@ -255,7 +255,7 @@ def create_timezone(tz, first_date=None, last_date=None):
     return timezone
 
 
-class ICalView(generic.base.View):
+class ICalClassesView(generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -299,17 +299,20 @@ class ICalView(generic.base.View):
                            "//compscicenter.ru//"))
         cal.add('version', '2.0')
         cal.add_component(create_timezone(tz, min_dt, max_dt))
-        cal.add('X-WR-CALNAME', vText("CSC"))
+        cal.add('X-WR-CALNAME', vText("Занятия CSC"))
         cal.add('X-WR-CALDESC',
-                vText("Календарь Computer Science Center ({})"
+                vText("Календарь занятий Computer Science Center ({})"
                       .format(user.get_full_name())))
+        cal.add('calscale', 'gregorian')
 
         for cc_type, cc in chain(izip(repeat('teaching'), teacher_ccs),
                                  izip(repeat('learning'), student_ccs)):
-            uid = "courseclass-{}-{}@compscicenter.ru".format(cc.pk, cc_type)
+            uid = ("courseclasses-{}-{}@compscicenter.ru"
+                   .format(cc.pk, cc_type))
             url = "http://{}{}".format(request.META['HTTP_HOST'],
                                        cc.get_absolute_url())
-            cats = 'CSC,{}'.format(cc_type.upper())
+            description = "{} ({})".format(cc.description, url)
+            cats = 'CSC,CLASS,{}'.format(cc_type.upper())
             dtstart = tz.localize(datetime.combine(cc.date, cc.starts_at))
             dtend = tz.localize(datetime.combine(cc.date, cc.ends_at))
 
@@ -317,7 +320,7 @@ class ICalView(generic.base.View):
             evt.add('uid', vText(uid))
             evt.add('url', vUri(url))
             evt.add('summary', vText(cc.name))
-            evt.add('description', vText(cc.description))
+            evt.add('description', vText(description))
             evt.add('location', vText(cc.venue.name))
             evt.add('dtstart', dtstart)
             evt.add('dtend', dtend)
@@ -329,6 +332,7 @@ class ICalView(generic.base.View):
         # FIXME(Dmitry): type "text/calendar"
         resp = HttpResponse(cal.to_ical(),
                             content_type="text/calendar; charset=UTF-8")
-        resp['Content-Disposition'] = "attachment; filename=\"csc.ics\""
+        resp['Content-Disposition'] \
+            = "attachment; filename=\"csc_classes.ics\""
         # resp = HttpResponse(cal.to_ical(), content_type="text/plain")
         return resp

@@ -6,7 +6,7 @@ from django.contrib import admin
 
 from index.views import IndexView, AlumniView, TeachersView, RobotsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
-    UserDetailView, UserUpdateView, ICalView
+    UserDetailView, UserUpdateView, ICalClassesView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
     CustomTextpageOpenView
 from learning.views import \
@@ -45,8 +45,8 @@ urlpatterns = patterns('',
         name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
-    url(r'^users/(?P<pk>\d+)/csc.ics', ICalView.as_view(),
-        name='user_ical'),
+    url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
+        name='user_ical_classes'),
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
