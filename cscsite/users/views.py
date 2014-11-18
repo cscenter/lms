@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import absolute_import, unicode_literals
 
 from datetime import datetime, time, timedelta
@@ -5,6 +7,7 @@ from itertools import chain, izip, repeat
 
 from django.conf import settings
 from django.contrib import auth
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.utils.decorators import method_decorator
@@ -258,6 +261,13 @@ class ICalView(generic.base.View):
     def get(self, request, *args, **kwargs):
         user_pk = kwargs['pk']
 
+        try:
+            user = (auth.get_user_model()
+                    ._default_manager
+                    .get(pk=user_pk))
+        except ObjectDoesNotExist:
+            return Http404('User not found')
+
         cc_related = ['venue',
                       'course_offering',
                       'course_offering__semester'
@@ -289,6 +299,11 @@ class ICalView(generic.base.View):
                            "//compscicenter.ru//"))
         cal.add('version', '2.0')
         cal.add_component(create_timezone(tz, min_dt, max_dt))
+        cal.add('X-WR-CALNAME', vText("CSC"))
+        cal.add('X-WR-CALDESC',
+                vText("Календарь Computer Science Center ({})"
+                      .format(user.get_full_name())))
+
         for cc_type, cc in chain(izip(repeat('teaching'), teacher_ccs),
                                  izip(repeat('learning'), student_ccs)):
             uid = "courseclass-{}-{}@compscicenter.ru".format(cc.pk, cc_type)
@@ -312,7 +327,8 @@ class ICalView(generic.base.View):
             evt.add('categories', vInline(cats))
             cal.add_component(evt)
         # FIXME(Dmitry): type "text/calendar"
-        resp = HttpResponse(cal.to_ical(), content_type="text/calendar")
+        resp = HttpResponse(cal.to_ical(),
+                            content_type="text/calendar; charset=UTF-8")
         resp['Content-Disposition'] = "attachment; filename=\"csc.ics\""
         # resp = HttpResponse(cal.to_ical(), content_type="text/plain")
         return resp
