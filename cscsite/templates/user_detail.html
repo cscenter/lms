@@ -68,6 +68,12 @@
         {{ user_object.csc_review }}
       </div>
       {% endif %}
+      {% if user_object.pk == user.pk %}
+      <div>{% trans ".iCal classes calendar" %}:
+        <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
+               disabled="disabled" size="50">
+      </div>
+      {% endif %}
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}
