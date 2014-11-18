@@ -1,16 +1,28 @@
 from __future__ import absolute_import, unicode_literals
 
+from datetime import datetime, time, timedelta
+from itertools import chain, izip, repeat
+
 from django.conf import settings
 from django.contrib import auth
-from django.http import HttpResponseRedirect, Http404
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.views import generic
+from django.utils import timezone
 from django.utils.http import is_safe_url
 from braces.views import LoginRequiredMixin
 
+from dateutil.relativedelta import relativedelta
+import icalendar
+from icalendar import Calendar, Event, vText, vUri
+from icalendar.prop import vInline
+import pytz
+
 from core.views import ProtectedFormMixin
+from learning.models import CourseClass, Assignment, CourseOffering
 from .forms import LoginForm, UserProfileForm
 from .models import CSCUser
 
@@ -137,3 +149,170 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         context = (super(UserUpdateView, self)
                    .get_context_data(*args, **kwargs))
         return context
+
+
+# The following code has been taken from
+# https://github.com/geier/khal/blob/498df2ef62a99bb1a50
+# 053e982f7f23a1bfb3600/khal/khalendar/event.py
+# See https://github.com/collective/icalendar/issues/44
+def to_naive_utc(dtime):
+    """convert a datetime object to UTC and than remove the tzinfo, if
+    datetime is naive already, return it
+    """
+    if not hasattr(dtime, 'tzinfo') or dtime.tzinfo is None:
+        return dtime
+
+    dtime_utc = dtime.astimezone(pytz.UTC)
+    dtime_naive = dtime_utc.replace(tzinfo=None)
+    return dtime_naive
+
+
+def create_timezone(tz, first_date=None, last_date=None):
+    """
+    create an icalendar vtimezone from a pytz.tzinfo
+
+    :param tz: the timezone
+    :type tz: pytz.tzinfo
+    :param first_date: the very first datetime that needs to be included in the
+    transition times, typically the DTSTART value of the (first recurring)
+    event
+    :type first_date: datetime.datetime
+    :param last_date: the last datetime that needs to included, typically the
+    end of the (very last) event (of a recursion set)
+    :returns: timezone information
+    :rtype: icalendar.Timezone()
+
+    we currently have a problem here:
+
+       pytz.timezones only carry the absolute dates of time zone transitions,
+       not their RRULEs. This will a) make for rather bloated VTIMEZONE
+       components, especially for long recurring events, b) we'll need to
+       specify for which time range this VTIMEZONE should be generated and c)
+       will not be valid for recurring events that go into eternity.
+
+    Possible Solutions:
+
+    As this information is not provided by pytz at all, there is no
+    easy solution, we'd really need to ship another version of the OLSON DB.
+
+    """
+
+    # TODO last_date = None, recurring to infintiy
+
+    first_date = (datetime.today() if not first_date
+                  else to_naive_utc(first_date))
+    last_date = datetime.today() if not last_date else to_naive_utc(last_date)
+    timezone = icalendar.Timezone()
+    timezone.add('TZID', tz)
+
+    dst = {one[2]: 'DST' in two.__repr__()
+           for one, two in tz._tzinfos.iteritems()}
+
+    # looking for the first and last transition time we need to include
+    first_num, last_num = 0, len(tz._utc_transition_times) - 1
+    first_tt = tz._utc_transition_times[0]
+    last_tt = tz._utc_transition_times[-1]
+    for num, dt in enumerate(tz._utc_transition_times):
+        if dt > first_tt and dt < first_date:
+            first_num = num
+            first_tt = dt
+        if dt < last_tt and dt > last_date:
+            last_num = num
+            last_tt = dt
+
+    timezones = dict()
+    for num in range(first_num, last_num + 1):
+        name = tz._transition_info[num][2]
+        if name in timezones:
+            ttime = (tz.fromutc(tz._utc_transition_times[num])
+                     .replace(tzinfo=None))
+            if 'RDATE' in timezones[name]:
+                timezones[name]['RDATE'].dts.append(
+                    icalendar.prop.vDDDTypes(ttime))
+            else:
+                timezones[name].add('RDATE', ttime)
+            continue
+
+        if dst[name]:
+            subcomp = icalendar.TimezoneDaylight()
+        else:
+            subcomp = icalendar.TimezoneStandard()
+
+        subcomp.add('TZNAME', tz._transition_info[num][2])
+        subcomp.add(
+            'DTSTART',
+            tz.fromutc(tz._utc_transition_times[num]).replace(tzinfo=None))
+        subcomp.add('TZOFFSETTO', tz._transition_info[num][0])
+        subcomp.add('TZOFFSETFROM', tz._transition_info[num - 1][0])
+        timezones[name] = subcomp
+
+    for subcomp in timezones.values():
+        timezone.add_component(subcomp)
+
+    return timezone
+
+
+class ICalView(generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        user_pk = kwargs['pk']
+
+        cc_related = ['venue',
+                      'course_offering',
+                      'course_offering__semester'
+                      'course_offering__course']
+        teacher_ccs = (
+            CourseClass.objects
+            .filter(course_offering__teachers__pk=user_pk)
+            .select_related(*cc_related))
+        student_ccs = (
+            CourseClass.objects
+            .filter(course_offering__enrolled_students__pk=user_pk)
+            .select_related(*cc_related))
+
+        tz = timezone.get_current_timezone()
+
+        min_date = min(cc.date for cc in chain(student_ccs, teacher_ccs))
+        max_date = max(cc.date for cc in chain(student_ccs, teacher_ccs))
+        min_dt = tz.localize(datetime.combine(min_date, time(00, 00)))
+        max_dt = (tz.localize(datetime.combine(max_date, time(23, 59)))
+                  + relativedelta(years=1))
+
+        # NOTE(Dmitry): i18n here isn't easy, seems to require user-selected
+        #               language
+        # NOTE(Dmitry): see http://www.kanzaki.com/docs/ical/ and
+        #               https://tools.ietf.org/html/rfc5545
+        cal = Calendar()
+
+        cal.add('prodid', ("-//Computer Science Center Calendar"
+                           "//compscicenter.ru//"))
+        cal.add('version', '2.0')
+        cal.add_component(create_timezone(tz, min_dt, max_dt))
+        for cc_type, cc in chain(izip(repeat('teaching'), teacher_ccs),
+                                 izip(repeat('learning'), student_ccs)):
+            uid = "courseclass-{}-{}@compscicenter.ru".format(cc.pk, cc_type)
+            url = "http://{}{}".format(request.META['HTTP_HOST'],
+                                       cc.get_absolute_url())
+            cats = 'CSC,{}'.format(cc_type.upper())
+            dtstart = tz.localize(datetime.combine(cc.date, cc.starts_at))
+            dtend = tz.localize(datetime.combine(cc.date, cc.ends_at))
+
+            evt = Event()
+            evt.add('uid', vText(uid))
+            evt.add('url', vUri(url))
+            evt.add('summary', vText(cc.name))
+            evt.add('description', vText(cc.description))
+            evt.add('location', vText(cc.venue.name))
+            evt.add('dtstart', dtstart)
+            evt.add('dtend', dtend)
+            evt.add('dtstamp', timezone.now())
+            evt.add('created', cc.created)
+            evt.add('last-modified', cc.modified)
+            evt.add('categories', vInline(cats))
+            cal.add_component(evt)
+        # FIXME(Dmitry): type "text/calendar"
+        resp = HttpResponse(cal.to_ical(), content_type="text/calendar")
+        resp['Content-Disposition'] = "attachment; filename=\"csc.ics\""
+        # resp = HttpResponse(cal.to_ical(), content_type="text/plain")
+        return resp
