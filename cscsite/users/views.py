@@ -321,7 +321,7 @@ class ICalClassesView(generic.base.View):
             evt.add('url', vUri(url))
             evt.add('summary', vText(cc.name))
             evt.add('description', vText(description))
-            evt.add('location', vText(cc.venue.name))
+            evt.add('location', vText(cc.venue.address))
             evt.add('dtstart', dtstart)
             evt.add('dtend', dtend)
             evt.add('dtstamp', timezone.now())

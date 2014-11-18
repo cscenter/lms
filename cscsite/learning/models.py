@@ -222,6 +222,11 @@ class CourseOfferingNews(TimeStampedModel):
 @python_2_unicode_compatible
 class Venue(models.Model):
     name = models.CharField(_("Venue|Name"), max_length=140)
+    address = models.CharField(
+        _("Venue|Address"),
+        help_text=(_("Should be resolvable by Google Maps")),
+        max_length=500,
+        blank=True)
     description = models.TextField(
         _("Description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
