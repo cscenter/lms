@@ -18,6 +18,7 @@ from learning.models import AssignmentNotification, \
 
 # import cscsite.urls
 
+BASE_URL = "http://compscicenter.ru"
 
 EMAILS = {'new_comment_for_student':
           {'title': "Преподаватель оставил комментарий к решению задания",
@@ -39,13 +40,14 @@ EMAILS = {'new_comment_for_student':
            'template': "emails/new_assignment.html"}}
 
 
-def report(s):
-    print("{0} {1}".format(datetime.now().strftime("%Y.%m.%d %H:%M:%S"), s))
+def report(f, s):
+    dt = datetime.now().strftime("%Y.%m.%d %H:%M:%S")
+    f.write("{0} {1}".format(dt, s))
 
 
-def notify(notification, name, context):
+def notify(notification, name, context, f):
     if not notification.user.email:
-        report("user {0} doesn't have an email"
+        report(f, "user {0} doesn't have an email"
                .format(smart_text(notification.user)))
         notification.is_notified = True
         notification.save()
@@ -55,13 +57,14 @@ def notify(notification, name, context):
         render_to_string(EMAILS[name]['template'], context))
     text_content = strip_tags(html_content)
 
-    msg = EmailMultiAlternatives(EMAILS[name]['title'],
+    msg = EmailMultiAlternatives("[{}] {}".format(context['course_name'],
+                                                  EMAILS[name]['title']),
                                  text_content,
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
-    report("sending {0} ({1})".format(smart_text(notification),
-                                      smart_text(name)))
+    report(f, "sending {0} ({1})".format(smart_text(notification),
+                                         smart_text(name)))
     msg.send()
     notification.is_notified = True
     notification.save()
@@ -88,20 +91,17 @@ class Command(BaseCommand):
 
         for notification in notifications_assignments:
             a_s = notification.assignment_student
-            # FIXME: reverse doesn't work in management,
-            # investigate, hardcode for now
             context = {'a_s_link_student':
-                       ("http://compscicenter.ru/learning/assignments/{0}/"
-                        .format(a_s.pk)),
+                       BASE_URL + reverse('a_s_detail_student',
+                                          args=[a_s.pk]),
                        'a_s_link_teacher':
-                       ("http://compscicenter.ru/"
-                        "teaching/assignments/submissions/{0}/"
-                        .format(a_s.pk)),
+                       BASE_URL + reverse('a_s_detail_teacher',
+                                          args=[a_s.pk]),
+                       'assignment_link':
+                       BASE_URL + reverse('assignment_detail_teacher',
+                                          args=[a_s.assignment.pk]),
                        'a_s_created':
                        a_s.created,
-                       'assignment_link':
-                       ("http://compscicenter.ru/teaching/assignments/{0}/"
-                        .format(a_s.assignment.pk)),
                        'assignment_name':
                        smart_text(a_s.assignment),
                        'assignment_text':
@@ -109,7 +109,9 @@ class Command(BaseCommand):
                        'student_name':
                        smart_text(a_s.student),
                        'deadline_at':
-                       a_s.assignment.deadline_at}
+                       a_s.assignment.deadline_at,
+                       'course_name':
+                       a_s.assignment.course_offering.course.name}
             if notification.is_about_creation:
                 name = 'new_assignment'
             elif notification.is_about_deadline:
@@ -122,7 +124,7 @@ class Command(BaseCommand):
                 else:
                     name = 'new_comment_for_teacher'
 
-            notify(notification, name, context)
+            notify(notification, name, context, self.stdout)
 
         notifications_courseoffering_news \
             = (CourseOfferingNewsNotification.objects
@@ -139,17 +141,18 @@ class Command(BaseCommand):
 
             name = 'new_courseoffering_news'
             context = {'courseoffering_link':
-                       # FIXME: see above for a note about 'reverse'
-                       ("http://compscicenter.ru/courses/{0}/{1}/"
-                        .format(course_offering.course.slug,
-                                course_offering.semester.slug)),
+                       BASE_URL + reverse('course_offering_detail',
+                                          args=[course_offering.course.slug,
+                                                course_offering.semester.slug]),
                        'courseoffering_name':
                        smart_text(course_offering.course),
                        'courseoffering_news_name':
                        notification.course_offering_news.title,
                        'courseoffering_news_text':
-                       notification.course_offering_news.text}
+                       notification.course_offering_news.text,
+                       'course_name':
+                       course_offering.course.name}
 
-            notify(notification, name, context)
+            notify(notification, name, context, self.stdout)
 
         translation.deactivate()
