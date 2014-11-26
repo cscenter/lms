@@ -1,10 +1,20 @@
 from __future__ import absolute_import
 
+from StringIO import StringIO
+
+from django.core import mail
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from testfixtures import LogCapture
 
+from learning.models import AssignmentNotification, \
+    CourseOfferingNewsNotification
+from learning.tests.factories import AssignmentNotificationFactory, \
+    CourseOfferingNewsNotificationFactory, AssignmentStudentFactory
+
 from .templatetags.navigation import current
+from .management.commands.notify import Command
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
@@ -116,3 +126,46 @@ class CurrentTagTest(TestCase):
                                          'second_subpage'))
             self.assertFalse(call_current('second_subpage_another_alias',
                                           'second_subpage_alias'))
+
+
+class NotifyCommandTest(TestCase):
+    def test_notifications(self):
+        out = StringIO()
+        mail.outbox = []
+        Command().execute(stdout=out)
+        self.assertEqual(0, len(mail.outbox))
+        self.assertEqual(0, len(out.getvalue()))
+
+        out = StringIO()
+        mail.outbox = []
+        an = AssignmentNotificationFactory.create(is_about_passed=True)
+        Command().execute(stdout=out)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertTrue(AssignmentNotification.objects
+                        .get(pk=an.pk)
+                        .is_notified)
+        self.assertIn(reverse('a_s_detail_teacher',
+                              args=[an.assignment_student.pk]),
+                      mail.outbox[0].body)
+        self.assertIn("sending notification for", out.getvalue())
+
+        out = StringIO()
+        mail.outbox = []
+        Command().execute(stdout=out)
+        self.assertEqual(0, len(mail.outbox))
+        self.assertEqual(0, len(out.getvalue()))
+
+        out = StringIO()
+        mail.outbox = []
+        conn = CourseOfferingNewsNotificationFactory.create()
+        course_offering = conn.course_offering_news.course_offering
+        Command().execute(stdout=out)
+        self.assertEqual(1, len(mail.outbox))
+        self.assertTrue(CourseOfferingNewsNotification.objects
+                        .get(pk=an.pk)
+                        .is_notified)
+        self.assertIn(reverse('course_offering_detail',
+                              args=[course_offering.course.slug,
+                                    course_offering.semester.slug]),
+                      mail.outbox[0].body)
+        self.assertIn("sending notification for", out.getvalue())
