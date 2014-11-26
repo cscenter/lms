@@ -70,6 +70,15 @@ class UserTests(TestCase):
         self.assertEqual(user.get_abbreviated_name(),
                          u"А.Иванова")
 
+    def test_short_name(self):
+        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
+                       patronymic=u"Васильевна")
+        self.assertEqual(user.get_short_name(),
+                         u"Иванова Анна")
+        user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
+        self.assertEqual(user.get_short_name(),
+                         u"Иванова Анна")
+
     def test_to_string(self):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
                        patronymic=u"Васильевна")
