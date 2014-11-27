@@ -266,7 +266,7 @@ class ICalClassesView(generic.base.View):
                     ._default_manager
                     .get(pk=user_pk))
         except ObjectDoesNotExist:
-            return Http404('User not found')
+            raise Http404('User not found')
 
         cc_related = ['venue',
                       'course_offering',
