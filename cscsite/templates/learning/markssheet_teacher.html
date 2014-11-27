@@ -17,7 +17,7 @@
       <form method="post">{% csrf_token %}
         <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
         {% for offering, header, by_student in structured %}
-        <h3>{{ offering }}</h3>
+        <h3>{{ offering }} <small><a href="{% url 'markssheet_teacher_csv' offering.pk offering.course.slug offering.semester.slug %}" class="marks-sheet-csv-link"><i class="fa fa-download"></i></a></small></h3>
         <div class="marks-table-container-outer">
           <div class="marks-table-container-inner">
           <table class="marks-table teacher">
