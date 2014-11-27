@@ -30,7 +30,7 @@ from learning.views import \
     AssignmentStudentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
-    MarksSheetTeacherView, MarksSheetStaffView
+    MarksSheetTeacherView, MarksSheetTeacherCSVView,  MarksSheetStaffView
 
 
 admin.autodiscover()
@@ -114,6 +114,9 @@ urlpatterns = patterns('',
     url(r'^teaching/marks/$',
         MarksSheetTeacherView.as_view(),
         name='markssheet_teacher'),
+    url(r'^teaching/marks/(?P<pk>\d+)_(?P<course_slug>[-\w]+)_(?P<semester_slug>[-\w]+).csv$',
+        MarksSheetTeacherCSVView.as_view(),
+        name='markssheet_teacher_csv'),
 
     url(r"^courses/$", SemesterListView.as_view(),
         name="course_list"),

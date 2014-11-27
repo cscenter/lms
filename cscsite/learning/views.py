@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import csv
 import datetime
 import logging
 import os
@@ -12,9 +13,10 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
 
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, F
-from django.http import HttpResponseBadRequest, Http404
+from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
@@ -1093,6 +1095,66 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                  in structured.iteritems()]
         context['user_type'] = self.user_type
         return context
+
+
+class MarksSheetTeacherCSVView(TeacherOnlyMixin,
+                               generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        courseoffering_pk = kwargs['pk']
+        try:
+            co = CourseOffering.objects.get(
+                teachers=request.user,
+                pk=courseoffering_pk,
+                course__slug=kwargs['course_slug'])
+        except ObjectDoesNotExist:
+            raise Http404('Course offering not found')
+        if co.semester.slug != kwargs['semester_slug']:
+            raise Http404('Course offering not found')
+        a_ss = (AssignmentStudent.objects
+                .filter(assignment__course_offering__pk=courseoffering_pk)
+                .order_by('student', 'assignment')
+                .select_related('assignment',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester',
+                                'student'))
+        enrollments = (Enrollment.objects
+                       .filter(course_offering__pk=courseoffering_pk)
+                       .select_related('course_offering', 'student'))
+        structured = OrderedDict()
+        for enrollment in enrollments:
+            student = enrollment.student
+            if student not in structured:
+                structured[student] = OrderedDict()
+        for a_s in a_ss:
+            structured[a_s.student][a_s.assignment] = a_s.grade
+
+        header = structured.values()[0].keys()
+        for _, by_assignment in structured.items():
+            # we should check for "assignment consistency": that all
+            # assignments are similar for all students in particular
+            # course offering
+            assert by_assignment.keys() == header
+
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename \
+            = "{}-{}-{}.csv".format(courseoffering_pk,
+                                    kwargs['course_slug'],
+                                    kwargs['semester_slug'])
+        response['Content-Disposition'] \
+            = 'attachment; filename="{}"'.format(filename)
+
+        writer = csv.writer(response)
+
+        writer.writerow([''] + [smart_text(x).encode('utf8') for x in header])
+        for student, by_assignment in structured.items():
+            writer.writerow([smart_text(x if x else '').encode('utf8') for x in
+                             ([student.get_short_name()]
+                              + by_assignment.values())])
+
+        return response
 
 
 class MarksSheetStaffView(StaffOnlyMixin,
