@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import absolute_import, unicode_literals
 
 import csv
@@ -1124,8 +1126,10 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                        .filter(course_offering__pk=courseoffering_pk)
                        .select_related('course_offering', 'student'))
         structured = OrderedDict()
+        enrollment_grades = {}
         for enrollment in enrollments:
             student = enrollment.student
+            enrollment_grades[student] = enrollment.grade_display
             if student not in structured:
                 structured[student] = OrderedDict()
         for a_s in a_ss:
@@ -1147,13 +1151,16 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             = 'attachment; filename="{}"'.format(filename)
 
         writer = csv.writer(response)
-
-        writer.writerow([''] + [smart_text(x).encode('utf8') for x in header])
+        writer.writerow(['Фамилия'.encode('utf8'),
+                         'Имя'.encode('utf8')]
+                        + [smart_text(a.title).encode('utf8')
+                           for a in header]
+                        + ['Итоговая оценка'.encode('utf8')])
         for student, by_assignment in structured.items():
             writer.writerow([smart_text(x if x else '').encode('utf8') for x in
-                             ([student.get_short_name()]
-                              + by_assignment.values())])
-
+                             ([student.last_name, student.first_name]
+                              + by_assignment.values()
+                              + [enrollment_grades[student]])])
         return response
 
 
