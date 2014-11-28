@@ -888,6 +888,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         context = (super(ASTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
         a_s = context['a_s']
+        co = a_s.assignment.course_offering
         initial = {'grade': a_s.grade}
         is_actual_teacher = (
             self.request.user in (a_s
@@ -902,6 +903,8 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         base = (
             AssignmentStudent.objects
             .filter(grade__isnull=True,
+                    is_passed=True,
+                    assignment__course_offering=co,
                     assignment__course_offering__teachers=self.request.user)
             .order_by('assignment__deadline_at',
                       'assignment__course_offering__course__name',
