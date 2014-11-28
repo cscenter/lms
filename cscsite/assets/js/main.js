@@ -115,24 +115,46 @@ $(document).ready(function () {
         $("#marks-sheet-save").attr("disabled", "disabled");
     }
 
-    $(".marks-sheet-form-cell input,.marks-sheet-form-cell select").change(function() {
+    $(".marks-table.teacher").on('change', 'input,select', function (e) {
         $this = $(this);
-        var current_value = $this.val();
-        var saved_value = $this.next("input[type=hidden]").val();
+        $target = $(e.target)
+        $csv_link = ($this.closest(".offering")
+                     .find(".marks-sheet-csv-link"));
+        var current_value = $target.val();
+        var saved_value = $target.next("input[type=hidden]").val();
+        var current_table_n_unsaved = $this.data("n-unsaved");
+        if (current_table_n_unsaved == null) {
+            current_table_n_unsaved = 0;
+        }
         if (current_value != saved_value) {
-            $this.parent().addClass("marks-sheet-unsaved-cell");
+            $target.parent().addClass("marks-sheet-unsaved-cell");
             marks_sheet_unsaved++;
+            current_table_n_unsaved++;
+            $this.data("n-unsaved", current_table_n_unsaved);
             if (marks_sheet_unsaved > 0) {
                 $("#marks-sheet-save").removeAttr("disabled");
             }
+            if (current_table_n_unsaved > 0) {
+                $csv_link.addClass("link-disabled");
+                $csv_link.click(function(e) {
+                    $(this).find(".reason").addClass("active");
+                    return false;
+                });
+            }
         } else {
-            $this.parent().removeClass("marks-sheet-unsaved-cell");
+            $target.parent().removeClass("marks-sheet-unsaved-cell");
             marks_sheet_unsaved--;
+            current_table_n_unsaved--;
+            $this.data("n-unsaved", current_table_n_unsaved);
             if (marks_sheet_unsaved == 0) {
                 $("#marks-sheet-save").attr("disabled", "disabled");
             }
+            if (current_table_n_unsaved == 0) {
+                $csv_link.removeClass("link-disabled");
+                $csv_link.off("click");
+            }
         }
-    });
+    })
 
     // see this http://stackoverflow.com/a/8641208 for discussion
     // about the following hack

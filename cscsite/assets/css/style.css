@@ -449,6 +449,44 @@ h5.assignment {
   margin-right: 1%;
 }
 
+.marks-sheet-csv-link .reason {
+  visibility: hidden;
+}
+
+.link-disabled {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:hover {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:active {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:visited {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled .reason {
+  opacity: 0;
+  visibility: visible;
+}
+
+.link-disabled .reason.active {
+  opacity: 1;
+  -webkit-transition: opacity .15s ease-in-out;
+  -moz-transition: opacity .15s ease-in-out;
+  -ms-transition: opacity .15s ease-in-out;
+  -o-transition: opacity .15s ease-in-out;
+  transition: opacity .15s ease-in-out;
+}
+
 .marks-table-container-outer {
   width: 920px;
   margin-bottom: 15px;
