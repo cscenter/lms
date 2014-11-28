@@ -1352,3 +1352,12 @@ class MarksSheetStaffTests(GroupSecurityCheckMixin,
             self.assertContains(resp, name)
         for co in cos:
             self.assertContains(resp, smart_text(co.course))
+
+
+class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
+    def basic_test(self):
+        evt = NonCourseEventFactory.create()
+        url = cc.get_absolute_url()
+        resp = self.client.get(url)
+        self.assertContains(evt.name, resp)
+        self.assertContains(evt.venue.get_absolute_url(), resp)
