@@ -1081,6 +1081,11 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         url1 = reverse('a_s_detail_teacher', args=[a_s1.pk])
         url2 = reverse('a_s_detail_teacher', args=[a_s2.pk])
         self.doLogin(teacher)
+        self.assertEqual(None, self.client.get(url1).context['next_a_s_pk'])
+        self.assertEqual(None, self.client.get(url2).context['next_a_s_pk'])
+        [AssignmentCommentFactory.create(author=a_s.student,
+                                         assignment_student=a_s)
+         for a_s in [a_s1, a_s2]]
         self.assertEqual(a_s2.pk, self.client.get(url1).context['next_a_s_pk'])
         self.assertEqual(a_s1.pk, self.client.get(url2).context['next_a_s_pk'])
 
