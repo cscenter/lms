@@ -120,7 +120,6 @@ class UserDetailView(generic.DetailView):
         return (auth.get_user_model()
                 ._default_manager
                 .all()
-                .select_related('overall_grade')
                 .prefetch_related('teaching_set',
                                   'teaching_set__semester',
                                   'teaching_set__course',
