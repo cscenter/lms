@@ -7,7 +7,7 @@ from core.admin import UbereditorMixin, WiderLabelsMixin
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentStudent, AssignmentComment, \
-    Enrollment
+    Enrollment, NonCourseEvent
 
 
 class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -87,6 +87,12 @@ class AssignmentStudentAdmin(admin.ModelAdmin):
             return ['grade_changed', 'state']
 
 
+class NonCourseEventAdmin(admin.ModelAdmin):
+    date_hierarchy = 'date'
+    list_filter = ['venue']
+    list_display = ['name', 'date', 'venue']
+
+
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester)
 admin.site.register(CourseOffering, CourseOfferingAdmin)
@@ -98,3 +104,4 @@ admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(NonCourseEvent, NonCourseEventAdmin)

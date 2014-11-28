@@ -30,7 +30,8 @@ from learning.views import \
     AssignmentStudentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
-    MarksSheetTeacherView, MarksSheetTeacherCSVView,  MarksSheetStaffView
+    MarksSheetTeacherView, MarksSheetTeacherCSVView,  MarksSheetStaffView, \
+    NonCourseEventDetailView
 
 
 admin.autodiscover()
@@ -158,6 +159,9 @@ urlpatterns = patterns('',
         name="venue_list"),
     url(r"^venues/(?P<pk>\d+)/$", VenueDetailView.as_view(),
         name="venue_detail"),
+
+    url(r"^events/(?P<pk>\d+)/$", NonCourseEventDetailView.as_view(),
+        name="non_course_event_detail"),
 
     url(r'^pages/(?P<slug>[-\w]+)$', CustomTextpageOpenView.as_view(),
         name='custom_text_page'),

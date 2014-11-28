@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {{ event.name }}
+      </h2>
+      {% if user.is_superuser %}
+      <div class="btn-toolbar">
+        <a href="{% url 'event_edit' event.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <table class="table table-striped">
+        <tr>
+          <td>{% trans "When" %}:</td>
+          <td>{{ event.date|date:"l, d E Y" }}, {{ event.starts_at|time:"H:i" }}–{{ event.ends_at|time:"H:i" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Where" %}:</td>
+          <td><a href="{% url 'venue_detail' event.venue.pk %}">{{ event.venue.name }}</a></td>
+        </tr>
+      </table>
+
+      {% if event.description %}
+      <h4 class="bigger-margin">{% trans "Description" %}</h4>
+      <div class="ubertext">
+        {{ event.description|safe }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
