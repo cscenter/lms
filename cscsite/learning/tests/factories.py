@@ -21,6 +21,8 @@ class UserFactory(factory.DjangoModelFactory):
     username = factory.Sequence(lambda n: "testuser%03d" % n)
     password = "test123foobar@!"
     email = "user@foobar.net"
+    first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
+    last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):

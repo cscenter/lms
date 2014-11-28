@@ -107,9 +107,7 @@ class CSCUser(AbstractUser):
                 or self.username)
 
     def get_abbreviated_name(self):
-        parts = [self.first_name[:1],
-                 self.patronymic[:1],
-                 self.last_name]
+        parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
         abbrev_name = smart_text("."
                                  .join(part for part in parts if part)
                                  .strip())
