@@ -122,19 +122,25 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         this_month_date = (datetime.datetime.now()
                            .replace(day=15,
                                     tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course_offering__teachers=[teacher],
-                                        date=this_month_date)
-        # teacher should see only his own classes
-        CourseClassFactory\
+        own_classes = (
+            CourseClassFactory
+            .create_batch(3, course_offering__teachers=[teacher],
+                          date=this_month_date))
+        others_classes = (
+            CourseClassFactory
             .create_batch(5, course_offering__teachers=[other_teacher],
-                          date=this_month_date)
+                          date=this_month_date))
+        events = (
+            NonCourseEventFactory
+            .create_batch(2, date=this_month_date))
+        # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
         classes = self.calendar_month_to_object_list(resp.context['month'])
-        self.assertEqual(3, len(classes))
+        self.assertSameObjects(own_classes + events, classes)
         # but in full calendar all classes should be shown
         classes = self.calendar_month_to_object_list(
-            self.client.get(reverse('calendar_full_student')).context['month'])
-        self.assertEqual(8, len(classes))
+            self.client.get(reverse('calendar_full_teacher')).context['month'])
+        self.assertSameObjects(own_classes + others_classes + events, classes)
         next_month_qstr = ("?year={0}&month={1}"
                            .format(resp.context['next_date'].year,
                                    resp.context['next_date'].month))
@@ -142,14 +148,15 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         self.assertContains(resp, next_month_qstr)
         classes = self.calendar_month_to_object_list(
             self.client.get(next_month_url).context['month'])
-        self.assertEqual(0, len(classes))
+        self.assertSameObjects([], classes)
         next_month_date = this_month_date + relativedelta(months=1)
-        CourseClassFactory\
+        next_month_classes = (
+            CourseClassFactory
             .create_batch(2, course_offering__teachers=[teacher],
-                          date=next_month_date)
+                          date=next_month_date))
         classes = self.calendar_month_to_object_list(
             self.client.get(next_month_url).context['month'])
-        self.assertEqual(2, len(classes))
+        self.assertSameObjects(next_month_classes, classes)
 
 
 class CalendarStudentTests(GroupSecurityCheckMixin,
@@ -169,18 +176,20 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         this_month_date = (datetime.datetime.now()
                            .replace(day=15,
                                     tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course_offering=co,
-                                        date=this_month_date)
+        own_classes = (
+            CourseClassFactory
+            .create_batch(3, course_offering=co, date=this_month_date))
+        others_classes = (
+            CourseClassFactory
+            .create_batch(5, course_offering=co_other, date=this_month_date))
         # student should see only his own classes
-        CourseClassFactory.create_batch(5, course_offering=co_other,
-                                        date=this_month_date)
         resp = self.client.get(reverse(self.url_name))
         classes = self.calendar_month_to_object_list(resp.context['month'])
-        self.assertEqual(3, len(classes))
+        self.assertSameObjects(own_classes, classes)
         # but in full calendar all classes should be shown
         classes = self.calendar_month_to_object_list(
             self.client.get(reverse('calendar_full_student')).context['month'])
-        self.assertEqual(8, len(classes))
+        self.assertSameObjects(own_classes + others_classes, classes)
         next_month_qstr = ("?year={0}&month={1}"
                            .format(resp.context['next_date'].year,
                                    resp.context['next_date'].month))
@@ -188,13 +197,14 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         self.assertContains(resp, next_month_qstr)
         classes = self.calendar_month_to_object_list(
             self.client.get(next_month_url).context['month'])
-        self.assertEqual(0, len(classes))
+        self.assertSameObjects([], classes)
         next_month_date = this_month_date + relativedelta(months=1)
-        CourseClassFactory.create_batch(2, course_offering=co,
-                                        date=next_month_date)
+        next_month_classes = (
+            CourseClassFactory
+            .create_batch(2, course_offering=co, date=next_month_date))
         classes = self.calendar_month_to_object_list(
             self.client.get(next_month_url).context['month'])
-        self.assertEqual(2, len(classes))
+        self.assertSameObjects(next_month_classes, classes)
 
 
 class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
@@ -1310,8 +1320,6 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
             row = row_last_names.index(s.last_name)
             col = data[0].index(a.title)
             self.assertEquals(grade, int(data[row][col]))
-
-
 
 
 class MarksSheetStaffTests(GroupSecurityCheckMixin,

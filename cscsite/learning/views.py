@@ -8,6 +8,7 @@ import logging
 import os
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
+from itertools import chain
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
@@ -28,7 +29,7 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
-    CourseOfferingNewsNotification, Semester
+    CourseOfferingNewsNotification, Semester, NonCourseEvent
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -144,6 +145,7 @@ class CalendarMixin(object):
 
     def __init__(self, *args, **kwargs):
         self._month_date = None
+        self._non_course_events = None
         super(CalendarMixin, self).__init__(*args, **kwargs)
 
     def get_queryset(self):
@@ -158,6 +160,19 @@ class CalendarMixin(object):
         self._month_date = datetime.date(year=year, month=month, day=1)
         prev_month_date = self._month_date + relativedelta(months=-1)
         next_month_date = self._month_date + relativedelta(months=+1)
+
+        # FIXME(Dmitry): somewhat dirty, come up with better generalization
+        self._non_course_events \
+            = (NonCourseEvent.objects
+               .filter(Q(date__month=month,
+                         date__year=year)
+                       | Q(date__month=prev_month_date.month,
+                           date__year=prev_month_date.year)
+                       | Q(date__month=next_month_date.month,
+                           date__year=next_month_date.year))
+               .order_by('date', 'starts_at')
+               .select_related('venue'))
+
         return (CourseClass.objects
                 .filter(Q(date__month=month,
                           date__year=year)
@@ -178,17 +193,20 @@ class CalendarMixin(object):
         context['prev_date'] = self._month_date + relativedelta(months=-1)
         context['user_type'] = self.user_type
 
-        classes = context['object_list']
-        dates_to_classes = defaultdict(list)
-        for course_class in classes:
-            dates_to_classes[course_class.date].append(course_class)
+        events = sorted(chain(context['object_list'],
+                              self._non_course_events.all()),
+                        key=lambda evt: (evt.date, evt.starts_at))
+
+        dates_to_events = defaultdict(list)
+        for event in events:
+            dates_to_events[event.date].append(event)
 
         cal = Calendar(0)
 
         month_cal = cal.monthdatescalendar(self._month_date.year,
                                            self._month_date.month)
         month = [(week[0].isocalendar()[1],
-                  [(day, dates_to_classes[day],
+                  [(day, dates_to_events[day],
                     day.month == self._month_date.month)
                    for day in week])
                  for week in month_cal]
@@ -1244,3 +1262,9 @@ class MarksSheetStaffView(StaffOnlyMixin,
         context['header'] = header
         context['user_type'] = self.user_type
         return context
+
+
+class NonCourseEventDetailView(generic.DetailView):
+    model = NonCourseEvent
+    context_object_name = 'event'
+    template_name = "learning/noncourseevent_detail.html"

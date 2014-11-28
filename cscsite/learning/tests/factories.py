@@ -10,7 +10,7 @@ import factory
 from learning.models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseOfferingNewsNotification
+    CourseOfferingNewsNotification, NonCourseEvent
 from users.models import CSCUser
 
 
@@ -191,3 +191,16 @@ class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     course_offering_news = factory.SubFactory(CourseOfferingNewsFactory)
+
+
+class NonCourseEventFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = NonCourseEvent
+
+    venue = factory.SubFactory(VenueFactory)
+    name = factory.Sequence(lambda n: "Test event %03d" % n)
+    description = factory.Sequence(lambda n: "Test event description %03d" % n)
+    date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+            + datetime.timedelta(days=3)).date()
+    starts_at = "13:00"
+    ends_at = "13:45"

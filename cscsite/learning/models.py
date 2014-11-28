@@ -706,6 +706,43 @@ class CourseOfferingNewsNotification(TimeStampedModel):
                         smart_text(self.course_offering_news)))
 
 
+class NonCourseEvent(TimeStampedModel):
+    venue = models.ForeignKey(
+        Venue,
+        verbose_name=_("CourseClass|Venue"),
+        on_delete=models.PROTECT)
+    name = models.CharField(_("CourseClass|Name"), max_length=255)
+    description = models.TextField(
+        _("Description"),
+        blank=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    date = models.DateField(_("Date"))
+    starts_at = models.TimeField(_("Starts at"))
+    ends_at = models.TimeField(_("Ends at"))
+
+    class Meta:
+        ordering = ["-date", "-starts_at", "name"]
+        verbose_name = _("Non-course event")
+        verbose_name_plural = _("Non-course events")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+    def clean(self):
+        super(NonCourseEvent, self).clean()
+        # ends_at should be later than starts_at
+        if self.starts_at >= self.ends_at:
+            raise ValidationError(_("Event should end after it's start"))
+
+    # this is needed to share code between CourseClasses and this model
+    @property
+    def type(self):
+        return "noncourse"
+
+    def get_absolute_url(self):
+        return reverse('non_course_event_detail', args=[self.pk])
+
+
 # XXX this is a gross hack of course. A better solution imo would be
 # to put signal handlers right next to the models.
 from .signals import *

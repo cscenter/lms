@@ -450,7 +450,7 @@ h5.assignment {
 }
 
 .marks-sheet-csv-link .reason {
-  visibility: hidden;
+  display: none;
 }
 
 .link-disabled {
@@ -475,7 +475,7 @@ h5.assignment {
 
 .link-disabled .reason {
   opacity: 0;
-  visibility: visible;
+  display: inline;
 }
 
 .link-disabled .reason.active {
@@ -638,22 +638,26 @@ h5.assignment {
   text-align: right;
 }
 
-.calendar .class {
+.calendar .event {
   margin-bottom: 3px;
   border: 1px solid #D3D3D3;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.calendar .class.lecture {
+.calendar .event.lecture {
   background-color: #F9F9F9;
 }
 
-.calendar .class.seminar {
+.calendar .event.seminar {
   background-color: #E9E9E9;
 }
 
-.calendar .class .times {
+.calendar .event.noncourse {
+  background-color: #ECF9FF;
+}
+
+.calendar .event .times {
   white-space: nowrap;
 }
 
