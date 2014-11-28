@@ -479,6 +479,10 @@ class AssignmentStudent(TimeStampedModel):
     grade_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='grade')
+    is_passed = models.BooleanField(
+        verbose_name=_("Is passed"),
+        help_text=_("It's online and has comments"),
+        default=False)
 
     class Meta:
         ordering = ["assignment", "student"]
@@ -499,13 +503,6 @@ class AssignmentStudent(TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.assignment),
                                   smart_text(self.student.get_full_name()))
 
-    def has_passes(self):
-        # TODO(Dmitry): this can be replaced with explicit field on AS object
-        return ((self.assignmentcomment_set
-                 .filter(author=self.student)
-                 .exists()) and
-                self.assignment.is_online)
-
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.assignments
@@ -516,7 +513,7 @@ class AssignmentStudent(TimeStampedModel):
         grade_max = self.assignment.grade_max
         grade_range = grade_max - grade_min
         if self.grade is None:
-            if not self.assignment.is_online or self.has_passes():
+            if not self.assignment.is_online or self.is_passed:
                 return 'not_checked'
             else:
                 return 'not_submitted'
@@ -596,7 +593,6 @@ class Enrollment(TimeStampedModel):
                      ('pass', _("Enrollment|Pass")),
                      ('good', _("Good")),
                      ('excellent', _("Excellent")))
-    # FIXME(Dmitry): don't know how to translate this properly
     SHORT_GRADES = Choices(('not_graded', "—"),
                            ('unsatisfactory', "н"),
                            ('pass', "з"),
