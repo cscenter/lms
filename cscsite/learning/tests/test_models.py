@@ -202,43 +202,42 @@ class AssignmentStudentTests(TestCase):
         as_.grade = as_.assignment.grade_max
         as_.save()
 
-    def test_has_passes(self):
+    def test_is_passed(self):
         u_student = UserFactory.create(groups=['Student'])
         u_teacher = UserFactory.create(groups=['Teacher'])
-        # TODO(Dmitry): enrollment should be correct here
         as_ = AssignmentStudentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
         # teacher comments first
-        self.assertFalse(as_.has_passes())
+        self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(assignment_student=as_,
                                         author=u_teacher)
-        self.assertFalse(as_.has_passes())
+        self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(assignment_student=as_,
                                         author=u_student)
-        self.assertTrue(as_.has_passes())
+        self.assertTrue(as_.is_passed)
         # student comments first
         as_ = AssignmentStudentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
-        self.assertFalse(as_.has_passes())
+        self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(assignment_student=as_,
                                         author=u_student)
-        self.assertTrue(as_.has_passes())
+        self.assertTrue(as_.is_passed)
         AssignmentCommentFactory.create(assignment_student=as_,
                                         author=u_student)
-        self.assertTrue(as_.has_passes())
+        self.assertTrue(as_.is_passed)
         # assignment is offline
         as_ = AssignmentStudentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=False)
-        self.assertFalse(as_.has_passes())
+        self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(assignment_student=as_,
                                         author=u_student)
-        self.assertFalse(as_.has_passes())
+        self.assertFalse(as_.is_passed)
 
     def test_assignment_student_state(self):
         student = CSCUser()

@@ -118,3 +118,16 @@ def create_deadline_change_notification(sender, instance, created,
                                     assignment_student=a_s,
                                     is_about_deadline=True)
              .save())
+
+
+@receiver(models.signals.post_save, sender=AssignmentComment)
+def mark_assignment_passed(sender, instance, created,
+                           *args, **kwargs):
+    if not created:
+        return
+    a_s = instance.assignment_student
+    if (not a_s.is_passed
+        and instance.author.pk == a_s.student.pk
+        and a_s.assignment.is_online):
+        a_s.is_passed = True
+        a_s.save()
