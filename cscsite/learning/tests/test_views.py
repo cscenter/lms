@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import csv
 import logging
 import os
 
@@ -1186,7 +1187,9 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
-            self.assertContains(resp, student.get_full_name(), 2)
+            name = "{}&nbsp;{}.".format(student.last_name,
+                                        student.first_name[0])
+            self.assertContains(resp, name, 2)
             for co in [co1, co2]:
                 field = 'final_grade_{}_{}'.format(co.pk, student.pk)
                 self.assertIn(field, resp.context['form'].fields)
@@ -1206,7 +1209,9 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
-            self.assertContains(resp, student.get_full_name())
+            name = "{}&nbsp;{}.".format(student.last_name,
+                                        student.first_name[0])
+            self.assertContains(resp, name)
         for as_ in as_online:
             self.assertContains(resp, as_.title)
             for student in students:
@@ -1229,8 +1234,8 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
         for student in students:
             EnrollmentFactory.create(student=student,
                                      course_offering=co)
-        a1 = AssignmentFactory.create(course_offering=co, is_online=False)
-        a2 = AssignmentFactory.create(course_offering=co, is_online=False)
+        a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
+                                                is_online=False)
         url = reverse(self.url_name)
         self.doLogin(teacher)
         form = {}
@@ -1256,6 +1261,59 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                                       .grade))
 
 
+class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
+    def test_security(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
+        EnrollmentFactory.create(student=student, course_offering=co)
+        url = reverse('markssheet_teacher_csv',
+                      args=[co.pk, co.course.slug, co.semester.slug])
+        self.assertEquals(403, self.client.get(url).status_code)
+        for groups in [[], ['Student']]:
+            self.doLogin(UserFactory.create(groups=groups))
+        self.doLogin(UserFactory.create(groups=['Teacher']))
+        self.assertEquals(404, self.client.get(url).status_code)
+        self.doLogin(student)
+        self.assertEquals(403, self.client.get(url).status_code)
+        self.doLogin(teacher)
+        self.assertEquals(200, self.client.get(url).status_code)
+
+    def test_csv(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        student1, student2 = UserFactory.create_batch(2, groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
+        [EnrollmentFactory.create(student=s, course_offering=co)
+         for s in [student1, student2]]
+        url = reverse('markssheet_teacher_csv',
+                      args=[co.pk, co.course.slug, co.semester.slug])
+        combos = [(a, s, grade+1)
+                  for ((a, s), grade)
+                  in zip([(a, s)
+                          for a in [a1, a2]
+                          for s in [student1, student2]],
+                         range(4))]
+        for a, s, grade in combos:
+            a_s = AssignmentStudent.objects.get(student=s, assignment=a)
+            a_s.grade = grade
+            a_s.save()
+        self.doLogin(teacher)
+        data = [[x.decode('utf8') if isinstance(x, basestring) else x
+                 for x in row]
+                for row in csv.reader(self.client.get(url)) if row]
+        self.assertEquals(3, len(data))
+        self.assertIn(a1.title, data[0])
+        row_last_names = [row[0] for row in data]
+        for a, s, grade in combos:
+            row = row_last_names.index(s.last_name)
+            col = data[0].index(a.title)
+            self.assertEquals(grade, int(data[row][col]))
+
+
+
+
 class MarksSheetStaffTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
     url_name = 'markssheet_staff'
@@ -1276,6 +1334,8 @@ class MarksSheetStaffTests(GroupSecurityCheckMixin,
         self.doLogin(UserFactory.create(is_superuser=True))
         resp = self.client.get(url)
         for student in students:
-            self.assertContains(resp, student.get_full_name())
+            name = "{}&nbsp;{}.".format(student.last_name,
+                                        student.first_name[0])
+            self.assertContains(resp, name)
         for co in cos:
             self.assertContains(resp, smart_text(co.course))

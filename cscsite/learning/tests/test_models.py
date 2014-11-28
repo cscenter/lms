@@ -35,7 +35,7 @@ class CommonTests(TestCase):
         self.assertIn(a.title, smart_text(a))
         self.assertIn(smart_text(a.course_offering), smart_text(a))
         as_ = AssignmentStudentFactory.build()
-        self.assertIn(smart_text(as_.student), smart_text(as_))
+        self.assertIn(smart_text(as_.student.get_full_name()), smart_text(as_))
         self.assertIn(smart_text(as_.assignment), smart_text(as_))
         ac = AssignmentCommentFactory.create()
         self.assertIn(smart_text(ac.assignment_student.assignment),
@@ -45,7 +45,7 @@ class CommonTests(TestCase):
                       smart_text(ac))
         e = EnrollmentFactory.build()
         self.assertIn(smart_text(e.course_offering), smart_text(e))
-        self.assertIn(smart_text(e.student), smart_text(e))
+        self.assertIn(smart_text(e.student.get_full_name()), smart_text(e))
         an = AssignmentNotificationFactory.build()
         self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
         self.assertIn(smart_text(an.assignment_student), smart_text(an))
