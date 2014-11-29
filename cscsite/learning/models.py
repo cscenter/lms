@@ -706,6 +706,7 @@ class CourseOfferingNewsNotification(TimeStampedModel):
                         smart_text(self.course_offering_news)))
 
 
+@python_2_unicode_compatible
 class NonCourseEvent(TimeStampedModel):
     venue = models.ForeignKey(
         Venue,
