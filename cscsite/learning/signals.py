@@ -126,8 +126,8 @@ def mark_assignment_passed(sender, instance, created,
     if not created:
         return
     a_s = instance.assignment_student
-    if (not a_s.is_passed
-        and instance.author.pk == a_s.student.pk
-        and a_s.assignment.is_online):
+    if not a_s.is_passed\
+       and instance.author.pk == a_s.student.pk\
+       and a_s.assignment.is_online:
         a_s.is_passed = True
         a_s.save()
