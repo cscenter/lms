@@ -1178,7 +1178,9 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                            for a in header]
                         + ['Итоговая оценка'.encode('utf8')])
         for student, by_assignment in structured.items():
-            writer.writerow([smart_text(x if x else '').encode('utf8') for x in
+            writer.writerow([(smart_text(x if x is not None else '')
+                              .encode('utf8'))
+                             for x in
                              ([student.last_name, student.first_name]
                               + by_assignment.values()
                               + [enrollment_grades[student]])])

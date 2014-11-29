@@ -141,9 +141,10 @@ class Command(BaseCommand):
 
             name = 'new_courseoffering_news'
             context = {'courseoffering_link':
-                       BASE_URL + reverse('course_offering_detail',
-                                          args=[course_offering.course.slug,
-                                                course_offering.semester.slug]),
+                       BASE_URL
+                       + reverse('course_offering_detail',
+                                 args=[course_offering.course.slug,
+                                       course_offering.semester.slug]),
                        'courseoffering_name':
                        smart_text(course_offering.course),
                        'courseoffering_news_name':
