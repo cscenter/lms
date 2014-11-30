@@ -727,7 +727,7 @@ class NonCourseEvent(TimeStampedModel):
         verbose_name_plural = _("Non-course events")
 
     def __str__(self):
-        return smart_text(self.name)
+        return "{}".format(smart_text(self.name))
 
     def clean(self):
         super(NonCourseEvent, self).clean()
