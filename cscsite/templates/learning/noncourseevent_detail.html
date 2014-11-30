@@ -8,12 +8,6 @@
       <h2>
         {{ event.name }}
       </h2>
-      {% if user.is_superuser %}
-      <div class="btn-toolbar">
-        <a href="{% url 'event_edit' event.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-        <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
-      </div>
-      {% endif %}
       <hr>
     </div>
   </div>
