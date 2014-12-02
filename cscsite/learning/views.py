@@ -1204,10 +1204,23 @@ class MarksSheetStaffView(StaffOnlyMixin,
         offerings_list = (CourseOffering.objects
                           .select_related('course')
                           .order_by('course__name'))
+
         students_list = (get_user_model().objects
                          .filter(groups__name='Student')
                          .select_related('student',
                                          'overall_grade'))
+        enrollment_years = sorted(set(x.enrollment_year
+                                       for x in students_list))
+        try:
+            year = int(self.request.GET.get('enrollment_year'))
+        except TypeError:
+            year = None
+
+        if year is not None:
+            students_list = filter(lambda s: s.enrollment_year == year,
+                                   students_list)
+        else:
+            students_list = students_list
 
         def merge_cells(cell1, cell2):
             grade_priorities = \
@@ -1257,12 +1270,13 @@ class MarksSheetStaffView(StaffOnlyMixin,
         else:
             header = []
 
-        context['structured'] = [(student,
-                                  by_course)
+        context['structured'] = [(student, by_course)
                                  for student, by_course
                                  in structured.iteritems()]
         context['header'] = header
         context['user_type'] = self.user_type
+        context['enrollment_years'] = enrollment_years
+        context['current_year'] = year
         return context
 
 

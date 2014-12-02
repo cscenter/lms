@@ -1353,6 +1353,26 @@ class MarksSheetStaffTests(GroupSecurityCheckMixin,
         for co in cos:
             self.assertContains(resp, smart_text(co.course))
 
+    def test_enrollment_year(self):
+        student1 = UserFactory.create(groups=['Student'],
+                                      enrollment_year=2012)
+        student2 = UserFactory.create(groups=['Student'],
+                                      enrollment_year=2013)
+        cos = CourseOfferingFactory.create_batch(2)
+        for student in [student1, student2]:
+            for co in cos:
+                EnrollmentFactory.create(student=student,
+                                         course_offering=co)
+        url = reverse(self.url_name)
+        self.doLogin(UserFactory.create(is_superuser=True))
+        resp = self.client.get(url)
+        self.assertSameObjects([2012, 2013], resp.context['enrollment_years'])
+        self.assertContains(resp, student1.last_name)
+        self.assertContains(resp, student2.last_name)
+        resp = self.client.get(url + "?enrollment_year=2012")
+        self.assertContains(resp, student1.last_name)
+        self.assertNotContains(resp, student2.last_name)
+
 
 class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
     def basic_test(self):

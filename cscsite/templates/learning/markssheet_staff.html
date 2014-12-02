@@ -14,6 +14,23 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
+      {% trans "CSCUser|enrollment year" %}:
+      <div class="btn-group pull-right" role="group">
+        <a href="{% url 'markssheet_staff' %}"
+           class="btn btn-default {% if not current_year %}disabled{% endif %}">
+          {% trans "All" %}
+        </a>
+        {% for year in enrollment_years %}
+        <a href="?enrollment_year={{ year }}"
+           class="btn btn-default {% if current_year == year %}disabled{% endif %}">
+          {{ year }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
       <div class="marks-table-container-outer">
         <div class="marks-table-container-inner">
           <table class="marks-table staff">
