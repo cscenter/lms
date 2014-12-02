@@ -1210,10 +1210,11 @@ class MarksSheetStaffView(StaffOnlyMixin,
                          .select_related('student',
                                          'overall_grade'))
         enrollment_years = sorted(set(x.enrollment_year
-                                       for x in students_list))
+                                      for x in students_list
+                                      if x.enrollment_year is not None))
         try:
             year = int(self.request.GET.get('enrollment_year'))
-        except TypeError:
+        except (TypeError, ValueError):
             year = None
 
         if year is not None:
