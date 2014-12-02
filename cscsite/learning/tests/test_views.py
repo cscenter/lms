@@ -141,9 +141,10 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         classes = self.calendar_month_to_object_list(
             self.client.get(reverse('calendar_full_teacher')).context['month'])
         self.assertSameObjects(own_classes + others_classes + events, classes)
-        next_month_qstr = ("?year={0}&month={1}"
-                           .format(resp.context['next_date'].year,
-                                   resp.context['next_date'].month))
+        next_month_qstr = (
+            "?year={0}&month={1}"
+            .format(resp.context['next_date'].year,
+                    str(resp.context['next_date'].month).zfill(2)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = self.calendar_month_to_object_list(
@@ -190,9 +191,10 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         classes = self.calendar_month_to_object_list(
             self.client.get(reverse('calendar_full_student')).context['month'])
         self.assertSameObjects(own_classes + others_classes, classes)
-        next_month_qstr = ("?year={0}&month={1}"
-                           .format(resp.context['next_date'].year,
-                                   resp.context['next_date'].month))
+        next_month_qstr = (
+            "?year={0}&month={1}"
+            .format(resp.context['next_date'].year,
+                    str(resp.context['next_date'].month).zfill(2)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = self.calendar_month_to_object_list(
