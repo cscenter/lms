@@ -10,6 +10,8 @@ from django.utils.encoding import smart_text
 from bs4 import BeautifulSoup
 import factory
 
+from learning.tests.factories import StudentProjectFactory, SemesterFactory
+
 from .models import CSCUser
 from .admin import CSCUserCreationForm
 
@@ -266,3 +268,21 @@ class UserTests(TestCase):
         form_data.update({'username': 'testuser2'})
         form = CSCUserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
+
+    def test_projects(self):
+        """
+        Students should have "student projects" in their info
+        """
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user.groups = [user.IS_STUDENT_PK]
+        user.save()
+        semester1 = SemesterFactory.create(year=2014, type='spring')
+        semester2 = SemesterFactory.create(year=2014, type='autumn')
+        sp1 = StudentProjectFactory.create(student=user, semesters=[])
+        sp2 = StudentProjectFactory.create(student=user,
+                                           semesters=[semester1, semester2],
+                                           description="")
+        resp = self.client.get(reverse('user_detail', args=[user.pk]))
+        self.assertContains(resp, sp1.name)
+        self.assertContains(resp, sp1.description)
+        self.assertContains(resp, sp2.name)
