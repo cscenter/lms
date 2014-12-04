@@ -10,7 +10,7 @@ import factory
 from learning.models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseOfferingNewsNotification, NonCourseEvent
+    CourseOfferingNewsNotification, NonCourseEvent, StudentProject
 from users.models import CSCUser
 
 
@@ -204,3 +204,23 @@ class NonCourseEventFactory(factory.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = "13:00"
     ends_at = "13:45"
+
+
+class StudentProjectFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StudentProject
+
+    name = factory.Sequence(lambda n: "Test student project %03d" % n)
+    description = factory.Sequence(lambda n: ("Test student project "
+                                              "description %03d" % n))
+    student = factory.SubFactory(UserFactory, groups=['Student'])
+    supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
+    project_type = 'practice'
+
+    @factory.post_generation
+    def semesters(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for semester in extracted:
+                self.semesters.add(semester)
