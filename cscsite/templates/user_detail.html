@@ -41,6 +41,23 @@
             {% endfor %}
           </ul>
           {% endif %}
+        {% if student_projects %}
+        {% trans "Student projects"|lower %}:
+          <ul>
+            {% for project in student_projects %}
+            <li>
+              {{ project.semesters_list|join:", " }}:
+              {{ project.name }}{% if project.presentation %} (<a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>){% endif %},
+              {% trans "StudentProject|Supervisor"|lower %} {{ project.supervisor }}
+              {% if project.description %}
+              <div class="ubertext">
+                {{ project.description }}
+              </div>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
         </li>
         {% endif %}
         {% if user_object.is_graduate %}
