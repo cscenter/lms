@@ -126,7 +126,8 @@ class UserDetailView(generic.DetailView):
                                   'enrollment_set',
                                   'enrollment_set__course_offering',
                                   'enrollment_set__course_offering__semester',
-                                  'enrollment_set__course_offering__course'))
+                                  'enrollment_set__course_offering__course',
+                                  'studentproject_set'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(UserDetailView, self)
@@ -136,6 +137,16 @@ class UserDetailView(generic.DetailView):
              self.request.user.is_superuser)
         context['is_editing_allowed'] = \
             context['is_extended_profile_available']
+        student_projects = list(self.object.studentproject_set.order_by('pk'))
+        for i in range(len(student_projects)):
+            semesters = list(reversed(student_projects[i].semesters.all()))
+            setattr(student_projects[i], 'semesters_list', semesters)
+        student_projects = sorted(student_projects,
+                                  key=lambda p: p.semesters_list[0].type,
+                                  reverse=True)
+        student_projects = sorted(student_projects,
+                                  key=lambda p: p.semesters_list[0].year)
+        context['student_projects'] = student_projects
         return context
 
 

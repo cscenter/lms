@@ -744,6 +744,57 @@ class NonCourseEvent(TimeStampedModel):
         return reverse('non_course_event_detail', args=[self.pk])
 
 
+@python_2_unicode_compatible
+class StudentProject(TimeStampedModel):
+    PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
+                            ('research', _("StudentProject|Research")))
+
+    def _slides_file_name(self, filename):
+        return os.path.join('project_presentations',
+                            str(self.student.pk), filename)
+
+    name = models.CharField(_("StudentProject|Name"), max_length=255)
+    description = models.TextField(
+        _("Description"),
+        blank=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("AssignmentStudent|student"),
+        on_delete=models.CASCADE,
+        limit_choices_to={'groups__name': 'Student'})
+    supervisor = models.CharField(
+        verbose_name=_("StudentProject|Supervisor"),
+        max_length=255,
+        help_text=_("Format: Last_name First_name Patronymic, Organization"))
+    semesters = models.ManyToManyField(
+        Semester,
+        verbose_name=_("Semesters"))
+    project_type = models.CharField(
+        choices=PROJECT_TYPES,
+        verbose_name=_("StudentProject|Type"),
+        max_length=10)
+    presentation = models.FileField(
+        _("Presentation"),
+        blank=True,
+        upload_to=_slides_file_name)
+
+    class Meta:
+        # NOTE(Dmitry): we should probably order by min of semesters,
+        #               but it can't be enforced here
+        ordering = ["name"]
+        verbose_name = _("Student project")
+        verbose_name_plural = _("Student projects")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+    # this is needed to share code between CourseClasses and this model
+    @property
+    def project_type_display(self):
+        return self.PROJECT_TYPES[self.project_type]
+
+
 # XXX this is a gross hack of course. A better solution imo would be
 # to put signal handlers right next to the models.
 from .signals import *
