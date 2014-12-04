@@ -617,6 +617,7 @@ class Enrollment(TimeStampedModel):
 
     class Meta:
         ordering = ["student", "course_offering"]
+        unique_together = [('student', 'course_offering')]
         verbose_name = _("Enrollment")
         verbose_name_plural = _("Enrollments")
 
