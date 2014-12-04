@@ -37,7 +37,7 @@ class LoginForm(AuthenticationForm):
         self.helper.layout = Layout(
             'username',
             'password',
-            FormActions(Div(Submit('submit', _("Submit")),
+            FormActions(Div(Submit('submit', _("Login")),
                             css_class="pull-right")))
 
 
