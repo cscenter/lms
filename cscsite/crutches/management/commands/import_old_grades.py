@@ -73,8 +73,7 @@ class Command(BaseCommand):
                     continue
                 if len(users) > 1:
                     self.stdout.write("ERROR: more than one user named {} {}"
-                                      .format(first_name, last_name)
-                                      .encode('utf8'))
+                                      .format(first_name, last_name))
                     continue
                 student = users[0]
                 for k, v in entry.items():
@@ -86,8 +85,7 @@ class Command(BaseCommand):
                     co = co_index[k]
                     if not grade:
                         self.stdout.write("ERROR: can't map grade {}"
-                                          .format(v)
-                                          .encode('utf8'))
+                                          .format(v))
                         continue
                     enr, created = (Enrollment.objects
                                     .get_or_create(
