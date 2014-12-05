@@ -170,6 +170,7 @@ MENU_URL_NAMES = {
     'teaching': {},
     'learning': {},
     'enrollment': {},
+    'staff': {},
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},

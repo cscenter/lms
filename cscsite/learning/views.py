@@ -1131,8 +1131,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                      'student__last_name',
                                      'student__first_name')
                            .select_related('course_offering', 'student'))
-        course_offering_list = (CourseOffering.objects
-                                .filter(teachers=self.request.user)
+        course_offering_list = (base_qs
                                 .order_by('-semester__year',
                                           '-semester__type',
                                           '-pk')
