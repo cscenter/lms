@@ -148,16 +148,16 @@ li.for-teachers.current {
 }
 
 .header.lvl2.for-staff {
-  background-color: #D3B665;
+  background-color: #E4C46C;
 }
 .header.lvl2.for-staff .row {
-  background-color: #D3B665;
+  background-color: #E4C46C;
 }
 li.for-staff.current {
   background-color: #D3B665 !important;
 }
 .header.for-staff li:hover {
-  background-color: #D3B665
+  background-color: #DBBD68;
 }
 .header.for-staff li.current {
   background-color: #D3B665 !important;

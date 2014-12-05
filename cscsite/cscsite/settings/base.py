@@ -212,9 +212,12 @@ MENU_URL_NAMES = {
     'calendar_full_teacher': {'parent': 'teaching'},
     'course_list_teacher': {'parent': 'teaching'},
     'course_edit': {'alias': 'course_list'},
-    'markssheet_teacher': {'parent': 'teaching'},
+    'markssheet_teacher_dispatch': {'parent': 'teaching'},
+    'markssheet_teacher': {'alias': 'markssheet_teacher_dispatch'},
 
-    'markssheet_staff': {},
+    'markssheet_staff': {'parent': 'staff'},
+    'course_markssheet_staff_dispatch': {'parent': 'staff'},
+    'course_markssheet_staff': {'alias': 'course_markssheet_staff_dispatch'},
     'user_detail': {},
     'custom_text_page': {},
 

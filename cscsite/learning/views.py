@@ -16,7 +16,8 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
 
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, F
-from django.http import HttpResponseBadRequest, Http404, HttpResponse
+from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
+    HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.encoding import smart_text
@@ -1008,22 +1009,112 @@ class AssignmentDeleteView(TeacherOnlyMixin,
             (user in obj.course_offering.teachers.all())
 
 
+class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
+                                    generic.ListView):
+    class RedirectException(Exception):
+        def __init__(self, url):
+            self.url = url
+
+    is_for_staff = None
+    ms_url_name = None
+    model = Semester
+    template_name = "learning/markssheet_teacher_dispatch.html"
+
+    def __init__(self, *args, **kwargs):
+        super(MarksSheetTeacherDispatchView, self).__init__(*args, **kwargs)
+        if kwargs.get('is_for_staff'):
+            self.is_for_staff = True
+            self.ms_url_name = 'course_markssheet_staff'
+        else:
+            self.is_for_staff = False
+            self.ms_url_name = 'markssheet_teacher'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return (super(MarksSheetTeacherDispatchView, self)
+                    .get(request, *args, **kwargs))
+        except MarksSheetTeacherDispatchView.RedirectException as re:
+            return HttpResponseRedirect(re.url)
+
+    def get_queryset(self):
+        return (self.model.objects
+                .prefetch_related("courseoffering_set",
+                                  "courseoffering_set__course"))
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(MarksSheetTeacherDispatchView, self)
+                   .get_context_data(**kwargs))
+        semester_list = list(context["semester_list"])
+        if not semester_list:
+            return context
+
+        now_ = now()
+        for semester in semester_list:
+            if self.request.user.is_superuser:
+                cos = semester.courseoffering_set.all()
+            else:
+                cos = (semester.courseoffering_set
+                       .filter(teachers=self.request.user))
+            semester.courseofferings = sorted(
+                cos,
+                key=lambda co: co.course.name)
+            if len(semester.courseofferings) == 1 \
+               and semester.starts_at <= now_ <= semester.ends_at:
+                co = semester.courseofferings[0]
+                url = reverse(self.ms_url_name,
+                              args=[co.course.slug,
+                                    co.semester.year,
+                                    co.semester.type])
+                raise MarksSheetTeacherDispatchView.RedirectException(url)
+
+        # Check if we only have the fall semester for the ongoing year.
+        current = semester_list[0]
+        if current.type == Semester.TYPES.autumn:
+            semester = Semester(type=Semester.TYPES.spring,
+                                year=current.year + 1)
+            semester.courseofferings = []
+            semester_list.insert(0, semester)
+
+        context["semester_list"] = [
+            (a, s) for s, a in utils.grouper(semester_list, 2)]
+        context['ms_url_name'] = self.ms_url_name
+        return context
+
+
+
 class MarksSheetTeacherView(TeacherOnlyMixin,
                             generic.FormView):
     user_type = 'teacher'
-    success_url = 'markssheet_teacher'
     template_name = "learning/markssheet_teacher.html"
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
         self.a_s_list = None
         self.enrollment_list = None
+        self.course_offering_list = None
+        self.course_offering = None
         super(MarksSheetTeacherView, self).__init__(*args, **kwargs)
 
     def get_form_class(self):
-        user = self.request.user
+        try:
+            semester_year = int(self.kwargs['semester_year'])
+        except ValueError, TypeError:
+            raise Http404('Course offering not found')
+        if self.request.user.is_superuser:
+            base_qs = CourseOffering.objects
+        else:
+            base_qs = (CourseOffering.objects
+                       .filter(teachers=self.request.user))
+        try:
+            co = (base_qs
+                  .select_related('semester', 'course')
+                  .get(course__slug=self.kwargs['course_slug'],
+                       semester__type=self.kwargs['semester_type'],
+                       semester__year=semester_year))
+        except ObjectDoesNotExist:
+            raise Http404('Course offering not found')
         a_s_list = (AssignmentStudent.objects
-                    .filter(assignment__course_offering__teachers=user)
+                    .filter(assignment__course_offering=co)
                     .order_by('assignment__course_offering',
                               'student',
                               'assignment')
@@ -1033,15 +1124,23 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                     'assignment__course_offering__semester',
                                     'student'))
         enrollment_list = (Enrollment.objects
-                           .filter(course_offering__teachers=user)
+                           .filter(course_offering=co)
                            .order_by('course_offering__semester__year',
                                      'course_offering__semester__type',
                                      'course_offering',
                                      'student__last_name',
                                      'student__first_name')
                            .select_related('course_offering', 'student'))
+        course_offering_list = (CourseOffering.objects
+                                .filter(teachers=self.request.user)
+                                .order_by('-semester__year',
+                                          '-semester__type',
+                                          '-pk')
+                                .select_related('semester', 'course'))
         self.a_s_list = a_s_list
         self.enrollment_list = enrollment_list
+        self.course_offering = co
+        self.course_offering_list = course_offering_list
         return (MarksSheetTeacherFormFabrique
                 .build_form_class(a_s_list,
                                   enrollment_list))
@@ -1049,6 +1148,12 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
     def get_initial(self):
         return (MarksSheetTeacherFormFabrique
                 .transform_to_initial(self.a_s_list, self.enrollment_list))
+
+    def get_success_url(self):
+        co = self.course_offering
+        return reverse('markssheet_teacher', args=[co.course.slug,
+                                                   co.semester.year,
+                                                   co.semester.type])
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
@@ -1081,40 +1186,36 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         # implying that the data is already sorted
         structured = OrderedDict()
         for enrollment in self.enrollment_list:
-            offering = enrollment.course_offering
             student = enrollment.student
-            if offering not in structured:
-                structured[offering] = OrderedDict()
-            if student not in structured[offering]:
-                structured[offering][student] = OrderedDict()
+            if student not in structured:
+                structured[student] = OrderedDict()
         for a_s in data:
-            offering = a_s.assignment.course_offering
             # if assignment is "offline", provide ModelForm instead of
             # the object itself
             if a_s.assignment.is_online:
                 cell = a_s
             else:
                 cell = get_a_s_field(a_s.pk)
-            structured[offering][a_s.student][a_s.assignment] = cell
+            structured[a_s.student][a_s.assignment] = cell
 
-        headers = OrderedDict()
-        for offering, by_student in structured.items():
-            header = by_student.values()[0].keys()
-            headers[offering] = header
-            for _, by_assignment in by_student.items():
-                # we should check for "assignment consistency": that all
-                # assignments are similar for all students in particular
-                # course offering
-                assert by_assignment.keys() == header
+        if len(structured) > 0:
+            header = structured.values()[0].keys()
+        else:
+            header = []
+        for _, by_assignment in structured.items():
+            # we should check for "assignment consistency": that all
+            # assignments are similar for all students in particular
+            # course offering
+            assert by_assignment.keys() == header
 
-        context['structured'] = [(offering, headers[offering],
-                                  [(student,
-                                    get_final_grade_field(offering.pk,
-                                                          student.pk),
-                                    by_assignment)
-                                   for student, by_assignment
-                                   in by_student.iteritems()])
-                                 for offering, by_student
+        context['course_offering'] = self.course_offering
+        context['course_offering_list'] = self.course_offering_list
+        context['header'] = header
+        context['structured'] = [(student,
+                                  get_final_grade_field(self.course_offering.pk,
+                                                        student.pk),
+                                  by_assignment)
+                                 for student, by_assignment
                                  in structured.iteritems()]
         context['user_type'] = self.user_type
         return context
@@ -1125,18 +1226,26 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        courseoffering_pk = kwargs['pk']
+        course_slug = kwargs['course_slug']
+        semester_slug = kwargs['semester_slug']
         try:
-            co = CourseOffering.objects.get(
-                teachers=request.user,
-                pk=courseoffering_pk,
-                course__slug=kwargs['course_slug'])
+            semester_year, semester_type = semester_slug.split('-')
+            semester_year = int(semester_year)
+        except ValueError, TypeError:
+            raise Http404('Course offering not found')
+        if request.user.is_superuser:
+            base_qs = CourseOffering.objects
+        else:
+            base_qs = CourseOffering.objects.filter(teachers=request.user)
+        try:
+            co = base_qs.get(
+                course__slug=course_slug,
+                semester__type=semester_type,
+                semester__year=semester_year)
         except ObjectDoesNotExist:
             raise Http404('Course offering not found')
-        if co.semester.slug != kwargs['semester_slug']:
-            raise Http404('Course offering not found')
         a_ss = (AssignmentStudent.objects
-                .filter(assignment__course_offering__pk=courseoffering_pk)
+                .filter(assignment__course_offering=co)
                 .order_by('student', 'assignment')
                 .select_related('assignment',
                                 'assignment__course_offering',
@@ -1144,7 +1253,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                                 'assignment__course_offering__semester',
                                 'student'))
         enrollments = (Enrollment.objects
-                       .filter(course_offering__pk=courseoffering_pk)
+                       .filter(course_offering=co)
                        .select_related('course_offering', 'student'))
         structured = OrderedDict()
         enrollment_grades = {}
@@ -1165,9 +1274,8 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename \
-            = "{}-{}-{}.csv".format(courseoffering_pk,
-                                    kwargs['course_slug'],
-                                    kwargs['semester_slug'])
+            = "{}-{}.csv".format(kwargs['course_slug'],
+                                 kwargs['semester_slug'])
         response['Content-Disposition'] \
             = 'attachment; filename="{}"'.format(filename)
 

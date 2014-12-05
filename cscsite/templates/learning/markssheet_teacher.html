@@ -4,88 +4,107 @@
 
 {% block content %}
 <div class="container">
+  <form method="post">{% csrf_token %}
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
-      <h2>{% trans "Marks sheet" %}</h2>
+      <h2>{% trans "Marks sheet" %}
+        <small>{{ course_offering }}</small>
+      </h2>
       <div class="btn-toolbar">
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
+        </div>
+        <div class="btn-group">
+          <a href="{% url 'markssheet_teacher_csv' course_offering.course.slug course_offering.semester.slug %}"
+             target="_blank"
+             class="btn btn-default marks-sheet-csv-link" role="button"><i class="fa fa-download"></i></a>
+        </div>
+        <div class="btn-group">
+          <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+              {% trans "Courses" %}
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdownMenu1">
+              {% regroup course_offering_list by semester as co_by_semester %}
+              {% for cos in co_by_semester %}
+              <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
+              {% for co in cos.list %}
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'markssheet_teacher' co.course.slug co.semester.year co.semester.type %}">{{ co }}</a></li>
+              {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
       <hr>
     </div>
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <form method="post">{% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
-        {% for offering, header, by_student in structured %}
-        <div class="offering">
-          <h3>{{ offering }}
-            <small>
-              <a href="{% url 'markssheet_teacher_csv' offering.pk offering.course.slug offering.semester.slug %}" class="marks-sheet-csv-link" target="_blank"><i class="fa fa-download"></i><span class="reason"> {% trans "please save before downloading" %}</span></a>
-            </small>
-          </h3>
+      <div class="offering">
         <div class="marks-table-container-outer">
           <div class="marks-table-container-inner">
-          <table class="marks-table teacher">
-            <tr>
-              <td></td>
-              {% for assignment in header %}
-              <td class="marks-header marks-header-vert">
-                <div class="inner">
-                  <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
-                    {{ assignment.title }}
+            <table class="marks-table teacher">
+              <tr>
+                <td></td>
+                {% for assignment in header %}
+                <td class="marks-header marks-header-vert">
+                  <div class="inner">
+                    <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
+                      {{ assignment.title }}
+                    </a>
+                  </div>
+                </td>
+                {% endfor %}
+                <td></td>
+              </tr>
+              {% for student, final_grade, by_assignment in structured %}
+              <tr>
+                <td class="marks-header marks-header-horiz">
+                  <a href="{{ student.get_absolute_url }}">
+                    {% if student.last_name %}
+                    {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
+                    {% else %}
+                    {{ student.username }}
+                    {% endif %}
                   </a>
-                </div>
-              </td>
-              {% endfor %}
-              <td></td>
-            </tr>
-            {% for student, final_grade, by_assignment in by_student %}
-            <tr>
-              <td class="marks-header marks-header-horiz">
-                <a href="{{ student.get_absolute_url }}">
-                  {% if student.last_name %}
-                  {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
-                  {% else %}
-                  {{ student.username }}
-                  {% endif %}
-                </a>
-              </td>
+                </td>
 
-              {% for assignment, cell in by_assignment.iteritems %}
-              <td class="content">
-                {% if assignment.is_online %}
-                <a href="{% url 'a_s_detail_teacher' cell.pk %}">
-                  {{ cell.state_short }}
-                </a>
-                {% else %}
-                <span class="marks-sheet-form-cell">
-                  {{ cell }}
-                </span>
-                {% endif %}
-              </td>
+                {% for assignment, cell in by_assignment.iteritems %}
+                <td class="content">
+                  {% if assignment.is_online %}
+                  <a href="{% url 'a_s_detail_teacher' cell.pk %}">
+                    {{ cell.state_short }}
+                  </a>
+                  {% else %}
+                  <span class="marks-sheet-form-cell">
+                    {{ cell }}
+                  </span>
+                  {% endif %}
+                </td>
+                {% endfor %}
+                <td>
+                  <span class="marks-sheet-form-cell final-grade-cell">
+                    {{ final_grade }}
+                  </span>
+                </td>
+              </tr>
               {% endfor %}
-              <td>
-                <span class="marks-sheet-form-cell final-grade-cell">
-                  {{ final_grade }}
-                </span>
-              </td>
-            </tr>
-            {% endfor %}
-            <tr>
-              <td></td>
-              {% for assignment in header %}
-              <td>
-                {{ assignment.grade_min }}–{{ assignment.grade_max }}
-              </td>
-              {% endfor %}
-            </tr>
-          </table>
+              <tr>
+                <td></td>
+                {% for assignment in header %}
+                <td>
+                  {{ assignment.grade_min }}–{{ assignment.grade_max }}
+                </td>
+                {% endfor %}
+              </tr>
+            </table>
           </div>
         </div>
-        </div>
-        {% endfor %}
-      </form>
+      </div>
     </div>
   </div>
+  </form>
 </div>
 {% endblock content %}

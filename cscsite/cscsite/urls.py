@@ -31,6 +31,7 @@ from learning.views import \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView,  MarksSheetStaffView, \
+    MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView
 
 
@@ -113,9 +114,12 @@ urlpatterns = patterns('',
         AssignmentDeleteView.as_view(),
         name='assignment_delete'),
     url(r'^teaching/marks/$',
+        MarksSheetTeacherDispatchView.as_view(),
+        name='markssheet_teacher_dispatch'),
+    url(r'^teaching/marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         MarksSheetTeacherView.as_view(),
         name='markssheet_teacher'),
-    url(r'^teaching/marks/(?P<pk>\d+)_(?P<course_slug>[-\w]+)_(?P<semester_slug>[-\w]+).csv$',
+    url(r'^teaching/marks/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)\.csv$',
         MarksSheetTeacherCSVView.as_view(),
         name='markssheet_teacher_csv'),
 
@@ -154,6 +158,12 @@ urlpatterns = patterns('',
     url(r'^staff/marks/$',
         MarksSheetStaffView.as_view(),
         name='markssheet_staff'),
+    url(r'^staff/course-marks/$',
+        MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
+        name='course_markssheet_staff_dispatch'),
+    url(r'^staff/course-marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
+        MarksSheetTeacherView.as_view(),
+        name='course_markssheet_staff'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),
