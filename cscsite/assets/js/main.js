@@ -118,40 +118,27 @@ $(document).ready(function () {
     $(".marks-table.teacher").on('change', 'input,select', function (e) {
         $this = $(this);
         $target = $(e.target)
-        $csv_link = ($this.closest(".offering")
-                     .find(".marks-sheet-csv-link"));
+        $csv_link = $(".marks-sheet-csv-link");
         var current_value = $target.val();
         var saved_value = $target.next("input[type=hidden]").val();
-        var current_table_n_unsaved = $this.data("n-unsaved");
-        if (current_table_n_unsaved == null) {
-            current_table_n_unsaved = 0;
-        }
         if (current_value != saved_value) {
             $target.parent().addClass("marks-sheet-unsaved-cell");
             marks_sheet_unsaved++;
-            current_table_n_unsaved++;
-            $this.data("n-unsaved", current_table_n_unsaved);
             if (marks_sheet_unsaved > 0) {
                 $("#marks-sheet-save").removeAttr("disabled");
-            }
-            if (current_table_n_unsaved > 0) {
-                $csv_link.addClass("link-disabled");
-                $csv_link.click(function(e) {
-                    $(this).find(".reason").addClass("active");
-                    return false;
-                });
+                $csv_link.addClass("disabled");
+                // $csv_link.click(function(e) {
+                //     $(this).find(".reason").addClass("active");
+                //     return false;
+                // });
             }
         } else {
             $target.parent().removeClass("marks-sheet-unsaved-cell");
             marks_sheet_unsaved--;
-            current_table_n_unsaved--;
-            $this.data("n-unsaved", current_table_n_unsaved);
             if (marks_sheet_unsaved == 0) {
                 $("#marks-sheet-save").attr("disabled", "disabled");
-            }
-            if (current_table_n_unsaved == 0) {
-                $csv_link.removeClass("link-disabled");
-                $csv_link.off("click");
+                $csv_link.removeClass("disabled");
+                // $csv_link.off("click");
             }
         }
     })

@@ -1187,8 +1187,41 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
 
 class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
-    url_name = 'markssheet_teacher'
+    url_name = 'markssheet_teacher_dispatch'
     groups_allowed = ['Teacher']
+
+    def test_redirect(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(3, groups=['Student'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co)
+        url = reverse(self.url_name)
+        co_url = reverse('markssheet_teacher',
+                         args=[co.course.slug,
+                               co.semester.year,
+                               co.semester.type])
+        self.assertRedirects(self.client.get(url), co_url)
+
+    def test_list(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        students = UserFactory.create_batch(3, groups=['Student'])
+        co1, co2 = CourseOfferingFactory.create_batch(2, teachers=[teacher])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co)
+        url = reverse(self.url_name)
+        for co in [co1, co2]:
+            co_url = reverse('markssheet_teacher',
+                             args=[co.course.slug,
+                                   co.semester.year,
+                                   co.semester.type])
+            self.assertContains(self.client.get(url), co_url)
+
+
+class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
+    # TODO(Dmitry): test security
 
     def test_empty_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -1200,16 +1233,23 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                                      course_offering=co1)
             EnrollmentFactory.create(student=student,
                                      course_offering=co2)
-        url = reverse(self.url_name)
+        url = reverse('markssheet_teacher', args=[co1.course.slug,
+                                                  co1.semester.year,
+                                                  co1.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
             name = "{}&nbsp;{}.".format(student.last_name,
                                         student.first_name[0])
-            self.assertContains(resp, name, 2)
-            for co in [co1, co2]:
-                field = 'final_grade_{}_{}'.format(co.pk, student.pk)
-                self.assertIn(field, resp.context['form'].fields)
+            self.assertContains(resp, name, 1)
+            field = 'final_grade_{}_{}'.format(co1.pk, student.pk)
+            self.assertIn(field, resp.context['form'].fields)
+        for co in [co1, co2]:
+            url = reverse('markssheet_teacher',
+                          args=[co.course.slug,
+                                co.semester.year,
+                                co.semester.type])
+            self.assertContains(resp, url)
 
     def test_nonempty_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -1222,7 +1262,9 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
             2, course_offering=co)
         as_offline = AssignmentFactory.create_batch(
             3, course_offering=co, is_online=False)
-        url = reverse(self.url_name)
+        url = reverse('markssheet_teacher', args=[co.course.slug,
+                                                  co.semester.year,
+                                                  co.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
@@ -1253,7 +1295,9 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                                      course_offering=co)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                                 is_online=False)
-        url = reverse(self.url_name)
+        url = reverse('markssheet_teacher', args=[co.course.slug,
+                                                  co.semester.year,
+                                                  co.semester.type])
         self.doLogin(teacher)
         form = {}
         pairs = zip([AssignmentStudent.objects.get(student=student,
@@ -1286,7 +1330,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         EnrollmentFactory.create(student=student, course_offering=co)
         url = reverse('markssheet_teacher_csv',
-                      args=[co.pk, co.course.slug, co.semester.slug])
+                      args=[co.course.slug, co.semester.slug])
         self.assertEquals(403, self.client.get(url).status_code)
         for groups in [[], ['Student']]:
             self.doLogin(UserFactory.create(groups=groups))
@@ -1305,7 +1349,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         [EnrollmentFactory.create(student=s, course_offering=co)
          for s in [student1, student2]]
         url = reverse('markssheet_teacher_csv',
-                      args=[co.pk, co.course.slug, co.semester.slug])
+                      args=[co.course.slug, co.semester.slug])
         combos = [(a, s, grade+1)
                   for ((a, s), grade)
                   in zip([(a, s)

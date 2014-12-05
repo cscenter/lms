@@ -75,8 +75,8 @@
                 {% endif %}
                 {% if user.is_staff %}
                   <a href="{% url 'markssheet_staff' %}">
-                    <li class="{% current 'markssheet_staff' %} for-staff">
-                      {% trans "Marks sheet" %}
+                    <li class="{% current 'staff' %} for-staff">
+                      {% trans "Marks sheets" %}
                     </li>
                   </a>
                 {% endif %}
@@ -234,8 +234,8 @@
                     {% endif %}
                   </li>
                 </a>
-                <a href="{% url 'markssheet_teacher' %}">
-                  <li class="{% current 'markssheet_teacher' %}">
+                <a href="{% url 'markssheet_teacher_dispatch' %}">
+                  <li class="{% current 'markssheet_teacher_dispatch' %}">
                     {% trans "Marks sheet" %}
                   </li>
                 </a>
@@ -244,6 +244,30 @@
           </div>
         </div>
       </div>
+
+      <div class="header lvl2 for-staff {% current 'staff' %}">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="logo-cell"></div>
+              <ul>
+                <a href="{% url 'markssheet_staff' %}">
+                  <li class="{% current 'markssheet_staff' %}">
+                    {% trans "MarksSheet|Main" %}
+                  </li>
+                </a>
+                <a href="{% url 'course_markssheet_staff_dispatch' %}">
+                  <li class="{% current 'course_markssheet_staff_dispatch' %}">
+                    {% trans "Course marks sheets" %}
+                  </li>
+                </a>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
 
     {% block content %}
