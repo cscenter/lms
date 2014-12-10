@@ -613,7 +613,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = CourseClassFactory.attributes()
         form.update({'venue': VenueFactory.create().pk})
-        url = reverse('course_class_add')
+        url = reverse('course_class_add',
+                      args=[co.course.slug, co.semester.slug])
         self.assertEqual(403, self.client.get(url).status_code)
         self.assertEqual(403, self.client.post(url, form).status_code)
 
@@ -625,15 +626,20 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co_other = CourseOfferingFactory.create(semester=s)
         form = CourseClassFactory.attributes()
         form.update({'venue': VenueFactory.create().pk})
-        url = reverse('course_class_add')
+        url = reverse('course_class_add',
+                      args=[co.course.slug, co.semester.slug])
         self.doLogin(teacher)
         form.update({'course_offering': co_other.pk})
-        # should show an error instead of 302
-        self.assertEqual(200, self.client.post(url, form).status_code)
-        form.update({'course_offering': co.pk})
+        # should save with course_offering = co
         self.assertEqual(302, self.client.post(url, form).status_code)
+        self.assertEqual(1, (CourseClass.objects
+                             .filter(course_offering=co).count()))
+        self.assertEqual(0, (CourseClass.objects
+                             .filter(course_offering=co_other).count()))
         self.assertEqual(CourseClass.objects.get(course_offering=co).name,
                          form['name'])
+        form.update({'course_offering': co.pk})
+        self.assertEqual(302, self.client.post(url, form).status_code)
 
     def test_update(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -641,7 +647,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        url = reverse('course_class_edit', args=[cc.pk])
+        url = reverse('course_class_edit',
+                      args=[co.course.slug, co.semester.slug, cc.pk])
         self.doLogin(teacher)
         form = model_to_dict(cc)
         del form['slides']
@@ -658,7 +665,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        url = reverse('course_class_delete', args=[cc.pk])
+        url = reverse('course_class_delete',
+                      args=[co.course.slug, co.semester.slug, cc.pk])
         self.assertEquals(403, self.client.get(url).status_code)
         self.assertEquals(403, self.client.post(url).status_code)
         self.doLogin(teacher)
@@ -673,29 +681,18 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        base_url = reverse('course_class_edit', args=[cc.pk])
+        base_url = reverse('course_class_edit',
+                           args=[co.course.slug, co.semester.slug, cc.pk])
         self.doLogin(teacher)
         form = model_to_dict(cc)
         del form['slides']
         form['name'] += " foobar"
         self.assertRedirects(self.client.post(base_url, form),
                              cc.get_absolute_url())
-        url = ("{}?back=course_offering&course_offering={}"
-               .format(base_url, co.pk))
+        url = ("{}?back=course_offering"
+               .format(base_url))
         self.assertRedirects(self.client.post(url, form),
                              co.get_absolute_url())
-        url = ("{}?back=course_offering&course_offering={}"
-               .format(base_url, "foobar"))
-        self.assertEquals(404, self.client.post(url, form).status_code)
-        url = ("{}?back=course_offering&course_offering={}"
-               .format(base_url, 424242))
-        self.assertEquals(404, self.client.post(url, form).status_code)
-        url = "{}?back=calendar".format(base_url, co.pk)
-        self.assertRedirects(self.client.post(url, form),
-                             reverse('calendar_teacher'))
-        url = "{}?back=timetable".format(base_url, co.pk)
-        self.assertRedirects(self.client.post(url, form),
-                             reverse('timetable_teacher'))
 
     def test_attachment_links(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -713,12 +710,18 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertContains(resp, cca2.material.url)
         self.assertContains(resp, cca2.material_file_name)
         self.doLogin(teacher)
-        resp = self.client.get(reverse('course_class_edit', args=[cc.pk]))
-        self.assertContains(resp, reverse('course_class_attachment_delete',
-                                          args=[cc.pk, cca1.pk]))
+        url = reverse('course_class_edit',
+                      args=[co.course.slug, co.semester.slug, cc.pk])
+        resp = self.client.get(url)
+        self.assertContains(resp,
+                            reverse('course_class_attachment_delete',
+                                    args=[co.course.slug, co.semester.slug,
+                                          cc.pk, cca1.pk]))
         self.assertContains(resp, cca1.material_file_name)
-        self.assertContains(resp, reverse('course_class_attachment_delete',
-                                          args=[cc.pk, cca2.pk]))
+        self.assertContains(resp,
+                            reverse('course_class_attachment_delete',
+                                    args=[co.course.slug, co.semester.slug,
+                                          cc.pk, cca2.pk]))
         self.assertContains(resp, cca2.material_file_name)
 
     def test_attachments(self):
@@ -733,7 +736,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form = model_to_dict(cc)
         del form['slides']
         form['attachments'] = [f1, f2]
-        url = reverse('course_class_edit', args=[cc.pk])
+        url = reverse('course_class_edit',
+                      args=[co.course.slug, co.semester.slug, cc.pk])
         self.assertRedirects(self.client.post(url, form),
                              cc.get_absolute_url())
         # check that files are available from course class page
@@ -756,7 +760,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertEquals(as_[1][1], b"attachment2_content")
         # delete one of the files, check that it's deleted and other isn't
         url = reverse('course_class_attachment_delete',
-                      args=[cc.pk, cca_to_delete.pk])
+                      args=[co.course.slug, co.semester.slug,
+                            cc.pk, cca_to_delete.pk])
         # check security just in case
         self.doLogout()
         self.assertEquals(403, self.client.get(url).status_code)
@@ -765,7 +770,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertContains(self.client.get(url),
                             cca_to_delete.material_file_name)
         self.assertRedirects(self.client.post(url),
-                             reverse('course_class_edit', args=[cc.pk]))
+                             reverse('course_class_edit',
+                                     args=[co.course.slug,
+                                           co.semester.slug,
+                                           cc.pk]))
         resp = self.client.get(cc.get_absolute_url())
         spans = (BeautifulSoup(resp.content)
                  .find_all('span', class_='assignment-attachment'))
@@ -1099,7 +1107,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         form = AssignmentFactory.attributes()
         form.update({'course_offering': co.pk,
                      'attached_file': None})
-        url = reverse('assignment_add')
+        url = reverse('assignment_add',
+                      args=[co.course.slug, co.semester.slug])
         self.assertEqual(403, self.client.get(url).status_code)
         self.assertEqual(403, self.client.post(url, form).status_code)
         for groups in [[], ['Student']]:
@@ -1108,7 +1117,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             self.assertEquals(403, self.client.post(url, form).status_code)
             self.doLogout()
         a = AssignmentFactory.create()
-        url = reverse('assignment_edit', args=[a.pk])
+        url = reverse('assignment_edit',
+                      args=[co.course.slug, co.semester.slug, a.pk])
         self.assertEqual(403, self.client.get(url).status_code)
         self.assertEqual(403, self.client.post(url, form).status_code)
         for groups in [[], ['Student'], ['Teacher']]:
@@ -1121,10 +1131,11 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             if groups and groups[0] != 'Teacher':
                 self.assertEquals(403, self.client.post(url, form).status_code)
             elif groups and groups[0] == 'Teacher':
-                # Teacher will get validation error
-                self.assertEquals(200, self.client.post(url, form).status_code)
+                # Teacher will get 404
+                self.assertEquals(404, self.client.post(url, form).status_code)
             self.doLogout()
-        url = reverse('assignment_delete', args=[a.pk])
+        url = reverse('assignment_delete',
+                      args=[co.course.slug, co.semester.slug, a.pk])
         self.assertEqual(403, self.client.get(url).status_code)
         self.assertEqual(403, self.client.post(url, form).status_code)
         for groups in [[], ['Student'], ['Teacher']]:
@@ -1144,14 +1155,11 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
-        url = reverse('assignment_add')
+        url = reverse('assignment_add',
+                      args=[co.course.slug, co.semester.slug])
         self.doLogin(teacher)
-        self.assertNotContains(self.client.get(url), "selected=\"selected\"")
-        self.assertContains(self.client.get(url + "?co={}".format(co.pk)),
-                            ("option value=\"{}\" selected=\"selected\""
-                             .format(co.pk)))
         self.assertRedirects(self.client.post(url, form),
-                             reverse('assignment_list_teacher'))
+                             co.get_absolute_url())
 
     def test_update(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -1165,18 +1173,20 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
-        url = reverse('assignment_edit', args=[a.pk])
+        url = reverse('assignment_edit',
+                      args=[co.course.slug, co.semester.slug, a.pk])
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
         self.assertNotContains(self.client.get(list_url), form['title'])
-        self.assertRedirects(self.client.post(url, form), list_url)
+        self.assertRedirects(self.client.post(url, form), co.get_absolute_url())
         self.assertContains(self.client.get(list_url), form['title'])
 
     def test_delete(self):
         teacher = UserFactory.create(groups=['Teacher'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a = AssignmentFactory.create(course_offering=co)
-        url = reverse('assignment_delete', args=[a.pk])
+        url = reverse('assignment_delete',
+                      args=[co.course.slug, co.semester.slug, a.pk])
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
         self.assertContains(self.client.get(list_url), a.title)

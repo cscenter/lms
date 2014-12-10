@@ -49,11 +49,6 @@
                role="button"
                class="btn btn-default active">{% trans 'Calendar' %}</a>
           </div>
-          {% if user.is_superuser or user.is_teacher and user_type == 'teacher' %}
-          <div class="btn-group">
-            <a href="{% url 'course_class_add' %}?back=calendar" class="btn btn-primary">{% trans 'Add class' %}</a>
-          </div>
-          {% endif%}
         {% endif %}
       </div>
       <hr>

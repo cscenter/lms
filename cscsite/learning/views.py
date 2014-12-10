@@ -599,48 +599,53 @@ class CourseClassCreateUpdateMixin(ProtectedFormMixin):
     def get_initial(self, *args, **kwargs):
         initial = (super(CourseClassCreateUpdateMixin, self)
                    .get_initial(*args, **kwargs))
-        if self.request.GET.get('back') == 'course_offering':
-            pk = self.request.GET['course_offering']
-            try:
-                pk = int(pk)
-            except ValueError:
-                raise Http404
-            self._course_offering = get_object_or_404(
-                CourseOffering.objects.filter(pk=pk))
-            initial['course_offering'] = self._course_offering
+        course_slug, semester_year, semester_type \
+            = utils.co_from_kwargs(self.kwargs)
+        if self.request.user.is_superuser:
+            base_qs = CourseOffering.objects
+        else:
+            base_qs = (CourseOffering.objects
+                       .filter(teachers=self.request.user))
+        self._course_offering = get_object_or_404(
+            base_qs.filter(course__slug=course_slug,
+                           semester__year=semester_year,
+                           semester__type=semester_type))
+        initial['course_offering'] = self._course_offering
         return initial
 
     def get_form(self, form_class):
         if self.object is not None:
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
+            co = self.object.course_offering
             remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
                 "".join("<li>"
                         "<i class=\"fa fa-times\"></i>&nbsp;"
                         "<a href=\"{0}\">{1}</a>"
                         "</li>"
                         .format(reverse('course_class_attachment_delete',
-                                        args=(self.object.pk,
-                                              attachment.pk)),
+                                        args=[co.course.slug,
+                                              co.semester.slug,
+                                              self.object.pk,
+                                              attachment.pk]),
                                 attachment.material_file_name)
                         for attachment
                         in self.object.courseclassattachment_set.all()))
         else:
             remove_links = ""
-        return form_class(self.request.user,
-                          remove_links=remove_links,
+        return form_class(remove_links=remove_links,
                           **self.get_form_kwargs())
 
     def form_valid(self, form):
+        assert self._course_offering is not None
+        self.object = form.save(commit=False)
+        self.object.course_offering = self._course_offering
+        self.object.save()
         attachments = self.request.FILES.getlist('attachments')
         if attachments:
-            self.object = form.save()
             for attachment in attachments:
                 CourseClassAttachment(course_class=self.object,
                                       material=attachment).save()
-        else:
-            self.object = form.save()
-
         return redirect(self.get_success_url())
 
     def get_success_url(self):
@@ -677,7 +682,11 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
             (user in obj.course_class.course_offering.teachers.all())
 
     def get_success_url(self):
-        return reverse('course_class_edit', args=[self.object.course_class.pk])
+        co = self.object.course_class.course_offering
+        return reverse('course_class_edit',
+                       args=[co.course.slug,
+                             co.semester.slug,
+                             self.object.course_class.pk])
 
     def delete(self, request, *args, **kwargs):
         resp = (super(CourseClassAttachmentDeleteView, self)
@@ -968,8 +977,37 @@ class AssignmentCreateUpdateMixin(object):
     form_class = AssignmentForm
     success_url = reverse_lazy('assignment_list_teacher')
 
-    def get_form(self, form_class):
-        return form_class(self.request.user, **self.get_form_kwargs())
+    def __init__(self, *args, **kwargs):
+        self._course_offering = None
+        super(AssignmentCreateUpdateMixin, self).__init__(*args, **kwargs)
+
+    def get_initial(self):
+        initial = super(AssignmentCreateUpdateMixin, self).get_initial()
+        course_slug, semester_year, semester_type \
+            = utils.co_from_kwargs(self.kwargs)
+        if self.request.user.is_superuser:
+            base_qs = CourseOffering.objects
+        else:
+            base_qs = (CourseOffering.objects
+                       .filter(teachers=self.request.user))
+        self._course_offering = get_object_or_404(
+            base_qs.filter(course__slug=course_slug,
+                           semester__year=semester_year,
+                           semester__type=semester_type))
+        initial['course_offering'] = self._course_offering
+        return initial
+
+    def get_success_url(self):
+        return reverse('course_offering_detail',
+                       args=[self._course_offering.course.slug,
+                             self._course_offering.semester.slug])
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        assert self._course_offering is not None
+        self.object.course_offering = self._course_offering
+        self.object.save()
+        return super(AssignmentCreateUpdateMixin, self).form_valid(form)
 
 
 # No ProtectedFormMixin here because we are filtering out other's courses
@@ -977,15 +1015,7 @@ class AssignmentCreateUpdateMixin(object):
 class AssignmentCreateView(TeacherOnlyMixin,
                            AssignmentCreateUpdateMixin,
                            generic.CreateView):
-    def get_initial(self):
-        initial = super(AssignmentCreateView, self).get_initial()
-        try:
-            course_offering = (CourseOffering.objects
-                               .get(pk=self.request.GET.get('co')))
-            initial.update({'course_offering': course_offering})
-        except ObjectDoesNotExist:
-            pass
-        return initial
+    pass
 
 
 # Same here

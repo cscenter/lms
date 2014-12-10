@@ -14,7 +14,7 @@
       <div class="btn-toolbar">
         {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
         <div class="btn-group">
-          <a href="{% url 'assignment_add' %}?co={{ course_offering.pk }}" class="btn btn-primary" role="button">
+          <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
             {% trans "Add assignment" %}
           </a>
         </div>
@@ -24,7 +24,7 @@
           </a>
         </div>
         <div class="btn-group">
-          <a href="{% url 'course_class_add' %}?back=course_offering&course_offering={{ course_offering.pk }}" class="btn btn-primary">{% trans 'Add class' %}</a>
+          <a href="{% url 'course_class_add' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary">{% trans 'Add class' %}</a>
         </div>
         <div class="btn-group">
           <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
@@ -119,7 +119,7 @@
           </td>
           <td>
             {% if user_type == 'teacher' %}
-            <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+            <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug  class.pk %}#div_id_slides">
               {{ class.slides|yesno:_("Yes,No") }}
             </a>
             {% else %}

@@ -33,14 +33,17 @@ $(document).ready(function () {
     $("textarea.ubereditor").each(function(i) {
         var $textarea = $(this);
         var $container = $("<div/>").insertAfter($textarea);
+        var shouldFocus = false;
 
         $textarea.hide();
+        shouldFocus = $textarea.prop("autofocus");
         $textarea.removeProp("required");
 
         var editor = new EpicEditor({
             container: $container[0],
             textarea: $textarea[0],
             parser: null,
+            focusOnLoad: shouldFocus,
             basePath: "/static/js/EpicEditor-v0.2.2",
             clientSideStorage: false,
             autogrow: {minHeight: 200},

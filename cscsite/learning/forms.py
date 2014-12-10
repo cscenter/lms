@@ -96,10 +96,6 @@ class CourseForm(forms.ModelForm):
 
 
 class CourseClassForm(forms.ModelForm):
-    course_offering = forms.ModelChoiceField(
-        CourseOffering.objects.all(),
-        label=_("Course offering"),
-        empty_label=None)
     venue = forms.ModelChoiceField(
         Venue.objects.all(),
         label=_("Venue"),
@@ -109,13 +105,12 @@ class CourseClassForm(forms.ModelForm):
         choices=CourseClass.TYPES)
     name = forms.CharField(
         label=_("CourseClass|Name"),
-        widget=forms.TextInput(attrs={'autocomplete': 'off',
-                                      'autofocus': 'autofocus'}))
+        widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     description = forms.CharField(
         label=_("Description"),
         required=False,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor)
+        widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
     slides = forms.FileField(
         label=_("Slides"),
         required=False,
@@ -150,14 +145,12 @@ class CourseClassForm(forms.ModelForm):
         # help_text=_("Example: 14:40"),
         widget=forms.TimeInput(format="%H:%M"))
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         remove_links = kwargs.get('remove_links', "")
         del kwargs['remove_links']
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div(Div(Div('course_offering',
-                        css_class='col-xs-7'),
-                    Div('type',
+            Div(Div(Div('type',
                         css_class='col-xs-2'),
                     Div('venue',
                         css_class='col-xs-3'),
@@ -185,13 +178,6 @@ class CourseClassForm(forms.ModelForm):
                      'other_materials'),
             CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
-
-        # This is needed to guard against teachers adding classes to
-        # other's courses. However, no protection is needed if user is
-        # a superuser
-        if not user.is_superuser:
-            self.fields['course_offering'].queryset = \
-                CourseOffering.objects.all().filter(teachers=user)
 
     class Meta:
         model = CourseClass
@@ -285,18 +271,13 @@ class AssignmentGradeForm(forms.Form):
 
 
 class AssignmentForm(forms.ModelForm):
-    course_offering = forms.ModelChoiceField(
-        queryset=None,
-        label=_("Course offering"),
-        empty_label=None)
     title = forms.CharField(
         label=_("Title"),
-        widget=forms.TextInput(attrs={'autocomplete': 'off',
-                                      'autofocus': 'autofocus'}))
+        widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     text = forms.CharField(
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor)
+        widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
 
     deadline_at = forms.DateTimeField(
         label=_("Deadline"),
@@ -317,11 +298,10 @@ class AssignmentForm(forms.ModelForm):
         label=_("Assignment|grade_max"),
         initial=5)
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('course_offering',
-                'title',
+            Div('title',
                 'text',
                 Div(Div('deadline_at',
                         'attached_file',
@@ -336,17 +316,16 @@ class AssignmentForm(forms.ModelForm):
             CANCEL_SAVE_PAIR)
         super(AssignmentForm, self).__init__(*args, **kwargs)
         # No protection is needed if user is a superuser
-        if not user.is_superuser:
-            self.fields['course_offering'].queryset = \
-                CourseOffering.objects.filter(teachers=user)
-        else:
-            self.fields['course_offering'].queryset = \
-                CourseOffering.objects.all()
+        # if not user.is_superuser:
+        #     self.fields['course_offering'].queryset = \
+        #         CourseOffering.objects.filter(teachers=user)
+        # else:
+        #     self.fields['course_offering'].queryset = \
+        #         CourseOffering.objects.all()
 
     class Meta:
         model = Assignment
-        fields = ['course_offering',
-                  'title',
+        fields = ['title',
                   'text',
                   'deadline_at',
                   'attached_file',
