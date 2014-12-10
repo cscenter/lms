@@ -181,7 +181,9 @@ class CourseClassForm(forms.ModelForm):
 
     class Meta:
         model = CourseClass
-        fields = '__all__'
+        fields = ['venue', 'type', 'name', 'description',
+                  'slides', 'attachments', 'video', 'other_materials',
+                  'date', 'starts_at', 'ends_at']
 
     def clean_date(self):
         date = self.cleaned_data['date']

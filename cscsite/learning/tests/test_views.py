@@ -629,7 +629,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         url = reverse('course_class_add',
                       args=[co.course.slug, co.semester.slug])
         self.doLogin(teacher)
-        form.update({'course_offering': co_other.pk})
+        del form['course_offering']
         # should save with course_offering = co
         self.assertEqual(302, self.client.post(url, form).status_code)
         self.assertEqual(1, (CourseClass.objects
