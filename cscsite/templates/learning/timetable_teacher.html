@@ -44,11 +44,6 @@
              role="button"
              class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>
-        {% if user.is_teacher and user_type == 'teacher' %}
-        <div class="btn-group">
-          <a href="{% url 'course_class_add' %}?back=timetable" class="btn btn-primary">{% trans 'Add class' %}</a>
-        </div>
-        {% endif %}
       </div>
       <hr>
     </div>
@@ -96,21 +91,21 @@
             <ul class="list-unstyled no-margin">
               {% if class.slides %}
               <li>
-                <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_slides">
                   {% trans "Slides" %}
                 </a>
               </li>
               {% endif %}
               {% if class.video %}
               <li>
-                <a href="{% url 'course_class_edit' class.pk %}#div_id_video">
+                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_video">
                   {% trans "Video" %}
                 </a>
               </li>
               {% endif %}
               {% if not class.slides and not class.video %}
               <li>
-                <a href="{% url 'course_class_edit' class.pk %}#div_id_slides">
+                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_slides">
                   {% trans "No" %}
                 </a>
               </li>
