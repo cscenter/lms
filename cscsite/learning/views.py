@@ -383,6 +383,7 @@ class GetCourseOfferingObjectMixin(object):
             .prefetch_related('teachers',
                               'courseclass_set',
                               'courseclass_set__venue',
+                              'courseclass_set__courseclassattachment_set',
                               'courseofferingnews_set',
                               'assignment_set'))
 
@@ -424,6 +425,50 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
+
+        course_classes = list(self.object.courseclass_set.all())
+        for cc in course_classes:
+            rev_args = [self.object.course.slug,
+                        self.object.semester.slug,
+                        cc.pk]
+            base_url = reverse('class_detail', args=rev_args)
+            base_teacher_url = reverse('course_class_edit', args=rev_args)
+            materials = []
+            if cc.slides:
+                if is_actual_teacher:
+                    url = base_teacher_url + "#div_id_slides"
+                else:
+                    url = base_url + "#slides"
+                materials.append({'url': url,
+                                  'name': _("Slides")})
+            if cc.video:
+                if is_actual_teacher:
+                    url = base_teacher_url + "#div_id_video"
+                else:
+                    url = base_url + "#video"
+                materials.append({'url': url,
+                                  'name': _("CourseClass|Video")})
+            if cc.other_materials:
+                if is_actual_teacher:
+                    url = base_teacher_url + "#div_id_other_materials"
+                else:
+                    url = base_url + "#other_materials"
+                materials.append({'url': url,
+                                  'name': _("CourseClass|Other [Materials]")})
+            if cc.courseclassattachment_set.count() > 0:
+                if is_actual_teacher:
+                    url = base_teacher_url + "#div_id_attachments"
+                else:
+                    url = base_url + "#attachments"
+                materials.append({'url': url,
+                                  'name': _("Files")})
+            for x in sorted(materials, key=lambda x: x['name']):
+                x.update({'name': x['name'].lower()})
+            materials_str = (", ".join("<a href={url}>{name}</a>".format(**x)
+                                       for x in materials)
+                             or _("No"))
+
+            setattr(cc, 'materials_str', materials_str)
 
         # Not sure if it's the best place for this, but it's the simplest one
         if self.request.user.is_authenticated():

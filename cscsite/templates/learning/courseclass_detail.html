@@ -35,7 +35,7 @@
         {% if course_class.slides %}
         <tr>
           <td>{% trans "Slides" %}:</td>
-          <td><a href="{{ course_class.slides.url }}">{{ course_class.slides_file_name }}</a></td>
+          <td id="slides"><a href="{{ course_class.slides.url }}">{{ course_class.slides_file_name }}</a></td>
         </tr>
         {% endif %}
       </table>
@@ -55,14 +55,14 @@
       {% endif %}
 
       {% if course_class.other_materials %}
-      <h4 class="bigger-margin" id="materials">{% trans "Materials" %}</h4>
+      <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
       <div class="ubertext">
         {{ course_class.other_materials|safe }}
       </div>
       {% endif %}
 
       {% if attachments %}
-      <h4 class="bigger-margin" id="materials">{% trans "Attached files" %}</h4>
+      <h4 class="bigger-margin" id="attachments">{% trans "Attached files" %}</h4>
       <ul class="list">
         {% for attachment in attachments %}
         <li>
