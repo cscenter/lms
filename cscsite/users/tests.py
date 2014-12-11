@@ -141,16 +141,19 @@ class UserTests(TestCase):
         self.assertIn('_auth_user_id', self.client.session)
 
     def test_auth_restriction_works(self):
+        def assertLoginRedirect(url):
+            self.assertRedirects(self.client.get(url),
+                                 "{}?next={}".format(settings.LOGIN_URL, url))
+
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        resp = self.client.get(reverse('assignment_list_teacher'))
-        self.assertEqual(resp.status_code, 403)
+        url = reverse('assignment_list_teacher')
+        assertLoginRedirect(url)
         self.client.post(reverse('login'), UserFactory.attributes())
-        resp = self.client.get(reverse('assignment_list_teacher'))
-        self.assertEqual(resp.status_code, 403)
+        assertLoginRedirect(url)
         user.groups = [user.IS_STUDENT_PK]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
-        self.assertEqual(resp.status_code, 403)
+        assertLoginRedirect(url)
         user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
