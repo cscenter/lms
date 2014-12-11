@@ -1164,7 +1164,6 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
         return context
 
 
-
 class MarksSheetTeacherView(TeacherOnlyMixin,
                             generic.FormView):
     user_type = 'teacher'
@@ -1294,8 +1293,9 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         context['course_offering_list'] = self.course_offering_list
         context['header'] = header
         context['structured'] = [(student,
-                                  get_final_grade_field(self.course_offering.pk,
-                                                        student.pk),
+                                  get_final_grade_field(
+                                      self.course_offering.pk,
+                                      student.pk),
                                   by_assignment)
                                  for student, by_assignment
                                  in structured.iteritems()]
