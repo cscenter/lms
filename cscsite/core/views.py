@@ -7,11 +7,11 @@ from braces.views import UserPassesTestMixin, LoginRequiredMixin
 
 
 class LoginRequiredMixin(LoginRequiredMixin):
-    raise_exception = True
+    raise_exception = False
 
 
 class StudentOnlyMixin(UserPassesTestMixin):
-    raise_exception = True
+    raise_exception = False
 
     def test_func(self, user):
         return (user.is_authenticated() and
@@ -19,7 +19,7 @@ class StudentOnlyMixin(UserPassesTestMixin):
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):
-    raise_exception = True
+    raise_exception = False
 
     def test_func(self, user):
         return (user.is_authenticated() and
@@ -27,7 +27,7 @@ class TeacherOnlyMixin(UserPassesTestMixin):
 
 
 class StaffOnlyMixin(UserPassesTestMixin):
-    raise_exception = True
+    raise_exception = False
 
     def test_func(self, user):
         return user.is_staff or user.is_superuser
