@@ -457,7 +457,8 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                   'name': _("Files")})
             other_materials_embed = (
                 cc.other_materials.startswith(
-                    "<iframe src=\"https://www.slideshare")
+                    ("<iframe src=\"https://www.slideshare",
+                     "<iframe src=\"http://www.slideshare"))
                 and cc.other_materials.strip().endswith("</iframe>"))
             if cc.other_materials and not other_materials_embed:
                 if is_actual_teacher:
