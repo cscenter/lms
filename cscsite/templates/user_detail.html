@@ -24,7 +24,7 @@
       <div class="ubertext">{{ user_object.note }}</div>
       {% endif %}
       <ul class="">
-        {% if user_object.is_student %}
+        {% if user_object.is_student or user_object.enrollment_year %}
         <li>
           {% trans "student" %},
           {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% if user_object.enrollment_set.all %}, {% trans "courseoffering|took" %}:
