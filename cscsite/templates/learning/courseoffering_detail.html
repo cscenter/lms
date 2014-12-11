@@ -91,10 +91,10 @@
         <thead>
           <th width="10%">{% trans "Date" %}</th>
           <th width="12%">{% trans "Time" %}</th>
-          <th>{% trans "Class|Name" %}</th>
-          <th width="12%">{% trans "Venue|short" %}</th>
+          <th style="width: 100%;">{% trans "Class|Name" %}</th>
+          <th style="min-width: 110px;">{% trans "Venue|short" %}</th>
           <th width="10%"></th>
-          <th width="13%"></th>
+          <th style="max-width: 160px;"></th>
         </thead>
         {% for class in course_offering.courseclass_set.all reversed %}
         <tr>
