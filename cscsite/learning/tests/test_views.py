@@ -1187,7 +1187,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
         self.assertNotContains(self.client.get(list_url), form['title'])
-        self.assertRedirects(self.client.post(url, form), co.get_absolute_url())
+        self.assertRedirects(self.client.post(url, form),
+                             co.get_absolute_url())
         self.assertContains(self.client.get(list_url), form['title'])
 
     def test_delete(self):

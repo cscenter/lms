@@ -102,7 +102,7 @@
               {% endif %}
               {% if class.video %}
               <li>
-                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#materials" "{% url 'course_class_edit' class.pk %}#video">
+                <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#video">
                   {% trans "Video" %}
                 </a>
               </li>
