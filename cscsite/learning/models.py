@@ -790,6 +790,9 @@ class StudentProject(TimeStampedModel):
     def __str__(self):
         return smart_text(self.name)
 
+    def get_absolute_url(self):
+        return self.student.get_absolute_url()
+
     # this is needed to share code between CourseClasses and this model
     @property
     def project_type_display(self):
