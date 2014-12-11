@@ -111,7 +111,7 @@ class Command(BaseCommand):
                        'deadline_at':
                        a_s.assignment.deadline_at,
                        'course_name':
-                       a_s.assignment.course_offering.course.name}
+                       smart_text(a_s.assignment.course_offering.course)}
             if notification.is_about_creation:
                 name = 'new_assignment'
             elif notification.is_about_deadline:
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                        'courseoffering_news_text':
                        notification.course_offering_news.text,
                        'course_name':
-                       course_offering.course.name}
+                       smart_text(course_offering.course)}
 
             notify(notification, name, context, self.stdout)
 
