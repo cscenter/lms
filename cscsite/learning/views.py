@@ -455,17 +455,17 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                     url = base_url + "#attachments"
                 materials.append({'url': url,
                                   'name': _("Files")})
-            materials = sorted(materials, key=lambda x: x['name'])
-            if cc.other_materials and \
-               cc.other_materials.startswith(
-                   "<iframe src=\"https://www.slideshare") and \
-               cc.other_materials.strip().endswith("</iframe>"):
+            other_materials_embed = (
+                cc.other_materials.startswith(
+                    "<iframe src=\"https://www.slideshare")
+                and cc.other_materials.strip().endswith("</iframe>"))
+            if cc.other_materials and not other_materials_embed:
                 if is_actual_teacher:
                     url = base_teacher_url + "#div_id_other_materials"
                 else:
                     url = base_url + "#other_materials"
                 materials.append({'url': url,
-                                  'name': _("CourseClass|Other materials")})
+                                  'name': _("Materials")})
             for x in materials:
                 x.update({'name': x['name'].lower()})
             materials_str = (", ".join("<a href={url}>{name}</a>".format(**x)
