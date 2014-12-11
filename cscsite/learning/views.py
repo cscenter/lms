@@ -465,12 +465,15 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                 else:
                     url = base_url + "#other_materials"
                 materials.append({'url': url,
-                                  'name': _("Materials")})
+                                  'name': _("CourseClass|Other [materials]")})
             for x in materials:
                 x.update({'name': x['name'].lower()})
-            materials_str = (", ".join("<a href={url}>{name}</a>".format(**x)
-                                       for x in materials)
-                             or _("No"))
+            materials_str = ", ".join(",&nbsp;"
+                                      .join(("<a href={url}>{name}</a>"
+                                             .format(**x))
+                                            for x in materials[i:i+2])
+                                      for i in range(0, len(materials), 2))
+            materials_str = materials_str or _("No")
 
             setattr(cc, 'materials_str', materials_str)
 
