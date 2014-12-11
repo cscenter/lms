@@ -35,13 +35,13 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         # return
         self.assertTrue(self.groups_allowed is not None)
         self.assertTrue(self.url_name is not None)
-        self.assertStatusCode(403, self.url_name)
+        self.assertLoginRedirect(reverse(self.url_name))
         for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
             self.doLogin(UserFactory.create(groups=groups))
             if any(group in self.groups_allowed for group in groups):
                 self.assertStatusCode(200, self.url_name)
             else:
-                self.assertStatusCode(403, self.url_name)
+                self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
         self.doLogin(UserFactory.create(is_superuser=True))
         self.assertStatusCode(200, self.url_name)
@@ -217,7 +217,7 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
     def test_full_calendar_security(self):
         u = UserFactory.create()
         for url in ['calendar_full_teacher', 'calendar_full_student']:
-            self.assertStatusCode(403, url)
+            self.assertLoginRedirect(reverse(url))
             self.doLogin(u)  # those URLs are LoginRequired-only
             self.assertStatusCode(200, url)
             self.client.logout()
@@ -330,7 +330,7 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
         url = reverse('course_edit', args=[c.slug])
         for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEqual(403, self.client.post(url).status_code)
+            self.assertPOSTLoginRedirect(url, {})
             self.client.logout()
         self.doLogin(UserFactory.create(is_superuser=True))
         self.assertEqual(
@@ -429,9 +429,9 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         url = reverse('course_offering_edit_descr',
                       args=[co.course.slug, co.semester.slug])
-        self.assertStatusCode(403, url, make_reverse=False)
+        self.assertLoginRedirect(url)
         self.doLogin(teacher_other)
-        self.assertStatusCode(403, url, make_reverse=False)
+        self.assertLoginRedirect(url)
         self.doLogout()
         self.doLogin(teacher)
         self.assertStatusCode(200, url, make_reverse=False)
@@ -449,11 +449,9 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
         self.n_dict.update({'course_offering': self.co})
 
     def test_security(self):
-        self.assertEqual(
-            403, self.client.post(self.url, self.n_dict).status_code)
+        self.assertPOSTLoginRedirect(self.url, self.n_dict)
         self.doLogin(self.teacher_other)
-        self.assertEqual(
-            403, self.client.post(self.url, self.n_dict).status_code)
+        self.assertPOSTLoginRedirect(self.url, self.n_dict)
         self.doLogout()
         self.doLogin(self.teacher)
         self.assertEqual(
@@ -485,11 +483,9 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
         self.con_dict.update({'text': "foobar text"})
 
     def test_security(self):
-        self.assertEqual(
-            403, self.client.post(self.url, self.con_dict).status_code)
+        self.assertPOSTLoginRedirect(self.url, self.con_dict)
         self.doLogin(self.teacher_other)
-        self.assertEqual(
-            403, self.client.post(self.url, self.con_dict).status_code)
+        self.assertPOSTLoginRedirect(self.url, self.con_dict)
         self.doLogout()
         self.doLogin(self.teacher)
         self.assertEqual(
@@ -516,9 +512,9 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
                                  self.con.pk])
 
     def test_security(self):
-        self.assertEqual(403, self.client.post(self.url).status_code)
+        self.assertPOSTLoginRedirect(self.url, {})
         self.doLogin(self.teacher_other)
-        self.assertEqual(403, self.client.post(self.url).status_code)
+        self.assertPOSTLoginRedirect(self.url, {})
         self.doLogout()
         self.doLogin(self.teacher)
         self.assertEqual(302, self.client.post(self.url).status_code)
@@ -615,8 +611,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form.update({'venue': VenueFactory.create().pk})
         url = reverse('course_class_add',
                       args=[co.course.slug, co.semester.slug])
-        self.assertEqual(403, self.client.get(url).status_code)
-        self.assertEqual(403, self.client.post(url, form).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, form)
 
     def test_create(self):
         teacher = UserFactory.create(groups=['Teacher'])
@@ -667,8 +663,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         cc = CourseClassFactory.create(course_offering=co)
         url = reverse('course_class_delete',
                       args=[co.course.slug, co.semester.slug, cc.pk])
-        self.assertEquals(403, self.client.get(url).status_code)
-        self.assertEquals(403, self.client.post(url).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, {})
         self.doLogin(teacher)
         self.assertContains(self.client.get(url), smart_text(cc))
         self.assertRedirects(self.client.post(url),
@@ -764,8 +760,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                             cc.pk, cca_to_delete.pk])
         # check security just in case
         self.doLogout()
-        self.assertEquals(403, self.client.get(url).status_code)
-        self.assertEquals(403, self.client.post(url).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, {})
         self.doLogin(teacher)
         self.assertContains(self.client.get(url),
                             cca_to_delete.material_file_name)
@@ -897,10 +893,13 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         teacher = UserFactory.create(groups=['Teacher'])
         a = AssignmentFactory.create(course_offering__teachers=[teacher])
         url = reverse('assignment_detail_teacher', args=[a.pk])
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(403, self.client.get(url).status_code)
+            if groups == ['Teacher']:
+                self.assertEquals(403, self.client.get(url).status_code)
+            else:
+                self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(teacher)
         self.assertEquals(200, self.client.get(url).status_code)
@@ -935,13 +934,17 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(403, self.client.get(url).status_code)
+            if groups == ['Student']:
+                # special case :(
+                self.assertEquals(403, self.client.get(url).status_code)
+            else:
+                self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(teacher)
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         self.doLogout()
         self.doLogin(student)
         self.assertEquals(200, self.client.get(url).status_code)
@@ -991,23 +994,29 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(403, self.client.get(url).status_code)
+            if groups == ['Teacher']:
+                self.assertEquals(403, self.client.get(url).status_code)
+            else:
+                self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(teacher)
         self.assertEquals(200, self.client.get(url).status_code)
         self.doLogout()
         self.doLogin(student)
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         self.doLogout()
         grade_dict = {'grading_form': True,
                       'grade': 3}
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(
-                403, self.client.post(url, grade_dict).status_code)
+            if groups == ['Teacher']:
+                resp = self.client.post(url, grade_dict)
+                self.assertEquals(403, resp.status_code)
+            else:
+                self.assertPOSTLoginRedirect(url, grade_dict)
             self.doLogout()
 
     def test_assignment_contents(self):
@@ -1109,39 +1118,39 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                      'attached_file': None})
         url = reverse('assignment_add',
                       args=[co.course.slug, co.semester.slug])
-        self.assertEqual(403, self.client.get(url).status_code)
-        self.assertEqual(403, self.client.post(url, form).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(403, self.client.get(url).status_code)
-            self.assertEquals(403, self.client.post(url, form).status_code)
+            self.assertLoginRedirect(url)
+            self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
         a = AssignmentFactory.create()
         url = reverse('assignment_edit',
                       args=[co.course.slug, co.semester.slug, a.pk])
-        self.assertEqual(403, self.client.get(url).status_code)
-        self.assertEqual(403, self.client.post(url, form).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
             if groups and groups[0] != 'Teacher':
                 # NOTE(Dmitry): currently teachers CAN see other's assignments
                 # through the edit form. However, it doesn't seem that bad
                 # to me.
-                self.assertEquals(403, self.client.get(url).status_code)
+                self.assertLoginRedirect(url)
             if groups and groups[0] != 'Teacher':
-                self.assertEquals(403, self.client.post(url, form).status_code)
+                self.assertPOSTLoginRedirect(url, form)
             elif groups and groups[0] == 'Teacher':
                 # Teacher will get 404
                 self.assertEquals(404, self.client.post(url, form).status_code)
             self.doLogout()
         url = reverse('assignment_delete',
                       args=[co.course.slug, co.semester.slug, a.pk])
-        self.assertEqual(403, self.client.get(url).status_code)
-        self.assertEqual(403, self.client.post(url, form).status_code)
+        self.assertLoginRedirect(url)
+        self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertEquals(403, self.client.get(url).status_code)
-            self.assertEquals(403, self.client.post(url, form).status_code)
+            self.assertLoginRedirect(url)
+            self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
 
     def test_create(self):
@@ -1341,13 +1350,13 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         EnrollmentFactory.create(student=student, course_offering=co)
         url = reverse('markssheet_teacher_csv',
                       args=[co.course.slug, co.semester.slug])
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         for groups in [[], ['Student']]:
             self.doLogin(UserFactory.create(groups=groups))
         self.doLogin(UserFactory.create(groups=['Teacher']))
         self.assertEquals(404, self.client.get(url).status_code)
         self.doLogin(student)
-        self.assertEquals(403, self.client.get(url).status_code)
+        self.assertLoginRedirect(url)
         self.doLogin(teacher)
         self.assertEquals(200, self.client.get(url).status_code)
 

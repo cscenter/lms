@@ -16,6 +16,14 @@ class MyUtilitiesMixin(object):
             url = url_name
         self.assertEqual(code, self.client.get(url).status_code)
 
+    def assertLoginRedirect(self, url):
+        self.assertRedirects(self.client.get(url),
+                             "{}?next={}".format(settings.LOGIN_URL, url))
+
+    def assertPOSTLoginRedirect(self, url, form):
+        self.assertRedirects(self.client.post(url, form),
+                             "{}?next={}".format(settings.LOGIN_URL, url))
+
     def assertSameObjects(self, obj_list1, obj_list2):
         self.assertEqual(set(obj_list1), set(obj_list2))
 
