@@ -133,6 +133,9 @@ class CourseOffering(TimeStampedModel):
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
                     "will be replaced by course description"),
         blank=True)
+    is_published_in_video = models.BooleanField(
+        _("Published in video section"),
+        default=False)
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Enrolled students"),
