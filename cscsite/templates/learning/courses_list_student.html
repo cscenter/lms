@@ -18,11 +18,11 @@
       <table class="table" width="100%">
         <thead>
           <th></th>
-          <th width="7%">
-            {% trans "Grade" %}
-          </th>
           <th width="20%">
             {% trans "Professors" %}
+          </th>
+          <th width="7%">
+            {% trans "Grade" %}
           </th>
           <th width="15%"></th>
         </thead>
@@ -33,15 +33,17 @@
               {{ e.course_offering.course.name }}
             </a>
           </td>
-          <td class="grade-cell">
-            {{ e.grade_short }}
-          </td>
           <td>
             <ul class="list-unstyled">
             {% for teacher in e.course_offering.teachers.all %}
             <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
             {% endfor %}
             </ul>
+          </td>
+          <td>
+            <span style="white-space: nowrap;" class="badge assignment-status {{ e.grade }}">
+              {{ e.grade_display }}
+            </span>
           </td>
           <td>
             <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
@@ -59,14 +61,14 @@
             </a>
           </td>
           <td>
-
-          </td>
-          <td>
             <ul class="list-unstyled">
             {% for teacher in course_offering.teachers.all %}
             <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
             {% endfor %}
             </ul>
+          </td>
+          <td>
+
           </td>
           <td>
             <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
@@ -91,11 +93,11 @@
       <table class="table" width="100%">
         <thead>
           <th></th>
-          <th width="7%">
-            {% trans "Grade" %}
-          </th>
           <th width="20%">
             {% trans "Professors" %}
+          </th>
+          <th width="10%">
+            {% trans "Grade" %}
           </th>
           <th width="15%">
             {% trans "Semester" %}
@@ -108,15 +110,17 @@
               {{ e.course_offering.course.name }}
             </a>
           </td>
-          <td class="grade-cell">
-            {{ e.grade_short }}
-          </td>
           <td>
             <ul class="list-unstyled">
             {% for teacher in e.course_offering.teachers.all %}
             <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
             {% endfor %}
             </ul>
+          </td>
+          <td>
+            <span style="white-space: nowrap;" class="badge assignment-status {{ e.grade }}">
+              {{ e.grade_display }}
+            </span>
           </td>
           <td>
             {{ e.course_offering.semester }}
