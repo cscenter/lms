@@ -739,3 +739,7 @@ tr.unread {
 .form-group div.controls {
   margin-right: 1%;
 }
+
+.nobreak {
+  white-space: nowrap;
+}
