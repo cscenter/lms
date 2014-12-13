@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-11 21:18+0300\n"
-"PO-Revision-Date: 2014-12-11 21:19+0230\n"
+"POT-Creation-Date: 2014-12-13 16:47+0300\n"
+"PO-Revision-Date: 2014-12-13 16:48+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -66,7 +66,7 @@ msgstr "Тип"
 msgid "CourseClass|Name"
 msgstr "Название"
 
-#: learning/forms.py:115 learning/models.py:288 learning/views.py:443
+#: learning/forms.py:115 learning/models.py:288 learning/views.py:448
 #: templates/learning/courseclass_detail.html:37
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
@@ -81,7 +81,7 @@ msgstr "Приложенные файлы"
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
-#: learning/forms.py:124 learning/models.py:292 learning/views.py:450
+#: learning/forms.py:124 learning/models.py:292 learning/views.py:455
 msgid "CourseClass|Video"
 msgstr "Видео"
 
@@ -216,6 +216,7 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: learning/models.py:81 learning/models.py:129
+#: templates/learning/courses_list_student.html:101
 msgid "Semester"
 msgstr "Семестр"
 
@@ -408,6 +409,8 @@ msgid "AssignmentStudent|student"
 msgstr "Студент"
 
 #: learning/models.py:479 templates/learning/assignment_student_detail.html:96
+#: templates/learning/courses_list_student.html:22
+#: templates/learning/courses_list_student.html:95
 msgid "Grade"
 msgstr "Оценка"
 
@@ -601,30 +604,30 @@ msgstr "Студенческий проект"
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
-#: learning/views.py:457
+#: learning/views.py:462
 msgid "Files"
 msgstr "Файлы"
 
-#: learning/views.py:469
+#: learning/views.py:474
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:477 templates/learning/timetable_student.html:112
+#: learning/views.py:482 templates/learning/timetable_student.html:112
 #: templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: learning/views.py:606
+#: learning/views.py:611
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:609 templates/learning/courseoffering_detail.html:40
-#: templates/learning/courses_list_student.html:42
+#: learning/views.py:614 templates/learning/courseoffering_detail.html:40
+#: templates/learning/courses_list_student.html:49
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1020
+#: learning/views.py:1025
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -774,7 +777,8 @@ msgstr "Организаторы"
 
 #: templates/base.html:135
 #: templates/learning/assignment_student_detail.html:108
-#: templates/learning/courses_list_student.html:21
+#: templates/learning/courses_list_student.html:25
+#: templates/learning/courses_list_student.html:98
 #: templates/learning/courses_list_teacher.html:22
 #: templates/learning/courses_list_teacher.html:61
 msgid "Professors"
@@ -955,6 +959,7 @@ msgid "Open assignments"
 msgstr "Открытые задания"
 
 #: templates/learning/assignment_list_student.html:97
+#: templates/learning/courses_list_student.html:90
 #: templates/learning/courses_list_teacher.html:54
 #: templates/learning/markssheet_teacher_dispatch.html:14
 #: templates/learning/semester_list.html:14
@@ -1085,7 +1090,7 @@ msgid "Add class"
 msgstr "Добавить занятие"
 
 #: templates/learning/courseoffering_detail.html:47
-#: templates/learning/courses_list_student.html:67
+#: templates/learning/courses_list_student.html:77
 msgid "Enroll"
 msgstr "Записаться"
 
@@ -1119,7 +1124,11 @@ msgstr "редактировать"
 msgid "delete"
 msgstr "удалить"
 
-#: templates/learning/courses_list_student.html:83
+#: templates/learning/courses_list_student.html:17
+msgid "Current semester"
+msgstr "Текущий семестр"
+
+#: templates/learning/courses_list_student.html:136
 #: templates/learning/courses_list_teacher.html:100
 #: templates/learning/markssheet_teacher_dispatch.html:44
 #: templates/learning/semester_list.html:50
