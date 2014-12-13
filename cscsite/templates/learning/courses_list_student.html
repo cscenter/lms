@@ -11,33 +11,40 @@
       <hr>
     </div>
   </div>
-  {% if course_list_ongoing or course_list_available %}
+  {% if enrollments_ongoing or course_list_available %}
   <div class="row">
     <div class="col-xs-12">
+      <h3>{% trans "Current semester" %}</h3>
       <table class="table" width="100%">
         <thead>
           <th></th>
-          <th width="30%">
+          <th width="7%">
+            {% trans "Grade" %}
+          </th>
+          <th width="20%">
             {% trans "Professors" %}
           </th>
           <th width="15%"></th>
         </thead>
-        {% for course_offering in course_list_ongoing %}
-        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
+        {% for e in enrollments_ongoing %}
+        <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
-            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-              {{ course_offering.course.name }}
+            <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
+              {{ e.course_offering.course.name }}
             </a>
+          </td>
+          <td class="grade-cell">
+            {{ e.grade_short }}
           </td>
           <td>
             <ul class="list-unstyled">
-            {% for teacher in course_offering.teachers.all %}
-            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            {% for teacher in e.course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
             {% endfor %}
             </ul>
           </td>
           <td>
-            <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}?back=course_list_student"
+            <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
                class="btn btn-default">
               {% trans "Unenroll" %}
             </a>
@@ -52,9 +59,12 @@
             </a>
           </td>
           <td>
+
+          </td>
+          <td>
             <ul class="list-unstyled">
             {% for teacher in course_offering.teachers.all %}
-            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
             {% endfor %}
             </ul>
           </td>
@@ -74,8 +84,51 @@
     </div>
   </div>
   {% endif %}
+  {% if enrollments_archive %}
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{% trans "Archive" %}</h3>
+      <table class="table" width="100%">
+        <thead>
+          <th></th>
+          <th width="7%">
+            {% trans "Grade" %}
+          </th>
+          <th width="20%">
+            {% trans "Professors" %}
+          </th>
+          <th width="15%">
+            {% trans "Semester" %}
+          </th>
+        </thead>
+        {% for e in enrollments_archive %}
+        <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
+          <td>
+            <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
+              {{ e.course_offering.course.name }}
+            </a>
+          </td>
+          <td class="grade-cell">
+            {{ e.grade_short }}
+          </td>
+          <td>
+            <ul class="list-unstyled">
+            {% for teacher in e.course_offering.teachers.all %}
+            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
+            {% endfor %}
+            </ul>
+          </td>
+          <td>
+            {{ e.course_offering.semester }}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
-{% if not course_list_ongoing and not course_list_available %}
+{% if not enrollments_ongoing and not enrollments_archive and not course_list_available %}
 <div class="container">
   <div class="row">
     <div class="col-xs-3"></div>

@@ -282,61 +282,66 @@ class SemesterListView(generic.ListView):
         return context
 
 
-class CourseListMixin(object):
+class CourseTeacherListView(TeacherOnlyMixin,
+                            generic.ListView):
     model = CourseOffering
     template_name = "learning/courses_list.html"
     context_object_name = 'course_list'
-
-    list_type = 'all'
+    template_name = "learning/courses_list_teacher.html"
 
     def get_queryset(self):
         return (self.model.objects
+                .filter(teachers=self.request.user)
                 .order_by('-semester__year', '-semester__type', 'course__name')
                 .select_related('course', 'semester')
                 .prefetch_related('teachers'))
 
     def get_context_data(self, **kwargs):
-        context = (super(CourseListMixin, self)
+        context = (super(CourseTeacherListView, self)
                    .get_context_data(**kwargs))
         ongoing, archive = utils.split_list(context['course_list'],
                                             lambda course: course.is_ongoing)
         context['course_list_ongoing'] = ongoing
         context['course_list_archive'] = archive
-        context['list_type'] = self.list_type
         return context
 
 
-class CourseTeacherListView(TeacherOnlyMixin,
-                            CourseListMixin,
-                            generic.ListView):
-    template_name = "learning/courses_list_teacher.html"
-
-    def get_queryset(self):
-        return (super(CourseTeacherListView, self)
-                .get_queryset()
-                .filter(teachers=self.request.user))
-
-
 class CourseStudentListView(StudentOnlyMixin,
-                            CourseListMixin,
-                            generic.ListView):
+                            generic.TemplateView):
+    model = CourseOffering
+    template_name = "learning/courses_list.html"
+    context_object_name = 'course_list'
     template_name = "learning/courses_list_student.html"
 
-    def get_queryset(self):
-        return (CourseOffering
-                .by_semester(utils.get_current_semester_pair())
-                .order_by('semester__year', '-semester__type', 'course__name')
-                .select_related('course', 'semester')
-                .prefetch_related('teachers', 'enrolled_students'))
-
     def get_context_data(self, **kwargs):
-        context = (super(CourseStudentListView, self)
-                   .get_context_data(**kwargs))
-        ongoing, available = utils.split_list(
-            context['course_list'],
-            lambda c_o: self.request.user in c_o.enrolled_students.all())
-        context['course_list_ongoing'] = ongoing
+        year, semester_type = utils.get_current_semester_pair()
+        available = (CourseOffering.objects
+                     .filter(semester__type=semester_type,
+                             semester__year=year)
+                     .exclude(enrolled_students=self.request.user)
+                     .order_by('semester__year', '-semester__type',
+                               'course__name')
+                     .select_related('course', 'semester')
+                     .prefetch_related('teachers'))
+        enrolled_on = (Enrollment.objects
+                       .filter(student=self.request.user)
+                       .order_by('course_offering__semester__year',
+                                 '-course_offering__semester__type',
+                                 'course_offering__course__name')
+                       .select_related('course_offering',
+                                       'course_offering__course',
+                                       'course_offering__semester')
+                       .prefetch_related('course_offering__teachers'))
+
+        ongoing, archive = utils.split_list(
+            enrolled_on,
+            lambda e: (e.course_offering.semester.year == year
+                       and e.course_offering.semester.type == semester_type))
+
+        context = {}
         context['course_list_available'] = available
+        context['enrollments_ongoing'] = ongoing
+        context['enrollments_archive'] = archive
         return context
 
 

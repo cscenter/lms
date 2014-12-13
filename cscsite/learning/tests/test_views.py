@@ -294,21 +294,31 @@ class CourseListStudentTests(GroupSecurityCheckMixin,
         other_student = UserFactory.create(groups=['Student'])
         self.doLogin(student)
         resp = self.client.get(reverse(self.url_name))
-        self.assertEqual(0, len(resp.context['course_list_ongoing']))
         self.assertEqual(0, len(resp.context['course_list_available']))
-        self.assertEqual(0, len(resp.context['course_list_archive']))
+        self.assertEqual(0, len(resp.context['enrollments_ongoing']))
+        self.assertEqual(0, len(resp.context['enrollments_archive']))
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         cos = CourseOfferingFactory.create_batch(4, semester=s)
         cos_available = cos[:2]
         cos_enrolled = cos[2:]
-        for co in cos_enrolled:
-            EnrollmentFactory.create(student=student, course_offering=co)
+        enrollments_ongoing = []
+        enrollments_archive = []
         cos_archived = CourseOfferingFactory.create_batch(
             3, semester__year=now_year-1)
+        for co in cos_enrolled:
+            enrollments_ongoing.append(
+                EnrollmentFactory.create(student=student,
+                                         course_offering=co))
+        for co in cos_archived:
+            enrollments_archive.append(
+                EnrollmentFactory.create(student=student,
+                                         course_offering=co))
         resp = self.client.get(reverse(self.url_name))
-        self.assertSameObjects(cos_enrolled,
-                               resp.context['course_list_ongoing'])
+        self.assertSameObjects(enrollments_ongoing,
+                               resp.context['enrollments_ongoing'])
+        self.assertSameObjects(enrollments_archive,
+                               resp.context['enrollments_archive'])
         self.assertSameObjects(cos_available,
                                resp.context['course_list_available'])
 
