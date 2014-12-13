@@ -743,3 +743,7 @@ tr.unread {
 .nobreak {
   white-space: nowrap;
 }
+
+.grade-cell {
+  text-align: center;
+}
