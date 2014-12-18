@@ -165,7 +165,7 @@ urlpatterns = patterns('',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
     url(r'^staff/course-marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
-        MarksSheetTeacherView.as_view(),
+        MarksSheetTeacherView.as_view(is_for_staff=True),
         name='course_markssheet_staff'),
 
     url(r"^venues/$", VenueListView.as_view(),

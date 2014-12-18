@@ -1171,6 +1171,7 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
 
 class MarksSheetTeacherView(TeacherOnlyMixin,
                             generic.FormView):
+    is_for_staff = None
     user_type = 'teacher'
     template_name = "learning/markssheet_teacher.html"
     context_object_name = 'assignment_list'
@@ -1181,6 +1182,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         self.course_offering_list = None
         self.course_offering = None
         super(MarksSheetTeacherView, self).__init__(*args, **kwargs)
+        if kwargs.get('is_for_staff'):
+            self.is_for_staff = True
+        else:
+            self.is_for_staff = False
 
     def get_form_class(self):
         try:
@@ -1237,9 +1242,13 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
     def get_success_url(self):
         co = self.course_offering
-        return reverse('markssheet_teacher', args=[co.course.slug,
-                                                   co.semester.year,
-                                                   co.semester.type])
+        if self.is_for_staff:
+            url_name = 'course_markssheet_staff'
+        else:
+            url_name = 'markssheet_teacher'
+        return reverse(url_name, args=[co.course.slug,
+                                       co.semester.year,
+                                       co.semester.type])
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
