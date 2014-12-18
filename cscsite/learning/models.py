@@ -11,7 +11,7 @@ import dateutil.parser as dparser
 from annoying.fields import AutoOneToOneField
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
@@ -155,6 +155,21 @@ class CourseOffering(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
+
+    def clean(self):
+        super(CourseOffering, self).clean()
+        if self.is_published_in_video:
+            try:
+                other_course = (CourseOffering.objects
+                                .filter(course=self.course,
+                                        is_published_in_video=True)
+                                .get())
+                raise ValidationError(_("Only one course offering for given "
+                                        "course can be published in video "
+                                        "section (there is one from {})")
+                                      .format(other_course.semester))
+            except ObjectDoesNotExist:
+                pass
 
     def has_unread(self):
         cache = get_unread_notifications_cache()

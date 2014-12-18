@@ -255,6 +255,21 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(7, len(cos))
 
 
+class CourseVideoListTests(MyUtilitiesMixin, TestCase):
+    def test_video_list(self):
+        cos_no_video = (CourseOfferingFactory
+                        .create_batch(2, is_published_in_video=False))
+        cos_video = (CourseOfferingFactory
+                     .create_batch(5, is_published_in_video=True))
+        resp = self.client.get(reverse('course_video_list'))
+        chunks = resp.context['course_list_chunks']
+        self.assertEqual(3, len(chunks[0]))
+        self.assertEqual(2, len(chunks[1]))
+        self.assertSameObjects(cos_video,
+                               [co for chunk in chunks for co in chunk])
+
+
+
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
