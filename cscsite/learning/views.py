@@ -345,6 +345,28 @@ class CourseStudentListView(StudentOnlyMixin,
         return context
 
 
+class CourseVideoListView(generic.ListView):
+    model = CourseOffering
+    template_name = "learning/courses_video_list.html"
+    context_object_name = 'course_list'
+
+    def get_queryset(self):
+        return (self.model.objects
+                .filter(is_published_in_video=True)
+                .order_by('-semester__year', 'semester__type')
+                .select_related('course', 'semester'))
+
+    def get_context_data(self, **kwargs):
+        context = (super(CourseVideoListView, self)
+                   .get_context_data(**kwargs))
+        full = context[self.context_object_name]
+        chunks = []
+        for i in range(0, len(full), 3):
+            chunks.append(full[i:i+3])
+        context['course_list_chunks'] = chunks
+        return context
+
+
 class CourseDetailView(generic.DetailView):
     model = Course
     template_name = "learning/course_detail.html"

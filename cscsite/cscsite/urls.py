@@ -12,6 +12,7 @@ from textpages.views import TextpageOpenView, TextpageStudentView, \
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
+    CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
     SemesterListView, CourseDetailView, CourseUpdateView, \
@@ -56,6 +57,7 @@ urlpatterns = patterns('',
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
     url(r'^online/$', TextpageOpenView.as_view(), name='online'),
+    url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
     url(r'^learning/$',
         RedirectView.as_view(pattern_name=settings.LEARNING_BASE),

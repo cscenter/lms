@@ -174,6 +174,7 @@ MENU_URL_NAMES = {
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
+    'course_video_list': {'alias': 'course_list'},
     'course_detail': {'alias': 'course_list'},
     'class_detail': {'alias': 'course_list'},
     'course_class_attachment_delete': {'alias': 'course_list'},
