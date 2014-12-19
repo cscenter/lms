@@ -594,16 +594,19 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(0, Enrollment.objects
                           .filter(student=s, course_offering=co)
                           .count())
-        self.assertEquals(0, (AssignmentStudent.objects
-                              .filter(student=s,
-                                      assignment__course_offering=co)
-                              .count()))
+        a_ss = (AssignmentStudent.objects
+                .filter(student=s,
+                        assignment__course_offering=co))
+        self.assertEquals(3, len(a_ss))
         self.client.post(reverse('course_offering_enroll',
                                  args=[co.course.slug, co.semester.slug]),
                          form)
         url += "?back=course_list_student"
         self.assertRedirects(self.client.post(url, form),
                              reverse('course_list_student'))
+        self.assertSameObjects(a_ss, (AssignmentStudent.objects
+                                      .filter(student=s,
+                                              assignment__course_offering=co)))
 
 
 class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
