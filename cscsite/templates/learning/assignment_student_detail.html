@@ -11,11 +11,13 @@
       <h2>
         {% if user_type == 'student' %}
         <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
+        {{ a_s.assignment.title }} <br>
+        <small>{{ a_s.assignment.course_offering }}</small>
         {% else %}
-        <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
+        <a href="{% url 'assignment_detail_teacher' a_s.assignment.pk %}"><span class="fa fa-angle-left"></span></a>
+        {{ a_s.student.get_short_name }} <br>
+        <small>{{ a_s.assignment.title }} ({{ a_s.assignment.course_offering }})</small>
         {% endif %}
-        {{ a_s.assignment.title }}
-        <small>{{ a_s.assignment.course_offering }} </small>
       </h2>
       {% if user.is_superuser or user_type == 'teacher' and is_actual_teacher %}
       <div class="btn-toolbar">
@@ -71,7 +73,10 @@
                 </a>
               </span>
               {% endif %}
-              <span class="metainfo pull-right">
+              <span class="metainfo pull-right
+                           {% if comment.first_student_comment and user_type == 'teacher' %}
+                           first
+                           {% endif %}">
                 {{ comment.created|date:"d.m.Y H:i" }}
               </span>
             </div>
@@ -116,8 +121,10 @@
         </li>
         {% endfor %}
       </ul>
+      {% if user_type == 'student' %}
       <h5 class="assignment">{% trans "Student" %}</h5>
       <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
+      {% endif %}
       <h5 class="assignment">{% trans "Deadline" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
       <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
