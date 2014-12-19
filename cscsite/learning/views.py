@@ -955,9 +955,15 @@ class AssignmentStudentDetailMixin(object):
             raise PermissionDenied
 
         context['a_s'] = a_s
-        context['comments'] = (AssignmentComment.objects
-                               .filter(assignment_student=a_s)
-                               .order_by('created'))
+        comments = (AssignmentComment.objects
+                    .filter(assignment_student=a_s)
+                    .order_by('created')
+                    .select_related('author'))
+        for c in comments:
+            if c.author == a_s.student:
+                setattr(c, 'first_student_comment', True)
+                break
+        context['comments'] = comments
         context['one_teacher'] = (a_s
                                   .assignment
                                   .course_offering

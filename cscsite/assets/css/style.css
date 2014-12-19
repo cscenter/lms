@@ -414,6 +414,11 @@ h5.assignment {
   color: #999;
 }
 
+.assignment-comment .metainfo.first {
+  color: #888;
+  font-weight: bold;
+}
+
 .assignment-comment .metainfo-holder {
   min-height: 20px;
 }
