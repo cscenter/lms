@@ -1313,6 +1313,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
             if student not in structured:
                 structured[student] = OrderedDict()
         for a_s in data:
+            if a_s.student not in structured:
+                continue  # student isn't enrolled
             # if assignment is "offline", provide ModelForm instead of
             # the object itself
             if a_s.assignment.is_online:
@@ -1387,6 +1389,8 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             if student not in structured:
                 structured[student] = OrderedDict()
         for a_s in a_ss:
+            if a_s.student not in structured:
+                continue  # student isn't enrolled
             structured[a_s.student][a_s.assignment] = a_s.grade
 
         header = structured.values()[0].keys()

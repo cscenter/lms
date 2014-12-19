@@ -36,17 +36,10 @@ def populate_student_assignments(sender, instance, created,
     if not created:
         return
     assignments = instance.course_offering.assignment_set.all()
-    AssignmentStudent.objects.bulk_create(
-        AssignmentStudent(assignment=assignment, student=instance.student)
-        for assignment in assignments)
-
-
-@receiver(models.signals.post_delete, sender=Enrollment)
-def delete_student_assignments(sender, instance, *args, **kwargs):
-    (AssignmentStudent.objects
-     .filter(assignment__course_offering=instance.course_offering,
-             student=instance.student)
-     .delete())
+    for a in assignments:
+        (AssignmentStudent.objects
+         .get_or_create(assignment=a,
+                        student=instance.student))
 
 
 @receiver(models.signals.post_save, sender=AssignmentComment)
