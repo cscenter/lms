@@ -25,7 +25,8 @@ from icalendar.prop import vInline
 import pytz
 
 from core.views import ProtectedFormMixin
-from learning.models import CourseClass, Assignment, CourseOffering
+from learning.models import CourseClass, Assignment, AssignmentStudent, \
+    CourseOffering, NonCourseEvent
 from .forms import LoginForm, UserProfileForm
 from .models import CSCUser
 
@@ -269,18 +270,77 @@ def create_timezone(tz, first_date=None, last_date=None):
     return timezone
 
 
-class ICalClassesView(generic.base.View):
+class ICalView(generic.base.View):
     http_method_names = ['get']
 
+    def get_context(self):
+        """
+        'calname' and 'caldesc' should be set by overrriding method
+        """
+        tz = timezone.get_current_timezone()
+
+        min_dt = timezone.now()
+        max_dt = min_dt + relativedelta(years=1)
+        return {'tz': tz, 'min_dt': min_dt, 'max_dt': max_dt}
+
+    def init_calendar(self, context):
+        cal = Calendar()
+        timezone_comp = create_timezone(context['tz'],
+                                        context['min_dt'], context['max_dt'])
+        cal.add('prodid', ("-//Computer Science Center Calendar"
+                           "//compscicenter.ru//"))
+        cal.add('version', '2.0')
+        cal.add_component(timezone_comp)
+        cal.add('X-WR-CALNAME', vText(context['calname']))
+        cal.add('X-WR-CALDESC', vText(context['caldesc']))
+        cal.add('calscale', 'gregorian')
+        return cal
+
+    def get_events(self, context):
+        return []
+
+    def fill_calendar(self, init_calendar, context):
+        for evt_dict in self.get_events(context):
+            evt = Event()
+            for k, v in evt_dict.items():
+                evt.add(k, v)
+            init_calendar.add_component(evt)
+
+        return init_calendar
+
     def get(self, request, *args, **kwargs):
-        user_pk = kwargs['pk']
+        self.kwargs = kwargs
+        self.request = request
+        context = self.get_context()
+        init_cal = self.init_calendar(context)
+        cal = self.fill_calendar(init_cal, context)
+        resp = HttpResponse(cal.to_ical(),
+                            content_type="text/calendar; charset=UTF-8")
+        resp['Content-Disposition'] \
+            = "attachment; filename=\"{}\"".format(self.ical_file_name)
+        return resp
+
+
+class UserSpecificCalMixin(object):
+    def get_context(self):
+        context = super(UserSpecificCalMixin, self).get_context()
 
         try:
-            user = (auth.get_user_model()
-                    ._default_manager
-                    .get(pk=user_pk))
+            context['user'] = (auth.get_user_model()
+                               ._default_manager
+                               .get(pk=self.kwargs['pk']))
         except ObjectDoesNotExist:
             raise Http404('User not found')
+
+        return context
+
+
+class ICalClassesView(UserSpecificCalMixin, ICalView):
+    ical_file_name = "csc_classes.ics"
+
+    def get_context(self):
+        context = super(ICalClassesView, self).get_context()
+        user = context['user']
 
         cc_related = ['venue',
                       'course_offering',
@@ -288,65 +348,198 @@ class ICalClassesView(generic.base.View):
                       'course_offering__course']
         teacher_ccs = (
             CourseClass.objects
-            .filter(course_offering__teachers__pk=user_pk)
+            .filter(course_offering__teachers=user)
             .select_related(*cc_related))
         student_ccs = (
             CourseClass.objects
-            .filter(course_offering__enrolled_students__pk=user_pk)
+            .filter(course_offering__enrolled_students=user)
             .select_related(*cc_related))
 
         tz = timezone.get_current_timezone()
 
-        min_date = min(cc.date for cc in chain(student_ccs, teacher_ccs))
-        max_date = max(cc.date for cc in chain(student_ccs, teacher_ccs))
-        min_dt = tz.localize(datetime.combine(min_date, time(00, 00)))
-        max_dt = (tz.localize(datetime.combine(max_date, time(23, 59)))
-                  + relativedelta(years=1))
+        if len(student_ccs) + len(teacher_ccs) > 0:
+            min_date = min(cc.date for cc in chain(student_ccs, teacher_ccs))
+            max_date = max(cc.date for cc in chain(student_ccs, teacher_ccs))
+            min_dt = tz.localize(datetime.combine(min_date, time(00, 00)))
+            max_dt = (tz.localize(datetime.combine(max_date, time(23, 59)))
+                      + relativedelta(years=1))
+        else:
+            min_dt = context['min_dt']
+            max_dt = context['max_dt']
 
-        # NOTE(Dmitry): i18n here isn't easy, seems to require user-selected
-        #               language
-        # NOTE(Dmitry): see http://www.kanzaki.com/docs/ical/ and
-        #               https://tools.ietf.org/html/rfc5545
-        cal = Calendar()
+        context.update({'min_dt': min_dt,
+                        'max_dt': max_dt,
+                        'user': user,
+                        'calname': "Занятия CSC",
+                        'caldesc': ("Календарь занятий Computer "
+                                    "Science Center ({})"
+                                    .format(user.get_full_name())),
+                        'teacher_ccs': teacher_ccs,
+                        'student_ccs': student_ccs})
+        return context
 
-        cal.add('prodid', ("-//Computer Science Center Calendar"
-                           "//compscicenter.ru//"))
-        cal.add('version', '2.0')
-        cal.add_component(create_timezone(tz, min_dt, max_dt))
-        cal.add('X-WR-CALNAME', vText("Занятия CSC"))
-        cal.add('X-WR-CALDESC',
-                vText("Календарь занятий Computer Science Center ({})"
-                      .format(user.get_full_name())))
-        cal.add('calscale', 'gregorian')
-
-        for cc_type, cc in chain(izip(repeat('teaching'), teacher_ccs),
-                                 izip(repeat('learning'), student_ccs)):
+    def get_events(self, context):
+        tz = context['tz']
+        data = chain(izip(repeat('teaching'), context['teacher_ccs']),
+                     izip(repeat('learning'), context['student_ccs']))
+        events = []
+        for cc_type, cc in data:
             uid = ("courseclasses-{}-{}@compscicenter.ru"
                    .format(cc.pk, cc_type))
-            url = "http://{}{}".format(request.META['HTTP_HOST'],
+            url = "http://{}{}".format(self.request.META['HTTP_HOST'],
                                        cc.get_absolute_url())
             description = "{} ({})".format(cc.description, url)
             cats = 'CSC,CLASS,{}'.format(cc_type.upper())
             dtstart = tz.localize(datetime.combine(cc.date, cc.starts_at))
             dtend = tz.localize(datetime.combine(cc.date, cc.ends_at))
 
-            evt = Event()
-            evt.add('uid', vText(uid))
-            evt.add('url', vUri(url))
-            evt.add('summary', vText(cc.name))
-            evt.add('description', vText(description))
-            evt.add('location', vText(cc.venue.address))
-            evt.add('dtstart', dtstart)
-            evt.add('dtend', dtend)
-            evt.add('dtstamp', timezone.now())
-            evt.add('created', cc.created)
-            evt.add('last-modified', cc.modified)
-            evt.add('categories', vInline(cats))
-            cal.add_component(evt)
-        # FIXME(Dmitry): type "text/calendar"
-        resp = HttpResponse(cal.to_ical(),
-                            content_type="text/calendar; charset=UTF-8")
-        resp['Content-Disposition'] \
-            = "attachment; filename=\"csc_classes.ics\""
-        # resp = HttpResponse(cal.to_ical(), content_type="text/plain")
-        return resp
+            evt = {'uid': vText(uid),
+                   'url': vUri(url),
+                   'summary': vText(cc.name),
+                   'description': vText(description),
+                   'location': vText(cc.venue.address),
+                   'dtstart': dtstart,
+                   'dtend': dtend,
+                   'dtstamp': timezone.now(),
+                   'created': cc.created,
+                   'last-modified': cc.modified,
+                   'categories': vInline(cats)}
+            events.append(evt)
+
+        return events
+
+
+class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
+    ical_file_name = "csc_assignments.ics"
+
+    def get_context(self):
+        context = super(ICalAssignmentsView, self).get_context()
+        user = context['user']
+
+        student_a_ss = (
+            AssignmentStudent.objects
+            .filter(student=user,
+                    assignment__deadline_at__gt=timezone.now())
+            .select_related('assignment',
+                            'assignment__course_offering',
+                            'assignment__course_offering__course',
+                            'assignment__course_offering__semester'))
+        # NOTE(Dmitry): this is hacky, but it's better to handle this here
+        #               than downstream
+        student_as = []
+        for a_s in student_a_ss:
+            a = a_s.assignment
+            url = reverse('a_s_detail_student', args=[a_s.pk])
+            setattr(a, 'hacky_url', url)
+            student_as.append(a)
+
+        teacher_as = list(
+            Assignment.objects
+            .filter(course_offering__teachers=user,
+                   deadline_at__gt=timezone.now())
+            .select_related('course_offering',
+                            'course_offering__course',
+                            'course_offering__semester',
+                            'student'))
+        # NOTE(Dmitry): hacky again to be consistent
+        for a in teacher_as:
+            url = reverse('assignment_detail_teacher', args=[a.pk])
+            setattr(a, 'hacky_url', url)
+
+        if len(student_as) + len(teacher_as) > 0:
+            max_dt = (max(a.deadline_at
+                          for a in chain(student_as, teacher_as))
+                      + relativedelta(years=1))
+        else:
+            max_dt = context['max_dt']
+
+        context.update({'max_dt': max_dt,
+                        'user': user,
+                        'calname': "Задания CSC",
+                        'caldesc': ("Календарь сроков выполнения заданий "
+                                    "Computer Science Center ({})"
+                                    .format(user.get_full_name())),
+                        'student_as': student_as,
+                        'teacher_as': teacher_as})
+        return context
+
+    def get_events(self, context):
+        tz = context['tz']
+        user = context['user']
+        data = chain(izip(repeat('teaching'), context['teacher_as']),
+                     izip(repeat('learning'), context['student_as']))
+        events = []
+        for a_type, a in data:
+            uid = ("assignments-{}-{}-{}@compscicenter.ru"
+                   .format(user.pk, a.pk, a_type))
+            summary = "{} ({})".format(a.title, a.course_offering.course.name)
+            url = "http://{}{}".format(self.request.META['HTTP_HOST'],
+                                       a.hacky_url)
+            cats = 'CSC,ASSIGNMENT,{}'.format(a_type.upper())
+            dtstart = a.deadline_at
+            dtend = a.deadline_at + relativedelta(hours=1)
+
+            evt = {'uid': vText(uid),
+                   'url': vUri(url),
+                   'summary': vText(summary),
+                   'description': vText(url),
+                   'dtstart': dtstart,
+                   'dtend': dtend,
+                   'dtstamp': timezone.now(),
+                   'created': a.created,
+                   'last-modified': a.modified,
+                   'categories': vInline(cats)}
+            events.append(evt)
+
+        return events
+
+
+class ICalEventsView(ICalView):
+    ical_file_name = "csc_events.ics"
+
+    def get_context(self):
+        context = super(ICalEventsView, self).get_context()
+        tz = context['tz']
+
+        nces = (NonCourseEvent.objects
+                .filter(date__gt=timezone.now())
+                .select_related('venue'))
+
+        if len(nces) > 0:
+            max_date = max(e.date for e in nces)
+            max_dt = (tz.localize(datetime.combine(max_date, time(0,0,0)))
+                      + relativedelta(years=1))
+        else:
+            max_dt = context['max_dt']
+
+        context.update({'max_dt': max_dt,
+                        'calname': "События CSC",
+                        'caldesc': ("Календарь общих событий "
+                                    "Computer Science Center"),
+                        'nces': nces})
+        return context
+
+    def get_events(self, context):
+        tz = context['tz']
+        events = []
+        for nce in context['nces']:
+            uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
+            url = "http://{}{}".format(self.request.META['HTTP_HOST'],
+                                       nce.get_absolute_url())
+            description = "{} ({})".format(nce.name, url)
+            dtstart = tz.localize(datetime.combine(nce.date, nce.starts_at))
+            dtend = tz.localize(datetime.combine(nce.date, nce.ends_at))
+
+            evt = {'uid': vText(uid),
+                   'url': vUri(url),
+                   'summary': vText(nce.name),
+                   'description': vText(description),
+                   'dtstart': dtstart,
+                   'dtend': dtend,
+                   'dtstamp': timezone.now(),
+                   'created': nce.created,
+                   'last-modified': nce.modified,
+                   'categories': vInline('CSC,EVENT')}
+            events.append(evt)
+
+        return events

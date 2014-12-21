@@ -86,10 +86,29 @@
       </div>
       {% endif %}
       {% if user_object.pk == user.pk %}
-      <div>{% trans ".iCal classes calendar" %}:
-        <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
-               disabled="disabled" size="50">
-      </div>
+      <table>
+        <tr>
+          <td>{% trans ".iCal classes calendar" %}:</td>
+          <td>
+            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
+                   disabled="disabled" size="50">
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans ".iCal assignments calendar" %}:</td>
+          <td>
+            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_assignments' user.pk %}"
+                   disabled="disabled" size="50">
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans ".iCal events calendar" %}:</td>
+          <td>
+            <input type="text" value="http://{{ request.get_host }}{% url 'ical_events' %}"
+                   disabled="disabled" size="50">
+          </td>
+        </tr>
+      </table>
       {% endif %}
     </div>
     <div class="col-xs-3">

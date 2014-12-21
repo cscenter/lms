@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+from itertools import chain
+
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
@@ -9,8 +13,12 @@ from django.utils.encoding import smart_text
 
 from bs4 import BeautifulSoup
 import factory
+from icalendar import Calendar, Event
 
-from learning.tests.factories import StudentProjectFactory, SemesterFactory
+from learning.tests.factories import StudentProjectFactory, SemesterFactory, \
+    CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
+    AssignmentFactory, NonCourseEventFactory
+from learning.tests.mixins import MyUtilitiesMixin
 
 from .models import CSCUser
 from .admin import CSCUserCreationForm
@@ -250,7 +258,7 @@ class UserTests(TestCase):
         user.graduation_year = 2014
         user.save()
         resp = self.client.get(reverse('user_update', args=[user.pk]))
-        self.assertIn('csc_review', resp.content)
+        self.assertIn(b'csc_review', resp.content)
         resp = self.client.post(reverse('user_update', args=[user.pk]),
                                 {'csc_review': test_review})
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
@@ -289,3 +297,79 @@ class UserTests(TestCase):
         self.assertContains(resp, sp1.name)
         self.assertContains(resp, sp1.description)
         self.assertContains(resp, sp2.name)
+
+
+class ICalTests(MyUtilitiesMixin, TestCase):
+    def test_classes(self):
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.save()
+        fname = 'csc_classes.ics'
+        # Empty calendar
+        resp = self.client.get(reverse('user_ical_classes', args=[user.pk]))
+        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
+        self.assertIn(fname, resp['content-disposition'])
+        cal = Calendar.from_ical(resp.content)
+        self.assertEquals("Занятия CSC", cal['X-WR-CALNAME'])
+        # Create some content
+        ccs_teaching = (CourseClassFactory
+                        .create_batch(2, course_offering__teachers=[user]))
+        co_learning = CourseOfferingFactory.create()
+        EnrollmentFactory.create(student=user, course_offering=co_learning)
+        ccs_learning = (CourseClassFactory
+                        .create_batch(3, course_offering=co_learning))
+        ccs_other = CourseClassFactory.create_batch(5)
+        resp = self.client.get(reverse('user_ical_classes', args=[user.pk]),
+                               HTTP_HOST = 'test.com')
+        cal = Calendar.from_ical(resp.content)
+        self.assertSameObjects([cc.name
+                                for cc in chain(ccs_teaching, ccs_learning)],
+                               [evt['SUMMARY']
+                                for evt in cal.subcomponents
+                                if isinstance(evt, Event)])
+
+    def test_assignments(self):
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.save()
+        fname = 'csc_assignments.ics'
+        # Empty calendar
+        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]))
+        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
+        self.assertIn(fname, resp['content-disposition'])
+        cal = Calendar.from_ical(resp.content)
+        self.assertEquals("Задания CSC", cal['X-WR-CALNAME'])
+        # Create some content
+        as_teaching = (AssignmentFactory
+                       .create_batch(2, course_offering__teachers=[user]))
+        co_learning = CourseOfferingFactory.create()
+        EnrollmentFactory.create(student=user, course_offering=co_learning)
+        as_learning = (AssignmentFactory
+                       .create_batch(3, course_offering=co_learning))
+        as_other = AssignmentFactory.create_batch(5)
+        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]),
+                               HTTP_HOST = 'test.com')
+        cal = Calendar.from_ical(resp.content)
+        self.assertSameObjects(["{} ({})".format(a.title,
+                                                 a.course_offering.course.name)
+                                for a in chain(as_teaching, as_learning)],
+                               [evt['SUMMARY']
+                                for evt in cal.subcomponents
+                                if isinstance(evt, Event)])
+
+    def test_assignments(self):
+        fname = 'csc_events.ics'
+        # Empty calendar
+        resp = self.client.get(reverse('ical_events'))
+        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
+        self.assertIn(fname, resp['content-disposition'])
+        cal = Calendar.from_ical(resp.content)
+        self.assertEquals("События CSC", cal['X-WR-CALNAME'])
+        # Create some content
+        nces = NonCourseEventFactory.create_batch(3)
+        resp = self.client.get(reverse('ical_events'), HTTP_HOST = 'test.com')
+        cal = Calendar.from_ical(resp.content)
+        self.assertSameObjects([nce.name for nce in nces],
+                               [evt['SUMMARY']
+                                for evt in cal.subcomponents
+                                if isinstance(evt, Event)])
