@@ -360,7 +360,7 @@ class CourseClass(TimeStampedModel, object):
 
 @receiver(post_save, sender=CourseClass)
 def maybe_upload_slides(sender, instance, **kwargs):
-    if instance.slides and not instance.other_materials:
+    if instance.slides and not instance.slides_url:
         instance.upload_slides()
 
 
