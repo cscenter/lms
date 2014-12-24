@@ -156,21 +156,6 @@ class CourseOffering(TimeStampedModel):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
 
-    def clean(self):
-        super(CourseOffering, self).clean()
-        if self.is_published_in_video:
-            try:
-                other_course = (CourseOffering.objects
-                                .filter(course=self.course,
-                                        is_published_in_video=True)
-                                .get())
-                raise ValidationError(_("Only one course offering for given "
-                                        "course can be published in video "
-                                        "section (there is one from {})")
-                                      .format(other_course.semester))
-            except ObjectDoesNotExist:
-                pass
-
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
