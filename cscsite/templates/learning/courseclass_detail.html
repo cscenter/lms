@@ -55,6 +55,11 @@
       <div class="ubertext">
         {{ course_class.video_url|oembed }}
       </div>
+      {% elif course_class.video %}
+      <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
+      <div class="ubertext">
+        {{ course_class.video }}
+      </div>
       {% endif %}
 
       {% if course_class.other_materials or course_class.slides_url %}
