@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load thumbnail %}
+{% load core_tags %}
 
 {% block content %}
 <div class="container">
@@ -108,6 +109,38 @@
                    disabled="disabled" size="50">
           </td>
         </tr>
+      </table>
+      {% endif %}
+      {% if a_ss %}
+      <p>&nbsp;</p>
+      <table class="table table-condensed">
+        <tr>
+          <th>{% trans "Course offering" %}</th>
+          <th>{% trans "Assignment" %}</th>
+          <th>{% trans "Grade" %}</th>
+        </tr>
+        {% for a_s in a_ss %}
+        <tr>
+          <td>
+            {% if a_s.hacky_co_change %}
+            <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
+            {% else %}
+            <span style="color: #CCC">—〃—</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
+              {{ a_s.assignment.title }}
+            </a>
+          </td>
+          <td>
+            <span style="white-space: nowrap;"
+                  class="badge assignment-status {{ a_s.state|to_css }}">
+              {{ a_s.state_display }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
       </table>
       {% endif %}
     </div>
