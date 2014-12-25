@@ -152,6 +152,25 @@ class UserDetailView(generic.DetailView):
                                                  if p.semesters_list
                                                  else None))
         context['student_projects'] = student_projects
+        if self.request.user.is_superuser:
+            related = ['assignment',
+                       'assignment__course_offering',
+                       'assignment__course_offering__course',
+                       'assignment__course_offering__semester']
+            a_ss = (AssignmentStudent.objects
+                    .filter(student=self.object)
+                    .order_by('assignment__course_offering__semester__year',
+                              '-assignment__course_offering__semester__type',
+                              'assignment__course_offering__course__name',
+                              'assignment__deadline_at')
+                    .select_related(*related))
+            a_ss = list(a_ss)
+            current_co = None
+            for a_s in a_ss:
+                if a_s.assignment.course_offering != current_co:
+                    setattr(a_s, 'hacky_co_change', True)
+                    current_co = a_s.assignment.course_offering
+            context['a_ss'] = a_ss
         return context
 
 
