@@ -5,7 +5,7 @@ import re
 from south.v2 import DataMigration
 
 
-re_youtube = re.compile("youtube.com/embed/([A-Za-z0-9]+)")
+re_youtube = re.compile("youtube.com/embed/(\S+)")
 
 
 class Migration(DataMigration):
