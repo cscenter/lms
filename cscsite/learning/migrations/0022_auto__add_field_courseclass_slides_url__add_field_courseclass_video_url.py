@@ -7,6 +7,7 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+
     def forwards(self, orm):
         # Adding field 'CourseClass.slides_url'
         db.add_column(u'learning_courseclass', 'slides_url',
@@ -87,12 +88,13 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
         },
         u'learning.assignmentstudent': {
-            'Meta': {'ordering': "[u'assignment', u'student']", 'object_name': 'AssignmentStudent'},
+            'Meta': {'ordering': "[u'assignment', u'student']", 'unique_together': "[[u'assignment', u'student']]", 'object_name': 'AssignmentStudent'},
             'assignment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Assignment']"}),
             'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
             'grade': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'grade_changed': ('model_utils.fields.MonitorField', [], {'default': 'datetime.datetime.now', u'monitor': "u'grade'"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_passed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
             'student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
         },
@@ -139,6 +141,7 @@ class Migration(SchemaMigration):
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'enrolled_students': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'enrolled_on_set'", 'blank': 'True', 'through': u"orm['learning.Enrollment']", 'to': u"orm['users.CSCUser']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_published_in_video': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
             'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Semester']", 'on_delete': 'models.PROTECT'}),
             'teachers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'teaching_set'", 'symmetrical': 'False', 'to': u"orm['users.CSCUser']"})
@@ -164,7 +167,7 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
         },
         u'learning.enrollment': {
-            'Meta': {'ordering': "[u'student', u'course_offering']", 'object_name': 'Enrollment'},
+            'Meta': {'ordering': "[u'student', u'course_offering']", 'unique_together': "[(u'student', u'course_offering')]", 'object_name': 'Enrollment'},
             'course_offering': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseOffering']"}),
             'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
             'grade': ('model_utils.fields.StatusField', [], {'default': "u'not_graded'", 'max_length': '100', u'no_check_for_status': 'True'}),
@@ -173,14 +176,17 @@ class Migration(SchemaMigration):
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
             'student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
         },
-        u'learning.overallgrade': {
-            'Meta': {'ordering': "[u'student']", 'object_name': 'OverallGrade'},
+        u'learning.noncourseevent': {
+            'Meta': {'ordering': "[u'-date', u'-starts_at', u'name']", 'object_name': 'NonCourseEvent'},
             'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'grade': ('model_utils.fields.StatusField', [], {'default': "u'not_graded'", 'max_length': '100', u'no_check_for_status': 'True'}),
-            'grade_changed': ('model_utils.fields.MonitorField', [], {'default': 'datetime.datetime.now', u'monitor': "u'grade'"}),
+            'date': ('django.db.models.fields.DateField', [], {}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'ends_at': ('django.db.models.fields.TimeField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'student': ('annoying.fields.AutoOneToOneField', [], {'related_name': "u'overall_grade'", 'unique': 'True', 'to': u"orm['users.CSCUser']"})
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'starts_at': ('django.db.models.fields.TimeField', [], {}),
+            'venue': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Venue']", 'on_delete': 'models.PROTECT'})
         },
         u'learning.semester': {
             'Meta': {'ordering': "[u'-year', u'type']", 'object_name': 'Semester'},
@@ -188,8 +194,22 @@ class Migration(SchemaMigration):
             'type': ('model_utils.fields.StatusField', [], {'default': "u'spring'", 'max_length': '100', u'no_check_for_status': 'True'}),
             'year': ('django.db.models.fields.PositiveSmallIntegerField', [], {})
         },
+        u'learning.studentproject': {
+            'Meta': {'ordering': "[u'name']", 'object_name': 'StudentProject'},
+            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'presentation': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
+            'project_type': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'semesters': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['learning.Semester']", 'symmetrical': 'False'}),
+            'student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"}),
+            'supervisor': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
         u'learning.venue': {
             'Meta': {'ordering': "[u'-is_preferred', u'name']", 'object_name': 'Venue'},
+            'address': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_preferred': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
