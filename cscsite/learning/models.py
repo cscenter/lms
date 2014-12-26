@@ -20,6 +20,7 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from micawber.contrib.mcdjango import extract_oembed
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
@@ -289,13 +290,9 @@ class CourseClass(TimeStampedModel, object):
         blank=True,
         upload_to=_slides_file_name)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
-    video = models.TextField(
-        _("CourseClass|Video"),
-        blank=True,
-        help_text=("{0}; {1}"
-                   .format(LATEX_MARKDOWN_HTML_ENABLED,
-                           _("please insert HTML for embedded video player"))))
-    video_url = models.URLField(_("YouTube URL"), blank=True)
+    video_url = models.URLField(
+        _("Video URL"), blank=True,
+        help_text=_("Both YouTube and Yandex Video are supported"))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
@@ -330,6 +327,14 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.short_description = _("Type")
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
+
+    @cached_property
+    def video(self):
+        if not self.video_url:
+            return ""
+
+        [(_url, embed)] = extract_oembed(self.video_url)
+        return embed
 
     # TODO: test this
     # Note(lebedev): should be a manager, not a class method.

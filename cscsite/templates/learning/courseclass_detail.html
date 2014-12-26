@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% load i18n %}
-{% load firstof from future %}
 
 {% load micawber_tags %}
 
@@ -51,21 +50,17 @@
       </div>
       {% endif %}
 
-      {% if course_class.video_url or course_class.video %}
+      {% if course_class.video %}
       <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
       <div class="ubertext">
-        {% autoescape off %}
-            {% firstof course_class.video_url|oembed course_class.video %}
-        {% endautoescape %}
+        {{ course_class.video }}
       </div>
       {% endif %}
 
-      {% if course_class.other_materials or course_class.slides_url or course_class.slides %}
+      {% if course_class.other_materials or course_class.slides_url %}
       <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
       <div class="ubertext">
-        {% autoescape off %}
-            {% firstof course_class.slides_url|oembed course_class.slides %}
-        {% endautoescape %}
+        {{ course_class.slides_url|oembed }}
         {{ course_class.other_materials|safe }}
       </div>
       {% endif %}
