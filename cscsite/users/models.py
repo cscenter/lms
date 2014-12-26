@@ -60,6 +60,12 @@ class CSCUser(AbstractUser):
         _("CSC review"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
+    private_contacts = models.TextField(
+        _("Contact information"),
+        help_text=("{}; {}"
+                   .format(_("LaTeX+Markdown is enabled"),
+                           _("will be shown only to logged-in users"))),
+        blank=True)
 
     class Meta:
         ordering = ['last_name', 'first_name']

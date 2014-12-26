@@ -86,6 +86,12 @@
         {{ user_object.csc_review }}
       </div>
       {% endif %}
+      {% if user.is_authenticated %}
+      <h4>{% trans "Contact information" %}</h4>
+      <div class="ubertext">
+        {{ user_object.private_contacts }}
+      </div>
+      {% endif %}
       {% if user_object.pk == user.pk %}
       <table>
         <tr>
