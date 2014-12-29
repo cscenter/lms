@@ -34,6 +34,7 @@ def extract_yandex_url(pk, html_source):
         return
     elif len(iframes) > 1:
         print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
+        print(html_source, file=sys.stderr)
         return
 
     [iframe] = iframes
