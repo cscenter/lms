@@ -756,3 +756,26 @@ tr.unread {
 .grade-cell {
   text-align: center;
 }
+
+.video-container {
+  margin: auto;
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  line-height: 150px;
+  margin-bottom: 30px;
+  opacity: 0.75;
+}
+
+.video-container:hover {
+  opacity: 1;
+}
+
+.video-inner {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-weight: bold;
+  font-size: 20px;
+  color: #1F4C66;
+}
