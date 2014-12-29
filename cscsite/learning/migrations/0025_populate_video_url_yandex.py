@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import re
 import sys
 
 from django.db.models import Q
@@ -39,7 +40,7 @@ def extract_yandex_url(pk, html_source):
         return
 
     [iframe] = iframes
-    return iframe.attrib["src"].rstrip("/")
+    return re.sub("https?:", "", iframe.attrib["src"].rstrip("/"))
 
 
 class Migration(DataMigration):
