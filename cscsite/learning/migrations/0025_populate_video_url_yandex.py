@@ -58,7 +58,11 @@ class Migration(DataMigration):
             iframe_url = extract_yandex_url(
                 course_class.pk,
                 course_class.video + course_class.other_materials)
-            if iframe_url is None or iframe_url not in embeds:
+            if iframe_url is None:
+                continue
+            elif iframe_url not in embeds:
+                print("Failed to lookup {} in embed->URL map"
+                      .format(iframe_url), file=sys.stderr)
                 continue
 
             course_class.video_url = embeds[iframe_url]
