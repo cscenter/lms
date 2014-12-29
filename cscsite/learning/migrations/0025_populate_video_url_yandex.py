@@ -5,7 +5,7 @@ from __future__ import print_function
 import sys
 
 from django.db.models import Q
-from lxml.html import html
+from lxml import html
 from micawber.contrib.mcdjango import extract_oembed
 from south.v2 import DataMigration
 
