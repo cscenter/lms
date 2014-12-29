@@ -349,24 +349,25 @@ class CourseClass(TimeStampedModel, object):
     def slides_file_name(self):
         return os.path.basename(self.slides.name)
 
-    def upload_slides(self):
-        course_offering = self.course_offering
-        title = "{0}: {1}".format(course_offering, self)
-        course = course_offering.course
-
-        # a) SlideShare
-        self.slides_url = slides.upload_to_slideshare(
-            self.slides.file, title, self.description, tags=[course.slug])
-        self.save()
-        # b) Yandex.Disk
-        yandex_path = posixpath.join(course.slug, self.slides_file_name)
-        slides.upload_to_yandex(self.slides.file, yandex_path)
-
 
 @receiver(post_save, sender=CourseClass)
 def maybe_upload_slides(sender, instance, **kwargs):
+    # XXX we might want to delegate this to cron or Celery.
     if instance.slides and not instance.slides_url:
-        instance.upload_slides()
+        course_offering = instance.course_offering
+        course = course_offering.course
+
+        # a) Yandex.Disk
+        slides.upload_to_yandex(
+            instance.slides.file,
+            posixpath.join(course.slug, instance.slides_file_name))
+
+        # b) SlideShare
+        instance.slides_url = slides.upload_to_slideshare(
+            instance.slides.file,
+            "{0}: {1}".format(course_offering, instance),
+            instance.description, tags=[course.slug])
+        instance.save()
 
 
 @python_2_unicode_compatible
