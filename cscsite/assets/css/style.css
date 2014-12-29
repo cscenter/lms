@@ -637,6 +637,10 @@ h5.assignment {
   width: 126px;
 }
 
+.calendar td.today {
+  background-color: #FAFFEC;
+}
+
 .calendar .day {
   font-weight: bold;
   color: #BBB;

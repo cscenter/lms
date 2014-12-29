@@ -68,8 +68,8 @@
         </tr>
         {% for week_num, week in month %}
         <tr id="week_{{week_num}}">
-          {% for day, events, in_semester in week %}
-          <td class="{{ in_semester|yesno:'in-semester,not-in-semester' }}">
+          {% for day, events, in_semester, is_today in week %}
+          <td class="{{ in_semester|yesno:'in-semester,not-in-semester' }} {{ is_today|yesno:'today,' }}">
             {% if forloop.first %}
             <div class="week-num-container">
               <div class="week-num">
