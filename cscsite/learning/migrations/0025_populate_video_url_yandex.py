@@ -31,6 +31,7 @@ def extract_yandex_url(pk, html_source):
         r"./iframe[contains(@src, 'video.yandex.ru/iframe/csc-video')]")
     if not iframes:
         print("{:03d} no embed found".format(pk), file=sys.stderr)
+        print(html_source, file=sys.stderr)
         return
     elif len(iframes) > 1:
         print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
@@ -51,8 +52,7 @@ class Migration(DataMigration):
 
         q = (Q(video__contains="yandex") |
              Q(other_materials__contains="yandex"))
-        course_classes = orm.CourseClass.objects.filter(q)
-        for course_class in course_classes:
+        for course_class in orm.CourseClass.objects.filter(q):
             iframe_url = extract_yandex_url(
                 course_class.pk,
                 course_class.video + course_class.other_materials)

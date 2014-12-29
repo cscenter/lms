@@ -16,6 +16,7 @@ def extract_youtube_url(pk, html_source):
     iframes = html_tree.xpath(r"./iframe[contains(@src, 'youtube.com/embed')]")
     if not iframes:
         print("{:03d} no embed found".format(pk), file=sys.stderr)
+        print(html_source, file=sys.stderr)
         return
     elif len(iframes) > 1:
         print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
@@ -31,8 +32,7 @@ class Migration(DataMigration):
     def forwards(self, orm):
         q = (Q(video__contains="youtube") |
              Q(other_materials__contains="youtube"))
-        course_classes = orm.CourseClass.objects.filter(q)
-        for course_class in course_classes:
+        for course_class in orm.CourseClass.objects.filter(q):
             iframe_url = extract_youtube_url(
                 course_class.pk,
                 course_class.video + course_class.other_materials)
