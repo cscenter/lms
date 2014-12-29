@@ -613,12 +613,12 @@ h5.assignment {
 }
 
 .calendar th {
-  width: 134px;
+  width: 130px;
 }
 
 .calendar td {
   padding: 4px !important;
-  width: 134px;
+  width: 130px;
 }
 
 .calendar div.week-num-container {
@@ -634,7 +634,7 @@ h5.assignment {
 
 .calendar td .cell {
   min-height: 100px;
-  width: 126px;
+  width: 122px;
 }
 
 .calendar td.today {
