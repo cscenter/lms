@@ -1,28 +1,45 @@
 # -*- coding: utf-8 -*-
 
-import re
+from __future__ import print_function
 
+import posixpath
+import sys
+from urlparse import urlparse
+
+from django.db.models import Q
+from lxml import html
 from south.v2 import DataMigration
 
 
-re_youtube = re.compile("youtube.com/embed/(\S+)")
+def extract_youtube_url(pk, html_source):
+    html_tree = html.fromstring(html_source)
+    iframes = html_tree.xpath(r"./iframe[contains(@src, 'youtube.com/embed')]")
+    if not iframes:
+        print("{:03d} no embed found".format(pk), file=sys.stderr)
+        return
+    elif len(iframes) > 1:
+        print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
+        return
+
+    [iframe] = iframes
+    return iframe.attrib["src"]
 
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        course_classes = orm.CourseClass.objects.exclude(video="")
+        q = (Q(video__contains="youtube") |
+             Q(other_materials__contains="youtube"))
+        course_classes = orm.CourseClass.objects.exclude(q)
         for course_class in course_classes:
-            yt_ids = re_youtube.findall(course_class.video)
-            if not yt_ids:
-                print("Skipping {}: no embed found".format(course_class.pk))
-                continue
-            elif len(yt_ids) > 1:
-                print("Skipping {}: multiple embeds found"
-                      .format(course_class.pk))
+            iframe_url = extract_youtube_url(
+                course_class.pk,
+                course_class.video + course_class.other_materials)
+            if iframe_url is None:
                 continue
 
-            [yt_id] = yt_ids
+            result = urlparse(iframe_url)
+            _prefix, yt_id = posixpath.split(result.path)
             course_class.video_url = "http://www.youtube.com/watch?v=" + yt_id
             course_class.save()
 

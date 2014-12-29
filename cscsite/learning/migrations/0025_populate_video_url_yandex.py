@@ -2,47 +2,62 @@
 
 from __future__ import print_function
 
-import itertools
-import re
+import sys
 
-from south.v2 import DataMigration
+from django.db.models import Q
+from lxml.html import html
 from micawber.contrib.mcdjango import extract_oembed
+from south.v2 import DataMigration
 
 
-re_yandex = re.compile(r"video.yandex.ru/iframe/csc-video/[^/]+")
+def bruteforce_yandex_embeds():
+    embeds = {}
+    for idx in range(1, 512):
+        url = ("https://video.yandex.ru/users/csc-video/view/{}"
+               .format(idx))
+        response = extract_oembed(url)
+        if not response:
+            continue
+        else:
+            [(_url, meta)] = response
+            iframe_url = extract_yandex_url(-1, meta["html"])
+            embeds[iframe_url] = url
+    return embeds
+
+
+def extract_yandex_url(pk, html_source):
+    html_tree = html.fromstring(html_source)
+    iframes = html_tree.xpath(
+        r"./iframe[contains(@src, 'video.yandex.ru/iframe/csc-video')]")
+    if not iframes:
+        print("{:03d} no embed found".format(pk), file=sys.stderr)
+        return
+    elif len(iframes) > 1:
+        print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
+        return
+
+    [iframe] = iframes
+    return iframe.attrib["src"]
 
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        embeds = {}
+        print("Populating embed->URL map via bruteforce ...", end=" ",
+              file=sys.stderr)
+        embeds = bruteforce_yandex_embeds()
+        print("resolved {} embeds".format(len(embeds)), file=sys.stderr)
 
-        print("Populating embed->URL map via bruteforce ...", end=" ")
-        for idx in range(1, 512):
-            url = ("https://video.yandex.ru/users/csc-video/view/{}"
-                   .format(idx))
-            response = extract_oembed(url)
-            if not response:
-                continue
-            else:
-                [(_url, meta)] = response
-                [iframe_url] = re_yandex.findall(meta["html"])
-                embeds[iframe_url] = url
-        print("resolved {} embeds".format(len(embeds)))
-
-        course_classes = \
-            orm.CourseClass.objects.filter(video__contains="yandex")
+        q = (Q(video__contains="yandex") |
+             Q(other_materials__contains="yandex"))
+        course_classes = orm.CourseClass.objects.filter(q)
         for course_class in course_classes:
-            iframe_urls = re_yandex.findall(course_class.video)
-            if not iframe_urls:
-                print("Skipping {}: no embed found".format(course_class.pk))
-                continue
-            elif len(iframe_urls) > 1:
-                print("Skipping {}: multiple embeds found"
-                      .format(course_class.pk))
+            iframe_url = extract_yandex_url(
+                course_class.pk,
+                course_class.video + course_class.other_materials)
+            if iframe_url is None or iframe_url not in embeds:
                 continue
 
-            [iframe_url] = iframe_urls
             course_class.video_url = embeds[iframe_url]
             course_class.save()
 

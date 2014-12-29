@@ -2,6 +2,7 @@ Django==1.6.5
 Pillow==2.3.0
 Unipath==1.0
 beautifulsoup4==4.3.2
+cssselect
 coverage==3.7.1
 colour_runner==0.0.4
 django-annoying==0.8.0
@@ -18,6 +19,7 @@ django-sitemetrics==0.4.2
 django-taggit==0.12.1
 factory_boy==2.4.1
 icalendar==3.8.4
+lxml==3.4.1
 micawber==0.3.1
 MySQL-python==1.2.5
 mock==1.0.1

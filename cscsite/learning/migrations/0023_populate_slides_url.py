@@ -18,7 +18,7 @@ class Migration(DataMigration):
         api = get_slideshare()
         for course_class in course_classes:
             other_materials = course_class.other_materials
-            sl_ids = re_slideshare.findall(other_materials)
+            sl_ids = set(re_slideshare.findall(other_materials))
             if not sl_ids:
                 print("Skipping {}: no embed found".format(course_class.pk))
                 continue
@@ -31,8 +31,9 @@ class Migration(DataMigration):
             sl_meta = api.get_slideshow(sl_id)
             try:
                 course_class.slides_url = sl_meta["Slideshow"]["URL"]
-            except KeyError:
-                import pdb; pdb.set_trace()  # Impossible?
+            except KeyError:  # Impossible?
+                import pdb
+                pdb.set_trace()
             else:
                 course_class.other_materials = ""
                 course_class.save()
