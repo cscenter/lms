@@ -50,9 +50,11 @@ class Migration(DataMigration):
         embeds = bruteforce_yandex_embeds()
         print("resolved {} embeds".format(len(embeds)), file=sys.stderr)
 
+        count = 0
         q = (Q(video__contains="yandex") |
              Q(other_materials__contains="yandex"))
-        for course_class in orm.CourseClass.objects.filter(q):
+        course_classes = orm.CourseClass.objects.filter(q)
+        for course_class in course_classes:
             iframe_url = extract_yandex_url(
                 course_class.pk,
                 course_class.video + course_class.other_materials)
@@ -61,6 +63,10 @@ class Migration(DataMigration):
 
             course_class.video_url = embeds[iframe_url]
             course_class.save()
+            count += 1
+
+        print("Populated {0}/{1} classes, yay!"
+              .format(count, len(course_classes)), file=sys.stderr)
 
     def backwards(self, orm):
         raise RuntimeError("Cannot reverse this migration.")

@@ -30,9 +30,11 @@ def extract_youtube_url(pk, html_source):
 class Migration(DataMigration):
 
     def forwards(self, orm):
+        count = 0
         q = (Q(video__contains="youtube") |
              Q(other_materials__contains="youtube"))
-        for course_class in orm.CourseClass.objects.filter(q):
+        course_classes = orm.CourseClass.objects.filter(q)
+        for course_class in course_classes:
             iframe_url = extract_youtube_url(
                 course_class.pk,
                 course_class.video + course_class.other_materials)
@@ -43,6 +45,10 @@ class Migration(DataMigration):
             _prefix, yt_id = posixpath.split(result.path)
             course_class.video_url = "http://www.youtube.com/watch?v=" + yt_id
             course_class.save()
+            count += 1
+
+        print("Populated {0}/{1} classes, yay!"
+              .format(count, len(course_classes)), file=sys.stderr)
 
     def backwards(self, orm):
         raise RuntimeError("Cannot reverse this migration.")
