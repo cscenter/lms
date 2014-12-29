@@ -208,9 +208,11 @@ class CalendarMixin(object):
                                            self._month_date.month)
         month = [(week[0].isocalendar()[1],
                   [(day, dates_to_events[day],
-                    day.month == self._month_date.month)
+                    day.month == self._month_date.month,
+                    now().date() == day)
                    for day in week])
                  for week in month_cal]
+        print month_cal[0][0], now().date()
 
         context['month'] = month
         context['month_date'] = self._month_date
