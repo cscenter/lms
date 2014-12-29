@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% load i18n %}
 
 {% block content %}
@@ -14,11 +15,13 @@
   <div class="row">
     {% for co in chunk %}
     <div class="col-xs-4">
-      <div style="margin: auto; width: 250px; height: 150px;">
-        <a href="{{ co.get_absolute_url }}">
-          <img data-src="holder.js/250x150">
-        </a>
+      <a href="{{ co.get_absolute_url }}">
+      <div class="video-container" style="background-image:url('{% static "img/video_mini.png" %}');">
+        <span class="video-inner">
+            {{ co.course.name }},<br> {{ co.semester}}
+        </span>
       </div>
+      </a>
     </div>
     {% endfor %}
   </div>
