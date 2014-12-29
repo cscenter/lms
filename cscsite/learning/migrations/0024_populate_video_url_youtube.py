@@ -30,7 +30,7 @@ class Migration(DataMigration):
     def forwards(self, orm):
         q = (Q(video__contains="youtube") |
              Q(other_materials__contains="youtube"))
-        course_classes = orm.CourseClass.objects.exclude(q)
+        course_classes = orm.CourseClass.objects.filter(q)
         for course_class in course_classes:
             iframe_url = extract_youtube_url(
                 course_class.pk,
