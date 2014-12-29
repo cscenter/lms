@@ -13,7 +13,7 @@ from south.v2 import DataMigration
 
 def extract_youtube_url(pk, html_source):
     html_tree = html.fromstring(html_source)
-    iframes = html_tree.xpath(r"./iframe[contains(@src, 'youtube.com/embed')]")
+    iframes = html_tree.xpath("//iframe[contains(@src, 'youtube.com/embed')]")
     if not iframes:
         print("{:03d} no embed found".format(pk), file=sys.stderr)
         print(html_source, file=sys.stderr)
@@ -24,7 +24,7 @@ def extract_youtube_url(pk, html_source):
         return
 
     [iframe] = iframes
-    return iframe.attrib["src"]
+    return iframe.attrib["src"].rstrip("/")
 
 
 class Migration(DataMigration):
