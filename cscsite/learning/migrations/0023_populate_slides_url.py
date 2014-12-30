@@ -57,8 +57,8 @@ class Migration(DataMigration):
                 if iframe_count == 1:
                     course_class.other_materials = ""
                 else:
-                    print("{:03d} PLEASE FIX other_materials MANUALLY!",
-                          file=sys.stderr)
+                    print("{:03d} PLEASE FIX other_materials MANUALLY!"
+                          .format(course_class.pk), file=sys.stderr)
 
                 course_class.save()
                 count += 1
