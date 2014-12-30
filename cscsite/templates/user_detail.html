@@ -149,15 +149,17 @@
         {% endfor %}
       </table>
       {% endif %}
-      {% if request.user.is_superuser %}
+      {% with borrows=user_object.borrows.all %}
+      {% if request.user.is_superuser and borrows %}
       <p>&nbsp;</p>
       <h4>{% trans "books" %}:</h4>
       <ul>
-        {% for borrow in user_object.borrows.all %}
+        {% for borrow in borrows %}
         <li><a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a></li>
         {% endfor %}
       </ul>
       {% endif %}
+      {% endwith %}
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}
