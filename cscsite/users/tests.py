@@ -229,6 +229,8 @@ class UserTests(TestCase):
     def test_user_can_update_profile(self):
         test_note = "The best user in the world"
         user = CSCUser.objects.create_user(**UserFactory.attributes())
+        resp = self.client.get(reverse('user_detail', args=[user.pk]))
+        self.assertFalse(resp.context['is_extended_profile_available'])
         self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.context['user_object'], user)
