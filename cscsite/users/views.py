@@ -132,9 +132,12 @@ class UserDetailView(generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = (super(UserDetailView, self)
                    .get_context_data(*args, **kwargs))
+        u = self.request.user
         context['is_extended_profile_available'] = \
-            (self.request.user == self.object or
-             self.request.user.is_superuser)
+            (u.is_authenticated()
+             and (u == self.object
+                  or u.is_teacher
+                  or u.is_superuser))
         context['is_editing_allowed'] = \
             context['is_extended_profile_available']
         student_projects = list(self.object.studentproject_set
