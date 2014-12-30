@@ -118,16 +118,19 @@ class UserDetailView(generic.DetailView):
     context_object_name = 'user_object'
 
     def get_queryset(self, *args, **kwargs):
+        prefetch_list = ['teaching_set',
+                         'teaching_set__semester',
+                         'teaching_set__course',
+                         'enrollment_set',
+                         'enrollment_set__course_offering',
+                         'enrollment_set__course_offering__semester',
+                         'enrollment_set__course_offering__course']
+        if self.request.user.is_superuser:
+            prefetch_list += ['borrows', 'borrows__book']
         return (auth.get_user_model()
                 ._default_manager
                 .all()
-                .prefetch_related('teaching_set',
-                                  'teaching_set__semester',
-                                  'teaching_set__course',
-                                  'enrollment_set',
-                                  'enrollment_set__course_offering',
-                                  'enrollment_set__course_offering__semester',
-                                  'enrollment_set__course_offering__course'))
+                .prefetch_related(*prefetch_list))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(UserDetailView, self)
