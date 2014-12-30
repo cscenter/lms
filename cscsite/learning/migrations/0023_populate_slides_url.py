@@ -52,7 +52,14 @@ class Migration(DataMigration):
                       file=sys.stderr)
                 print(e, file=sys.stderr)
             else:
-                course_class.other_materials = ""
+                html_tree = html.fromstring(course_class.other_materials)
+                iframe_count = len(html_tree.xpath("//iframe"))
+                if iframe_count == 1:
+                    course_class.other_materials = ""
+                else:
+                    print("{:03d} PLEASE FIX other_materials MANUALLY!",
+                          file=sys.stderr)
+
                 course_class.save()
                 count += 1
 
