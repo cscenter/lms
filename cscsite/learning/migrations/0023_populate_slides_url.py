@@ -1,42 +1,63 @@
 # -*- coding: utf-8 -*-
 
-import re
+from __future__ import print_function
 
+import posixpath
+import sys
+from urlparse import urlparse
+
+from lxml import html
 from south.v2 import DataMigration
 
 from ..slides import get_slideshare
 
 
-re_slideshare = re.compile("slideshare.net/slideshow/embed_code/(\d+)")
+def extract_slideshare_url(pk, html_source):
+    html_tree = html.fromstring(html_source)
+    iframes = html_tree.xpath(
+        "//iframe[contains(@src, 'slideshare.net/slideshow/embed_code')]")
+    if not iframes:
+        print("{:03d} no embed found".format(pk), file=sys.stderr)
+        print(html_source, file=sys.stderr)
+        return
+    elif len(iframes) > 1:
+        print("{:03d}: multiple embeds found".format(pk), file=sys.stderr)
+        print(html_source, file=sys.stderr)
+        return
+
+    [iframe] = iframes
+    return iframe.attrib["src"].rstrip("/")
 
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        course_classes = orm.CourseClass.objects \
-            .exclude(slides="", other_materials="")
+        count = 0
+        course_classes = orm.CourseClass.objects.filter(
+            other_materials__contains="slideshare")
         api = get_slideshare()
         for course_class in course_classes:
-            other_materials = course_class.other_materials
-            sl_ids = set(re_slideshare.findall(other_materials))
-            if not sl_ids:
-                print("Skipping {}: no embed found".format(course_class.pk))
-                continue
-            elif len(sl_ids) > 1:
-                print("Skipping {}: multiple embeds found"
-                      .format(course_class.pk))
+            iframe_url = extract_slideshare_url(
+                course_class.pk, course_class.other_materials)
+            if iframe_url is None:
                 continue
 
-            [sl_id] = sl_ids
-            sl_meta = api.get_slideshow(sl_id)
+            result = urlparse(iframe_url)
+            _prefix, sl_id = posixpath.split(result.path)
             try:
+                sl_meta = api.get_slideshow(sl_id)
                 course_class.slides_url = sl_meta["Slideshow"]["URL"]
-            except KeyError:  # Impossible?
-                import pdb
-                pdb.set_trace()
+            except Exception as e:  # Impossible?
+                print("{:03d}: unexpected error".format(course_class.pk),
+                      file=sys.stderr)
+                print(e, file=sys.stderr)
             else:
                 course_class.other_materials = ""
                 course_class.save()
+                count += 1
+
+        print("Populated {0}/{1} classes, yay!"
+              .format(count, len(course_classes)), file=sys.stderr)
 
     def backwards(self, orm):
         raise RuntimeError("Cannot reverse this migration.")
