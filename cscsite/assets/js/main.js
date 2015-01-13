@@ -88,8 +88,6 @@ $(document).ready(function () {
                     if (filename in savedHashes) {
                         hash = savedHashes[filename];
                     } else {
-                        console.warn("filename " + filename
-                                     + " not found in savedHashes");
                         hash = "";
                     };
 
