@@ -2,6 +2,32 @@ var ends_at_touched = false;
 var marks_sheet_unsaved = 0;
 
 $(document).ready(function () {
+    //
+    // localStorage-related helpers
+    //
+
+    var loadMap = function(name) {
+        var map = window.localStorage.getItem(name);
+        if (map !== null) {
+            return JSON.parse(map);
+        } else {
+            return {};
+        };
+    };
+
+    var saveMap = function(name, map) {
+        window.localStorage.setItem(name, JSON.stringify(map));
+    };
+
+    // map from filename to hash
+    var savedHashes = loadMap("savedHashes");
+    // map from hash to date when it was seen
+    var seenHashes = loadMap("seenHashes");
+
+    //
+    // Ubertext
+    //
+
     hljs.configure({tabReplace: '    '});
 
     var renderer = new marked.Renderer();
@@ -28,9 +54,58 @@ $(document).ready(function () {
             target.innerHTML = marked(jQuery.trim(target.innerHTML));
             $target.find("pre").addClass("hljs");
         }]);
+
+        if (target.dataset.hash !== undefined) {
+            seenHashes[target.dataset.hash] = new Date();
+            saveMap("seenHashes", seenHashes);
+        }
     });
 
-    $("textarea.ubereditor").each(function(i) {
+    //
+    // Ubereditors
+    //
+
+    var $ubereditors = $("textarea.ubereditor");
+    var ubereditorRestoration = true;
+    if ($ubereditors.length > 1) {
+        console.warn("more than one Ubereditor on page, " +
+                     "text restoration may be buggy");
+    }
+
+    // eliminate old or definitely succeeded (because their hash has been seen)
+    // epiceditor "files"
+    if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
+        (function() {
+            var editor = new EpicEditor();
+            var files = editor.getFiles(null, true);
+            for (var filename in files) {
+                if (files.hasOwnProperty(filename)) {
+                    var modified = new Date(files[filename].modified);
+                    var now = new Date();
+                    var hoursOld = Math.floor((now - modified)
+                                              / (1000 * 60 * 60));
+                    var hash;
+                    if (filename in savedHashes) {
+                        hash = savedHashes[filename];
+                    } else {
+                        console.warn("filename " + filename
+                                     + " not found in savedHashes");
+                        hash = "";
+                    };
+
+                    if ((hoursOld > 24) || (hash in seenHashes)) {
+                        editor.remove(filename);
+                        delete savedHashes[filename];
+                        delete seenHashes[hash];
+                        saveMap("savedHashes", savedHashes);
+                        saveMap("seenHashes", seenHashes);
+                    };
+                };
+            };
+        })();
+    };
+
+    $ubereditors.each(function(i) {
         var $textarea = $(this);
         var $container = $("<div/>").insertAfter($textarea);
         var shouldFocus = false;
@@ -39,20 +114,41 @@ $(document).ready(function () {
         shouldFocus = $textarea.prop("autofocus");
         $textarea.removeProp("required");
 
-        var editor = new EpicEditor({
+        var opts = {
             container: $container[0],
             textarea: $textarea[0],
             parser: null,
             focusOnLoad: shouldFocus,
             basePath: "/static/js/EpicEditor-v0.2.2",
-            clientSideStorage: false,
+            clientSideStorage: ubereditorRestoration,
             autogrow: {minHeight: 200},
             button: {bar: "show"},
             theme: {
                 base: '/themes/base/epiceditor.css',
                 editor: '/themes/editor/epic-light.css'
             }
-        });
+        };
+
+        var filename = (window.location.pathname.replace(/\//g, "_")
+                        + "_" + i.toString());
+        if (ubereditorRestoration) {
+            opts['file'] = {
+                name: filename,
+                defaultContent: "",
+                autoSave: 1000
+            };
+        };
+
+        var editor = new EpicEditor(opts);
+
+        if (ubereditorRestoration) {
+            editor.on('autosave', function() {
+                var text = editor.exportFile();
+                var hash = CryptoJS.MD5(text).toString();
+                savedHashes[filename] = hash;
+                saveMap("savedHashes", savedHashes);
+            });
+        }
 
         editor.load();
 
@@ -74,6 +170,10 @@ $(document).ready(function () {
             }]);
         });
     });
+
+    //
+    // Course class editing
+    //
 
     $("#id_ends_at").focus(function() {
         ends_at_touched = true;
@@ -114,6 +214,10 @@ $(document).ready(function () {
         }
     });
 
+    //
+    // Marks sheet (for teacher's one and staff's)
+    //
+
     if (marks_sheet_unsaved == 0) {
         $("#marks-sheet-save").attr("disabled", "disabled");
     }
@@ -130,10 +234,6 @@ $(document).ready(function () {
             if (marks_sheet_unsaved > 0) {
                 $("#marks-sheet-save").removeAttr("disabled");
                 $csv_link.addClass("disabled");
-                // $csv_link.click(function(e) {
-                //     $(this).find(".reason").addClass("active");
-                //     return false;
-                // });
             }
         } else {
             $target.parent().removeClass("marks-sheet-unsaved-cell");
@@ -141,7 +241,6 @@ $(document).ready(function () {
             if (marks_sheet_unsaved == 0) {
                 $("#marks-sheet-save").attr("disabled", "disabled");
                 $csv_link.removeClass("disabled");
-                // $csv_link.off("click");
             }
         }
     })
@@ -183,4 +282,10 @@ $(document).ready(function () {
          .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
          .addClass("active"));
     });
+
+    //
+    // Cache AssignmentComments to local storage
+    //
+
+
 });

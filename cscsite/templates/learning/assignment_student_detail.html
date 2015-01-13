@@ -61,7 +61,7 @@
                    {% endif %}">
           <div class="csc-well assignment-comment">
             <h5 class="assignment">{{ comment.author }}</h5>
-            <div class="ubertext">
+            <div class="ubertext" data-hash="{{ comment.text|to_md5 }}">
               {{ comment.text }}
             </div>
             <div class="metainfo-holder">

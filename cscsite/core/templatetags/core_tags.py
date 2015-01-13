@@ -1,3 +1,5 @@
+import md5
+
 from django import template
 from django.utils.timezone import now
 
@@ -32,3 +34,8 @@ def date_soon_css(d):
         return "day-after-tomorrow"
     else:
         return "in-future"
+
+
+@register.filter
+def to_md5(txt):
+    return md5.new(txt).hexdigest();
