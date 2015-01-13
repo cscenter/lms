@@ -86,7 +86,7 @@
         {{ user_object.csc_review }}
       </div>
       {% endif %}
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated and user_object.private_contacts %}
       <h4>{% trans "Contact information" %}</h4>
       <div class="ubertext">
         {{ user_object.private_contacts }}
