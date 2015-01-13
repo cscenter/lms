@@ -1,4 +1,4 @@
-import md5
+import hashlib
 
 from django import template
 from django.utils.timezone import now
@@ -38,4 +38,4 @@ def date_soon_css(d):
 
 @register.filter
 def to_md5(txt):
-    return md5.new(txt).hexdigest();
+    return hashlib.md5(txt).hexdigest();
