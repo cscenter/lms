@@ -156,7 +156,7 @@
       <h3>{% trans "News" %}</h3>
       {% for news in course_offering.courseofferingnews_set.all %}
       <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
-      <div class="ubertext">
+      <div class="ubertext shorten">
         {{ news.text|safe }}
       </div>
       <p class="news-metainfo">
