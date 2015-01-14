@@ -38,4 +38,4 @@ def date_soon_css(d):
 
 @register.filter
 def to_md5(txt):
-    return hashlib.md5(txt).hexdigest();
+    return hashlib.md5(txt.encode('utf-8')).hexdigest();
