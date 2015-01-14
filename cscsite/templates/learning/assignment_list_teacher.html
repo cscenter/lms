@@ -123,7 +123,7 @@
           </th>
         </thead>
         {% for assignment in assignment_list_archive %}
-        <tr>
+        <tr class="{{ assignment.has_unread|yesno:"unread,noop" }}">
           <td>
             <span style="white-space: nowrap;">{{ assignment.deadline_at|naturalday:"d E Y" }}</span><br>
             {{ assignment.deadline_at|time:"H:i" }}
