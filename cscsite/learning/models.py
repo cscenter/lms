@@ -442,6 +442,10 @@ class Assignment(TimeStampedModel, object):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
 
+    def has_unread(self):
+        cache = get_unread_notifications_cache()
+        return self.id in cache.assignment_ids_set
+
     @property
     def is_open(self):
         return self.deadline_at > timezone.now()

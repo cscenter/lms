@@ -43,6 +43,10 @@ class UnreadNotificationsCache(object):
                 if a_s.student_id != obj.user.id}
 
     @cached_property
+    def assignment_ids_set(self):
+        return {a_s.assignment_id for a_s in self.assignments}
+
+    @cached_property
     def courseoffering_news(self):
         return {obj.course_offering_news.course_offering: obj
                 for obj in self.coursenews_qs.all()}
