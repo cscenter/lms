@@ -57,19 +57,20 @@ $(document).ready(function () {
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             target.innerHTML = marked(jQuery.trim(target.innerHTML));
             $target.find("pre").addClass("hljs");
+            if ($target.hasClass("shorten")) {
+                $target.readmore({
+                    speed: 75,
+                    collapsedHeight: 150,
+                    moreLink: '<a href="#">Развернуть</a>',
+                    lessLink: '<a href="#">Свернуть</a>'
+                });
+            };
         }]);
 
         if (target.dataset.hash !== undefined) {
             seenHashes[target.dataset.hash] = new Date();
             saveMap("seenHashes", seenHashes);
         }
-    });
-
-    $("div.ubertext.shorten").readmore({
-        speed: 75,
-        collapsedHeight: 150,
-        moreLink: '<a href="#">Далее…</a>',
-        lessLink: '<a href="#">Свернуть</a>'
     });
 
     //
