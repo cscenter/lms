@@ -179,6 +179,15 @@ $(document).ready(function () {
                 target.innerHTML = marked(target.innerHTML);
             }]);
         });
+
+        if ($textarea[0].dataset.quicksend == 'true') {
+            var editorBody = editor.getElement('editor').body;
+            editorBody.addEventListener('keydown', function(e) {
+                if (e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
+                    $textarea[0].form.submit();
+                };
+            });
+        }
     });
 
     //
