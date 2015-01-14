@@ -155,9 +155,9 @@
                 <a href="{% url 'assignment_list_student' %}">
                   <li class="{% current 'assignment_list_student' %}">
                     {% trans "Assignments" %}
-                    {% if request.unread_notifications_cache.assignments %}
+                    {% if request.unread_notifications_cache.assignments_student %}
                     <span class="badge">
-                      {{ request.unread_notifications_cache.assignments|length }}
+                      {{ request.unread_notifications_cache.assignments_student|length }}
                     </span>
                     {% endif %}
                   </li>
@@ -207,9 +207,9 @@
                 <a href="{% url 'assignment_list_teacher' %}">
                   <li class="{% current 'assignment_list_teacher' %}">
                     {% trans "Assignments" %}
-                    {% if request.unread_notifications_cache.assignments %}
+                    {% if request.unread_notifications_cache.assignments_teacher %}
                     <span class="badge">
-                      {{ request.unread_notifications_cache.assignments|length }}
+                      {{ request.unread_notifications_cache.assignments_teacher|length }}
                     </span>
                     {% endif %}
                   </li>

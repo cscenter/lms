@@ -31,6 +31,18 @@ class UnreadNotificationsCache(object):
                 for obj in self.assignments_qs.all()}
 
     @cached_property
+    def assignments_student(self):
+        return {a_s: obj
+                for a_s, obj in self.assignments.items()
+                if a_s.student_id == obj.user.id}
+
+    @cached_property
+    def assignments_teacher(self):
+        return {a_s: obj
+                for a_s, obj in self.assignments.items()
+                if a_s.student_id != obj.user.id}
+
+    @cached_property
     def courseoffering_news(self):
         return {obj.course_offering_news.course_offering: obj
                 for obj in self.coursenews_qs.all()}
