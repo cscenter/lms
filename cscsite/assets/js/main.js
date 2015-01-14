@@ -19,6 +19,10 @@ $(document).ready(function () {
         window.localStorage.setItem(name, JSON.stringify(map));
     };
 
+    //
+    // State
+    //
+
     // map from filename to hash
     var savedHashes = loadMap("savedHashes");
     // map from hash to date when it was seen
@@ -59,6 +63,13 @@ $(document).ready(function () {
             seenHashes[target.dataset.hash] = new Date();
             saveMap("seenHashes", seenHashes);
         }
+    });
+
+    $("div.ubertext.shorten").readmore({
+        speed: 75,
+        collapsedHeight: 150,
+        moreLink: '<a href="#">Далее…</a>',
+        lessLink: '<a href="#">Свернуть</a>'
     });
 
     //
