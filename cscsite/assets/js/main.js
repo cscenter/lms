@@ -61,7 +61,7 @@ $(document).ready(function () {
                 $target.readmore({
                     speed: 75,
                     collapsedHeight: 150,
-                    moreLink: '<a href="#">Развернуть</a>',
+                    moreLink: '<a href="#">Далее…</a>',
                     lessLink: '<a href="#">Свернуть</a>'
                 });
             };
