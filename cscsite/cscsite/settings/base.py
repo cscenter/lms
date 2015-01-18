@@ -166,6 +166,7 @@ AUTHENTICATION_BACKENDS = (
 MENU_URL_NAMES = {
     'index': {},
     'about': {},
+    'course_video_list': {},
     'online': {},
     'teaching': {},
     'learning': {},
@@ -174,7 +175,6 @@ MENU_URL_NAMES = {
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
-    'course_video_list': {'alias': 'course_list'},
     'course_detail': {'alias': 'course_list'},
     'class_detail': {'alias': 'course_list'},
     'course_class_attachment_delete': {'alias': 'course_list'},
