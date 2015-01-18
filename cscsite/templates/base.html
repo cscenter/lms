@@ -53,6 +53,11 @@
                   {% trans "About CSC" %} <i class="fa fa-caret-down"></i>
                 </li>
               </a>
+              <a href="{% url 'course_video_list' %}">
+                <li class="{% current 'course_video_list' %}">
+                  {% trans "Videos" %}
+                </li>
+              </a>
               <a href="{% url 'online' %}">
                 <li class="{% current 'online' %}">
                   {% trans "Online" %}
