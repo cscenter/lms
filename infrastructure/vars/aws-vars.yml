@@ -1,0 +1,23 @@
+---
+ec2_region: eu-central-1
+
+security_groups:
+  - name: ssh
+    desc: the security group for ssh-available server
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+
+  - name: web
+    desc: the security group for the web server
+    rules:
+      - proto: tcp
+        from_port: "80"
+        to_port: "80"
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: "443"
+        to_port: "443"
+        cidr_ip: 0.0.0.0/0
