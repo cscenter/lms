@@ -1,0 +1,16 @@
+---
+- name: restart uwsgi
+  service: name=uwsgi state=restarted
+  sudo: yes
+
+- name: reload uwsgi
+  service: name=uwsgi state=reloaded
+  sudo: yes
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  sudo: yes
+
+- name: reload nginx
+  service: name=nginx state=reloaded
+  sudo: yes

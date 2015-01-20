@@ -1,0 +1,204 @@
+---
+- name: setup ec2 instance for CSC website
+  hosts: tag_Name_cscweb
+  user: ubuntu
+  sudo: True
+
+  # vars_files:
+  #   - vars/setup-vars.yml
+
+  vars:
+    root_user: ubuntu
+    cscweb_user: cscweb
+    cscweb_project: cscweb
+
+  tasks:
+  - name: add PPAs for latest and greatest software
+    apt_repository:
+      repo: "{{ item }}"
+      update_cache: no
+    with_items:
+      - 'ppa:nginx/stable'
+
+  - name: upgrade all packages to the latest version
+    apt: update_cache=yes upgrade=dist
+
+  - name: check if a reboot is required
+    stat: path=/var/run/reboot-required get_md5=no
+    register: reboot_file
+
+  - name: reboot the server
+    command: /sbin/reboot removes=/var/run/reboot-required
+    when: reboot_file.stat.exists == true
+
+  - name: wait for server to go offline (because reboot)
+    sudo: no
+    local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
+    when: reboot_file.stat.exists == true
+
+  - name: wait for server to come back online
+    sudo: no
+    local_action: wait_for host="{{ inventory_hostname }}" port=22
+    when: reboot_file.stat.exists == true
+
+  - name: install stuff
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      # core items
+      - nginx
+      - mysql-server
+      - libmysqlclient-dev
+      - python-setuptools
+      - python-dev
+      - python-mysqldb  # needed for Ansible itself
+      - git
+      - build-essential
+      - uwsgi
+      - uwsgi-plugin-python
+      # utilities
+      - zsh
+      - tmux
+      - htop
+
+  - name: install pip
+    easy_install: name=pip
+
+  - name: install global Python stuff
+    pip: name="{{ item }}"
+    with_items:
+      - ipython
+      - virtualenv
+      # NOTE(Dmitry): this one is better, but doesn't come with init.d and stuff
+      - uwsgi
+      - uwsgitop
+
+  # deployment user
+
+  - name: create user for CSC website
+    user:
+      home: "/home/{{ cscweb_user }}"
+      name: "{{ cscweb_user }}"
+      state: present
+
+  # comfort stuff
+
+  - name: install oh-my-zsh
+    git:
+      repo: https://github.com/robbyrussell/oh-my-zsh.git
+      dest: "/home/{{ item }}/.oh-my-zsh"
+    with_items:
+      - "{{ root_user }}"
+      - "{{ cscweb_user }}"
+
+  - name: copy zshrc
+    template:
+      src: templates/zshrc.tmpl
+      dest: "/home/{{ item }}/.zshrc"
+      owner: "{{ item }}"
+    with_items:
+      - "{{ root_user }}"
+      - "{{ cscweb_user }}"
+
+  - name: set zsh as default shell
+    user: name="{{ item }}" shell=/bin/zsh
+    with_items:
+      - "{{ root_user }}"
+      - "{{ cscweb_user }}"
+
+  # preparing deployment
+
+  - name: create .ssh directory for CSC website user
+    file:
+      path: "/home/{{ cscweb_user }}/.ssh"
+      state: directory
+      owner: "{{ cscweb_user }}"
+
+  - name: ensure ssh key stuff is present
+    copy:
+      src: "files/{{ item.from }}"
+      dest: "/home/{{ cscweb_user }}/.ssh/{{ item.to }}"
+      mode: 0400
+      owner: "{{ cscweb_user }}"
+    with_items:
+      - from: cscweb_deploy_ssh_key
+        to: id_rsa
+      - from: cscweb_deploy_ssh_key.pub
+        to: id_rsa.pub
+      - from: ssh_known_hosts_gh
+        to: known_hosts
+
+  - name: create application directory structure
+    file:
+      path: "/home/{{ cscweb_user }}/site/{{ item }}"
+      state: directory
+      owner: "{{ cscweb_user }}"
+    with_items:
+      - ""
+      # TODO(Dmitry): move static/media one level up
+      # - static
+      # - media
+      - logs
+      - env
+
+  - name: clone CSC website repo
+    sudo_user: "{{ cscweb_user }}"
+    git:
+      repo: git@github.com:cscenter/site.git
+      dest: "/home/{{ cscweb_user }}/site/repo"
+      key_file: "/home/{{ cscweb_user }}/.ssh/id_rsa"
+
+  - name: install CSC website deps
+    sudo_user: "{{ cscweb_user }}"
+    pip:
+      requirements: "/home/{{ cscweb_user }}/site/repo/requirements.txt"
+      virtualenv: "/home/{{ cscweb_user }}/site/env/"
+
+  # prepare database
+
+  - name: create database
+    mysql_db: name=cscdb state=present
+
+  - name: add user to database
+    mysql_user: name=csc password=FooBar priv=cscdb.*:ALL state=present
+
+  # configuring software stack and running the thing
+
+  - name: copy upstart uwsgi config
+    template:
+      src: templates/uwsgi-upstart.tmpl
+      dest: /etc/init/uwsgi.conf
+
+  - name: create uwsgi config dir
+    file: path=/etc/uwsgi/vassals state=directory
+
+  - name: copy uwsgi config
+    template:
+      src: templates/cscweb-uwsgi.ini.tmpl
+      dest: "/etc/uwsgi/vassals/{{ cscweb_project }}"
+
+  # - name: symlink uwsgi config
+  #   file:
+  #     src: "/etc/uwsgi/apps-available/{{ cscweb_project }}"
+  #     dest: "/etc/uwsgi/apps-enabled/{{ cscweb_project }}"
+  #     state: link
+  #   notify: restart uwsgi
+
+  - name: copy nginx config
+    template:
+      src: templates/cscweb-nginx.tmpl
+      dest: "/etc/nginx/sites-available/{{ cscweb_project }}"
+
+  - name: remove default nginx config
+    file: path=/etc/nginx/sites-enabled/default state=absent
+
+  - name: symlink nginx config
+    file:
+      src: "/etc/nginx/sites-available/{{ cscweb_project }}"
+      dest: "/etc/nginx/sites-enabled/{{ cscweb_project }}"
+      state: link
+    notify: restart nginx
+
+  handlers:
+    - include: handlers.yml

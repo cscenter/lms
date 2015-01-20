@@ -1,0 +1,40 @@
+upstream django {
+	# server unix:///run/uwsgi/app/{{ cscweb_project }}/socket;
+    server unix:///tmp/uwsgi_{{ cscweb_project }}.socket;
+}
+
+server {
+	listen 80;
+	server_name compscicenter.ru www.compscicenter.ru _;
+	charset utf-8;
+	client_max_body_size 42m;
+
+	location /media  {
+		alias /home/{{ cscweb_user }}/site/repo/media;
+    	access_log off;
+		tcp_nodelay off;
+        # gzip_static on;
+        gzip on;
+		expires 6h;
+        add_header Cache-Control public,max-age=21600;
+	}
+
+	location /static {
+		alias /home/{{ cscweb_user }}/site/repo/static;
+		access_log off;
+		tcp_nodelay off;
+        # FIXME(Dmitry): do this statically
+        # gzip_static on;
+        gzip on;
+		expires 6h;
+        add_header Cache-Control public,max-age=21600;
+	}
+
+	# Django
+    location / {
+        # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
+        gzip on;
+        uwsgi_pass django;
+        include uwsgi_params;
+    }
+}

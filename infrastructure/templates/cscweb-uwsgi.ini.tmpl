@@ -1,0 +1,27 @@
+[uwsgi]
+plugins = python
+enable-threads = true
+
+# Django-related settings
+chdir           = /home/{{ cscweb_user }}/site/repo/cscsite
+module          = cscsite.wsgi:application
+home            = /home/{{ cscweb_user }}/site/env
+pythonpath      = /home/{{ cscweb_user }}/site/env/lib/python2.7/site-packages
+pythonpath      = /home/{{ cscweb_user }}/site/repo/cscsite
+env             = DJANGO_SETTINGS_MODULE=cscsite.settings.production
+env             = PYTHONIOENCODING=UTF-8
+env             = LC_ALL=en_US.UTF-8
+env             = LANG=en_US.UTF-8
+
+# process-related settings
+master          = true
+processes       = 8
+# socket          = /run/uwsgi/app/{{ cscweb_project }}/socket
+socket          = /tmp/uwsgi_{{ cscweb_project }}.socket
+chmod-socket    = 660
+vacuum          = true
+stats           = /tmp/uwsgi_stats.socket
+uid             = {{ cscweb_user }}
+gid             = {{ cscweb_user }}
+# daemonize       = /var/log/uwsgi/%n.log
+# daemonize       = /home/{{ cscweb_user }}/site/logs/uwsgi.log
