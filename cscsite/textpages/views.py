@@ -9,6 +9,7 @@ from textpages.models import Textpage, CustomTextpage
 
 from braces.views import GroupRequiredMixin, LoginRequiredMixin
 
+from core.views import StudentOnlyMixin
 from learning.models import Course
 
 logger = logging.getLogger(__name__)
@@ -42,8 +43,8 @@ class CustomTextpageOpenView(DetailView):
             raise Http404
 
 
-class TextpageStudentView(GroupRequiredMixin, TextpageOpenView):
-    group_required = 'Student'
+class TextpageStudentView(StudentOnlyMixin, TextpageOpenView):
+    pass
 
 
 class TextpageLoggedInView(LoginRequiredMixin, TextpageOpenView):

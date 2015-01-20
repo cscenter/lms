@@ -18,6 +18,7 @@
       name: "{{ item.name }}"
       description: "{{ item.desc }}"
       rules: "{{ item.rules }}"
+      rules_egress: "{{ item.rules_egress }}"
       region: "{{ ec2_region }}"
     with_items: security_groups
 

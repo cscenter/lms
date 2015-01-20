@@ -9,15 +9,21 @@ security_groups:
         from_port: 22
         to_port: 22
         cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
 
   - name: web
     desc: the security group for the web server
     rules:
       - proto: tcp
-        from_port: "80"
-        to_port: "80"
+        from_port: 80
+        to_port: 80
         cidr_ip: 0.0.0.0/0
       - proto: tcp
-        from_port: "443"
-        to_port: "443"
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: all
         cidr_ip: 0.0.0.0/0
