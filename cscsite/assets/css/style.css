@@ -764,7 +764,18 @@ tr.unread {
   text-align: center;
   line-height: 150px;
   margin-bottom: 30px;
-  opacity: 0.75;
+  opacity: 0.65;
+  position: relative;
+}
+
+.video-bg {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 250px;
+  height: 150px;
+  opacity: 0.45;
+  z-index: -5;
 }
 
 .video-container:hover {
