@@ -16,11 +16,13 @@
     {% for co in chunk %}
     <div class="col-xs-4">
       <a href="{{ co.get_absolute_url }}">
-      <div class="video-container" style="background-image:url('{% static "img/video_mini.png" %}');">
-        <span class="video-inner">
+        <div class="video-container">
+          <div class="video-bg" style="background-image:url('{% static "img/video_mini.png" %}');">
+          </div>
+          <span class="video-inner">
             {{ co.course.name }},<br> {{ co.semester}}
-        </span>
-      </div>
+          </span>
+        </div>
       </a>
     </div>
     {% endfor %}
