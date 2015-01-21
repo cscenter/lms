@@ -19,6 +19,7 @@ access to the repository already
 * recent Ansible (1.8.2 at the point of writing)
 * globally installed [boto](https://github.com/boto/boto) (may not work from
 virtualenv)
+* both could be installed globally from pip
 
 ## Provisioning
 
