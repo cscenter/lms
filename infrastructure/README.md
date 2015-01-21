@@ -31,3 +31,7 @@ virtualenv)
 
 * run `ansible-playbook -i ec2.py setup.yml`. In theory it's idempotent, so you
 can modify `setup.yml` and rerun playbook as you wish
+
+**NOTE:** it is hard to keep changes in playbook and on remote server in
+  sync. Please try to avoid editing remote configs directly, aiming for
+  idempotent playbook instead.
