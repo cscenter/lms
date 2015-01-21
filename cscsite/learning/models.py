@@ -545,7 +545,7 @@ class AssignmentStudent(TimeStampedModel):
 
     @property
     def state_short(self):
-        if self.grade:
+        if self.grade is not None:
             return "{0}/{1}".format(self.grade,
                                     self.assignment.grade_max)
         else:
