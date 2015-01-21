@@ -6,7 +6,7 @@ from .base import *
 
 TEMPLATE_DEBUG = DEBUG = False
 
-ALLOWED_HOSTS = ["compscicenter.ru", "www.compscicenter.ru"]
+ALLOWED_HOSTS = ["compscicenter.ru", "www.compscicenter.ru", "*"]
 
 # Logging-related stuff
 RAVEN_CONFIG = {
