@@ -163,42 +163,53 @@
   - name: add user to database
     mysql_user: name=csc password=FooBar priv=cscdb.*:ALL state=present
 
+  - name: init Django db
+    django_manage:
+      command: "{{ item }}"
+      app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
+      settings: cscsite.settings.production
+      virtualenv: "/home/{{ cscweb_user }}/site/env/"
+    with_items:
+      - syncdb
+      - "migrate --no-initial-data"
+      - migrate
+      - collectstatic
+
   # configuring software stack and running the thing
 
   - name: copy upstart uwsgi config
     template:
       src: templates/uwsgi-upstart.tmpl
       dest: /etc/init/uwsgi.conf
+    notify: reload uwsgi
 
   - name: create uwsgi config dir
     file: path=/etc/uwsgi/vassals state=directory
+    notify: reload uwsgi
 
   - name: copy uwsgi config
     template:
       src: templates/cscweb-uwsgi.ini.tmpl
-      dest: "/etc/uwsgi/vassals/{{ cscweb_project }}"
-
-  # - name: symlink uwsgi config
-  #   file:
-  #     src: "/etc/uwsgi/apps-available/{{ cscweb_project }}"
-  #     dest: "/etc/uwsgi/apps-enabled/{{ cscweb_project }}"
-  #     state: link
-  #   notify: restart uwsgi
+      dest: "/home/{{ cscweb_user }}/site/uwsgi.ini"
+      owner: "{{ cscweb_user }}"
+    notify: reload uwsgi
 
   - name: copy nginx config
     template:
       src: templates/cscweb-nginx.tmpl
       dest: "/etc/nginx/sites-available/{{ cscweb_project }}"
+    notify: reload nginx
 
   - name: remove default nginx config
     file: path=/etc/nginx/sites-enabled/default state=absent
+    notify: reload nginx
 
   - name: symlink nginx config
     file:
       src: "/etc/nginx/sites-available/{{ cscweb_project }}"
       dest: "/etc/nginx/sites-enabled/{{ cscweb_project }}"
       state: link
-    notify: restart nginx
+    notify: reload nginx
 
   handlers:
     - include: handlers.yml

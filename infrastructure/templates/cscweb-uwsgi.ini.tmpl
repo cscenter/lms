@@ -1,7 +1,4 @@
 [uwsgi]
-plugins = python
-enable-threads = true
-
 # Django-related settings
 chdir           = /home/{{ cscweb_user }}/site/repo/cscsite
 module          = cscsite.wsgi:application
@@ -15,13 +12,13 @@ env             = LANG=en_US.UTF-8
 
 # process-related settings
 master          = true
-processes       = 8
-# socket          = /run/uwsgi/app/{{ cscweb_project }}/socket
+enable-threads  = true
+processes       = 5
 socket          = /tmp/uwsgi_{{ cscweb_project }}.socket
-chmod-socket    = 660
+die-on-term     = true
+chmod-socket    = 666
 vacuum          = true
 stats           = /tmp/uwsgi_stats.socket
 uid             = {{ cscweb_user }}
 gid             = {{ cscweb_user }}
-# daemonize       = /var/log/uwsgi/%n.log
-# daemonize       = /home/{{ cscweb_user }}/site/logs/uwsgi.log
+logto           = /home/{{ cscweb_user }}/site/logs/uwsgi.log

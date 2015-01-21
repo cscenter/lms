@@ -54,8 +54,4 @@
     local_action: wait_for host="{{ groups['tag_Name_cscweb'][0] }}" port=22
 
 - name: setup provisioned servers
-  hosts: tag_Name_cscweb
-  user: ubuntu
-  sudo: True
-  tasks:
-    - include: setup.yml
+  include: setup.yml
