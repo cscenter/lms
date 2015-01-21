@@ -44,7 +44,7 @@ $(document).ready(function () {
         highlight: function (code, lang) {
             var unescaped = _.unescape(code);
             return typeof lang != "undefined"
-                ? hljs.highlight(lang, unescaped).value
+                ? hljs.highlight(lang, unescaped, true).value
                 : unescaped;
         },
         smartypants: true
@@ -55,7 +55,7 @@ $(document).ready(function () {
           , $target = $(this);
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
-            target.innerHTML = marked(jQuery.trim(target.innerHTML));
+            target.innerHTML = marked(_.unescape(jQuery.trim(target.innerHTML)));
             $target.find("pre").addClass("hljs");
             if ($target.hasClass("shorten")) {
                 $target.readmore({
@@ -176,7 +176,7 @@ $(document).ready(function () {
                 = editor.getElement('previewerIframe').contentDocument;
             var target = $("#epiceditor-preview", contentDocument).get(0);
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
-                target.innerHTML = marked(target.innerHTML);
+                target.innerHTML = marked(_.unescape(target.innerHTML));
             }]);
         });
 

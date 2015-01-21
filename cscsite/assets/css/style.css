@@ -790,3 +790,7 @@ tr.unread {
   font-size: 20px;
   color: #1F4C66;
 }
+
+.csc-well blockquote {
+  border-left-color: #CFCFCF;
+}
