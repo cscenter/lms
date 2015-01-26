@@ -1,5 +1,46 @@
 # Provisioning and deployment of CSC site
 
+## AWS setup
+
+This is already done for you and provided here for documentation purposes
+because it was done by hand (as opposed to automatic provisioning by scripts or
+playbooks).
+
+* user for provisioning should be provided
+* they should be granted rights neccessary for provisioning of nodes
+* S3 bucket for backups should be created
+* additional user which only can read and write to the bucket should be created
+
+IAM policy for the "backup" user:
+
+```
+{
+  "Statement": [
+    {
+      "Sid": "Stmt1422269318537",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::csc-main-backup/*"
+    },
+    {
+      "Sid": "Stmt1422269334760",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::csc-main-backup"
+    }
+  ]
+}
+```
+
+
 ## Credentials
 
 * you need to obtain `csc-main.pem` and AWS credentials (from someone)
@@ -24,6 +65,7 @@ virtualenv)
 ## Provisioning
 
 * run `ansible-playbook provision.yml`
+* do not forget to accept an SSH fingerprint of new VM
 * now you should have EC2 VMs set up, IP is displayed by a playbook
 * to SSH into the node: `ssh ubuntu@IP-THAT-HAS-BEEN-SHOWN-BY-PLAYBOOK`
 * host setup runs automatically after provisioning, no need to call it separately
