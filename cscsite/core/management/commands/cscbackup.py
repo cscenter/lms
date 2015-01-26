@@ -115,4 +115,5 @@ class Command(BaseCommand):
             write_file(open(local_path, 'rb'), bucket, bucket_path)
             report('wrote {} to S3://{}'.format(f, bucket_path))
 
-        report("done")
+        report("done, removing {}".format(backup_dir))
+        shutil.rmtree(backup_dir)

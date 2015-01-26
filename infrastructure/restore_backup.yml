@@ -1,0 +1,25 @@
+---
+- name: restore production backup for CSC website
+  hosts: tag_Name_cscweb
+  user: ubuntu
+  sudo: True
+
+  vars:
+    root_user: ubuntu
+    cscweb_user: cscweb
+    cscweb_project: cscweb
+
+  tasks:
+  - name: fetching backup and applying it
+    sudo_user: "{{ cscweb_user }}"
+    django_manage:
+      command: "{{ item }}"
+      app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
+      settings: cscsite.settings.production
+      virtualenv: "/home/{{ cscweb_user }}/site/env/"
+    with_items:
+      - cscrestore
+    notify: reload uwsgi
+
+  handlers:
+    - include: handlers.yml

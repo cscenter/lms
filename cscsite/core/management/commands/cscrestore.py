@@ -71,8 +71,8 @@ class Command(BaseCommand):
         #               input
         sys_stdin = sys.stdin
         sys.stdin = BytesIO(b'y')
-        # management.call_command('dbrestore', uncompress=True,
-        #                         filepath=os.path.join(backup_dir, 'db.gz'))
+        management.call_command('dbrestore', uncompress=True,
+                                filepath=os.path.join(backup_dir, 'db.gz'))
         sys.stdin = sys_stdin
 
         report("manually restoring media")
@@ -82,4 +82,5 @@ class Command(BaseCommand):
                            mode='r:gz')
         tgz.extractall(path=settings.MEDIA_ROOT)
 
-        report("done")
+        report("done, removing {}".format(backup_dir))
+        shutil.rmtree(backup_dir)

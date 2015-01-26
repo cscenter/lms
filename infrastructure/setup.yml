@@ -164,6 +164,7 @@
     mysql_user: name=csc password=FooBar priv=cscdb.*:ALL state=present
 
   - name: init Django db
+    sudo_user: "{{ cscweb_user }}"
     django_manage:
       command: "{{ item }}"
       app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
@@ -213,3 +214,6 @@
 
   handlers:
     - include: handlers.yml
+
+- name: restore production backup
+  include: restore_backup.yml
