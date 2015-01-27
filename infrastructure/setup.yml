@@ -66,13 +66,17 @@
     easy_install: name=pip
 
   - name: install global Python stuff
-    pip: name="{{ item }}"
+    pip: name="{{ item.name }}" version="{{ item.version }}"
     with_items:
-      - ipython
-      - virtualenv
+      - name: ipython
+        version: "2.3.1"
+      - name: virtualenv
+        version: "12.0.5"
       # NOTE(Dmitry): this one is better, but doesn't come with init.d and stuff
-      - uwsgi
-      - uwsgitop
+      - name: uwsgi
+        version: "2.0.9"
+      - name: uwsgitop
+        version: "0.8"
 
   # deployment user
 
@@ -138,7 +142,7 @@
       - ""
       # TODO(Dmitry): move static/media one level up
       # - static
-      # - media
+       # - media
       - logs
       - env
 
@@ -159,22 +163,24 @@
 
   - name: create database
     mysql_db: name=cscdb state=present
+    register: cscdb
 
   - name: add user to database
     mysql_user: name=csc password=FooBar priv=cscdb.*:ALL state=present
 
-  - name: init Django db
-    sudo_user: "{{ cscweb_user }}"
-    django_manage:
-      command: "{{ item }}"
-      app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
-      settings: cscsite.settings.production
-      virtualenv: "/home/{{ cscweb_user }}/site/env/"
-    with_items:
-      - syncdb
-      - "migrate --no-initial-data"
-      - migrate
-      - collectstatic
+  # - name: init Django db
+  #   sudo_user: "{{ cscweb_user }}"
+  #   django_manage:
+  #     command: "{{ item }}"
+  #     app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
+  #     settings: cscsite.settings.production
+  #     virtualenv: "/home/{{ cscweb_user }}/site/env/"
+  #   with_items:
+  #     - syncdb
+  #     - "migrate --no-initial-data"
+  #     - migrate
+  #     - collectstatic
+  #   when: cscdb.changed
 
   # configuring software stack and running the thing
 
@@ -195,6 +201,25 @@
       owner: "{{ cscweb_user }}"
     notify: reload uwsgi
 
+  - name: create dir for nginx crypto stuff
+    file: path=/etc/nginx/crypto state=directory
+    notify: reload nginx
+
+  - name: ensure all nginx crypto material is present
+    copy:
+      src: "files/{{ item.from }}"
+      dest: "/etc/nginx/crypto/{{ item.to }}"
+      mode: 0400
+    with_items:
+      - from: cscweb_tls_intermediate_bundle.crt
+        to: intermediate_bundle.crt
+      - from: cscweb_tls_server_bundle.crt
+        to: server_bundle.crt
+      - from: cscweb_tls_server_decrypted_key.crt
+        to: server_key.crt
+      - from: cscweb_tls_dhparam.pem
+        to: dhparam.pem
+
   - name: copy nginx config
     template:
       src: templates/cscweb-nginx.tmpl
@@ -212,8 +237,42 @@
       state: link
     notify: reload nginx
 
+  - name: daily late-night backup goes in cron
+    sudo_user: "{{ cscweb_user }}"
+    cron:
+      name: backup CSC website to S3
+      user: "{{ cscweb_user }}"
+      hour: "4"
+      minute: "0"
+      job: >
+        . /home/{{ cscweb_user }}/site/env/bin/activate &&
+        /home/{{ cscweb_user }}/site/repo/cscsite/manage.py cscbackup
+        --settings=cscsite.settings.production
+
+  - name: notify people every 5 minutes (cronjob)
+    sudo_user: "{{ cscweb_user }}"
+    cron:
+      name: CSC mail notifier
+      user: "{{ cscweb_user }}"
+      minute: "*/5"
+      job: >
+        . /home/{{ cscweb_user }}/site/env/bin/activate &&
+        /home/{{ cscweb_user }}/site/repo/cscsite/manage.py notify
+        --settings=cscsite.settings.production
+        >> /home/{{ cscweb_user }}/site/logs/cscnotifier.log
+
+  - name: remove useless notifications each week (cronjob)
+    sudo_user: "{{ cscweb_user }}"
+    cron:
+      name: CSC notification cleanup
+      user: "{{ cscweb_user }}"
+      special_time: weekly
+      job: >
+        . /home/{{ cscweb_user }}/site/env/bin/activate &&
+        /home/{{ cscweb_user }}/site/repo/cscsite/manage.py notification_cleanup
+        --settings=cscsite.settings.production
+        >> /home/{{ cscweb_user }}/site/logs/cscnotifier.log
+
+
   handlers:
     - include: handlers.yml
-
-- name: restore production backup
-  include: restore_backup.yml

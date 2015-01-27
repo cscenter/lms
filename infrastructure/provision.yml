@@ -55,3 +55,6 @@
 
 - name: setup provisioned servers
   include: setup.yml
+
+- name: restore production backup
+  include: restore_backup.yml

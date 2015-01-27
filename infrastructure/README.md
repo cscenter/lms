@@ -10,6 +10,7 @@ playbooks).
 * they should be granted rights neccessary for provisioning of nodes
 * S3 bucket for backups should be created
 * additional user which only can read and write to the bucket should be created
+* TTL for S3 bucket should be set (for now it's 30 days)
 
 IAM policy for the "backup" user:
 
@@ -40,10 +41,10 @@ IAM policy for the "backup" user:
 }
 ```
 
-
 ## Credentials
 
-* you need to obtain `csc-main.pem` and AWS credentials (from someone)
+* you need to obtain `csc-main.pem`, AWS credentials and TLS private key
+  `cscweb_tls_server_decrypted_key.crt` (from someone)
 * add SSH keys to your SSH agent with `ssh-add csc-main.pem`
 * put AWS credentials to `~/.boto` as follows:
 ```
@@ -51,9 +52,14 @@ IAM policy for the "backup" user:
 aws_access_key_id = <your_access_key_here>
 aws_secret_access_key = <your_secret_key_here>
 ```
-* SSH key for host with deployment rights is in
+* put `cscweb_tls_server_decrypted_key.crt` into `files/` subdir
+* SSH key for host with read-only SSH access to CSC GitHub is in
 `files/cscweb_deploy_ssh_key{,.pub}`. It's OK because one presumable have an
 access to the repository already
+
+## TLS story
+
+Current TLS cert is valid until **January 27 2016**.
 
 ## Prerequisites
 
