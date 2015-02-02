@@ -192,6 +192,7 @@ MENU_URL_NAMES = {
     'teachers': {'parent': 'about'},
     'teacher_detail': {'alias': 'teachers'},
     'alumni': {'parent': 'about'},
+    'non_course_event_detail': {'parent': 'about'},
 
     'news_list': {},
     'news_detail': {'alias': 'news_list'},
