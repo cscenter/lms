@@ -104,7 +104,7 @@
           </div>
           <div class="col-xs-3 login">
             {% if user.is_authenticated %}
-            <i class="fa fa-user"></i>&nbsp;<a href="{{ user.get_absolute_url }}">{{ user.username }}</a>&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
+            <i class="fa fa-user" data-user-id="{{ user.pk }}"></i>&nbsp;<a href="{{ user.get_absolute_url }}">{{ user.username }}</a>&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
             {% else %}
             <a href="{% url 'login' %}">
               {% trans "Login" %}
@@ -351,6 +351,12 @@
       ]
     };
     Raven.config('https://3b2af1d12608406a8320124ea9d861e3@app.getsentry.com/13763', ravenOptions).install();
+    var $faUser = $(".login .fa-user")
+    if ($faUser.length > 0) {
+      Raven.setUserContext({
+        id: $faUser.data('user-id')
+     });
+    }
     </script>
     <script type="text/javascript" src="//yastatic.net/underscore/1.6.0/underscore-min.js"></script>
     <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
