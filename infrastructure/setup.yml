@@ -254,6 +254,8 @@
         . /home/{{ cscweb_user }}/site/env/bin/activate &&
         /home/{{ cscweb_user }}/site/repo/cscsite/manage.py cscbackup
         --settings=cscsite.settings.production
+        >> /home/{{ cscweb_user }}/site/logs/cscbackup.log
+        2>&1
 
   - name: notify people every 5 minutes (cronjob)
     sudo_user: "{{ cscweb_user }}"
@@ -266,6 +268,7 @@
         /home/{{ cscweb_user }}/site/repo/cscsite/manage.py notify
         --settings=cscsite.settings.production
         >> /home/{{ cscweb_user }}/site/logs/cscnotifier.log
+        2>&1
 
   - name: remove useless notifications each week (cronjob)
     sudo_user: "{{ cscweb_user }}"
