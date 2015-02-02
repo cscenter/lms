@@ -20,26 +20,26 @@
     with_items:
       - 'ppa:nginx/stable'
 
-  - name: upgrade all packages to the latest version
-    apt: update_cache=yes upgrade=dist
+  # - name: upgrade all packages to the latest version
+  #   apt: update_cache=yes upgrade=dist
 
-  - name: check if a reboot is required
-    stat: path=/var/run/reboot-required get_md5=no
-    register: reboot_file
+  # - name: check if a reboot is required
+  #   stat: path=/var/run/reboot-required get_md5=no
+  #   register: reboot_file
 
-  - name: reboot the server
-    command: /sbin/reboot removes=/var/run/reboot-required
-    when: reboot_file.stat.exists == true
+  # - name: reboot the server
+  #   command: /sbin/reboot removes=/var/run/reboot-required
+  #   when: reboot_file.stat.exists == true
 
-  - name: wait for server to go offline (because reboot)
-    sudo: no
-    local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
-    when: reboot_file.stat.exists == true
+  # - name: wait for server to go offline (because reboot)
+  #   sudo: no
+  #   local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
+  #   when: reboot_file.stat.exists == true
 
-  - name: wait for server to come back online
-    sudo: no
-    local_action: wait_for host="{{ inventory_hostname }}" port=22
-    when: reboot_file.stat.exists == true
+  # - name: wait for server to come back online
+  #   sudo: no
+  #   local_action: wait_for host="{{ inventory_hostname }}" port=22
+  #   when: reboot_file.stat.exists == true
 
   - name: install stuff
     apt:
@@ -57,6 +57,8 @@
       - build-essential
       - uwsgi
       - uwsgi-plugin-python
+      - libjpeg-dev
+      - libpng-dev
       # utilities
       - zsh
       - tmux
@@ -181,6 +183,10 @@
   #     - migrate
   #     - collectstatic
   #   when: cscdb.changed
+
+  # this should be run on db init while we use MySQL
+  # mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p  mysql
+  # reboot mysql
 
   # configuring software stack and running the thing
 
