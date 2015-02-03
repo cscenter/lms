@@ -34,8 +34,3 @@ def date_soon_css(d):
         return "day-after-tomorrow"
     else:
         return "in-future"
-
-
-@register.filter
-def to_md5(txt):
-    return hashlib.md5(txt.encode('utf-8')).hexdigest();

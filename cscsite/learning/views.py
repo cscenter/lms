@@ -27,6 +27,7 @@ from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin, LoginRequiredMixin
+from core import comment_persistence
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
@@ -970,6 +971,7 @@ class AssignmentStudentDetailMixin(object):
                                   .teachers
                                   .count() == 1)
         context['user_type'] = self.user_type
+        context['hashes_json'] = comment_persistence.get_hashes_json()
         return context
 
     def form_valid(self, form):
@@ -979,6 +981,7 @@ class AssignmentStudentDetailMixin(object):
         comment.assignment_student = a_s
         comment.author = self.request.user
         comment.save()
+        comment_persistence.report_saved(comment.text)
         if self.user_type == 'student':
             url = reverse('a_s_detail_student', args=[a_s.pk])
         else:
