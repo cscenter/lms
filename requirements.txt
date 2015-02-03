@@ -34,4 +34,5 @@ sorl-thumbnail==11.12.1b
 south==0.8.4
 sqlparse==0.1.11
 testfixtures==3.0.2
+uwsgi==2.0.9
 yandexwebdav==0.2.11
