@@ -243,7 +243,7 @@ MENU_URL_NAMES = {
     'password_change': {}
     }
 
-LOGIN_URL= "/login/"
+LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 # this urls will be used to redirect from '/learning/' and '/teaching/'
@@ -291,5 +291,5 @@ DBBACKUP_S3_BUCKET = 'csc-main-backup'
 DBBACKUP_S3_DIRECTORY = 'cscweb_backups'
 DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
 # special user with access to S3 bucket
-DBBACKUP_S3_ACCESS_KEY = 'AKIAJHTXLPDHW3TR5AHQ'
-DBBACKUP_S3_SECRET_KEY = 'UgZ3nondqW7M/ySzCvyWX5LVzz9yhTCwAw0Bn3Pw'
+DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
+DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
