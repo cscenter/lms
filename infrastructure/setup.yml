@@ -55,8 +55,6 @@
       - python-mysqldb  # needed for Ansible itself
       - git
       - build-essential
-      - uwsgi
-      - uwsgi-plugin-python
       - libjpeg-dev
       - libpng-dev
       # utilities
