@@ -17,7 +17,8 @@ RAVEN_CONFIG = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'uwsgicache.UWSGICache'
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache'
     }
 }
 

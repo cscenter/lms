@@ -186,6 +186,9 @@
   # mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p  mysql
   # reboot mysql
 
+  - name: ensure folder for file-based cache exists
+    file: path=/tmp/django_cache mode=777 state=directory
+
   # configuring software stack and running the thing
 
   - name: copy upstart uwsgi config
