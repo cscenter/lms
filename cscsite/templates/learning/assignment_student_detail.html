@@ -5,6 +5,9 @@
 {% load core_tags %}
 
 {% block content %}
+<script type="text/javascript">
+  window.CSCCommentPersistenceHashes = {{ hashes_json|safe }};
+</script>
 <div class="container">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
@@ -61,7 +64,7 @@
                    {% endif %}">
           <div class="csc-well assignment-comment">
             <h5 class="assignment">{{ comment.author }}</h5>
-            <div class="ubertext" data-hash="{{ comment.text|to_md5 }}">
+            <div class="ubertext">
               {{ comment.text }}
             </div>
             <div class="metainfo-holder">

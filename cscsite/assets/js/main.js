@@ -3,30 +3,11 @@ var marks_sheet_unsaved = 0;
 
 $(document).ready(function () {
     //
-    // localStorage-related helpers
-    //
-
-    var loadMap = function(name) {
-        var map = window.localStorage.getItem(name);
-        if (map !== null) {
-            return JSON.parse(map);
-        } else {
-            return {};
-        };
-    };
-
-    var saveMap = function(name, map) {
-        window.localStorage.setItem(name, JSON.stringify(map));
-    };
-
-    //
     // State
     //
 
-    // map from filename to hash
-    var savedHashes = loadMap("savedHashes");
-    // map from hash to date when it was seen
-    var seenHashes = loadMap("seenHashes");
+    // map from hash to dummy value (effectively a set)
+    var persistedHashes = window.CSCCommentPersistenceHashes;
 
     //
     // Ubertext
@@ -51,8 +32,8 @@ $(document).ready(function () {
     });
 
     $("div.ubertext").each(function() {
-        var target = this
-          , $target = $(this);
+        var target = this;
+        var $target = $(this);
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             target.innerHTML = marked(_.unescape(jQuery.trim(target.innerHTML)));
@@ -66,11 +47,6 @@ $(document).ready(function () {
                 });
             };
         }]);
-
-        if (target.dataset.hash !== undefined) {
-            seenHashes[target.dataset.hash] = new Date();
-            saveMap("seenHashes", seenHashes);
-        }
     });
 
     //
@@ -84,34 +60,24 @@ $(document).ready(function () {
                      "text restoration may be buggy");
     }
 
-    // eliminate old or definitely succeeded (because their hash has been seen)
-    // epiceditor "files"
+    // eliminate old and persisted epiceditor "files"
     if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
         (function() {
             var editor = new EpicEditor();
             var files = editor.getFiles(null, true);
-            for (var filename in files) {
-                if (files.hasOwnProperty(filename)) {
-                    var modified = new Date(files[filename].modified);
-                    var now = new Date();
-                    var hoursOld = Math.floor((now - modified)
-                                              / (1000 * 60 * 60));
-                    var hash;
-                    if (filename in savedHashes) {
-                        hash = savedHashes[filename];
-                    } else {
-                        hash = "";
-                    };
-
-                    if ((hoursOld > 24) || (hash in seenHashes)) {
+            _.each(files, function(meta, filename, m) {
+                var hoursOld = (((new Date()) - (new Date(meta.modified)))
+                                / (1000 * 60 * 60));
+                if (hoursOld > 24) {
+                    editor.remove(filename);
+                } else {
+                    var text = editor.exportFile(filename);
+                    var hash = CryptoJS.MD5(text).toString();
+                    if (hash in persistedHashes) {
                         editor.remove(filename);
-                        delete savedHashes[filename];
-                        delete seenHashes[hash];
-                        saveMap("savedHashes", savedHashes);
-                        saveMap("seenHashes", seenHashes);
-                    };
+                    }
                 };
-            };
+            });
         })();
     };
 
@@ -145,20 +111,11 @@ $(document).ready(function () {
             opts['file'] = {
                 name: filename,
                 defaultContent: "",
-                autoSave: 1000
+                autoSave: 300
             };
         };
 
         var editor = new EpicEditor(opts);
-
-        if (ubereditorRestoration) {
-            editor.on('autosave', function() {
-                var text = editor.exportFile();
-                var hash = CryptoJS.MD5(text).toString();
-                savedHashes[filename] = hash;
-                saveMap("savedHashes", savedHashes);
-            });
-        }
 
         editor.load();
 
@@ -180,6 +137,7 @@ $(document).ready(function () {
             }]);
         });
 
+        // Ctrl+Enter to send form
         if ($textarea[0].dataset.quicksend == 'true') {
             var editorBody = editor.getElement('editor').body;
             editorBody.addEventListener('keydown', function(e) {
@@ -208,7 +166,6 @@ $(document).ready(function () {
             return s;
         }
 
-        //if ($("#id_ends_at").val().length === 0) {
         if (!ends_at_touched) {
             var string_time = $(this).val();
             var matches = string_time.match(
@@ -228,7 +185,7 @@ $(document).ready(function () {
                                      + pad(new_minutes, 2)
                                      + maybe_seconds);
             } else {
-                console.log("Can't parse " + string_time);
+                console.warning("Can't parse " + string_time);
             }
         }
     });
@@ -242,9 +199,9 @@ $(document).ready(function () {
     }
 
     $(".marks-table.teacher").on('change', 'input,select', function (e) {
-        $this = $(this);
-        $target = $(e.target)
-        $csv_link = $(".marks-sheet-csv-link");
+        var $this = $(this);
+        var $target = $(e.target);
+        var $csv_link = $(".marks-sheet-csv-link");
         var current_value = $target.val();
         var saved_value = $target.next("input[type=hidden]").val();
         if (current_value != saved_value) {
@@ -262,7 +219,7 @@ $(document).ready(function () {
                 $csv_link.removeClass("disabled");
             }
         }
-    })
+    });
 
     // see this http://stackoverflow.com/a/8641208 for discussion
     // about the following hack
@@ -301,10 +258,4 @@ $(document).ready(function () {
          .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
          .addClass("active"));
     });
-
-    //
-    // Cache AssignmentComments to local storage
-    //
-
-
 });
