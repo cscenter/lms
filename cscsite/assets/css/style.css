@@ -271,7 +271,7 @@ html {
   padding-left: 0px;
 }
 
-.index-news li {
+.index-news>li {
   position: relative;
   list-style: none;
 }
