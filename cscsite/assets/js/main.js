@@ -54,7 +54,6 @@ $(document).ready(function () {
     //
 
     var $ubereditors = $("textarea.ubereditor");
-    var ubereditorRestoration = true;
     if ($ubereditors.length > 1) {
         console.warn("more than one Ubereditor on page, " +
                      "text restoration may be buggy");
@@ -70,7 +69,7 @@ $(document).ready(function () {
                                 / (1000 * 60 * 60));
                 if (hoursOld > 24) {
                     editor.remove(filename);
-                } else {
+                } else if (persistedHashes) {
                     var text = editor.exportFile(filename);
                     var hash = CryptoJS.MD5(text).toString();
                     if (hash in persistedHashes) {
@@ -85,6 +84,7 @@ $(document).ready(function () {
         var $textarea = $(this);
         var $container = $("<div/>").insertAfter($textarea);
         var shouldFocus = false;
+        var ubereditorRestoration = $textarea.data('local-persist') == true;
 
         $textarea.hide();
         shouldFocus = $textarea.prop("autofocus");

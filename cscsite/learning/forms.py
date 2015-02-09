@@ -208,7 +208,8 @@ class AssignmentCommentForm(forms.ModelForm):
         label=_("Text"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
-        widget=Ubereditor(attrs={'data-quicksend': 'true'}))
+        widget=Ubereditor(attrs={'data-quicksend': 'true',
+                                 'data-local-persist': 'true'}))
     attached_file = forms.FileField(
         label="",
         required=False,
