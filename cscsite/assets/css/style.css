@@ -98,7 +98,6 @@ h4.no-top-margin {
   float: left;
   line-height: 40px;
   padding: 0px 7px;
-  font-family: sans-serif;
   font-weight: bolder;
   cursor: pointer;
 }
@@ -174,7 +173,6 @@ li.for-staff.current {
 
 .header .login {
   line-height: 40px;
-  font-family: sans-serif;
   font-weight: bolder;
   text-align: right;
 }
