@@ -58,9 +58,9 @@
                   {% trans "Videos" %}
                 </li>
               </a>
-              <a href="{% url 'online' %}">
-                <li class="{% current 'online' %}">
-                  {% trans "Online" %}
+              <a href="{% url 'lectures' %}">
+                <li class="{% current 'lectures' %}">
+                  {% trans "Lectures|topmenu" %}
                 </li>
               </a>
               {% if user.is_authenticated %}

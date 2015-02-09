@@ -53,6 +53,15 @@
             "text": "# Online\n\nThis is \"online\" page. **Please change this text**."
         }
     },
+    {
+        "model": "textpages.textpage",
+        "pk": 7,
+        "fields": {
+            "url_name": "lectures",
+            "name": "Lectures",
+            "text": "# Lectures\n\nThis is \"lectures\" page. **Please change this text**."
+        }
+    },
 {
   "pk": 1,
   "model": "learning.venue",
