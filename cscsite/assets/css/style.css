@@ -723,6 +723,10 @@ tr.unread {
   margin-bottom: 0px !important;
 }
 
+.marks-sheet-form-cell>input[type="number"] {
+  width: 43px;
+}
+
 .marks-sheet-unsaved-cell {
   border-left: 2px solid #428bca;
   padding-left: 3px;
