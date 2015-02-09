@@ -9,7 +9,7 @@ class Ubereditor(forms.Textarea, object):
 
     class Media:
         css = {"all": ["css/highlight-styles/solarized_light.css"]}
-        js = ["//code.jquery.com/jquery-1.10.2.min.js",
+        js = ["//yastatic.net/underscore/1.6.0/underscore-min.js",
               "js/highlight.pack.js",
               "js/main.js",
               # assuming that Django will include JS files in this order,
