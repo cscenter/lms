@@ -20,7 +20,7 @@ class TextpagesTests(TestCase):
                                      "just in case; и юникод!")}
         tp = CustomTextpage(**test_page_fields)
         self.assertEqual(smart_text(tp), smart_text(test_page_fields['name']))
-        obj = Textpage.objects.get(url_name='online')
+        obj = Textpage.objects.get(url_name='contacts')
         self.assertEqual(smart_text(obj), obj.name)
 
     def test_open_textpage(self):
@@ -33,12 +33,12 @@ class TextpagesTests(TestCase):
 
     def test_missing_open_textpage(self):
         client = Client()
-        Textpage.objects.filter(url_name='online').delete()
+        Textpage.objects.filter(url_name='contacts').delete()
         with LogCapture() as l:
-            resp = client.get(reverse('online'))
+            resp = client.get(reverse('contacts'))
             self.assertEqual(resp.status_code, 404)
             l.check(('textpages.views', 'WARNING',
-                     "can't find \"online\" as a textpage"))
+                     "can't find \"contacts\" as a textpage"))
         resp = client.get(reverse('enrollment'))
         self.assertEqual(resp.status_code, 200)
 
