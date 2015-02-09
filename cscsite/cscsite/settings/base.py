@@ -174,7 +174,7 @@ MENU_URL_NAMES = {
     'index': {},
     'about': {},
     'course_video_list': {},
-    'online': {},
+    'lectures': {},
     'teaching': {},
     'learning': {},
     'enrollment': {},
