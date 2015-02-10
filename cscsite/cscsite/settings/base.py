@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'textpages',
     'learning',
     'library',
+    'studentinfo',
     'crutches',
 )
 
