@@ -62,6 +62,7 @@ urlpatterns = patterns('',
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
     url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
+    url(r'^online/$', TextpageOpenView.as_view(), name='online'),
     url(r'^lectures/$', TextpageOpenView.as_view(), name='lectures'),
     url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
