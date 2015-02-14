@@ -7,7 +7,7 @@ from django.contrib import admin
 from index.views import IndexView, AlumniView, TeachersView, RobotsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView
+    ICalEventsView, StudentInfoUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
     CustomTextpageOpenView
 from learning.views import \
@@ -58,6 +58,8 @@ urlpatterns = patterns('',
         name='ical_events'),
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
+    url(r'^student-info/(?P<pk>\d+)/edit$', StudentInfoUpdateView.as_view(),
+        name='student_info_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^news/', include('news.urls')),
     url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),

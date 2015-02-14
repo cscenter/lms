@@ -9,9 +9,9 @@ from crispy_forms.bootstrap import FormActions
 import floppyforms as forms
 
 from core.forms import Ubereditor
-from learning.models import LATEX_MARKDOWN_ENABLED
+from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
-from .models import CSCUser
+from .models import CSCUser, StudentInfo
 
 
 class LoginForm(AuthenticationForm):
@@ -78,3 +78,22 @@ class UserProfileForm(forms.ModelForm):
             'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
             'stepid_id': _("stepic.org/users/<b>424242</b>")
         }
+
+
+class StudentInfoForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('university', 'phone', 'uni_year_at_enrollment', 'comment',
+                'nondegree', 'status', 'study_program', 'online_courses',
+                'shad_courses', 'workplace'),
+            CANCEL_SAVE_PAIR)
+
+        super(StudentInfoForm, self).__init__(*args, **kwargs)
+
+
+    class Meta:
+        model = StudentInfo
+        fields = ['university', 'phone', 'uni_year_at_enrollment', 'comment',
+                  'nondegree', 'status', 'study_program', 'online_courses',
+                  'shad_courses', 'workplace']

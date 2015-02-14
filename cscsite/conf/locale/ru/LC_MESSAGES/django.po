@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-14 21:01+0300\n"
-"PO-Revision-Date: 2015-02-14 21:01+0230\n"
+"POT-Creation-Date: 2015-02-14 21:34+0300\n"
+"PO-Revision-Date: 2015-02-14 21:34+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -246,7 +246,7 @@ msgstr "Записавшиеся студенты"
 
 #: learning/models.py:139 learning/models.py:195 learning/models.py:264
 #: learning/models.py:380 learning/models.py:606
-#: templates/user_detail.html:124
+#: templates/user_detail.html:127
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -358,12 +358,12 @@ msgstr "Название"
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: learning/models.py:415 templates/user_detail.html:125
+#: learning/models.py:415 templates/user_detail.html:128
 msgid "Assignment"
 msgstr "Задание"
 
 #: learning/models.py:416 templates/base.html:164 templates/base.html.py:216
-#: templates/user_detail.html:121
+#: templates/user_detail.html:124
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -410,7 +410,7 @@ msgstr "Задание"
 msgid "AssignmentStudent|student"
 msgstr "Студент"
 
-#: learning/models.py:474 templates/user_detail.html:126
+#: learning/models.py:474 templates/user_detail.html:129
 #: templates/learning/assignment_student_detail.html:104
 #: templates/learning/courses_list_student.html:25
 #: templates/learning/courses_list_student.html:100
@@ -584,7 +584,7 @@ msgstr "НИР"
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: learning/models.py:766 templates/user_detail.html:52
+#: learning/models.py:766 templates/user_detail.html:55
 msgid "StudentProject|Supervisor"
 msgstr "Руководитель"
 
@@ -596,7 +596,7 @@ msgstr "Формат: Фамилия Имя Отчество, Организац
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: learning/models.py:777 templates/user_detail.html:51
+#: learning/models.py:777 templates/user_detail.html:54
 msgid "Presentation"
 msgstr "Презентация"
 
@@ -604,7 +604,7 @@ msgstr "Презентация"
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: learning/models.py:786 templates/user_detail.html:46
+#: learning/models.py:786 templates/user_detail.html:49
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
@@ -679,7 +679,7 @@ msgstr "Количество копий"
 msgid "book"
 msgstr "Книга"
 
-#: library/models.py:48 templates/user_detail.html:154
+#: library/models.py:48 templates/user_detail.html:157
 msgid "books"
 msgstr "Книги"
 
@@ -890,6 +890,10 @@ msgid "Edit"
 msgstr "Редактировать"
 
 #: templates/user_detail.html:16
+msgid "Edit info record"
+msgstr "Редактировать карточку"
+
+#: templates/user_detail.html:19
 #: templates/registration/password_change_form.html:5
 #: templates/registration/password_change_form.html:16
 #: templates/registration/password_reset_confirm.html:5
@@ -897,91 +901,91 @@ msgstr "Редактировать"
 msgid "Change password"
 msgstr "Сменить пароль"
 
-#: templates/user_detail.html:30
+#: templates/user_detail.html:33
 msgid "student"
 msgstr "студент"
 
-#: templates/user_detail.html:31
+#: templates/user_detail.html:34
 msgid "enrolled in"
 msgstr "год поступления"
 
-#: templates/user_detail.html:31
+#: templates/user_detail.html:34
 msgid "courseoffering|took"
 msgstr "курсы"
 
-#: templates/user_detail.html:66
+#: templates/user_detail.html:69
 #, python-format
 msgid "graduated in %(year)s"
 msgstr "выпускник %(year)s года"
 
-#: templates/user_detail.html:70
+#: templates/user_detail.html:73
 msgid "teacher"
 msgstr "преподаватель"
 
-#: templates/user_detail.html:84
+#: templates/user_detail.html:87
 #, python-format
 msgid "%(name)s about CSC"
 msgstr "%(name)s о Центре"
 
-#: templates/user_detail.html:90 users/models.py:76
+#: templates/user_detail.html:93 users/models.py:76
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: templates/user_detail.html:98
+#: templates/user_detail.html:101
 msgid ".iCal classes calendar"
 msgstr ".iCal-календарь занятий"
 
-#: templates/user_detail.html:105
+#: templates/user_detail.html:108
 msgid ".iCal assignments calendar"
 msgstr ".iCal-календарь заданий"
 
-#: templates/user_detail.html:112
+#: templates/user_detail.html:115
 msgid ".iCal events calendar"
 msgstr ".iCal-календарь событий"
 
-#: templates/user_detail.html:163 users/models.py:227
+#: templates/user_detail.html:166 users/models.py:227
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: templates/user_detail.html:166 users/models.py:174
+#: templates/user_detail.html:169 users/models.py:174
 msgid "University"
 msgstr "Университет"
 
-#: templates/user_detail.html:170 users/models.py:178
+#: templates/user_detail.html:173 users/models.py:178
 msgid "Phone"
 msgstr "Телефон"
 
-#: templates/user_detail.html:174 users/models.py:182
+#: templates/user_detail.html:177 users/models.py:182
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: templates/user_detail.html:178
+#: templates/user_detail.html:181
 #: templates/learning/assignment_student_detail.html:51
 #: templates/learning/assignment_student_detail.html:91 users/models.py:188
 msgid "Comment"
 msgstr "Комментарий"
 
-#: templates/user_detail.html:186 users/models.py:204
+#: templates/user_detail.html:189 users/models.py:204
 msgid "Status"
 msgstr "Статус"
 
-#: templates/user_detail.html:190 users/models.py:200
+#: templates/user_detail.html:193 users/models.py:200
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: templates/user_detail.html:195 users/models.py:209
+#: templates/user_detail.html:198 users/models.py:209
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: templates/user_detail.html:199 users/models.py:213
+#: templates/user_detail.html:202 users/models.py:213
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: templates/user_detail.html:207 users/models.py:217
+#: templates/user_detail.html:210 users/models.py:217
 msgid "School of Data Analysis courses"
 msgstr "Курсы ШАД"
 
-#: templates/user_detail.html:214 users/models.py:221
+#: templates/user_detail.html:217 users/models.py:221
 msgid "Workplace"
 msgstr "Место работы"
 
