@@ -142,7 +142,9 @@ class UserDetailView(generic.DetailView):
                   or u.is_teacher
                   or u.is_superuser))
         context['is_editing_allowed'] = \
-            context['is_extended_profile_available']
+            (u.is_authenticated()
+             and (u == self.object
+                  or u.is_superuser))
         student_projects = list(self.object.studentproject_set
                                 .prefetch_related('semesters')
                                 .order_by('pk'))
@@ -158,7 +160,7 @@ class UserDetailView(generic.DetailView):
                                                   else None)),
                                   reverse=True)
         context['student_projects'] = student_projects
-        if self.request.user.is_superuser:
+        if self.request.user.is_staff:
             related = ['assignment',
                        'assignment__course_offering',
                        'assignment__course_offering__course',
@@ -186,7 +188,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
-        return obj.pk == user.pk
+        return obj.pk == user.pk or user.is_superuser or user.is_staff
 
     def get_context_data(self, *args, **kwargs):
         context = (super(UserUpdateView, self)

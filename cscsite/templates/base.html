@@ -81,7 +81,7 @@
                 {% if user.is_staff %}
                   <a href="{% url 'markssheet_staff' %}">
                     <li class="{% current 'staff' %} for-staff">
-                      {% trans "Marks sheets" %}
+                      {% trans "Supervision" %}  <i class="fa fa-caret-down"></i>
                     </li>
                   </a>
                 {% endif %}
@@ -260,12 +260,12 @@
               <ul>
                 <a href="{% url 'markssheet_staff' %}">
                   <li class="{% current 'markssheet_staff' %}">
-                    {% trans "MarksSheet|Main" %}
+                    {% trans "Mark sheet" %}
                   </li>
                 </a>
                 <a href="{% url 'course_markssheet_staff_dispatch' %}">
                   <li class="{% current 'course_markssheet_staff_dispatch' %}">
-                    {% trans "Course marks sheets" %}
+                    {% trans "Courses" %}
                   </li>
                 </a>
               </ul>

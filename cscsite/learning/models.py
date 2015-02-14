@@ -25,18 +25,9 @@ from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
+from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.notifications import get_unread_notifications_cache
 from learning import slides
-
-
-LATEX_MARKDOWN_HTML_ENABLED = _(
-    "LaTeX+"
-    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+"
-    "HTML is enabled")
-LATEX_MARKDOWN_ENABLED = _(
-    "LaTeX+"
-    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
-    " is enabled")
 
 
 @python_2_unicode_compatible
