@@ -87,7 +87,7 @@
       </div>
       {% endif %}
       {% if user.is_authenticated and user_object.private_contacts %}
-      <h4>{% trans "Contact information" %}</h4>
+      <h4>{% trans "Contact information" %}:</h4>
       <div class="ubertext">
         {{ user_object.private_contacts }}
       </div>
@@ -118,7 +118,7 @@
       </table>
       {% endif %}
       {% if a_ss %}
-      <p>&nbsp;</p>
+      <h4 class="bigger-margin">{% trans "Assignments" %}:</h4>
       <table class="table table-condensed">
         <tr>
           <th>{% trans "Course offering" %}</th>
@@ -150,9 +150,8 @@
       </table>
       {% endif %}
       {% with borrows=user_object.borrows.all %}
-      {% if request.user.is_superuser and borrows %}
-      <p>&nbsp;</p>
-      <h4>{% trans "books" %}:</h4>
+      {% if request.user.is_staff and borrows %}
+      <h4 class="bigger-margin">{% trans "books" %}:</h4>
       <ul>
         {% for borrow in borrows %}
         <li><a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a></li>
@@ -160,6 +159,63 @@
       </ul>
       {% endif %}
       {% endwith %}
+      {% if request.user.is_staff and user_object.studentinfo %}
+      <h4 class="bigger-margin">{% trans "Student info record" %}:</h4>
+      <table class="table table-condensed">
+        <tr>
+          <td width="25%">{% trans "University" %}</td>
+          <td>{{ user_object.studentinfo.university|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Phone" %}</td>
+          <td>{{ user_object.studentinfo.phone|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "StudentInfo|University year" %}</td>
+          <td>{{ user_object.studentinfo.uni_year_at_enrollment|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Comment" %}</td>
+          <td>
+            <div class="ubertext">
+              {{ user_object.studentinfo.comment|default:"—" }}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans "Status" %}</td>
+          <td>
+            {{ user_object.studentinfo.get_status_display|default:"—" }}
+            {% if user_object.studentinfo.nondegree %}
+            ({% trans "Non-degree student"|lower %})
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans "StudentInfo|Study program" %}</td>
+          <td>{{ user_object.studentinfo.get_study_program_display|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Online courses" %}</td>
+          <td>
+            <div class="ubertext">
+              {{ user_object.studentinfo.online_courses|default:"—" }}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans "School of Data Analysis courses" %}</td>
+          <td>
+            <div class="ubertext">
+              {{ user_object.studentinfo.shad_courses|default:"—" }}</td>
+            </div>
+        </tr>
+        <tr>
+          <td>{% trans "Workplace" %}</td>
+          <td>{{ user_object.studentinfo.workplace|default:"—" }}</td>
+        </tr>
+      </table>
+      {% endif %}
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}
