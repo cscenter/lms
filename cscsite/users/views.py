@@ -24,11 +24,11 @@ from icalendar import Calendar, Event, vText, vUri
 from icalendar.prop import vInline
 import pytz
 
-from core.views import ProtectedFormMixin
+from core.views import ProtectedFormMixin, StaffOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent
-from .forms import LoginForm, UserProfileForm
-from .models import CSCUser
+from .forms import LoginForm, UserProfileForm, StudentInfoForm
+from .models import CSCUser, StudentInfo
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -190,10 +190,20 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or user.is_superuser or user.is_staff
 
-    def get_context_data(self, *args, **kwargs):
-        context = (super(UserUpdateView, self)
-                   .get_context_data(*args, **kwargs))
-        return context
+
+class StudentInfoUpdateView(StaffOnlyMixin, generic.UpdateView):
+    model = StudentInfo
+    template_name = "learning/simple_crispy_form.html"
+    form_class = StudentInfoForm
+
+    def get_success_url(self):
+        return reverse('user_detail', args=[self.object.student_id])
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save(edit_author=self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
 
 
 # The following code has been taken from
