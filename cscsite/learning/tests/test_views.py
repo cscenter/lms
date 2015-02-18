@@ -778,8 +778,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                       "".join(self.client.get(span.a['href'])
                               .streaming_content))
                      for span in spans)
-        self.assertRegexpMatches(as_[0][0], "attachment1(_\d+)?.txt")
-        self.assertRegexpMatches(as_[1][0], "attachment2(_\d+)?.txt")
+        self.assertRegexpMatches(as_[0][0], "attachment1(_[0-9a-zA-Z]+)?.txt")
+        self.assertRegexpMatches(as_[1][0], "attachment2(_[0-9a-zA-Z]+)?.txt")
         self.assertEquals(as_[0][1], b"attachment1_content")
         self.assertEquals(as_[1][1], b"attachment2_content")
         # delete one of the files, check that it's deleted and other isn't
@@ -803,7 +803,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                  .find_all('span', class_='assignment-attachment'))
         self.assertEquals(1, len(spans))
         self.assertRegexpMatches(spans[0].a.contents[0].strip(),
-                                 "attachment1(_\d+)?.txt")
+                                 "attachment1(_[0-9a-zA-Z]+)?.txt")
         self.assertFalse(os.path.isfile(cca_files[1]))
 
 

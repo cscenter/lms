@@ -185,7 +185,7 @@ class AssignmentTest(TestCase):
     def test_attached_file_name(self):
         fname = "foobar.pdf"
         a = AssignmentFactory.create(attached_file__filename=fname)
-        self.assertRegexpMatches(a.attached_file_name, "^foobar(_\d+)?.pdf$")
+        self.assertRegexpMatches(a.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
 class AssignmentStudentTests(TestCase):
@@ -281,15 +281,15 @@ class AssignmentStudentTests(TestCase):
 
 
 class AssignmentCommentTests(TestCase):
-    def test_atttached_file(self):
+    def test_attached_file(self):
         ac = AssignmentCommentFactory.create(
             attached_file__filename="foobar.pdf")
         self.assertIn(smart_text(ac.assignment_student.assignment.pk),
                       ac.attached_file.name)
         self.assertIn(smart_text(ac.assignment_student.student.pk),
                       ac.attached_file.name)
-        self.assertRegexpMatches(ac.attached_file.name, "/foobar(_\d+)?.pdf$")
-        self.assertRegexpMatches(ac.attached_file_name, "^foobar(_\d+)?.pdf$")
+        self.assertRegexpMatches(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
+        self.assertRegexpMatches(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
 class EnrollmentTests(TestCase):
