@@ -31,8 +31,6 @@ DATABASES = {
         }
     }
 
-SOUTH_TESTS_MIGRATE = False
-
 # This makes tests almost 2x faster; we don't need strong security and DEBUG
 # during tests
 PASSWORD_HASHERS = (
@@ -42,3 +40,15 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 MEDIA_ROOT = '/tmp/django_test_media/'
+
+
+class DisableMigrations(object):
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return "notmigrations"
+
+
+# disable migration in tests; it's a hack until Django 1.8 with --keepdb
+MIGRATION_MODULES = DisableMigrations()
