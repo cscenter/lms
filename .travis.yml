@@ -7,6 +7,6 @@ env:
 install:
   - pip install pep8
   - pip install pylint
-  # - pip install -q Django==$DJANGO
-  - pip install -r requirements.txt
+  - pip install -q Django==$DJANGO
+  - pip install -r requirements-nodjango.txt
 script: make test_nocoverage
