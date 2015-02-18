@@ -1,3 +1,3 @@
-Django==1.6.5
+Django==1.7.4
 
 -r requirements-nodjango.txt

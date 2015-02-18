@@ -1,40 +1,49 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import django.utils.timezone
+import model_utils.fields
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Textpage'
-        db.create_table(u'textpages_textpage', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('url_name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=100)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('text', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'textpages', ['Textpage'])
+    dependencies = [
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'Textpage'
-        db.delete_table(u'textpages_textpage')
-
-
-    models = {
-        u'textpages.textpage': {
-            'Meta': {'ordering': "[u'url_name']", 'object_name': 'Textpage'},
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'text': ('django.db.models.fields.TextField', [], {}),
-            'url_name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'})
-        }
-    }
-
-    complete_apps = ['textpages']
+    operations = [
+        migrations.CreateModel(
+            name='CustomTextpage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('slug', models.SlugField(help_text='Short dash-separated string for human-readable URLs, as in compscicenter.ru/pages/<b>some-news</b>/', unique=True, max_length=70, verbose_name='News|slug')),
+                ('name', models.CharField(max_length=100, verbose_name='Textpage|name')),
+                ('text', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='News|text')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Textpage|Custom page',
+                'verbose_name_plural': 'Textpage|Custom pages',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Textpage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('url_name', models.CharField(verbose_name='Textpage|url_name', unique=True, max_length=100, editable=False)),
+                ('name', models.CharField(verbose_name='Textpage|name', max_length=100, editable=False)),
+                ('text', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='News|text')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Textpage|page',
+                'verbose_name_plural': 'Textpage|pages',
+            },
+            bases=(models.Model,),
+        ),
+    ]

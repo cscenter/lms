@@ -189,8 +189,8 @@ class StudentInfo(TimeStampedModel):
         help_text=LATEX_MARKDOWN_ENABLED,
         blank=True)
     comment_changed = MonitorField(
-        verbose_name=_("Comment changed"),
-        monitor='comment')
+        monitor='comment',
+        verbose_name=_("Comment changed"))
     comment_last_author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author of last edit"),

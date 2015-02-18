@@ -1,338 +1,278 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import model_utils.fields
+import learning.models
+import django.utils.timezone
+import django.core.validators
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Course'
-        db.create_table(u'learning_course', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=140)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(unique=True, max_length=70)),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'learning', ['Course'])
+    dependencies = [
+    ]
 
-        # Adding model 'Semester'
-        db.create_table(u'learning_semester', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('year', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
-            ('type', self.gf('model_utils.fields.StatusField')(default=u'spring', max_length=100, no_check_for_status=True)),
-        ))
-        db.send_create_signal(u'learning', ['Semester'])
-
-        # Adding model 'CourseOffering'
-        db.create_table(u'learning_courseoffering', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('course', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.Course'], on_delete=models.PROTECT)),
-            ('semester', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.Semester'], on_delete=models.PROTECT)),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal(u'learning', ['CourseOffering'])
-
-        # Adding M2M table for field teachers on 'CourseOffering'
-        m2m_table_name = db.shorten_name(u'learning_courseoffering_teachers')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('courseoffering', models.ForeignKey(orm[u'learning.courseoffering'], null=False)),
-            ('cscuser', models.ForeignKey(orm[u'users.cscuser'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['courseoffering_id', 'cscuser_id'])
-
-        # Adding model 'CourseOfferingNews'
-        db.create_table(u'learning_courseofferingnews', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('course_offering', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.CourseOffering'], on_delete=models.PROTECT)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=140)),
-            ('text', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'learning', ['CourseOfferingNews'])
-
-        # Adding model 'Venue'
-        db.create_table(u'learning_venue', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=140)),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal(u'learning', ['Venue'])
-
-        # Adding model 'CourseClass'
-        db.create_table(u'learning_courseclass', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('course_offering', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.CourseOffering'], on_delete=models.PROTECT)),
-            ('venue', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.Venue'], on_delete=models.PROTECT)),
-            ('type', self.gf('model_utils.fields.StatusField')(default=u'lecture', max_length=100, no_check_for_status=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=140)),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('slides', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
-            ('other_materials', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('date', self.gf('django.db.models.fields.DateField')()),
-            ('starts_at', self.gf('django.db.models.fields.TimeField')()),
-            ('ends_at', self.gf('django.db.models.fields.TimeField')()),
-        ))
-        db.send_create_signal(u'learning', ['CourseClass'])
-
-        # Adding model 'CourseClassAttachment'
-        db.create_table(u'learning_courseclassattachment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('course_class', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.CourseClass'])),
-            ('material', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
-        ))
-        db.send_create_signal(u'learning', ['CourseClassAttachment'])
-
-        # Adding model 'Assignment'
-        db.create_table(u'learning_assignment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('course_offering', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.CourseOffering'], on_delete=models.PROTECT)),
-            ('deadline_at', self.gf('django.db.models.fields.DateTimeField')()),
-            ('is_online', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=140)),
-            ('text', self.gf('django.db.models.fields.TextField')()),
-            ('attached_file', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
-        ))
-        db.send_create_signal(u'learning', ['Assignment'])
-
-        # Adding model 'AssignmentStudent'
-        db.create_table(u'learning_assignmentstudent', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('assignment', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.Assignment'])),
-            ('student', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.CSCUser'])),
-            ('state', self.gf('model_utils.fields.StatusField')(default=u'not_checked', max_length=100, no_check_for_status=True)),
-            ('state_changed', self.gf('model_utils.fields.MonitorField')(default=datetime.datetime.now, monitor=u'state')),
-        ))
-        db.send_create_signal(u'learning', ['AssignmentStudent'])
-
-        # Adding model 'AssignmentComment'
-        db.create_table(u'learning_assignmentcomment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('assignment_student', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.AssignmentStudent'])),
-            ('text', self.gf('django.db.models.fields.TextField')()),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.CSCUser'])),
-            ('attached_file', self.gf('django.db.models.fields.files.FileField')(max_length=100, blank=True)),
-        ))
-        db.send_create_signal(u'learning', ['AssignmentComment'])
-
-        # Adding model 'Enrollment'
-        db.create_table(u'learning_enrollment', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('student', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.CSCUser'])),
-            ('course_offering', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['learning.CourseOffering'])),
-            ('grade', self.gf('model_utils.fields.StatusField')(default=u'not_graded', max_length=100, no_check_for_status=True)),
-            ('grade_changed', self.gf('model_utils.fields.MonitorField')(default=datetime.datetime.now, monitor=u'grade')),
-        ))
-        db.send_create_signal(u'learning', ['Enrollment'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'Course'
-        db.delete_table(u'learning_course')
-
-        # Deleting model 'Semester'
-        db.delete_table(u'learning_semester')
-
-        # Deleting model 'CourseOffering'
-        db.delete_table(u'learning_courseoffering')
-
-        # Removing M2M table for field teachers on 'CourseOffering'
-        db.delete_table(db.shorten_name(u'learning_courseoffering_teachers'))
-
-        # Deleting model 'CourseOfferingNews'
-        db.delete_table(u'learning_courseofferingnews')
-
-        # Deleting model 'Venue'
-        db.delete_table(u'learning_venue')
-
-        # Deleting model 'CourseClass'
-        db.delete_table(u'learning_courseclass')
-
-        # Deleting model 'CourseClassAttachment'
-        db.delete_table(u'learning_courseclassattachment')
-
-        # Deleting model 'Assignment'
-        db.delete_table(u'learning_assignment')
-
-        # Deleting model 'AssignmentStudent'
-        db.delete_table(u'learning_assignmentstudent')
-
-        # Deleting model 'AssignmentComment'
-        db.delete_table(u'learning_assignmentcomment')
-
-        # Deleting model 'Enrollment'
-        db.delete_table(u'learning_enrollment')
-
-
-    models = {
-        u'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'auth.permission': {
-            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'learning.assignment': {
-            'Meta': {'ordering': "[u'created', u'course_offering']", 'object_name': 'Assignment'},
-            'assigned_to': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['users.CSCUser']", 'symmetrical': 'False', 'through': u"orm['learning.AssignmentStudent']", 'blank': 'True'}),
-            'attached_file': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'course_offering': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseOffering']", 'on_delete': 'models.PROTECT'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'deadline_at': ('django.db.models.fields.DateTimeField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_online': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'text': ('django.db.models.fields.TextField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '140'})
-        },
-        u'learning.assignmentcomment': {
-            'Meta': {'ordering': "[u'created']", 'object_name': 'AssignmentComment'},
-            'assignment_student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.AssignmentStudent']"}),
-            'attached_file': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'text': ('django.db.models.fields.TextField', [], {})
-        },
-        u'learning.assignmentstudent': {
-            'Meta': {'ordering': "[u'assignment', u'student']", 'object_name': 'AssignmentStudent'},
-            'assignment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Assignment']"}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'state': ('model_utils.fields.StatusField', [], {'default': "u'not_checked'", 'max_length': '100', u'no_check_for_status': 'True'}),
-            'state_changed': ('model_utils.fields.MonitorField', [], {'default': 'datetime.datetime.now', u'monitor': "u'state'"}),
-            'student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
-        },
-        u'learning.course': {
-            'Meta': {'ordering': "[u'name']", 'object_name': 'Course'},
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'description': ('django.db.models.fields.TextField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '140'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '70'})
-        },
-        u'learning.courseclass': {
-            'Meta': {'ordering': "[u'-date', u'course_offering', u'starts_at']", 'object_name': 'CourseClass'},
-            'course_offering': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseOffering']", 'on_delete': 'models.PROTECT'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'date': ('django.db.models.fields.DateField', [], {}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'ends_at': ('django.db.models.fields.TimeField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '140'}),
-            'other_materials': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'slides': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
-            'starts_at': ('django.db.models.fields.TimeField', [], {}),
-            'type': ('model_utils.fields.StatusField', [], {'default': "u'lecture'", 'max_length': '100', u'no_check_for_status': 'True'}),
-            'venue': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Venue']", 'on_delete': 'models.PROTECT'})
-        },
-        u'learning.courseclassattachment': {
-            'Meta': {'ordering': "[u'course_class', u'-created']", 'object_name': 'CourseClassAttachment'},
-            'course_class': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseClass']"}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'material': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'})
-        },
-        u'learning.courseoffering': {
-            'Meta': {'ordering': "[u'-semester', u'course__created']", 'object_name': 'CourseOffering'},
-            'course': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Course']", 'on_delete': 'models.PROTECT'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'enrolled_students': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'enrolled_on_set'", 'blank': 'True', 'through': u"orm['learning.Enrollment']", 'to': u"orm['users.CSCUser']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'semester': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.Semester']", 'on_delete': 'models.PROTECT'}),
-            'teachers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'teaching_set'", 'symmetrical': 'False', 'to': u"orm['users.CSCUser']"})
-        },
-        u'learning.courseofferingnews': {
-            'Meta': {'ordering': "[u'-created']", 'object_name': 'CourseOfferingNews'},
-            'course_offering': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseOffering']", 'on_delete': 'models.PROTECT'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'text': ('django.db.models.fields.TextField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '140'})
-        },
-        u'learning.enrollment': {
-            'Meta': {'ordering': "[u'student', u'course_offering']", 'object_name': 'Enrollment'},
-            'course_offering': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['learning.CourseOffering']"}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'grade': ('model_utils.fields.StatusField', [], {'default': "u'not_graded'", 'max_length': '100', u'no_check_for_status': 'True'}),
-            'grade_changed': ('model_utils.fields.MonitorField', [], {'default': 'datetime.datetime.now', u'monitor': "u'grade'"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'student': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['users.CSCUser']"})
-        },
-        u'learning.semester': {
-            'Meta': {'ordering': "[u'year', u'-type']", 'object_name': 'Semester'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'type': ('model_utils.fields.StatusField', [], {'default': "u'spring'", 'max_length': '100', u'no_check_for_status': 'True'}),
-            'year': ('django.db.models.fields.PositiveSmallIntegerField', [], {})
-        },
-        u'learning.venue': {
-            'Meta': {'ordering': "[u'name']", 'object_name': 'Venue'},
-            'description': ('django.db.models.fields.TextField', [], {}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '140'})
-        },
-        u'users.cscuser': {
-            'Meta': {'object_name': 'CSCUser'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'enrolment_year': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'graduation_year': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'note': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'patronymic': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'photo': (u'sorl.thumbnail.fields.ImageField', [], {'max_length': '100', 'blank': 'True'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        }
-    }
-
-    complete_apps = ['learning']
+    operations = [
+        migrations.CreateModel(
+            name='Assignment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('deadline_at', models.DateTimeField(verbose_name='Assignment|deadline')),
+                ('is_online', models.BooleanField(default=True, verbose_name='Assignment|can be passed online')),
+                ('title', models.CharField(max_length=140, verbose_name='Asssignment|name')),
+                ('text', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Assignment|text')),
+                ('attached_file', models.FileField(upload_to=learning.models.assignment_upload_to, blank=True)),
+                ('grade_min', models.PositiveSmallIntegerField(default=2, verbose_name='Assignment|grade_min', validators=[django.core.validators.MaxValueValidator(1000)])),
+                ('grade_max', models.PositiveSmallIntegerField(default=5, verbose_name='Assignment|grade_max', validators=[django.core.validators.MaxValueValidator(1000)])),
+            ],
+            options={
+                'ordering': ['created', 'course_offering'],
+                'verbose_name': 'Assignment',
+                'verbose_name_plural': 'Assignments',
+            },
+            bases=(models.Model, object),
+        ),
+        migrations.CreateModel(
+            name='AssignmentComment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('text', models.TextField(help_text='LaTeX+Markdown is enabled', verbose_name='AssignmentComment|text', blank=True)),
+                ('attached_file', models.FileField(upload_to=learning.models.assignmentcomment_upload_to, blank=True)),
+            ],
+            options={
+                'ordering': ['created'],
+                'verbose_name': 'Assignment-comment',
+                'verbose_name_plural': 'Assignment-comments',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssignmentNotification',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('is_about_passed', models.BooleanField(default=False, verbose_name='About passed assignment')),
+                ('is_about_creation', models.BooleanField(default=False, verbose_name='About created assignment')),
+                ('is_about_deadline', models.BooleanField(default=False, verbose_name='About change of deadline')),
+                ('is_unread', models.BooleanField(default=True, verbose_name='Unread')),
+                ('is_notified', models.BooleanField(default=False, verbose_name='User is notified')),
+            ],
+            options={
+                'ordering': ['-created'],
+                'verbose_name': 'Assignment notification',
+                'verbose_name_plural': 'Assignment notifications',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='AssignmentStudent',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('grade', models.PositiveSmallIntegerField(null=True, verbose_name='Grade', blank=True)),
+                ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, verbose_name='Assignment|grade changed', monitor='grade')),
+                ('is_passed', models.BooleanField(default=False, help_text="It's online and has comments", verbose_name='Is passed')),
+            ],
+            options={
+                'ordering': ['assignment', 'student'],
+                'verbose_name': 'Assignment-student',
+                'verbose_name_plural': 'Assignment-students',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Course',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('name', models.CharField(max_length=140, verbose_name='Course|name')),
+                ('slug', models.SlugField(help_text='Short dash-separated string for human-readable URLs, as in test.com/news/<b>some-news</b>/', unique=True, max_length=70, verbose_name='News|slug')),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Course|description')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Course',
+                'verbose_name_plural': 'Courses',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CourseClass',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('type', model_utils.fields.StatusField(default='lecture', max_length=100, verbose_name='Type', no_check_for_status=True, choices=[('lecture', 'Lecture'), ('seminar', 'Seminar')])),
+                ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
+                ('slides', models.FileField(upload_to=learning.models.courseclass_slides_file_name, verbose_name='Slides', blank=True)),
+                ('video', models.TextField(help_text='\u0414\u043e\u0441\u0442\u0443\u043f\u043d\u044b LaTeX+<a href="http://ru.wikipedia.org/wiki/Markdown">Markdown</a>+HTML; \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430, \u0432\u0441\u0442\u0430\u0432\u044c\u0442\u0435 HTML \u0434\u043b\u044f \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0432\u0438\u0434\u0435\u043e\u043f\u043b\u0435\u0435\u0440\u0430', verbose_name='CourseClass|Video', blank=True)),
+                ('other_materials', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='CourseClass|Other materials', blank=True)),
+                ('date', models.DateField(verbose_name='Date')),
+                ('starts_at', models.TimeField(verbose_name='Starts at')),
+                ('ends_at', models.TimeField(verbose_name='Ends at')),
+            ],
+            options={
+                'ordering': ['-date', 'course_offering', '-starts_at'],
+                'verbose_name': 'Class',
+                'verbose_name_plural': 'Classes',
+            },
+            bases=(models.Model, object),
+        ),
+        migrations.CreateModel(
+            name='CourseClassAttachment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('material', models.FileField(upload_to='course_class_attachments')),
+            ],
+            options={
+                'ordering': ['course_class', '-created'],
+                'verbose_name': 'Class attachment',
+                'verbose_name_plural': 'Class attachments',
+            },
+            bases=(models.Model, object),
+        ),
+        migrations.CreateModel(
+            name='CourseOffering',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('description', models.TextField(help_text='LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description', verbose_name='Description', blank=True)),
+                ('is_published_in_video', models.BooleanField(default=False, verbose_name='Published in video section')),
+            ],
+            options={
+                'ordering': ['-semester', 'course__created'],
+                'verbose_name': 'Course offering',
+                'verbose_name_plural': 'Course offerings',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CourseOfferingNews',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('title', models.CharField(max_length=140, verbose_name='CourseNews|title')),
+                ('text', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='CourseNews|text')),
+            ],
+            options={
+                'ordering': ['-created'],
+                'verbose_name': 'Course news-singular',
+                'verbose_name_plural': 'Course news-plural',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CourseOfferingNewsNotification',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('is_unread', models.BooleanField(default=True, verbose_name='Unread')),
+                ('is_notified', models.BooleanField(default=False, verbose_name='User is notified')),
+            ],
+            options={
+                'ordering': ['-created'],
+                'verbose_name': 'Course offering news notification',
+                'verbose_name_plural': 'Course offering news notifications',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Enrollment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('grade', model_utils.fields.StatusField(default='not_graded', max_length=100, verbose_name='Enrollment|grade', no_check_for_status=True, choices=[('not_graded', 'Not graded'), ('unsatisfactory', 'Enrollment|Unsatisfactory'), ('pass', 'Enrollment|Pass'), ('good', 'Good'), ('excellent', 'Excellent')])),
+                ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, verbose_name='Enrollment|grade changed', monitor='grade')),
+            ],
+            options={
+                'ordering': ['student', 'course_offering'],
+                'verbose_name': 'Enrollment',
+                'verbose_name_plural': 'Enrollments',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='NonCourseEvent',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
+                ('date', models.DateField(verbose_name='Date')),
+                ('starts_at', models.TimeField(verbose_name='Starts at')),
+                ('ends_at', models.TimeField(verbose_name='Ends at')),
+            ],
+            options={
+                'ordering': ['-date', '-starts_at', 'name'],
+                'verbose_name': 'Non-course event',
+                'verbose_name_plural': 'Non-course events',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Semester',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('year', models.PositiveSmallIntegerField(verbose_name='CSCUser|Year', validators=[django.core.validators.MinValueValidator(1990)])),
+                ('type', model_utils.fields.StatusField(default='spring', max_length=100, verbose_name='Semester|type', no_check_for_status=True, choices=[('spring', 'spring'), ('autumn', 'autumn')])),
+            ],
+            options={
+                'ordering': ['-year', 'type'],
+                'verbose_name': 'Semester',
+                'verbose_name_plural': 'Semesters',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StudentProject',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('name', models.CharField(max_length=255, verbose_name='StudentProject|Name')),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
+                ('supervisor', models.CharField(help_text='Format: Last_name First_name Patronymic, Organization', max_length=255, verbose_name='StudentProject|Supervisor')),
+                ('project_type', models.CharField(max_length=10, verbose_name='StudentProject|Type', choices=[('practice', 'StudentProject|Practice'), ('research', 'StudentProject|Research')])),
+                ('presentation', models.FileField(upload_to=learning.models.studentproject_slides_file_name, verbose_name='Presentation', blank=True)),
+                ('semesters', models.ManyToManyField(to='learning.Semester', verbose_name='Semesters')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Student project',
+                'verbose_name_plural': 'Student projects',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Venue',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=140, verbose_name='Venue|Name')),
+                ('address', models.CharField(help_text='Should be resolvable by Google Maps', max_length=500, verbose_name='Venue|Address', blank=True)),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description')),
+                ('is_preferred', models.BooleanField(default=False, help_text='Will be displayed on top of the venue list', verbose_name='Preferred')),
+            ],
+            options={
+                'ordering': ['-is_preferred', 'name'],
+                'verbose_name': 'Venue',
+                'verbose_name_plural': 'Venues',
+            },
+            bases=(models.Model,),
+        ),
+    ]

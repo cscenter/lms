@@ -71,8 +71,6 @@ INSTALLED_APPS = (
     'floppyforms',
     'bootstrap3',
     'taggit',
-    'south',
-    'rosetta',
     'sitemetrics',
     'dbbackup',
 
