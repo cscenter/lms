@@ -9,7 +9,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "travis_ci_test",
-        "USER": "postgrest",
+        "USER": "postgres",
         "PASSWORD": "",
         "HOST": "localhost",
         "PORT": ""
