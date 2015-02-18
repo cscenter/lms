@@ -173,6 +173,7 @@ MENU_URL_NAMES = {
     'about': {},
     'course_video_list': {},
     'lectures': {},
+    'online': {},
     'teaching': {},
     'learning': {},
     'enrollment': {},
