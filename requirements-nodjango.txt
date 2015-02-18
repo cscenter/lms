@@ -10,10 +10,10 @@ django-braces==1.3.1
 django-coverage==1.2.4
 django-crispy-forms==1.4.0
 django-dbbackup==2.0.4
-django-debug-toolbar==1.0.1
+django-debug-toolbar==1.2.2
 django-fixture-media==0.1.4
 django-floppyforms==1.1.1
-django-model-utils==2.0
+django-model-utils==2.2
 django-rosetta==0.7.3
 django-sitemetrics==0.4.2
 django-taggit==0.12.1
@@ -23,13 +23,12 @@ MySQL-python==1.2.5
 mock==1.0.1
 pylint-django==0.3
 python-dateutil==2.2
-pytz==2013.9
+pytz==2014.10
 raven==5.0.0
 requests==2.2.0
 six==1.5.2
 slideshare==0.1dev
 sorl-thumbnail==11.12.1b
-south==0.8.4
 sqlparse==0.1.11
 testfixtures==3.0.2
 yandexwebdav==0.2.11

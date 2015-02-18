@@ -25,6 +25,7 @@ class CSCUserCreationForm(UserCreationForm):
 
 class CSCUserChangeForm(UserChangeForm):
     class Meta:
+        fields = '__all__'
         model = CSCUser
 
 

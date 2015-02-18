@@ -241,12 +241,7 @@ class Venue(models.Model):
         return reverse('venue_detail', args=[self.pk])
 
 
-@python_2_unicode_compatible
-class CourseClass(TimeStampedModel, object):
-    TYPES = Choices(('lecture', _("Lecture")),
-                    ('seminar', _("Seminar")))
-
-    def _slides_file_name(self, filename):
+def courseclass_slides_file_name(self, filename):
         _, ext = os.path.splitext(filename)
         timestamp = self.date.strftime("%Y_%m_%d")
         course_offering = ("{0}_{1}"
@@ -258,6 +253,12 @@ class CourseClass(TimeStampedModel, object):
                             course_offering,
                             ext))
         return os.path.join('slides', course_offering, filename)
+
+
+@python_2_unicode_compatible
+class CourseClass(TimeStampedModel, object):
+    TYPES = Choices(('lecture', _("Lecture")),
+                    ('seminar', _("Seminar")))
 
     course_offering = models.ForeignKey(
         CourseOffering,
@@ -278,7 +279,7 @@ class CourseClass(TimeStampedModel, object):
     slides = models.FileField(
         _("Slides"),
         blank=True,
-        upload_to=_slides_file_name)
+        upload_to=courseclass_slides_file_name)
     video = models.TextField(
         _("CourseClass|Video"),
         blank=True,
@@ -373,6 +374,14 @@ class CourseClassAttachment(TimeStampedModel, object):
         return os.path.basename(self.material.name)
 
 
+## NOTE(Dmitry): this is needed because of
+## https://docs.djangoproject.com/en/1.7/topics/migrations/#serializing-values
+def assignment_upload_to(instance, filename):
+    # somewhat protecting against URL enumeration
+    return ("assignments/{0}/{1}"
+            .format(int(time.time()) % 30, filename))
+
+
 @python_2_unicode_compatible
 class Assignment(TimeStampedModel, object):
     course_offering = models.ForeignKey(
@@ -393,11 +402,7 @@ class Assignment(TimeStampedModel, object):
     text = models.TextField(_("Assignment|text"),
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
     attached_file = models.FileField(
-        upload_to=(lambda instance, filename:
-                   ("assignments/{0}/{1}"
-                    # somewhat protecting against URL enumeration
-                    .format(int(time.time()) % 30,
-                            filename))),
+        upload_to=assignment_upload_to,
         blank=True)
     grade_min = models.PositiveSmallIntegerField(
         _("Assignment|grade_min"),
@@ -543,6 +548,17 @@ class AssignmentStudent(TimeStampedModel):
             return self.SHORT_STATES[self.state]
 
 
+## NOTE(Dmitry): this is needed because of
+## https://docs.djangoproject.com/en/1.7/topics/migrations/#serializing-values
+def assignmentcomment_upload_to(instance, filename):
+    return ("assignment_{0}/user_{1}/{2}/{3}"
+            .format(instance.assignment_student.assignment.pk,
+                    instance.assignment_student.student.pk,
+                    # somewhat protecting against URL enumeration
+                    int(time.time()) % 30,
+                    filename))
+
+
 @python_2_unicode_compatible
 class AssignmentComment(TimeStampedModel):
     assignment_student = models.ForeignKey(
@@ -558,13 +574,7 @@ class AssignmentComment(TimeStampedModel):
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
     attached_file = models.FileField(
-        upload_to=(lambda instance, filename:
-                   ("assignment_{0}/user_{1}/{2}/{3}"
-                    .format(instance.assignment_student.assignment.pk,
-                            instance.assignment_student.student.pk,
-                            # somewhat protecting against URL enumeration
-                            int(time.time()) % 30,
-                            filename))),
+        upload_to=assignmentcomment_upload_to,
         blank=True)
 
     class Meta:
@@ -743,14 +753,15 @@ class NonCourseEvent(TimeStampedModel):
         return reverse('non_course_event_detail', args=[self.pk])
 
 
+def studentproject_slides_file_name(self, filename):
+    return os.path.join('project_presentations',
+                        str(self.student.pk), filename)
+
+
 @python_2_unicode_compatible
 class StudentProject(TimeStampedModel):
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))
-
-    def _slides_file_name(self, filename):
-        return os.path.join('project_presentations',
-                            str(self.student.pk), filename)
 
     name = models.CharField(_("StudentProject|Name"), max_length=255)
     description = models.TextField(
@@ -776,7 +787,7 @@ class StudentProject(TimeStampedModel):
     presentation = models.FileField(
         _("Presentation"),
         blank=True,
-        upload_to=_slides_file_name)
+        upload_to=studentproject_slides_file_name)
 
     class Meta:
         # NOTE(Dmitry): we should probably order by min of semesters,
