@@ -19,9 +19,13 @@
       update_cache: no
     with_items:
       - 'ppa:nginx/stable'
+      - 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
 
-  # - name: upgrade all packages to the latest version
-  #   apt: update_cache=yes upgrade=dist
+  - name: add postgres repo key
+    apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+
+  - name: upgrade all packages to the latest version
+    apt: update_cache=yes upgrade=dist
 
   # - name: check if a reboot is required
   #   stat: path=/var/run/reboot-required get_md5=no
@@ -48,11 +52,12 @@
     with_items:
       # core items
       - nginx
-      - mysql-server
-      - libmysqlclient-dev
+      # - mysql-server
+      # - libmysqlclient-dev
+      - postgresql-9.4
+      - libpq-dev
       - python-setuptools
       - python-dev
-      - python-mysqldb  # needed for Ansible itself
       - git
       - build-essential
       - libjpeg-dev
@@ -77,6 +82,8 @@
         version: "2.0.9"
       - name: uwsgitop
         version: "0.8"
+      - name: psycopg2
+        version: "2.6"
 
   # deployment user
 
