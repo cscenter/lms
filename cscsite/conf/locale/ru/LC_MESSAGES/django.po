@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-14 21:34+0300\n"
-"PO-Revision-Date: 2015-02-14 21:34+0230\n"
+"POT-Creation-Date: 2015-02-18 16:49+0300\n"
+"PO-Revision-Date: 2015-02-18 16:49+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -832,6 +832,10 @@ msgstr "Ведомость"
 #: templates/base.html:293
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
+
+#: templates/base.html:295
+msgid "report a problem"
+msgstr "сообщить об ошибке"
 
 #: templates/index.html:15
 msgid "Learn more"
