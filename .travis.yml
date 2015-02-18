@@ -2,10 +2,11 @@ language: python
 python:
   - "2.7"
 env:
-  - DJANGO=1.6
-  - DJANGO=1.7
+  - DJANGO=1.6.5
+  - DJANGO=1.7.4
 install:
   - pip install pep8
   - pip install pylint
+  - pip install -q Django==$DJANGO
   - pip install -r requirements.txt
 script: make test_nocoverage
