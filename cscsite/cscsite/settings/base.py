@@ -224,7 +224,6 @@ MENU_URL_NAMES = {
     'markssheet_teacher_dispatch': {'parent': 'teaching'},
     'markssheet_teacher': {'alias': 'markssheet_teacher_dispatch'},
 
-    'markssheet_staff': {'parent': 'staff'},
     'course_markssheet_staff_dispatch': {'parent': 'staff'},
     'course_markssheet_staff': {'alias': 'course_markssheet_staff_dispatch'},
     'user_detail': {},
