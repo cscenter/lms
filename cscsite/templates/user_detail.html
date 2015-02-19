@@ -162,7 +162,7 @@
       </ul>
       {% endif %}
       {% endwith %}
-      {% if request.user.is_staff %}
+      {% if request.user.is_staff and user_object.is_student %}
       <h4 class="bigger-margin">{% trans "Student info record" %}:</h4>
       <table class="table table-condensed">
         <tr>
@@ -183,10 +183,12 @@
             <div class="ubertext">
               {{ user_object.comment|default:"—" }}
             </div>
+            {% if user_object.comment %}
             <span class="student-comment-metainfo pull-right">
               {{ user_object.comment_last_author.get_short_name }}{% if user_object.comment_last_author %}, {% endif %}
               {{ user_object.comment_changed_at|date:"d.m.Y H:i" }}
             </span>
+            {% endif %}
           </td>
         </tr>
         <tr>
@@ -201,37 +203,49 @@
         <tr>
           <td>{% trans "StudentInfo|Study program" %}:</td>
           <td>
+            {% with sps=user_object.study_programs.all %}
+            {% if sps %}
             <ul class="list-unstyled">
-              {% for sp in user_object.study_programs.all %}
+              {% for sp in sps %}
               <li>{{ sp.name }}</li>
-              {% empty %}
-              <li>"—"</li>
               {% endfor %}
             </ul>
+            {% else %}
+            —
+            {% endif %}
+            {% endwith %}
           </td>
         </tr>
         <tr>
           <td>{% trans "Online courses" %}:</td>
           <td>
+            {% with recs=user_object.onlinecourserecord_set.all %}
+            {% if recs %}
             <ol>
-              {% for rec in user_object.onlinecourserecord_set.all %}
+              {% for rec in recs %}
               <li>{{ rec.name }}</li>
-              {% empty %}
-              <li>"—"</li>
               {% endfor %}
             </ol>
+            {% else %}
+            —
+            {% endif %}
+            {% endwith %}
           </td>
         </tr>
         <tr>
           <td>{% trans "School of Data Analysis courses" %}:</td>
           <td>
+            {% with recs=user_object.shadcourserecord_set.all %}
+            {% if recs %}
             <ol>
-              {% for rec in user_object.shadcourserecord_set.all %}
-              <li>{{ rec.name }}{% if rec.grade %} ({{ rec.grade }}){% endif %}</li>
-              {% empty %}
-              <li>"—"</li>
+              {% for rec in recs %}
+              <li>{{ rec.name }}</li>
               {% endfor %}
             </ol>
+            {% else %}
+            —
+            {% endif %}
+            {% endwith %}
           </td>
         </tr>
         <tr>
