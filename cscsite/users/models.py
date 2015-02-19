@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
 from core.models import LATEX_MARKDOWN_ENABLED
+from learning.models import StudyProgram
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
 YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
@@ -34,6 +35,13 @@ class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
     IS_TEACHER_PK = 2
     IS_GRADUATE_PK = 3
+
+    STATUS = Choices(('graduate', _("Graduate")),
+                     ('expelled', _("StudentInfo|Expelled")),
+                     ('reinstated', _("StudentInfo|Reinstalled")),
+                     ('will_graduate', _("StudentInfo|Will graduate")))
+
+    _original_comment = None
 
     patronymic = models.CharField(
         _("CSCUser|patronymic"),
@@ -78,11 +86,60 @@ class CSCUser(AbstractUser):
                    .format(_("LaTeX+Markdown is enabled"),
                            _("will be shown only to logged-in users"))),
         blank=True)
+    # internal student info
+    university = models.CharField(
+        _("University"),
+        max_length=140,
+        blank=True)
+    phone = models.CharField(
+        _("Phone"),
+        max_length=40,
+        blank=True)
+    uni_year_at_enrollment = models.PositiveSmallIntegerField(
+        _("StudentInfo|University year"),
+        validators=[MinValueValidator(0), MaxValueValidator(10)],
+        help_text=_("at enrollment"),
+        null=True,
+        blank=True)
+    comment = models.TextField(
+        _("Comment"),
+        help_text=LATEX_MARKDOWN_ENABLED,
+        blank=True)
+    comment_changed_at = MonitorField(
+        monitor='comment',
+        verbose_name=_("Comment changed"))
+    comment_last_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author of last edit"),
+        on_delete=models.PROTECT,
+        related_name='cscuser_commented',
+        blank=True,
+        null=True)
+    nondegree = models.BooleanField(
+        _("Non-degree student"),
+        default=False)
+    status = models.CharField(
+        choices=STATUS,
+        verbose_name=_("Status"),
+        max_length=15,
+        blank=True)
+    study_programs = models.ManyToManyField(
+        StudyProgram,
+        verbose_name=_("StudentInfo|Study programs"),
+        blank=True)
+    workplace = models.CharField(
+        _("Workplace"),
+        max_length=200,
+        blank=True)
 
     class Meta:
         ordering = ['last_name', 'first_name']
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
+
+    def __init__(self, *args, **kwargs):
+        super(CSCUser, self).__init__(*args, **kwargs)
+        self._original_comment = self.comment
 
     def clean(self):
         # avoid checking if the model wasn't yet saved, otherwise exception
@@ -101,7 +158,17 @@ class CSCUser(AbstractUser):
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
 
+        author = kwargs.get('edit_author')
+        if author is None:
+            logger.warning("edit_author is not provided, kwargs {}"
+                           .format(kwargs))
+        else:
+            del kwargs['edit_author']
+            if self.comment != self._original_comment:
+                self.comment_last_author = author
+
         super(CSCUser, self).save(**kwargs)
+        self._original_comment = self.comment
 
     def __str__(self):
         return smart_text(self.get_full_name(True))
@@ -156,96 +223,40 @@ class CSCUser(AbstractUser):
 
 
 @python_2_unicode_compatible
-class StudentInfo(TimeStampedModel):
-    STUDY_PROGRAMS = Choices(('dm', _("Data mining")),
-                             ('cs', _("Computer Science")),
-                             ('se', _("Software Engineering")))
-    STATUS = Choices(('graduate', _("Graduate")),
-                     ('expelled', _("StudentInfo|Expelled")),
-                     ('reinstated', _("StudentInfo|Reinstalled")),
-                     ('will_graduate', _("StudentInfo|Will graduate")))
-
-    student = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+class OnlineCourseRecord(TimeStampedModel):
+    student = models.ForeignKey(
+        CSCUser,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
+    name = models.CharField(_("Course|name"), max_length=255)
 
-    university = models.CharField(
-        _("University"),
-        max_length=140,
-        blank=True)
-    phone = models.CharField(
-        _("Phone"),
-        max_length=40,
-        blank=True)
-    uni_year_at_enrollment = models.PositiveSmallIntegerField(
-        _("StudentInfo|University year"),
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        help_text=_("at enrollment"),
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("Online course record")
+        verbose_name_plural = _("Online course records")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
+@python_2_unicode_compatible
+class SHADCourseRecord(TimeStampedModel):
+    student = models.ForeignKey(
+        CSCUser,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE)
+    name = models.CharField(_("Course|name"), max_length=255)
+    grade = models.PositiveSmallIntegerField(
+        _("Grade"),
+        validators=[MinValueValidator(2), MaxValueValidator(5)],
+        help_text=_("from 2 to 5, inclusive"),
         null=True,
-        blank=True)
-    comment = models.TextField(
-        _("Comment"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    comment_changed = MonitorField(
-        monitor='comment',
-        verbose_name=_("Comment changed"))
-    comment_last_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Author of last edit"),
-        on_delete=models.PROTECT,
-        related_name='studentinfo_commented')
-    nondegree = models.BooleanField(
-        _("Non-degree student"),
-        default=False)
-    status = models.CharField(
-        choices=STATUS,
-        verbose_name=_("Status"),
-        max_length=15,
-        blank=True)
-    study_program = models.CharField(
-        choices=STUDY_PROGRAMS,
-        verbose_name=_("StudentInfo|Study program"),
-        max_length=2,
-        blank=True)
-    online_courses = models.TextField(
-        _("Online courses"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    shad_courses = models.TextField(
-        _("School of Data Analysis courses"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    workplace = models.CharField(
-        _("Workplace"),
-        max_length=200,
         blank=True)
 
     class Meta:
-        ordering = ["student"]
-        verbose_name = _("Student info record")
-        verbose_name_plural = _("Student info records")
+        ordering = ["name"]
+        verbose_name = _("SHAD course record")
+        verbose_name_plural = _("SHAD course records")
 
     def __str__(self):
-        return smart_text(self.student)
-
-    # overrides
-
-    _original_comment = None
-
-    def __init__(self, *args, **kwargs):
-        super(StudentInfo, self).__init__(*args, **kwargs)
-        self._original_comment = self.comment
-
-    def save(self, *args, **kwargs):
-        author = kwargs.get('edit_author')
-        if author is None:
-            logger.warning("edit_author is not provided, kwargs {}"
-                           .format(kwargs))
-        else:
-            del kwargs['edit_author']
-        if self.comment != self._original_comment:
-            self.comment_last_author = author
-        super(StudentInfo, self).save(*args, **kwargs)
-        self._original_comment = self.comment
+        return smart_text(self.name)

@@ -808,6 +808,19 @@ class StudentProject(TimeStampedModel):
         return self.PROJECT_TYPES[self.project_type]
 
 
+@python_2_unicode_compatible
+class StudyProgram(TimeStampedModel):
+    name = models.CharField(_("StudyProgram|Name"), max_length=255)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("Study program")
+        verbose_name_plural = _("Study programs")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
 # XXX this is a gross hack of course. A better solution imo would be
 # to put signal handlers right next to the models.
 from .signals import *
