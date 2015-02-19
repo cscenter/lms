@@ -162,60 +162,81 @@
       </ul>
       {% endif %}
       {% endwith %}
-      {% if request.user.is_staff and user_object.studentinfo %}
+      {% if request.user.is_staff %}
       <h4 class="bigger-margin">{% trans "Student info record" %}:</h4>
       <table class="table table-condensed">
         <tr>
-          <td width="25%">{% trans "University" %}</td>
-          <td>{{ user_object.studentinfo.university|default:"—" }}</td>
+          <td width="25%">{% trans "University" %}:</td>
+          <td>{{ user_object.university|default:"—" }}</td>
         </tr>
         <tr>
-          <td>{% trans "Phone" %}</td>
-          <td>{{ user_object.studentinfo.phone|default:"—" }}</td>
+          <td>{% trans "Phone" %}:</td>
+          <td>{{ user_object.phone|default:"—" }}</td>
         </tr>
         <tr>
-          <td>{% trans "StudentInfo|University year" %}</td>
-          <td>{{ user_object.studentinfo.uni_year_at_enrollment|default:"—" }}</td>
+          <td>{% trans "StudentInfo|University year" %}:</td>
+          <td>{{ user_object.uni_year_at_enrollment|default:"—" }}</td>
         </tr>
         <tr>
-          <td>{% trans "Comment" %}</td>
+          <td>{% trans "Comment" %}:</td>
           <td>
             <div class="ubertext">
-              {{ user_object.studentinfo.comment|default:"—" }}
+              {{ user_object.comment|default:"—" }}
             </div>
+            <span class="student-comment-metainfo pull-right">
+              {{ user_object.comment_last_author.get_short_name }}{% if user_object.comment_last_author %}, {% endif %}
+              {{ user_object.comment_changed_at|date:"d.m.Y H:i" }}
+            </span>
           </td>
         </tr>
         <tr>
-          <td>{% trans "Status" %}</td>
+          <td>{% trans "Status" %}:</td>
           <td>
-            {{ user_object.studentinfo.get_status_display|default:"—" }}
-            {% if user_object.studentinfo.nondegree %}
+            {{ user_object.get_status_display|default:"—" }}
+            {% if user_object.nondegree %}
             ({% trans "Non-degree student"|lower %})
             {% endif %}
           </td>
         </tr>
         <tr>
-          <td>{% trans "StudentInfo|Study program" %}</td>
-          <td>{{ user_object.studentinfo.get_study_program_display|default:"—" }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Online courses" %}</td>
+          <td>{% trans "StudentInfo|Study program" %}:</td>
           <td>
-            <div class="ubertext">
-              {{ user_object.studentinfo.online_courses|default:"—" }}
-            </div>
+            <ul class="list-unstyled">
+              {% for sp in user_object.study_programs.all %}
+              <li>{{ sp.name }}</li>
+              {% empty %}
+              <li>"—"</li>
+              {% endfor %}
+            </ul>
           </td>
         </tr>
         <tr>
-          <td>{% trans "School of Data Analysis courses" %}</td>
+          <td>{% trans "Online courses" %}:</td>
           <td>
-            <div class="ubertext">
-              {{ user_object.studentinfo.shad_courses|default:"—" }}</td>
-            </div>
+            <ol>
+              {% for rec in user_object.onlinecourserecord_set.all %}
+              <li>{{ rec.name }}</li>
+              {% empty %}
+              <li>"—"</li>
+              {% endfor %}
+            </ol>
+          </td>
         </tr>
         <tr>
-          <td>{% trans "Workplace" %}</td>
-          <td>{{ user_object.studentinfo.workplace|default:"—" }}</td>
+          <td>{% trans "School of Data Analysis courses" %}:</td>
+          <td>
+            <ol>
+              {% for rec in user_object.shadcourserecord_set.all %}
+              <li>{{ rec.name }}{% if rec.grade %} ({{ rec.grade }}){% endif %}</li>
+              {% empty %}
+              <li>"—"</li>
+              {% endfor %}
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans "Workplace" %}:</td>
+          <td>{{ user_object.workplace|default:"—" }}</td>
         </tr>
       </table>
       {% endif %}

@@ -11,7 +11,7 @@ import floppyforms as forms
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
-from .models import CSCUser, StudentInfo
+from .models import CSCUser
 
 
 class LoginForm(AuthenticationForm):
@@ -80,20 +80,18 @@ class UserProfileForm(forms.ModelForm):
         }
 
 
-class StudentInfoForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div('university', 'phone', 'uni_year_at_enrollment', 'comment',
-                'nondegree', 'status', 'study_program', 'online_courses',
-                'shad_courses', 'workplace'),
-            CANCEL_SAVE_PAIR)
+# class StudentInfoForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         self.helper = FormHelper()
+#         self.helper.layout = Layout(
+#             Div('university', 'phone', 'uni_year_at_enrollment', 'comment',
+#                 'nondegree', 'status', 'study_programs', 'workplace'),
+#             CANCEL_SAVE_PAIR)
 
-        super(StudentInfoForm, self).__init__(*args, **kwargs)
+#         super(StudentInfoForm, self).__init__(*args, **kwargs)
 
 
-    class Meta:
-        model = StudentInfo
-        fields = ['university', 'phone', 'uni_year_at_enrollment', 'comment',
-                  'nondegree', 'status', 'study_program', 'online_courses',
-                  'shad_courses', 'workplace']
+#     class Meta:
+#         model = StudentInfo
+#         fields = ['university', 'phone', 'uni_year_at_enrollment', 'comment',
+#                   'nondegree', 'status', 'study_programs', 'workplace']

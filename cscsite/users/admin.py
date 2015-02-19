@@ -2,11 +2,13 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.forms import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 from sorl.thumbnail.admin import AdminImageMixin
 
 from core.admin import UbereditorMixin
-from users.models import CSCUser, StudentInfo
+from users.models import CSCUser, \
+    OnlineCourseRecord, SHADCourseRecord
 
 
 class CSCUserCreationForm(UserCreationForm):
@@ -29,37 +31,39 @@ class CSCUserChangeForm(UserChangeForm):
         model = CSCUser
 
 
-class StudentInfoAdmin(admin.StackedInline):
-    model = StudentInfo
-    fk_name = 'student'
-    readonly_fields = ['comment_changed', 'comment_last_author']
+class OnlineCourseRecordAdmin(admin.StackedInline):
+    model = OnlineCourseRecord
+
+
+class SHADCourseRecordAdmin(admin.StackedInline):
+    model = SHADCourseRecord
 
 
 class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
     ordering = ['last_name', 'first_name']
-    inlines = [StudentInfoAdmin]
+    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin]
+    readonly_fields = ['comment_changed_at', 'comment_last_author',
+                       'last_login', 'date_joined']
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
-        ('Personal info', {'fields': ['last_name', 'first_name', 'patronymic',
-                                      'photo', 'note', 'enrollment_year',
-                                      'graduation_year',
-                                      'csc_review']}),
-        ('Permissions', {'fields': ['is_active', 'is_staff', 'is_superuser',
-                                    'groups', 'user_permissions']}),
-        ('External services', {'fields': ['yandex_id', 'stepic_id']}),
-        ('Important dates', {'fields': ['last_login', 'date_joined']})]
+        (_('Personal info'), {'fields': ['last_name', 'first_name', 'patronymic',
+                                         'photo', 'note', 'enrollment_year',
+                                         'graduation_year',
+                                         'csc_review']}),
+        (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
+                                       'groups', 'user_permissions']}),
+        (_('External services'), {'fields': ['yandex_id', 'stepic_id']}),
+        (_('Student info record'),
+         {'fields': ['nondegree', 'status', 'study_programs', 'university',
+                     'workplace', 'uni_year_at_enrollment', 'phone',
+                     'comment', 'comment_changed_at', 'comment_last_author']}),
+        (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
-    def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-
-        for instance in instances:
-            if isinstance(instance, StudentInfo):
-                instance.save(edit_author=request.user)
-            else:
-                instance.save()
+    def save_model(self, request, obj, form, change):
+        obj.save(edit_author=request.user)
 
 
 admin.site.register(CSCUser, CSCUserAdmin)

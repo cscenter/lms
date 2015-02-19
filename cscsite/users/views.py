@@ -27,8 +27,8 @@ import pytz
 from core.views import ProtectedFormMixin, StaffOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent
-from .forms import LoginForm, UserProfileForm, StudentInfoForm
-from .models import CSCUser, StudentInfo
+from .forms import LoginForm, UserProfileForm
+from .models import CSCUser
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -125,11 +125,18 @@ class UserDetailView(generic.DetailView):
                          'enrollment_set__course_offering',
                          'enrollment_set__course_offering__semester',
                          'enrollment_set__course_offering__course']
-        if self.request.user.is_superuser:
-            prefetch_list += ['borrows', 'borrows__book']
+        select_list = []
+        if self.request.user.is_staff:
+            prefetch_list += ['borrows',
+                              'borrows__book',
+                              'onlinecourserecord_set',
+                              'shadcourserecord_set',
+                              'study_programs']
+            select_list += ['comment_last_author']
         return (auth.get_user_model()
                 ._default_manager
                 .all()
+                .select_related(*select_list)
                 .prefetch_related(*prefetch_list))
 
     def get_context_data(self, *args, **kwargs):
@@ -191,19 +198,18 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return obj.pk == user.pk or user.is_superuser or user.is_staff
 
 
-class StudentInfoUpdateView(StaffOnlyMixin, generic.UpdateView):
-    model = StudentInfo
-    template_name = "learning/simple_crispy_form.html"
-    form_class = StudentInfoForm
+# class StudentInfoUpdateView(StaffOnlyMixin, generic.UpdateView):
+#     model = StudentInfo
+#     template_name = "learning/simple_crispy_form.html"
+#     form_class = StudentInfoForm
 
-    def get_success_url(self):
-        return reverse('user_detail', args=[self.object.student_id])
+#     def get_success_url(self):
+#         return reverse('user_detail', args=[self.object.student_id])
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.save(edit_author=self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
+#     def form_valid(self, form):
+#         self.object = form.save(commit=False)
+#         self.object.save(edit_author=self.request.user)
+#         return HttpResponseRedirect(self.get_success_url())
 
 
 # The following code has been taken from
