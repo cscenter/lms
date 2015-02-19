@@ -107,8 +107,8 @@ server {
         # FIXME(Dmitry): do this statically
         # gzip_static on;
         gzip on;
-        expires 6h;
-        add_header Cache-Control public,max-age=21600;
+        expires 1M;
+        add_header Cache-Control public,max-age=2592000;
     }
 
     # Django
