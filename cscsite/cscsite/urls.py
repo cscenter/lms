@@ -32,7 +32,7 @@ from learning.views import \
     AssignmentStudentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
-    MarksSheetTeacherView, MarksSheetTeacherCSVView,  MarksSheetStaffView, \
+    MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView
 
@@ -169,9 +169,6 @@ urlpatterns = patterns('',
         CourseClassDetailView.as_view(),
         name="class_detail"),
 
-    url(r'^staff/marks/$',
-        MarksSheetStaffView.as_view(),
-        name='markssheet_staff'),
     url(r'^staff/course-marks/$',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
