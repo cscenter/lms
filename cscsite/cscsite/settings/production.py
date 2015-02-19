@@ -76,6 +76,8 @@ EMAIL_HOST_PASSWORD = '***REMOVED***'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
 # -- learning
 SLIDESHARE_API_KEY = "E3GDS7t4"
 SLIDESHARE_SECRET = "fnk6fOLp"
