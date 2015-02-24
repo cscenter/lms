@@ -158,14 +158,15 @@ class CSCUser(AbstractUser):
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
 
-        author = kwargs.get('edit_author')
-        if author is None:
-            logger.warning("edit_author is not provided, kwargs {}"
-                           .format(kwargs))
-        else:
-            del kwargs['edit_author']
-            if self.comment != self._original_comment:
+        if self.comment != self._original_comment:
+            author = kwargs.get('edit_author')
+            if author is None:
+                logger.warning("edit_author is not provided, kwargs {}"
+                               .format(kwargs))
+            else:
                 self.comment_last_author = author
+        if 'edit_author' in kwargs:
+            del kwargs['edit_author']
 
         super(CSCUser, self).save(**kwargs)
         self._original_comment = self.comment
