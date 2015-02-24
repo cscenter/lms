@@ -11,6 +11,7 @@ playbooks).
 * S3 bucket for backups should be created
 * additional user which only can read and write to the bucket should be created
 * TTL for S3 bucket should be set (for now it's 30 days)
+* Amazon SES should be set up (email and domain verification)
 
 IAM policy for the "backup" user:
 

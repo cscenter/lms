@@ -117,7 +117,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'cscdb',
         'USER': 'csc',
         'PASSWORD': 'FooBar',
@@ -298,3 +298,6 @@ DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
 # special user with access to S3 bucket
 DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
 DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
+
+NEWRELIC_CONF = "../newrelic.ini"
+NEWRELIC_ENV = 'development'
