@@ -265,4 +265,37 @@ $(document).ready(function () {
          .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
          .addClass("active"));
     });
+
+    if ($('.user-search').length > 0) {
+        var ajaxURI = $('.user-search #ajax-uri').val();
+        var query = function(qstr) {
+            $.ajax({
+                url: ajaxURI,
+                data: {name: qstr},
+                dataType: "json"
+            }).done(function(msg) {
+                $("#user-num-container").show();
+                $("#user-num").text(msg.users.length.toString());
+                var h = "<table class=\"table table-condensed\">";
+                _.each(msg.users, function(user) {
+                    h += "<td><a href=\"" + user.url  + "\">";
+                    h += user.last_name + " " + user.first_name;
+                    h += "</a></td>";
+                });
+                if (msg.there_is_more) {
+                    h += "<tr><td>…</td></tr>";
+                }
+                h += "</table>";
+                $("#user-table-container").html(h);
+            });
+        };
+        query = _.debounce(query, 400);
+
+        $('.user-search').on('input paste', '#name', function (e) {
+            var qstr = $(this).val();
+            if (qstr.length > 2) {
+                query(qstr);
+            }
+        });
+    }
 });

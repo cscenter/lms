@@ -263,6 +263,11 @@
                     {% trans "Courses" %}
                   </li>
                 </a>
+                <a href="{% url 'user_search' %}">
+                  <li class="{% current 'user_search' %}">
+                    {% trans "User search" %}
+                  </li>
+                </a>
               </ul>
             </div>
           </div>
