@@ -278,9 +278,9 @@ $(document).ready(function () {
                 $("#user-num").text(msg.users.length.toString());
                 var h = "<table class=\"table table-condensed\">";
                 _.each(msg.users, function(user) {
-                    h += "<td><a href=\"" + user.url  + "\">";
+                    h += "<tr><td><a href=\"" + user.url  + "\">";
                     h += user.last_name + " " + user.first_name;
-                    h += "</a></td>";
+                    h += "</a></td></tr>";
                 });
                 if (msg.there_is_more) {
                     h += "<tr><td>…</td></tr>";
