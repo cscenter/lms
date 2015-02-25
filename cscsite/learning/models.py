@@ -444,8 +444,7 @@ class Assignment(TimeStampedModel, object):
 
     @property
     def is_open(self):
-        aware = timezone.make_aware(self.deadline_at, timezone.get_current_timezone())
-        return aware > timezone.now()
+        return self.deadline_at > timezone.now()
 
     @property
     def attached_file_name(self):
