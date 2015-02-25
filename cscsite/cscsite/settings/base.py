@@ -229,6 +229,7 @@ MENU_URL_NAMES = {
     'course_markssheet_staff': {'alias': 'course_markssheet_staff_dispatch'},
     'user_detail': {},
     'custom_text_page': {},
+    'user_search': {'parent': 'staff'},
 
     'a_s_detail_teacher': {'alias': 'assignment_list_teacher'},
     'a_s_detail_student': {'alias': 'assignment_list_student'},

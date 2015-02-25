@@ -7,7 +7,7 @@ from django.contrib import admin
 from index.views import IndexView, AlumniView, TeachersView, RobotsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView#, StudentInfoUpdateView
+    ICalEventsView, UserSearchJSONView, UserSearchView #, StudentInfoUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
     CustomTextpageOpenView
 from learning.views import \
@@ -175,6 +175,12 @@ urlpatterns = patterns('',
     url(r'^staff/course-marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         MarksSheetTeacherView.as_view(is_for_staff=True),
         name='course_markssheet_staff'),
+    url(r'^staff/user-search/$',
+        UserSearchView.as_view(),
+        name='user_search'),
+    url(r'^staff/user-search.json$',
+        UserSearchJSONView.as_view(),
+        name='user_search_json'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),

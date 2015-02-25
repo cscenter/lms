@@ -5,11 +5,12 @@ import logging
 from model_utils import Choices
 from model_utils.fields import MonitorField
 from model_utils.models import TimeStampedModel
+from model_utils.managers import PassThroughManagerMixin
 from sorl.thumbnail import ImageField
 
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator, \
     RegexValidator
@@ -28,6 +29,39 @@ YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
 
 
 logger = logging.getLogger(__name__)
+
+
+class CSCUserQuerySet(models.query.QuerySet):
+    _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
+
+    def _form_name_tsquery(self, qstr):
+        if qstr is None or not (2 < len(qstr) < 100):
+            return
+        lexems = []
+        for s in qstr.split(' '):
+            lexeme = s.translate(self._lexeme_trans_map).strip()
+            if len(lexeme) > 0:
+                lexems.append(lexeme)
+        if len(lexems) > 3:
+            return
+        return " & ".join("{}:*".format(l) for l in lexems)
+
+    def search_names(self, qstr):
+        qstr = qstr.strip()
+        tsquery = self._form_name_tsquery(qstr)
+        if tsquery is None:
+            return self.none()
+        else:
+            return (self
+                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
+                                  "@@ to_tsquery(%s)"],
+                           params=[tsquery])
+                    .exclude(first_name__exact='',
+                             last_name__exact=''))
+
+
+class PassThroughUserManager(PassThroughManagerMixin, UserManager):
+    pass
 
 
 @python_2_unicode_compatible
@@ -131,6 +165,8 @@ class CSCUser(AbstractUser):
         _("Workplace"),
         max_length=200,
         blank=True)
+
+    objects = PassThroughUserManager.for_queryset_class(CSCUserQuerySet)()
 
     class Meta:
         ordering = ['last_name', 'first_name']
