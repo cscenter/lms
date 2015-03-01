@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+{% load core_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>{% trans "Disable subscription" %}</h2>
+      <div class="btn-toolbar"></div>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <p>{{ result }}</p>
+    </div>
+  </div>
+</div>
+{% endblock content %}
