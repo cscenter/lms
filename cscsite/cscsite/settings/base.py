@@ -179,6 +179,7 @@ MENU_URL_NAMES = {
     'learning': {},
     'enrollment': {},
     'staff': {},
+    'unsubscribe_ya': {},
 
     'syllabus': {'parent': 'about'},
     'course_list': {'parent': 'about'},
