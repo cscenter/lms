@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import hashlib
+import re
 
 from django.core.cache import cache
 
@@ -15,7 +16,8 @@ CACHE_KEY = 'comment_persistence'
 
 
 def report_saved(comment_text):
-    comment_md5 = hashlib.md5(comment_text.encode('utf-8')).hexdigest();
+    nowhite_text = re.sub('\s+', '', comment_text)
+    comment_md5 = hashlib.md5(nowhite_text.encode('utf-8')).hexdigest();
     # NOTE(Dmitry): there is a race here, but it shouldn't matter
     old_md5s = cache.get(CACHE_KEY, "")
     new_md5s = "{}|{}".format(comment_md5, old_md5s[:(HASH_LEN * HASH_N)])
