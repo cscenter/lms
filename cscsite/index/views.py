@@ -1,10 +1,18 @@
+import logging
+
 from django.contrib.auth import get_user_model
-from django.views.generic import TemplateView, ListView
+from django.utils.translation import ugettext_lazy as _
+from django.views import generic
+
+import requests
 
 from news.models import News
 
 
-class IndexView(TemplateView):
+logger = logging.getLogger(__name__)
+
+
+class IndexView(generic.TemplateView):
     template_name = "index.html"
 
     def get_context_data(self, **kwargs):
@@ -14,7 +22,7 @@ class IndexView(TemplateView):
 
 
 # TODO: test it
-class AlumniView(ListView):
+class AlumniView(generic.ListView):
     template_name = "alumni_list.html"
 
     def get_queryset(self):
@@ -28,7 +36,7 @@ class AlumniView(ListView):
 # TODO: this view should make a distinction between professors that have active
 #       courses and that who don't
 # TODO: test it
-class TeachersView(ListView):
+class TeachersView(generic.ListView):
     template_name = "teacher_list.html"
 
     def get_queryset(self):
@@ -37,7 +45,7 @@ class TeachersView(ListView):
         return user_model.objects.filter(groups__pk=teacher_pk)
 
 
-class RobotsView(TemplateView):
+class RobotsView(generic.TemplateView):
     template_name = "robots.txt"
 
     def render_to_response(self, context, **kwargs):
@@ -45,3 +53,57 @@ class RobotsView(TemplateView):
                 .render_to_response(context,
                                     content_type='text/plain',
                                     **kwargs))
+
+
+class UnsubscribeYaProxyView(generic.TemplateView):
+    template_name = "unsubscribe.html"
+
+    _results = {
+        'not_found': _("Subscription wasn't found"),
+        'generic_error': _("There was en error, please try again later"),
+        'error_no_retry': _("There was an error, but your "
+                            "subscription will be removed"),
+        'ok': _("Subscription removed!")}
+
+    def _call_ya_api(self, sub_hash):
+        r = requests.get("https://subs-api.yandex.ru/api/1.0"
+                         "/subscriptions/{}/unsubscribe/".format(sub_hash))
+        if r.status_code == 404:
+            return 'not_found'
+        if r.status_code == 500:
+            logger.warning("HTTP 500 while calling Yandex API, "
+                           "hash {}, response {}".format(sub_hash, r.text))
+            return 'generic_error'
+        r_json = r.json()
+        if 'error' in r_json:
+            code = r_json['error'].get('code')
+            if code == 0:
+                return 'generic_error'
+            elif code == 2:
+                return 'not_found'
+            elif code == 7:
+                return 'generic_error'
+            elif code == 8:
+                return 'error_no_retry'
+            else:
+                logger.warning("Yandex API returned strange code: {}"
+                               .format(r_json))
+                return 'generic_error'
+        elif r_json.get('result') == "success":
+            return 'ok'
+        else:
+            logger.warning("Yandex API returned strange JSON: {}"
+                           .format(r_json))
+            return 'generic_error'
+
+
+    def get_context_data(self, **kwargs):
+        context = (super(UnsubscribeYaProxyView, self)
+                   .get_context_data(**kwargs))
+        h = kwargs.get('hash')
+        if not h:
+            result = 'not_found'
+        else:
+            result = self._call_ya_api(h)
+        context['result'] = self._results[result]
+        return context
