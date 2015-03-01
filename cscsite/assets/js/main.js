@@ -70,7 +70,7 @@ $(document).ready(function () {
                 if (hoursOld > 24) {
                     editor.remove(filename);
                 } else if (persistedHashes) {
-                    var text = editor.exportFile(filename);
+                    var text = editor.exportFile(filename).replace(/\s+/g, '');
                     var hash = CryptoJS.MD5(text).toString();
                     if (hash in persistedHashes) {
                         editor.remove(filename);
