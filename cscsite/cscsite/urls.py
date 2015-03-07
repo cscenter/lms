@@ -43,7 +43,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^unsubscribe/(?P<hash>[a-f0-9]{32})/',
+    url(r'^unsubscribe/(?P<sub_hash>[a-f0-9]{32})/',
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),

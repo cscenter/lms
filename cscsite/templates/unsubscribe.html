@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load thumbnail %}
+{% load crispy_forms_tags %}
 {% load core_tags %}
 
 {% block content %}
@@ -14,7 +15,16 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <p>{{ result }}</p>
+      {% if redirect %}
+      <p>{{ text_result }}</p>
+      {% else %}
+      {% if error %}
+      <p>{{ text_result }}</p>
+      {% else %}
+      <p>{% trans "Do you want to unsubscribe from" %} «{{ sub_name|lower }}»?</p>
+      {% crispy form form.helper %}
+      {% endif %}
+      {% endif %}
     </div>
   </div>
 </div>

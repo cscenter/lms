@@ -1,12 +1,15 @@
 import logging
 
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 
 import requests
 
 from news.models import News
+from .forms import UnsubscribeForm
 
 
 logger = logging.getLogger(__name__)
@@ -55,8 +58,9 @@ class RobotsView(generic.TemplateView):
                                     **kwargs))
 
 
-class UnsubscribeYaProxyView(generic.TemplateView):
+class UnsubscribeYaProxyView(generic.FormView):
     template_name = "unsubscribe.html"
+    form_class = UnsubscribeForm
 
     _results = {
         'not_found': _("Subscription wasn't found"),
@@ -65,7 +69,20 @@ class UnsubscribeYaProxyView(generic.TemplateView):
                             "subscription will be removed"),
         'ok': _("Subscription removed!")}
 
-    def _call_ya_api(self, sub_hash):
+    def _call_ya_api_info(self, sub_hash):
+        r = requests.get("https://subs-api.yandex.ru/api/1.0"
+                         "/subscriptions/{}/".format(sub_hash))
+        print ("https://subs-api.yandex.ru/api/1.0"
+                         "/subscriptions/{}/".format(sub_hash))
+        if r.status_code == 404:
+            return (False, 'not_found')
+        elif r.status_code != 200:
+            logger.warning("Can't get subscription data: {}".format(r))
+            return (False, 'generic_error')
+        else:
+            return (True, r.json())
+
+    def _call_ya_api_unsub(self, sub_hash):
         r = requests.get("https://subs-api.yandex.ru/api/1.0"
                          "/subscriptions/{}/unsubscribe/".format(sub_hash))
         if r.status_code == 404:
@@ -96,14 +113,36 @@ class UnsubscribeYaProxyView(generic.TemplateView):
                            .format(r_json))
             return 'generic_error'
 
+    def get_initial(self):
+        return {'sub_hash': self.kwargs['sub_hash']}
+
+    def get_success_url(self):
+        return reverse('unsubscribe_ya', args=[self.sub_hash])
+
+    def form_valid(self, form):
+        self.sub_hash = form.cleaned_data['sub_hash']
+        result = self._call_ya_api_unsub(self.sub_hash)
+        url = "{}?result={}".format(self.get_success_url(), result)
+        return HttpResponseRedirect(url)
 
     def get_context_data(self, **kwargs):
         context = (super(UnsubscribeYaProxyView, self)
                    .get_context_data(**kwargs))
-        h = kwargs.get('hash')
-        if not h:
-            result = 'not_found'
+        redirect_result = self.request.GET.get('result')
+        if redirect_result is not None:
+            context['redirect'] = True
+            context['text_result'] = self._results[redirect_result]
         else:
-            result = self._call_ya_api(h)
-        context['result'] = self._results[result]
+            h = self.kwargs['sub_hash']
+            is_ok, result = self._call_ya_api_info(h)
+            context['redirect'] = False
+            if not is_ok:
+                context['error'] = True
+                context['text_result'] = self._results[result]
+            else:
+                context['error'] = False
+                context['sub_hash'] = h
+                context['sub_name'] = result['mail_list']['name']
+
+            result = self._call_ya_api_unsub(h)
         return context
