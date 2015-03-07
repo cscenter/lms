@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-01 22:06+0300\n"
-"PO-Revision-Date: 2015-03-01 22:07+0230\n"
+"POT-Creation-Date: 2015-03-07 22:28+0300\n"
+"PO-Revision-Date: 2015-03-07 22:29+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -34,19 +34,24 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
-#: index/views.py:62
+#: index/forms.py:17
+#| msgid "Unsubscribe"
+msgid "Ya|Unsubscribe"
+msgstr "Отписаться"
+
+#: index/views.py:66
 msgid "Subscription wasn't found"
 msgstr "Подписка не найдена"
 
-#: index/views.py:63
+#: index/views.py:67
 msgid "There was en error, please try again later"
 msgstr "Произошла ошибка, пожалуйста, попробуйте ещё раз позже"
 
-#: index/views.py:64
+#: index/views.py:68
 msgid "There was an error, but your subscription will be removed"
 msgstr "Произошла ошибка, но подписка будет удалена позже"
 
-#: index/views.py:66
+#: index/views.py:70
 msgid "Subscription removed!"
 msgstr "Подписка удалена!"
 
@@ -1209,10 +1214,13 @@ msgstr "Инструкции по смене пароля были выслан�
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
-#: templates/unsubscribe.html:10
-#| msgid "Description"
+#: templates/unsubscribe.html:11
 msgid "Disable subscription"
 msgstr "Отмена подписки"
+
+#: templates/unsubscribe.html:24
+msgid "Do you want to unsubscribe from"
+msgstr "Вы действительно хотите отменить подписку "
 
 #: templates/user_detail.html:16
 msgid "Edit info record"
@@ -1485,6 +1493,9 @@ msgstr "Запись о курсе ШАД"
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
+#~ msgid "Confirm"
+#~ msgstr "Подтвердить"
+
 #~ msgid "Data mining"
 #~ msgstr "Анализ данных"
 
@@ -1609,9 +1620,6 @@ msgstr "Записи о курсах ШАД"
 
 #~ msgid "Example: 14:40"
 #~ msgstr "Пример: 14:40"
-
-#~ msgid "Confirm"
-#~ msgstr "Подтвердить"
 
 #~ msgid "Yes"
 #~ msgstr "Да"
