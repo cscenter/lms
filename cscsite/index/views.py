@@ -72,8 +72,6 @@ class UnsubscribeYaProxyView(generic.FormView):
     def _call_ya_api_info(self, sub_hash):
         r = requests.get("https://subs-api.yandex.ru/api/1.0"
                          "/subscriptions/{}/".format(sub_hash))
-        print ("https://subs-api.yandex.ru/api/1.0"
-                         "/subscriptions/{}/".format(sub_hash))
         if r.status_code == 404:
             return (False, 'not_found')
         elif r.status_code != 200:
