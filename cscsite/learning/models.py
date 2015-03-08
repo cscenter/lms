@@ -242,17 +242,17 @@ class Venue(models.Model):
 
 
 def courseclass_slides_file_name(self, filename):
-        _, ext = os.path.splitext(filename)
-        timestamp = self.date.strftime("%Y_%m_%d")
-        course_offering = ("{0}_{1}"
-                           .format(self.course_offering.course.slug,
-                                   self.course_offering.semester.slug)
-                           .replace("-", "_"))
-        filename = ("{0}_{1}{2}"
-                    .format(timestamp,
-                            course_offering,
-                            ext))
-        return os.path.join('slides', course_offering, filename)
+    _, ext = os.path.splitext(filename)
+    timestamp = self.date.strftime("%Y_%m_%d")
+    course_offering = ("{0}_{1}"
+                       .format(self.course_offering.course.slug,
+                               self.course_offering.semester.slug)
+                       .replace("-", "_"))
+    filename = ("{0}_{1}{2}"
+                .format(timestamp,
+                        course_offering,
+                        ext))
+    return os.path.join('slides', course_offering, filename)
 
 
 @python_2_unicode_compatible
