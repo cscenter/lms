@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
@@ -15,7 +16,7 @@ from braces import views
 
 from news.models import News
 from .forms import UnsubscribeForm
-from .models import EnrollmentApplicationEmail
+from .models import EnrollmentApplEmail
 
 
 logger = logging.getLogger(__name__)
@@ -158,7 +159,11 @@ class EnrollmentApplicationCallback(views.CsrfExemptMixin,
     require_json = True
 
     def post(self, request, *args, **kwargs):
-        print request
-        print self.request_json
-        logger.warning("foo: {} bar: {}".format(request, self.request_json))
-        return self.render_json_response({"status": "ok"})
+        if self.request_json['secret'] == settings.GFORM_CALLBACK_SECRET:
+            email = self.request_json['email']
+            obj, created = (EnrollmentApplEmail.objects
+                            .get_or_create(email=email))
+            resp = {"status": "ok", "created": created}
+            return self.render_json_response(resp)
+        else:
+            return self.render_json_response({"status": "auth error"})

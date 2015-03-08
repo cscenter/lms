@@ -303,3 +303,5 @@ DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 
 NEWRELIC_CONF = "../newrelic.ini"
 NEWRELIC_ENV = 'development'
+
+GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="

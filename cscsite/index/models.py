@@ -10,7 +10,7 @@ from model_utils.models import TimeStampedModel
 
 
 @python_2_unicode_compatible
-class EnrollmentApplicationEmail(TimeStampedModel):
+class EnrollmentApplEmail(TimeStampedModel):
     email = models.EmailField(_("email"))
     is_notified = models.BooleanField(_("User is notified"),
                                       default=False)
