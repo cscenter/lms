@@ -5,7 +5,7 @@ from django.views.generic.base import RedirectView
 from django.contrib import admin
 
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
-    UnsubscribeYaProxyView
+    UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, UserSearchJSONView, UserSearchView #, StudentInfoUpdateView
@@ -45,6 +45,8 @@ urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^unsubscribe/(?P<sub_hash>[a-f0-9]{32})/',
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
+    url(r'^private/enrollment_gform_callback/',
+        EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
     url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
     url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),

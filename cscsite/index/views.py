@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
+
 import logging
 
 from django.contrib.auth import get_user_model
@@ -7,9 +11,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 
 import requests
+from braces import views
 
 from news.models import News
 from .forms import UnsubscribeForm
+from .models import EnrollmentApplicationEmail
 
 
 logger = logging.getLogger(__name__)
@@ -144,3 +150,15 @@ class UnsubscribeYaProxyView(generic.FormView):
 
             result = self._call_ya_api_unsub(h)
         return context
+
+
+class EnrollmentApplicationCallback(views.CsrfExemptMixin,
+                                    views.JsonRequestResponseMixin,
+                                    generic.View):
+    require_json = True
+
+    def post(self, request, *args, **kwargs):
+        print request
+        print self.request_json
+        logger.warning("foo: {} bar: {}".format(request, self.request_json))
+        return self.render_json_response({"status": "ok"})
