@@ -6,8 +6,8 @@ from django.contrib.auth import get_user_model
 from core.admin import UbereditorMixin, WiderLabelsMixin
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
-    Assignment, AssignmentStudent, AssignmentComment, \
-    Enrollment, NonCourseEvent, StudentProject
+    Assignment, AssignmentAttachment, AssignmentStudent, \
+    AssignmentComment, Enrollment, NonCourseEvent, StudentProject
 
 
 class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -105,6 +105,7 @@ admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
+admin.site.register(AssignmentAttachment)
 admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)

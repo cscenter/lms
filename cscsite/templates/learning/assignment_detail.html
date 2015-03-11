@@ -34,14 +34,20 @@
         {% trans "Online" %}:
         {{ assignment.is_online|yesno:_("Yes,No") }}
       </p>
-      {% if assignment.attached_file %}
-      {% trans "Attached file" %}:
-      <span class="assignment-attachment">
-        <i class="fa fa-file"></i>
-        <a href="{{ assignment.attached_file.url }}">
-          {{ assignment.attached_file_name }}
-        </a>
-      </span>
+      {% if assignment.assignmentattachment_set.all %}
+      {% trans "Attached files" %}:
+      <ul class="list-unstyled">
+        {% for aa in assignment.assignmentattachment_set.all %}
+        <li>
+          <span class="assignment-attachment">
+            <i class="fa fa-file"></i>
+            <a href="{{ aa.attachment.url }}">
+              {{ aa.attachment_file_name }}
+            </a>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
       {% endif %}
     </div>
   </div>

@@ -10,6 +10,7 @@ import factory
 from learning.models import Course, Semester, CourseOffering, CourseOfferingNews, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
+    AssignmentAttachment, \
     CourseOfferingNewsNotification, NonCourseEvent, StudentProject
 from users.models import CSCUser
 
@@ -146,9 +147,16 @@ class AssignmentFactory(factory.DjangoModelFactory):
     is_online = True
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"
-    attached_file = factory.django.FileField()
     grade_min = 10
     grade_max = 80
+
+
+class AssignmentAttachmentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = AssignmentAttachment
+
+    assignment = factory.SubFactory(AssignmentFactory)
+    attachment = factory.django.FileField()
 
 
 class AssignmentStudentFactory(factory.DjangoModelFactory):

@@ -287,10 +287,11 @@ class AssignmentForm(forms.ModelForm):
         # help_text=_("Example: 1990-07-13 12:00"),
         widget=forms.SplitDateTimeWidget(date_format="%Y-%m-%d",
                                          time_format="%H:%M"))
-    attached_file = forms.FileField(
+    attachments = forms.FileField(
         label=_("Attached file"),
         required=False,
-        widget=forms.FileInput)
+        help_text=_("You can select multiple files"),
+        widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
     is_online = forms.BooleanField(
         label=_("Can be passed online"),
         required=False)
@@ -302,14 +303,19 @@ class AssignmentForm(forms.ModelForm):
         initial=5)
 
     def __init__(self, *args, **kwargs):
+        remove_links = kwargs.get('remove_links', "")
+        del kwargs['remove_links']
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div('title',
                 'text',
-                Div(Div('deadline_at',
-                        'attached_file',
-                        css_class="form-inline"),
-                    css_class="form-group"),
+                Div(Div(Div('deadline_at',
+                            css_class='col-xs-6'),
+                        Div('attachments',
+                            HTML(remove_links),
+                            css_class='col-xs-6'),
+                        css_class='row'),
+                    css_class='container inner'),
                 Div(Div('grade_min',
                         'grade_max',
                         css_class="form-inline"),
@@ -331,7 +337,7 @@ class AssignmentForm(forms.ModelForm):
         fields = ['title',
                   'text',
                   'deadline_at',
-                  'attached_file',
+                  'attachments',
                   'is_online',
                   'grade_min',
                   'grade_max']
