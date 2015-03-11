@@ -182,10 +182,13 @@ class AssignmentTest(TestCase):
                          - datetime.timedelta(days=1))
         self.assertFalse(a.is_open)
 
+
+class AssignmentAttachmentTest(TestCase):
     def test_attached_file_name(self):
         fname = "foobar.pdf"
-        a = AssignmentFactory.create(attached_file__filename=fname)
-        self.assertRegexpMatches(a.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
+        aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
+        self.assertRegexpMatches(aa.attachment_file_name,
+                                 "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
 class AssignmentStudentTests(TestCase):

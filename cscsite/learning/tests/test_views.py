@@ -1160,16 +1160,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student'], ['Teacher']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups and groups[0] != 'Teacher':
-                # NOTE(Dmitry): currently teachers CAN see other's assignments
-                # through the edit form. However, it doesn't seem that bad
-                # to me.
-                self.assertLoginRedirect(url)
-            if groups and groups[0] != 'Teacher':
-                self.assertPOSTLoginRedirect(url, form)
-            elif groups and groups[0] == 'Teacher':
-                # Teacher will get 404
-                self.assertEquals(404, self.client.post(url, form).status_code)
+            self.assertLoginRedirect(url)
+            self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
         url = reverse('assignment_delete',
                       args=[co.course.slug, co.semester.slug, a.pk])

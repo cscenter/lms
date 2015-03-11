@@ -401,9 +401,6 @@ class Assignment(TimeStampedModel, object):
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    attached_file = models.FileField(
-        upload_to=assignment_upload_to,
-        blank=True)
     grade_min = models.PositiveSmallIntegerField(
         _("Assignment|grade_min"),
         default=2,
@@ -449,6 +446,27 @@ class Assignment(TimeStampedModel, object):
     @property
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
+
+
+@python_2_unicode_compatible
+class AssignmentAttachment(TimeStampedModel, object):
+    assignment = models.ForeignKey(
+        Assignment,
+        verbose_name=_("Assignment"),
+        on_delete=models.CASCADE)
+    attachment = models.FileField(upload_to="assignment_attachments")
+
+    class Meta:
+        ordering = ["assignment", "-created"]
+        verbose_name = _("Assignment attachment")
+        verbose_name_plural = _("Assignment attachments")
+
+    def __str__(self):
+        return "{0}".format(smart_text(self.attachment_file_name))
+
+    @property
+    def attachment_file_name(self):
+        return os.path.basename(self.attachment.name)
 
 
 @python_2_unicode_compatible

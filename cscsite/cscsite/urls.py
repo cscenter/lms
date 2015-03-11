@@ -33,6 +33,7 @@ from learning.views import \
     AssignmentStudentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
+    AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView
@@ -129,6 +130,9 @@ urlpatterns = patterns('',
     url(r'^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/assignments/(?P<pk>\d+)/edit$',
         AssignmentUpdateView.as_view(),
         name='assignment_edit'),
+    url(r'^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/assignments/(?P<assignment_pk>\d+)/attachments/(?P<pk>\d+)/delete$',
+        AssignmentAttachmentDeleteView.as_view(),
+        name='assignment_attachment_delete'),
     url(r'^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/assignments/(?P<pk>\d+)/delete$',
         AssignmentDeleteView.as_view(),
         name='assignment_delete'),

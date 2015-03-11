@@ -29,7 +29,8 @@ from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin, LoginRequiredMixin
 from core import comment_persistence
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, Assignment, AssignmentStudent, AssignmentComment, \
+    CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
+    AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent
 from learning.forms import CourseOfferingPKForm, \
@@ -663,7 +664,7 @@ class CourseClassDetailView(generic.DetailView):
         return context
 
 
-class CourseClassCreateUpdateMixin(ProtectedFormMixin):
+class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = CourseClass
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseClassForm
@@ -740,14 +741,12 @@ class CourseClassCreateUpdateMixin(ProtectedFormMixin):
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
-class CourseClassCreateView(TeacherOnlyMixin,
-                            CourseClassCreateUpdateMixin,
+class CourseClassCreateView(CourseClassCreateUpdateMixin,
                             generic.CreateView):
     pass
 
 
-class CourseClassUpdateView(TeacherOnlyMixin,
-                            CourseClassCreateUpdateMixin,
+class CourseClassUpdateView(CourseClassCreateUpdateMixin,
                             generic.UpdateView):
     pass
 
@@ -899,7 +898,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         return (self.model.objects
                 .select_related('course_offering',
                                 'course_offering__course',
-                                'course_offering__semester'))
+                                'course_offering__semester',
+                                'assignmentattachment_set'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherDetailView, self)
@@ -940,7 +940,8 @@ class AssignmentStudentDetailMixin(object):
                             'assignment__course_offering',
                             'assignment__course_offering__course',
                             'assignment__course_offering__semester')
-            .prefetch_related('assignment__course_offering__teachers'))
+            .prefetch_related('assignment__course_offering__teachers',
+                              'assignment__assignmentattachment_set'))
 
         # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
@@ -1060,7 +1061,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                     .post(request, *args, **kwargs))
 
 
-class AssignmentCreateUpdateMixin(object):
+class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
     template_name = "learning/simple_crispy_form.html"
     form_class = AssignmentForm
@@ -1069,6 +1070,11 @@ class AssignmentCreateUpdateMixin(object):
     def __init__(self, *args, **kwargs):
         self._course_offering = None
         super(AssignmentCreateUpdateMixin, self).__init__(*args, **kwargs)
+
+    def is_form_allowed(self, user, obj):
+        return (obj is None or
+                user.is_superuser or
+                user in obj.course_offering.teachers.all())
 
     def get_initial(self):
         initial = super(AssignmentCreateUpdateMixin, self).get_initial()
@@ -1086,6 +1092,30 @@ class AssignmentCreateUpdateMixin(object):
         initial['course_offering'] = self._course_offering
         return initial
 
+    def get_form(self, form_class):
+        if self.object is not None:
+            # NOTE(Dmitry): dirty, but I don't see a better way given
+            #               that forms are generated in code
+            co = self.object.course_offering
+            remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
+                "".join("<li>"
+                        "<i class=\"fa fa-times\"></i>&nbsp;"
+                        "<a href=\"{0}\">{1}</a>"
+                        "</li>"
+                        .format(reverse('assignment_attachment_delete',
+                                        args=[co.course.slug,
+                                              co.semester.slug,
+                                              self.object.pk,
+                                              aa.pk]),
+                                aa.attachment_file_name)
+                        for aa
+                        in self.object.assignmentattachment_set.all()))
+        else:
+            remove_links = ""
+        return form_class(remove_links=remove_links,
+                          **self.get_form_kwargs())
+
+
     def get_success_url(self):
         return reverse('course_offering_detail',
                        args=[self._course_offering.course.slug,
@@ -1096,20 +1126,22 @@ class AssignmentCreateUpdateMixin(object):
         assert self._course_offering is not None
         self.object.course_offering = self._course_offering
         self.object.save()
-        return super(AssignmentCreateUpdateMixin, self).form_valid(form)
+        attachments = self.request.FILES.getlist('attachments')
+        if attachments:
+            for attachment in attachments:
+                (AssignmentAttachment.objects
+                 .create(assignment=self.object,
+                         attachment=attachment))
+        return redirect(self.get_success_url())
 
 
-# No ProtectedFormMixin here because we are filtering out other's courses
-# on form level (see __init__ of AssignmentForm)
-class AssignmentCreateView(TeacherOnlyMixin,
-                           AssignmentCreateUpdateMixin,
+class AssignmentCreateView(AssignmentCreateUpdateMixin,
                            generic.CreateView):
     pass
 
 
 # Same here
-class AssignmentUpdateView(TeacherOnlyMixin,
-                           AssignmentCreateUpdateMixin,
+class AssignmentUpdateView(AssignmentCreateUpdateMixin,
                            generic.UpdateView):
     pass
 
@@ -1126,6 +1158,30 @@ class AssignmentDeleteView(TeacherOnlyMixin,
     def is_form_allowed(self, user, obj):
         return user.is_superuser or \
             (user in obj.course_offering.teachers.all())
+
+
+class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
+                                     ProtectedFormMixin,
+                                     generic.DeleteView):
+    model = AssignmentAttachment
+    template_name = "learning/simple_delete_confirmation.html"
+
+    def is_form_allowed(self, user, obj):
+        return user.is_superuser or \
+            (user in obj.assignment.course_offering.teachers.all())
+
+    def get_success_url(self):
+        co = self.object.assignment.course_offering
+        return reverse('assignment_edit',
+                       args=[co.course.slug,
+                             co.semester.slug,
+                             self.object.assignment.pk])
+
+    def delete(self, request, *args, **kwargs):
+        resp = (super(AssignmentAttachmentDeleteView, self)
+                .delete(request, *args, **kwargs))
+        os.remove(self.object.attachment.path)
+        return resp
 
 
 class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
