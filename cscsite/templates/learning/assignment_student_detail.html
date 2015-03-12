@@ -36,30 +36,32 @@
         <div class="ubertext">
           {{ a_s.assignment.text|safe }}
         </div>
-        {% if a_s.assignment.assignmentattachment_set.all %}
-        <ul class="list-unstyled">
-          {% for aa in a_s.assignment.assignmentattachment_set.all %}
-          <li>
-            <span class="assignment-attachment">
-              <i class="fa fa-file"></i>
-              <a href="{{ aa.attachment.url }}">
-                {{ aa.attachment_file_name }}
-              </a>
-            </span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+        {% with aas=a_s.assignment.assignmentattachment_set.all %}
+          {% if aas %}
+            <ul class="list-unstyled">
+              {% for aa in aas %}
+                <li>
+                  <span class="assignment-attachment">
+                    <i class="fa fa-file"></i>
+                    <a href="{{ aa.attachment.url }}">
+                      {{ aa.attachment_file_name }}
+                    </a>
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
       </div>
       {% if not comments %}
-      <div class="csc-well">
-        {% if user_type == 'teacher' or not a_s.assignment.is_online %}
-        <h4>{% trans "Comment" %}</h4>
-        {% else %}
-        <h4>{% trans "Solution" %}</h4>
-        {% endif %}
-        {% crispy form form.helper %}
-      </div>
+        <div class="csc-well">
+          {% if user_type == 'teacher' or not a_s.assignment.is_online %}
+            <h4>{% trans "Comment" %}</h4>
+          {% else %}
+            <h4>{% trans "Solution" %}</h4>
+          {% endif %}
+          {% crispy form form.helper %}
+        </div>
       {% else %}
         <ul class="comment-list">
         {% for comment in comments %}
