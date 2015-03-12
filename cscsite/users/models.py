@@ -120,6 +120,10 @@ class CSCUser(AbstractUser):
                    .format(_("LaTeX+Markdown is enabled"),
                            _("will be shown only to logged-in users"))),
         blank=True)
+    is_center_student = models.BooleanField(
+        _("Student of CSCenter"),
+        help_text=("Students without this flag belong to CSClub only"),
+        default=False)
     # internal student info
     university = models.CharField(
         _("University"),

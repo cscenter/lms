@@ -827,13 +827,28 @@ class StudentProject(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class StudyProgram(TimeStampedModel):
+class StudyProgram(models.Model):
+    ## FIXME: move to explicit code for PK here instead of ID
     name = models.CharField(_("StudyProgram|Name"), max_length=255)
 
     class Meta:
         ordering = ["name"]
         verbose_name = _("Study program")
         verbose_name_plural = _("Study programs")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
+@python_2_unicode_compatible
+class City(models.Model):
+    code = models.CharField(_("City|Code"), max_length=3, primary_key=True)
+    name = models.CharField(_("City|Name"), max_length=255)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("City")
+        verbose_name_plural = _("Cities")
 
     def __str__(self):
         return smart_text(self.name)
