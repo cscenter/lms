@@ -4,10 +4,17 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
+from core.models import apply_related_spec
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject
+
+
+class RelatedSpecMixin(object):
+    def get_queryset(self, request):
+        qs = super(RelatedSpecMixin, self).get_queryset(request)
+        return apply_related_spec(qs, self.related_spec)
 
 
 class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -56,8 +63,15 @@ class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
         return ['course_offering'] if obj else []
 
 
-class AssignmentCommentAdmin(UbereditorMixin, admin.ModelAdmin):
-    pass
+class AssignmentCommentAdmin(RelatedSpecMixin,
+                             UbereditorMixin,
+                             admin.ModelAdmin):
+    readonly_fields = ['assignment_student']
+    related_spec = {'select': [('assignment_student',
+                                [('assignment',
+                                  [('course_offering',
+                                    ['semester', 'course'])]),
+                                 'student'])]}
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
@@ -77,8 +91,12 @@ class EnrollmentAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class AssignmentStudentAdmin(admin.ModelAdmin):
+class AssignmentStudentAdmin(RelatedSpecMixin,
+                             admin.ModelAdmin):
     list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
+    related_spec = {'select': [('assignment',
+                                [('course_offering', ['semester', 'course'])]),
+                               'student']}
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
