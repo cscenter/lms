@@ -1,4 +1,6 @@
-from __future__ import absolute_import
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
 
 from StringIO import StringIO
 
@@ -7,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from testfixtures import LogCapture
+from mock import Mock
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
@@ -15,6 +18,7 @@ from learning.tests.factories import AssignmentNotificationFactory, \
 
 from .templatetags.navigation import current
 from .management.commands.notify import Command
+from .models import related_spec_to_list, apply_related_spec
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
@@ -169,3 +173,52 @@ class NotifyCommandTest(TestCase):
                                     course_offering.semester.slug]),
                       mail.outbox[0].body)
         self.assertIn("sending notification for", out.getvalue())
+
+
+class RelatedSpec(TestCase):
+    def test_to_list(self):
+        spec_form = [('assignment_student',
+                      [('assignment',
+                        [('course_offering', ['semester', 'course'])]),
+                       'student'])]
+        list_form \
+            = ['assignment_student',
+               'assignment_student__assignment',
+               'assignment_student__assignment__course_offering',
+               'assignment_student__assignment__course_offering__semester',
+               'assignment_student__assignment__course_offering__course',
+               'assignment_student__student']
+        self.assertEqual(list_form, related_spec_to_list(spec_form))
+
+        spec_form = [('assignment_student',
+                      [('assignment',
+                        [('course_offering', ['semester', 'course'])])]),
+                     'student']
+        list_form \
+            = ['assignment_student',
+               'assignment_student__assignment',
+               'assignment_student__assignment__course_offering',
+               'assignment_student__assignment__course_offering__semester',
+               'assignment_student__assignment__course_offering__course',
+               'student']
+        self.assertEqual(list_form, related_spec_to_list(spec_form))
+
+    def test_apply(self):
+        class FakeQS(object):
+            def select_related(self, _):
+                pass
+
+            def prefetch_related(self, _):
+                pass
+
+        test_obj = FakeQS()
+        test_obj.select_related = Mock(return_value=test_obj)
+        test_obj.prefetch_related = Mock(return_value=test_obj)
+
+        related_spec = {'select': [('foo', ['bar', 'baz'])],
+                        'prefetch': ['baq']}
+        list_select = ['foo', 'foo__bar', 'foo__baz']
+        list_prefetch = ['baq']
+        apply_related_spec(test_obj, related_spec)
+        test_obj.select_related.assert_called_once_with(*list_select)
+        test_obj.prefetch_related.assert_called_once_with(*list_prefetch)
