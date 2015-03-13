@@ -1,3 +1,5 @@
+"use strict";
+
 var ends_at_touched = false;
 var marks_sheet_unsaved = 0;
 
