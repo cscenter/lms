@@ -828,7 +828,7 @@ class StudentProject(TimeStampedModel):
 
 @python_2_unicode_compatible
 class StudyProgram(models.Model):
-    ## FIXME: move to explicit code for PK here instead of ID
+    code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
     name = models.CharField(_("StudyProgram|Name"), max_length=255)
 
     class Meta:
@@ -842,7 +842,12 @@ class StudyProgram(models.Model):
 
 @python_2_unicode_compatible
 class City(models.Model):
-    code = models.CharField(_("City|Code"), max_length=3, primary_key=True)
+    ## NOTE(Dmitry): this is UN/LOCODE
+    code = models.CharField(
+        _("PK|Code"),
+        max_length=6,
+        help_text=_("This should be UN/LOCODE, e.g. \"RU LED\""),
+        primary_key=True)
     name = models.CharField(_("City|Name"), max_length=255)
 
     class Meta:
