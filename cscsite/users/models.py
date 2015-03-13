@@ -122,7 +122,8 @@ class CSCUser(AbstractUser):
         blank=True)
     is_center_student = models.BooleanField(
         _("Student of CSCenter"),
-        help_text=("Students without this flag belong to CSClub only"),
+        help_text=_("Students without this flag belong to CSClub only "
+                    "and can't enroll to CSCenter's courses"),
         default=False)
     # internal student info
     university = models.CharField(
