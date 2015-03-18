@@ -21,7 +21,7 @@
       {% if error %}
       <p>{{ text_result }}</p>
       {% else %}
-      <p>{% trans "Do you want to unsubscribe from" %} «{{ sub_name|lower }}»?</p>
+      <p>{% trans "Do you want to unsubscribe from" %} «{{ sub_name }}»?</p>
       {% crispy form form.helper %}
       {% endif %}
       {% endif %}
