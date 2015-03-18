@@ -269,15 +269,34 @@ $(document).ready(function () {
     });
 
     if ($('.user-search').length > 0) {
+        var enrollmentYears = {};
+        var qstr = "";
         var ajaxURI = $('.user-search #ajax-uri').val();
-        var query = function(qstr) {
+        var query = function() {
+            var flatYears;
+
+            if (qstr.length < 3) {
+                return;
+            }
+
+            flatYears = _.chain(enrollmentYears)
+                .pairs()
+                .filter(function(x) {return x[1]})
+                .map(function(x) {return x[0]})
+                .value();
+            console.log(flatYears);
             $.ajax({
                 url: ajaxURI,
-                data: {name: qstr},
-                dataType: "json"
+                data: {name: qstr,
+                       enrollment_years: flatYears},
+                dataType: "json",
+                traditional: true
             }).done(function(msg) {
+                var numStr = (msg.users.length.toString()
+                              + (msg.there_is_more ? "+" : ""));
+
                 $("#user-num-container").show();
-                $("#user-num").text(msg.users.length.toString());
+                $("#user-num").text(numStr);
                 var h = "<table class=\"table table-condensed\">";
                 _.each(msg.users, function(user) {
                     h += "<tr><td><a href=\"" + user.url  + "\">";
@@ -291,13 +310,22 @@ $(document).ready(function () {
                 $("#user-table-container").html(h);
             });
         };
-        query = _.debounce(query, 400);
+        query = _.debounce(query, 200);
 
-        $('.user-search').on('input paste', '#name', function (e) {
-            var qstr = $(this).val();
-            if (qstr.length > 2) {
-                query(qstr);
-            }
-        });
+        $('.user-search [name="enrollment_year_cb"]')
+            .each(function(idx) {
+                enrollmentYears[$(this).val()] = false;
+            });
+
+        $('.user-search')
+            .on('input paste', '#name', function (e) {
+                qstr = $(this).val();
+                query();
+            })
+            .on('change', '[name="enrollment_year_cb"]', function (e) {
+                enrollmentYears[$(this).val()] = this.checked;
+                query();
+            });
+
     }
 });
