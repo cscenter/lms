@@ -8,6 +8,8 @@ The power of Django! [![Build Status](https://magnum.travis-ci.com/cscenter/site
 Installation
 ============
 
+**TODO**: actually it's Postgres now
+
 Setup MySQL database:
 
 ```bash
