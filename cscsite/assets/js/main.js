@@ -275,10 +275,6 @@ $(document).ready(function () {
         var query = function() {
             var flatYears;
 
-            if (qstr.length < 3) {
-                return;
-            }
-
             flatYears = _.chain(enrollmentYears)
                 .pairs()
                 .filter(function(x) {return x[1]})
