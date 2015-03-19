@@ -242,9 +242,22 @@ $(document).ready(function () {
         });
     });
 
-    $('.marks-table').on('mousewheel', 'input[type=number]', function (e) {
-        this.blur();
-    });
+    $('.marks-table')
+        .on('mousewheel', 'input[type=number]', function (e) {
+            this.blur();
+        })
+        .on('keypress', 'input', function(e) {
+            var code = e.keyCode || e.which;
+            if (code == 13 || code == 10) {
+                if (e.metaKey || e.ctrlKey) {
+                    this.form.submit();
+                } else {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
 
     $('.marks-table.teacher').on('focus', 'input,select', function (e) {
         $(this).closest("tr").addClass("active");
