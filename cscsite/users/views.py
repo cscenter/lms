@@ -160,10 +160,10 @@ class UserDetailView(generic.DetailView):
             semesters = list(reversed(student_projects[i].semesters.all()))
             setattr(student_projects[i], 'semesters_list', semesters)
         student_projects = sorted(student_projects,
-                                  key=lambda p: ((p.semesters_list[0].type
+                                  key=lambda p: ((-p.semesters_list[0].year
                                                   if p.semesters_list
                                                   else None),
-                                                 (-p.semesters_list[0].year
+                                                 (p.semesters_list[0].type
                                                   if p.semesters_list
                                                   else None)),
                                   reverse=True)
