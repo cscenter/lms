@@ -163,9 +163,10 @@ class UserDetailView(generic.DetailView):
                                   key=lambda p: ((p.semesters_list[0].type
                                                   if p.semesters_list
                                                   else None),
-                                                 (p.semesters_list[0].year
+                                                 (-p.semesters_list[0].year
                                                   if p.semesters_list
-                                                  else None)))
+                                                  else None)),
+                                  reverse=True)
         context['student_projects'] = student_projects
         if self.request.user.is_staff:
             related = ['assignment',
