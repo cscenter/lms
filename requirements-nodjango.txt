@@ -12,6 +12,7 @@ django-coverage==1.2.4
 django-crispy-forms==1.4.0
 django-dbbackup==2.0.4
 django-debug-toolbar==1.2.2
+django-debug-toolbar-template-timings==0.6.4
 django-fixture-media==0.1.4
 django-floppyforms==1.1.1
 django-model-utils==2.2
