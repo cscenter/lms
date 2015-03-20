@@ -87,7 +87,9 @@
                 {% endif %}
               {% else %}
                   <a href="{% url 'enrollment' %}">
-                    <li class="{% current 'enrollment' %}">{% trans "CSC|Enrollment" %}</li>
+                    <li class="{% current 'enrollment_menu' %}">
+                      {% trans "CSC|Enrollment" %}   <i class="fa fa-caret-down"></i>
+                    </li>
                   </a>
               {% endif %}
               {% if not user.is_authenticated %}
@@ -152,6 +154,29 @@
           </div>
         </div>
       </div>
+
+      <div class="header lvl2 {% current 'enrollment_menu' %}">
+          <div class="container">
+            <div class="row">
+              <div class="col-xs-12">
+                <div class="logo-cell"></div>
+                <ul>
+                  <a href="{% url 'enrollment' %}">
+                    <li class="{% current 'enrollment' %}">
+                      {% trans "CSC|Enrollment info" %}
+                    </li>
+                  </a>
+                  <a href="{% url 'enrollment_application' %}">
+                    <li class="{% current 'enrollment_application' %}">
+                      {% trans "Enrollment application" %}
+                    </li>
+                  </a>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <div class="header lvl2 for-students {% current 'learning' %}">
         <div class="container">
