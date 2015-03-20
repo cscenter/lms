@@ -177,7 +177,8 @@ MENU_URL_NAMES = {
     'online': {},
     'teaching': {},
     'learning': {},
-    'enrollment': {},
+    'enrollment': {'parent': 'enrollment_menu'},
+    'enrollment_application': {'parent': 'enrollment_menu'},
     'staff': {},
     'unsubscribe_ya': {},
 

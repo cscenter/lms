@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-13 18:32+0300\n"
-"PO-Revision-Date: 2015-03-13 18:33+0230\n"
+"POT-Creation-Date: 2015-03-20 19:05+0300\n"
+"PO-Revision-Date: 2015-03-20 19:06+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -230,7 +230,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:50 templates/base.html:132 templates/base.html.py:263
+#: learning/models.py:50 templates/base.html:132 templates/base.html.py:287
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:31
@@ -401,7 +401,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:418 templates/base.html:164 templates/base.html.py:216
+#: learning/models.py:418 templates/base.html:188 templates/base.html.py:240
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -878,46 +878,56 @@ msgstr "Преподаватели"
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:174
+#: templates/base.html:165
+#| msgid "CSC|Enrollment"
+msgid "CSC|Enrollment info"
+msgstr "Информация"
+
+#: templates/base.html:170
+#| msgid "Enrollment application email"
+msgid "Enrollment application"
+msgstr "Анкета"
+
+#: templates/base.html:198
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:179 templates/base.html.py:231
+#: templates/base.html:203 templates/base.html.py:255
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:184 templates/base.html.py:236
+#: templates/base.html:208 templates/base.html.py:260
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:194 templates/library/book_list.html:11
+#: templates/base.html:218 templates/library/book_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: templates/base.html:199
+#: templates/base.html:223
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:226
+#: templates/base.html:250
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:246 templates/learning/markssheet_teacher.html:16
+#: templates/base.html:270 templates/learning/markssheet_teacher.html:16
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:268 templates/user_search.html:10
+#: templates/base.html:292 templates/user_search.html:10
 msgid "User search"
 msgstr "Поиск пользователей"
 
-#: templates/base.html:293
+#: templates/base.html:317
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
-#: templates/base.html:295
+#: templates/base.html:319
 msgid "report a problem"
 msgstr "сообщить об ошибке"
 
@@ -1353,7 +1363,11 @@ msgstr "Место работы"
 msgid "Name, full or partial"
 msgstr "Имя, целиком или часть"
 
-#: templates/user_search.html:28
+#: templates/user_search.html:26 users/models.py:93
+msgid "CSCUser|enrollment year"
+msgstr "Год поступления"
+
+#: templates/user_search.html:42
 msgid "Found"
 msgstr "Найдено"
 
@@ -1457,10 +1471,6 @@ msgstr "Фото"
 #: users/models.py:89
 msgid "CSCUser|note"
 msgstr "Дополнительно"
-
-#: users/models.py:93
-msgid "CSCUser|enrollment year"
-msgstr "Год поступления"
 
 #: users/models.py:98
 msgid "CSCUser|graduation year"
