@@ -206,7 +206,7 @@ class JSONDataView(generic.View):
 
 class UserSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
     content_type = u"application/javascript; charset=utf-8"
-    limit = 100
+    limit = 1000
 
     def get(self, request, *args, **kwargs):
         qs = CSCUser.objects
