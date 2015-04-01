@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-20 19:05+0300\n"
-"PO-Revision-Date: 2015-03-20 19:06+0230\n"
+"POT-Creation-Date: 2015-04-01 18:21+0300\n"
+"PO-Revision-Date: 2015-04-01 18:22+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -81,7 +81,7 @@ msgstr "Сохранить"
 
 #: learning/forms.py:32 learning/forms.py:110 learning/models.py:123
 #: learning/models.py:225 learning/models.py:276 learning/models.py:744
-#: learning/models.py:786 templates/learning/courseclass_detail.html:44
+#: learning/models.py:813 templates/learning/courseclass_detail.html:44
 #: templates/learning/noncourseevent_detail.html:28
 msgid "Description"
 msgstr "Описание"
@@ -230,26 +230,26 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:50 templates/base.html:132 templates/base.html.py:287
+#: learning/models.py:50 templates/base.html:134 templates/base.html.py:288
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:31
 msgid "Courses"
 msgstr "Курсы"
 
-#: learning/models.py:61
+#: learning/models.py:61 learning/models.py:785
 msgid "spring"
 msgstr "весна"
 
-#: learning/models.py:62
+#: learning/models.py:62 learning/models.py:787
 msgid "autumn"
 msgstr "осень"
 
-#: learning/models.py:65
+#: learning/models.py:65 learning/models.py:790
 msgid "CSCUser|Year"
 msgstr "Год"
 
-#: learning/models.py:67
+#: learning/models.py:67 learning/models.py:793
 msgid "Semester|type"
 msgstr "Тип"
 
@@ -258,7 +258,7 @@ msgstr "Тип"
 msgid "Semester"
 msgstr "Семестр"
 
-#: learning/models.py:73 learning/models.py:800
+#: learning/models.py:73 learning/models.py:827
 msgid "Semesters"
 msgstr "Семестры"
 
@@ -401,7 +401,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:418 templates/base.html:188 templates/base.html.py:240
+#: learning/models.py:418 templates/base.html:189 templates/base.html.py:241
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -453,7 +453,7 @@ msgstr "Отлично"
 msgid "AssignmentStudent|assignment"
 msgstr "Задание"
 
-#: learning/models.py:493 learning/models.py:791
+#: learning/models.py:493 learning/models.py:818
 msgid "AssignmentStudent|student"
 msgstr "Студент"
 
@@ -617,71 +617,85 @@ msgstr "События"
 msgid "Event should end after it's start"
 msgstr "Конец события должен быть позже начала"
 
-#: learning/models.py:781
+#: learning/models.py:786
+msgid "summer"
+msgstr "лето"
+
+#: learning/models.py:798
+#| msgid "Student project"
+msgid "Student project timeframe"
+msgstr "Период выполнения студ. проектов"
+
+#: learning/models.py:799
+#| msgid "Student projects"
+msgid "Student project timeframes"
+msgstr "Периоды выполнения студ. проектов"
+
+#: learning/models.py:808
 msgid "StudentProject|Practice"
 msgstr "Практика"
 
-#: learning/models.py:782
+#: learning/models.py:809
 msgid "StudentProject|Research"
 msgstr "НИР"
 
-#: learning/models.py:784
+#: learning/models.py:811
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: learning/models.py:795 templates/user_detail.html:55
+#: learning/models.py:822 templates/user_detail.html:55
 msgid "StudentProject|Supervisor"
 msgstr "Руководитель"
 
-#: learning/models.py:797
+#: learning/models.py:824
 msgid "Format: Last_name First_name Patronymic, Organization"
 msgstr "Формат: Фамилия Имя Отчество, Организация"
 
-#: learning/models.py:803
+#: learning/models.py:830
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: learning/models.py:806 templates/user_detail.html:54
+#: learning/models.py:833 templates/user_detail.html:54
 msgid "Presentation"
 msgstr "Презентация"
 
-#: learning/models.py:814
+#: learning/models.py:841
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: learning/models.py:815 templates/user_detail.html:49
+#: learning/models.py:842 templates/user_detail.html:49
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
-#: learning/models.py:831 learning/models.py:847
+#: learning/models.py:858 learning/models.py:874
 msgid "PK|Code"
 msgstr "Код"
 
-#: learning/models.py:832
+#: learning/models.py:859
 msgid "StudyProgram|Name"
 msgstr "Название"
 
-#: learning/models.py:836
+#: learning/models.py:863
 msgid "Study program"
 msgstr "Учебная программа"
 
-#: learning/models.py:837
+#: learning/models.py:864
 msgid "Study programs"
 msgstr "Учебные программы"
 
-#: learning/models.py:849
+#: learning/models.py:876
 msgid "This should be UN/LOCODE, e.g. \"RU LED\""
 msgstr "UN/LOCODE, например, \"RU LED\""
 
-#: learning/models.py:851
+#: learning/models.py:878
 msgid "City|Name"
 msgstr "Имя"
 
-#: learning/models.py:855
+#: learning/models.py:882
 msgid "City"
 msgstr "Город"
 
-#: learning/models.py:856
+#: learning/models.py:883
 msgid "Cities"
 msgstr "Города"
 
@@ -837,35 +851,35 @@ msgstr "Преподавание"
 msgid "Supervision"
 msgstr "Курирование"
 
-#: templates/base.html:90
+#: templates/base.html:91
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:95
+#: templates/base.html:97
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:100
+#: templates/base.html:102
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:107
+#: templates/base.html:109
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:110 users/forms.py:40
+#: templates/base.html:112 users/forms.py:40
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:127
+#: templates/base.html:129
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:137
+#: templates/base.html:139
 msgid "Organizers"
 msgstr "Организаторы"
 
-#: templates/base.html:142
+#: templates/base.html:144
 #: templates/learning/assignment_student_detail.html:124
 #: templates/learning/courses_list_student.html:22
 #: templates/learning/courses_list_student.html:97
@@ -874,60 +888,58 @@ msgstr "Организаторы"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:147
+#: templates/base.html:149
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:165
-#| msgid "CSC|Enrollment"
+#: templates/base.html:166
 msgid "CSC|Enrollment info"
 msgstr "Информация"
 
-#: templates/base.html:170
-#| msgid "Enrollment application email"
+#: templates/base.html:171
 msgid "Enrollment application"
 msgstr "Анкета"
 
-#: templates/base.html:198
+#: templates/base.html:199
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:203 templates/base.html.py:255
+#: templates/base.html:204 templates/base.html.py:256
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:208 templates/base.html.py:260
+#: templates/base.html:209 templates/base.html.py:261
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:218 templates/library/book_list.html:11
+#: templates/base.html:219 templates/library/book_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: templates/base.html:223
+#: templates/base.html:224
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:250
+#: templates/base.html:251
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:270 templates/learning/markssheet_teacher.html:16
+#: templates/base.html:271 templates/learning/markssheet_teacher.html:16
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:292 templates/user_search.html:10
+#: templates/base.html:293 templates/user_search.html:10
 msgid "User search"
 msgstr "Поиск пользователей"
 
-#: templates/base.html:317
+#: templates/base.html:318
 msgid "Computer Science Center Все права защищены, 2011–14 гг."
 msgstr "Computer Science Center Все права защищены, 2011–14 гг."
 
-#: templates/base.html:319
+#: templates/base.html:320
 msgid "report a problem"
 msgstr "сообщить об ошибке"
 
