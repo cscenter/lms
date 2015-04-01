@@ -154,19 +154,19 @@ class UserDetailView(generic.DetailView):
              and (u == self.object
                   or u.is_superuser))
         student_projects = list(self.object.studentproject_set
-                                .prefetch_related('semesters')
+                                .prefetch_related('timeframes')
                                 .order_by('pk'))
         for i in range(len(student_projects)):
-            semesters = list(reversed(student_projects[i].semesters.all()))
+            semesters = list(reversed(student_projects[i].timeframes.all()))
             setattr(student_projects[i], 'semesters_list', semesters)
         student_projects = sorted(student_projects,
-                                  key=lambda p: ((-p.semesters_list[0].year
+                                  key=lambda p: ((p.semesters_list[0].year
                                                   if p.semesters_list
                                                   else None),
                                                  (p.semesters_list[0].type
                                                   if p.semesters_list
                                                   else None)),
-                                  reverse=True)
+                                  reverse=False)
         context['student_projects'] = student_projects
         if self.request.user.is_staff:
             related = ['assignment',
