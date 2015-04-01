@@ -136,6 +136,8 @@
       <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
       <h5 class="assignment">{% trans "Deadline" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
+      <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
+      <span style="white-space: nowrap;">{{ a_s.assignment.grade_max }}</span>
       <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
       <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
       <h5 class="assignment">{% trans "Assignment created" %}</h5>
