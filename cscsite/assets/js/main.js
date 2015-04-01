@@ -33,9 +33,8 @@ $(document).ready(function () {
         smartypants: true
     });
 
-    $("div.ubertext").each(function() {
-        var target = this;
-        var $target = $(this);
+    $("div.ubertext").each(function(i, target) {
+        var $target = $(target);
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             target.innerHTML = marked(_.unescape(jQuery.trim(target.innerHTML)));
@@ -82,8 +81,8 @@ $(document).ready(function () {
         })();
     };
 
-    $ubereditors.each(function(i) {
-        var $textarea = $(this);
+    $ubereditors.each(function(i, textarea) {
+        var $textarea = $(textarea);
         var $container = $("<div/>").insertAfter($textarea);
         var shouldFocus = false;
         var ubereditorRestoration = $textarea.data('local-persist') == true;
@@ -149,6 +148,7 @@ $(document).ready(function () {
         // Ctrl+Enter to send form
         if ($textarea[0].dataset.quicksend == 'true') {
             var editorBody = editor.getElement('editor').body;
+            // FIXME: use .on here
             editorBody.addEventListener('keydown', function(e) {
                 if (e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
                     $textarea[0].form.submit();
@@ -161,6 +161,7 @@ $(document).ready(function () {
     // Course class editing
     //
 
+    // FIXME: use .on here
     $("#id_ends_at").focus(function() {
         ends_at_touched = true;
     });
@@ -237,7 +238,7 @@ $(document).ready(function () {
             $(this).find('td').each(function(j) {
                 // order marks sheets for different course offerings properly
                 var idx = j + 1000 * (i + 1);
-                $(this).find('input,select').attr('tabindex', idx);
+                $(this).find('input,select').prop('tabindex', idx);
             });
         });
     });
@@ -322,8 +323,8 @@ $(document).ready(function () {
         query = _.debounce(query, 200);
 
         $('.user-search [name="enrollment_year_cb"]')
-            .each(function(idx) {
-                enrollmentYears[$(this).val()] = false;
+            .each(function(idx, obj) {
+                enrollmentYears[$(obj).val()] = false;
             });
 
         $('.user-search')
