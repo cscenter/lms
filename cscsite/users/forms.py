@@ -46,9 +46,11 @@ class UserProfileForm(forms.ModelForm):
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
             show_fields = ['photo', 'note', 'csc_review',
-                           'yandex_id', 'stepic_id', 'private_contacts']
+                           'yandex_id', 'github_id', 'stepic_id',
+                           'private_contacts']
         else:
-            show_fields = ['photo', 'note', 'yandex_id', 'stepic_id',
+            show_fields = ['photo', 'note',
+                           'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
         self.helper.layout = Layout(
             Div(*show_fields),
@@ -61,8 +63,8 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = CSCUser
-        fields = ['photo', 'note', 'yandex_id', 'stepic_id', 'csc_review',
-                  'private_contacts']
+        fields = ['photo', 'note', 'yandex_id', 'github_id', 'stepic_id',
+                  'csc_review', 'private_contacts']
         widgets = {
             'note': Ubereditor,
             'csc_review': Ubereditor,
@@ -76,7 +78,8 @@ class UserProfileForm(forms.ModelForm):
                 .format(LATEX_MARKDOWN_ENABLED,
                         _("will be shown only to logged-in users"))),
             'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
-            'stepid_id': _("stepic.org/users/<b>424242</b>")
+            'github_id': "github.com/<b>GITHUB-ID</b>",
+            'stepic_id': _("stepic.org/users/<b>STEPIC-ID</b>")
         }
 
 
