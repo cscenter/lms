@@ -8,8 +8,7 @@ from core.models import apply_related_spec
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, AssignmentStudent, \
-    AssignmentComment, Enrollment, NonCourseEvent, StudentProject, \
-    StudentProjectTimeframe
+    AssignmentComment, Enrollment, NonCourseEvent, StudentProject
 
 
 class RelatedSpecMixin(object):
@@ -130,4 +129,3 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
 admin.site.register(StudentProject, StudentProjectAdmin)
-admin.site.register(StudentProjectTimeframe)
