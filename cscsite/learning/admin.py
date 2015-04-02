@@ -25,7 +25,7 @@ class CourseOfferingAdmin(UbereditorMixin,
                           WiderLabelsMixin,
                           admin.ModelAdmin):
     list_filter = ['course', 'semester']
-    list_display = ['course', 'semester', 'is_published_in_video']
+    list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
