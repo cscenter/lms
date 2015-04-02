@@ -201,6 +201,32 @@ $(document).ready(function () {
     });
 
     //
+    // User info page
+    //
+
+    (function() {
+        var $btnGroup = $("div.assignment-list-control");
+        var $oldRows = $("#assignments-table .old");
+
+        $btnGroup
+            .on("click", ".current-semester", function(e) {
+                var $target = $(e.target);
+                $btnGroup.find(".all").removeClass("active");
+                $target.addClass("active");
+                $oldRows.hide();
+
+            })
+            .on("click", ".all", function(e) {
+                var $target = $(e.target);
+                $btnGroup.find(".current-semester").removeClass("active");
+                $target.addClass("active");
+                $oldRows.show();
+
+            });
+    })();
+
+
+    //
     // Marks sheet (for teacher's one and staff's)
     //
 
@@ -208,7 +234,7 @@ $(document).ready(function () {
         $("#marks-sheet-save").attr("disabled", "disabled");
     }
 
-    $(".marks-table.teacher").on('change', 'input,select', function (e) {
+    $(".marks-table.teacher").on("change", "input,select", function (e) {
         var $this = $(this);
         var $target = $(e.target);
         var $csv_link = $(".marks-sheet-csv-link");

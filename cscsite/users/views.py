@@ -27,7 +27,7 @@ import pytz
 
 from core.views import ProtectedFormMixin, StaffOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
-    CourseOffering, NonCourseEvent
+    CourseOffering, NonCourseEvent, Semester
 from .forms import LoginForm, UserProfileForm
 from .models import CSCUser
 
@@ -180,6 +180,9 @@ class UserDetailView(generic.DetailView):
                               'assignment__course_offering__course__name',
                               'assignment__deadline_at')
                     .select_related(*related))
+            # NOTE(Dmitry): this is needed to skip duplicated CourseOfferings
+            #               in the table (works if objs are sorted by
+            #               CourseOfferings)
             a_ss = list(a_ss)
             current_co = None
             for a_s in a_ss:
@@ -187,6 +190,7 @@ class UserDetailView(generic.DetailView):
                     setattr(a_s, 'hacky_co_change', True)
                     current_co = a_s.assignment.course_offering
             context['a_ss'] = a_ss
+        context['current_semester'] = Semester.get_current()
         return context
 
 
