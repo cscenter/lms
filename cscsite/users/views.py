@@ -203,11 +203,6 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return obj.pk == user.pk or user.is_superuser or user.is_staff
 
 
-class JSONDataView(generic.View):
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({'foo': 'bar'})
-
-
 class UserSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
     content_type = u"application/javascript; charset=utf-8"
     limit = 1000
