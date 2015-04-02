@@ -180,6 +180,30 @@
           <td>{{ user_object.phone|default:"—" }}</td>
         </tr>
         <tr>
+          <td>{% trans "Yandex ID" %}:</td>
+          <td>{{ user_object.yandex_id|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Github ID" %}:</td>
+          <td>
+            {% if user_object.github_id %}
+              <a href="https://github.com/{{ user_object.github_id }}" target="_blank">{{ user_object.github_id }}</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td>{% trans "Stepic ID" %}:</td>
+          <td>
+            {% if user_object.stepic_id %}
+              <a href="https://stepic.org/users/{{ user_object.stepic_id }}" target="_blank">{{ user_object.stepic_id }}</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
           <td>{% trans "StudentInfo|University year" %}:</td>
           <td>{{ user_object.uni_year_at_enrollment|default:"—" }}</td>
         </tr>
