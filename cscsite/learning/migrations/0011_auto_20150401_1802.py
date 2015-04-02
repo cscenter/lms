@@ -21,6 +21,22 @@ def forwards_func(apps, schema_editor):
                 tf.save()
             sp.timeframes.add(tf)
 
+def backwards_func(apps, schema_editor):
+    SP = apps.get_model('learning', 'StudentProject')
+    Sem = apps.get_model('learning', 'Semester')
+    db_alias = schema_editor.connection.alias
+    type_map = {StudentProjectTimeframe.AUTUMN: 'autumn',
+                StudentProjectTimeframe.SPRING: 'spring'}
+    for sp in SP.objects.using(db_alias).all():
+        sems = [(Sem.objects.using(db_alias)
+                 .get_or_create(year=tfs.year,
+                                type=type_map[tfs.type]))
+                for tfs in sp.timeframes.all()]
+        for sem, created in sems:
+            if created:
+                sem.save()
+            sp.semesters.add(sem)
+
 
 class Migration(migrations.Migration):
 
@@ -33,5 +49,5 @@ class Migration(migrations.Migration):
             name='studentprojecttimeframe',
             unique_together=set([('year', 'type')]),
         ),
-        migrations.RunPython(forwards_func),
+        migrations.RunPython(forwards_func, backwards_func),
     ]
