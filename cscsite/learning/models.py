@@ -777,33 +777,6 @@ def studentproject_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
-class StudentProjectTimeframe(models.Model):
-    SPRING = 0
-    SUMMER = 1
-    AUTUMN = 2
-
-    TIMEFRAME_TYPES = [(SPRING, _("spring")),
-                       (SUMMER, _("summer")),
-                       (AUTUMN, _("autumn"))]
-
-    year = models.PositiveSmallIntegerField(
-        _("CSCUser|Year"),
-        validators=[MinValueValidator(1990)])
-    type = models.IntegerField(
-        _("Semester|type"),
-        choices=TIMEFRAME_TYPES)
-
-    class Meta:
-        ordering = ["-year", "-type"]
-        verbose_name = _("Student project timeframe")
-        verbose_name_plural = _("Student project timeframes")
-        unique_together = ('year', 'type')
-
-    def __str__(self):
-        return "{0} {1}".format(self.get_type_display(), self.year)
-
-
-@python_2_unicode_compatible
 class StudentProject(TimeStampedModel):
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))
@@ -822,8 +795,8 @@ class StudentProject(TimeStampedModel):
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,
         help_text=_("Format: Last_name First_name Patronymic, Organization"))
-    timeframes = models.ManyToManyField(
-        StudentProjectTimeframe,
+    semesters = models.ManyToManyField(
+        Semester,
         verbose_name=_("Semesters"))
     project_type = models.CharField(
         choices=PROJECT_TYPES,
