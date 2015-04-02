@@ -121,36 +121,42 @@
       </table>
       {% endif %}
       {% if a_ss %}
-      <h4 class="bigger-margin">{% trans "Assignments" %}:</h4>
-      <table class="table table-condensed">
-        <tr>
-          <th>{% trans "Course offering" %}</th>
-          <th>{% trans "Assignment" %}</th>
-          <th>{% trans "Grade" %}</th>
-        </tr>
-        {% for a_s in a_ss %}
-        <tr>
-          <td>
-            {% if a_s.hacky_co_change %}
-            <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
-            {% else %}
-            <span style="color: #CCC">—〃—</span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
-              {{ a_s.assignment.title }}
-            </a>
-          </td>
-          <td>
-            <span style="white-space: nowrap;"
-                  class="badge assignment-status {{ a_s.state|to_css }}">
-              {{ a_s.state_display }}
-            </span>
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
+        <h4 class="bigger-margin">{% trans "Assignments" %}:
+          <div class="btn-group pull-right assignment-list-control" role="group">
+            <button type="button" class="btn btn-xs btn-default active current-semester">{{ current_semester }}</button>
+            <button type="button" class="btn btn-xs btn-default all">{% trans "All"|lower %}</button>
+          </div></h4>
+        <table class="table table-condensed" id="assignments-table">
+          <tr>
+            <th>{% trans "Course offering" %}</th>
+            <th>{% trans "Assignment" %}</th>
+            <th>{% trans "Grade" %}</th>
+          </tr>
+          {% for a_s in a_ss %}
+            <tr {% if a_s.assignment.course_offering.semester_id != current_semester.id %}
+                   class="old" style="display:none;"
+                {% endif %}>
+              <td>
+                {% if a_s.hacky_co_change %}
+                  <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
+                {% else %}
+                  <span style="color: #CCC">—〃—</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
+                  {{ a_s.assignment.title }}
+                </a>
+              </td>
+              <td>
+                <span style="white-space: nowrap;"
+                      class="badge assignment-status {{ a_s.state|to_css }}">
+                  {{ a_s.state_display }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
       {% endif %}
       {% with borrows=user_object.borrows.all %}
       {% if request.user.is_staff and borrows %}

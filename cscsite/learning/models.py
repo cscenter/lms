@@ -28,6 +28,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.notifications import get_unread_notifications_cache
 from learning import slides
+from .utils import get_current_semester_pair
 
 
 @python_2_unicode_compatible
@@ -102,6 +103,15 @@ class Semester(models.Model):
                 .parse(next_start_str)
                 .replace(tzinfo=timezone.utc,
                          year=next_year)) - datetime.timedelta(days=1)
+
+    @classmethod
+    def get_current(cls):
+        year, season = get_current_semester_pair()
+        obj, created = cls.objects.get_or_create(year=year,
+                                                 type=season)
+        if created:
+            obj.save()
+        return obj
 
 
 @python_2_unicode_compatible
