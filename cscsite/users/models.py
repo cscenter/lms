@@ -106,6 +106,12 @@ class CSCUser(AbstractUser):
                                    message=_("Only the part before "
                                              "\"@yandex.ru\" is expected"))],
         blank=True)
+    github_id = models.CharField(
+        _("Github ID"),
+        max_length=80,
+        validators=[RegexValidator(
+            regex="^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$")],
+        blank=True)
     stepic_id = models.PositiveIntegerField(
         _("Stepic ID"),
         blank=True,
