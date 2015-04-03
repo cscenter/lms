@@ -3,30 +3,37 @@ CSC site
 
 The power of Django! [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=xBAa4nJZ4qY7pPgbqyTE&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
-**NOTE**: `libjpeg-dev` and `libpng-dev` and `libmysqlclient-dev` should be installed
+**NOTE**: `libjpeg-dev`, `libpng-dev` and `libpq-dev` should be installed
 
-Installation
-============
+Dev installation
+================
 
-**TODO**: actually it's Postgres now
-
-Setup MySQL database:
+* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev` and `libpq-dev` globally;
+* create virtualenv for the project and open it;
+* setup PostgreSQL database:
 
 ```bash
-$ mysql -u root -p
-> CREATE DATABASE cscdb CHARACTER SET utf8;
-> CREATE USER 'csc'@'localhost' IDENTIFIED BY 'FooBar';
-> GRANT ALL ON cscdb.* TO 'csc'@'localhost';
+> sudo -u postgres psql
+[sudo] password for user:
+psql (9.4.1)
+Type "help" for help.
+
+postgres=# CREATE DATABASE cscdb;
+CREATE DATABASE
+postgres=# CREATE USER csc WITH password 'FooBar';
+CREATE ROLE
+postgres=# GRANT ALL privileges ON DATABASE cscdb TO csc;
+GRANT
 ^D
 ```
 
-Do the Django part of the database configuration:
+* do the Django part of the database configuration:
 
 ```bash
-$ python cscsite/manage.py syncdb --all --settings=cscsite.settings.local
-$ python cscsite/manage.py migrate --settings=cscsite.settings.local --no-initial-data
+$ python cscsite/manage.py syncdb --settings=cscsite.settings.local
 ```
 
+* run with `python manage.py runserver --settings=cscsite.settings.local`
 
 Misc
 ====
