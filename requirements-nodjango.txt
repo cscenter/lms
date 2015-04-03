@@ -15,10 +15,12 @@ django-debug-toolbar==1.2.2
 django-debug-toolbar-template-timings==0.6.4
 django-fixture-media==0.1.4
 django-floppyforms==1.1.1
-django-model-utils==2.2
+# django-model-utils==2.2
+# because newer version that fixes migrations on 1.7 is not released yet
+git+https://github.com/carljm/django-model-utils.git@d797996d13a871328bada34aef8ad25534e0058f
 django-rosetta==0.7.3
 django-sitemetrics==0.4.2
-django-taggit==0.12.2
+django-taggit==0.12.3
 factory_boy==2.4.1
 icalendar==3.8.4
 MySQL-python==1.2.5

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('library', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        # ('taggit', '0002_auto_20150218_1950'),
+        ('taggit', '0002_auto_20150218_1950'),
     ]
 
     operations = [
