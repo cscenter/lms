@@ -35,6 +35,12 @@ $ python cscsite/manage.py syncdb --settings=cscsite.settings.local
 
 * run with `python manage.py runserver --settings=cscsite.settings.local`
 
+Production setup
+===============
+
+See [infrastructure](https://github.com/cscenter/site/tree/master/infrastructure) subdirectory.
+
+
 Misc
 ====
 
