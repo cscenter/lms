@@ -276,6 +276,8 @@ class UserSearchView(StaffOnlyMixin, generic.TemplateView):
 # https://github.com/geier/khal/blob/498df2ef62a99bb1a50
 # 053e982f7f23a1bfb3600/khal/khalendar/event.py
 # See https://github.com/collective/icalendar/issues/44
+# FIXME: it's fixed in upstream, can be removed with retesting
+#        and corresponding code changes
 def to_naive_utc(dtime):
     """convert a datetime object to UTC and than remove the tzinfo, if
     datetime is naive already, return it
