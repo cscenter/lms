@@ -10,6 +10,14 @@ from django.conf import settings
 import django.core.validators
 
 
+def forwards_func(apps, schema_editor):
+    Group = apps.get_model('auth', 'Group')
+    db_alias = schema_editor.connection.alias
+    Group(id=1, name="Student").save(force_insert=True, using=db_alias)
+    Group(id=2, name="Teacher").save(force_insert=True, using=db_alias)
+    Group(id=3, name="Graduate").save(force_insert=True, using=db_alias)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -77,4 +85,15 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.RunPython(forwards_func),
+        # NOTE(Dmitry): this is needed to move forward "autoincrementing"
+        #               counters that are used to give new groups/etc
+        #               unique IDs
+        migrations.RunSQL("""
+BEGIN;
+SELECT setval(pg_get_serial_sequence('"auth_permission"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "auth_permission";
+SELECT setval(pg_get_serial_sequence('"auth_group_permissions"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "auth_group_permissions";
+SELECT setval(pg_get_serial_sequence('"auth_group"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "auth_group";
+COMMIT;
+        """)
     ]
