@@ -5,7 +5,7 @@ addons:
   postgresql: '9.4'
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
-  - python cscsite/manage.py migrate --settings=cscsite.settings.test_travis
+  - python cscsite/manage.py syncdb --settings=cscsite.settings.test_travis
 env:
   - DJANGO=1.7.4
 install:
