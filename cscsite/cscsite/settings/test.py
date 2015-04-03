@@ -51,5 +51,4 @@ class DisableMigrations(object):
 
 
 # disable migration in tests; it's a hack until Django 1.8 with --keepdb
-_MIGRATION_MODULES_BACKUP = MIGRATION_MODULES
 MIGRATION_MODULES = DisableMigrations()
