@@ -15,3 +15,5 @@ DATABASES = {
         "PORT": ""
         }
     }
+
+MIGRATION_MODULES = _MIGRATION_MODULES_BACKUP
