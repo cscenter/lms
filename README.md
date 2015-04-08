@@ -1,10 +1,10 @@
-CSC site
-========
+Computer Science Center/Club websites
+=====================================
 
 [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=xBAa4nJZ4qY7pPgbqyTE&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
 Dev setup
-=========
+---------
 
 * setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev` and `libpq-dev` globally;
 * create virtualenv for the project and open it;
@@ -35,13 +35,13 @@ $ python cscsite/manage.py syncdb --settings=cscsite.settings.local
 
 
 Production setup
-===============
+----------------
 
 See [infrastructure](https://github.com/cscenter/site/tree/master/infrastructure) subdirectory.
 
 
 Production deploy
-=================
+-----------------
 
 Right now it's done manually (it's probably better to leave it so until staging
 environment is set up). To simplify the process, production host's ssh key is
@@ -77,7 +77,7 @@ every update.
 
 
 Misc
-====
+----
 
 To test:
 
