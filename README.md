@@ -79,9 +79,12 @@ every update.
 Misc
 ----
 
-To test:
+To autorun test on change:
 
 ```
 pip install gorun
 gorun.py gorun_settings.py
 ```
+
+For details on architecture and general concerns, see
+[about.md](https://github.com/cscenter/site/tree/master/about.md) (in Russian).
