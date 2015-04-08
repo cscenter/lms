@@ -57,9 +57,18 @@ are `^b n`/`^b p` for switching "tabs" and `^b d` to "detach", where `^b` is
 non-sudoers user `cscweb`, so it's handy to have two separate "tabs" in tmux:
 one with `sudo su - cscweb` (this will "switch" the tab to `cscweb` user) and
 other with `ubuntu` user
-* `git pull` in `cscweb` "tab", optionally followed by `./manage.py migrate
-MIGRATED_APP --settings=cscsite.settings.production` or `./manage.py
-collectstatic --noinput --settings=cscsite.settings.production`
+* `git pull` in `cscweb` "tab", optionally followed by
+
+```
+./manage.py migrate MIGRATED_APP --settings=cscsite.settings.production
+```
+
+or
+
+```
+./manage.py collectstatic --noinput --settings=cscsite.settings.production
+```
+
 * `sudo service uwsgi reload` in `ubuntu` tab. Note that uwsgi reload is needed
 to reload translation, static file update (see
 [ManifestStaticFileStorage docs](https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage)
