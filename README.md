@@ -48,15 +48,15 @@ environment is set up). To simplify the process, production host's ssh key is
 set as "deploy key" on github, so one can `git pull` the code from
 production. Common workflow is as follows:
 
-* `ssh ubuntu@compscicenter.ru`; you can ask Sergei Lebedev or Ekaterina
-Lebedeva to add your key into `authorized_keys`
-* `tmux attach`; tmux is used on the server, please consult
+* `ssh ubuntu@compscicenter.ru`. You can ask Sergei Lebedev or Ekaterina
+Lebedeva to add your key into `authorized_keys`;
+* `tmux attach`. Tmux is used on the server, please consult
 [cheatsheet](http://www.dayid.org/os/notes/tm.html) for shorcuts (most used ones
 are `^b n`/`^b p` for switching "tabs" and `^b d` to "detach", where `^b` is
 `ctrl+b`). For a bit better security, web-related stuff is done by a separate
 non-sudoers user `cscweb`, so it's handy to have two separate "tabs" in tmux:
 one with `sudo su - cscweb` (this will "switch" the tab to `cscweb` user) and
-other with `ubuntu` user
+other with `ubuntu` user;
 * `git pull` in `cscweb` "tab", optionally followed by
 
 ```
@@ -71,7 +71,7 @@ or
 
 * `sudo service uwsgi reload` in `ubuntu` tab. Note that uwsgi reload is needed
 to reload translation, static file update (see
-[ManifestStaticFileStorage docs](https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage)
+[ManifestStaticFilesStorage docs](https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage)
 for details) and python modules, so you will need to reload uwsgi on almost
 every update.
 
