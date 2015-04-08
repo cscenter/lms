@@ -52,11 +52,11 @@ production. Common workflow is as follows:
 Lebedeva to add your key into `authorized_keys`;
 * `tmux attach`. Tmux is used on the server, please consult
 [cheatsheet](http://www.dayid.org/os/notes/tm.html) for shorcuts (most used ones
-are `^b n`/`^b p` for switching "tabs" and `^b d` to "detach", where `^b` is
-`ctrl+b`). For a bit better security, web-related stuff is done by a separate
-non-sudoers user `cscweb`, so it's handy to have two separate "tabs" in tmux:
-one with `sudo su - cscweb` (this will "switch" the tab to `cscweb` user) and
-other with `ubuntu` user;
+are `^b n`/`^b p` to switch "tabs", `^b c` to create tab and `^b d` to "detach",
+where `^b` is `ctrl+b`). For a bit better security, web-related stuff is done by
+a separate non-sudoers user `cscweb`, so it's handy to have two separate "tabs"
+in tmux: one with `sudo su - cscweb` (this will "switch" the tab to `cscweb`
+user) and other with `ubuntu` user;
 * `git pull` in `cscweb` "tab", optionally followed by
 
 ```
