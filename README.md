@@ -3,8 +3,8 @@ CSC site
 
 [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=xBAa4nJZ4qY7pPgbqyTE&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
-Dev installation
-================
+Dev setup
+=========
 
 * setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev` and `libpq-dev` globally;
 * create virtualenv for the project and open it;
