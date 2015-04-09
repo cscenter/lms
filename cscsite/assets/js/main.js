@@ -270,6 +270,8 @@ $(document).ready(function () {
     });
 
     $('.marks-table')
+    // NOTE(Dmitry): this is needed to prevent default change-on-scroll
+    //               behavior on HTML5 number input fields
         .on('mousewheel', 'input[type=number]', function (e) {
             this.blur();
         })
