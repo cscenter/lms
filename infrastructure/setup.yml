@@ -4,9 +4,6 @@
   user: ubuntu
   sudo: True
 
-  # vars_files:
-  #   - vars/setup-vars.yml
-
   vars:
     root_user: ubuntu
     cscweb_user: cscweb
@@ -27,27 +24,29 @@
   - name: upgrade all packages to the latest version
     apt: update_cache=yes upgrade=dist
 
-  # - name: check if a reboot is required
-  #   stat: path=/var/run/reboot-required get_md5=no
-  #   register: reboot_file
+  - name: check if a reboot is required
+    stat: path=/var/run/reboot-required get_md5=no
+    register: reboot_file
 
-  # - name: reboot the server
-  #   command: /sbin/reboot removes=/var/run/reboot-required
-  #   when: reboot_file.stat.exists == true
+  - name: reboot the server
+    command: /sbin/reboot removes=/var/run/reboot-required
+    when: reboot_file.stat.exists == true
 
-  # - name: wait for server to go offline (because reboot)
-  #   sudo: no
-  #   local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
-  #   when: reboot_file.stat.exists == true
+  - name: wait for server to go offline (because reboot)
+    sudo: no
+    local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
+    when: reboot_file.stat.exists == true
 
-  # - name: wait for server to come back online
-  #   sudo: no
-  #   local_action: wait_for host="{{ inventory_hostname }}" port=22
-  #   when: reboot_file.stat.exists == true
+  - name: wait for server to come back online
+    sudo: no
+    local_action: wait_for host="{{ inventory_hostname }}" port=22
+    when: reboot_file.stat.exists == true
 
-  # TODO: add this:
-  # sudo nano /etc/environment
-  # LC_ALL="en_US.utf-8"
+  - name: set default locale LANG to UTF-8
+    lineinfile: dest=/etc/default/locale line='LANG="en_US.utf8"' regexp='^LANG=' state=present insertafter=BOF
+
+  - name: set default locale LC_ALL to UTF-8
+    lineinfile: dest=/etc/environment line='LC_ALL="en_US.utf8"' regexp='^LC_ALL=' state=present insertafter=BOF
 
   - name: install stuff
     apt:
@@ -56,8 +55,6 @@
     with_items:
       # core items
       - nginx
-      # - mysql-server
-      # - libmysqlclient-dev
       - postgresql-9.4
       - libpq-dev
       - python-setuptools
@@ -153,7 +150,7 @@
       - ""
       # TODO(Dmitry): move static/media one level up
       # - static
-       # - media
+      # - media
       - logs
       - env
 
@@ -172,32 +169,51 @@
 
   # prepare database
 
-  # TODO: pgsql here
+  - name: ensure the PostgreSQL service is running
+    service: name=postgresql state=started enabled=yes
 
-  # - name: create database
-  #   mysql_db: name=cscdb state=present
-  #   register: cscdb
+  - name: ensure user exists
+    sudo_user: postgres
+    postgresql_user:
+      name: csc
+      password: FooBar
+      state: present
 
-  # - name: add user to database
-  #   mysql_user: name=csc password=FooBar priv=cscdb.*:ALL state=present
+  - name: ensure database is created
+    sudo_user: postgres
+    postgresql_db:
+      name: cscdb
+      encoding: 'UTF-8'
+      owner: csc
+      state: present
+    register: cscdb
 
-  # - name: init Django db
-  #   sudo_user: "{{ cscweb_user }}"
-  #   django_manage:
-  #     command: "{{ item }}"
-  #     app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
-  #     settings: cscsite.settings.production
-  #     virtualenv: "/home/{{ cscweb_user }}/site/env/"
-  #   with_items:
-  #     - syncdb
-  #     - "migrate --no-initial-data"
-  #     - migrate
-  #     - collectstatic
-  #   when: cscdb.changed
+  - name: ensure user has access to the database
+    sudo_user: postgres
+    postgresql_user:
+      db: cscdb
+      name: csc
+      priv: ALL
+      state: present
 
-  # this should be run on db init while we use MySQL
-  # mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p  mysql
-  # reboot mysql
+  - name: ensure user does not have unnecessary privileges
+    sudo_user: postgres
+    postgresql_user:
+      name: csc
+      role_attr_flags: NOSUPERUSER,CREATEDB
+      state: present
+
+  - name: init Django db
+    sudo_user: "{{ cscweb_user }}"
+    django_manage:
+      command: "{{ item }}"
+      app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
+      settings: cscsite.settings.production
+      virtualenv: "/home/{{ cscweb_user }}/site/env/"
+    with_items:
+      - syncdb
+      - collectstatic
+    when: cscdb.changed
 
   - name: ensure folder for file-based cache exists
     file: path=/tmp/django_cache mode=777 state=directory
