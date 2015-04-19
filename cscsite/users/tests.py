@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import re
+
 from itertools import chain
 
 from django.test import TestCase
@@ -9,7 +11,9 @@ from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text
+from django.utils.translation import ugettext as _
 
 from bs4 import BeautifulSoup
 import factory
@@ -17,10 +21,11 @@ from icalendar import Calendar, Event
 
 from learning.tests.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
-    AssignmentFactory, NonCourseEventFactory
+    AssignmentFactory, NonCourseEventFactory, \
+    UserFactory as LearningUserFactory, CourseFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
-from .models import CSCUser
+from .models import CSCUser, CSCUserReference
 from .admin import CSCUserCreationForm
 
 
@@ -31,6 +36,17 @@ class UserFactory(factory.Factory):
     username = "testuser"
     password = "test123foobar@!"
     email = "foo@bar.net"
+
+class CSCUserReferenceFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CSCUserReference
+
+    signature = "FIO"
+    note = ""
+    # student = factory.SubFactory(UserFactory, groups=['Student'])
+
+class CustomSemesterFactory(SemesterFactory):
+    type = factory.Iterator(['spring', 'autumn'])
 
 
 class UserTests(TestCase):
@@ -375,3 +391,103 @@ class ICalTests(MyUtilitiesMixin, TestCase):
                                [evt['SUMMARY']
                                 for evt in cal.subcomponents
                                 if isinstance(evt, Event)])
+
+
+class UserReferenceTests(MyUtilitiesMixin, TestCase):
+    def test_user_detail_view(self):
+        """Show reference-add button only to curators (superusers)"""
+        # check user page without curator credentials
+        student = LearningUserFactory.create(groups=['Student'])
+        self.doLogin(student)
+        url = reverse('user_detail', args=[student.pk])
+        resp = self.client.get(url)
+        self.assertEquals(resp.context['create_reference_allowed'], False)
+        soup = BeautifulSoup(resp.content)
+        button = soup.find('a', text=_("Create reference"))
+        self.assertIsNone(button)
+        # check with curator credentials
+        curator = LearningUserFactory.create(is_superuser=True)
+        self.doLogin(curator)
+        resp = self.client.get(url)
+        self.assertEquals(resp.context['create_reference_allowed'], True)
+        soup = BeautifulSoup(resp.content)
+        button = soup.find('a', text=_("Create reference"))
+        self.assertIsNotNone(button)
+
+    def test_user_detail_reference_list_view(self):
+        """Check reference list appears on student profile page for curators only"""
+        student = LearningUserFactory.create(groups=['Student'])
+        EnrollmentFactory.create()
+        CSCUserReferenceFactory.create(student=student)
+        curator = LearningUserFactory.create(is_superuser=True)
+        url = reverse('user_detail', args=[student.pk])
+        self.doLogin(curator)
+        response = self.client.get(url)
+        self.assertEquals(
+            response.context['user_object'].cscuserreference_set.count(), 1)
+        soup = BeautifulSoup(response.content)
+        list_header = soup.find('h4', text=re.compile(_("Student references")))
+        self.assertIsNotNone(list_header)
+        self.doLogin(student)
+        response = self.client.get(url)
+        soup = BeautifulSoup(response.content)
+        list_header = soup.find('h4', text=_("Student references"))
+        self.assertIsNone(list_header)
+
+    def test_create_reference(self):
+        """Check FIO substitues in signature input field
+           Check redirect to reference detail after form submit
+        """
+        curator = LearningUserFactory.create(is_superuser=True)
+        self.doLogin(curator)
+        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        form_url = reverse('user_reference_add', args=[user.id])
+        resp = self.client.get(form_url)
+        soup = BeautifulSoup(resp.content)
+        sig_input = soup.find(id="id_signature")
+        self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
+
+        student = LearningUserFactory.create(groups=['Student'])
+        reference = CSCUserReferenceFactory.build(student=student)
+        expected_reference_id = 1
+        form_data = model_to_dict(reference)
+        response = self.client.post(form_url, form_data)
+        self.assertRedirects(response,
+            reverse('user_reference_detail',
+                    args=[student.id, expected_reference_id])
+        )
+
+    def test_reference_detail(self):
+        """Check enrollments duplicates, reference fields"""
+        student = LearningUserFactory.create(groups=['Student'])
+        # add 2 enrollments from 1 course reading exactly
+        course = CourseFactory.create()
+        semesters = (CustomSemesterFactory.create_batch(2, year=2014))
+        enrollments = []
+        for s in semesters:
+            e = EnrollmentFactory.create(
+                course_offering=CourseOfferingFactory.create(
+                    course=course,
+                    semester=s),
+                student=student,
+                grade='good'
+            )
+            enrollments.append(e)
+        reference = CSCUserReferenceFactory.create(
+            student=student,
+            note="TEST",
+            signature="SIGNATURE")
+        url = reverse('user_reference_detail',
+                             args=[student.id, reference.id])
+        self.doLogin(student)
+        self.assertLoginRedirect(url)
+        curator = LearningUserFactory.create(is_superuser=True)
+        self.doLogin(curator)
+        response  = self.client.get(url)
+        self.assertEqual(response.context['object'].note, "TEST")
+        soup = BeautifulSoup(response.content)
+        sig_text = soup.find(text=re.compile('SIGNATURE'))
+        self.assertIsNotNone(sig_text)
+        es = soup.find(id='reference-page-body').findAll('li')
+        expected_enrollments_count = 1
+        self.assertEquals(len(es), expected_enrollments_count)

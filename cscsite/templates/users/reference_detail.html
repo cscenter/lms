@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+{% load core_tags %}
+
+{% block stylesheets %}
+    <link href="{% static "css/reference-detail.css" %}" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+    <page size="A4">
+        <img src="{% static "img/top_reference.png" %}" id="reference-page-header">
+        <div id="reference-page-request">{% trans "Reference|Detail|request" %}</div>
+        <div id="reference-page-body">
+            <div class="title">{% trans "Reference|Detail|title" %}</div>
+            {% blocktrans with full_name=object.student.get_full_name enrollment_year=object.student.enrollment_year first_name=object.student.first_name patronymic=object.student.patronymic %}Подтверждаю, что {{ full_name }} является студентом Computer Science центра с
+            сентября {{ enrollment_year }} года. За время обучения {{ first_name }} {{ patronymic }} успешно сдал(а) следующие курсы:
+            {% endblocktrans %}
+            <ol>
+                {% for course_id, enrollment in user_enrollments.items %}
+                    <li>
+                        {{ enrollment.course_offering }}
+                      ({{ enrollment.grade_display|lower }})
+                    </li>
+                {% endfor %}
+            </ol>
+            <div id="reference-page-note">
+                {{ object.note }}
+            </div>
+        </div>
+        <div id="reference-page-curator-signature">
+            <div class="left">
+                {{ object.signature }}
+            </div>
+            <div class="cursive"></div>
+        </div>
+        <div id="reference-page-date-line">
+            <div class="left">
+                {% trans "Reference|Detail|signature" %}
+            </div>
+            <div class="date">{% now "d.m.Y" %}</div>
+        </div>
+        <div id="reference-page-footer">
+            <div class="title">{% trans "Reference|Detail|info" %}:</div>
+            http://compscicenter.ru
+            <div class="email">info@compscicenter.ru</div>
+        </div>
+    </page>
+{% endblock content %}

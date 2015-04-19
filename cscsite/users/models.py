@@ -308,3 +308,22 @@ class SHADCourseRecord(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
+
+
+@python_2_unicode_compatible
+class CSCUserReference(TimeStampedModel):
+    signature = models.CharField(_("Reference|signature"), max_length=255)
+    note = models.TextField(_("Reference|note"), blank=True)
+
+    student = models.ForeignKey(
+        CSCUser,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["signature"]
+        verbose_name = _("User reference record")
+        verbose_name_plural = _("User reference records")
+
+    def __str__(self):
+        return smart_text(self.student)

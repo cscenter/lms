@@ -17,6 +17,7 @@ from django.views.decorators.cache import never_cache
 from django.views import generic
 from django.utils import timezone
 from django.utils.http import is_safe_url
+from django.utils.translation import ugettext_lazy as _
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from dateutil.relativedelta import relativedelta
@@ -25,11 +26,11 @@ from icalendar import Calendar, Event, vText, vUri
 from icalendar.prop import vInline
 import pytz
 
-from core.views import ProtectedFormMixin, StaffOnlyMixin
+from core.views import ProtectedFormMixin, StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent, Semester
-from .forms import LoginForm, UserProfileForm
-from .models import CSCUser
+from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
+from .models import CSCUser, CSCUserReference
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -132,7 +133,8 @@ class UserDetailView(generic.DetailView):
                               'borrows__book',
                               'onlinecourserecord_set',
                               'shadcourserecord_set',
-                              'study_programs']
+                              'study_programs',
+                              'cscuserreference_set']
             select_list += ['comment_last_author']
         return (auth.get_user_model()
                 ._default_manager
@@ -153,6 +155,8 @@ class UserDetailView(generic.DetailView):
             (u.is_authenticated()
              and (u == self.object
                   or u.is_superuser))
+        context['create_reference_allowed'] = \
+            u.is_authenticated() and u.is_superuser
         student_projects = list(self.object.studentproject_set
                                 .prefetch_related('semesters')
                                 .order_by('pk'))
@@ -255,6 +259,56 @@ class UserSearchView(StaffOnlyMixin, generic.TemplateView):
                                        .filter(enrollment_year__isnull=False)
                                        .order_by('enrollment_year')
                                        .distinct())
+        return context
+
+
+class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
+    model = CSCUserReference
+    template_name = "users/reference_add.html"
+    form_class = CSCUserReferenceCreateForm
+
+    def get_initial(self):
+        initial = super(UserReferenceCreateView, self).get_initial()
+        initial['signature'] = self.request.user.get_full_name()
+        return initial
+
+    def form_valid(self, form):
+        form.instance.student_id = self.kwargs['pk']
+        return super(UserReferenceCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('user_reference_detail',
+                       args=[self.object.student_id, self.object.pk])
+
+    def is_form_allowed(self, user, obj):
+        return user.is_superuser
+
+
+class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
+    model = CSCUserReference
+    template_name = "users/reference_detail.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(UserReferenceDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        enrollments_query = (self.object.student.enrollment_set
+            .filter(created__lte=self.object.created)
+            .exclude(grade__in=['not_graded', 'unsatisfactory'])
+            .select_related('course_offering',
+                            'course_offering__course',
+                            'course_offering__semester')
+            .order_by('pk'))
+        # remove duplicates (store enrollment with higher grade)
+        enrollments = {}
+        for e in enrollments_query:
+            course_id = e.course_offering.course_id
+            if course_id in enrollments:
+                if e.grade > enrollments[course_id].grade:
+                    enrollments[course_id] = e
+            else:
+                enrollments[course_id] = e
+        context['user_enrollments'] = enrollments
+
         return context
 
 

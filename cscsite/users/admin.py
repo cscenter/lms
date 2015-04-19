@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail.admin import AdminImageMixin
 
 from core.admin import UbereditorMixin
-from users.models import CSCUser, \
+from users.models import CSCUser, CSCUserReference, \
     OnlineCourseRecord, SHADCourseRecord
 
 
@@ -68,3 +68,4 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
 
 
 admin.site.register(CSCUser, CSCUserAdmin)
+admin.site.register(CSCUserReference)

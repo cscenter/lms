@@ -12,6 +12,9 @@
         {% if is_editing_allowed %}
         <a href="{% url 'user_update' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
         {% endif %}
+        {% if create_reference_allowed and user_object.is_student or user_object.enrollment_year %}
+        <a href="{% url 'user_reference_add' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Create reference" %}</a>
+        {% endif %}
         {% if request.user.is_staff and user_object.studentinfo %}
         <a href="{% url 'student_info_update' user_object.studentinfo.pk %}" class="btn btn-primary" role="button">{% trans "Edit info record" %}</a>
         {% endif %}
@@ -284,6 +287,20 @@
         </tr>
       </table>
       {% endif %}
+
+      {% if request.user.is_superuser and user_object.is_student and  user_object.cscuserreference_set.count > 0 %}
+        <h4 class="bigger-margin">{% trans "Student references" %}:</h4>
+          <ul>
+            {% for reference in user_object.cscuserreference_set.all %}
+            <li>
+              <a href="{% url 'user_reference_detail' user_object.id reference.id %}">
+                {{ reference.created|date:"d.m.Y" }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+      {% endif %}
+
     </div>
     <div class="col-xs-3">
       {% thumbnail user_object.photo "200x200" crop="center" as im %}

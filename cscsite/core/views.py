@@ -34,6 +34,13 @@ class StaffOnlyMixin(UserPassesTestMixin):
         return user.is_staff or user.is_superuser
 
 
+class SuperUserOnlyMixin(UserPassesTestMixin):
+    raise_exception = False
+
+    def test_func(self, user):
+        return user.is_superuser
+
+
 class ProtectedFormMixin(object):
     def __init__(self, *args, **kwargs):
         self._cached_object = None
