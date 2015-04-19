@@ -8,7 +8,8 @@ from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView, UserSearchJSONView, UserSearchView #, StudentInfoUpdateView
+    ICalEventsView, UserSearchJSONView, UserSearchView, \
+    UserReferenceCreateView, UserReferenceDetailView  # , StudentInfoUpdateView
 from textpages.views import TextpageOpenView, TextpageStudentView, \
     CustomTextpageOpenView
 from learning.views import \
@@ -55,6 +56,12 @@ urlpatterns = patterns('',
         name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
+    url(r'^users/(?P<pk>\d+)/reference/add$',
+        UserReferenceCreateView.as_view(),
+        name='user_reference_add'),
+    url(r'^users/(?P<user_id>\d+)/reference/(?P<pk>\d+)$',
+        UserReferenceDetailView.as_view(),
+        name='user_reference_detail'),
     url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
         name='user_ical_classes'),
     url(r'^users/(?P<pk>\d+)/csc_assignments.ics',

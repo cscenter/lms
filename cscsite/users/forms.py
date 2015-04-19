@@ -11,7 +11,7 @@ import floppyforms as forms
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
-from .models import CSCUser
+from .models import CSCUser, CSCUserReference
 
 
 class LoginForm(AuthenticationForm):
@@ -81,6 +81,23 @@ class UserProfileForm(forms.ModelForm):
             'github_id': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepic.org/users/<b>STEPIC-ID</b>")
         }
+
+
+class CSCUserReferenceCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Div('signature',
+                'note',
+                Div(Div(Submit('save', _('Save'), css_class='pull-right'),
+                    css_class='controls'),
+                css_class="form-group"))
+        )
+        super(CSCUserReferenceCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = CSCUserReference
+        fields = ['signature', 'note']
 
 
 # class StudentInfoForm(forms.ModelForm):
