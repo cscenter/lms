@@ -302,7 +302,8 @@ DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
 DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
 DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 
-NEWRELIC_CONF = "../newrelic.ini"
+NEWRELIC_CONF = BASE_DIR + "/../../newrelic.ini"
+
 NEWRELIC_ENV = 'development'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
