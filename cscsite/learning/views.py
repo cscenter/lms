@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, F
+from django.db.models import Q, F, Prefetch
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
@@ -26,13 +26,14 @@ from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
-    ProtectedFormMixin, LoginRequiredMixin
+    ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from core import comment_persistence
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
     AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
-    CourseOfferingNewsNotification, Semester, NonCourseEvent
+    CourseOfferingNewsNotification, Semester, NonCourseEvent, \
+    StudentProject
 from learning.forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -41,6 +42,7 @@ from learning.forms import CourseOfferingPKForm, \
     MarksSheetTeacherFormFabrique
 from core.notifications import get_unread_notifications_cache
 from . import utils
+from users.models import CSCUser
 
 
 logger = logging.getLogger(__name__)
@@ -258,10 +260,11 @@ class SemesterListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = (super(SemesterListView, self)
                    .get_context_data(**kwargs))
-        semester_list = list(context["semester_list"])
+        # skip summer semesters
+        semester_list = [s for s in context["semester_list"]
+                           if s.type != Semester.TYPES.summer]
         if not semester_list:
             return context
-
         for semester in semester_list:
             # HACK(lebedev): since we don't have a 'Prefetch' object
             # yet, there's no way to impose ordering on the related
@@ -1219,7 +1222,8 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(MarksSheetTeacherDispatchView, self)
                    .get_context_data(**kwargs))
-        semester_list = list(context["semester_list"])
+        semester_list = [s for s in context["semester_list"]
+                           if s.type != Semester.TYPES.summer]
         if not semester_list:
             return context
 
@@ -1486,3 +1490,39 @@ class NonCourseEventDetailView(generic.DetailView):
     model = NonCourseEvent
     context_object_name = 'event'
     template_name = "learning/noncourseevent_detail.html"
+
+
+class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
+    template_name = "learning/diplomas.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
+        try:
+            year = int(self.request.GET.get('year'))
+        except TypeError:
+            year = now().date().year
+        context['students'] = (CSCUser.objects
+            .filter(
+                is_center_student=True,
+                groups__name__in=["Graduate"],
+            )
+            .order_by('last_name', 'first_name')
+            .prefetch_related(
+                Prefetch(
+                    'enrollment_set',
+                    queryset=Enrollment.objects
+                        # .filter(course_offering__semester__year=year)
+                        .exclude(grade__in=[
+                            'not_graded', 'unsatisfactory'])
+                        .select_related('course_offering', 'course_offering__semester', 'course_offering__course'),
+                    to_attr='enrollments'
+                ),
+                Prefetch(
+                    'studentproject_set',
+                    queryset=StudentProject.objects.order_by('project_type'),
+                    to_attr='projects'
+                ),
+            )
+        )
+
+        return context

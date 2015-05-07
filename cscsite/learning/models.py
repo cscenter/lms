@@ -60,6 +60,7 @@ class Course(TimeStampedModel):
 @python_2_unicode_compatible
 class Semester(models.Model):
     TYPES = Choices(('spring', _("spring")),
+                    ('summer', _("summer")),
                     ('autumn', _("autumn")))
 
     year = models.PositiveSmallIntegerField(

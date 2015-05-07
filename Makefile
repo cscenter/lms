@@ -1,8 +1,15 @@
 run:
-	python cscsite/manage.py runserver --settings=cscsite.settings.local
+	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
+	cd cscsite && python manage.py runserver --settings=cscsite.settings.local
 
 syncdb:
 	python cscsite/manage.py syncdb --settings=cscsite.settings.local
+
+msg:
+	cd cscsite && python manage.py makemessages -l ru
+	
+msgcompile:
+	cd cscsite && python manage.py compilemessages
 
 freeze:
 	pip freeze --local > requirements.txt
