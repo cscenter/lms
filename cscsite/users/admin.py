@@ -49,7 +49,8 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
-        (_('Personal info'), {'fields': ['last_name', 'first_name', 'patronymic',
+        (_('Personal info'), {'fields': ['last_name', 'first_name', 
+                                         'patronymic', 'gender',
                                          'photo', 'note', 'enrollment_year',
                                          'graduation_year',
                                          'csc_review']}),

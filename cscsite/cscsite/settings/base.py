@@ -15,6 +15,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 PROJECT_DIR = Path(__file__).ancestor(3)
+
 MEDIA_ROOT = PROJECT_DIR.child("media")
 MEDIA_URL = "/media/"
 STATIC_ROOT = PROJECT_DIR.child("static")
@@ -262,7 +263,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # don't know what will happen if we change this when there are models in DB
 SPRING_TERM_START = '10 jan'
-AUTUMN_TERM_START = '10 aug'
+SUMMER_TERM_START = '1 jul'
+AUTUMN_TERM_START = '1 sep'
 
 THUMBNAIL_DEBUG = False
 

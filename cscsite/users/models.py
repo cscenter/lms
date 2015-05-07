@@ -75,6 +75,14 @@ class CSCUser(AbstractUser):
                      ('reinstated', _("StudentInfo|Reinstalled")),
                      ('will_graduate', _("StudentInfo|Will graduate")))
 
+    GENDER_MALE = 'M'
+    GENDER_FEMALE = 'F'
+    GENDER_CHOICES = (
+        (GENDER_MALE, _('Male')),
+        (GENDER_FEMALE, _('Female')),
+    )
+    gender = models.CharField(_("Gender"), max_length=1, choices=GENDER_CHOICES)
+
     _original_comment = None
 
     patronymic = models.CharField(

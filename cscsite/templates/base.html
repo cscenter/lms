@@ -284,16 +284,21 @@
             <div class="col-xs-12">
               <div class="logo-cell"></div>
               <ul>
-                <a href="{% url 'course_markssheet_staff_dispatch' %}">
                   <li class="{% current 'course_markssheet_staff_dispatch' %}">
-                    {% trans "Courses" %}
+                    <a href="{% url 'course_markssheet_staff_dispatch' %}">
+                      {% trans "Courses" %}
+                    </a>
                   </li>
-                </a>
-                <a href="{% url 'user_search' %}">
                   <li class="{% current 'user_search' %}">
-                    {% trans "User search" %}
+                    <a href="{% url 'user_search' %}">
+                      {% trans "User search" %}
+                    </a>
                   </li>
-                </a>
+                  <li class="{% current 'students_diplomas' %}">
+                    <a href="{% url 'students_diplomas' %}">
+                      {% trans "Generate diplomas" %}
+                    </a>
+                  </li>
               </ul>
             </div>
           </div>
@@ -346,6 +351,8 @@
     <script type="text/javascript" src="{% static "js/marked.js" %}"></script>
 
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+    {% block javascripts %}{% endblock javascripts %}
 
     {% sitemetrics by yandex for "25844420" %}
   </body>

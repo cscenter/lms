@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+{% load core_tags %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/github.min.css">
+    <link href="{% static "css/diplomas.css" %}" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container">
+    <pre style="position:relative;">
+<span class="btn-clipboard">Copy</span>
+<code class="tex">
+{% for s in students %}
+\diploma {{s.id}}
+{{ '{' }}{{s.first_name}}{{ '}' }} {{ '{' }}{{s.patronymic}}{{ '}' }} {{ '{' }}{{s.last_name}}{{ '}' }}
+{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
+{{ '{' }}направлению Computer Science{{ '}' }}
+{{ '{' }}сентября {{s.enrollment_year}} года{{ '}' }}
+{{ '{' }}{% for enrollment in s.enrollments %}
+{% spaceless %}\course{Алгоритмы и структуры данных}{2 семестра}{96}{отлично}
+{Александр Сергеевич Куликов}{Михаил Эдуардович Дворкин}{% endspaceless %}{% if forloop.last %}
+{% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{% for project in s.projects %}
+{% spaceless %}\theory{Максима Александровича Алексеева}{assoc.prof.~George Wadhington University}
+{Разработка алгоритма реконструкции предковых геномов с учётом вставок и удалений генов}{% endspaceless %}{% if forloop.last %}
+{% endif %}{% endfor %}{{ '}' }}
+{% endfor %}
+</code>
+    </pre>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="http://yastatic.net/highlightjs/8.2/languages/tex.min.js"></script>
+    <script type="text/javascript" src="{% static "js/zero_clipboard/ZeroClipboard.min.js" %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Highlight TeX code
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+
+            // Copy to clipboard
+            var client = new ZeroClipboard( $(".btn-clipboard") );
+            client.on({
+                "copy": function(e) {
+                    var text = $(e.target).next('code').text();
+                    client.setText(text);
+                    $(e.target).text('Copied!');
+                },
+                "aftercopy": function(e) {
+                    console.log(e.target);
+                    setTimeout(function() { $(e.target).text("Copy")}, 700);
+                },
+                "complete": function(client, args) {
+                    console.log("Text copied to clipboard: \n" + args.text );
+                },
+                "error": function(e) {
+                    ZeroClipboard.destroy();
+                }
+            });
+        });
+    </script>
+{% endblock javascripts %}

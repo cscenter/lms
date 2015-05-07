@@ -37,7 +37,8 @@ from learning.views import \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherDispatchView, \
-    NonCourseEventDetailView
+    NonCourseEventDetailView, \
+    StudentsDiplomasView
 
 
 admin.autodiscover()
@@ -198,6 +199,9 @@ urlpatterns = patterns('',
     url(r'^staff/user-search.json$',
         UserSearchJSONView.as_view(),
         name='user_search_json'),
+    url(r'^staff/dimplomas/$',
+        StudentsDiplomasView.as_view(),
+        name='students_diplomas'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),
