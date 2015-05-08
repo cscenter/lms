@@ -1,4 +1,8 @@
+import sys
+
 from .base import *
+
+
 
 INSTALLED_APPS += ('fixture_media',
                    'debug_toolbar',
@@ -31,3 +35,17 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO'
+    }
+}
