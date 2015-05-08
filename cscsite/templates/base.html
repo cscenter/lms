@@ -44,64 +44,68 @@
             <div class="logo-cell">
               <a href="{% url 'index' %}">
                 <div class="logo-container">
-                  <img src="{% static "img/transparent_logo.png" %}">
+                  <img src="{% static "img/transparent_logo.png" %}" alt="Computer Science Center">
                 </div>
               </a>
             </div>
             <ul>
-              <a href="{% url 'syllabus' %}">
-                <li class="{% current 'about' %}">
+              <li class="{% current 'about' %}">
+                <a href="{% url 'syllabus' %}">
                   {% trans "About CSC" %} <i class="fa fa-caret-down"></i>
-                </li>
-              </a>
-              <a href="{% url 'course_video_list' %}">
-                <li class="{% current 'course_video_list' %}">
+                </a>
+              </li>
+              <li class="{% current 'course_video_list' %}">
+                <a href="{% url 'course_video_list' %}">
                   {% trans "Videos" %}
-                </li>
-              </a>
-              <a href="{% url 'lectures' %}">
-                <li class="{% current 'lectures' %}">
+                </a>
+              </li>
+              <li class="{% current 'lectures' %}">
+                <a href="{% url 'lectures' %}">
                   {% trans "Lectures|topmenu" %}
-                </li>
-              </a>
+                </a>
+              </li>
               {% if user.is_authenticated %}
                 {% if user.is_student %}
-                  <a href="{% url LEARNING_BASE %}">
-                    <li class="{% current 'learning' %} for-students">
+                  <li class="{% current 'learning' %} for-students">
+                    <a href="{% url LEARNING_BASE %}">
                       {% trans "Learning" %} <i class="fa fa-caret-down"></i>
-                    </li>
-                  </a>
+                    </a>
+                  </li>
                 {% endif %}
                 {% if user.is_teacher %}
-                  <a href="{% url TEACHING_BASE %}">
-                    <li class="{% current 'teaching' %} for-teachers">
+                  <li class="{% current 'teaching' %} for-teachers">
+                    <a href="{% url TEACHING_BASE %}">
                       {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
-                    </li>
-                  </a>
+                    </a>
+                  </li>
                 {% endif %}
                 {% if user.is_staff %}
-                  <a href="{% url 'course_markssheet_staff_dispatch' %}">
-                    <li class="{% current 'staff' %} for-staff">
+                  <li class="{% current 'staff' %} for-staff">
+                    <a href="{% url 'course_markssheet_staff_dispatch' %}">
                       {% trans "Supervision" %}  <i class="fa fa-caret-down"></i>
-                    </li>
-                  </a>
+                    </a>
+                  </li>
                 {% endif %}
               {% else %}
-                  <a href="{% url 'enrollment' %}">
-                    <li class="{% current 'enrollment_menu' %}">
+                  <li class="{% current 'enrollment_menu' %}">
+                    <a href="{% url 'enrollment' %}">
                       {% trans "CSC|Enrollment" %}   <i class="fa fa-caret-down"></i>
-                    </li>
-                  </a>
+                    </a>
+                  </li>
               {% endif %}
               {% if not user.is_authenticated %}
-              <a href="{% url 'contacts' %}">
-                <li class="{% current 'contacts' %}">{% trans "Contacts" %}</li>
-              </a>
+                <li class="{% current 'contacts' %}">
+                  <a href="{% url 'contacts' %}">
+                    {% trans "Contacts" %}
+                  </a>
+                </li>
               {% endif %}
               {% if user.is_staff %}
-              <a href="{% url 'admin:index' %}" target="_blank">
-                <li>{% trans "Admin page" %}</li>
-              </a>
+                <li>
+                  <a href="{% url 'admin:index' %}" target="_blank">
+                    {% trans "Admin page" %}
+                  </a>
+                </li>
               {% endif %}
             </ul>
           </div>
@@ -125,31 +129,31 @@
             <div class="col-xs-12">
               <div class="logo-cell"></div>
               <ul>
-                <a href="{% url 'syllabus' %}">
-                  <li class="{% current 'syllabus' %}">
+                <li class="{% current 'syllabus' %}">
+                  <a href="{% url 'syllabus' %}">
                     {% trans "Syllabus" %}
-                  </li>
-                </a>
-                <a href="{% url 'course_list' %}">
-                  <li class="{% current 'course_list' %}">
+                  </a>
+                </li>
+                <li class="{% current 'course_list' %}">
+                  <a href="{% url 'course_list' %}">
                     {% trans "Courses" %}
-                  </li>
-                </a>
-                <a href="{% url 'orgs' %}" style="display: block;">
-                  <li class="{% current 'orgs' %}">
+                  </a>
+                </li>
+                <li class="{% current 'orgs' %}">
+                  <a href="{% url 'orgs' %}" style="display: block;">
                     {% trans "Organizers" %}
-                  </li>
-                </a>
-                <a href="{% url 'teachers' %}">
-                  <li class="{% current 'teachers' %}">
+                  </a>
+                </li>
+                <li class="{% current 'teachers' %}">
+                  <a href="{% url 'teachers' %}">
                     {% trans "Professors" %}
-                  </li>
-                </a>
-                <a href="{% url 'alumni' %}">
-                  <li class="{% current 'alumni' %}">
+                  </a>
+                </li>
+                <li class="{% current 'alumni' %}">
+                  <a href="{% url 'alumni' %}">
                     {% trans "Alumni" %}
-                  </li>
-                </a>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -162,16 +166,16 @@
               <div class="col-xs-12">
                 <div class="logo-cell"></div>
                 <ul>
-                  <a href="{% url 'enrollment' %}">
-                    <li class="{% current 'enrollment' %}">
+                  <li class="{% current 'enrollment' %}">
+                    <a href="{% url 'enrollment' %}">
                       {% trans "CSC|Enrollment info" %}
-                    </li>
-                  </a>
-                  <a href="{% url 'enrollment_application' %}">
-                    <li class="{% current 'enrollment_application' %}">
+                    </a>
+                  </li>
+                  <li class="{% current 'enrollment_application' %}">
+                    <a href="{% url 'enrollment_application' %}">
                       {% trans "Enrollment application" %}
-                    </li>
-                  </a>
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -185,46 +189,46 @@
             <div class="col-xs-12">
               <div class="logo-cell"></div>
               <ul>
-                <a href="{% url 'assignment_list_student' %}">
-                  <li class="{% current 'assignment_list_student' %}">
+                <li class="{% current 'assignment_list_student' %}">
+                  <a href="{% url 'assignment_list_student' %}">
                     {% trans "Assignments" %}
                     {% if request.unread_notifications_cache.assignments_student %}
                     <span class="badge">
                       {{ request.unread_notifications_cache.assignments_student|length }}
                     </span>
                     {% endif %}
-                  </li>
-                </a>
-                <a href="{% url 'timetable_student' %}">
-                  <li class="{% current 'timetable_student' %}">
+                  </a>
+                </li>
+                <li class="{% current 'timetable_student' %}">
+                  <a href="{% url 'timetable_student' %}">
                     {% trans "My timetable" %}
-                  </li>
-                </a>
-                <a href="{% url 'calendar_full_student' %}">
-                  <li class="{% current 'calendar_full_student' %}">
+                  </a>
+                </li>
+                <li class="{% current 'calendar_full_student' %}">
+                  <a href="{% url 'calendar_full_student' %}">
                     {% trans "Calendar" %}
-                  </li>
-                </a>
-                <a href="{% url 'course_list_student' %}">
-                  <li class="{% current 'course_list_student' %}">
+                  </a>
+                </li>
+                <li class="{% current 'course_list_student' %}">
+                  <a href="{% url 'course_list_student' %}">
                     {% trans "My courses" %}
                     {% if request.unread_notifications_cache.courseoffering_news %}
                     <span class="badge">
                       {{ request.unread_notifications_cache.courseoffering_news|length }}
                     </span>
                     {% endif %}
-                  </li>
-                </a>
-              <a href="{% url 'library_book_list' %}">
-                  <li class="{% current 'library_book_list' %}">
+                  </a>
+                </li>
+                <li class="{% current 'library_book_list' %}">
+                  <a href="{% url 'library_book_list' %}">
                     {% trans "library"|capfirst %}
-                  </li>
-                </a>
-               <a href="{% url 'useful_stuff' %}">
-                  <li class="{% current 'useful_stuff' %}">
+                  </a>
+                </li>
+                <li class="{% current 'useful_stuff' %}">
+                  <a href="{% url 'useful_stuff' %}">
                     {% trans "Useful stuff" %}
-                  </li>
-                </a>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -237,41 +241,41 @@
             <div class="col-xs-12">
               <div class="logo-cell"></div>
               <ul>
-                <a href="{% url 'assignment_list_teacher' %}">
-                  <li class="{% current 'assignment_list_teacher' %}">
+                <li class="{% current 'assignment_list_teacher' %}">
+                  <a href="{% url 'assignment_list_teacher' %}">
                     {% trans "Assignments" %}
                     {% if request.unread_notifications_cache.assignments_teacher %}
                     <span class="badge">
                       {{ request.unread_notifications_cache.assignments_teacher|length }}
                     </span>
                     {% endif %}
-                  </li>
-                </a>
-                <a href="{% url 'timetable_teacher' %}">
-                  <li class="{% current 'timetable_teacher' %}">
+                  </a>
+                </li>
+                <li class="{% current 'timetable_teacher' %}">
+                  <a href="{% url 'timetable_teacher' %}">
                     {% trans "Timetable" %}
-                  </li>
-                </a>
-                <a href="{% url 'calendar_full_teacher' %}">
-                  <li class="{% current 'calendar_full_teacher' %}">
+                  </a>
+                </li>
+                <li class="{% current 'calendar_full_teacher' %}">
+                  <a href="{% url 'calendar_full_teacher' %}">
                     {% trans "Calendar" %}
-                  </li>
-                </a>
-                <a href="{% url 'course_list_teacher' %}">
-                  <li class="{% current 'course_list_teacher' %}">
+                  </a>
+                </li>
+                <li class="{% current 'course_list_teacher' %}">
+                  <a href="{% url 'course_list_teacher' %}">
                     {% trans "My courses" %}
                     {% if request.unread_notifications_cache.courseoffering_news %}
                     <span class="badge">
                       {{ request.unread_notifications_cache.courseoffering_news|length }}
                     </span>
                     {% endif %}
-                  </li>
-                </a>
-                <a href="{% url 'markssheet_teacher_dispatch' %}">
-                  <li class="{% current 'markssheet_teacher_dispatch' %}">
+                  </a>
+                </li>
+                <li class="{% current 'markssheet_teacher_dispatch' %}">
+                  <a href="{% url 'markssheet_teacher_dispatch' %}">
                     {% trans "Marks sheet" %}
-                  </li>
-                </a>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
