@@ -1,3 +1,8 @@
+# Mac specific files
+.DS_Store
+._*
+
+*.sublime-project
 *.pyc
 *.sqlite3
 cscenter_web.pdf
