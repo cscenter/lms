@@ -7,6 +7,7 @@ Dev setup
 ---------
 
 * setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev` and `libpq-dev` globally;
+    note for mac users: `brew intall libpng libjpeg libpqxx`
 * create virtualenv for the project and open it;
 * setup PostgreSQL database:
 
