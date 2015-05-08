@@ -89,6 +89,11 @@ h4.no-top-margin {
   color: white;
 }
 
+.header ul a {
+  display: block;
+}
+
+
 .header a:hover {
   text-decoration: none;
 }
