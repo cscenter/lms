@@ -231,6 +231,7 @@ MENU_URL_NAMES = {
 
     'course_markssheet_staff_dispatch': {'parent': 'staff'},
     'course_markssheet_staff': {'alias': 'course_markssheet_staff_dispatch'},
+    'students_diplomas': {'parent': 'staff'},
     'user_detail': {},
     'custom_text_page': {},
     'user_search': {'parent': 'staff'},
