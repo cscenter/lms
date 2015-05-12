@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, F, Prefetch
+from django.db.models import Q, F, Prefetch, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
@@ -1497,25 +1497,30 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        try:
-            year = int(self.request.GET.get('year'))
-        except TypeError:
-            year = now().date().year
         context['students'] = (CSCUser.objects
             .filter(
                 is_center_student=True,
-                groups__name__in=["Graduate"],
+                status=CSCUser.STATUS.will_graduate,
             )
             .order_by('last_name', 'first_name')
             .prefetch_related(
                 Prefetch(
                     'enrollment_set',
                     queryset=Enrollment.objects
-                        # .filter(course_offering__semester__year=year)
                         .exclude(grade__in=[
                             'not_graded', 'unsatisfactory'])
-                        .select_related('course_offering', 'course_offering__semester', 'course_offering__course'),
+                        .select_related('course_offering',
+                                        'course_offering__semester',
+                                        'course_offering__course'
+                                        ),
                     to_attr='enrollments'
+                ),
+                Prefetch(
+                    'enrollments__course_offering__courseclass_set',
+                    queryset=CourseClass.objects.annotate(Count('pk')),
+                ),
+                Prefetch(
+                    'enrollments__course_offering__teachers',
                 ),
                 Prefetch(
                     'studentproject_set',
@@ -1524,5 +1529,7 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
                 ),
             )
         )
+
+        # import ipdb; ipdb.set_trace()
 
         return context

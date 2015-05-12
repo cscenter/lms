@@ -937,7 +937,7 @@ msgstr "Поиск пользователей"
 
 #: templates/base.html:298
 msgid "Generate diplomas"
-msgstr ""
+msgstr "Сгенерировать дипломы"
 
 #: templates/base.html:323
 msgid "Computer Science Center Все права защищены, 2011–15 гг."
