@@ -450,6 +450,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         student = LearningUserFactory.create(groups=['Student'])
         reference = CSCUserReferenceFactory.build(student=student)
         expected_reference_id = 1
+        form_url = reverse('user_reference_add', args=[student.id])
         form_data = model_to_dict(reference)
         response = self.client.post(form_url, form_data)
         self.assertRedirects(response,
