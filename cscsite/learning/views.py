@@ -1530,6 +1530,4 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
             )
         )
 
-        # import ipdb; ipdb.set_trace()
-
         return context
