@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-06 16:48+0300\n"
+"POT-Creation-Date: 2015-05-14 15:36+0300\n"
 "PO-Revision-Date: 2015-04-02 17:41+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,6 +177,7 @@ msgid "Either text or file should be non-empty"
 msgstr "Требуется текст либо приложенный файл"
 
 #: learning/forms.py:270 learning/models.py:535
+#, python-brace-format
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
@@ -229,7 +230,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:51 templates/base.html:134 templates/base.html.py:288
+#: learning/models.py:51 templates/base.html:140 templates/base.html.py:294
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:31
@@ -416,7 +417,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:434 templates/base.html:189 templates/base.html.py:241
+#: learning/models.py:434 templates/base.html:195 templates/base.html.py:247
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -792,6 +793,7 @@ msgid "News|text"
 msgstr "Текст"
 
 #: news/models.py:36
+#, python-brace-format
 msgid ""
 "First {n_par} paragraphs or anything before {marker} will serve as excerpt; "
 "LaTeX+Markdown is enabled"
@@ -819,19 +821,19 @@ msgstr "Администрирование Django"
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
-#: templates/base.html:53
+#: templates/base.html:55
 msgid "About CSC"
 msgstr "О Центре"
 
-#: templates/base.html:58 templates/learning/courses_video_list.html:9
+#: templates/base.html:60 templates/learning/courses_video_list.html:9
 msgid "Videos"
 msgstr "Видео"
 
-#: templates/base.html:63
+#: templates/base.html:65
 msgid "Lectures|topmenu"
 msgstr "Лекторий"
 
-#: templates/base.html:70 templates/learning/assignment_list_student.html:22
+#: templates/base.html:72 templates/learning/assignment_list_student.html:22
 #: templates/learning/assignment_list_teacher.html:22
 #: templates/learning/calendar.html:24
 #: templates/learning/timetable_student.html:27
@@ -839,7 +841,7 @@ msgstr "Лекторий"
 msgid "Learning"
 msgstr "Обучение"
 
-#: templates/base.html:77 templates/learning/assignment_list_student.html:30
+#: templates/base.html:79 templates/learning/assignment_list_student.html:30
 #: templates/learning/assignment_list_teacher.html:30
 #: templates/learning/calendar.html:32
 #: templates/learning/timetable_student.html:35
@@ -847,39 +849,39 @@ msgstr "Обучение"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:84
+#: templates/base.html:86
 msgid "Supervision"
 msgstr "Курирование"
 
-#: templates/base.html:91
+#: templates/base.html:93
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:97
+#: templates/base.html:100
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:102
+#: templates/base.html:107
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:109
+#: templates/base.html:115
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:112 users/forms.py:40
+#: templates/base.html:118 users/forms.py:40
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:129
+#: templates/base.html:135
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:139
+#: templates/base.html:145
 msgid "Organizers"
 msgstr "Организаторы"
 
-#: templates/base.html:144
+#: templates/base.html:150
 #: templates/learning/assignment_student_detail.html:124
 #: templates/learning/courses_list_student.html:22
 #: templates/learning/courses_list_student.html:97
@@ -888,62 +890,62 @@ msgstr "Организаторы"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:149
+#: templates/base.html:155
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:166
+#: templates/base.html:172
 msgid "CSC|Enrollment info"
 msgstr "Информация"
 
-#: templates/base.html:171
+#: templates/base.html:177
 msgid "Enrollment application"
 msgstr "Анкета"
 
-#: templates/base.html:199
+#: templates/base.html:205
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:204 templates/base.html.py:256
+#: templates/base.html:210 templates/base.html.py:262
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:209 templates/base.html.py:261
+#: templates/base.html:215 templates/base.html.py:267
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:219 templates/library/book_list.html:11
+#: templates/base.html:225 templates/library/book_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: templates/base.html:224
+#: templates/base.html:230
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:251
+#: templates/base.html:257
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:271 templates/learning/markssheet_teacher.html:16
+#: templates/base.html:277 templates/learning/markssheet_teacher.html:16
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:293 templates/user_search.html:10
+#: templates/base.html:299 templates/user_search.html:10
 msgid "User search"
 msgstr "Поиск пользователей"
 
-#: templates/base.html:298
+#: templates/base.html:304
 msgid "Generate diplomas"
 msgstr "Сгенерировать дипломы"
 
-#: templates/base.html:323
+#: templates/base.html:329
 msgid "Computer Science Center Все права защищены, 2011–15 гг."
 msgstr "Computer Science Center Все права защищены, 2011–15 гг."
 
-#: templates/base.html:325
+#: templates/base.html:331
 msgid "report a problem"
 msgstr "сообщить об ошибке"
 
@@ -1219,6 +1221,10 @@ msgstr "Текущие"
 msgid "No videos yet"
 msgstr "Список видео пуст"
 
+#: templates/learning/markssheet_teacher.html:67
+msgid "Total score"
+msgstr "Суммарный балл"
+
 #: templates/learning/simple_delete_confirmation.html:12
 msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
@@ -1493,6 +1499,7 @@ msgid "Password"
 msgstr "Пароль"
 
 #: users/forms.py:31
+#, python-brace-format
 msgid "You can also <a href=\"{0}\">reset your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">сменить ваш пароль</a>"
 

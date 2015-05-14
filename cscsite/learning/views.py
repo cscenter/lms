@@ -1375,6 +1375,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
             student = enrollment.student
             if student not in structured:
                 structured[student] = OrderedDict()
+        total_score = defaultdict(int)
         for a_s in data:
             if a_s.student not in structured:
                 continue  # student isn't enrolled
@@ -1386,6 +1387,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                 cell = get_a_s_field(a_s.pk)
             structured[a_s.student][a_s.assignment] = cell
 
+            if a_s.grade is not None:
+                key = str(a_s.student.pk) + '_' + \
+                      str(a_s.assignment.course_offering.pk)
+                total_score[key] += int(a_s.grade)
         if len(structured) > 0:
             header = structured.values()[0].keys()
         else:
@@ -1403,7 +1408,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                   get_final_grade_field(
                                       self.course_offering.pk,
                                       student.pk),
-                                  by_assignment)
+                                  by_assignment,
+                                  total_score[str(student.pk) + '_' +
+                                            str(self.course_offering.pk)]
+                                  )
                                  for student, by_assignment
                                  in structured.iteritems()]
         context['user_type'] = self.user_type
