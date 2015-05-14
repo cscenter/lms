@@ -242,7 +242,7 @@ msgstr "весна"
 
 #: learning/models.py:63
 msgid "summer"
-msgstr ""
+msgstr "лето"
 
 #: learning/models.py:64
 msgid "autumn"

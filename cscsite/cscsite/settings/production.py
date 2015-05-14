@@ -76,8 +76,6 @@ EMAIL_HOST_PASSWORD = '***REMOVED***'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
-
 # -- learning
 SLIDESHARE_API_KEY = "E3GDS7t4"
 SLIDESHARE_SECRET = "fnk6fOLp"
@@ -92,3 +90,5 @@ DBBACKUP_S3_ACCESS_KEY = 'AKIAJHTXLPDHW3TR5AHQ'
 DBBACKUP_S3_SECRET_KEY = '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'
 
 NEWRELIC_ENV = 'production'
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'

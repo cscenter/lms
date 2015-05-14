@@ -11,6 +11,9 @@ msg:
 msgcompile:
 	cd cscsite && python manage.py compilemessages
 
+static:
+	cd cscsite && python manage.py collectstatic --noinput --settings=cscsite.settings.production
+
 freeze:
 	pip freeze --local > requirements.txt
 
