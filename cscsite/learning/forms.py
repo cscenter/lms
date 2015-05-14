@@ -347,6 +347,9 @@ class AssignmentForm(forms.ModelForm):
 class MarksSheetTeacherFormFabrique(object):
     @staticmethod
     def build_form_class(a_s_list, enrollment_list):
+        """New form.Form subclass with AssignmentStudent's list and Enrollment
+        grade
+        """
         fields = {'a_s_{0}'.format(a_s.pk):
                   forms.IntegerField(show_hidden_initial=True,
                                      min_value=0,

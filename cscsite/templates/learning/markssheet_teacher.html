@@ -63,9 +63,12 @@
                   </div>
                 </td>
                 {% endfor %}
+                <td class="marks-header marks-header-vert">
+                  <div class="inner">{% trans "Total score" %}</div>
+                </td>
                 <td></td>
               </tr>
-              {% for student, final_grade, by_assignment in structured %}
+              {% for student, final_grade, by_assignment, total_score in structured %}
               <tr>
                 <td class="marks-header marks-header-horiz">
                   <a href="{{ student.get_absolute_url }}">
@@ -90,6 +93,7 @@
                   {% endif %}
                 </td>
                 {% endfor %}
+                <td>{{ total_score }}</td>
                 <td>
                   <span class="marks-sheet-form-cell final-grade-cell">
                     {{ final_grade }}
