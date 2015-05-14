@@ -70,6 +70,8 @@ or
 ./manage.py collectstatic --noinput --settings=cscsite.settings.production
 ```
 
+Don't forget to clear sometimes static folder with `--clear` option
+
 * `sudo service uwsgi reload` in `ubuntu` tab. Note that uwsgi reload is needed
 to reload translation, static file update (see
 [ManifestStaticFilesStorage docs](https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage)

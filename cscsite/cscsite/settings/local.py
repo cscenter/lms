@@ -49,3 +49,15 @@ LOGGING = {
         'level': 'INFO'
     }
 }
+
+# Looks for files in PIPELINE_CSS and PIPELINE_JS
+STATICFILES_FINDERS += (
+    'pipeline.finders.ManifestFinder',
+)
+
+# Only concatenate files for debug purpose
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+
+# Versioning disabled if DEBUG=True
+PIPELINE_ENABLED = True

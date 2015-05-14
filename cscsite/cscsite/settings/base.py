@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'learning',
     'library',
     'crutches',
+    'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -311,3 +312,42 @@ NEWRELIC_CONF = BASE_DIR + "/../../newrelic.ini"
 NEWRELIC_ENV = 'development'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
+
+
+# Js/Css compression settings
+
+# Enable versioning
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+
+# Disable compression
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+
+# Enable concatenation and compression.
+PIPELINE_ENABLED = True
+
+# Do not wrap js output with anonimous function
+PIPELINE_DISABLE_WRAPPER = True
+
+PIPELINE_JS = {
+    'base': {
+        'source_filenames': (
+            'js/holder.js',
+            'js/readmore.min.js',
+            'js/md5.js',
+            'js/EpicEditor-v0.2.2/js/epiceditor.min.js',
+            # custom marked build clashes with the one in EpicEditor,
+            # therefore this include should be *after* EpicEditor
+            'js/marked.js',
+            'js/bootstrap.min.js',
+            'js/main.js',
+        ),
+        'output_filename': 'js/dist/base.js',
+    },
+}
