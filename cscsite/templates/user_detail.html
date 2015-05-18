@@ -206,6 +206,14 @@
             {% endif %}
           </td>
         </tr>
+        {% if request.user.is_superuser %}
+          <tr>
+            <td>{% trans "Email" %}:</td>
+            <td>
+              {{ user_object.email }}
+            </td>
+          </tr>
+        {% endif %}
         <tr>
           <td>{% trans "StudentInfo|University year" %}:</td>
           <td>{{ user_object.uni_year_at_enrollment|default:"—" }}</td>
