@@ -18,8 +18,9 @@
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- TODO: fix variables in bootstrap -->
+    <link href="{% static "css/vendor/jquery.jgrowl.min.css" %}" rel="stylesheet">
     <link href="{% static "css/style.css" %}" rel="stylesheet">
-    <link href="{% static "img/fav.png" %}" rel="icon">
+    <link rel="icon" type="image/png" href="{% static "img/fav.png" %}" >
     <link href="{% static "css/highlight-styles/solarized_light.css" %}" rel="stylesheet">
     {% block stylesheets %} {% endblock stylesheets %}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -349,6 +350,16 @@
     <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
 
     {% javascript 'base' %}
+    {% if messages %}
+      <script type="text/javascript">
+        $(function() {
+          $.jGrowl.defaults.closerTemplate = '<div>[{% trans "close all" %}]</div>';
+          {% for message in messages %}
+            $.jGrowl("{{ message | safe }}", { position: 'bottom-right', life: 15000 });
+          {% endfor %}
+        });
+      </script>
+    {% endif %}
 
     {% block javascripts %}{% endblock javascripts %}
 

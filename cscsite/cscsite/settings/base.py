@@ -346,8 +346,17 @@ PIPELINE_JS = {
             # therefore this include should be *after* EpicEditor
             'js/marked.js',
             'js/bootstrap.min.js',
+            'js/vendor/jquery.jgrowl.min.js',
             'js/main.js',
         ),
         'output_filename': 'js/dist/base.js',
     },
+    'fileinput': {
+        'source_filenames': (
+            'js/bootstrap-fileinput/fileinput.min.js',
+            'js/bootstrap-fileinput/fileinput_locale_ru.js',
+            'js/bootstrap-fileinput/main.js',
+        ),
+        'output_filename': 'js/dist/fileinput.js',
+    }
 }

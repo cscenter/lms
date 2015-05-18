@@ -36,6 +36,7 @@ from learning.views import \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
+    MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView, \
     StudentsDiplomasView
@@ -154,6 +155,9 @@ urlpatterns = patterns('',
     url(r'^teaching/marks/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)\.csv$',
         MarksSheetTeacherCSVView.as_view(),
         name='markssheet_teacher_csv'),
+    url(r'^teaching/marks/(?P<course_offering_pk>\d+)/import/stepic$',
+        MarksSheetTeacherImportCSVFromStepicView.as_view(),
+        name='markssheet_teacher_csv_import_stepic'),
 
     url(r"^courses/$", SemesterListView.as_view(),
         name="course_list"),

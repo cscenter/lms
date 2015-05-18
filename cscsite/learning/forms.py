@@ -10,6 +10,7 @@ from crispy_forms.bootstrap import StrictButton
 import floppyforms as forms
 
 from core.forms import Ubereditor
+from core.validators import FileValidator
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
     Enrollment, \
@@ -341,6 +342,29 @@ class AssignmentForm(forms.ModelForm):
                   'is_online',
                   'grade_min',
                   'grade_max']
+
+
+class MarksSheetTeacherImportGradesForm(forms.Form):
+    """Import grades for particular CourseOffering from *.csv
+    """
+
+    def __init__(self, *args, **kwargs):
+        c_slug = kwargs['c_slug']
+        del(kwargs['c_slug'])
+        super(MarksSheetTeacherImportGradesForm, self).__init__(*args, **kwargs)
+        self.fields['assignment'].queryset = \
+            Assignment.objects.filter(course_offering__course__slug=c_slug)
+
+    assignment = forms.ModelChoiceField(
+        queryset = Assignment.objects.all(),
+        empty_label=None)
+
+    csvfile = forms.FileField(
+        label=_('Select csv file'),
+        validators=[FileValidator(
+            allowd_mimetypes=('text/csv', 'application/vnd.ms-excel')),
+        ]
+    )
 
 
 # Hipster factory class!

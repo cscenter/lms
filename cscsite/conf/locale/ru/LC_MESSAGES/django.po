@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-14 15:36+0300\n"
+"POT-Creation-Date: 2015-05-18 16:12+0300\n"
 "PO-Revision-Date: 2015-04-02 17:41+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,6 +32,34 @@ msgid ""
 "enabled"
 msgstr ""
 "Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+
+#: core/validators.py:35
+#, python-format
+msgid ""
+"Extension '%(extension)s' not allowed. Allowed extensions are: "
+"'%(allowed_extensions)s.'"
+msgstr ""
+
+#: core/validators.py:36
+#, python-format
+msgid ""
+"MIME type '%(mimetype)s' is not valid. Allowed types are: "
+"%(allowed_mimetypes)s."
+msgstr ""
+
+#: core/validators.py:37
+#, python-format
+msgid ""
+"The current file %(size)s, which is too small. The minumum file size is "
+"%(allowed_size)s."
+msgstr ""
+
+#: core/validators.py:38
+#, python-format
+msgid ""
+"The current file %(size)s, which is too large. The maximum file size is "
+"%(allowed_size)s."
+msgstr ""
 
 #: index/forms.py:17
 msgid "Ya|Unsubscribe"
@@ -69,119 +97,119 @@ msgstr "Произошла ошибка, но подписка будет уда
 msgid "Subscription removed!"
 msgstr "Подписка удалена!"
 
-#: learning/forms.py:19 templates/learning/simple_delete_confirmation.html:14
+#: learning/forms.py:20 templates/learning/simple_delete_confirmation.html:14
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:22 learning/forms.py:223
-#: templates/learning/markssheet_teacher.html:21 users/forms.py:92
+#: learning/forms.py:23 learning/forms.py:224
+#: templates/learning/markssheet_teacher.html:27 users/forms.py:92
 msgid "Save"
 msgstr "Сохранить"
 
-#: learning/forms.py:32 learning/forms.py:110 learning/models.py:134
+#: learning/forms.py:33 learning/forms.py:111 learning/models.py:134
 #: learning/models.py:241 learning/models.py:292 learning/models.py:760
 #: learning/models.py:802 templates/learning/courseclass_detail.html:44
 #: templates/learning/noncourseevent_detail.html:28
 msgid "Description"
 msgstr "Описание"
 
-#: learning/forms.py:34
+#: learning/forms.py:35
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
 
-#: learning/forms.py:52 learning/forms.py:278
+#: learning/forms.py:53 learning/forms.py:279
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:57 learning/forms.py:208 learning/forms.py:281
+#: learning/forms.py:58 learning/forms.py:209 learning/forms.py:282
 msgid "Text"
 msgstr "Текст"
 
-#: learning/forms.py:76 learning/models.py:36 users/models.py:287
+#: learning/forms.py:77 learning/models.py:36 users/models.py:287
 #: users/models.py:304
 msgid "Course|name"
 msgstr "Название"
 
-#: learning/forms.py:81 learning/models.py:45
+#: learning/forms.py:82 learning/models.py:45
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:101 learning/models.py:250
+#: learning/forms.py:102 learning/models.py:250
 msgid "Venue"
 msgstr "Место проведения"
 
-#: learning/forms.py:104 learning/models.py:288 learning/models.py:336
+#: learning/forms.py:105 learning/models.py:288 learning/models.py:336
 msgid "Type"
 msgstr "Тип"
 
-#: learning/forms.py:107 learning/models.py:290 learning/models.py:758
+#: learning/forms.py:108 learning/models.py:290 learning/models.py:758
 msgid "CourseClass|Name"
 msgstr "Название"
 
-#: learning/forms.py:115 learning/models.py:296 learning/views.py:475
+#: learning/forms.py:116 learning/models.py:296 learning/views.py:476
 #: templates/learning/courseclass_detail.html:37
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
 msgid "Slides"
 msgstr "Слайды"
 
-#: learning/forms.py:119 templates/learning/assignment_detail.html:38
+#: learning/forms.py:120 templates/learning/assignment_detail.html:38
 #: templates/learning/courseclass_detail.html:65
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
-#: learning/forms.py:121 learning/forms.py:293
+#: learning/forms.py:122 learning/forms.py:294
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
-#: learning/forms.py:124 learning/models.py:300 learning/views.py:482
+#: learning/forms.py:125 learning/models.py:300 learning/views.py:483
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: learning/forms.py:128 learning/models.py:304
+#: learning/forms.py:129 learning/models.py:304
 msgid "please insert HTML for embedded video player"
 msgstr "пожалуйста, вставьте HTML для встроенного видеоплеера"
 
-#: learning/forms.py:131
+#: learning/forms.py:132
 msgid "Other materials"
 msgstr "Материалы"
 
-#: learning/forms.py:136 learning/models.py:309 learning/models.py:763
+#: learning/forms.py:137 learning/models.py:309 learning/models.py:763
 #: templates/learning/courseoffering_detail.html:92
 msgid "Date"
 msgstr "Дата"
 
-#: learning/forms.py:140 learning/models.py:310 learning/models.py:764
+#: learning/forms.py:141 learning/models.py:310 learning/models.py:764
 msgid "Starts at"
 msgstr "Начало"
 
-#: learning/forms.py:144 learning/models.py:311 learning/models.py:765
+#: learning/forms.py:145 learning/models.py:311 learning/models.py:765
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:169 templates/learning/courseclass_detail.html:58
+#: learning/forms.py:170 templates/learning/courseclass_detail.html:58
 #: templates/learning/courseoffering_detail.html:97
 #: templates/learning/timetable_student.html:67
 #: templates/learning/timetable_teacher.html:63
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:198
+#: learning/forms.py:199
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:238
+#: learning/forms.py:239
 msgid "Either text or file should be non-empty"
 msgstr "Требуется текст либо приложенный файл"
 
-#: learning/forms.py:270 learning/models.py:535
+#: learning/forms.py:271 learning/models.py:535
 #, python-brace-format
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
-#: learning/forms.py:286 templates/learning/assignment_detail.html:29
+#: learning/forms.py:287 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:63
@@ -190,23 +218,27 @@ msgstr "Оценка не может быть больше максимальн�
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:291
+#: learning/forms.py:292
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:296
+#: learning/forms.py:297
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
-#: learning/forms.py:299 learning/models.py:421
+#: learning/forms.py:300 learning/models.py:421
 #: templates/learning/assignment_student_detail.html:141
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
-#: learning/forms.py:302 learning/models.py:425
+#: learning/forms.py:303 learning/models.py:425
 #: templates/learning/assignment_student_detail.html:139
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
+
+#: learning/forms.py:363 templates/learning/markssheet_teacher.html:158
+msgid "Select csv file"
+msgstr "Выбрать csv-файл"
 
 #: learning/models.py:38 news/models.py:27 textpages/models.py:43
 msgid "News|slug"
@@ -230,10 +262,10 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:51 templates/base.html:140 templates/base.html.py:294
+#: learning/models.py:51 templates/base.html:141 templates/base.html.py:295
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
-#: templates/learning/markssheet_teacher.html:31
+#: templates/learning/markssheet_teacher.html:45
 msgid "Courses"
 msgstr "Курсы"
 
@@ -417,7 +449,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:434 templates/base.html:195 templates/base.html.py:247
+#: learning/models.py:434 templates/base.html:196 templates/base.html.py:248
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -701,32 +733,44 @@ msgstr "Город"
 msgid "Cities"
 msgstr "Города"
 
-#: learning/views.py:489
+#: learning/utils.py:113
+msgid "No user with Stepic ID {}"
+msgstr "Пользователь со Stepic ID {} не найден"
+
+#: learning/views.py:490
 msgid "Files"
 msgstr "Файлы"
 
-#: learning/views.py:501
+#: learning/views.py:502
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:509 templates/learning/timetable_student.html:112
+#: learning/views.py:510 templates/learning/timetable_student.html:112
 #: templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: learning/views.py:638
+#: learning/views.py:639
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:641 templates/learning/courseoffering_detail.html:40
+#: learning/views.py:642 templates/learning/courseoffering_detail.html:40
 #: templates/learning/courses_list_student.html:51
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1060
+#: learning/views.py:1061
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
+
+#: learning/views.py:1513
+msgid "Import results: {}/{} successes"
+msgstr "Импорт из stepic: {}/{} успешно"
+
+#: learning/views.py:1517
+msgid "Invalid form. Details in log"
+msgstr ""
 
 #: library/admin.py:23 library/models.py:41
 msgid "read by"
@@ -821,19 +865,19 @@ msgstr "Администрирование Django"
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
-#: templates/base.html:55
+#: templates/base.html:56
 msgid "About CSC"
 msgstr "О Центре"
 
-#: templates/base.html:60 templates/learning/courses_video_list.html:9
+#: templates/base.html:61 templates/learning/courses_video_list.html:9
 msgid "Videos"
 msgstr "Видео"
 
-#: templates/base.html:65
+#: templates/base.html:66
 msgid "Lectures|topmenu"
 msgstr "Лекторий"
 
-#: templates/base.html:72 templates/learning/assignment_list_student.html:22
+#: templates/base.html:73 templates/learning/assignment_list_student.html:22
 #: templates/learning/assignment_list_teacher.html:22
 #: templates/learning/calendar.html:24
 #: templates/learning/timetable_student.html:27
@@ -841,7 +885,7 @@ msgstr "Лекторий"
 msgid "Learning"
 msgstr "Обучение"
 
-#: templates/base.html:79 templates/learning/assignment_list_student.html:30
+#: templates/base.html:80 templates/learning/assignment_list_student.html:30
 #: templates/learning/assignment_list_teacher.html:30
 #: templates/learning/calendar.html:32
 #: templates/learning/timetable_student.html:35
@@ -849,39 +893,39 @@ msgstr "Обучение"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:86
+#: templates/base.html:87
 msgid "Supervision"
 msgstr "Курирование"
 
-#: templates/base.html:93
+#: templates/base.html:94
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:100
+#: templates/base.html:101
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:107
+#: templates/base.html:108
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:115
+#: templates/base.html:116
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:118 users/forms.py:40
+#: templates/base.html:119 users/forms.py:40
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:135
+#: templates/base.html:136
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:145
+#: templates/base.html:146
 msgid "Organizers"
 msgstr "Организаторы"
 
-#: templates/base.html:150
+#: templates/base.html:151
 #: templates/learning/assignment_student_detail.html:124
 #: templates/learning/courses_list_student.html:22
 #: templates/learning/courses_list_student.html:97
@@ -890,64 +934,68 @@ msgstr "Организаторы"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:155
+#: templates/base.html:156
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:172
+#: templates/base.html:173
 msgid "CSC|Enrollment info"
 msgstr "Информация"
 
-#: templates/base.html:177
+#: templates/base.html:178
 msgid "Enrollment application"
 msgstr "Анкета"
 
-#: templates/base.html:205
+#: templates/base.html:206
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:210 templates/base.html.py:262
+#: templates/base.html:211 templates/base.html.py:263
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:215 templates/base.html.py:267
+#: templates/base.html:216 templates/base.html.py:268
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:225 templates/library/book_list.html:11
+#: templates/base.html:226 templates/library/book_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: templates/base.html:230
+#: templates/base.html:231
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:257
+#: templates/base.html:258
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:277 templates/learning/markssheet_teacher.html:16
+#: templates/base.html:278 templates/learning/markssheet_teacher.html:22
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:299 templates/user_search.html:10
+#: templates/base.html:300 templates/user_search.html:10
 msgid "User search"
 msgstr "Поиск пользователей"
 
-#: templates/base.html:304
+#: templates/base.html:305
 msgid "Generate diplomas"
 msgstr "Сгенерировать дипломы"
 
-#: templates/base.html:329
+#: templates/base.html:330
 msgid "Computer Science Center Все права защищены, 2011–15 гг."
 msgstr "Computer Science Center Все права защищены, 2011–15 гг."
 
-#: templates/base.html:331
+#: templates/base.html:332
 msgid "report a problem"
 msgstr "сообщить об ошибке"
+
+#: templates/base.html:357
+msgid "close all"
+msgstr "закрыть все"
 
 #: templates/index.html:15
 msgid "Learn more"
@@ -1221,9 +1269,39 @@ msgstr "Текущие"
 msgid "No videos yet"
 msgstr "Список видео пуст"
 
-#: templates/learning/markssheet_teacher.html:67
+#: templates/learning/markssheet_teacher.html:38
+msgid "From Stepic"
+msgstr "Из Stepic"
+
+#: templates/learning/markssheet_teacher.html:81
 msgid "Total score"
 msgstr "Суммарный балл"
+
+#: templates/learning/markssheet_teacher.html:140
+msgid "Import stepic statements"
+msgstr "Импортировать баллы Stepic"
+
+#: templates/learning/markssheet_teacher.html:147
+msgid "Select assignment"
+msgstr "Выбрать задание"
+
+#: templates/learning/markssheet_teacher.html:155
+msgid "Score will be imported for selected assignment"
+msgstr "Оценки будут импортированы для выбранного задания"
+
+#: templates/learning/markssheet_teacher.html:160
+msgid ""
+"Should contains comma-separated values of user stepic id and assignment "
+"score. First row is header. Example:"
+msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
+
+#: templates/learning/markssheet_teacher.html:166
+msgid "Close"
+msgstr "Закрыть"
+
+#: templates/learning/markssheet_teacher.html:167
+msgid "Import"
+msgstr "Импортировать"
 
 #: templates/learning/simple_delete_confirmation.html:12
 msgid "Are you sure you want to delete"
@@ -1689,9 +1767,6 @@ msgstr "Справки пользователей"
 #~ msgstr ""
 #~ "Только одно прочтение для каждого курса может быть опубликовано в разделе "
 #~ "видео (уже опубликованное — {})"
-
-#~ msgid "Create assignment"
-#~ msgstr "Создать задание"
 
 #~ msgid "please save before downloading"
 #~ msgstr "пожалуйста, сохраните перед скачиванием"
