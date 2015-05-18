@@ -10,6 +10,7 @@ from calendar import Calendar
 from collections import OrderedDict, defaultdict
 from itertools import chain
 
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
@@ -39,7 +40,7 @@ from learning.forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetTeacherFormFabrique
+    MarksSheetTeacherImportGradesForm, MarksSheetTeacherFormFabrique
 from core.notifications import get_unread_notifications_cache
 from . import utils
 from users.models import CSCUser
@@ -1492,6 +1493,29 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                               + by_assignment.values()
                               + [enrollment_grades[student]])])
         return response
+
+
+class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
+    """Import students grades from stepic platform"""
+    def post(self, request, *args, **kwargs):
+        filter = dict(pk=self.kwargs.get('course_offering_pk'))
+        if not request.user.is_superuser:
+            filter['teachers__in'] = [request.user.pk]
+        co = get_object_or_404(CourseOffering, **filter)
+        url = reverse('markssheet_teacher',
+                      args=[co.course.slug, co.semester.year, co.semester.type])
+        form = MarksSheetTeacherImportGradesForm(
+            request.POST, request.FILES, c_slug = co.course.slug)
+        if form.is_valid():
+            res = utils.import_stepic(
+                request, form.cleaned_data['assignment']
+            )
+            messages.info(request, _("Import results: {}/{} successes").format(
+                res['success'], res['total']))
+        else:
+            # TODO: provide better description
+            messages.info(request, _('Invalid form. Details in log'))
+        return HttpResponseRedirect(url)
 
 
 class NonCourseEventDetailView(generic.DetailView):

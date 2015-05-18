@@ -38,16 +38,32 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 LOGGING = {
     'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
+            'formatter': 'simple'
         }
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO'
-    }
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'learning.utils': {
+            'handlers': ['console'],
+            'propagate': False,
+            'level': 'DEBUG',
+        },
+    },
 }
 
 # Looks for files in PIPELINE_CSS and PIPELINE_JS
@@ -60,4 +76,7 @@ PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
 # Versioning disabled if DEBUG=True
-PIPELINE_ENABLED = True
+PIPELINE_ENABLED = False
+
+
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)

@@ -1,9 +1,17 @@
+import csv
 import datetime
 import itertools
+import logging
+from math import ceil
 
 import dateutil.parser as dparser
 from django.conf import settings
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 def get_current_semester_pair():
@@ -69,3 +77,49 @@ def co_from_kwargs(kwargs):
     except ValueError, TypeError:
         raise Http404('Course offering not found')
     return (course_slug, semester_year, semester_type)
+
+
+def import_stepic(request, selected_assignment):
+    from learning.models import AssignmentStudent, Assignment
+    from users.models import CSCUser
+
+    def update_score(assignment_id, user, score):
+        try:
+            a_s = (AssignmentStudent.objects
+                   .get(assignment__pk=assignment_id, student=user))
+        except ObjectDoesNotExist:
+            logger.debug("User ID {} with stepic ID {} doesn't "
+                         "have an assignment {}"
+                         .format(user.pk, user.stepic_id, assignment_id))
+            return False
+        a_s.grade = stepic_points
+        a_s.save()
+        return True
+
+    f = request.FILES['csvfile']
+    reader = csv.DictReader(iter(f), fieldnames=['user_id'], restkey='as_ids')
+    total = 0
+    success = 0
+    response = {'success': 0, 'total': 0, 'errors': []}
+    # skip real headers
+    reader.next()
+    headers = ['user_id', selected_assignment.pk]
+    for entry in reader:
+        total += len(headers) - 1
+        stepic_id = int(entry['user_id'])
+        try:
+            user = CSCUser.objects.get(stepic_id=stepic_id)
+        except ObjectDoesNotExist:
+            msg = _("No user with Stepic ID {}").format(stepic_id)
+            logger.debug(msg)
+            messages.error(request, msg)
+            continue
+        for assignment_id, score in zip(headers[1:], entry[reader.restkey]):
+            stepic_points = int(ceil(float(score)))
+            res = update_score(int(assignment_id), user, stepic_points)
+            success += int(res)
+            logger.debug("Wrote {} points for user {} on assignment {}"
+                         .format(stepic_points, user.pk, assignment_id))
+    logger.debug("{}/{} successes".format(success, total))
+    response['success'], response['total'] = success, total
+    return response
