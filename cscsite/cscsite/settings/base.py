@@ -12,8 +12,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 from unipath import Path
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+BASE_DIR = Path(__file__).ancestor(2)
 PROJECT_DIR = Path(__file__).ancestor(3)
 
 MEDIA_ROOT = PROJECT_DIR.child("media")
@@ -307,8 +306,7 @@ DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
 DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
 DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 
-NEWRELIC_CONF = BASE_DIR + "/../../newrelic.ini"
-
+NEWRELIC_CONF = Path(BASE_DIR.ancestor(2), "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
@@ -332,7 +330,7 @@ PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 # Enable concatenation and compression.
 PIPELINE_ENABLED = True
 
-# Do not wrap js output with anonimous function
+# Do not wrap js output with anonymous function
 PIPELINE_DISABLE_WRAPPER = True
 
 PIPELINE_JS = {
