@@ -61,7 +61,7 @@ class CSCUserQuerySet(models.query.QuerySet):
 
 
 class PassThroughUserManager(PassThroughManagerMixin, UserManager):
-    pass
+    use_in_migrations = False
 
 
 @python_2_unicode_compatible
@@ -186,6 +186,7 @@ class CSCUser(AbstractUser):
         blank=True)
 
     objects = PassThroughUserManager.for_queryset_class(CSCUserQuerySet)()
+    use_in_migrations = False
 
     class Meta:
         ordering = ['last_name', 'first_name']
