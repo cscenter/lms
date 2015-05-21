@@ -19,22 +19,22 @@ class CommonTests(TestCase):
         semester = Semester(year=2015, type='spring')
         self.assertIn(smart_text(semester.year), smart_text(semester))
         self.assertIn('spring', smart_text(semester))
-        co = CourseOfferingFactory.build()
+        co = CourseOfferingFactory.create()
         self.assertIn(smart_text(co.course), smart_text(co))
         self.assertIn(smart_text(co.semester), smart_text(co))
-        con = CourseOfferingNewsFactory.build()
+        con = CourseOfferingNewsFactory.create()
         self.assertIn(smart_text(con.title), smart_text(con))
         self.assertIn(smart_text(con.course_offering), smart_text(con))
-        cc = CourseClassFactory.build()
+        cc = CourseClassFactory.create()
         self.assertIn(cc.name, smart_text(cc))
         cca = (CourseClassAttachmentFactory
-               .build(material__filename="foobar.pdf"))
+               .create(material__filename="foobar.pdf"))
         self.assertIn("foobar", smart_text(cca))
         self.assertIn("pdf", smart_text(cca))
-        a = AssignmentFactory.build()
+        a = AssignmentFactory.create()
         self.assertIn(a.title, smart_text(a))
         self.assertIn(smart_text(a.course_offering), smart_text(a))
-        as_ = AssignmentStudentFactory.build()
+        as_ = AssignmentStudentFactory.create()
         self.assertIn(smart_text(as_.student.get_full_name()), smart_text(as_))
         self.assertIn(smart_text(as_.assignment), smart_text(as_))
         ac = AssignmentCommentFactory.create()
@@ -43,13 +43,13 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(ac.assignment_student
                                  .student.get_full_name()),
                       smart_text(ac))
-        e = EnrollmentFactory.build()
+        e = EnrollmentFactory.create()
         self.assertIn(smart_text(e.course_offering), smart_text(e))
         self.assertIn(smart_text(e.student.get_full_name()), smart_text(e))
-        an = AssignmentNotificationFactory.build()
+        an = AssignmentNotificationFactory.create()
         self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
         self.assertIn(smart_text(an.assignment_student), smart_text(an))
-        conn = CourseOfferingNewsNotificationFactory.build()
+        conn = CourseOfferingNewsNotificationFactory.create()
         self.assertIn(smart_text(conn.user.get_full_name()), smart_text(conn))
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 
@@ -95,17 +95,21 @@ class CourseOfferingTests(TestCase):
                               type=t)
                      for t in ['spring', 'autumn']
                      for year in range(2010, future_year)]
+        # Save semesters in db dut to django 1.8 not supported build strategy 
+        # with SubFactory
+        for semester in semesters:
+            semester.save()
         old_now = timezone.now
         timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=Course(name="Test course"),
+        n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
                                         semester=semester)
                          .is_ongoing)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=Course(name="Test course"),
+        n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
                                         semester=semester)
                          .is_ongoing)
                         for semester in semesters)
@@ -116,7 +120,7 @@ class CourseOfferingTests(TestCase):
 class CourseClassTests(TestCase):
     def test_slides_file_name(self):
         slide_fname = "foobar.pdf"
-        cc = CourseClassFactory.build()
+        cc = CourseClassFactory.create()
         fname = cc._slides_file_name(slide_fname)
         co = cc.course_offering
         self.assertIn(co.course.slug.replace("-", "_"), fname)
@@ -127,13 +131,13 @@ class CourseClassTests(TestCase):
     def test_start_end_validation(self):
         time1 = "13:00"
         time2 = "14:20"
-        cc = CourseClassFactory.build(starts_at=time1, ends_at=time2)
+        cc = CourseClassFactory.create(starts_at=time1, ends_at=time2)
         self.assertEqual(None, cc.clean())
-        cc = CourseClassFactory.build(starts_at=time2, ends_at=time1)
+        cc = CourseClassFactory.create(starts_at=time2, ends_at=time1)
         self.assertRaises(ValidationError, cc.clean)
 
     def test_display_prop(self):
-        cc = CourseClassFactory.build(type='lecture')
+        cc = CourseClassFactory.create(type='lecture')
         self.assertEqual("Lecture", cc.type_display)
 
     def test_by_semester(self):
@@ -247,7 +251,9 @@ class AssignmentStudentTests(TestCase):
         student.save()
         student.groups = [student.IS_STUDENT_PK]
         student.save()
-        a_online = Assignment(grade_min=5, grade_max=10, is_online=True)
+        a_online = Assignment(grade_min=5, grade_max=10, is_online=True,
+            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc))
+        a_online.save()
         ctx = {'student': student, 'assignment': a_online}
         a_s = AssignmentStudent(grade=0, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
@@ -297,13 +303,13 @@ class AssignmentCommentTests(TestCase):
 
 class EnrollmentTests(TestCase):
     def test_clean(self):
-        e = EnrollmentFactory.build(student=UserFactory.create())
+        e = EnrollmentFactory.create(student=UserFactory.create())
         self.assertRaises(ValidationError, e.clean)
 
 
 class AssignmentNotificationTests(TestCase):
     def test_clean(self):
-        an = AssignmentNotificationFactory.build(
+        an = AssignmentNotificationFactory.create(
             user=UserFactory.create(groups=['Student']),
             is_about_passed=True)
         self.assertRaises(ValidationError, an.clean)
