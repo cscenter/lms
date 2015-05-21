@@ -471,7 +471,7 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
         self.url = reverse('course_offering_news_create',
                            args=[self.co.course.slug,
                                  self.co.semester.slug])
-        self.n_dict = CourseOfferingNewsFactory.attributes()
+        self.n_dict = CourseOfferingNewsFactory.attributes(create=True)
         self.n_dict.update({'course_offering': self.co})
 
     def test_security(self):
@@ -636,7 +636,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_security(self):
         teacher = UserFactory.create(groups=['Teacher'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = CourseClassFactory.attributes()
+        form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
         url = reverse('course_class_add',
                       args=[co.course.slug, co.semester.slug])
@@ -649,7 +649,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         co_other = CourseOfferingFactory.create(semester=s)
-        form = CourseClassFactory.attributes()
+        form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
         url = reverse('course_class_add',
                       args=[co.course.slug, co.semester.slug])
@@ -1142,7 +1142,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = UserFactory.create(groups=['Teacher'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = AssignmentFactory.attributes()
+        form = AssignmentFactory.attributes(create=True)
         form.update({'course_offering': co.pk,
                      'attached_file': None})
         url = reverse('assignment_add',
@@ -1178,7 +1178,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         teacher = UserFactory.create(groups=['Teacher'])
         CourseOfferingFactory.create_batch(3, teachers=[teacher])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = AssignmentFactory.attributes()
+        form = AssignmentFactory.attributes(create=True)
         deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
         deadline_time = form['deadline_at'].strftime("%H:%M:%S")
         form.update({'course_offering': co.pk,
