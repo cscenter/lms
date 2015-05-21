@@ -503,7 +503,7 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
 
         cc_related = ['venue',
                       'course_offering',
-                      'course_offering__semester'
+                      'course_offering__semester',
                       'course_offering__course']
         teacher_ccs = (
             CourseClass.objects
