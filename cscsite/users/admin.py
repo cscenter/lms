@@ -12,9 +12,13 @@ from users.models import CSCUser, CSCUserReference, \
 
 
 class CSCUserCreationForm(UserCreationForm):
+    # FIXME (Sergey Zh): Guess this Meta class has no effect!
     class Meta:
         model = CSCUser
         fields = ('username',)
+        error_messages = {
+            'duplicate_username': _("Username must be unique"),
+        }
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -22,7 +26,7 @@ class CSCUserCreationForm(UserCreationForm):
             self._meta.model._default_manager.get(username=username)
         except self._meta.model.DoesNotExist:
             return username
-        raise ValidationError(self.error_messages["duplicate_username"])
+        raise ValidationError(self.Meta.error_messages["duplicate_username"])
 
 
 class CSCUserChangeForm(UserChangeForm):
