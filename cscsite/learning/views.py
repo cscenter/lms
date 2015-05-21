@@ -1514,7 +1514,7 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
                 res['success'], res['total']))
         else:
             # TODO: provide better description
-            messages.info(request, _('Invalid form. Details in log'))
+            messages.info(request, _('Invalid form.'))
         return HttpResponseRedirect(url)
 
 

@@ -22,6 +22,7 @@ import cscsite.urls
 from learning.utils import get_current_semester_pair
 from .factories import *
 from .mixins import *
+from learning.forms import MarksSheetTeacherImportGradesForm
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
@@ -1326,6 +1327,30 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                 self.assertIn('a_s_{}'.format(a_s.pk),
                               resp.context['form'].fields)
 
+    def test_total_score(self):
+        """Calculate total score by assignments for course offering"""
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        student = UserFactory.create(groups=['Student'])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        as_cnt = 2
+        assignments = AssignmentFactory.create_batch(as_cnt, course_offering=co)
+        # AssignmentFactory implicitly create AssignmentStudent instances
+        # with empty grade value.
+        default_grade = 10
+        for assignment in assignments:
+            a_s = AssignmentStudent.objects.get(student=student,
+                                                assignment=assignment)
+            a_s.grade = default_grade
+            a_s.save()
+        expected_total_score = as_cnt * default_grade
+        url = reverse('markssheet_teacher', args=[co.course.slug,
+                                                  co.semester.year,
+                                                  co.semester.type])
+        self.doLogin(teacher)
+        resp = self.client.get(url)
+        self.assertEquals(resp.context['structured'][0][3], expected_total_score)
+
     def test_save_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher'])
         students = UserFactory.create_batch(2, groups=['Student'])
@@ -1360,6 +1385,52 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                       .get(student=student,
                                            course_offering=co)
                                       .grade))
+
+    def test_import_stepic(self):
+        teacher = UserFactory.create(groups=['Teacher'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        student = UserFactory.create(groups=['Student'])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        assignments = AssignmentFactory.create_batch(3, course_offering=co)
+        # for assignment in assignments:
+        #     a_s = AssignmentStudent.objects.get(student=student,
+        #                                         assignment=assignment)
+        # Import grades allowed only for particular course offering
+        form_fields = {'assignment': assignments[0].pk}
+        form = MarksSheetTeacherImportGradesForm(form_fields,
+                                                 c_slug=co.course.slug)
+        self.assertFalse(form.is_valid())
+        self.assertListEqual(form.errors.keys(), ['csvfile'])
+        # Teachers can import grades only for own CO
+        teacher2 = UserFactory.create(groups=['Teacher'])
+        self.doLogin(teacher2)
+        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+        resp = self.client.post(url, {'assignment': assignments[0].pk})
+        self.assertEqual(resp.status_code, 404)
+        # Wrong assignment id
+        self.doLogin(teacher)
+        form = MarksSheetTeacherImportGradesForm(
+            {'assignment': max((a.pk for a in assignments)) + 1},
+            c_slug=co.course.slug)
+        self.assertFalse(form.is_valid())
+        self.assertIn('assignment', form.errors)
+        # Wrong course offering slug
+        form = MarksSheetTeacherImportGradesForm(form_fields,
+                                                 c_slug='THIS_SLUG_CANT_EXIST')
+        self.assertFalse(form.is_valid())
+        self.assertIn('assignment', form.errors)
+        # CO not found
+        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk + 1])
+        resp = self.client.post(url, {'assignment': assignments[0].pk})
+        self.assertEqual(resp.status_code, 404)
+        # Check redirects
+        redirect_url = reverse('markssheet_teacher',
+                               args=[co.course.slug, co.semester.year, co.semester.type])
+        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+        resp = self.client.post(url, {'assignment': assignments[0].pk})
+        self.assertRedirects(resp, redirect_url)
+        self.assertIn('messages', resp.cookies)
+        # TODO: provide testing with request.FILES. Move it to test_utils...
 
 
 class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):

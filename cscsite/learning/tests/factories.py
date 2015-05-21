@@ -137,6 +137,7 @@ class CourseClassAttachmentFactory(factory.DjangoModelFactory):
 
 
 class AssignmentFactory(factory.DjangoModelFactory):
+    # Note(Sergey Zh): implicitly create AssignmentStudent record through assigned_to
     class Meta:
         model = Assignment
 

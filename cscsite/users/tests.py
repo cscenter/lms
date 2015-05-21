@@ -49,7 +49,7 @@ class CustomSemesterFactory(SemesterFactory):
     type = factory.Iterator(['spring', 'autumn'])
 
 
-class UserTests(TestCase):
+class UserTests(MyUtilitiesMixin, TestCase):
     def test_student_should_have_enrollment_year(self):
         """
         If user set "student" group (pk=1 in initial_data fixture), they
@@ -315,6 +315,22 @@ class UserTests(TestCase):
         self.assertContains(resp, sp1.name)
         self.assertContains(resp, sp1.description)
         self.assertContains(resp, sp2.name)
+
+    def test_email_on_detail(self):
+        """Email field should be displayed only to curators (superuser)"""
+        student_mail = "student@student.mail"
+        student = LearningUserFactory.create(
+            groups=['Student'],
+            email = student_mail)
+        self.doLogin(student)
+        url = reverse('user_detail', args=[student.pk])
+        resp = self.client.get(url)
+        self.assertNotContains(resp, student_mail)
+        # check with curator credentials
+        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        self.doLogin(curator)
+        resp = self.client.get(url)
+        self.assertContains(resp, student_mail)
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):
