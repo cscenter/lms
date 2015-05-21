@@ -699,7 +699,9 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         initial['course_offering'] = self._course_offering
         return initial
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
         if self.object is not None:
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
@@ -902,8 +904,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         return (self.model.objects
                 .select_related('course_offering',
                                 'course_offering__course',
-                                'course_offering__semester',
-                                'assignmentattachment_set'))
+                                'course_offering__semester')
+                .prefetch_related('assignmentattachment_set'))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(AssignmentTeacherDetailView, self)
@@ -1096,7 +1098,9 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         initial['course_offering'] = self._course_offering
         return initial
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
         if self.object is not None:
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
