@@ -59,6 +59,10 @@ class CSCUserQuerySet(models.query.QuerySet):
                              last_name__exact=''))
 
 
+class CustomUserManager(UserManager.from_queryset(CSCUserQuerySet)):
+    use_in_migrations = False
+
+
 @python_2_unicode_compatible
 class CSCUser(AbstractUser):
     IS_STUDENT_PK = 1
@@ -180,8 +184,7 @@ class CSCUser(AbstractUser):
         max_length=200,
         blank=True)
 
-    objects = UserManager.from_queryset(CSCUserQuerySet)()
-    use_in_migrations = False
+    objects = CustomUserManager()
 
     class Meta:
         ordering = ['last_name', 'first_name']
