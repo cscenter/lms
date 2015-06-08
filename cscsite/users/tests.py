@@ -413,7 +413,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = LearningUserFactory.create(groups=['Student'])
+        student = LearningUserFactory.create(groups=['Student'], enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         resp = self.client.get(url)
