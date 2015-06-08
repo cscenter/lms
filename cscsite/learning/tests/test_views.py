@@ -651,16 +651,18 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co_other = CourseOfferingFactory.create(semester=s)
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
+        del form['slides']
         url = reverse('course_class_add',
                       args=[co.course.slug, co.semester.slug])
         self.doLogin(teacher)
-        del form['course_offering']
         # should save with course_offering = co
         self.assertEqual(302, self.client.post(url, form).status_code)
         self.assertEqual(1, (CourseClass.objects
                              .filter(course_offering=co).count()))
         self.assertEqual(0, (CourseClass.objects
                              .filter(course_offering=co_other).count()))
+        self.assertEqual(0, (CourseClass.objects
+                             .filter(course_offering=form['course_offering']).count()))
         self.assertEqual(CourseClass.objects.get(course_offering=co).name,
                          form['name'])
         form.update({'course_offering': co.pk})
