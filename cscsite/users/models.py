@@ -5,7 +5,6 @@ import logging
 from model_utils import Choices
 from model_utils.fields import MonitorField
 from model_utils.models import TimeStampedModel
-from model_utils.managers import PassThroughManagerMixin
 from sorl.thumbnail import ImageField
 
 from django.db import models
@@ -58,10 +57,6 @@ class CSCUserQuerySet(models.query.QuerySet):
                            params=[tsquery])
                     .exclude(first_name__exact='',
                              last_name__exact=''))
-
-
-class PassThroughUserManager(PassThroughManagerMixin, UserManager):
-    use_in_migrations = False
 
 
 @python_2_unicode_compatible
@@ -185,7 +180,7 @@ class CSCUser(AbstractUser):
         max_length=200,
         blank=True)
 
-    objects = PassThroughUserManager.for_queryset_class(CSCUserQuerySet)()
+    objects = UserManager.from_queryset(CSCUserQuerySet)()
     use_in_migrations = False
 
     class Meta:
