@@ -53,7 +53,7 @@ class LoginView(generic.FormView):
 
     # TODO: redirect on user-specific page?
     def get_success_url(self):
-        redirect_to = self.request.REQUEST.get(self.redirect_field_name)
+        redirect_to = self.request.GET.get(self.redirect_field_name)
 
         if not is_safe_url(redirect_to, self.request.get_host()):
             redirect_to = settings.LOGOUT_REDIRECT_URL
@@ -87,8 +87,8 @@ class LogoutView(LoginRequiredMixin,
     def get_redirect_url(self, **kwargs):
         redirect_to = settings.LOGOUT_REDIRECT_URL
 
-        if self.redirect_field_name in self.request.REQUEST:
-            maybe_redirect_to = self.request.REQUEST[self.redirect_field_name]
+        if self.redirect_field_name in self.request.GET:
+            maybe_redirect_to = self.request.GET[self.redirect_field_name]
             if is_safe_url(url=maybe_redirect_to,
                            host=self.request.get_host()):
                 redirect_to = maybe_redirect_to
