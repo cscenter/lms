@@ -37,6 +37,8 @@
     <script>
       webshims.polyfill("forms forms-ext");
     </script>
+    
+    {% include "mathjax.html" %}
   </head>
   <body class="tex2jax_ignore">
     <div class="header lvl1">
@@ -346,7 +348,6 @@
     <script type="text/javascript" src="//cdn.ravenjs.com/1.1.16/raven.min.js"></script>
     <script type="text/javascript" src="{% static "js/raven_conf.js" %}"></script>
     <script type="text/javascript" src="//yastatic.net/underscore/1.6.0/underscore-min.js"></script>
-    {% include "mathjax.html" %}
     <script type="text/javascript" src="{% static "js/highlight.pack.js" %}"></script>
 
     {% javascript 'base' %}
