@@ -247,13 +247,11 @@ class AssignmentStudentTests(TestCase):
         self.assertFalse(as_.is_passed)
 
     def test_assignment_student_state(self):
-        student = CSCUser()
-        student.save()
-        student.groups = [student.IS_STUDENT_PK]
-        student.save()
-        a_online = Assignment(grade_min=5, grade_max=10, is_online=True,
-            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc))
-        a_online.save()
+        student = UserFactory.create(groups=['Student'])
+        a_online = AssignmentFactory.create(
+            grade_min=5, grade_max=10, is_online=True,
+            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
+        )
         ctx = {'student': student, 'assignment': a_online}
         a_s = AssignmentStudent(grade=0, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
@@ -267,7 +265,10 @@ class AssignmentStudentTests(TestCase):
         self.assertEqual(a_s.state, 'excellent')
         a_s = AssignmentStudent(**ctx)
         self.assertEqual(a_s.state, 'not_submitted')
-        a_offline = Assignment(grade_min=5, grade_max=10, is_online=False)
+        a_offline = AssignmentFactory.create(
+            grade_min=5, grade_max=10, is_online=False,
+            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
+        )
         ctx['assignment'] = a_offline
         a_s = AssignmentStudent(**ctx)
         self.assertEqual(a_s.state, 'not_checked')
