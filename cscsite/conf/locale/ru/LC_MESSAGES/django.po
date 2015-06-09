@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-18 16:12+0300\n"
+"POT-Creation-Date: 2015-06-09 12:34+0300\n"
 "PO-Revision-Date: 2015-04-02 17:41+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,8 +125,8 @@ msgstr "Название"
 msgid "Text"
 msgstr "Текст"
 
-#: learning/forms.py:77 learning/models.py:36 users/models.py:287
-#: users/models.py:304
+#: learning/forms.py:77 learning/models.py:36 users/models.py:286
+#: users/models.py:303
 msgid "Course|name"
 msgstr "Название"
 
@@ -262,7 +262,7 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:51 templates/base.html:141 templates/base.html.py:295
+#: learning/models.py:51 templates/base.html:143 templates/base.html.py:297
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:45
@@ -449,7 +449,7 @@ msgstr "Текст"
 msgid "Assignment"
 msgstr "Задание"
 
-#: learning/models.py:434 templates/base.html:196 templates/base.html.py:248
+#: learning/models.py:434 templates/base.html:198 templates/base.html.py:250
 #: templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
@@ -509,7 +509,7 @@ msgstr "Студент"
 #: templates/learning/assignment_student_detail.html:112
 #: templates/learning/courses_list_student.html:25
 #: templates/learning/courses_list_student.html:100
-#: templates/user_detail.html:136 users/models.py:306
+#: templates/user_detail.html:136 users/models.py:305
 msgid "Grade"
 msgstr "Оценка"
 
@@ -545,8 +545,8 @@ msgstr "Выполнение задания"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: learning/models.py:604 users/models.py:98 users/models.py:129
-#: users/models.py:134
+#: learning/models.py:604 users/models.py:97 users/models.py:128
+#: users/models.py:133
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -580,8 +580,8 @@ msgstr "Отлично"
 
 #: learning/models.py:646 templates/learning/assignment_detail.html:61
 #: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:135 users/models.py:285
-#: users/models.py:302 users/models.py:328
+#: templates/learning/assignment_student_detail.html:135 users/models.py:284
+#: users/models.py:301 users/models.py:327
 msgid "Student"
 msgstr "Студент"
 
@@ -760,15 +760,15 @@ msgstr "Вы уверены, что хотите отказаться от \"%(c
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1061
+#: learning/views.py:1063
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: learning/views.py:1513
+#: learning/views.py:1517
 msgid "Import results: {}/{} successes"
 msgstr "Импорт из stepic: {}/{} успешно"
 
-#: learning/views.py:1517
+#: learning/views.py:1521
 msgid "Invalid form. Details in log"
 msgstr ""
 
@@ -865,19 +865,19 @@ msgstr "Администрирование Django"
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
-#: templates/base.html:56
+#: templates/base.html:58
 msgid "About CSC"
 msgstr "О Центре"
 
-#: templates/base.html:61 templates/learning/courses_video_list.html:9
+#: templates/base.html:63 templates/learning/courses_video_list.html:9
 msgid "Videos"
 msgstr "Видео"
 
-#: templates/base.html:66
+#: templates/base.html:68
 msgid "Lectures|topmenu"
 msgstr "Лекторий"
 
-#: templates/base.html:73 templates/learning/assignment_list_student.html:22
+#: templates/base.html:75 templates/learning/assignment_list_student.html:22
 #: templates/learning/assignment_list_teacher.html:22
 #: templates/learning/calendar.html:24
 #: templates/learning/timetable_student.html:27
@@ -885,7 +885,7 @@ msgstr "Лекторий"
 msgid "Learning"
 msgstr "Обучение"
 
-#: templates/base.html:80 templates/learning/assignment_list_student.html:30
+#: templates/base.html:82 templates/learning/assignment_list_student.html:30
 #: templates/learning/assignment_list_teacher.html:30
 #: templates/learning/calendar.html:32
 #: templates/learning/timetable_student.html:35
@@ -893,39 +893,39 @@ msgstr "Обучение"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: templates/base.html:87
+#: templates/base.html:89
 msgid "Supervision"
 msgstr "Курирование"
 
-#: templates/base.html:94
+#: templates/base.html:96
 msgid "CSC|Enrollment"
 msgstr "Поступление"
 
-#: templates/base.html:101
+#: templates/base.html:103
 msgid "Contacts"
 msgstr "Контакты"
 
-#: templates/base.html:108
+#: templates/base.html:110
 msgid "Admin page"
 msgstr "Админка"
 
-#: templates/base.html:116
+#: templates/base.html:118
 msgid "logout"
 msgstr "выйти"
 
-#: templates/base.html:119 users/forms.py:40
+#: templates/base.html:121 users/forms.py:40
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:136
+#: templates/base.html:138
 msgid "Syllabus"
 msgstr "Программа"
 
-#: templates/base.html:146
+#: templates/base.html:148
 msgid "Organizers"
 msgstr "Организаторы"
 
-#: templates/base.html:151
+#: templates/base.html:153
 #: templates/learning/assignment_student_detail.html:124
 #: templates/learning/courses_list_student.html:22
 #: templates/learning/courses_list_student.html:97
@@ -934,62 +934,62 @@ msgstr "Организаторы"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: templates/base.html:156
+#: templates/base.html:158
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: templates/base.html:173
+#: templates/base.html:175
 msgid "CSC|Enrollment info"
 msgstr "Информация"
 
-#: templates/base.html:178
+#: templates/base.html:180
 msgid "Enrollment application"
 msgstr "Анкета"
 
-#: templates/base.html:206
+#: templates/base.html:208
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: templates/base.html:211 templates/base.html.py:263
+#: templates/base.html:213 templates/base.html.py:265
 #: templates/learning/calendar.html:50
 #: templates/learning/timetable_student.html:49
 #: templates/learning/timetable_teacher.html:45
 msgid "Calendar"
 msgstr "Календарь"
 
-#: templates/base.html:216 templates/base.html.py:268
+#: templates/base.html:218 templates/base.html.py:270
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: templates/base.html:226 templates/library/book_list.html:11
+#: templates/base.html:228 templates/library/book_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: templates/base.html:231
+#: templates/base.html:233
 msgid "Useful stuff"
 msgstr "Полезное"
 
-#: templates/base.html:258
+#: templates/base.html:260
 msgid "Timetable"
 msgstr "Расписание"
 
-#: templates/base.html:278 templates/learning/markssheet_teacher.html:22
+#: templates/base.html:280 templates/learning/markssheet_teacher.html:22
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: templates/base.html:300 templates/user_search.html:10
+#: templates/base.html:302 templates/user_search.html:10
 msgid "User search"
 msgstr "Поиск пользователей"
 
-#: templates/base.html:305
+#: templates/base.html:307
 msgid "Generate diplomas"
 msgstr "Сгенерировать дипломы"
 
-#: templates/base.html:330
-msgid "Computer Science Center Все права защищены, 2011–15 гг."
-msgstr "Computer Science Center Все права защищены, 2011–15 гг."
-
 #: templates/base.html:332
+msgid "Computer Science Center, 2011–15 гг."
+msgstr "Computer Science Center, 2011–15 гг."
+
+#: templates/base.html:334
 msgid "report a problem"
 msgstr "сообщить об ошибке"
 
@@ -1113,7 +1113,7 @@ msgstr "Все задания"
 
 #: templates/learning/assignment_student_detail.html:59
 #: templates/learning/assignment_student_detail.html:99
-#: templates/user_detail.html:214 users/models.py:158
+#: templates/user_detail.html:222 users/models.py:157
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -1411,7 +1411,7 @@ msgstr "преподаватель"
 msgid "%(name)s about CSC"
 msgstr "%(name)s о Центре"
 
-#: templates/user_detail.html:96 users/models.py:132
+#: templates/user_detail.html:96 users/models.py:131
 msgid "Contact information"
 msgstr "Контактная информация"
 
@@ -1427,59 +1427,65 @@ msgstr ".iCal-календарь заданий"
 msgid ".iCal events calendar"
 msgstr ".iCal-календарь событий"
 
-#: templates/user_detail.html:175 users/admin.py:61
+#: templates/user_detail.html:175 users/admin.py:65
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: templates/user_detail.html:178 users/models.py:144
+#: templates/user_detail.html:178 users/models.py:143
 msgid "University"
 msgstr "Университет"
 
-#: templates/user_detail.html:182 users/models.py:148
+#: templates/user_detail.html:182 users/models.py:147
 msgid "Phone"
 msgstr "Телефон"
 
-#: templates/user_detail.html:186 users/models.py:111
+#: templates/user_detail.html:186 users/models.py:110
 msgid "Yandex ID"
 msgstr "Yandex ID"
 
-#: templates/user_detail.html:190 users/models.py:118
+#: templates/user_detail.html:190 users/models.py:117
 msgid "Github ID"
 msgstr "Github ID"
 
-#: templates/user_detail.html:200 users/models.py:124
+#: templates/user_detail.html:200 users/models.py:123
 msgid "Stepic ID"
 msgstr "Stepic ID"
 
-#: templates/user_detail.html:210 users/models.py:152
+#: templates/user_detail.html:211
+#, fuzzy
+#| msgid "email"
+msgid "Email"
+msgstr "email"
+
+#: templates/user_detail.html:218 users/models.py:151
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: templates/user_detail.html:228 users/models.py:176
+#: templates/user_detail.html:236 users/models.py:175
 msgid "Status"
 msgstr "Статус"
 
-#: templates/user_detail.html:232 users/models.py:172
+#: templates/user_detail.html:240 users/models.py:171
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: templates/user_detail.html:237
+#: templates/user_detail.html:245
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: templates/user_detail.html:253
+#: templates/user_detail.html:261
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: templates/user_detail.html:269
+#: templates/user_detail.html:277
 msgid "School of Data Analysis courses"
 msgstr "Курсы ШАД"
 
-#: templates/user_detail.html:285 users/models.py:184
+#: templates/user_detail.html:293 users/models.py:183
 msgid "Workplace"
 msgstr "Место работы"
 
-#: templates/user_detail.html:292 users/tests.py:429 users/tests.py:434
+#: templates/user_detail.html:300 users/tests.py:429 users/tests.py:434
 msgid "Student references"
 msgstr "Справки студента"
 
@@ -1487,7 +1493,7 @@ msgstr "Справки студента"
 msgid "Name, full or partial"
 msgstr "Имя, целиком или часть"
 
-#: templates/user_search.html:26 users/models.py:101
+#: templates/user_search.html:26 users/models.py:100
 msgid "CSCUser|enrollment year"
 msgstr "Год поступления"
 
@@ -1552,19 +1558,23 @@ msgstr "Дополнительная страница"
 msgid "Textpage|Custom pages"
 msgstr "Дополнительные страницы"
 
-#: users/admin.py:52
+#: users/admin.py:20
+msgid "Username must be unique"
+msgstr ""
+
+#: users/admin.py:56
 msgid "Personal info"
 msgstr "Персональная информация"
 
-#: users/admin.py:57
+#: users/admin.py:61
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: users/admin.py:60
+#: users/admin.py:64
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: users/admin.py:65
+#: users/admin.py:69
 msgid "Important dates"
 msgstr "Важные даты"
 
@@ -1581,7 +1591,7 @@ msgstr "Пароль"
 msgid "You can also <a href=\"{0}\">reset your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">сменить ваш пароль</a>"
 
-#: users/forms.py:79 users/models.py:135
+#: users/forms.py:79 users/models.py:134
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
@@ -1593,63 +1603,63 @@ msgstr "<b>YANDEX.ID</b>@yandex.ru"
 msgid "stepic.org/users/<b>STEPIC-ID</b>"
 msgstr "stepic.org/users/<b>STEPIC-ID</b>"
 
-#: users/models.py:73
+#: users/models.py:72
 msgid "Graduate"
 msgstr "Выпускник"
 
-#: users/models.py:74
+#: users/models.py:73
 msgid "StudentInfo|Expelled"
 msgstr "Отчислен"
 
-#: users/models.py:75
+#: users/models.py:74
 msgid "StudentInfo|Reinstalled"
 msgstr "Восстановлен"
 
-#: users/models.py:76
+#: users/models.py:75
 msgid "StudentInfo|Will graduate"
 msgstr "Будет выпускаться"
 
-#: users/models.py:81
+#: users/models.py:80
 msgid "Male"
 msgstr "мужской"
 
-#: users/models.py:82
+#: users/models.py:81
 msgid "Female"
 msgstr "женский"
 
-#: users/models.py:84
+#: users/models.py:83
 msgid "Gender"
 msgstr "Пол"
 
-#: users/models.py:89
+#: users/models.py:88
 msgid "CSCUser|patronymic"
 msgstr "Отчество"
 
-#: users/models.py:93
+#: users/models.py:92
 msgid "CSCUser|photo"
 msgstr "Фото"
 
-#: users/models.py:97
+#: users/models.py:96
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
-#: users/models.py:106
+#: users/models.py:105
 msgid "CSCUser|graduation year"
 msgstr "Год выпуска"
 
-#: users/models.py:114
+#: users/models.py:113
 msgid "Only the part before \"@yandex.ru\" is expected"
 msgstr "Ожидается часть до «@yandex.ru»"
 
-#: users/models.py:128
+#: users/models.py:127
 msgid "CSC review"
 msgstr "Отзыв о CSC"
 
-#: users/models.py:138
+#: users/models.py:137
 msgid "Student of CSCenter"
 msgstr "Студент CS центра"
 
-#: users/models.py:139
+#: users/models.py:138
 msgid ""
 "Students without this flag belong to CSClub only and can't enroll to "
 "CSCenter's courses"
@@ -1657,71 +1667,71 @@ msgstr ""
 "Студенты без этого флага предполагаются студентами CS клуба и не могут "
 "записываться на курсы CS центра"
 
-#: users/models.py:154
+#: users/models.py:153
 msgid "at enrollment"
 msgstr "при поступлении"
 
-#: users/models.py:163
+#: users/models.py:162
 msgid "Comment changed"
 msgstr "Комментарий изменён"
 
-#: users/models.py:166
+#: users/models.py:165
 msgid "Author of last edit"
 msgstr "Автор последней правки"
 
-#: users/models.py:181
+#: users/models.py:180
 msgid "StudentInfo|Study programs"
 msgstr "Учебные программы"
 
-#: users/models.py:192
+#: users/models.py:191
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: users/models.py:193
+#: users/models.py:192
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:204
+#: users/models.py:203
 msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
-#: users/models.py:207
+#: users/models.py:206
 msgid "CSCUser|graduation year should be  provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
-#: users/models.py:291
+#: users/models.py:290
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: users/models.py:292
+#: users/models.py:291
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: users/models.py:308
+#: users/models.py:307
 msgid "from 2 to 5, inclusive"
 msgstr "от 2 до 5 включительно"
 
-#: users/models.py:314
+#: users/models.py:313
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: users/models.py:315
+#: users/models.py:314
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: users/models.py:323
+#: users/models.py:322
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: users/models.py:324
+#: users/models.py:323
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: users/models.py:333
+#: users/models.py:332
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: users/models.py:334
+#: users/models.py:333
 msgid "User reference records"
 msgstr "Справки пользователей"
 
