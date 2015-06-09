@@ -253,7 +253,8 @@ MENU_URL_NAMES = {
     'password_reset_confirm': {},
     'password_reset_done': {},
     'password_reset': {},
-    'password_change': {}
+    'password_change': {},
+    'assignment_attachment_delete': {}
     }
 
 LOGIN_URL = "/login/"
