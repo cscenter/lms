@@ -19,7 +19,8 @@ django-model-utils==2.2
 # because newer version that fixes migrations on 1.7 is not released yet
 # git+https://github.com/carljm/django-model-utils.git@d797996d13a871328bada34aef8ad25534e0058f
 django-rosetta==0.7.3
-django-sitemetrics==0.4.2
+#django-sitemetrics==0.4.2
+git+https://github.com/idlesign/django-sitemetrics.git@886b35443d7163b8cab7a49c57bd7be6337379ef
 django-taggit==0.14.0
 factory_boy==2.5.2
 icalendar==3.8.4
