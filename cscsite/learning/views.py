@@ -1563,6 +1563,13 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
                     queryset=StudentProject.objects.order_by('project_type'),
                     to_attr='projects'
                 ),
+                Prefetch(
+                    'study_programs',
+                ),
+                Prefetch(
+                    'shadcourserecord_set',
+                    to_attr='shads'
+                ),
             )
         )
 
