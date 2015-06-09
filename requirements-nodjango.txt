@@ -32,8 +32,8 @@ raven==5.0.0
 requests==2.2.0
 six==1.5.2
 slideshare==0.1dev
-sorl-thumbnail==11.12.1b
+sorl-thumbnail==12.2
 sqlparse==0.1.11
 testfixtures==3.0.2
 yandexwebdav==0.2.11
-django-pipeline
+django-pipeline==1.5.1
