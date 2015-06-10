@@ -598,8 +598,7 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
                    deadline_at__gt=timezone.now())
             .select_related('course_offering',
                             'course_offering__course',
-                            'course_offering__semester',
-                            'student'))
+                            'course_offering__semester'))
         # NOTE(Dmitry): hacky again to be consistent
         for a in teacher_as:
             url = reverse('assignment_detail_teacher', args=[a.pk])
