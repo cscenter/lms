@@ -307,7 +307,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user.save()
         semester1 = SemesterFactory.create(year=2014, type='spring')
         semester2 = SemesterFactory.create(year=2014, type='autumn')
-        sp1 = StudentProjectFactory.create(student=user, semesters=[])
+        sp1 = StudentProjectFactory.create(student=user, semesters=[semester1])
         sp2 = StudentProjectFactory.create(student=user,
                                            semesters=[semester1, semester2],
                                            description="")
