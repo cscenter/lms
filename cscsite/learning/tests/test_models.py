@@ -71,6 +71,28 @@ class SemesterTests(TestCase):
         self.assertLess(autumn_date, semester.ends_at)
         self.assertLess(semester.ends_at, next_spring_date)
 
+    def test_semester_cmp(self):
+        s2013_spring = Semester(type='spring', year=2013)
+        s2013_autumn = Semester(type='autumn', year=2013)
+        s2013_summer = Semester(type='summer', year=2013)
+        s2014_spring = Semester(type='spring', year=2014)
+        self.assertLess(s2013_spring, s2013_autumn)
+        self.assertLess(s2013_spring, s2013_summer)
+        self.assertLess(s2013_summer, s2013_autumn)
+        self.assertLess(s2013_summer, s2014_spring)
+
+    def test_type_index(self):
+        spring_index = 0
+        summer_index = 1
+        autumn_index = 2
+        semester = Semester(type='spring', year=2013)
+        self.assertEqual(semester.type_index, spring_index)
+        semester.type = 'summer'
+        self.assertEqual(semester.type_index, summer_index)
+        semester.type = 'autumn'
+        self.assertEqual(semester.type_index, autumn_index)
+
+
 
 class CourseOfferingTests(TestCase):
     def test_by_semester(self):
