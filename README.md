@@ -1,7 +1,7 @@
 Computer Science Center/Club websites
 =====================================
 
-[![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=xBAa4nJZ4qY7pPgbqyTE&branch=master)](https://magnum.travis-ci.com/cscenter/site)
+[![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
 Dev setup
 ---------
