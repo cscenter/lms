@@ -11,7 +11,8 @@ import dateutil.parser as dparser
 from annoying.fields import AutoOneToOneField
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError, ObjectDoesNotExist, \
+                                   ImproperlyConfigured
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
@@ -59,6 +60,7 @@ class Course(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Semester(models.Model):
+    # Note: Save sort order. See type_index for details
     TYPES = Choices(('spring', _("spring")),
                     ('summer', _("summer")),
                     ('autumn', _("autumn")))
@@ -69,6 +71,14 @@ class Semester(models.Model):
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
 
+    @property
+    def type_index(self):
+        """ Return int representation of semester type """
+        for index, choice in enumerate(Semester.TYPES):
+            if choice[0] == self.type:
+                return index
+        return ImproperlyConfigured('Can not retrieve semester type index')
+
     class Meta:
         ordering = ["-year", "type"]
         verbose_name = _("Semester")
@@ -76,6 +86,13 @@ class Semester(models.Model):
 
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
+
+    def __cmp__(self, other):
+        """ Compare by year and semester type """
+        if self.year != other.year:
+            return self.year - other.year
+        else:
+            return self.type_index - other.type_index
 
     @property
     def slug(self):
