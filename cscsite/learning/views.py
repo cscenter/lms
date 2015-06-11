@@ -1589,6 +1589,7 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
+        shads_max = 0
         projects_headers = set()
         for s in students:
             student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
@@ -1602,6 +1603,9 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
                     teachers=", ".join(teachers)
                 )
             s.courses = student_courses
+
+            if len(s.shads) > shads_max:
+                shads_max = len(s.shads)
 
             sp = defaultdict(
                 lambda: {'name': '', 'supervisor': '', 'semesters': ''})
@@ -1625,6 +1629,9 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
         for course_id, course_name in courses_headers.iteritems():
             headers.append(course_name + u', оценка')
             headers.append(course_name + u', преподаватели')
+        for i in xrange(1, shads_max + 1):
+            headers.append(u'ШАД, курс ' + str(i) + u', название')
+            headers.append(u'ШАД, курс ' + str(i) + u', оценка')
         for i in xrange(1, len(projects_headers) + 1):
             headers.append(u'Проект ' + str(i) + u', оценка')
             headers.append(u'Проект ' + str(i) + u', руководитель(и)')
@@ -1636,6 +1643,13 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             for course_id in courses_headers:
                 sc = s.courses[course_id]
                 row.extend([sc['grade'], sc['teachers']])
+            s.shads.extend([None] * (shads_max - len(s.shads)))
+            for shad in s.shads:
+                if shad is not None:
+                    row.extend([shad.name, shad.grade])
+                else:
+                    row.extend(['', ''])
+
             for project_id in projects_headers:
                 sp = s.projects[project_id]
                 row.extend([sp['name'], sp['supervisor'], sp['semesters']])
