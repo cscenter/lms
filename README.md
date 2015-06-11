@@ -70,6 +70,12 @@ or
 ./manage.py collectstatic --noinput --settings=cscsite.settings.production
 ```
 
+or 
+
+```
+pip install -r requirements.txt
+```
+
 Don't forget to clear sometimes static folder with `--clear` option
 
 * `sudo service uwsgi reload` in `ubuntu` tab. Note that uwsgi reload is needed
