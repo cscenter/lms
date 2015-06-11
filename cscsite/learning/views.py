@@ -1630,12 +1630,12 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
         for i in xrange(1, shads_max + 1):
-            headers.append('ШАД, курс ' + unicode(i) + ', название')
-            headers.append('ШАД, курс ' + unicode(i) + ', оценка')
+            headers.append('ШАД, курс {}, название'.format(i))
+            headers.append('ШАД, курс {}, оценка'.format(i))
         for i in xrange(1, len(projects_headers) + 1):
-            headers.append('Проект ' + unicode(i) + ', оценка')
-            headers.append('Проект ' + unicode(i) + ', руководитель(и)')
-            headers.append('Проект ' + unicode(i) + ', семестр(ы)')
+            headers.append('Проект {}, оценка'.format(i))
+            headers.append('Проект {}, руководитель(и)'.format(i))
+            headers.append('Проект {}, семестр(ы)'.format(i))
         w.writerow(headers)
 
         for s in students:
