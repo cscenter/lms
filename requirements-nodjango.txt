@@ -38,3 +38,4 @@ sqlparse==0.1.11
 testfixtures==3.0.2
 yandexwebdav==0.2.11
 django-pipeline==1.5.1
+unicodecsv==0.13.0
