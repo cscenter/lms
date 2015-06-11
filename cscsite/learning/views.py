@@ -6,6 +6,8 @@ import csv
 import datetime
 import logging
 import os
+import unicodecsv
+
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
 from itertools import chain
@@ -1533,7 +1535,13 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = (CSCUser.objects
+        context['students'] = self.get_graduation_students_info()
+
+        return context
+
+    @staticmethod
+    def get_graduation_students_info():
+        return (CSCUser.objects
             .filter(
                 is_center_student=True,
                 status=CSCUser.STATUS.will_graduate,
@@ -1543,8 +1551,7 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
                 Prefetch(
                     'enrollment_set',
                     queryset=Enrollment.objects
-                        .exclude(grade__in=[
-                            'not_graded', 'unsatisfactory'])
+                        .exclude(grade__in=['not_graded', 'unsatisfactory'])
                         .select_related('course_offering',
                                         'course_offering__semester',
                                         'course_offering__course'
@@ -1573,4 +1580,65 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
             )
         )
 
-        return context
+
+class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        students = StudentsDiplomasView.get_graduation_students_info()
+
+        # Prepare courses and student projects data
+        courses_headers = OrderedDict()
+        projects_headers = set()
+        for s in students:
+            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
+            for e in s.enrollments:
+                courses_headers[e.course_offering.course.id] = \
+                    e.course_offering.course.name
+                teachers = [t.get_full_name() for t
+                            in e.course_offering.teachers.all()]
+                student_courses[e.course_offering.course.id] = dict(
+                    grade=e.grade_display.lower(),
+                    teachers=", ".join(teachers)
+                )
+            s.courses = student_courses
+
+            sp = defaultdict(
+                lambda: {'name': '', 'supervisor': '', 'semesters': ''})
+            for p in s.projects:
+                projects_headers.add(p.id)
+                semesters = [unicode(sem) for sem in p.semesters.all()]
+                sp[p.id] = dict(
+                    name=p.name,
+                    supervisor=p.supervisor,
+                    semesters=", ".join(semesters)
+                )
+            s.projects = sp
+
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename = "diplomas_{}.csv".format(datetime.datetime.now().year)
+        response['Content-Disposition'] \
+            = 'attachment; filename="{}"'.format(filename)
+        w = unicodecsv.writer(response, encoding='utf-8')
+
+        headers = [u'Фамилия', u'Имя', u'Отчество', u'университет']
+        for course_id, course_name in courses_headers.iteritems():
+            headers.append(course_name + u', оценка')
+            headers.append(course_name + u', преподаватели')
+        for i in xrange(1, len(projects_headers) + 1):
+            headers.append(u'Проект ' + str(i) + u', оценка')
+            headers.append(u'Проект ' + str(i) + u', руководитель(и)')
+            headers.append(u'Проект ' + str(i) + u', семестр(ы)')
+        w.writerow(headers)
+
+        for s in students:
+            row = [s.last_name, s.first_name, s.patronymic, s.university]
+            for course_id in courses_headers:
+                sc = s.courses[course_id]
+                row.extend([sc['grade'], sc['teachers']])
+            for project_id in projects_headers:
+                sp = s.projects[project_id]
+                row.extend([sp['name'], sp['supervisor'], sp['semesters']])
+            w.writerow(row)
+
+        return response

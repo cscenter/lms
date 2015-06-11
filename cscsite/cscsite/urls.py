@@ -39,7 +39,7 @@ from learning.views import \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView, \
-    StudentsDiplomasView
+    StudentsDiplomasView, StudentsDiplomasCSVView
 
 
 admin.autodiscover()
@@ -206,6 +206,9 @@ urlpatterns = patterns('',
     url(r'^staff/dimplomas/$',
         StudentsDiplomasView.as_view(),
         name='students_diplomas'),
+    url(r'^staff/dimplomas/csv/$',
+        StudentsDiplomasCSVView.as_view(),
+        name='students_diplomas_csv'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),
