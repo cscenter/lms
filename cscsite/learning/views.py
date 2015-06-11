@@ -1625,17 +1625,17 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             = 'attachment; filename="{}"'.format(filename)
         w = unicodecsv.writer(response, encoding='utf-8')
 
-        headers = [u'Фамилия', u'Имя', u'Отчество', u'университет']
+        headers = ['Фамилия', 'Имя', 'Отчество', 'университет']
         for course_id, course_name in courses_headers.iteritems():
-            headers.append(course_name + u', оценка')
-            headers.append(course_name + u', преподаватели')
+            headers.append(course_name + ', оценка')
+            headers.append(course_name + ', преподаватели')
         for i in xrange(1, shads_max + 1):
-            headers.append(u'ШАД, курс ' + str(i) + u', название')
-            headers.append(u'ШАД, курс ' + str(i) + u', оценка')
+            headers.append('ШАД, курс ' + unicode(i) + ', название')
+            headers.append('ШАД, курс ' + unicode(i) + ', оценка')
         for i in xrange(1, len(projects_headers) + 1):
-            headers.append(u'Проект ' + str(i) + u', оценка')
-            headers.append(u'Проект ' + str(i) + u', руководитель(и)')
-            headers.append(u'Проект ' + str(i) + u', семестр(ы)')
+            headers.append('Проект ' + unicode(i) + ', оценка')
+            headers.append('Проект ' + unicode(i) + ', руководитель(и)')
+            headers.append('Проект ' + unicode(i) + ', семестр(ы)')
         w.writerow(headers)
 
         for s in students:
@@ -1643,6 +1643,7 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             for course_id in courses_headers:
                 sc = s.courses[course_id]
                 row.extend([sc['grade'], sc['teachers']])
+
             s.shads.extend([None] * (shads_max - len(s.shads)))
             for shad in s.shads:
                 if shad is not None:
