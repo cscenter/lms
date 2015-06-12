@@ -1536,6 +1536,8 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
         context['students'] = self.get_graduation_students_info()
+        for student in context['students']:
+            student.projects = StudentProject.sorted(student.projects)
 
         return context
 
@@ -1565,9 +1567,11 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
                 Prefetch(
                     'enrollments__course_offering__teachers',
                 ),
+                # FIXME: For some reasons semesters prefetched two times
                 Prefetch(
                     'studentproject_set',
-                    queryset=StudentProject.objects.order_by('project_type'),
+                    queryset=StudentProject.objects.order_by('project_type')
+                             .prefetch_related('semesters'),
                     to_attr='projects'
                 ),
                 Prefetch(
