@@ -858,6 +858,15 @@ class StudentProject(TimeStampedModel):
     def project_type_display(self):
         return self.PROJECT_TYPES[self.project_type]
 
+    @staticmethod
+    def sorted(student_projects, reverse=False):
+        """Return projects in chronological order"""
+        for i in range(len(student_projects)):
+            semesters = list(reversed(student_projects[i].semesters.all()))
+            setattr(student_projects[i], 'semesters_list', semesters)
+        return sorted(student_projects, key=lambda p: p.semesters_list[0],
+                      reverse=reverse)
+
 
 @python_2_unicode_compatible
 class StudyProgram(models.Model):

@@ -1590,7 +1590,7 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
         shads_max = 0
-        projects_headers = set()
+        projects_max = 0
         for s in students:
             student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
             for e in s.enrollments:
@@ -1607,17 +1607,9 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             if len(s.shads) > shads_max:
                 shads_max = len(s.shads)
 
-            sp = defaultdict(
-                lambda: {'name': '', 'supervisor': '', 'semesters': ''})
-            for p in s.projects:
-                projects_headers.add(p.id)
-                semesters = [unicode(sem) for sem in p.semesters.all()]
-                sp[p.id] = dict(
-                    name=p.name,
-                    supervisor=p.supervisor,
-                    semesters=", ".join(semesters)
-                )
-            s.projects = sp
+            if len(s.projects) > projects_max:
+                projects_max = len(s.projects)
+            s.projects = StudentProject.sorted(s.projects)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "diplomas_{}.csv".format(datetime.datetime.now().year)
@@ -1632,7 +1624,7 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
         for i in xrange(1, shads_max + 1):
             headers.append('ШАД, курс {}, название'.format(i))
             headers.append('ШАД, курс {}, оценка'.format(i))
-        for i in xrange(1, len(projects_headers) + 1):
+        for i in xrange(1, projects_max + 1):
             headers.append('Проект {}, оценка'.format(i))
             headers.append('Проект {}, руководитель(и)'.format(i))
             headers.append('Проект {}, семестр(ы)'.format(i))
@@ -1651,9 +1643,13 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
                 else:
                     row.extend(['', ''])
 
-            for project_id in projects_headers:
-                sp = s.projects[project_id]
-                row.extend([sp['name'], sp['supervisor'], sp['semesters']])
+            s.projects.extend([None] * (projects_max - len(s.projects)))
+            for p in s.projects:
+                if p is not None:
+                    semesters = [unicode(sem) for sem in p.semesters.all()]
+                    row.extend([p.name, p.supervisor, ", ".join(semesters)])
+                else:
+                    row.extend(['', '', ''])
             w.writerow(row)
 
         return response
