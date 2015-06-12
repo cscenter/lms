@@ -28,7 +28,7 @@ import pytz
 
 from core.views import ProtectedFormMixin, StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
-    CourseOffering, NonCourseEvent, Semester
+    CourseOffering, NonCourseEvent, Semester, StudentProject
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
 from .models import CSCUser, CSCUserReference
 
@@ -160,12 +160,7 @@ class UserDetailView(generic.DetailView):
         student_projects = list(self.object.studentproject_set
                                 .prefetch_related('semesters')
                                 .order_by('pk'))
-        for i in range(len(student_projects)):
-            semesters = list(reversed(student_projects[i].semesters.all()))
-            setattr(student_projects[i], 'semesters_list', semesters)
-        student_projects = sorted(student_projects,
-                                  key=lambda p: p.semesters_list[0])
-        context['student_projects'] = student_projects
+        context['student_projects'] = StudentProject.sorted(student_projects)
         if self.request.user.is_staff:
             related = ['assignment',
                        'assignment__course_offering',
