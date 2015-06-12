@@ -1617,7 +1617,7 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
             = 'attachment; filename="{}"'.format(filename)
         w = unicodecsv.writer(response, encoding='utf-8')
 
-        headers = ['Фамилия', 'Имя', 'Отчество', 'университет']
+        headers = ['Фамилия', 'Имя', 'Отчество', 'Университет', 'Направления']
         for course_id, course_name in courses_headers.iteritems():
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
@@ -1631,7 +1631,8 @@ class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
         w.writerow(headers)
 
         for s in students:
-            row = [s.last_name, s.first_name, s.patronymic, s.university]
+            row = [s.last_name, s.first_name, s.patronymic, s.university,
+                   " и ".join((s.name for s in s.study_programs.all()))]
             for course_id in courses_headers:
                 sc = s.courses[course_id]
                 row.extend([sc['grade'], sc['teachers']])
