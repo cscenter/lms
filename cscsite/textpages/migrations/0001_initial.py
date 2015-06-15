@@ -9,39 +9,40 @@ import model_utils.fields
 def forwards_func(apps, schema_editor):
     Textpage = apps.get_model('textpages', 'Textpage')
     db_alias = schema_editor.connection.alias
-    initial_pages = [{"id": 1,
-                      "url_name": "syllabus",
-                      "name": "Syllabus",
-                      "text": "# Syllabus\n\nThis is Computer Science Center syllabus. **Please change this text**."},
-                     {"id": 2,
-                      "url_name": "orgs",
-                      "name": "Organizers",
-                      "text": "# Organizers\n\nThis is a list of people that made Computer Science Center real. **Please change this text**."},
-                     {"id": 3,
-                      "url_name": "contacts",
-                      "name": "Contacts",
-                      "text": "# Contacts\r\n\r\nThis is how you can contact Computer Science Center. **Please change this text**.\r\n\r\n[CSCenter learning venues](/venues)"},
-                     {"id": 4,
-                      "url_name": "enrollment",
-                      "name": "Enrollment",
-                      "text": "# Enrollment\n\nThis is how you can enroll at Computer Science Center. **Please change this text**."},
-                     {"id": 5,
-                      "url_name": "useful_stuff",
-                      "name": "Useful stuff",
-                      "text": "# Licenses\n\nThis is a list of licenses available for Computer Science Center students. **Please change this text**."},
-                     {"id": 6,
-                      "url_name": "online",
-                      "name": "Online",
-                      "text": "# Online\n\nThis is \"online\" page. **Please change this text**."},
-                     {"id": 7,
-                      "url_name": "lectures",
-                      "name": "Lectures",
-                      "text": "# Lectures\n\nThis is \"lectures\" page. **Please change this text**."}]
+    initial_pages = [{
+                        "url_name": "syllabus",
+                        "name": "Syllabus",
+                        "text": "# Syllabus\n\nThis is Computer Science Center syllabus. **Please change this text**."},
+                     {
+                        "url_name": "orgs",
+                        "name": "Organizers",
+                        "text": "# Organizers\n\nThis is a list of people that made Computer Science Center real. **Please change this text**."},
+                     {
+                        "url_name": "contacts",
+                        "name": "Contacts",
+                        "text": "# Contacts\r\n\r\nThis is how you can contact Computer Science Center. **Please change this text**.\r\n\r\n[CSCenter learning venues](/venues)"},
+                     {
+                        "url_name": "enrollment",
+                        "name": "Enrollment",
+                        "text": "# Enrollment\n\nThis is how you can enroll at Computer Science Center. **Please change this text**."},
+                     {
+                        "url_name": "useful_stuff",
+                        "name": "Useful stuff",
+                        "text": "# Licenses\n\nThis is a list of licenses available for Computer Science Center students. **Please change this text**."},
+                     {
+                        "url_name": "online",
+                        "name": "Online",
+                        "text": "# Online\n\nThis is \"online\" page. **Please change this text**."},
+                     {
+                        "url_name": "lectures",
+                        "name": "Lectures",
+                        "text": "# Lectures\n\nThis is \"lectures\" page. **Please change this text**."}]
     for page in initial_pages:
         Textpage(**page).save(force_insert=True, using=db_alias)
 
-
 class Migration(migrations.Migration):
+
+
 
     dependencies = [
     ]
@@ -62,7 +63,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Textpage|Custom page',
                 'verbose_name_plural': 'Textpage|Custom pages',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Textpage',
@@ -79,15 +79,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Textpage|page',
                 'verbose_name_plural': 'Textpage|pages',
             },
-            bases=(models.Model,),
         ),
         migrations.RunPython(forwards_func),
-        # NOTE(Dmitry): this is needed to move forward "autoincrementing"
-        #               counter that is used to give new textpages
-        #               unique IDs
-        migrations.RunSQL("""
-BEGIN;
-SELECT setval(pg_get_serial_sequence('"textpages_textpage"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "textpages_textpage";
-COMMIT;
-        """)
     ]

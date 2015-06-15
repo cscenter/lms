@@ -2,22 +2,10 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import model_utils.fields
 import learning.models
 import django.utils.timezone
+import model_utils.fields
 import django.core.validators
-
-
-def forwards_func(apps, schema_editor):
-    Venue = apps.get_model('learning', 'Venue')
-    db_alias = schema_editor.connection.alias
-    initial_venues = [{"name": "\u041f\u041e\u041c\u0418 \u0420\u0410\u041d",
-                       "description": "\u041d\u0430\u0431\u0435\u0440\u0435\u0436\u043d\u0430\u044f \u0440\u0435\u043a\u0438 \u0424\u043e\u043d\u0442\u0430\u043d\u043a\u0438, 27, \u041c\u0440\u0430\u043c\u043e\u0440\u043d\u044b\u0439 \u0437\u0430\u043b (2 \u044d\u0442\u0430\u0436)\r\n\r\n<img src=\"//api-maps.yandex.ru/services/constructor/1.0/static/?sid=hlqT2p1Lqk9imQqe8w2gxQktaxSuP91c&width=600&height=450\" alt=\"\"/>"},
-                      {"name": "\u0424\u041c\u041b 239",
-                       "description": "\u0424\u0443\u0440\u0448\u0442\u0430\u0442\u0441\u043a\u0430\u044f \u0443\u043b\u0438\u0446\u0430, 9, \u0432\u0442\u043e\u0440\u043e\u0439 \u044d\u0442\u0430\u0436, \u0430\u043a\u0442\u043e\u0432\u044b\u0439 \u0437\u0430\u043b \u043b\u0438\u0431\u043e \u0430\u0443\u0434. 25 (\u0432 \u043a\u043e\u043d\u0446\u0435 \u043a\u043e\u0440\u0438\u0434\u043e\u0440\u0430)\r\n\r\n<img src=\"//api-maps.yandex.ru/services/constructor/1.0/static/?sid=95w30endKrJjcgE7ct5DTGxUgfGuvBgx&width=600&height=450\" alt=\"\"/>"}]
-    for page in initial_venues:
-        Venue(**page).save(force_insert=True, using=db_alias)
-
 
 
 class Migration(migrations.Migration):
@@ -36,7 +24,6 @@ class Migration(migrations.Migration):
                 ('is_online', models.BooleanField(default=True, verbose_name='Assignment|can be passed online')),
                 ('title', models.CharField(max_length=140, verbose_name='Asssignment|name')),
                 ('text', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Assignment|text')),
-                ('attached_file', models.FileField(upload_to=learning.models.assignment_upload_to, blank=True)),
                 ('grade_min', models.PositiveSmallIntegerField(default=2, verbose_name='Assignment|grade_min', validators=[django.core.validators.MaxValueValidator(1000)])),
                 ('grade_max', models.PositiveSmallIntegerField(default=5, verbose_name='Assignment|grade_max', validators=[django.core.validators.MaxValueValidator(1000)])),
             ],
@@ -44,6 +31,21 @@ class Migration(migrations.Migration):
                 'ordering': ['created', 'course_offering'],
                 'verbose_name': 'Assignment',
                 'verbose_name_plural': 'Assignments',
+            },
+            bases=(models.Model, object),
+        ),
+        migrations.CreateModel(
+            name='AssignmentAttachment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('attachment', models.FileField(upload_to='assignment_attachments')),
+            ],
+            options={
+                'ordering': ['assignment', '-created'],
+                'verbose_name': 'Assignment attachment',
+                'verbose_name_plural': 'Assignment attachments',
             },
             bases=(models.Model, object),
         ),
@@ -61,7 +63,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Assignment-comment',
                 'verbose_name_plural': 'Assignment-comments',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='AssignmentNotification',
@@ -80,7 +81,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Assignment notification',
                 'verbose_name_plural': 'Assignment notifications',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='AssignmentStudent',
@@ -97,7 +97,18 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Assignment-student',
                 'verbose_name_plural': 'Assignment-students',
             },
-            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='City',
+            fields=[
+                ('code', models.CharField(help_text='This should be UN/LOCODE, e.g. "RU LED"', max_length=6, serialize=False, verbose_name='PK|Code', primary_key=True)),
+                ('name', models.CharField(max_length=255, verbose_name='City|Name')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'City',
+                'verbose_name_plural': 'Cities',
+            },
         ),
         migrations.CreateModel(
             name='Course',
@@ -114,7 +125,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Course',
                 'verbose_name_plural': 'Courses',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='CourseClass',
@@ -126,7 +136,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
                 ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
                 ('slides', models.FileField(upload_to=learning.models.courseclass_slides_file_name, verbose_name='Slides', blank=True)),
-                ('video', models.TextField(help_text='\u0414\u043e\u0441\u0442\u0443\u043f\u043d\u044b LaTeX+<a href="http://ru.wikipedia.org/wiki/Markdown">Markdown</a>+HTML; \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430, \u0432\u0441\u0442\u0430\u0432\u044c\u0442\u0435 HTML \u0434\u043b\u044f \u0432\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u043e\u0433\u043e \u0432\u0438\u0434\u0435\u043e\u043f\u043b\u0435\u0435\u0440\u0430', verbose_name='CourseClass|Video', blank=True)),
+                ('video', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled; please insert HTML for embedded video player', verbose_name='CourseClass|Video', blank=True)),
                 ('other_materials', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='CourseClass|Other materials', blank=True)),
                 ('date', models.DateField(verbose_name='Date')),
                 ('starts_at', models.TimeField(verbose_name='Starts at')),
@@ -162,13 +172,13 @@ class Migration(migrations.Migration):
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('description', models.TextField(help_text='LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description', verbose_name='Description', blank=True)),
                 ('is_published_in_video', models.BooleanField(default=False, verbose_name='Published in video section')),
+                ('is_open', models.BooleanField(default=False, help_text='This course offering will be available on ComputerScience Club website so anyone can join', verbose_name='Open course offering')),
             ],
             options={
                 'ordering': ['-semester', 'course__created'],
                 'verbose_name': 'Course offering',
                 'verbose_name_plural': 'Course offerings',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='CourseOfferingNews',
@@ -184,7 +194,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Course news-singular',
                 'verbose_name_plural': 'Course news-plural',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='CourseOfferingNewsNotification',
@@ -200,7 +209,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Course offering news notification',
                 'verbose_name_plural': 'Course offering news notifications',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Enrollment',
@@ -216,7 +224,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Enrollment',
                 'verbose_name_plural': 'Enrollments',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='NonCourseEvent',
@@ -235,21 +242,19 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Non-course event',
                 'verbose_name_plural': 'Non-course events',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Semester',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('year', models.PositiveSmallIntegerField(verbose_name='CSCUser|Year', validators=[django.core.validators.MinValueValidator(1990)])),
-                ('type', model_utils.fields.StatusField(default='spring', max_length=100, verbose_name='Semester|type', no_check_for_status=True, choices=[('spring', 'spring'), ('autumn', 'autumn')])),
+                ('type', model_utils.fields.StatusField(default='spring', max_length=100, verbose_name='Semester|type', no_check_for_status=True, choices=[('spring', 'spring'), ('summer', 'summer'), ('autumn', 'autumn')])),
             ],
             options={
                 'ordering': ['-year', 'type'],
                 'verbose_name': 'Semester',
                 'verbose_name_plural': 'Semesters',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='StudentProject',
@@ -269,7 +274,18 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Student project',
                 'verbose_name_plural': 'Student projects',
             },
-            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StudyProgram',
+            fields=[
+                ('code', models.CharField(max_length=2, serialize=False, verbose_name='PK|Code', primary_key=True)),
+                ('name', models.CharField(max_length=255, verbose_name='StudyProgram|Name')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Study program',
+                'verbose_name_plural': 'Study programs',
+            },
         ),
         migrations.CreateModel(
             name='Venue',
@@ -285,7 +301,5 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Venue',
                 'verbose_name_plural': 'Venues',
             },
-            bases=(models.Model,),
         ),
-        migrations.RunPython(forwards_func),
     ]

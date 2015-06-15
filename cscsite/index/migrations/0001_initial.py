@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('email', models.EmailField(max_length=75, verbose_name='email')),
+                ('email', models.EmailField(max_length=254, verbose_name='email')),
                 ('is_notified', models.BooleanField(default=False, verbose_name='User is notified')),
             ],
             options={
@@ -26,6 +26,5 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Enrollment application email',
                 'verbose_name_plural': 'Enrollment application emails',
             },
-            bases=(models.Model,),
         ),
     ]

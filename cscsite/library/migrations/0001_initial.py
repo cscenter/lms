@@ -26,7 +26,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'book',
                 'verbose_name_plural': 'books',
             },
-            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Borrow',
@@ -40,6 +39,5 @@ class Migration(migrations.Migration):
                 'verbose_name': 'borrow',
                 'verbose_name_plural': 'borrows',
             },
-            bases=(models.Model,),
         ),
     ]
