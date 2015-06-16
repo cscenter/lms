@@ -41,9 +41,11 @@ def current(context, tag_url_name, return_value='current', **kwargs):
     def inner_recursive(current_url_name):
         matched_simple = tag_url_name == current_url_name
         if current_url_name not in settings.MENU_URL_NAMES:
-            logger.warning("can't find url {0} in MENU_URL_NAMES"
-                           .format(current_url_name),
-                           extra={"request": context["request"]})
+            # Silence warnings for html pages starts with '/pages/'
+            if not current_url_name.startswith('/pages/'):
+                logger.warning("can't find url {0} in MENU_URL_NAMES"
+                                .format(current_url_name),
+                                extra={"request": context["request"]})
             return return_value if matched_simple else ''
         if matched_simple:
             return return_value

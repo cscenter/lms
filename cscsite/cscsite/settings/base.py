@@ -229,7 +229,6 @@ MENU_URL_NAMES = {
     'students_diplomas': {'parent': 'staff'},
     'user_detail': {},
     'user_reference_add': {},
-    'custom_text_page': {},
     'user_search': {'parent': 'staff'},
 
     'a_s_detail_teacher': {'alias': 'assignment_list_teacher'},
