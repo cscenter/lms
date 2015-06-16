@@ -3,6 +3,8 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
 from django.contrib import admin
+from django.contrib.flatpages import views
+
 
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
@@ -10,8 +12,6 @@ from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, UserSearchJSONView, UserSearchView, \
     UserReferenceCreateView, UserReferenceDetailView  # , StudentInfoUpdateView
-from textpages.views import TextpageOpenView, TextpageStudentView, \
-    CustomTextpageOpenView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
@@ -51,8 +51,6 @@ urlpatterns = patterns('',
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
     url(r'^private/enrollment_gform_callback/',
         EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
-    url(r'^syllabus/$', TextpageOpenView.as_view(), name='syllabus'),
-    url(r'^orgs/$', TextpageOpenView.as_view(), name='orgs'),
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
         name='teacher_detail'),
@@ -77,11 +75,7 @@ urlpatterns = patterns('',
     #     name='student_info_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^news/', include('news.urls')),
-    url(r'^enrollment/$', TextpageOpenView.as_view(), name='enrollment'),
-    url(r'^application/$', TextpageOpenView.as_view(), name='enrollment_application'),
-    url(r'^contacts/$', TextpageOpenView.as_view(), name='contacts'),
-    url(r'^online/$', TextpageOpenView.as_view(), name='online'),
-    url(r'^lectures/$', TextpageOpenView.as_view(), name='lectures'),
+
     url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
     url(r'^learning/$',
@@ -99,8 +93,6 @@ urlpatterns = patterns('',
         name='calendar_student'),
     url(r'^learning/full-calendar/$', CalendarFullView.as_view(),
         name='calendar_full_student'),
-    url(r'^learning/useful/$', TextpageStudentView.as_view(),
-        name='useful_stuff'),
 
     url(r'^teaching/$',
         RedirectView.as_view(pattern_name=settings.TEACHING_BASE),
@@ -218,8 +210,7 @@ urlpatterns = patterns('',
     url(r"^events/(?P<pk>\d+)/$", NonCourseEventDetailView.as_view(),
         name="non_course_event_detail"),
 
-    url(r'^pages/(?P<slug>[-\w]+)$', CustomTextpageOpenView.as_view(),
-        name='custom_text_page'),
+
 
     url(r'^library/', include("library.urls")),
 
@@ -253,3 +244,6 @@ urlpatterns = patterns('',
 
 if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += patterns('', url(r'^rosetta/', include('rosetta.urls')))
+
+urlpatterns += patterns('',
+    url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'))

@@ -197,8 +197,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         CSCUser.objects.create_user(**UserFactory.attributes())
         login = self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('logout'),
-                               {'next': reverse('enrollment')})
-        self.assertRedirects(resp, reverse('enrollment'),
+                               {'next': reverse('course_video_list')})
+        self.assertRedirects(resp, reverse('course_video_list'),
                              status_code=301)
 
     def test_yandex_id_from_email(self):

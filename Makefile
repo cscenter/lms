@@ -27,10 +27,13 @@ loaddemo:
 	python cscsite/manage.py loaddata --settings=cscsite.settings.local cscsite/fixtures/demo_data.json
 
 test:
-	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test
+	python cscsite/manage.py test core index news users learning --settings=cscsite.settings.test
+
+test_travis:
+	python cscsite/manage.py test core index news users learning --settings=cscsite.settings.test_travis
 
 test_nocoverage:
-	python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test_nocover
+	python cscsite/manage.py test core index news users learning --settings=cscsite.settings.test_nocover
 
 init:
 	python cscsite/manage.py syncdb --all --settings=cscsite.settings.local
@@ -38,7 +41,7 @@ init:
 	python cscsite/manage.py loaddata --settings=cscsite.settings.local cscsite/fixtures/demo_data.json
 
 stylecheck:
-	pep8 cscsite/users cscsite/index cscsite/news cscsite/learning cscsite/textpages cscsite/core --exclude=migrations
+	pep8 cscsite/users cscsite/index cscsite/news cscsite/learning cscsite/core --exclude=migrations
 #PYTHONPATH=cscsite pylint -rn --load-plugins pylint_django --rcfile=pylint.config learning core
 
 localmail:

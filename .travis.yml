@@ -15,4 +15,4 @@ install:
   - pip install -q psycopg2==2.6
   - pip install -r requirements-nodjango.txt
 script:
-  - python cscsite/manage.py test core index news users textpages learning --settings=cscsite.settings.test_travis
+  - python cscsite/manage.py test core index news users learning --settings=cscsite.settings.test_travis
