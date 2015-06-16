@@ -54,4 +54,11 @@ def current(context, tag_url_name, return_value='current', **kwargs):
             return inner_recursive(url_info['parent'])
         return ''
 
-    return inner_recursive(context['request'].resolver_match.url_name)
+    if context['request'].resolver_match.url_name == 'html_pages':
+        current_url_name = context['request'].resolver_match.kwargs['url']
+        if not current_url_name.startswith('/'):
+            current_url_name = '/' + current_url_name
+    else:
+        current_url_name = context['request'].resolver_match.url_name
+
+    return inner_recursive(current_url_name)

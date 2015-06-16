@@ -1,12 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.flatpages.admin import FlatPageAdmin
+from django.contrib.flatpages.models import FlatPage
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
+
 
 from .forms import Ubereditor
 
@@ -87,3 +91,8 @@ class UbereditorMixin(object):
 class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}
+
+class ExtendedFlatPageAdmin(UbereditorMixin, FlatPageAdmin):
+    pass
+admin.site.unregister(FlatPage)
+admin.site.register(FlatPage, ExtendedFlatPageAdmin)

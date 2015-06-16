@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.flatpages',
 
     'sorl.thumbnail',
     'crispy_forms',
@@ -76,9 +77,9 @@ INSTALLED_APPS = (
 
     'users',
     'core',
+    'htmlpages',
     'news',
     'index',
-    'textpages',
     'learning',
     'library',
     'crutches',
@@ -94,7 +95,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'core.notifications.UnreadNotificationsCacheMiddleware'
+    'core.notifications.UnreadNotificationsCacheMiddleware',
 )
 
 ROOT_URLCONF = 'cscsite.urls'
@@ -175,13 +176,8 @@ MENU_URL_NAMES = {
     'index': {},
     'about': {},
     'course_video_list': {},
-    'lectures': {},
-    'online': {},
     'teaching': {},
     'learning': {},
-    'enrollment_menu': {},
-    'enrollment': {'parent': 'enrollment_menu'},
-    'enrollment_application': {'parent': 'enrollment_menu'},
     'staff': {},
     'unsubscribe_ya': {},
 
@@ -199,7 +195,6 @@ MENU_URL_NAMES = {
     'course_offering_news_delete': {'alias': 'course_list'},
     'course_offering_edit_descr': {'alias': 'course_list'},
     'course_offering_unenroll': {},
-    'orgs': {'parent': 'about'},
     'teachers': {'parent': 'about'},
     'teacher_detail': {'alias': 'teachers'},
     'alumni': {'parent': 'about'},
@@ -215,7 +210,6 @@ MENU_URL_NAMES = {
     'course_list_student': {'parent': 'learning'},
     'library_book_list': {'parent': 'learning'},
     'library_book_detail': {'parent': 'library_book_list'},
-    'useful_stuff': {'parent': 'learning'},
 
     'assignment_list_teacher': {'parent': 'teaching'},
     'assignment_detail_teacher': {'alias': 'assignment_list_teacher'},
@@ -241,7 +235,6 @@ MENU_URL_NAMES = {
     'a_s_detail_teacher': {'alias': 'assignment_list_teacher'},
     'a_s_detail_student': {'alias': 'assignment_list_student'},
 
-    'contacts': {},
     'venue_detail': {},
 
     'user_update': {},
@@ -254,8 +247,21 @@ MENU_URL_NAMES = {
     'password_reset_done': {},
     'password_reset': {},
     'password_change': {},
-    'assignment_attachment_delete': {}
-    }
+    'assignment_attachment_delete': {},
+
+
+    # FLATPAGES
+    'html_pages': {},
+    '/syllabus/': {'parent': 'about'},
+    '/orgs/': {'parent': 'about'},
+    '/lectures/': {},
+    'enrollment_menu': {},
+    '/enrollment/': {'parent': 'enrollment_menu'},
+    '/application/': {'parent': 'enrollment_menu'},
+    '/contacts/': {},
+    '/online/': {},
+    '/learning/useful/': {'parent': 'learning'},
+}
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
