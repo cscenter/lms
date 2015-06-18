@@ -51,7 +51,8 @@ class DisableMigrations(object):
 
 
 # disable migration in tests; it's a hack until Django 1.8 with --keepdb
-MIGRATION_MODULES = DisableMigrations()
+# MIGRATION_MODULES = DisableMigrations()
+MIGRATION_MODULES = {}
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
