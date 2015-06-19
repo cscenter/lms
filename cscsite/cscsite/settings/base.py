@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'learning',
     'library',
     'crutches',
+    'loginas',
     'pipeline',
 )
 
@@ -265,6 +266,7 @@ MENU_URL_NAMES = {
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 # this urls will be used to redirect from '/learning/' and '/teaching/'
 LEARNING_BASE = 'assignment_list_student'
 TEACHING_BASE = 'assignment_list_teacher'

@@ -245,5 +245,9 @@ urlpatterns = patterns('',
 if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += patterns('', url(r'^rosetta/', include('rosetta.urls')))
 
+urlpatterns += patterns('loginas.views',
+    url(r"^login/user/(?P<user_id>.+)/$", "user_login", name="loginas-user-login"),
+)
+
 urlpatterns += patterns('',
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'))

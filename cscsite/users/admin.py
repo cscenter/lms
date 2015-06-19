@@ -46,6 +46,7 @@ class SHADCourseRecordAdmin(admin.StackedInline):
 class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
+    change_form_template = 'loginas/change_form.html'
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
