@@ -127,7 +127,6 @@
         <h4 class="bigger-margin">{% trans "Assignments" %}:
           <div class="btn-group pull-right assignment-list-control" role="group">
             <button type="button" class="btn btn-xs btn-default active current-semester">{{ current_semester }}</button>
-            <button type="button" class="btn btn-xs btn-default all">{% trans "All"|lower %}</button>
           </div></h4>
         <table class="table table-condensed" id="assignments-table">
           <tr>
@@ -136,9 +135,7 @@
             <th>{% trans "Grade" %}</th>
           </tr>
           {% for a_s in a_ss %}
-            <tr {% if a_s.assignment.course_offering.semester_id != current_semester.id %}
-                   class="old" style="display:none;"
-                {% endif %}>
+            <tr>
               <td>
                 {% if a_s.hacky_co_change %}
                   <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>

@@ -161,6 +161,7 @@ class UserDetailView(generic.DetailView):
                                 .prefetch_related('semesters')
                                 .order_by('pk'))
         context['student_projects'] = StudentProject.sorted(student_projects)
+        context['current_semester'] = Semester.get_current()
         if self.request.user.is_staff:
             related = ['assignment',
                        'assignment__course_offering',
@@ -168,6 +169,7 @@ class UserDetailView(generic.DetailView):
                        'assignment__course_offering__semester']
             a_ss = (AssignmentStudent.objects
                     .filter(student=self.object)
+                    .filter(assignment__course_offering__semester_id=context['current_semester'].id)
                     .order_by('assignment__course_offering__semester__year',
                               '-assignment__course_offering__semester__type',
                               'assignment__course_offering__course__name',
@@ -183,7 +185,6 @@ class UserDetailView(generic.DetailView):
                     setattr(a_s, 'hacky_co_change', True)
                     current_co = a_s.assignment.course_offering
             context['a_ss'] = a_ss
-        context['current_semester'] = Semester.get_current()
         return context
 
 
