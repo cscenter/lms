@@ -283,11 +283,12 @@ class AssignmentForm(forms.ModelForm):
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
 
-    deadline_at = forms.DateTimeField(
+    deadline_at = forms.SplitDateTimeField(
         label=_("Deadline"),
+        input_date_formats=["%Y-%m-%d"],
+        input_time_formats=["%H:%M"]
         # help_text=_("Example: 1990-07-13 12:00"),
-        widget=forms.SplitDateTimeWidget(date_format="%Y-%m-%d",
-                                         time_format="%H:%M"))
+        )
     attachments = forms.FileField(
         label=_("Attached file"),
         required=False,
