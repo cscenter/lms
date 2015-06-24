@@ -1,0 +1,400 @@
+[
+{
+  "fields": {
+    "root_item": 1,
+    "name": "compscicenter"
+  },
+  "model": "treemenus.menu",
+  "pk": 1
+},
+{
+  "fields": {
+    "parent": null,
+    "level": 0,
+    "url": "",
+    "menu": 1,
+    "rank": 0,
+    "caption": "root",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 1
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/syllabus/",
+    "menu": 1,
+    "rank": 0,
+    "caption": "About CSC",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 2
+},
+{
+  "fields": {
+    "parent": 2,
+    "level": 2,
+    "url": "/syllabus/",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Syllabus",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 3
+},
+{
+  "fields": {
+    "parent": 2,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 1,
+    "caption": "Courses",
+    "named_url": "course_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 4
+},
+{
+  "fields": {
+    "parent": 2,
+    "level": 2,
+    "url": "/orgs/",
+    "menu": 1,
+    "rank": 2,
+    "caption": "Organizers",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 5
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/videos/",
+    "menu": 1,
+    "rank": 1,
+    "caption": "Video",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 6
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/lectures/",
+    "menu": 1,
+    "rank": 2,
+    "caption": "Lyceum",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 7
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/learning/assignments/",
+    "menu": 1,
+    "rank": 3,
+    "caption": "Learning",
+    "named_url": "assignment_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 8
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/learning/assignments/",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Assignments",
+    "named_url": "assignment_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 9
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/learning/timetable/",
+    "menu": 1,
+    "rank": 1,
+    "caption": "My timetable",
+    "named_url": "timetable_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 10
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/learning/full-calendar/",
+    "menu": 1,
+    "rank": 2,
+    "caption": "Calendar",
+    "named_url": "calendar_full_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 11
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/learning/courses/",
+    "menu": 1,
+    "rank": 3,
+    "caption": "My courses",
+    "named_url": "course_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 12
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/library/",
+    "menu": 1,
+    "rank": 4,
+    "caption": "Library",
+    "named_url": "library_book_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 13
+},
+{
+  "fields": {
+    "parent": 8,
+    "level": 2,
+    "url": "/learning/useful/",
+    "menu": 1,
+    "rank": 5,
+    "caption": "Tips",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 14
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "",
+    "menu": 1,
+    "rank": 4,
+    "caption": "Supervision",
+    "named_url": "course_markssheet_staff_dispatch"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 15
+},
+{
+  "fields": {
+    "parent": 15,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Courses",
+    "named_url": "course_markssheet_staff_dispatch"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 16
+},
+{
+  "fields": {
+    "parent": 15,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 1,
+    "caption": "User search",
+    "named_url": "user_search"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 17
+},
+{
+  "fields": {
+    "parent": 15,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 2,
+    "caption": "Generate diplomas",
+    "named_url": "students_diplomas"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 18
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "",
+    "menu": 1,
+    "rank": 5,
+    "caption": "Teaching",
+    "named_url": "assignment_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 19
+},
+{
+  "fields": {
+    "parent": 19,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Assignments",
+    "named_url": "assignment_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 20
+},
+{
+  "fields": {
+    "parent": 19,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 1,
+    "caption": "Timetable",
+    "named_url": "timetable_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 21
+},
+{
+  "fields": {
+    "parent": 19,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 2,
+    "caption": "Calendar",
+    "named_url": "calendar_full_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 22
+},
+{
+  "fields": {
+    "parent": 19,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 3,
+    "caption": "My courses",
+    "named_url": "course_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 23
+},
+{
+  "fields": {
+    "parent": 19,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 4,
+    "caption": "Marks sheet",
+    "named_url": "markssheet_teacher_dispatch"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 24
+},
+{
+  "fields": {
+    "parent": 2,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 3,
+    "caption": "Professors",
+    "named_url": "teachers"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 25
+},
+{
+  "fields": {
+    "parent": 2,
+    "level": 2,
+    "url": "",
+    "menu": 1,
+    "rank": 4,
+    "caption": "Alumni",
+    "named_url": "alumni"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 26
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/enrollment/",
+    "menu": 1,
+    "rank": 6,
+    "caption": "Enrollment",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 27
+},
+{
+  "fields": {
+    "parent": 27,
+    "level": 2,
+    "url": "/enrollment/",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Information",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 28
+},
+{
+  "fields": {
+    "parent": 27,
+    "level": 2,
+    "url": "/application/",
+    "menu": 1,
+    "rank": 1,
+    "caption": "Application",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 29
+},
+{
+  "fields": {
+    "parent": 1,
+    "level": 1,
+    "url": "/contacts/",
+    "menu": 1,
+    "rank": 7,
+    "caption": "Contacts",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 30
+}
+]
