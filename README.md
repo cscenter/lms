@@ -32,6 +32,8 @@ GRANT
 $ python cscsite/manage.py syncdb --settings=cscsite.settings.local
 ```
 
+* load data for menu with `python cscsite/manage.py loaddata` from cscsite/fixtures/ folder
+
 * run with `python manage.py runserver --settings=cscsite.settings.local`
 
 
