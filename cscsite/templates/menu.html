@@ -1,0 +1,75 @@
+{% load i18n %}
+{% load staticfiles %}
+{% load getattribute from core_tags %}
+
+<div class="header lvl1">
+  <div class="container">
+    <div class="row">
+        <div class="col-xs-9">
+            <div class="logo-cell">
+              <a href="{% url 'index' %}">
+                <div class="logo-container">
+                  <img src="{% static "img/transparent_logo.png" %}" alt="Computer Science Center">
+                </div>
+              </a>
+            </div>
+            <ul>
+                {% for menu_item in menu %}
+                    {% if not menu_item.hidden %}
+                    <li {% if menu_item.extension.classes %}class="{{menu_item.extension.classes}}"{% endif %}>
+                        <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-caret-down"></i>{% endif %}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                {% if user.is_staff %}
+                    <li>
+                      <a href="{% url 'admin:index' %}" target="_blank">
+                        {% trans "Admin page" %}
+                      </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="col-xs-3 login">
+            {% if user.is_authenticated %}
+            <i class="fa fa-user" data-user-id="{{ user.pk }}"></i>&nbsp;<a href="{{ user.get_absolute_url }}">{{ user.username }}</a>&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
+            {% else %}
+            <a href="{% url 'login' %}">
+              {% trans "Login" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="header-lvl2-container">
+{% for menu_item in menu %}
+    {% if 'current' in menu_item.extension.classes and menu_item.children and not menu_item.hidden %}
+          <div class="header lvl2 {{menu_item.extension.classes}}">
+            <div class="container">
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="logo-cell"></div>
+                  <ul>
+                    {% for second_level in menu_item.children %}
+                        <li {% if second_level.extension.classes %}class="{{second_level.extension.classes}}"{% endif %}>
+                            <a href="{{ second_level.url }}">
+                                {% trans second_level.caption context 'menu' %}
+
+                                {% if second_level.extension.budge and request.unread_notifications_cache|getattribute:second_level.extension.budge %}
+                                <span class="badge">
+                                  {{ request.unread_notifications_cache|getattribute:second_level.extension.budge|length }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+    {% endif %}
+{% endfor %}
+</div>

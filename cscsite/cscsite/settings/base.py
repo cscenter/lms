@@ -67,6 +67,8 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.flatpages',
 
+    'treemenus',
+    'menu_extension',
     'sorl.thumbnail',
     'crispy_forms',
     'floppyforms',
@@ -89,6 +91,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -140,7 +143,7 @@ CACHES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-RU'
 LANGUAGES = (
     ('ru', "Russian"),)
 LOCALE_PATHS = (
@@ -165,103 +168,6 @@ AUTH_USER_MODEL = "users.CSCUser"
 AUTHENTICATION_BACKENDS = (
     "crutches.compat.EmailOrUsernameModelBackend",
 )
-
-# URL names info for top menu. Possible keys:
-# "parent": name of "parent" menu item, as if in submenu
-# "alias": name of "alias" to current url name, when highlighted menu entry
-#          should differ from current url
-# cscsite.core.templatetags.navigation will comply if there is no entry for
-# current URL name
-
-MENU_URL_NAMES = {
-    'index': {},
-    'about': {},
-    'course_video_list': {},
-    'teaching': {},
-    'learning': {},
-    'staff': {},
-    'unsubscribe_ya': {},
-
-    'syllabus': {'parent': 'about'},
-    'course_list': {'parent': 'about'},
-    'course_detail': {'alias': 'course_list'},
-    'class_detail': {'alias': 'course_list'},
-    'course_class_attachment_delete': {'alias': 'course_list'},
-    'course_offering_detail': {'alias': 'course_list'},
-    'course_class_add': {'alias': 'course_list'},
-    'course_class_edit': {'alias': 'course_list'},
-    'course_class_delete': {'alias': 'course_list'},
-    'course_offering_news_create': {'alias': 'course_list'},
-    'course_offering_news_update': {'alias': 'course_list'},
-    'course_offering_news_delete': {'alias': 'course_list'},
-    'course_offering_edit_descr': {'alias': 'course_list'},
-    'course_offering_unenroll': {},
-    'teachers': {'parent': 'about'},
-    'teacher_detail': {'alias': 'teachers'},
-    'alumni': {'parent': 'about'},
-    'non_course_event_detail': {'parent': 'about'},
-
-    'news_list': {},
-    'news_detail': {'alias': 'news_list'},
-
-    'assignment_list_student': {'parent': 'learning'},
-    'timetable_student': {'parent': 'learning'},
-    'calendar_student': {'alias': 'timetable_student'},
-    'calendar_full_student': {'parent': 'learning'},
-    'course_list_student': {'parent': 'learning'},
-    'library_book_list': {'parent': 'learning'},
-    'library_book_detail': {'parent': 'library_book_list'},
-
-    'assignment_list_teacher': {'parent': 'teaching'},
-    'assignment_detail_teacher': {'alias': 'assignment_list_teacher'},
-    'assignment_add': {'alias': 'assignment_list_teacher'},
-    'assignment_edit': {'alias': 'assignment_list_teacher'},
-    'assignment_delete': {'alias': 'assignment_list_teacher'},
-    'timetable_teacher': {'parent': 'teaching'},
-    'calendar_teacher': {'alias': 'timetable_teacher'},
-    'calendar_full_teacher': {'parent': 'teaching'},
-    'course_list_teacher': {'parent': 'teaching'},
-    'course_edit': {'alias': 'course_list'},
-    'markssheet_teacher_dispatch': {'parent': 'teaching'},
-    'markssheet_teacher': {'alias': 'markssheet_teacher_dispatch'},
-
-    'course_markssheet_staff_dispatch': {'parent': 'staff'},
-    'course_markssheet_staff': {'alias': 'course_markssheet_staff_dispatch'},
-    'students_diplomas': {'parent': 'staff'},
-    'user_detail': {},
-    'user_reference_add': {},
-    'user_search': {'parent': 'staff'},
-
-    'a_s_detail_teacher': {'alias': 'assignment_list_teacher'},
-    'a_s_detail_student': {'alias': 'assignment_list_student'},
-
-    'venue_detail': {},
-
-    'user_update': {},
-    'login': {},
-    'logout': {},
-
-    'password_change_complete': {},
-    'password_reset_complete': {},
-    'password_reset_confirm': {},
-    'password_reset_done': {},
-    'password_reset': {},
-    'password_change': {},
-    'assignment_attachment_delete': {},
-
-
-    # FLATPAGES
-    'html_pages': {},
-    '/syllabus/': {'parent': 'about'},
-    '/orgs/': {'parent': 'about'},
-    '/lectures/': {},
-    'enrollment_menu': {},
-    '/enrollment/': {'parent': 'enrollment_menu'},
-    '/application/': {'parent': 'enrollment_menu'},
-    '/contacts/': {},
-    '/online/': {},
-    '/learning/useful/': {'parent': 'learning'},
-}
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"

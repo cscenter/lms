@@ -1,0 +1,426 @@
+[
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 1
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " ^/events/\r\n"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 2
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 3
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": "^/courses/.*/assignments/add$\r\n^/courses/.*/assignments/\\d+/edit$",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": ""
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 4
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 5
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 6
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 7
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [
+      1
+    ],
+    "classes": "for-students",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 8
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "assignments_student",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 9
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 10
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 11
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "courseoffering_news",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 12
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 13
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 14
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": true,
+    "groups": [],
+    "classes": "for-staff",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 15
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 16
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 17
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 18
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [
+      2
+    ],
+    "classes": "for-teachers",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 19
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "assignments_teacher",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": "^/courses/.*/assignments/add$\r\n^/courses/.*/assignments/\\d+/edit$\r\n"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 20
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 21
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 22
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "courseoffering_news",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 23
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 24
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 25
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 26
+},
+{
+  "fields": {
+    "unauthenticated": true,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 27
+},
+{
+  "fields": {
+    "unauthenticated": true,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 28
+},
+{
+  "fields": {
+    "unauthenticated": true,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 29
+},
+{
+  "fields": {
+    "unauthenticated": true,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 30
+}
+]

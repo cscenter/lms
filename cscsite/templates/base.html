@@ -2,7 +2,7 @@
 {% load pipeline %}
 {% load staticfiles %}
 
-{% load current from navigation %}
+{% load csc_menu from csc_menu_tags %}
 {% load flatpage_url %}
 
 {% load sitemetrics %}
@@ -42,280 +42,7 @@
     {% include "mathjax.html" %}
   </head>
   <body class="tex2jax_ignore">
-    <div class="header lvl1">
-      <div class="container">
-        <div class="row">
-          <div class="col-xs-9">
-            <div class="logo-cell">
-              <a href="{% url 'index' %}">
-                <div class="logo-container">
-                  <img src="{% static "img/transparent_logo.png" %}" alt="Computer Science Center">
-                </div>
-              </a>
-            </div>
-            <ul>
-              <li class="{% current 'about' %}">
-                <a href="{% flatpage_url '/syllabus/' %}">
-                  {% trans "About CSC" %} <i class="fa fa-caret-down"></i>
-                </a>
-              </li>
-              <li class="{% current 'course_video_list' %}">
-                <a href="{% url 'course_video_list' %}">
-                  {% trans "Videos" %}
-                </a>
-              </li>
-              <li class="{% current '/lectures/' %}">
-                <a href="{% flatpage_url '/lectures/' %}">
-                  {% trans "Lectures|topmenu" %}
-                </a>
-              </li>
-              {% if user.is_authenticated %}
-                {% if user.is_student %}
-                  <li class="{% current 'learning' %} for-students">
-                    <a href="{% url LEARNING_BASE %}">
-                      {% trans "Learning" %} <i class="fa fa-caret-down"></i>
-                    </a>
-                  </li>
-                {% endif %}
-                {% if user.is_teacher %}
-                  <li class="{% current 'teaching' %} for-teachers">
-                    <a href="{% url TEACHING_BASE %}">
-                      {% trans "Teaching" %} <i class="fa fa-caret-down"></i>
-                    </a>
-                  </li>
-                {% endif %}
-                {% if user.is_staff %}
-                  <li class="{% current 'staff' %} for-staff">
-                    <a href="{% url 'course_markssheet_staff_dispatch' %}">
-                      {% trans "Supervision" %}  <i class="fa fa-caret-down"></i>
-                    </a>
-                  </li>
-                {% endif %}
-              {% else %}
-                  <li class="{% current 'enrollment_menu' %}">
-                    <a href="{% flatpage_url '/enrollment/' %}">
-                      {% trans "CSC|Enrollment" %}   <i class="fa fa-caret-down"></i>
-                    </a>
-                  </li>
-              {% endif %}
-              {% if not user.is_authenticated %}
-                <li class="{% current '/contacts/' %}">
-                  <a href="{% flatpage_url '/contacts/' %}">
-                    {% trans "Contacts" %}
-                  </a>
-                </li>
-              {% endif %}
-              {% if user.is_staff %}
-                <li>
-                  <a href="{% url 'admin:index' %}" target="_blank">
-                    {% trans "Admin page" %}
-                  </a>
-                </li>
-              {% endif %}
-            </ul>
-          </div>
-          <div class="col-xs-3 login">
-            {% if user.is_authenticated %}
-            <i class="fa fa-user" data-user-id="{{ user.pk }}"></i>&nbsp;<a href="{{ user.get_absolute_url }}">{{ user.username }}</a>&nbsp;<span class="logout-url">(<a href="{% url 'logout' %}">{% trans "logout" %}</a>)</span>
-            {% else %}
-            <a href="{% url 'login' %}">
-              {% trans "Login" %}
-            </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="header-lvl2-container">
-      <div class="header lvl2 {% current 'about' %}">
-        <div class="container">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="logo-cell"></div>
-              <ul>
-                <li class="{% current '/syllabus/' %}">
-                  <a href="{% flatpage_url '/syllabus/' %}">
-                    {% trans "Syllabus" %}
-                  </a>
-                </li>
-                <li class="{% current 'course_list' %}">
-                  <a href="{% url 'course_list' %}">
-                    {% trans "Courses" %}
-                  </a>
-                </li>
-                <li class="{% current '/orgs/' %}">
-                  <a href="{% flatpage_url '/orgs/' %}" style="display: block;">
-                    {% trans "Organizers" %}
-                  </a>
-                </li>
-                <li class="{% current 'teachers' %}">
-                  <a href="{% url 'teachers' %}">
-                    {% trans "Professors" %}
-                  </a>
-                </li>
-                <li class="{% current 'alumni' %}">
-                  <a href="{% url 'alumni' %}">
-                    {% trans "Alumni" %}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="header lvl2 {% current 'enrollment_menu' %}">
-          <div class="container">
-            <div class="row">
-              <div class="col-xs-12">
-                <div class="logo-cell"></div>
-                <ul>
-                  <li class="{% current '/enrollment/' %}">
-                    <a href="{% flatpage_url '/enrollment/' %}">
-                      {% trans "CSC|Enrollment info" %}
-                    </a>
-                  </li>
-                  <li class="{% current '/application/' %}">
-                    <a href="{% flatpage_url '/application/' %}">
-                      {% trans "Enrollment application" %}
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-      <div class="header lvl2 for-students {% current 'learning' %}">
-        <div class="container">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="logo-cell"></div>
-              <ul>
-                <li class="{% current 'assignment_list_student' %}">
-                  <a href="{% url 'assignment_list_student' %}">
-                    {% trans "Assignments" %}
-                    {% if request.unread_notifications_cache.assignments_student %}
-                    <span class="badge">
-                      {{ request.unread_notifications_cache.assignments_student|length }}
-                    </span>
-                    {% endif %}
-                  </a>
-                </li>
-                <li class="{% current 'timetable_student' %}">
-                  <a href="{% url 'timetable_student' %}">
-                    {% trans "My timetable" %}
-                  </a>
-                </li>
-                <li class="{% current 'calendar_full_student' %}">
-                  <a href="{% url 'calendar_full_student' %}">
-                    {% trans "Calendar" %}
-                  </a>
-                </li>
-                <li class="{% current 'course_list_student' %}">
-                  <a href="{% url 'course_list_student' %}">
-                    {% trans "My courses" %}
-                    {% if request.unread_notifications_cache.courseoffering_news %}
-                    <span class="badge">
-                      {{ request.unread_notifications_cache.courseoffering_news|length }}
-                    </span>
-                    {% endif %}
-                  </a>
-                </li>
-                <li class="{% current 'library_book_list' %}">
-                  <a href="{% url 'library_book_list' %}">
-                    {% trans "library"|capfirst %}
-                  </a>
-                </li>
-                <li class="{% current '/learning/useful/' %}">
-                  <a href="{% flatpage_url '/learning/useful/' %}">
-                    {% trans "Useful stuff" %}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="header lvl2 for-teachers {% current 'teaching' %}">
-        <div class="container">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="logo-cell"></div>
-              <ul>
-                <li class="{% current 'assignment_list_teacher' %}">
-                  <a href="{% url 'assignment_list_teacher' %}">
-                    {% trans "Assignments" %}
-                    {% if request.unread_notifications_cache.assignments_teacher %}
-                    <span class="badge">
-                      {{ request.unread_notifications_cache.assignments_teacher|length }}
-                    </span>
-                    {% endif %}
-                  </a>
-                </li>
-                <li class="{% current 'timetable_teacher' %}">
-                  <a href="{% url 'timetable_teacher' %}">
-                    {% trans "Timetable" %}
-                  </a>
-                </li>
-                <li class="{% current 'calendar_full_teacher' %}">
-                  <a href="{% url 'calendar_full_teacher' %}">
-                    {% trans "Calendar" %}
-                  </a>
-                </li>
-                <li class="{% current 'course_list_teacher' %}">
-                  <a href="{% url 'course_list_teacher' %}">
-                    {% trans "My courses" %}
-                    {% if request.unread_notifications_cache.courseoffering_news %}
-                    <span class="badge">
-                      {{ request.unread_notifications_cache.courseoffering_news|length }}
-                    </span>
-                    {% endif %}
-                  </a>
-                </li>
-                <li class="{% current 'markssheet_teacher_dispatch' %}">
-                  <a href="{% url 'markssheet_teacher_dispatch' %}">
-                    {% trans "Marks sheet" %}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="header lvl2 for-staff {% current 'staff' %}">
-        <div class="container">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="logo-cell"></div>
-              <ul>
-                  <li class="{% current 'course_markssheet_staff_dispatch' %}">
-                    <a href="{% url 'course_markssheet_staff_dispatch' %}">
-                      {% trans "Courses" %}
-                    </a>
-                  </li>
-                  <li class="{% current 'user_search' %}">
-                    <a href="{% url 'user_search' %}">
-                      {% trans "User search" %}
-                    </a>
-                  </li>
-                  <li class="{% current 'students_diplomas' %}">
-                    <a href="{% url 'students_diplomas' %}">
-                      {% trans "Generate diplomas" %}
-                    </a>
-                  </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-    </div>
+    {% csc_menu "compscicenter" %}
 
     {% block content %}
     <div class="container">
@@ -328,19 +55,19 @@
     {% endblock content %}
 
     <div class="footer">
-    <div class="container">
-      <div class="row">
-        <div class="col-xs-7">{% trans "Computer Science Center, 2011–15 гг."%}</div>
-        <div class="col-xs-3">
-          <a href="https://github.com/cscenter/public-issue-tracker" target="_blank" class="pull-right" style="white-space: nowrap;">{% trans "report a problem"%}</a>
-        </div>
-        <div class="col-xs-2 social">
-          <a class="col-xs-4" href="http://vkontakte.ru/compscicenter" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
-          <a class="col-xs-4" href="https://www.facebook.com/CSCenter" target="_blank"><i class="fa fa-facebook fa-2x"></i></a>
-          <a class="col-xs-4" href="http://twitter.com/#Compscicenter" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-7">{% trans "Computer Science Center, 2011–15 гг."%}</div>
+          <div class="col-xs-3">
+            <a href="https://github.com/cscenter/public-issue-tracker" target="_blank" class="pull-right" style="white-space: nowrap;">{% trans "report a problem"%}</a>
+          </div>
+          <div class="col-xs-2 social">
+            <a class="col-xs-4" href="http://vkontakte.ru/compscicenter" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+            <a class="col-xs-4" href="https://www.facebook.com/CSCenter" target="_blank"><i class="fa fa-facebook fa-2x"></i></a>
+            <a class="col-xs-4" href="http://twitter.com/#Compscicenter" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
+          </div>
         </div>
       </div>
-    </div>
     </div>
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
