@@ -30,7 +30,9 @@ class Command(BaseCommand):
             )
             .exclude(
                 groups__in=[CSCUser.IS_GRADUATE_PK],
-                status__in=['will_graduate', 'expelled',]
+            )
+            .exclude(
+                status__in=[CSCUser.STATUS.will_graduate, 'expelled']
             )
             .prefetch_related(
                 Prefetch(
@@ -45,7 +47,6 @@ class Command(BaseCommand):
                 ),
             )
         )
-
 
         for student in students:
             w.writerow([student.get_full_name(), student.yandex_id, student.enrollment_year, len(student.enrollments), student.id])
