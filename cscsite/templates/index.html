@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
-{% load flatpage_url %}
+{% load htmlpage_url %}
 
 {% block content %}
 <div class="container">
@@ -11,11 +11,11 @@
            style="background-image:url('{% static "img/front_picture.jpg" %}')">
         <div class="row index-callout-buttons-row" style="margin-top: 225px;">
           <div class="col-xs-12 callout-buttons">
-            <a href="{% flatpage_url '/syllabus/' %}"
+            <a href="{% htmlpage_url '/syllabus/' %}"
                role="button" class="btn btn-lg btn-primary">
               {% trans "Learn more" %}
             </a>
-            <a href="{% flatpage_url '/enrollment/' %}"
+            <a href="{% htmlpage_url '/enrollment/' %}"
                role="button" class="btn btn-lg btn-primary">
               {% trans "How to enroll" %}
             </a>
