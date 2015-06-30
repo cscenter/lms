@@ -69,8 +69,7 @@ class CSCUser(AbstractUser):
     IS_TEACHER_PK = 2
     IS_GRADUATE_PK = 3
 
-    STATUS = Choices(('graduate', _("Graduate")),
-                     ('expelled', _("StudentInfo|Expelled")),
+    STATUS = Choices(('expelled', _("StudentInfo|Expelled")),
                      ('reinstated', _("StudentInfo|Reinstalled")),
                      ('will_graduate', _("StudentInfo|Will graduate")))
 
