@@ -16,6 +16,8 @@ class assertItemsEqualMixin(object):
 
 
 class IndexTests(assertItemsEqualMixin, TestCase):
+    fixtures = ['cscenter_htmlpages.json']
+
     def test_no_news(self):
         response = self.client.get(reverse('index'))
         self.assertItemsEqual(response.context['news_objects'], [])

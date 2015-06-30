@@ -6,7 +6,6 @@ addons:
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python cscsite/manage.py migrate --noinput --settings=cscsite.settings.test_travis
-  - python cscsite/manage.py loaddata cscsite/cscsite/fixtures/htmlpages.json --settings=cscsite.settings.test_travis
 env:
   - DJANGO=1.8.2
 install:
