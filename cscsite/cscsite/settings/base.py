@@ -40,7 +40,7 @@ TEMPLATE_LOADERS = (
 SECRET_KEY = '***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -57,6 +57,7 @@ EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
 # Application definition
 
 INSTALLED_APPS = (
+    'modeltranslation', # insert before admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,7 +66,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'django.contrib.flatpages',
 
     'treemenus',
     'menu_extension',
@@ -91,7 +91,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -145,7 +145,9 @@ CACHES = {
 
 LANGUAGE_CODE = 'ru-RU'
 LANGUAGES = (
-    ('ru', "Russian"),)
+    ('ru', "Russian"),
+    ('en', "English"),
+)
 LOCALE_PATHS = (
     "conf/locale",
 )

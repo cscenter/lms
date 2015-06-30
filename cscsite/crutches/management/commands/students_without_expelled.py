@@ -26,7 +26,7 @@ class Command(BaseCommand):
                 is_center_student=True,
                 groups__in=[CSCUser.IS_STUDENT_PK],
                 enrollment_year__isnull=False,
-                graduation_year__isnull=True
+                graduation_year__isnull=True,
             )
             .exclude(
                 groups__in=[CSCUser.IS_GRADUATE_PK],

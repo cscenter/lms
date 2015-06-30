@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
 from django.contrib import admin
-from django.contrib.flatpages import views
+from htmlpages import views
 
 
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
