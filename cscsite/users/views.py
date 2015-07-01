@@ -128,7 +128,7 @@ class UserDetailView(generic.DetailView):
                          'enrollment_set__course_offering__semester',
                          'enrollment_set__course_offering__course']
         select_list = []
-        if self.request.user.is_staff:
+        if self.request.user.is_authenticated() and self.request.user.is_curator:
             prefetch_list += ['borrows',
                               'borrows__book',
                               'onlinecourserecord_set',
@@ -147,22 +147,19 @@ class UserDetailView(generic.DetailView):
                    .get_context_data(*args, **kwargs))
         u = self.request.user
         context['is_extended_profile_available'] = \
-            (u.is_authenticated()
-             and (u == self.object
-                  or u.is_teacher
-                  or u.is_superuser))
+            (u.is_authenticated() and
+            (u == self.object or u.is_teacher or u.is_curator))
         context['is_editing_allowed'] = \
-            (u.is_authenticated()
-             and (u == self.object
-                  or u.is_superuser))
-        context['create_reference_allowed'] = \
-            u.is_authenticated() and u.is_superuser
+            (u.is_authenticated() and
+            (u == self.object or u.is_curator))
+        context['has_curator_permissions'] = \
+            u.is_authenticated() and u.is_curator
         student_projects = list(self.object.studentproject_set
                                 .prefetch_related('semesters')
                                 .order_by('pk'))
         context['student_projects'] = StudentProject.sorted(student_projects)
         context['current_semester'] = Semester.get_current()
-        if self.request.user.is_staff:
+        if self.request.user.is_authenticated() and self.request.user.is_curator:
             related = ['assignment',
                        'assignment__course_offering',
                        'assignment__course_offering__course',
@@ -194,7 +191,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
-        return obj.pk == user.pk or user.is_superuser or user.is_staff
+        return obj.pk == user.pk or (user.is_authenticated() and user.is_curator)
 
 
 class UserSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
@@ -271,7 +268,7 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
                        args=[self.object.student_id, self.object.pk])
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser
+        return user.is_authenticated() and user.is_curator
 
 
 class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):

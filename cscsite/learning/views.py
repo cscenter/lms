@@ -395,7 +395,7 @@ class CourseUpdateView(StaffOnlyMixin,
     form_class = CourseForm
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser
+        return user.is_authenticated() and user.is_curator
 
 
 class GetCourseOfferingObjectMixin(object):
@@ -443,7 +443,9 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         context['is_actual_teacher'] = is_actual_teacher
         assignments = self.object.assignment_set.all().order_by('created')
         for assignment in assignments:
-            if is_actual_teacher or self.request.user.is_superuser:
+            if is_actual_teacher or \
+              (self.request.user.is_authenticated() and
+               self.request.user.is_curator):
                 setattr(assignment, 'magic_link',
                         reverse("assignment_detail_teacher",
                                 args=[assignment.pk]))
@@ -533,8 +535,7 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
     form_class = CourseOfferingEditDescrForm
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or (user in obj.teachers.all())
 
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin,
@@ -563,8 +564,8 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug']))
-        return user.is_superuser or \
-            (user in self._course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in self._course_offering.teachers.all())
 
 
 class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
@@ -578,8 +579,8 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.course_offering.teachers.all())
 
 
 class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
@@ -592,8 +593,8 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.course_offering.teachers.all())
 
 
 class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
@@ -681,7 +682,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def is_form_allowed(self, user, obj):
         return (obj is None or
-                user.is_superuser or
+                (user.is_authenticated() and user.is_curator) or
                 user in obj.course_offering.teachers.all())
 
     def get_initial(self, *args, **kwargs):
@@ -689,7 +690,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                    .get_initial(*args, **kwargs))
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_superuser:
+        if self.request.user.is_authenticated() and self.request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = (CourseOffering.objects
@@ -766,8 +767,8 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.course_class.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.course_class.course_offering.teachers.all())
 
     def get_success_url(self):
         co = self.object.course_class.course_offering
@@ -791,8 +792,8 @@ class CourseClassDeleteView(TeacherOnlyMixin,
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.course_offering.teachers.all())
 
 
 class VenueListView(generic.ListView):
@@ -917,7 +918,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             self.request.user in (self.object
                                   .course_offering
                                   .teachers.all()))
-        if not is_actual_teacher and not self.request.user.is_superuser:
+        if not is_actual_teacher and (not self.request.user.is_authenticated()
+           or not self.request.user.is_curator):
             raise PermissionDenied
         context['a_s_list'] = \
             (AssignmentStudent.objects
@@ -959,9 +961,9 @@ class AssignmentStudentDetailMixin(object):
 
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way
-        if (not self.request.user.is_superuser
-            and (self.user_type == 'student'
-                 and not a_s.student == self.request.user)):
+        if ((not self.request.user.is_authenticated() or not self.request.user.is_curator)
+            and self.user_type == 'student'
+            and not a_s.student == self.request.user):
             raise PermissionDenied
 
         context['a_s'] = a_s
@@ -1021,7 +1023,9 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                                   .assignment
                                   .course_offering
                                   .teachers.all()))
-        if not is_actual_teacher and not self.request.user.is_superuser:
+        if (not is_actual_teacher and
+           (not self.request.user.is_authenticated() or
+            not self.request.user.is_curator)):
             raise PermissionDenied
         context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
@@ -1081,14 +1085,14 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def is_form_allowed(self, user, obj):
         return (obj is None or
-                user.is_superuser or
+                (user.is_authenticated() and user.is_curator) or
                 user in obj.course_offering.teachers.all())
 
     def get_initial(self):
         initial = super(AssignmentCreateUpdateMixin, self).get_initial()
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_superuser:
+        if self.request.user.is_authenticated() and self.request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = (CourseOffering.objects
@@ -1166,8 +1170,8 @@ class AssignmentDeleteView(TeacherOnlyMixin,
         return reverse('assignment_list_teacher')
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.course_offering.teachers.all())
 
 
 class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
@@ -1177,8 +1181,8 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return user.is_superuser or \
-            (user in obj.assignment.course_offering.teachers.all())
+        return (user.is_authenticated() and user.is_curator) or \
+               (user in obj.assignment.course_offering.teachers.all())
 
     def get_success_url(self):
         co = self.object.assignment.course_offering
@@ -1236,7 +1240,7 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
 
         now_ = now()
         for semester in semester_list:
-            if self.request.user.is_superuser:
+            if self.request.user.is_authenticated() and self.request.user.is_curator:
                 cos = semester.courseoffering_set.all()
             else:
                 cos = (semester.courseoffering_set
@@ -1290,7 +1294,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
             semester_year = int(self.kwargs['semester_year'])
         except ValueError, TypeError:
             raise Http404('Course offering not found')
-        if self.request.user.is_superuser:
+        if self.request.user.is_authenticated() and self.request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = (CourseOffering.objects
@@ -1437,7 +1441,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             semester_year = int(semester_year)
         except ValueError, TypeError:
             raise Http404('Course offering not found')
-        if request.user.is_superuser:
+        if request.user.is_authenticated() and request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = CourseOffering.objects.filter(teachers=request.user)
@@ -1505,7 +1509,7 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
     """Import students grades from stepic platform"""
     def post(self, request, *args, **kwargs):
         filter = dict(pk=self.kwargs.get('course_offering_pk'))
-        if not request.user.is_superuser:
+        if not request.user.is_authenticated() or not request.user.is_curator:
             filter['teachers__in'] = [request.user.pk]
         co = get_object_or_404(CourseOffering, **filter)
         url = reverse('markssheet_teacher',
