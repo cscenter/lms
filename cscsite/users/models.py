@@ -20,7 +20,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
 from core.models import LATEX_MARKDOWN_ENABLED
-from learning.models import StudyProgram
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
 YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
@@ -65,9 +64,16 @@ class CustomUserManager(UserManager.from_queryset(CSCUserQuerySet)):
 
 @python_2_unicode_compatible
 class CSCUser(AbstractUser):
-    IS_STUDENT_PK = 1
-    IS_TEACHER_PK = 2
-    IS_GRADUATE_PK = 3
+
+    # FIXME: replace `groups__name` with groups__pk in learning.signals
+    group_pks = Choices(
+        (1, 'STUDENT_CENTER', _('Student [CENTER]')),
+        (2, 'TEACHER_CENTER', _('Teacher [CENTER]')),
+        (3, 'GRADUATE_CENTER', _('Graduate')),
+        (4, 'VOLUNTEER', _('Volunteer')),
+        (5, 'STUDENT_CLUB', _('Student [CLUB]')),
+        (6, 'TEACHER_CLUB', _('Teacher [CLUB]')),
+    )
 
     STATUS = Choices(('expelled', _("StudentInfo|Expelled")),
                      ('reinstated', _("StudentInfo|Reinstalled")),
@@ -175,7 +181,7 @@ class CSCUser(AbstractUser):
         max_length=15,
         blank=True)
     study_programs = models.ManyToManyField(
-        StudyProgram,
+        'learning.StudyProgram',
         verbose_name=_("StudentInfo|Study programs"),
         blank=True)
     workplace = models.CharField(
@@ -265,15 +271,17 @@ class CSCUser(AbstractUser):
 
     @property
     def is_student(self):
-        return self.IS_STUDENT_PK in self._cs_group_pks
+        return self.group_pks.STUDENT_CENTER in self._cs_group_pks or \
+               self.group_pks.STUDENT_CLUB in self._cs_group_pks
 
     @property
     def is_teacher(self):
-        return self.IS_TEACHER_PK in self._cs_group_pks
+        return self.group_pks.TEACHER_CENTER in self._cs_group_pks or \
+               self.group_pks.TEACHER_CLUB in self._cs_group_pks
 
     @property
     def is_graduate(self):
-        return self.IS_GRADUATE_PK in self._cs_group_pks
+        return self.group_pks.GRADUATE_CENTER in self._cs_group_pks
 
 
 @python_2_unicode_compatible

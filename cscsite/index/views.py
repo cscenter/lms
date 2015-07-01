@@ -37,7 +37,7 @@ class AlumniView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        graduate_pk = user_model.IS_GRADUATE_PK
+        graduate_pk = user_model.group_pks.GRADUATE_CENTER
         return (user_model.objects
                 .filter(groups__pk=graduate_pk)
                 .order_by("-graduation_year", "last_name", "first_name"))
@@ -51,7 +51,7 @@ class TeachersView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        teacher_pk = user_model.IS_TEACHER_PK
+        teacher_pk = user_model.group_pks.TEACHER_CENTER
         return user_model.objects.filter(groups__pk=teacher_pk)
 
 

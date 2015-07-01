@@ -36,9 +36,9 @@ class UtilTests(TestCase):
 
     @patch('django.contrib.messages.error')
     def test_import_stepic(self, mock_messages):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         student.stepic_id = 20
         student.save()
         EnrollmentFactory.create(student=student, course_offering=co)

@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist, \
                                    ImproperlyConfigured
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.encoding import smart_text, python_2_unicode_compatible
@@ -30,6 +31,8 @@ from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.notifications import get_unread_notifications_cache
 from learning import slides
 from .utils import get_current_semester_pair
+
+from users.models import CSCUser
 
 
 @python_2_unicode_compatible
@@ -131,18 +134,18 @@ class Semester(models.Model):
             obj.save()
         return obj
 
-
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
+    # FIXME: Groups name hardcoded due to import problems
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         related_name='teaching_set',
-        limit_choices_to={'groups__name': 'Teacher'})
+        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
@@ -525,7 +528,7 @@ class AssignmentStudent(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__name': 'Student'})
+        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
     grade = models.PositiveSmallIntegerField(
         verbose_name=_("Grade"),
         null=True,
@@ -823,7 +826,7 @@ class StudentProject(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__name': 'Student'})
+        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,

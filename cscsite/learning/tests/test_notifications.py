@@ -31,9 +31,9 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                 .unread_notifications_cache)
 
     def test_assignment(self):
-        student = UserFactory.create(groups=['Student'])
-        teacher1 = UserFactory.create(groups=['Teacher'])
-        teacher2 = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        teacher1 = UserFactory.create(groups=['Teacher [CENTER]'])
+        teacher2 = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -47,6 +47,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         student_comment_dict = {'text': "Test student comment without file"}
         teacher_comment_dict = {'text': "Test teacher comment without file"}
 
+        # Post first comment on assignment
         self.doLogin(student)
         self.client.post(student_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
@@ -71,6 +72,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(1, len(self._get_unread(teacher_list_url)
                                  .assignments))
 
+        # One of teachers answered
         self.doLogin(teacher1)
         self.client.post(teacher_url, teacher_comment_dict)
         self.assertEquals(1, (AssignmentNotification.objects

@@ -32,8 +32,8 @@ random.seed(42)
 @override_settings(DEBUG=True)
 class SmokeTests(MyUtilitiesMixin, TestCase):
     def _populate(self):
-        teachers = UserFactory.create_batch(30, groups=['Teacher'])
-        students = UserFactory.create_batch(30, groups=['Student'])
+        teachers = UserFactory.create_batch(30, groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(30, groups=['Student [CENTER]'])
         courses = CourseFactory.create_batch(30)
         venues = VenueFactory.create_batch(5)
         semesters = [

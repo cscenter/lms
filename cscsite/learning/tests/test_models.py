@@ -219,7 +219,7 @@ class AssignmentAttachmentTest(TestCase):
 
 class AssignmentStudentTests(TestCase):
     def test_clean(self):
-        u1 = UserFactory.create(groups=['Student'])
+        u1 = UserFactory.create(groups=['Student [CENTER]'])
         u2 = UserFactory.create(groups=[])
         as_ = AssignmentStudentFactory.create(student=u1)
         as_.student = u2
@@ -232,8 +232,8 @@ class AssignmentStudentTests(TestCase):
         as_.save()
 
     def test_is_passed(self):
-        u_student = UserFactory.create(groups=['Student'])
-        u_teacher = UserFactory.create(groups=['Teacher'])
+        u_student = UserFactory.create(groups=['Student [CENTER]'])
+        u_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         as_ = AssignmentStudentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
@@ -269,7 +269,7 @@ class AssignmentStudentTests(TestCase):
         self.assertFalse(as_.is_passed)
 
     def test_assignment_student_state(self):
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         a_online = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=True,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
@@ -333,6 +333,6 @@ class EnrollmentTests(TestCase):
 class AssignmentNotificationTests(TestCase):
     def test_clean(self):
         an = AssignmentNotificationFactory.create(
-            user=UserFactory.create(groups=['Student']),
+            user=UserFactory.create(groups=['Student [CENTER]']),
             is_about_passed=True)
         self.assertRaises(ValidationError, an.clean)
