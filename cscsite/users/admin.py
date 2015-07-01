@@ -64,7 +64,7 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
                                        'user_permissions']}),
         (_('External services'), {'fields': ['yandex_id', 'stepic_id']}),
         (_('Student info record'),
-         {'fields': ['nondegree', 'status', 'study_programs', 'university',
+         {'fields': ['status', 'study_programs', 'university',
                      'workplace', 'uni_year_at_enrollment', 'phone',
                      'comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]

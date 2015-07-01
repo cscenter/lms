@@ -98,20 +98,3 @@ class CSCUserReferenceCreateForm(forms.ModelForm):
     class Meta:
         model = CSCUserReference
         fields = ['signature', 'note']
-
-
-# class StudentInfoForm(forms.ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         self.helper = FormHelper()
-#         self.helper.layout = Layout(
-#             Div('university', 'phone', 'uni_year_at_enrollment', 'comment',
-#                 'nondegree', 'status', 'study_programs', 'workplace'),
-#             CANCEL_SAVE_PAIR)
-
-#         super(StudentInfoForm, self).__init__(*args, **kwargs)
-
-
-#     class Meta:
-#         model = StudentInfo
-#         fields = ['university', 'phone', 'uni_year_at_enrollment', 'comment',
-#                   'nondegree', 'status', 'study_programs', 'workplace']

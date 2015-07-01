@@ -280,6 +280,10 @@ class CSCUser(AbstractUser):
     def is_graduate(self):
         return self.group_pks.GRADUATE_CENTER in self._cs_group_pks
 
+    @property
+    def is_volunteer(self):
+        return self.group_pks.VOLUNTEER in self._cs_group_pks
+
 
 @python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):
