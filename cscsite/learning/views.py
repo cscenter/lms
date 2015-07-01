@@ -1545,7 +1545,7 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
     def get_graduation_students_info():
         return (CSCUser.objects
             .filter(
-                is_center_student=True,
+                groups__pk=CSCUser.group_pks.STUDENT_CENTER,
                 status=CSCUser.STATUS.will_graduate,
             )
             .order_by('last_name', 'first_name')
