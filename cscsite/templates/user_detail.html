@@ -233,7 +233,7 @@
           <td>{% trans "Status" %}:</td>
           <td>
             {{ user_object.get_status_display|default:"—" }}
-            {% if user_object.nondegree %}
+            {% if user_object.is_volunteer %}
             ({% trans "Non-degree student"|lower %})
             {% endif %}
           </td>
