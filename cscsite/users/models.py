@@ -172,9 +172,6 @@ class CSCUser(AbstractUser):
         related_name='cscuser_commented',
         blank=True,
         null=True)
-    nondegree = models.BooleanField(
-        _("Non-degree student"),
-        default=False)
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Status"),
