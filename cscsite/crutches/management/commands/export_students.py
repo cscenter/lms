@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         w.writerow(["ФИО", "Год поступления"] + course_offerings)
 
-        student_group = Group.objects.get(pk=CSCUser.IS_STUDENT_PK)
+        student_group = Group.objects.get(pk=CSCUser.group_pks.STUDENT_CENTER)
         for student in student_group.user_set.all():
             if student.graduation_year or not student.enrollment_year:
                 continue

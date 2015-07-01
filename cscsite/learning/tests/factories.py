@@ -86,7 +86,7 @@ class CourseOfferingNewsFactory(factory.DjangoModelFactory):
 
     course_offering = factory.SubFactory(CourseOfferingFactory)
     title = factory.Sequence(lambda n: "Imporant news about testing %03d" % n)
-    author = factory.SubFactory(UserFactory, groups=['Teacher'])
+    author = factory.SubFactory(UserFactory, groups=['Teacher [CENTER]'])
     text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
                                        "(%03d) can be useful!" % n))
 
@@ -165,7 +165,7 @@ class AssignmentStudentFactory(factory.DjangoModelFactory):
         model = AssignmentStudent
 
     assignment = factory.SubFactory(AssignmentFactory)
-    student = factory.SubFactory(UserFactory, groups=['Student'])
+    student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
 
 
 class AssignmentCommentFactory(factory.DjangoModelFactory):
@@ -182,7 +182,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Enrollment
 
-    student = factory.SubFactory(UserFactory, groups=['Student'])
+    student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
     course_offering = factory.SubFactory(CourseOfferingFactory)
 
 
@@ -222,7 +222,7 @@ class StudentProjectFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Test student project %03d" % n)
     description = factory.Sequence(lambda n: ("Test student project "
                                               "description %03d" % n))
-    student = factory.SubFactory(UserFactory, groups=['Student'])
+    student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
     supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
     project_type = 'practice'
 

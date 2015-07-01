@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
+from users.models import CSCUser
 
 
 class Borrow(models.Model):
@@ -15,7 +16,7 @@ class Borrow(models.Model):
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__name': 'Student'},
+        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER},
         related_name="borrows", verbose_name=_("Borrow|student"))
     borrowed_on = models.DateField(_("Borrow|borrowed on"))
 

@@ -37,7 +37,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         self.assertTrue(self.groups_allowed is not None)
         self.assertTrue(self.url_name is not None)
         self.assertLoginRedirect(reverse(self.url_name))
-        for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
+        for groups in [[], ['Teacher [CENTER]'], ['Student [CENTER]'], ['Graduate']]:
             self.doLogin(UserFactory.create(groups=groups))
             if any(group in self.groups_allowed for group in groups):
                 self.assertStatusCode(200, self.url_name)
@@ -51,10 +51,10 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
 class TimetableTeacherTests(GroupSecurityCheckMixin,
                             MyUtilitiesMixin, TestCase):
     url_name = 'timetable_teacher'
-    groups_allowed = ['Teacher']
+    groups_allowed = ['Teacher [CENTER]']
 
     def test_teacher_timetable(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher)
         self.assertEqual(0, len(self.client.get(reverse('timetable_teacher'))
                                 .context['object_list']))
@@ -81,10 +81,10 @@ class TimetableTeacherTests(GroupSecurityCheckMixin,
 class TimetableStudentTests(GroupSecurityCheckMixin,
                             MyUtilitiesMixin, TestCase):
     url_name = 'timetable_student'
-    groups_allowed = ['Student']
+    groups_allowed = ['Student [CENTER]']
 
     def test_student_timetable(self):
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         self.doLogin(student)
         co = CourseOfferingFactory.create()
         e = EnrollmentFactory.create(course_offering=co, student=student)
@@ -111,11 +111,11 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
     url_name = 'calendar_teacher'
-    groups_allowed = ['Teacher']
+    groups_allowed = ['Teacher [CENTER]']
 
     def test_teacher_calendar(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        other_teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        other_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher)
         classes = self.calendar_month_to_object_list(
             self.client.get(reverse(self.url_name)).context['month'])
@@ -164,10 +164,10 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 class CalendarStudentTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
     url_name = 'calendar_student'
-    groups_allowed = ['Student']
+    groups_allowed = ['Student [CENTER]']
 
     def test_student_calendar(self):
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         self.doLogin(student)
         co = CourseOfferingFactory.create()
         co_other = CourseOfferingFactory.create()
@@ -237,7 +237,7 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
             .context['semester_list'])
         self.assertEqual(0, len(cos))
         # Microoptimization: avoid creating teachers/courses
-        u = UserFactory.create(groups=['Teacher'])
+        u = UserFactory.create(groups=['Teacher [CENTER]'])
         c = CourseFactory.create()
         for semester_type in ['autumn', 'spring']:
             for year in range(2012, 2015):
@@ -274,11 +274,11 @@ class CourseVideoListTests(MyUtilitiesMixin, TestCase):
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
-    groups_allowed = ['Teacher']
+    groups_allowed = ['Teacher [CENTER]']
 
     def test_teacher_course_list(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        other_teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        other_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher)
         resp = self.client.get(reverse(self.url_name))
         self.assertEqual(0, len(resp.context['course_list_ongoing']))
@@ -303,11 +303,11 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
 class CourseListStudentTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_student'
-    groups_allowed = ['Student']
+    groups_allowed = ['Student [CENTER]']
 
     def test_student_course_list(self):
-        student = UserFactory.create(groups=['Student'])
-        other_student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        other_student = UserFactory.create(groups=['Student [CENTER]'])
         self.doLogin(student)
         resp = self.client.get(reverse(self.url_name))
         self.assertEqual(0, len(resp.context['course_list_available']))
@@ -354,7 +354,7 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         c = CourseFactory.create()
         url = reverse('course_edit', args=[c.slug])
-        for groups in [[], ['Teacher'], ['Student'], ['Graduate']]:
+        for groups in [[], ['Teacher [CENTER]'], ['Student [CENTER]'], ['Graduate']]:
             self.doLogin(UserFactory.create(groups=groups))
             self.assertPOSTLoginRedirect(url, {})
             self.client.logout()
@@ -384,8 +384,8 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         """
         Testing is_enrolled and is_actual_teacher here
         """
-        student = UserFactory.create(groups=['Student'])
-        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create()
         co_other = CourseOfferingFactory.create()
         url = co.get_absolute_url()
@@ -421,8 +421,8 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(True, ctx['is_actual_teacher'])
 
     def test_assignment_list(self):
-        student = UserFactory.create(groups=['Student'])
-        teacher = UserFactory.create(groups=['Teacher'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         url = co.get_absolute_url()
         EnrollmentFactory.create(student=student, course_offering=co)
@@ -450,8 +450,8 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        teacher_other = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         url = reverse('course_offering_edit_descr',
                       args=[co.course.slug, co.semester.slug])
@@ -465,8 +465,8 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
-        self.teacher = UserFactory.create(groups=['Teacher'])
-        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        self.teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.url = reverse('course_offering_news_create',
                            args=[self.co.course.slug,
@@ -496,8 +496,8 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
-        self.teacher = UserFactory.create(groups=['Teacher'])
-        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        self.teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
                                                     author=self.teacher)
@@ -527,8 +527,8 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
-        self.teacher = UserFactory.create(groups=['Teacher'])
-        self.teacher_other = UserFactory.create(groups=['Teacher'])
+        self.teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        self.teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
                                                     author=self.teacher)
@@ -554,7 +554,7 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
     def test_enrollment(self):
-        s = UserFactory.create(groups=['Student'])
+        s = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create()
         co_other = CourseOfferingFactory.create()
         as_ = AssignmentFactory.create_batch(3, course_offering=co)
@@ -578,7 +578,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
                              reverse('course_list_student'))
 
     def test_unenrollment(self):
-        s = UserFactory.create(groups=['Student'])
+        s = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create()
         as_ = AssignmentFactory.create_batch(3, course_offering=co)
         form = {'course_offering_pk': co.pk}
@@ -612,7 +612,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
 
 class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
     def test_is_actual_teacher(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         cc = CourseClassFactory.create()
         cc_other = CourseClassFactory.create()
         url = cc.get_absolute_url()
@@ -634,7 +634,7 @@ class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
 class CourseClassDetailCRUDTests(MediaServingMixin,
                                  MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
@@ -644,7 +644,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertPOSTLoginRedirect(url, form)
 
     def test_create(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -669,7 +669,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertEqual(302, self.client.post(url, form).status_code)
 
     def test_update(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -687,7 +687,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                           .context['object'].name)
 
     def test_delete(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -703,7 +703,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertFalse(CourseClass.objects.filter(pk=cc.pk).exists())
 
     def test_back_variable(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -722,7 +722,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                              co.get_absolute_url())
 
     def test_attachment_links(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -752,7 +752,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertContains(resp, cca2.material_file_name)
 
     def test_attachments(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
@@ -813,10 +813,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 class AssignmentStudentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'
-    groups_allowed = ['Student']
+    groups_allowed = ['Student [CENTER]']
 
     def test_list(self):
-        u = UserFactory.create(groups=['Student'])
+        u = UserFactory.create(groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(semester=s)
@@ -860,11 +860,11 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
 class AssignmentTeacherListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_teacher'
-    groups_allowed = ['Teacher']
+    groups_allowed = ['Teacher [CENTER]']
 
     def test_list(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(3, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
@@ -921,13 +921,13 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
 
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         a = AssignmentFactory.create(course_offering__teachers=[teacher])
         url = reverse('assignment_detail_teacher', args=[a.pk])
         self.assertLoginRedirect(url)
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == ['Teacher']:
+            if groups == ['Teacher [CENTER]']:
                 self.assertEquals(403, self.client.get(url).status_code)
             else:
                 self.assertLoginRedirect(url)
@@ -936,8 +936,8 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         self.assertEquals(200, self.client.get(url).status_code)
 
     def test_details(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
@@ -956,8 +956,8 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
 
 class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -966,9 +966,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
         self.assertLoginRedirect(url)
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == ['Student']:
+            if groups == ['Student [CENTER]']:
                 # special case :(
                 self.assertEquals(403, self.client.get(url).status_code)
             else:
@@ -981,7 +981,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(200, self.client.get(url).status_code)
 
     def test_assignment_contents(self):
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -993,7 +993,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(url), a.text)
 
     def test_comment(self):
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1016,8 +1016,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
 
 class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1026,9 +1026,9 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
         self.assertLoginRedirect(url)
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == ['Teacher']:
+            if groups == ['Teacher [CENTER]']:
                 self.assertEquals(403, self.client.get(url).status_code)
             else:
                 self.assertLoginRedirect(url)
@@ -1041,9 +1041,9 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogout()
         grade_dict = {'grading_form': True,
                       'grade': 3}
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == ['Teacher']:
+            if groups == ['Teacher [CENTER]']:
                 resp = self.client.post(url, grade_dict)
                 self.assertEquals(403, resp.status_code)
             else:
@@ -1051,8 +1051,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
             self.doLogout()
 
     def test_assignment_contents(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1064,8 +1064,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(url), a.text)
 
     def test_comment(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1086,8 +1086,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, 'attachment1')
 
     def test_grading(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co,
@@ -1111,8 +1111,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
 
     def test_next_unchecked(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         co_other = CourseOfferingFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
@@ -1142,7 +1142,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
 
 class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = AssignmentFactory.attributes(create=True)
         form.update({'course_offering': co.pk,
@@ -1151,7 +1151,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                       args=[co.course.slug, co.semester.slug])
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
-        for groups in [[], ['Student']]:
+        for groups in [[], ['Student [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
@@ -1161,7 +1161,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                       args=[co.course.slug, co.semester.slug, a.pk])
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
@@ -1170,14 +1170,14 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                       args=[co.course.slug, co.semester.slug, a.pk])
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
-        for groups in [[], ['Student'], ['Teacher']]:
+        for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
 
     def test_create(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         CourseOfferingFactory.create_batch(3, teachers=[teacher])
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = AssignmentFactory.attributes(create=True)
@@ -1194,7 +1194,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                              co.get_absolute_url())
 
     def test_update(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a = AssignmentFactory.create(course_offering=co)
         form = model_to_dict(a)
@@ -1215,7 +1215,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(list_url), form['title'])
 
     def test_delete(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a = AssignmentFactory.create(course_offering=co)
         url = reverse('assignment_delete',
@@ -1231,11 +1231,11 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
 class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'markssheet_teacher_dispatch'
-    groups_allowed = ['Teacher']
+    groups_allowed = ['Teacher [CENTER]']
 
     def test_redirect(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(3, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student,
@@ -1248,8 +1248,8 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
         self.assertRedirects(self.client.get(url), co_url)
 
     def test_list(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(3, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co1, co2 = CourseOfferingFactory.create_batch(2, teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student,
@@ -1267,8 +1267,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
     # TODO(Dmitry): test security
 
     def test_empty_markssheet(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(3, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co1 = CourseOfferingFactory.create(teachers=[teacher])
         co2 = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
@@ -1295,8 +1295,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             self.assertContains(resp, url)
 
     def test_nonempty_markssheet(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(3, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student,
@@ -1331,9 +1331,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
 
     def test_total_score(self):
         """Calculate total score by assignments for course offering"""
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         EnrollmentFactory.create(student=student, course_offering=co)
         as_cnt = 2
         assignments = AssignmentFactory.create_batch(as_cnt, course_offering=co)
@@ -1354,8 +1354,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(resp.context['structured'][0][3], expected_total_score)
 
     def test_save_markssheet(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        students = UserFactory.create_batch(2, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        students = UserFactory.create_batch(2, groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student,
@@ -1389,9 +1389,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                       .grade))
 
     def test_import_stepic(self):
-        teacher = UserFactory.create(groups=['Teacher'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        student = UserFactory.create(groups=['Student'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         EnrollmentFactory.create(student=student, course_offering=co)
         assignments = AssignmentFactory.create_batch(3, course_offering=co)
         # for assignment in assignments:
@@ -1404,7 +1404,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(form.is_valid())
         self.assertListEqual(form.errors.keys(), ['csvfile'])
         # Teachers can import grades only for own CO
-        teacher2 = UserFactory.create(groups=['Teacher'])
+        teacher2 = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher2)
         url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
         resp = self.client.post(url, {'assignment': assignments[0].pk})
@@ -1437,17 +1437,17 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
 
 class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student = UserFactory.create(groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         EnrollmentFactory.create(student=student, course_offering=co)
         url = reverse('markssheet_teacher_csv',
                       args=[co.course.slug, co.semester.slug])
         self.assertLoginRedirect(url)
-        for groups in [[], ['Student']]:
+        for groups in [[], ['Student [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-        self.doLogin(UserFactory.create(groups=['Teacher']))
+        self.doLogin(UserFactory.create(groups=['Teacher [CENTER]']))
         self.assertEquals(404, self.client.get(url).status_code)
         self.doLogin(student)
         self.assertLoginRedirect(url)
@@ -1455,8 +1455,8 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         self.assertEquals(200, self.client.get(url).status_code)
 
     def test_csv(self):
-        teacher = UserFactory.create(groups=['Teacher'])
-        student1, student2 = UserFactory.create_batch(2, groups=['Student'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        student1, student2 = UserFactory.create_batch(2, groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         [EnrollmentFactory.create(student=s, course_offering=co)

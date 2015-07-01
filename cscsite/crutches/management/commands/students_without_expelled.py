@@ -24,12 +24,12 @@ class Command(BaseCommand):
         students = (CSCUser.objects
             .filter(
                 is_center_student=True,
-                groups__in=[CSCUser.IS_STUDENT_PK],
+                groups__in=[CSCUser.group_pks.STUDENT_CENTER],
                 enrollment_year__isnull=False,
                 graduation_year__isnull=True,
             )
             .exclude(
-                groups__in=[CSCUser.IS_GRADUATE_PK],
+                groups__in=[CSCUser.group_pks.GRADUATE_CENTER],
             )
             .exclude(
                 status__in=[CSCUser.STATUS.will_graduate, 'expelled']

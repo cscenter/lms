@@ -9,6 +9,7 @@ from itertools import chain
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -43,13 +44,31 @@ class CSCUserReferenceFactory(factory.DjangoModelFactory):
 
     signature = "FIO"
     note = ""
-    # student = factory.SubFactory(UserFactory, groups=['Student'])
+    # student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
 
 class CustomSemesterFactory(SemesterFactory):
     type = factory.Iterator(['spring', 'autumn'])
 
 
 class UserTests(MyUtilitiesMixin, TestCase):
+    def test_groups_pks_synced_with_migrations(self):
+        """
+        We need to be sure, that migrations creates groups with desired pk's.
+        Not so actual for prod db, but we still should check it.
+        """
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CENTER],
+                         Group.objects.get(pk=1).name)
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CENTER],
+                         Group.objects.get(pk=2).name)
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.GRADUATE_CENTER],
+                         Group.objects.get(pk=3).name)
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.VOLUNTEER],
+                         Group.objects.get(pk=4).name)
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CLUB],
+                         Group.objects.get(pk=5).name)
+        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CLUB],
+                         Group.objects.get(pk=6).name)
+
     def test_student_should_have_enrollment_year(self):
         """
         If user set "student" group (pk=1 in initial_data fixture), they
@@ -58,7 +77,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         user = CSCUser()
         user.save()
-        user.groups = [user.IS_STUDENT_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER]
         self.assertRaises(ValidationError, user.clean)
         user.enrollment_year = 2010
         self.assertIsNone(user.clean())
@@ -71,7 +90,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         user = CSCUser()
         user.save()
-        user.groups = [user.IS_GRADUATE_PK]
+        user.groups = [user.group_pks.GRADUATE_CENTER]
         self.assertRaises(ValidationError, user.clean)
         user.graduation_year = 2011
         self.assertIsNone(user.clean())
@@ -121,20 +140,20 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="bar")
         user.save()
-        user.groups = [user.IS_STUDENT_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER]
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baz")
         user.save()
-        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baq")
         user.save()
-        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK,
-                       user.IS_GRADUATE_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER,
+                       user.group_pks.GRADUATE_CENTER]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
@@ -174,11 +193,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
         assertLoginRedirect(url)
         self.client.post(reverse('login'), UserFactory.attributes())
         assertLoginRedirect(url)
-        user.groups = [user.IS_STUDENT_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
         assertLoginRedirect(url)
-        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
         self.assertEqual(resp.status_code, 200)
@@ -228,7 +247,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
-        user.groups = [user.IS_TEACHER_PK]
+        user.groups = [user.group_pks.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
@@ -272,7 +291,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.client.login(**UserFactory.attributes())
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
-        user.groups = [user.IS_GRADUATE_PK]
+        user.groups = [user.group_pks.GRADUATE_CENTER]
         user.graduation_year = 2014
         user.save()
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -303,7 +322,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Students should have "student projects" in their info
         """
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.IS_STUDENT_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER]
         user.save()
         semester1 = SemesterFactory.create(year=2014, type='spring')
         semester2 = SemesterFactory.create(year=2014, type='autumn')
@@ -320,7 +339,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """Email field should be displayed only to curators (superuser)"""
         student_mail = "student@student.mail"
         student = LearningUserFactory.create(
-            groups=['Student'],
+            groups=['Student [CENTER]'],
             email = student_mail)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
@@ -336,7 +355,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 class ICalTests(MyUtilitiesMixin, TestCase):
     def test_classes(self):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
         user.save()
         fname = 'csc_classes.ics'
         # Empty calendar
@@ -364,7 +383,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
 
     def test_assignments(self):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.IS_STUDENT_PK, user.IS_TEACHER_PK]
+        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
         user.save()
         fname = 'csc_assignments.ics'
         # Empty calendar
@@ -413,7 +432,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = LearningUserFactory.create(groups=['Student'], enrollment_year=2011)
+        student = LearningUserFactory.create(groups=['Student [CENTER]'], enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         resp = self.client.get(url)
@@ -432,7 +451,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_user_detail_reference_list_view(self):
         """Check reference list appears on student profile page for curators only"""
-        student = LearningUserFactory.create(groups=['Student'])
+        student = LearningUserFactory.create(groups=['Student [CENTER]'])
         EnrollmentFactory.create()
         CSCUserReferenceFactory.create(student=student)
         curator = LearningUserFactory.create(is_superuser=True)
@@ -463,7 +482,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         sig_input = soup.find(id="id_signature")
         self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
 
-        student = LearningUserFactory.create(groups=['Student'])
+        student = LearningUserFactory.create(groups=['Student [CENTER]'])
         reference = CSCUserReferenceFactory.build(student=student)
         expected_reference_id = 1
         form_url = reverse('user_reference_add', args=[student.id])
@@ -476,7 +495,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = LearningUserFactory.create(groups=['Student'])
+        student = LearningUserFactory.create(groups=['Student [CENTER]'])
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))

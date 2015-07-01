@@ -57,7 +57,7 @@ def create_assignment_comment_notification(sender, instance, created,
                     .all())
         is_about_passed = not ((a_s.assignmentcomment_set
                                 .exclude(pk=instance.pk)
-                                .filter(author__groups__name='Student')
+                                .filter(author__groups__name='Student [CENTER]')
                                 .exists()) and
                                a_s.assignment.is_online)
         # this loop can be optimized using bulk_create at the expence of
