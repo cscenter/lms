@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
@@ -11,6 +12,9 @@ from django.utils.translation import ugettext_lazy as _
 
 
 from .forms import Ubereditor
+
+# Remove groups app from django admin
+admin.site.unregister(Group)
 
 
 def get_admin_url(instance_or_qs):
