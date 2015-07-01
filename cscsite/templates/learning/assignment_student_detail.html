@@ -22,7 +22,7 @@
         <small>{{ a_s.assignment.title }} ({{ a_s.assignment.course_offering }})</small>
         {% endif %}
       </h2>
-      {% if user.is_superuser or user_type == 'teacher' and is_actual_teacher %}
+      {% if user.is_curator or user_type == 'teacher' and is_actual_teacher %}
       <div class="btn-toolbar">
         <a href="{% url 'assignment_edit' a_s.assignment.course_offering.course.slug a_s.assignment.course_offering.semester.slug a_s.assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
       </div>

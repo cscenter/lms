@@ -8,7 +8,7 @@
       <h2>
         {{ course_class.name }} <small><a href="{{ course_class.course_offering.get_absolute_url }}">{{ course_class.course_offering.course.name }}</a></small>
       </h2>
-      {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
+      {% if user.is_curator or user.is_teacher and is_actual_teacher %}
       <div class="btn-toolbar">
         <a href="{% url 'course_class_edit' course_class.course_offering.course.slug course_class.course_offering.semester.slug course_class.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
         <a href="{% url 'course_class_delete' course_class.course_offering.course.slug course_class.course_offering.semester.slug course_class.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>

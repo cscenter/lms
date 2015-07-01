@@ -30,7 +30,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         """
         Checks if only users in groups listed in self.groups_allowed can
         access the page which url is stored in self.url_name.
-        Also checks that superuser can access any page
+        Also checks that curator can access any page
         """
         # TODO: remove return
         # return
@@ -44,7 +44,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
             else:
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
-        self.doLogin(UserFactory.create(is_superuser=True))
+        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
         self.assertStatusCode(200, self.url_name)
 
 
@@ -358,14 +358,14 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
             self.doLogin(UserFactory.create(groups=groups))
             self.assertPOSTLoginRedirect(url, {})
             self.client.logout()
-        self.doLogin(UserFactory.create(is_superuser=True))
+        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
         self.assertEqual(
             200, self.client.post(url, {'name': "foobar"}).status_code)
 
     def test_update(self):
         c = CourseFactory.create()
         url = reverse('course_edit', args=[c.slug])
-        self.doLogin(UserFactory.create(is_superuser=True))
+        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
         fields = model_to_dict(c)
         fields.update({'name': "foobar"})
         self.assertEqual(302, self.client.post(url, fields).status_code)

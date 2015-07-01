@@ -279,6 +279,10 @@ class CSCUser(AbstractUser):
     def is_volunteer(self):
         return self.group_pks.VOLUNTEER in self._cs_group_pks
 
+    @property
+    def is_curator(self):
+        return self.is_superuser and self.is_staff
+
 
 @python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):

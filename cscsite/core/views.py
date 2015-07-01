@@ -16,7 +16,7 @@ class StudentOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         return (user.is_authenticated() and
-                (user.is_student or user.is_superuser))
+               (user.is_student or user.is_curator))
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):
@@ -24,14 +24,14 @@ class TeacherOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         return (user.is_authenticated() and
-                (user.is_teacher or user.is_superuser))
+               (user.is_teacher or user.is_curator))
 
 
 class StaffOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):
-        return user.is_staff or user.is_superuser
+        return user.is_authenticated() and user.is_curator
 
 
 class SuperUserOnlyMixin(UserPassesTestMixin):

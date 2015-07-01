@@ -12,7 +12,7 @@
         <small>{{ course_offering.semester }}</small>
       </h2>
       <div class="btn-toolbar">
-        {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
+        {% if user.is_curator or user.is_teacher and is_actual_teacher %}
         <div class="btn-group">
           <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
             {% trans "Add assignment" %}
@@ -127,7 +127,7 @@
   </div>
   {% endif %}
   {% if user.is_authenticated %}
-    {% if user.is_student or is_actual_teacher or user.is_superuser %}
+    {% if user.is_student or is_actual_teacher or user.is_curator %}
       {% if course_offering.assignment_set.all %}
       <div class="row">
         <div class="col-xs-12">
@@ -160,7 +160,7 @@
         {{ news.text|safe }}
       </div>
       <p class="news-metainfo">
-        {% if user.is_superuser or user.is_teacher and is_actual_teacher %}
+        {% if user.is_curator or user.is_teacher and is_actual_teacher %}
         <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
         <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
         {% endif %}

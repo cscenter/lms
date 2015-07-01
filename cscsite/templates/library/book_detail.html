@@ -35,7 +35,7 @@
             <div class="col-xs-offset-1 col-xs-7">
                 <h4>
                     <em>{{ book.author }}</em> {{ book.title }}
-                    {% if user.is_staff %}
+                    {% if user.is_authenticated and user.is_curator %}
                         <a href="{% admin_url book %}" target="_blank" class="btn btn-mini btn-link">
                             <i class="glyphicon glyphicon-edit"></i>
                         </a>
