@@ -1561,7 +1561,8 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
                         .select_related('course_offering',
                                         'course_offering__semester',
                                         'course_offering__course'
-                                        ),
+                                        )
+                        .order_by('course_offering__course__name'),
                     to_attr='enrollments'
                 ),
                 Prefetch(

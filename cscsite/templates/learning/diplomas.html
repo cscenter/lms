@@ -28,6 +28,7 @@
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
          {{ '{' }}{{project.name}}{{ '}' }}{% endspaceless %}
 {% endfor %}{{ '}' }}
+
 {% empty %}
     Нет студентов со статусом "Будет выпускаться"
 {% endfor %}
