@@ -1,14 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations
 
-def forwards_func(apps, schema_editor):
-    # Add sites
+CENTER_SITE_ID = 1
+CLUB_SITE_ID = 2
+
+
+def update_forward(apps, schema_editor):
+    """Add sites list"""
     Site = apps.get_model('sites', 'Site')
-    db_alias = schema_editor.connection.alias
-    Site(name="compscicenter.ru", domain='compscicenter.ru').save(force_insert=True, using=db_alias)
-    Site(name="compsciclub.ru", domain='compsciclub.ru').save(force_insert=True, using=db_alias)
+    Site.objects.update_or_create(
+        id=CENTER_SITE_ID,
+        defaults={
+            "domain": "compscicenter.ru",
+            "name": "compscicenter.ru"
+        }
+    )
+    Site.objects.update_or_create(
+        id=CLUB_SITE_ID,
+        defaults={
+            "domain": "compsciclub.ru",
+            "name": "compsciclub.ru"
+        }
+    )
+
+
+def update_backward(apps, schema_editor):
+    """Revert sites list to default"""
+    Site = apps.get_model("sites", "Site")
+    Site.objects.get(CLUB_SITE_ID).delete()
+    Site.objects.update_or_create(
+        id=CENTER_SITE_ID,
+        defaults={
+            "domain": "example.com",
+            "name": "example.com"
+        }
+    )
 
 
 class Migration(migrations.Migration):
@@ -18,5 +46,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(forwards_func),
+        migrations.RunPython(update_forward, update_backward),
     ]
