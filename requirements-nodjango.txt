@@ -22,7 +22,7 @@ git+https://github.com/carljm/django-model-utils.git@fb20a1390f365854538aa7f17c0
 django-rosetta==0.7.3
 #django-sitemetrics==0.4.2
 git+https://github.com/idlesign/django-sitemetrics.git@886b35443d7163b8cab7a49c57bd7be6337379ef
-django-taggit==0.15.0
+django-taggit==0.16.2
 factory_boy==2.5.2
 icalendar==3.8.4
 mock==1.0.1
