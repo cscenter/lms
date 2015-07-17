@@ -197,10 +197,6 @@ YANDEX_DISK_USERNAME = "dummy_ya_username"
 YANDEX_DISK_PASSWORD = "dummy_ya_password"
 YANDEX_DISK_SLIDES_ROOT = "dummy_ya_root"
 
-SOUTH_MIGRATION_MODULES = {
-    'taggit': 'taggit.south_migrations',
-}
-
 # django-dbbackup settings
 
 DBBACKUP_CLEANUP_KEEP = 30
