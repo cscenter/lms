@@ -768,14 +768,14 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertRedirects(self.client.post(url, form),
                              cc.get_absolute_url())
         # check that files are available from course class page
-        resp = self.client.get(cc.get_absolute_url())
-        spans = (BeautifulSoup(resp.content)
+        response = self.client.get(cc.get_absolute_url())
+        spans = (BeautifulSoup(response.content, "html.parser")
                  .find_all('span', class_='assignment-attachment'))
         self.assertEquals(2, len(spans))
         cca_files = sorted(a.material.path
-                           for a in resp.context['attachments'])
+                           for a in response.context['attachments'])
         # we will delete attachment2.txt
-        cca_to_delete = [a for a in resp.context['attachments']
+        cca_to_delete = [a for a in response.context['attachments']
                          if a.material.path == cca_files[1]][0]
         as_ = sorted((span.a.contents[0].strip(),
                       "".join(self.client.get(span.a['href'])
@@ -801,8 +801,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                                      args=[co.course.slug,
                                            co.semester.slug,
                                            cc.pk]))
-        resp = self.client.get(cc.get_absolute_url())
-        spans = (BeautifulSoup(resp.content)
+        response = self.client.get(cc.get_absolute_url())
+        spans = (BeautifulSoup(response.content, "html.parser")
                  .find_all('span', class_='assignment-attachment'))
         self.assertEquals(1, len(spans))
         self.assertRegexpMatches(spans[0].a.contents[0].strip(),
