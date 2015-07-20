@@ -15,7 +15,7 @@
     django_manage:
       command: "{{ item }}"
       app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
-      settings: cscsite.settings.production
+      settings: cscenter.settings.production
       virtualenv: "/home/{{ cscweb_user }}/site/env/"
     with_items:
       - cscbackup

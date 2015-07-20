@@ -19,7 +19,7 @@ from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-import cscsite.urls
+import cscenter.urls
 from learning.utils import get_current_semester_pair
 from learning.models import AssignmentStudent
 from .factories import *
@@ -101,7 +101,7 @@ class SmokeTests(MyUtilitiesMixin, TestCase):
     def test_num_queries(self):
         return  # too slow, makes life hard
         self._populate()
-        for urlpat in cscsite.urls.urlpatterns:
+        for urlpat in cscenter.urls.urlpatterns:
             # FIXME(Dmitry): don't skip nested pathes
             if type(urlpat) != RegexURLPattern:
                 continue

@@ -17,7 +17,7 @@ from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
 from index.models import EnrollmentApplEmail
 
-# import cscsite.urls
+# import cscenter.urls
 
 BASE_URL = "http://compscicenter.ru"
 

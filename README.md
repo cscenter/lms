@@ -29,12 +29,12 @@ GRANT
 * do the Django part of the database configuration:
 
 ```bash
-$ python cscsite/manage.py syncdb --settings=cscsite.settings.local
+$ python cscsite/manage.py syncdb --settings=cscenter.settings.local
 ```
 
 * load data for menu with `python cscsite/manage.py loaddata` from cscsite/fixtures/ folder
 
-* run with `python manage.py runserver --settings=cscsite.settings.local`
+* run with `python manage.py runserver --settings=cscenter.settings.local`
 
 
 Production setup
@@ -63,13 +63,13 @@ user) and other with `ubuntu` user;
 * `git pull` in `cscweb` "tab", optionally followed by
 
 ```
-./manage.py migrate MIGRATED_APP --settings=cscsite.settings.production
+./manage.py migrate MIGRATED_APP --settings=cscenter.settings.production
 ```
 
 or
 
 ```
-./manage.py collectstatic --noinput --settings=cscsite.settings.production
+./manage.py collectstatic --noinput --settings=cscenter.settings.production
 ```
 
 or 

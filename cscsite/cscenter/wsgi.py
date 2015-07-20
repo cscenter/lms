@@ -1,5 +1,5 @@
 """
-WSGI config for cscsite project.
+WSGI config for cscenter project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -8,7 +8,7 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 """
 
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cscsite.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cscenter.settings")
 
 import newrelic.agent
 from django.conf import settings

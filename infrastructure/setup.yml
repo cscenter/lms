@@ -208,7 +208,7 @@
     django_manage:
       command: "{{ item }}"
       app_path: "/home/{{ cscweb_user }}/site/repo/cscsite"
-      settings: cscsite.settings.production
+      settings: cscenter.settings.production
       virtualenv: "/home/{{ cscweb_user }}/site/env/"
     with_items:
       - syncdb
@@ -283,7 +283,7 @@
       job: >
         . /home/{{ cscweb_user }}/site/env/bin/activate &&
         /home/{{ cscweb_user }}/site/repo/cscsite/manage.py cscbackup
-        --settings=cscsite.settings.production
+        --settings=cscenter.settings.production
         >> /home/{{ cscweb_user }}/site/logs/cscbackup.log
         2>&1
 
@@ -296,7 +296,7 @@
       job: >
         . /home/{{ cscweb_user }}/site/env/bin/activate &&
         /home/{{ cscweb_user }}/site/repo/cscsite/manage.py notify
-        --settings=cscsite.settings.production
+        --settings=cscenter.settings.production
         >> /home/{{ cscweb_user }}/site/logs/cscnotifier.log
         2>&1
 
@@ -309,7 +309,7 @@
       job: >
         . /home/{{ cscweb_user }}/site/env/bin/activate &&
         /home/{{ cscweb_user }}/site/repo/cscsite/manage.py notification_cleanup
-        --settings=cscsite.settings.production
+        --settings=cscenter.settings.production
         >> /home/{{ cscweb_user }}/site/logs/cscnotifier.log
 
 

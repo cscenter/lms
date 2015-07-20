@@ -18,7 +18,7 @@ from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-import cscsite.urls
+import cscenter.urls
 from learning.utils import get_current_semester_pair
 from .factories import *
 from .mixins import *

@@ -1,11 +1,11 @@
 [uwsgi]
 # Django-related settings
 chdir           = /home/{{ cscweb_user }}/site/repo/cscsite
-module          = cscsite.wsgi:application
+module          = cscenter.wsgi:application
 home            = /home/{{ cscweb_user }}/site/env
 pythonpath      = /home/{{ cscweb_user }}/site/env/lib/python2.7/site-packages
 pythonpath      = /home/{{ cscweb_user }}/site/repo/cscsite
-env             = DJANGO_SETTINGS_MODULE=cscsite.settings.production
+env             = DJANGO_SETTINGS_MODULE=cscenter.settings.production
 env             = PYTHONIOENCODING=UTF-8
 env             = LC_ALL=en_US.UTF-8
 env             = LANG=en_US.UTF-8
