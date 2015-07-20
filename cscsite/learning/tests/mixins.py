@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.conf.urls.static import static
 
-import cscsite.urls
+import cscenter.urls
 
 
 class MyUtilitiesMixin(object):
@@ -43,11 +43,11 @@ class MyUtilitiesMixin(object):
 
 class MediaServingMixin(object):
     def setUp(self):
-        self._original_urls = cscsite.urls.urlpatterns
+        self._original_urls = cscenter.urls.urlpatterns
         with self.settings(DEBUG=True):
             s = static(settings.MEDIA_URL,
                        document_root=settings.MEDIA_ROOT)
-            cscsite.urls.urlpatterns += s
+            cscenter.urls.urlpatterns += s
 
     def tearDown(self):
-        cscsite.urls.urlpatterns = self._original_urls
+        cscenter.urls.urlpatterns = self._original_urls

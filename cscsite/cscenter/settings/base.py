@@ -1,5 +1,5 @@
 """
-Django settings for cscsite project.
+Django settings for cscenter project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -101,9 +101,9 @@ MIDDLEWARE_CLASSES = (
     'core.notifications.UnreadNotificationsCacheMiddleware',
 )
 
-ROOT_URLCONF = 'cscsite.urls'
+ROOT_URLCONF = 'cscenter.urls'
 
-WSGI_APPLICATION = 'cscsite.wsgi.application'
+WSGI_APPLICATION = 'cscenter.wsgi.application'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
