@@ -6,7 +6,7 @@ import copy
 
 from django import template
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 
 from treemenus.models import Menu, MenuItem
 from treemenus.config import APP_LABEL
@@ -34,7 +34,8 @@ def csc_menu(context, menu_name):
                 if item.named_url:
                     item.url = reverse(item.named_url)
             CSCMENU_CACHE[:] = flattened
-        except (MenuItem.DoesNotExist, Menu.DoesNotExist) as e:
+        except (MenuItem.DoesNotExist, Menu.DoesNotExist,
+                NoReverseMatch) as e:
             if settings.TEMPLATE_DEBUG:
                 raise e
             else:
