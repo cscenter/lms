@@ -38,8 +38,10 @@ from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherDispatchView, \
-    NonCourseEventDetailView, \
-    StudentsDiplomasView, StudentsDiplomasCSVView
+    NonCourseEventDetailView
+
+from staff.views import ExportsView, StudentsDiplomasView, \
+    StudentsDiplomasCSVView, StudentsAllSheetCSVView
 
 
 admin.autodiscover()
@@ -195,12 +197,18 @@ urlpatterns = patterns('',
     url(r'^staff/user-search.json$',
         UserSearchJSONView.as_view(),
         name='user_search_json'),
-    url(r'^staff/dimplomas/$',
+    url(r'^staff/exports/$',
+        ExportsView.as_view(),
+        name='staff_exports'),
+    url(r'^staff/exports/diplomas/$',
         StudentsDiplomasView.as_view(),
-        name='students_diplomas'),
-    url(r'^staff/dimplomas/csv/$',
+        name='staff_exports_students_diplomas'),
+    url(r'^staff/exports/diplomas/csv/$',
         StudentsDiplomasCSVView.as_view(),
-        name='students_diplomas_csv'),
+        name='staff_exports_students_diplomas_csv'),
+    url(r'^staff/exports/sheet/csv/$',
+        StudentsAllSheetCSVView.as_view(),
+        name='staff_exports_sheet_all_students_csv'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),

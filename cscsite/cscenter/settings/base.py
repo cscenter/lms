@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     'news',
     'index',
     'learning',
+    'staff',
     'library',
     'crutches',
     'loginas',

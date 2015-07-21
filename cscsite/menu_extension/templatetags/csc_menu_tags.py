@@ -11,8 +11,8 @@ from django.core.urlresolvers import reverse
 from treemenus.models import Menu, MenuItem
 from treemenus.config import APP_LABEL
 
-from menu_extension import CSCMENU_CACHE
-from menu_extension.models import MenuItemExtension
+from .. import CSCMENU_CACHE
+from ..models import MenuItemExtension
 
 register = template.Library()
 
@@ -102,10 +102,10 @@ def handle_selected(menu, request):
 
 def match_url(item, current_url):
     for pattern in item.extension.exclude_patterns.strip().splitlines():
-        if re.compile(pattern).match(current_url):
+        if re.compile(pattern.strip()).match(current_url):
             return False
     for pattern in item.extension.select_patterns.strip().splitlines():
-        if re.compile(pattern).match(current_url):
+        if re.compile(pattern.strip()).match(current_url):
             return True
     if current_url.startswith(item.url):
         return True

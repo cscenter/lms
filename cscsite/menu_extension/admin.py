@@ -1,7 +1,8 @@
 from django.contrib import admin
 from treemenus.admin import MenuAdmin, MenuItemAdmin
 from treemenus.models import Menu
-from menu_extension.models import MenuItemExtension
+
+from .models import MenuItemExtension
 
 # XXX: Too many queries in admin for treemenus package. Customize admin queryset for better perfomance
 
