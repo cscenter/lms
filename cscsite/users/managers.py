@@ -100,6 +100,10 @@ class CSCUserQuerySet(query.QuerySet):
                     'shadcourserecord_set',
                     to_attr='shads'
                 ),
+                Prefetch(
+                    'onlinecourserecord_set',
+                    to_attr='online_courses'
+                ),
             )
         )
 

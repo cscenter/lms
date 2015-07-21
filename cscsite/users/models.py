@@ -232,6 +232,13 @@ class CSCUser(AbstractUser):
         return self.groups.values_list("pk", flat=True)
 
     @property
+    def status_display(self):
+        if self.status in self.STATUS:
+            return self.STATUS[self.status]
+        else:
+            return ''
+
+    @property
     def is_student(self):
         return self.group_pks.STUDENT_CENTER in self._cs_group_pks or \
                self.group_pks.STUDENT_CLUB in self._cs_group_pks
