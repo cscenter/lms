@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 import logging
 
 from model_utils import Choices
-from model_utils.fields import MonitorField
+from model_utils.fields import MonitorField, StatusField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 
 from core.models import LATEX_MARKDOWN_ENABLED
+from learning.constants import GRADES
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
 YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
@@ -352,17 +353,22 @@ class OnlineCourseRecord(TimeStampedModel):
 
 @python_2_unicode_compatible
 class SHADCourseRecord(TimeStampedModel):
+    GRADES = GRADES
     student = models.ForeignKey(
         CSCUser,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     name = models.CharField(_("Course|name"), max_length=255)
-    grade = models.PositiveSmallIntegerField(
-        _("Grade"),
-        validators=[MinValueValidator(2), MaxValueValidator(5)],
-        help_text=_("from 2 to 5, inclusive"),
-        null=True,
-        blank=True)
+    teachers = models.CharField(_("Teachers"), max_length=255)
+    semester = models.ForeignKey(
+        'learning.Semester',
+        verbose_name=_("Semester"),
+        on_delete=models.PROTECT)
+
+    grade = StatusField(
+        verbose_name=_("Enrollment|grade"),
+        choices_name='GRADES',
+        default='not_graded')
 
     class Meta:
         ordering = ["name"]

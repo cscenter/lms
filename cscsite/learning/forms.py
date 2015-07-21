@@ -11,6 +11,7 @@ import floppyforms as forms
 
 from core.forms import Ubereditor
 from core.validators import FileValidator
+from .constants import GRADES
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
     Enrollment, \
@@ -384,7 +385,7 @@ class MarksSheetTeacherFormFabrique(object):
                   if not a_s.assignment.is_online}
         fields.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
                                                     e.student.pk):
-                       forms.ChoiceField(Enrollment.GRADES,
+                       forms.ChoiceField(GRADES,
                                          show_hidden_initial=True)
                        for e in enrollment_list})
         return type(b'MarksSheetTeacherForm', (forms.Form,), fields)
