@@ -48,7 +48,7 @@ class StudentSearchView(StaffOnlyMixin, generic.TemplateView):
                                        .distinct())
         return context
 
-class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
+class StudentsDiplomasView(StaffOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, **kwargs):
@@ -60,7 +60,7 @@ class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
         return context
 
 
-class StudentsDiplomasCSVView(SuperUserOnlyMixin, generic.base.View):
+class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -143,11 +143,12 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(only_graduate=True)
+        students = CSCUser.objects.students_info(only_graduate=False)
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
         shads_max = 0
+        online_courses_max = 0
         projects_max = 0
         for s in students:
             student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
@@ -165,43 +166,77 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
             if len(s.shads) > shads_max:
                 shads_max = len(s.shads)
 
+            if len(s.online_courses) > online_courses_max:
+                online_courses_max = len(s.online_courses)
+
             if len(s.projects) > projects_max:
                 projects_max = len(s.projects)
             s.projects = StudentProject.sorted(s.projects)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        filename = "diplomas_{}.csv".format(datetime.datetime.now().year)
+        filename = "sheet_{}.csv".format(datetime.datetime.now().year)
         response['Content-Disposition'] \
             = 'attachment; filename="{}"'.format(filename)
         w = unicodecsv.writer(response, encoding='utf-8')
 
-        headers = ['Фамилия', 'Имя', 'Отчество', 'Университет', 'Направления']
+        headers = [
+            'Фамилия',
+            'Имя',
+            'Отчество',
+            'ВУЗ',
+            'Курс (на момент поступления)',
+            'Год поступления',
+            'Год выпуска',
+            'Почта',
+            'Яндекс ID',
+            'Телефон',
+            'Направления обучения',
+            'Статус',
+            'Дата статуса или итога (изменения)',
+            'Комментарий',
+            'Дата последнего изменения комментария',
+            'Работа',
+            'Сдано курсов',
+        ]
         for course_id, course_name in courses_headers.iteritems():
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
-        for i in xrange(1, shads_max + 1):
-            headers.append('ШАД, курс {}, название'.format(i))
-            headers.append('ШАД, курс {}, преподаватели'.format(i))
-            headers.append('ШАД, курс {}, оценка'.format(i))
         for i in xrange(1, projects_max + 1):
             headers.append('Проект {}, оценка'.format(i))
             headers.append('Проект {}, руководитель(и)'.format(i))
             headers.append('Проект {}, семестр(ы)'.format(i))
+        for i in xrange(1, shads_max + 1):
+            headers.append('ШАД, курс {}, название'.format(i))
+            headers.append('ШАД, курс {}, преподаватели'.format(i))
+            headers.append('ШАД, курс {}, оценка'.format(i))
+        for i in xrange(1, online_courses_max + 1):
+            headers.append('Онлайн-курс {}, название'.format(i))
         w.writerow(headers)
 
         for s in students:
-            row = [s.last_name, s.first_name, s.patronymic, s.university,
-                   " и ".join((s.name for s in s.study_programs.all()))]
+            row = [
+                s.last_name,
+                s.first_name,
+                s.patronymic,
+                s.university,
+                s.uni_year_at_enrollment,
+                s.enrollment_year,
+                s.graduation_year,
+                s.email,
+                s.yandex_id,
+                s.phone,
+                " и ".join((s.name for s in s.study_programs.all())),
+                s.status_display,
+                '',
+                s.comment,
+                s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
+                s.workplace,
+                len(s.courses) + len(s.shads) + len(s.online_courses)
+            ]
+
             for course_id in courses_headers:
                 sc = s.courses[course_id]
                 row.extend([sc['grade'], sc['teachers']])
-
-            s.shads.extend([None] * (shads_max - len(s.shads)))
-            for shad in s.shads:
-                if shad is not None:
-                    row.extend([shad.name, shad.teachers, shad.grade_display])
-                else:
-                    row.extend(['', '', ''])
 
             s.projects.extend([None] * (projects_max - len(s.projects)))
             for p in s.projects:
@@ -210,6 +245,22 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
                     row.extend([p.name, p.supervisor, ", ".join(semesters)])
                 else:
                     row.extend(['', '', ''])
+
+            s.shads.extend([None] * (shads_max - len(s.shads)))
+            for shad in s.shads:
+                if shad is not None:
+                    row.extend([shad.name, shad.teachers, shad.grade_display])
+                else:
+                    row.extend(['', '', ''])
+
+            s.online_courses.extend([None] * (online_courses_max -
+                                              len(s.online_courses)))
+            for online_course in s.online_courses:
+                if online_course is not None:
+                    row.extend([online_course.name])
+                else:
+                    row.extend([''])
+
             w.writerow(row)
 
         return response
