@@ -20,14 +20,16 @@
        {% for teacher in enrollment.course_offering.teachers.all|slice:":2" %}{{ '{' }}{{teacher.get_full_name}}{{ '}' }}{% endfor %}{% if enrollment.course_offering.teachers.all|length == 1 %}{{ '{' }}{{ '}' }}{% endif %}
 {% endspaceless %}{% if forloop.last %}
 {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{% for project in s.shads %}
-\shad{{ '{' }}{{project.name}}{{ '}' }}{{ '{' }}{{project.grade}}{{ '}' }}
-{% endfor %}{{ '}' }}
-{{ '{' }}
+{{ '{' }}{% if s.shads|length > 0 %}{% for project in s.shads %}
+{% spaceless %}
+\shad{{ '{' }}{{project.name}}{{ '}' }}{{ '{' }}{{project.teachers}}{{ '}' }}{{ '{' }}{{project.grade_display}}{{ '}' }}
+{% endspaceless %}{% endfor %}
+{% endif %}{{ '}' }}
+{{ '{' }}{% if s.projects|length > 0 %}
 {% for project in s.projects %}{% spaceless %}
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
          {{ '{' }}{{project.name}}{{ '}' }}{% endspaceless %}
-{% endfor %}{{ '}' }}
+{% endfor %}{% endif %}{{ '}' }}
 
 {% empty %}
     Нет студентов со статусом "Будет выпускаться"

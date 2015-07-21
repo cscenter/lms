@@ -10,7 +10,7 @@ from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView, UserSearchJSONView, UserSearchView, \
+    ICalEventsView, \
     UserReferenceCreateView, UserReferenceDetailView  # , StudentInfoUpdateView
 from learning.views import \
     TimetableTeacherView, TimetableStudentView, \
@@ -41,7 +41,8 @@ from learning.views import \
     NonCourseEventDetailView
 
 from staff.views import ExportsView, StudentsDiplomasView, \
-    StudentsDiplomasCSVView, StudentsAllSheetCSVView
+    StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
+    StudentSearchJSONView, StudentSearchView
 
 
 admin.autodiscover()
@@ -191,12 +192,12 @@ urlpatterns = patterns('',
     url(r'^staff/course-marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         MarksSheetTeacherView.as_view(is_for_staff=True),
         name='course_markssheet_staff'),
-    url(r'^staff/user-search/$',
-        UserSearchView.as_view(),
-        name='user_search'),
-    url(r'^staff/user-search.json$',
-        UserSearchJSONView.as_view(),
-        name='user_search_json'),
+    url(r'^staff/student-search/$',
+        StudentSearchView.as_view(),
+        name='student_search'),
+    url(r'^staff/student-search.json$',
+        StudentSearchJSONView.as_view(),
+        name='student_search_json'),
     url(r'^staff/exports/$',
         ExportsView.as_view(),
         name='staff_exports'),

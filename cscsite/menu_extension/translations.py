@@ -9,7 +9,6 @@ def dummy_for_makemessages():
     Removing this code causes makemessages to comment out those PO entries, so don't do that
     unless you find a better way to do this
     """
-    # Menu block
     pgettext('menu', 'About CSC')
     pgettext('menu', 'Syllabus')
     pgettext('menu', 'Courses')
@@ -30,7 +29,7 @@ def dummy_for_makemessages():
     pgettext('menu', 'Tips')
 
     pgettext('menu', 'Supervision')
-    pgettext('menu', 'User search')
+    pgettext('menu', 'Student search')
     pgettext('menu', 'Generate diplomas')
     pgettext('menu', 'Exports')
 

@@ -18,7 +18,7 @@ from django.views import generic
 from django.utils import timezone
 from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
-from braces.views import LoginRequiredMixin, JSONResponseMixin
+from braces.views import LoginRequiredMixin
 
 from dateutil.relativedelta import relativedelta
 import icalendar
@@ -192,61 +192,6 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
 
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or (user.is_authenticated() and user.is_curator)
-
-
-class UserSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
-    content_type = u"application/javascript; charset=utf-8"
-    limit = 1000
-
-    def get(self, request, *args, **kwargs):
-        qs = CSCUser.objects
-        filtered = False
-
-        name_qstr = request.GET.get('name', "")
-        if len(name_qstr.strip()) > 0:
-            qs = qs.search_names(name_qstr)
-            filtered = True
-
-        ey_qlist = request.GET.getlist('enrollment_years')
-        eys = []
-        for ey_str in ey_qlist:
-            try:
-                eys.append(int(ey_str))
-            except ValueError:
-                pass
-        if len(eys) > 0:
-            qs = qs.filter(enrollment_year__in=eys)
-            filtered = True
-
-        if not filtered:
-            return self.render_json_response({
-                "users": [],
-                "there_is_more": False
-            })
-
-        users_list = list(qs[:self.limit + 1]
-                          .values('first_name', 'last_name', 'pk'))
-        for u in users_list:
-            u['url'] = reverse('user_detail', args=[u['pk']])
-
-        return self.render_json_response({
-            "users": users_list[:self.limit],
-            "there_is_more": len(users_list) > self.limit
-        })
-
-
-class UserSearchView(StaffOnlyMixin, generic.TemplateView):
-    template_name = "user_search.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(UserSearchView, self).get_context_data(**kwargs)
-        context['json_api_uri'] = reverse('user_search_json')
-        context['enrollment_years'] = (CSCUser.objects
-                                       .values_list('enrollment_year', flat=True)
-                                       .filter(enrollment_year__isnull=False)
-                                       .order_by('enrollment_year')
-                                       .distinct())
-        return context
 
 
 class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):

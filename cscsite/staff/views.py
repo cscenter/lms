@@ -4,16 +4,49 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import unicodecsv
-
 from collections import OrderedDict, defaultdict
 
+from django.core.urlresolvers import reverse
 from django.views import generic
 from django.http import HttpResponse
+from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from core.views import StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import StudentProject
 from users.models import CSCUser
 
+
+class StudentSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
+    content_type = u"application/javascript; charset=utf-8"
+    limit = 1000
+
+    def get(self, request, *args, **kwargs):
+        qs = (CSCUser.objects.search(request)
+                     .filter(groups__pk=CSCUser.group_pks.STUDENT_CENTER)
+                     .values('first_name', 'last_name', 'pk'))
+
+        users_list = list(qs[:self.limit + 1])
+        for u in users_list:
+            u['url'] = reverse('user_detail', args=[u['pk']])
+
+        return self.render_json_response({
+            "users": users_list[:self.limit],
+            "there_is_more": len(users_list) > self.limit
+        })
+
+
+class StudentSearchView(StaffOnlyMixin, generic.TemplateView):
+    template_name = "staff/student_search.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentSearchView, self).get_context_data(**kwargs)
+        context['json_api_uri'] = reverse('student_search_json')
+        context['enrollment_years'] = (CSCUser.objects
+                                       .values_list('enrollment_year', flat=True)
+                                       .filter(enrollment_year__isnull=False)
+                                       .order_by('enrollment_year')
+                                       .distinct())
+        return context
 
 class StudentsDiplomasView(SuperUserOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
@@ -148,6 +181,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
             headers.append(course_name + ', преподаватели')
         for i in xrange(1, shads_max + 1):
             headers.append('ШАД, курс {}, название'.format(i))
+            headers.append('ШАД, курс {}, преподаватели'.format(i))
             headers.append('ШАД, курс {}, оценка'.format(i))
         for i in xrange(1, projects_max + 1):
             headers.append('Проект {}, оценка'.format(i))
@@ -165,9 +199,9 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
             s.shads.extend([None] * (shads_max - len(s.shads)))
             for shad in s.shads:
                 if shad is not None:
-                    row.extend([shad.name, shad.grade])
+                    row.extend([shad.name, shad.teachers, shad.grade_display])
                 else:
-                    row.extend(['', ''])
+                    row.extend(['', '', ''])
 
             s.projects.extend([None] * (projects_max - len(s.projects)))
             for p in s.projects:
