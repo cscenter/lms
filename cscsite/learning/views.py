@@ -340,7 +340,6 @@ class CourseStudentListView(StudentOnlyMixin,
                                        'course_offering__course',
                                        'course_offering__semester')
                        .prefetch_related('course_offering__teachers'))
-
         ongoing, archive = utils.split_list(
             enrolled_on,
             lambda e: (e.course_offering.semester.year == year
