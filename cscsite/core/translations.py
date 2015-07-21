@@ -32,6 +32,7 @@ def dummy_for_makemessages():
     pgettext('menu', 'Supervision')
     pgettext('menu', 'User search')
     pgettext('menu', 'Generate diplomas')
+    pgettext('menu', 'Exports')
 
     pgettext('menu', 'Teaching')
     pgettext('menu', 'Assignments')

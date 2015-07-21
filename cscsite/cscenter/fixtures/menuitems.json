@@ -235,8 +235,8 @@
     "url": "",
     "menu": 1,
     "rank": 2,
-    "caption": "Generate diplomas",
-    "named_url": "students_diplomas"
+    "caption": "Exports",
+    "named_url": "staff_exports"
   },
   "model": "treemenus.menuitem",
   "pk": 18

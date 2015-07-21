@@ -4,9 +4,9 @@ from django.db import models
 from django.dispatch import receiver
 
 
-from menu_extension import CSCMENU_CACHE
+from . import CSCMENU_CACHE
 from treemenus.models import MenuItem
-from menu_extension.models import MenuItemExtension
+from .models import MenuItemExtension
 
 
 @receiver(models.signals.post_save, sender=MenuItem)

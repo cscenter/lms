@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Файлы</h2>
+            <div class="list-group">
+                <a href="{% url 'staff_exports_students_diplomas' %}" class="list-group-item">
+                    <h4 class="list-group-item-heading">1. Список будущих выпускников (TeX template)</h4>
+                </a>
+                <a href="{% url 'staff_exports_students_diplomas_csv' %}" class="list-group-item">
+                    <h4 class="list-group-item-heading">2. Список будущих выпускников (CSV)</h4>
+                </a>
+                <a href="{% url 'staff_exports_sheet_all_students_csv' %}" class="list-group-item">
+                    <h4 class="list-group-item-heading">3. Ведомость по всем студентам центра (CSV)</h4>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
