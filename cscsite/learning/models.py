@@ -30,6 +30,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.notifications import get_unread_notifications_cache
 from learning import slides
+from .constants import GRADES, SHORT_GRADES
 from .utils import get_current_semester_pair
 
 from users.models import CSCUser
@@ -140,7 +141,6 @@ class CourseOffering(TimeStampedModel):
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
-    # FIXME: Groups name hardcoded due to import problems
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
@@ -650,16 +650,7 @@ class AssignmentComment(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
-    GRADES = Choices(('not_graded', _("Not graded")),
-                     ('unsatisfactory', _("Enrollment|Unsatisfactory")),
-                     ('pass', _("Enrollment|Pass")),
-                     ('good', _("Good")),
-                     ('excellent', _("Excellent")))
-    SHORT_GRADES = Choices(('not_graded', "—"),
-                           ('unsatisfactory', "н"),
-                           ('pass', "з"),
-                           ('good', "4"),
-                           ('excellent', "5"))
+    GRADES = GRADES
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -693,11 +684,11 @@ class Enrollment(TimeStampedModel):
 
     @property
     def grade_display(self):
-        return self.GRADES[self.grade]
+        return GRADES[self.grade]
 
     @property
     def grade_short(self):
-        return self.SHORT_GRADES[self.grade]
+        return SHORT_GRADES[self.grade]
 
 
 @python_2_unicode_compatible
