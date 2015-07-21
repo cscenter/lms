@@ -222,8 +222,8 @@
     "url": "",
     "menu": 1,
     "rank": 1,
-    "caption": "User search",
-    "named_url": "user_search"
+    "caption": "Student search",
+    "named_url": "student_search"
   },
   "model": "treemenus.menuitem",
   "pk": 17
