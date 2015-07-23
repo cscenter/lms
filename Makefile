@@ -1,9 +1,18 @@
+SHELL := /bin/sh
+
+PROJECT := cscenter
+SS := local
+DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
+DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
+
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check-app-specified check-src-specified
+
 run:
 	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
-	cd cscsite && python manage.py runserver --settings=cscenter.settings.local
+	cd cscsite && python manage.py runserver $(DJANGO_POSTFIX)
 
-syncdb:
-	python cscsite/manage.py syncdb --settings=cscenter.settings.local
+migrate:
+	python cscsite/manage.py migrate $(DJANGO_POSTFIX)
 
 msg:
 	cd cscsite && python manage.py makemessages -l ru
@@ -12,37 +21,50 @@ msgcompile:
 	cd cscsite && python manage.py compilemessages
 
 static:
-	cd cscsite && python manage.py collectstatic --noinput --settings=cscenter.settings.production
+	cd cscsite && python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
 
 freeze:
 	pip freeze --local > requirements.txt
 
-get-deps:
+pip:
 	pip install -r requirements.txt
 
-dumpdemo:
-	python cscsite/manage.py dumpdata --settings=cscenter.settings.local --indent=2 > cscsite/fixtures/demo_data.new.json
+dumpdemo: check-app-specified
+	python cscsite/manage.py dumpdata $(DJANGO_POSTFIX) --indent=2 $(app) --output=./fixture_$(app).json
 
-loaddemo:
-	python cscsite/manage.py loaddata --settings=cscenter.settings.local cscsite/fixtures/demo_data.json
+loaddemo: check-src-specified
+	python cscsite/manage.py loaddata $(DJANGO_POSTFIX) $(SRC)
 
-test:
-	python cscsite/manage.py test core index news users learning --settings=cscenter.settings.test
+coverage:
+	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
 test_travis:
-	python cscsite/manage.py test core index news users learning --settings=cscenter.settings.test_travis
+	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
 
-test_nocoverage:
-	python cscsite/manage.py test core index news users learning --settings=cscenter.settings.test_nocover
-
-init:
-	python cscsite/manage.py syncdb --all --settings=cscenter.settings.local
-	python cscsite/manage.py migrate --fake --settings=cscenter.settings.local
-	python cscsite/manage.py loaddata --settings=cscenter.settings.local cscsite/fixtures/demo_data.json
-
-stylecheck:
-	pep8 cscsite/users cscsite/index cscsite/news cscsite/learning cscsite/core --exclude=migrations
-#PYTHONPATH=cscsite pylint -rn --load-plugins pylint_django --rcfile=pylint.config learning core
+test:
+	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_nocover
 
 localmail:
 	python -m smtpd -n -c DebuggingServer localhost:1025
+
+clean:
+	find . -name "*.pyc" -print0 -delete
+	-rm -rf htmlcov
+	-rm -rf .coverage
+	-rm -rf build
+	-rm -rf dist
+	-rm -rf src/*.egg-info
+
+cmd:
+	cscsite/manage.py $(CMD) $(DJANGO_POSTFIX)
+
+# Prerequisite
+check-app-specified:
+	ifndef app
+	    $(error APP is undefined)
+	endif
+
+check-src-specified:
+	ifndef src
+	    $(error src is undefined)
+	endif
