@@ -25,12 +25,13 @@ from django.utils import timezone
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
-from model_utils.models import TimeStampedModel
+from model_utils.models import TimeStampedModel, TimeFramedModel
+from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.notifications import get_unread_notifications_cache
 from learning import slides
-from .constants import GRADES, SHORT_GRADES
+from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
 from .utils import get_current_semester_pair
 
 from users.models import CSCUser
@@ -64,10 +65,7 @@ class Course(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Semester(models.Model):
-    # Note: Save sort order. See type_index for details
-    TYPES = Choices(('spring', _("spring")),
-                    ('summer', _("summer")),
-                    ('autumn', _("autumn")))
+    TYPES = SEMESTER_TYPES
 
     year = models.PositiveSmallIntegerField(
         _("CSCUser|Year"),
@@ -134,6 +132,8 @@ class Semester(models.Model):
         if created:
             obj.save()
         return obj
+
+
 
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
@@ -890,6 +890,32 @@ class City(models.Model):
         ordering = ["name"]
         verbose_name = _("City")
         verbose_name_plural = _("Cities")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
+@python_2_unicode_compatible
+class OnlineCourse(TimeStampedModel, TimeFramedModel):
+    name = models.CharField(_("Course|name"), max_length=255)
+    teachers = models.TextField(
+        _("Online Course|teachers"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    description = models.TextField(
+        _("Online Course|description"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    link = models.URLField(
+        _("Online Course|Link"))
+    photo = ImageField(
+        _("Online Course|photo"),
+        upload_to="online_courses/",
+        blank=True)
+
+    class Meta:
+        db_table = 'online_courses'
+        ordering = ["name"]
+        verbose_name = _("Online course")
+        verbose_name_plural = _("Online courses")
 
     def __str__(self):
         return smart_text(self.name)

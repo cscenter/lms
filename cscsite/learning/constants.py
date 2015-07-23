@@ -16,3 +16,7 @@ SHORT_GRADES = Choices(('not_graded', "—"),
                        ('pass', "з"),
                        ('good', "4"),
                        ('excellent', "5"))
+# Note: Save sort order!
+SEMESTER_TYPES = Choices(('spring', _("spring")),
+                        ('summer', _("summer")),
+                        ('autumn', _("autumn")))
