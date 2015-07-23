@@ -13,8 +13,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from .forms import Ubereditor
 
+from sitemetrics.models import Keycode
+
 # Remove groups app from django admin
 admin.site.unregister(Group)
+# Hide sitemetrics app
+admin.site.unregister(Keycode)
 
 
 def get_admin_url(instance_or_qs):
@@ -93,3 +97,4 @@ class UbereditorMixin(object):
 class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}
+
