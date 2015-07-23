@@ -97,7 +97,7 @@ class SHADCourseRecordResource(resources.ModelResource):
 
     class Meta:
         model = SHADCourseRecord
-        fields = ('student_id', 'name', 'teachers', 'semester', 'grade')
+        fields = ('id', 'student_id', 'name', 'teachers', 'semester', 'grade')
         skip_unchanged = True
 
     def get_instance(self, instance_loader, row):
