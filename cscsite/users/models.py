@@ -307,7 +307,7 @@ class SHADCourseRecord(TimeStampedModel):
         return GRADES[self.grade]
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_text("{} [{}]".format(self.name, self.student_id))
 
 
 @python_2_unicode_compatible

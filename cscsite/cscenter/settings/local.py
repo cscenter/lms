@@ -6,6 +6,7 @@ from .base import *
 
 INSTALLED_APPS += ('fixture_media',
                    'debug_toolbar',
+                   'django_extensions',
                    'template_timings_panel',
                    'rosetta')
 
