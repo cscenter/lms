@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'library',
     'crutches',
     'loginas',
+    'import_export',
     'pipeline',
 )
 

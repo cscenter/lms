@@ -40,6 +40,7 @@ class CSCUserQuerySet(query.QuerySet):
         filtered = False
 
         if request:
+            # FIXME: Mb should rewrite with django-filter app
             name_qstr = request.GET.get('name', "")
             if len(name_qstr.strip()) > 0:
                 qs = qs.search_names(name_qstr)

@@ -8,7 +8,7 @@ from core.models import apply_related_spec
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, AssignmentStudent, \
-    AssignmentComment, Enrollment, NonCourseEvent, StudentProject
+    AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse
 
 from users.models import CSCUser
 
@@ -117,7 +117,12 @@ class StudentProjectAdmin(admin.ModelAdmin):
     list_display = ['student', 'name', 'project_type']
 
 
+class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Course, CourseAdmin)
+admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(Semester)
 admin.site.register(CourseOffering, CourseOfferingAdmin)
 admin.site.register(Venue, VenueAdmin)
