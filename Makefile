@@ -71,7 +71,7 @@ deploy:
 	pip install -r requirements.txt
 	python cscsite/manage.py compilemessages --settings=$(app).settings.$(conf)
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
-	python cscsite/manage.py collectstatic --settings=$(app).settings.$(conf)
+	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
