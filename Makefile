@@ -1,6 +1,7 @@
 SHELL := /bin/sh
 
 PROJECT := cscenter
+PORT := 8000
 SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
@@ -9,7 +10,7 @@ DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
 run:
 	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
-	cd cscsite && python manage.py runserver $(DJANGO_POSTFIX)
+	cd cscsite && python manage.py runserver $(DJANGO_POSTFIX) $(PORT)
 
 migrate:
 	python cscsite/manage.py migrate $(DJANGO_POSTFIX)
