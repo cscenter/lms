@@ -30,6 +30,9 @@ class Command(BaseCommand):
                 enrollment_year__isnull=False,
                 graduation_year__isnull=True
             )
+            .exclude(
+                status=CSCUser.STATUS.expelled
+            )
             .prefetch_related(
                 Prefetch(
                     'enrollment_set',
