@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-24 17:19+0300\n"
+"POT-Creation-Date: 2015-07-24 17:26+0300\n"
 "PO-Revision-Date: 2015-04-02 17:41+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,6 +60,1024 @@ msgid ""
 "The current file %(size)s, which is too large. The maximum file size is "
 "%(allowed_size)s."
 msgstr ""
+
+#: cscenter/templates/admin/base_site.html:6 templates/admin/base_site.html:6
+msgid "Django site admin"
+msgstr "Административная панель Django"
+
+#: cscenter/templates/admin/base_site.html:17
+#: templates/admin/base_site.html:17
+msgid "Django administration"
+msgstr "Администрирование Django"
+
+#: cscenter/templates/base.html:59 templates/base.html:59
+msgid "Computer Science Center, 2011–15 гг."
+msgstr "Computer Science Center, 2011–15 гг."
+
+#: cscenter/templates/base.html:61 templates/base.html:61
+msgid "report a problem"
+msgstr "сообщить об ошибке"
+
+#: cscenter/templates/base.html:85 templates/base.html:85
+msgid "close all"
+msgstr "закрыть все"
+
+#: cscenter/templates/base_menu.html:27 templates/base_menu.html:27
+msgid "Admin page"
+msgstr "Админка"
+
+#: cscenter/templates/base_menu.html:35 templates/base_menu.html:35
+msgid "logout"
+msgstr "выйти"
+
+#: cscenter/templates/base_menu.html:38 templates/base_menu.html:38
+#: users/forms.py:40
+msgid "Login"
+msgstr "Войти"
+
+#: cscenter/templates/index.html:16 templates/index.html:16
+msgid "Learn more"
+msgstr "Узнать больше"
+
+#: cscenter/templates/index.html:20 templates/index.html:20
+msgid "How to enroll"
+msgstr "Как поступить"
+
+#: cscenter/templates/index.html:30 templates/index.html:30
+msgid "CS Center News"
+msgstr "Новости CS центра"
+
+#: cscenter/templates/index.html:39 cscenter/templates/news/news_list.html:19
+#: templates/index.html:39 templates/news/news_list.html:19
+msgid "More…"
+msgstr "Далее…"
+
+#: cscenter/templates/index.html:45 templates/index.html:45
+msgid "All news"
+msgstr "Все новости"
+
+#: cscenter/templates/index.html:48 cscenter/templates/news/news_list.html:27
+#: templates/index.html:48 templates/news/news_list.html:27
+msgid "No news yet"
+msgstr "Список новостей пуст"
+
+#: cscenter/templates/index.html:56 templates/index.html:56
+msgid "Supported by"
+msgstr "При поддержке"
+
+#: cscenter/templates/index.html:61 templates/index.html:61
+msgid "Yandex School of Data Analysis"
+msgstr "Яндекс ШАД"
+
+#: cscenter/templates/index.html:67 templates/index.html:67
+msgid "JetBrains"
+msgstr "JetBrains"
+
+#: cscenter/templates/index.html:73 templates/index.html:73
+msgid "Computer Science Club"
+msgstr "Computer Science Club"
+
+#: cscenter/templates/index.html:79 templates/index.html:79
+msgid "FML #239"
+msgstr "ФМЛ №239"
+
+#: cscenter/templates/learning/assignment_detail.html:17
+#: cscenter/templates/learning/assignment_student_detail.html:27
+#: cscenter/templates/learning/course_detail.html:13
+#: cscenter/templates/learning/courseclass_detail.html:13
+#: cscenter/templates/learning/courseoffering_detail.html:31
+#: cscenter/templates/users/user_detail.html:15
+#: templates/learning/assignment_detail.html:17
+#: templates/learning/assignment_student_detail.html:27
+#: templates/learning/course_detail.html:13
+#: templates/learning/courseclass_detail.html:13
+#: templates/learning/courseoffering_detail.html:31
+#: templates/users/user_detail.html:15
+msgid "Edit"
+msgstr "Редактировать"
+
+#: cscenter/templates/learning/assignment_detail.html:18
+#: cscenter/templates/learning/courseclass_detail.html:14
+#: cscenter/templates/learning/simple_delete_confirmation.html:18
+#: templates/learning/assignment_detail.html:18
+#: templates/learning/courseclass_detail.html:14
+#: templates/learning/simple_delete_confirmation.html:18
+msgid "Delete"
+msgstr "Удалить"
+
+#: cscenter/templates/learning/assignment_detail.html:29
+#: cscenter/templates/learning/assignment_list_student.html:45
+#: cscenter/templates/learning/assignment_list_student.html:101
+#: cscenter/templates/learning/assignment_list_teacher.html:63
+#: cscenter/templates/learning/assignment_list_teacher.html:115
+#: cscenter/templates/learning/assignment_student_detail.html:137
+#: learning/forms.py:288 templates/learning/assignment_detail.html:29
+#: templates/learning/assignment_list_student.html:45
+#: templates/learning/assignment_list_student.html:101
+#: templates/learning/assignment_list_teacher.html:63
+#: templates/learning/assignment_list_teacher.html:115
+#: templates/learning/assignment_student_detail.html:137
+msgid "Deadline"
+msgstr "Срок сдачи"
+
+#: cscenter/templates/learning/assignment_detail.html:34
+#: cscenter/templates/learning/assignment_list_student.html:55
+#: cscenter/templates/learning/assignment_list_student.html:111
+#: cscenter/templates/learning/assignment_list_teacher.html:122
+#: templates/learning/assignment_detail.html:34
+#: templates/learning/assignment_list_student.html:55
+#: templates/learning/assignment_list_student.html:111
+#: templates/learning/assignment_list_teacher.html:122
+msgid "Online"
+msgstr "Онлайн"
+
+#: cscenter/templates/learning/assignment_detail.html:35
+#: cscenter/templates/learning/assignment_list_student.html:86
+#: cscenter/templates/learning/assignment_list_student.html:137
+#: cscenter/templates/learning/assignment_list_teacher.html:142
+#: templates/learning/assignment_detail.html:35
+#: templates/learning/assignment_list_student.html:86
+#: templates/learning/assignment_list_student.html:137
+#: templates/learning/assignment_list_teacher.html:142
+msgid "Yes,No"
+msgstr "Да,Нет"
+
+#: cscenter/templates/learning/assignment_detail.html:38
+#: cscenter/templates/learning/courseclass_detail.html:65
+#: learning/forms.py:121 templates/learning/assignment_detail.html:38
+#: templates/learning/courseclass_detail.html:65
+msgid "Attached files"
+msgstr "Приложенные файлы"
+
+#: cscenter/templates/learning/assignment_detail.html:61
+#: cscenter/templates/learning/assignment_list_teacher.html:66
+#: cscenter/templates/learning/assignment_student_detail.html:135
+#: learning/models.py:657 templates/learning/assignment_detail.html:61
+#: templates/learning/assignment_list_teacher.html:66
+#: templates/learning/assignment_student_detail.html:135 users/models.py:268
+#: users/models.py:286 users/models.py:320
+msgid "Student"
+msgstr "Студент"
+
+#: cscenter/templates/learning/assignment_detail.html:63
+#: cscenter/templates/learning/assignment_list_student.html:52
+#: cscenter/templates/learning/assignment_list_student.html:108
+#: cscenter/templates/learning/assignment_list_teacher.html:71
+#: templates/learning/assignment_detail.html:63
+#: templates/learning/assignment_list_student.html:52
+#: templates/learning/assignment_list_student.html:108
+#: templates/learning/assignment_list_teacher.html:71
+msgid "State"
+msgstr "Статус"
+
+#: cscenter/templates/learning/assignment_list_student.html:11
+#: cscenter/templates/learning/assignment_list_teacher.html:11
+#: cscenter/templates/learning/courseoffering_detail.html:134
+#: cscenter/templates/users/user_detail.html:130 learning/models.py:454
+#: templates/learning/assignment_list_student.html:11
+#: templates/learning/assignment_list_teacher.html:11
+#: templates/learning/courseoffering_detail.html:134
+#: templates/users/user_detail.html:130
+msgid "Assignments"
+msgstr "Задания"
+
+#: cscenter/templates/learning/assignment_list_student.html:22
+#: cscenter/templates/learning/assignment_list_teacher.html:22
+#: cscenter/templates/learning/calendar.html:24
+#: cscenter/templates/learning/timetable_student.html:27
+#: cscenter/templates/learning/timetable_teacher.html:23
+#: templates/learning/assignment_list_student.html:22
+#: templates/learning/assignment_list_teacher.html:22
+#: templates/learning/calendar.html:24
+#: templates/learning/timetable_student.html:27
+#: templates/learning/timetable_teacher.html:23
+msgid "Learning"
+msgstr "Обучение"
+
+#: cscenter/templates/learning/assignment_list_student.html:30
+#: cscenter/templates/learning/assignment_list_teacher.html:30
+#: cscenter/templates/learning/calendar.html:32
+#: cscenter/templates/learning/timetable_student.html:35
+#: cscenter/templates/learning/timetable_teacher.html:31
+#: templates/learning/assignment_list_student.html:30
+#: templates/learning/assignment_list_teacher.html:30
+#: templates/learning/calendar.html:32
+#: templates/learning/timetable_student.html:35
+#: templates/learning/timetable_teacher.html:31
+msgid "Teaching"
+msgstr "Преподавание"
+
+#: cscenter/templates/learning/assignment_list_student.html:41
+#: templates/learning/assignment_list_student.html:41
+msgid "Open assignments"
+msgstr "Открытые задания"
+
+#: cscenter/templates/learning/assignment_list_student.html:49
+#: cscenter/templates/learning/assignment_list_student.html:105
+#: cscenter/templates/learning/assignment_list_teacher.html:68
+#: cscenter/templates/learning/assignment_list_teacher.html:119
+#: cscenter/templates/learning/timetable_student.html:64
+#: cscenter/templates/learning/timetable_teacher.html:60 learning/models.py:56
+#: learning/models.py:142 templates/learning/assignment_list_student.html:49
+#: templates/learning/assignment_list_student.html:105
+#: templates/learning/assignment_list_teacher.html:68
+#: templates/learning/assignment_list_teacher.html:119
+#: templates/learning/timetable_student.html:64
+#: templates/learning/timetable_teacher.html:60
+msgid "Course"
+msgstr "Курс"
+
+#: cscenter/templates/learning/assignment_list_student.html:97
+#: cscenter/templates/learning/courses_list_student.html:92
+#: cscenter/templates/learning/courses_list_teacher.html:54
+#: cscenter/templates/learning/markssheet_teacher_dispatch.html:14
+#: cscenter/templates/learning/semester_list.html:14
+#: templates/learning/assignment_list_student.html:97
+#: templates/learning/courses_list_student.html:92
+#: templates/learning/courses_list_teacher.html:54
+#: templates/learning/markssheet_teacher_dispatch.html:14
+#: templates/learning/semester_list.html:14
+msgid "Archive"
+msgstr "Архив"
+
+#: cscenter/templates/learning/assignment_list_student.html:151
+#: cscenter/templates/learning/assignment_list_teacher.html:156
+#: templates/learning/assignment_list_student.html:151
+#: templates/learning/assignment_list_teacher.html:156
+msgid "No assignments yet"
+msgstr "Список заданий пуст"
+
+#: cscenter/templates/learning/assignment_list_teacher.html:41
+#: templates/learning/assignment_list_teacher.html:41
+msgid "Passed online"
+msgstr "Сданные онлайн"
+
+#: cscenter/templates/learning/assignment_list_teacher.html:49
+#: templates/learning/assignment_list_teacher.html:49
+msgid "All"
+msgstr "Все"
+
+#: cscenter/templates/learning/assignment_list_teacher.html:59
+#: templates/learning/assignment_list_teacher.html:59
+msgid "Without grades"
+msgstr "Без оценки"
+
+#: cscenter/templates/learning/assignment_list_teacher.html:111
+#: templates/learning/assignment_list_teacher.html:111
+msgid "All assignments"
+msgstr "Все задания"
+
+#: cscenter/templates/learning/assignment_student_detail.html:59
+#: cscenter/templates/learning/assignment_student_detail.html:99
+#: cscenter/templates/users/user_detail.html:222
+#: templates/learning/assignment_student_detail.html:59
+#: templates/learning/assignment_student_detail.html:99
+#: templates/users/user_detail.html:222 users/models.py:127
+msgid "Comment"
+msgstr "Комментарий"
+
+#: cscenter/templates/learning/assignment_student_detail.html:61
+#: templates/learning/assignment_student_detail.html:61
+msgid "Solution"
+msgstr "Решение"
+
+#: cscenter/templates/learning/assignment_student_detail.html:108
+#: templates/learning/assignment_student_detail.html:108
+msgid "Next unchecked[assignment]"
+msgstr "Следующее непроверенное"
+
+#: cscenter/templates/learning/assignment_student_detail.html:112
+#: cscenter/templates/learning/courses_list_student.html:25
+#: cscenter/templates/learning/courses_list_student.html:100
+#: cscenter/templates/users/user_detail.html:138 learning/models.py:533
+#: templates/learning/assignment_student_detail.html:112
+#: templates/learning/courses_list_student.html:25
+#: templates/learning/courses_list_student.html:100
+#: templates/users/user_detail.html:138
+msgid "Grade"
+msgstr "Оценка"
+
+#: cscenter/templates/learning/assignment_student_detail.html:122
+#: templates/learning/assignment_student_detail.html:122
+msgid "Professor"
+msgstr "Преподаватель"
+
+#: cscenter/templates/learning/assignment_student_detail.html:124
+#: cscenter/templates/learning/courses_list_student.html:22
+#: cscenter/templates/learning/courses_list_student.html:97
+#: cscenter/templates/learning/courses_list_teacher.html:22
+#: cscenter/templates/learning/courses_list_teacher.html:61
+#: templates/learning/assignment_student_detail.html:124
+#: templates/learning/courses_list_student.html:22
+#: templates/learning/courses_list_student.html:97
+#: templates/learning/courses_list_teacher.html:22
+#: templates/learning/courses_list_teacher.html:61
+msgid "Professors"
+msgstr "Преподаватели"
+
+#: cscenter/templates/learning/assignment_student_detail.html:139
+#: learning/forms.py:305 learning/models.py:445
+#: templates/learning/assignment_student_detail.html:139
+msgid "Assignment|grade_max"
+msgstr "Максимальный балл"
+
+#: cscenter/templates/learning/assignment_student_detail.html:141
+#: learning/forms.py:302 learning/models.py:441
+#: templates/learning/assignment_student_detail.html:141
+msgid "Assignment|grade_min"
+msgstr "Проходной балл"
+
+#: cscenter/templates/learning/assignment_student_detail.html:143
+#: templates/learning/assignment_student_detail.html:143
+msgid "Assignment created"
+msgstr "Задание добавлено"
+
+#: cscenter/templates/learning/assignment_student_detail.html:146
+#: templates/learning/assignment_student_detail.html:146
+msgid "Can be passed online "
+msgstr "Можно сдать онлайн"
+
+#: cscenter/templates/learning/assignment_student_detail.html:148
+#: templates/learning/assignment_student_detail.html:148
+msgid "Should be passed offline "
+msgstr "Должно быть сдано оффлайн"
+
+#: cscenter/templates/learning/calendar.html:43
+#: cscenter/templates/learning/timetable_student.html:46
+#: cscenter/templates/learning/timetable_teacher.html:42
+#: templates/learning/calendar.html:43
+#: templates/learning/timetable_student.html:46
+#: templates/learning/timetable_teacher.html:42
+msgid "List"
+msgstr "Список"
+
+#: cscenter/templates/learning/calendar.html:50
+#: cscenter/templates/learning/timetable_student.html:49
+#: cscenter/templates/learning/timetable_teacher.html:45
+#: templates/learning/calendar.html:50
+#: templates/learning/timetable_student.html:49
+#: templates/learning/timetable_teacher.html:45
+msgid "Calendar"
+msgstr "Календарь"
+
+#: cscenter/templates/learning/calendar.html:61
+#: templates/learning/calendar.html:61
+msgid "Monday"
+msgstr "Понедельник"
+
+#: cscenter/templates/learning/calendar.html:62
+#: templates/learning/calendar.html:62
+msgid "Tuesday"
+msgstr "Вторник"
+
+#: cscenter/templates/learning/calendar.html:63
+#: templates/learning/calendar.html:63
+msgid "Wednesday"
+msgstr "Среда"
+
+#: cscenter/templates/learning/calendar.html:64
+#: templates/learning/calendar.html:64
+msgid "Thursday"
+msgstr "Четверг"
+
+#: cscenter/templates/learning/calendar.html:65
+#: templates/learning/calendar.html:65
+msgid "Friday"
+msgstr "Пятница"
+
+#: cscenter/templates/learning/calendar.html:66
+#: templates/learning/calendar.html:66
+msgid "Saturday"
+msgstr "Суббота"
+
+#: cscenter/templates/learning/calendar.html:67
+#: templates/learning/calendar.html:67
+msgid "Sunday"
+msgstr "Воскресенье"
+
+#: cscenter/templates/learning/course_detail.html:25
+#: templates/learning/course_detail.html:25
+msgid "Course offerings:|course-singular"
+msgstr "Прочтения курса:"
+
+#: cscenter/templates/learning/courseclass_detail.html:24
+#: templates/learning/courseclass_detail.html:24
+msgid "What"
+msgstr "Что"
+
+#: cscenter/templates/learning/courseclass_detail.html:28
+#: cscenter/templates/learning/noncourseevent_detail.html:18
+#: templates/learning/courseclass_detail.html:28
+#: templates/learning/noncourseevent_detail.html:18
+msgid "When"
+msgstr "Когда"
+
+#: cscenter/templates/learning/courseclass_detail.html:32
+#: cscenter/templates/learning/noncourseevent_detail.html:22
+#: templates/learning/courseclass_detail.html:32
+#: templates/learning/noncourseevent_detail.html:22
+msgid "Where"
+msgstr "Где"
+
+#: cscenter/templates/learning/courseclass_detail.html:37
+#: cscenter/templates/learning/timetable_student.html:99
+#: cscenter/templates/learning/timetable_teacher.html:95 learning/forms.py:117
+#: learning/models.py:316 learning/views.py:479
+#: templates/learning/courseclass_detail.html:37
+#: templates/learning/timetable_student.html:99
+#: templates/learning/timetable_teacher.html:95
+msgid "Slides"
+msgstr "Слайды"
+
+#: cscenter/templates/learning/courseclass_detail.html:44
+#: cscenter/templates/learning/noncourseevent_detail.html:28
+#: learning/forms.py:34 learning/forms.py:112 learning/models.py:154
+#: learning/models.py:261 learning/models.py:312 learning/models.py:771
+#: learning/models.py:813 templates/learning/courseclass_detail.html:44
+#: templates/learning/noncourseevent_detail.html:28
+msgid "Description"
+msgstr "Описание"
+
+#: cscenter/templates/learning/courseclass_detail.html:51
+#: cscenter/templates/learning/timetable_student.html:106
+#: cscenter/templates/learning/timetable_teacher.html:102
+#: templates/learning/courseclass_detail.html:51
+#: templates/learning/timetable_student.html:106
+#: templates/learning/timetable_teacher.html:102
+msgid "Video"
+msgstr "Видео"
+
+#: cscenter/templates/learning/courseclass_detail.html:58
+#: cscenter/templates/learning/courseoffering_detail.html:97
+#: cscenter/templates/learning/timetable_student.html:67
+#: cscenter/templates/learning/timetable_teacher.html:63 learning/forms.py:171
+#: templates/learning/courseclass_detail.html:58
+#: templates/learning/courseoffering_detail.html:97
+#: templates/learning/timetable_student.html:67
+#: templates/learning/timetable_teacher.html:63
+msgid "Materials"
+msgstr "Материалы"
+
+#: cscenter/templates/learning/courseoffering_detail.html:18
+#: templates/learning/courseoffering_detail.html:18
+msgid "Add assignment"
+msgstr "Добавить задание"
+
+#: cscenter/templates/learning/courseoffering_detail.html:23
+#: cscenter/templates/learning/courses_list_teacher.html:42
+#: cscenter/templates/learning/courses_list_teacher.html:84
+#: templates/learning/courseoffering_detail.html:23
+#: templates/learning/courses_list_teacher.html:42
+#: templates/learning/courses_list_teacher.html:84
+msgid "Add news"
+msgstr "Добавить новость"
+
+#: cscenter/templates/learning/courseoffering_detail.html:27
+#: templates/learning/courseoffering_detail.html:27
+msgid "Add class"
+msgstr "Добавить занятие"
+
+#: cscenter/templates/learning/courseoffering_detail.html:40
+#: cscenter/templates/learning/courses_list_student.html:51
+#: learning/views.py:644 templates/learning/courseoffering_detail.html:40
+#: templates/learning/courses_list_student.html:51
+msgid "Unenroll"
+msgstr "Отказаться"
+
+#: cscenter/templates/learning/courseoffering_detail.html:47
+#: cscenter/templates/learning/courses_list_student.html:79
+#: templates/learning/courseoffering_detail.html:47
+#: templates/learning/courses_list_student.html:79
+msgid "Enroll"
+msgstr "Записаться"
+
+#: cscenter/templates/learning/courseoffering_detail.html:88
+#: learning/models.py:336 templates/learning/courseoffering_detail.html:88
+msgid "Classes"
+msgstr "Занятия"
+
+#: cscenter/templates/learning/courseoffering_detail.html:92
+#: learning/forms.py:138 learning/models.py:329 learning/models.py:774
+#: templates/learning/courseoffering_detail.html:92
+msgid "Date"
+msgstr "Дата"
+
+#: cscenter/templates/learning/courseoffering_detail.html:93
+#: cscenter/templates/learning/timetable_student.html:62
+#: cscenter/templates/learning/timetable_teacher.html:58
+#: templates/learning/courseoffering_detail.html:93
+#: templates/learning/timetable_student.html:62
+#: templates/learning/timetable_teacher.html:58
+msgid "Time"
+msgstr "Время"
+
+#: cscenter/templates/learning/courseoffering_detail.html:94
+#: cscenter/templates/learning/timetable_student.html:63
+#: cscenter/templates/learning/timetable_teacher.html:59
+#: templates/learning/courseoffering_detail.html:94
+#: templates/learning/timetable_student.html:63
+#: templates/learning/timetable_teacher.html:59
+msgid "Class|Name"
+msgstr "Название"
+
+#: cscenter/templates/learning/courseoffering_detail.html:95
+#: cscenter/templates/learning/timetable_student.html:65
+#: cscenter/templates/learning/timetable_teacher.html:61
+#: templates/learning/courseoffering_detail.html:95
+#: templates/learning/timetable_student.html:65
+#: templates/learning/timetable_teacher.html:61
+msgid "Venue|short"
+msgstr "Место"
+
+#: cscenter/templates/learning/courseoffering_detail.html:115
+#: cscenter/templates/learning/timetable_student.html:89
+#: cscenter/templates/learning/timetable_teacher.html:85
+#: learning/models.py:296 templates/learning/courseoffering_detail.html:115
+#: templates/learning/timetable_student.html:89
+#: templates/learning/timetable_teacher.html:85
+msgid "Lecture"
+msgstr "Лекция"
+
+#: cscenter/templates/learning/courseoffering_detail.html:117
+#: cscenter/templates/learning/timetable_student.html:91
+#: cscenter/templates/learning/timetable_teacher.html:87
+#: learning/models.py:297 templates/learning/courseoffering_detail.html:117
+#: templates/learning/timetable_student.html:91
+#: templates/learning/timetable_teacher.html:87
+msgid "Seminar"
+msgstr "Семинар"
+
+#: cscenter/templates/learning/courseoffering_detail.html:156
+#: templates/learning/courseoffering_detail.html:156
+msgid "News"
+msgstr "Новости"
+
+#: cscenter/templates/learning/courseoffering_detail.html:164
+#: templates/learning/courseoffering_detail.html:164
+msgid "edit"
+msgstr "редактировать"
+
+#: cscenter/templates/learning/courseoffering_detail.html:165
+#: templates/learning/courseoffering_detail.html:165
+msgid "delete"
+msgstr "удалить"
+
+#: cscenter/templates/learning/courses_list_student.html:9
+#: cscenter/templates/learning/courses_list_teacher.html:9
+#: cscenter/templates/learning/markssheet_teacher.html:45
+#: learning/models.py:57 templates/learning/courses_list_student.html:9
+#: templates/learning/courses_list_teacher.html:9
+#: templates/learning/markssheet_teacher.html:45
+msgid "Courses"
+msgstr "Курсы"
+
+#: cscenter/templates/learning/courses_list_student.html:17
+#: templates/learning/courses_list_student.html:17
+msgid "Current semester"
+msgstr "Текущий семестр"
+
+#: cscenter/templates/learning/courses_list_student.html:103
+#: learning/models.py:86 learning/models.py:151
+#: templates/learning/courses_list_student.html:103 users/models.py:292
+msgid "Semester"
+msgstr "Семестр"
+
+#: cscenter/templates/learning/courses_list_student.html:140
+#: cscenter/templates/learning/courses_list_teacher.html:100
+#: cscenter/templates/learning/markssheet_teacher_dispatch.html:44
+#: cscenter/templates/learning/semester_list.html:50
+#: templates/learning/courses_list_student.html:140
+#: templates/learning/courses_list_teacher.html:100
+#: templates/learning/markssheet_teacher_dispatch.html:44
+#: templates/learning/semester_list.html:50
+msgid "No courses yet"
+msgstr "Список курсов пуст"
+
+#: cscenter/templates/learning/courses_list_teacher.html:17
+#: cscenter/templates/learning/markssheet_teacher_dispatch.html:12
+#: cscenter/templates/learning/semester_list.html:12
+#: templates/learning/courses_list_teacher.html:17
+#: templates/learning/markssheet_teacher_dispatch.html:12
+#: templates/learning/semester_list.html:12
+msgid "Ongoing|plural"
+msgstr "Текущие"
+
+#: cscenter/templates/learning/courses_video_list.html:9
+#: templates/learning/courses_video_list.html:9
+msgid "Videos"
+msgstr "Видео"
+
+#: cscenter/templates/learning/courses_video_list.html:38
+#: templates/learning/courses_video_list.html:38
+msgid "No videos yet"
+msgstr "Список видео пуст"
+
+#: cscenter/templates/learning/markssheet_teacher.html:22
+#: templates/learning/markssheet_teacher.html:22
+msgid "Marks sheet"
+msgstr "Ведомость"
+
+#: cscenter/templates/learning/markssheet_teacher.html:27 learning/forms.py:24
+#: learning/forms.py:225 templates/learning/markssheet_teacher.html:27
+#: users/forms.py:92
+msgid "Save"
+msgstr "Сохранить"
+
+#: cscenter/templates/learning/markssheet_teacher.html:38
+#: templates/learning/markssheet_teacher.html:38
+msgid "From Stepic"
+msgstr "Из Stepic"
+
+#: cscenter/templates/learning/markssheet_teacher.html:81
+#: templates/learning/markssheet_teacher.html:81
+msgid "Total score"
+msgstr "Суммарный балл"
+
+#: cscenter/templates/learning/markssheet_teacher.html:140
+#: templates/learning/markssheet_teacher.html:140
+msgid "Import stepic statements"
+msgstr "Импортировать баллы Stepic"
+
+#: cscenter/templates/learning/markssheet_teacher.html:147
+#: templates/learning/markssheet_teacher.html:147
+msgid "Select assignment"
+msgstr "Выбрать задание"
+
+#: cscenter/templates/learning/markssheet_teacher.html:155
+#: templates/learning/markssheet_teacher.html:155
+msgid "Score will be imported for selected assignment"
+msgstr "Оценки будут импортированы для выбранного задания"
+
+#: cscenter/templates/learning/markssheet_teacher.html:158
+#: learning/forms.py:365 templates/learning/markssheet_teacher.html:158
+msgid "Select csv file"
+msgstr "Выбрать csv-файл"
+
+#: cscenter/templates/learning/markssheet_teacher.html:160
+#: templates/learning/markssheet_teacher.html:160
+msgid ""
+"Should contains comma-separated values of user stepic id and assignment "
+"score. First row is header. Example:"
+msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
+
+#: cscenter/templates/learning/markssheet_teacher.html:166
+#: templates/learning/markssheet_teacher.html:166
+msgid "Close"
+msgstr "Закрыть"
+
+#: cscenter/templates/learning/markssheet_teacher.html:167
+#: templates/learning/markssheet_teacher.html:167
+msgid "Import"
+msgstr "Импортировать"
+
+#: cscenter/templates/learning/simple_delete_confirmation.html:12
+#: templates/learning/simple_delete_confirmation.html:12
+msgid "Are you sure you want to delete"
+msgstr "Вы уверены, что хотите удалить"
+
+#: cscenter/templates/learning/simple_delete_confirmation.html:14
+#: learning/forms.py:21 templates/learning/simple_delete_confirmation.html:14
+msgid "Cancel"
+msgstr "Отмена"
+
+#: cscenter/templates/learning/timetable_student.html:112
+#: cscenter/templates/learning/timetable_teacher.html:109
+#: learning/views.py:513 templates/learning/timetable_student.html:112
+#: templates/learning/timetable_teacher.html:109
+msgid "No"
+msgstr "Нет"
+
+#: cscenter/templates/learning/timetable_student.html:126
+#: cscenter/templates/learning/timetable_teacher.html:124
+#: templates/learning/timetable_student.html:126
+#: templates/learning/timetable_teacher.html:124
+msgid "No classes yet"
+msgstr "Список занятий пуст"
+
+#: cscenter/templates/learning/venue_list.html:8
+#: templates/learning/venue_list.html:8
+msgid "CSCenter learning venues"
+msgstr "Места проведения занятий CSC"
+
+#: cscenter/templates/library/book_detail.html:30
+#: cscenter/templates/library/book_list.html:30
+#: templates/library/book_detail.html:30 templates/library/book_list.html:30
+msgid "Book|read by"
+msgstr "Читают"
+
+#: cscenter/templates/library/book_list.html:11
+#: templates/library/book_list.html:11
+msgid "library"
+msgstr "Библиотека"
+
+#: cscenter/templates/library/book_list.html:20
+#: templates/library/book_list.html:20
+msgid ""
+"\n"
+"                    HOWTO instructions. Do we even need i18n here?\n"
+"                "
+msgstr ""
+"\n"
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
+"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
+"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
+"сейчас читают другие студенты."
+
+#: cscenter/templates/library/book_list.html:28 library/models.py:31
+#: templates/library/book_list.html:28
+msgid "Book|author"
+msgstr "Автор"
+
+#: cscenter/templates/library/book_list.html:29 library/models.py:32
+#: templates/library/book_list.html:29
+msgid "Book|title"
+msgstr "Заголовок"
+
+#: cscenter/templates/library/book_list.html:31
+#: templates/library/book_list.html:31
+msgid "Book|number of copies left"
+msgstr "Количество оставшихся копий"
+
+#: cscenter/templates/registration/password_change_done.html:5
+#: cscenter/templates/registration/password_reset_complete.html:5
+#: cscenter/templates/registration/password_reset_done.html:5
+#: cscenter/templates/registration/password_reset_form.html:5
+#: cscenter/templates/registration/password_reset_form.html:16
+#: templates/registration/password_change_done.html:5
+#: templates/registration/password_reset_complete.html:5
+#: templates/registration/password_reset_done.html:5
+#: templates/registration/password_reset_form.html:5
+#: templates/registration/password_reset_form.html:16
+msgid "Reset password"
+msgstr "Сменить пароль"
+
+#: cscenter/templates/registration/password_change_done.html:11
+#: cscenter/templates/registration/password_reset_complete.html:11
+#: templates/registration/password_change_done.html:11
+#: templates/registration/password_reset_complete.html:11
+msgid "Password changed"
+msgstr "Пароль изменён"
+
+#: cscenter/templates/registration/password_change_form.html:5
+#: cscenter/templates/registration/password_change_form.html:16
+#: cscenter/templates/registration/password_reset_confirm.html:5
+#: cscenter/templates/registration/password_reset_confirm.html:17
+#: cscenter/templates/users/user_detail.html:25
+#: templates/registration/password_change_form.html:5
+#: templates/registration/password_change_form.html:16
+#: templates/registration/password_reset_confirm.html:5
+#: templates/registration/password_reset_confirm.html:17
+#: templates/users/user_detail.html:25
+msgid "Change password"
+msgstr "Сменить пароль"
+
+#: cscenter/templates/registration/password_reset_confirm.html:22
+#: templates/registration/password_reset_confirm.html:22
+msgid "Sorry, the link is invalid"
+msgstr "Извините, ссылка устарела"
+
+#: cscenter/templates/registration/password_reset_done.html:11
+#: templates/registration/password_reset_done.html:11
+msgid "An email with instructions for setting a new password has been sent"
+msgstr "Инструкции по смене пароля были высланы на указанный почтовый адрес"
+
+#: cscenter/templates/staff/student_search.html:10
+#: templates/staff/student_search.html:10
+msgid "Student search"
+msgstr "Поиск студентов"
+
+#: cscenter/templates/staff/student_search.html:21
+#: templates/staff/student_search.html:21
+msgid "Name, full or partial"
+msgstr "Имя, целиком или часть"
+
+#: cscenter/templates/staff/student_search.html:26
+#: templates/staff/student_search.html:26 users/models.py:75
+msgid "CSCUser|enrollment year"
+msgstr "Год поступления"
+
+#: cscenter/templates/staff/student_search.html:42
+#: templates/staff/student_search.html:42
+msgid "Found"
+msgstr "Найдено"
+
+#: cscenter/templates/unsubscribe.html:11 templates/unsubscribe.html:11
+msgid "Disable subscription"
+msgstr "Отмена подписки"
+
+#: cscenter/templates/unsubscribe.html:24 templates/unsubscribe.html:24
+msgid "Do you want to unsubscribe from"
+msgstr "Вы действительно хотите отменить подписку "
+
+#: cscenter/templates/users/alumni_list.html:33
+#: templates/users/alumni_list.html:33
+msgid "No alumni yet"
+msgstr "Список выпускников пуст"
+
+#: cscenter/templates/users/reference_detail.html:14
+#: templates/users/reference_detail.html:14
+msgid "Reference|Detail|request"
+msgstr "Справка дана по месту требования"
+
+#: cscenter/templates/users/reference_detail.html:16
+#: templates/users/reference_detail.html:16
+msgid "Reference|Detail|title"
+msgstr "СПРАВКА"
+
+#: cscenter/templates/users/reference_detail.html:17
+#: templates/users/reference_detail.html:17
+#, python-format
+msgid ""
+"Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
+"            сентября %(enrollment_year)s года. За время обучения "
+"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
+"            "
+msgstr ""
+
+#: cscenter/templates/users/reference_detail.html:40
+#: templates/users/reference_detail.html:40
+msgid "Reference|Detail|signature"
+msgstr "Куратор в Computer Science центре"
+
+#: cscenter/templates/users/reference_detail.html:45
+#: templates/users/reference_detail.html:45
+msgid "Reference|Detail|info"
+msgstr "Информация"
+
+#: cscenter/templates/users/teacher_list.html:27
+#: templates/users/teacher_list.html:27
+msgid "No professors yet"
+msgstr "Преподавателей ещё нет"
+
+#: cscenter/templates/users/user_detail.html:19
+#: templates/users/user_detail.html:19 users/tests.py:441 users/tests.py:449
+msgid "Create reference"
+msgstr "Выдать справку"
+
+#: cscenter/templates/users/user_detail.html:22
+#: templates/users/user_detail.html:22
+msgid "Edit info record"
+msgstr "Редактировать карточку"
+
+#: cscenter/templates/users/user_detail.html:39
+#: templates/users/user_detail.html:39
+msgid "student"
+msgstr "студент"
+
+#: cscenter/templates/users/user_detail.html:40
+#: templates/users/user_detail.html:40
+msgid "enrolled in"
+msgstr "год поступления"
+
+#: cscenter/templates/users/user_detail.html:40
+#: templates/users/user_detail.html:40
+msgid "courseoffering|took"
+msgstr "курсы"
+
+#: cscenter/templates/users/user_detail.html:55 learning/models.py:842
+#: templates/users/user_detail.html:55
+msgid "Student projects"
+msgstr "Студенческие проекты"
+
+#: cscenter/templates/users/user_detail.html:60 learning/models.py:833
+#: templates/users/user_detail.html:60
+msgid "Presentation"
+msgstr "Презентация"
+
+#: cscenter/templates/users/user_detail.html:61 learning/models.py:822
+#: templates/users/user_detail.html:61
+msgid "StudentProject|Supervisor"
+msgstr "Руководитель"
+
+#: cscenter/templates/users/user_detail.html:75
+#: templates/users/user_detail.html:75
+#, python-format
+msgid "graduated in %(year)s"
+msgstr "выпускник %(year)s года"
+
+#: cscenter/templates/users/user_detail.html:79
+#: templates/users/user_detail.html:79
+msgid "teacher"
+msgstr "преподаватель"
+
+#: cscenter/templates/users/user_detail.html:93
+#: templates/users/user_detail.html:93
+#, python-format
+msgid "%(name)s about CSC"
+msgstr "%(name)s о Центре"
+
+#: cscenter/templates/users/user_detail.html:99
+#: templates/users/user_detail.html:99 users/models.py:106
+msgid "Contact information"
+msgstr "Контактная информация"
+
+#: cscenter/templates/users/user_detail.html:107
+#: templates/users/user_detail.html:107
+msgid ".iCal classes calendar"
+msgstr ".iCal-календарь занятий"
+
+#: cscenter/templates/users/user_detail.html:114
+#: templates/users/user_detail.html:114
+msgid ".iCal assignments calendar"
+msgstr ".iCal-календарь заданий"
+
+#: cscenter/templates/users/user_detail.html:121
+#: templates/users/user_detail.html:121
+msgid ".iCal events calendar"
+msgstr ".iCal-календарь событий"
+
+#: cscenter/templates/users/user_detail.html:136 learning/models.py:175
+#: learning/models.py:231 learning/models.py:301 learning/models.py:425
+#: learning/models.py:661 templates/users/user_detail.html:136
+msgid "Course offering"
+msgstr "Прочтение курса"
+
+#: cscenter/templates/users/user_detail.html:137 learning/models.py:453
+#: learning/models.py:491 templates/users/user_detail.html:137
+msgid "Assignment"
+msgstr "Задание"
+
+#: cscenter/templates/users/user_detail.html:166 library/models.py:49
+#: templates/users/user_detail.html:166
+msgid "books"
+msgstr "Книги"
+
+#: cscenter/templates/users/user_detail.html:175
+#: templates/users/user_detail.html:175 users/admin.py:135
+msgid "Student info record"
+msgstr "Карточка студента"
+
+#: cscenter/templates/users/user_detail.html:178
+#: templates/users/user_detail.html:178 users/models.py:113
+msgid "University"
+msgstr "Университет"
+
+#: cscenter/templates/users/user_detail.html:182
+#: templates/users/user_detail.html:182 users/models.py:117
+msgid "Phone"
+msgstr "Телефон"
+
+#: cscenter/templates/users/user_detail.html:186
+#: templates/users/user_detail.html:186 users/models.py:85
+msgid "Yandex ID"
+msgstr "Yandex ID"
+
+#: cscenter/templates/users/user_detail.html:190
+#: templates/users/user_detail.html:190 users/models.py:92
+msgid "Github ID"
+msgstr "Github ID"
+
+#: cscenter/templates/users/user_detail.html:200
+#: templates/users/user_detail.html:200 users/models.py:98
+msgid "Stepic ID"
+msgstr "Stepic ID"
+
+#: cscenter/templates/users/user_detail.html:211
+#: templates/users/user_detail.html:211
+#, fuzzy
+#| msgid "email"
+msgid "Email"
+msgstr "email"
+
+#: cscenter/templates/users/user_detail.html:218
+#: templates/users/user_detail.html:218 users/models.py:121
+msgid "StudentInfo|University year"
+msgstr "Курс"
+
+#: cscenter/templates/users/user_detail.html:236
+#: templates/users/user_detail.html:236 users/models.py:142
+msgid "Status"
+msgstr "Статус"
+
+#: cscenter/templates/users/user_detail.html:240
+#: templates/users/user_detail.html:240
+msgid "Non-degree student"
+msgstr "Вольнослушатель"
+
+#: cscenter/templates/users/user_detail.html:245
+#: templates/users/user_detail.html:245
+msgid "StudentInfo|Study program"
+msgstr "Учебная программа"
+
+#: cscenter/templates/users/user_detail.html:261 learning/models.py:918
+#: templates/users/user_detail.html:261
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: cscenter/templates/users/user_detail.html:277
+#: templates/users/user_detail.html:277
+msgid "School of Data Analysis courses"
+msgstr "Курсы ШАД"
+
+#: cscenter/templates/users/user_detail.html:293
+#: templates/users/user_detail.html:293 users/models.py:150
+msgid "Workplace"
+msgstr "Место работы"
+
+#: cscenter/templates/users/user_detail.html:300
+#: templates/users/user_detail.html:300 users/tests.py:464 users/tests.py:469
+msgid "Student references"
+msgstr "Справки студента"
 
 #: index/forms.py:17
 msgid "Ya|Unsubscribe"
@@ -129,22 +1147,6 @@ msgstr "лето"
 msgid "autumn"
 msgstr "осень"
 
-#: learning/forms.py:21 templates/learning/simple_delete_confirmation.html:14
-msgid "Cancel"
-msgstr "Отмена"
-
-#: learning/forms.py:24 learning/forms.py:225
-#: templates/learning/markssheet_teacher.html:27 users/forms.py:92
-msgid "Save"
-msgstr "Сохранить"
-
-#: learning/forms.py:34 learning/forms.py:112 learning/models.py:154
-#: learning/models.py:261 learning/models.py:312 learning/models.py:771
-#: learning/models.py:813 templates/learning/courseclass_detail.html:44
-#: templates/learning/noncourseevent_detail.html:28
-msgid "Description"
-msgstr "Описание"
-
 #: learning/forms.py:36
 msgid "empty description will be replaced by course description"
 msgstr "пустое описание будет заменено на описание курса"
@@ -178,18 +1180,6 @@ msgstr "Тип"
 msgid "CourseClass|Name"
 msgstr "Название"
 
-#: learning/forms.py:117 learning/models.py:316 learning/views.py:479
-#: templates/learning/courseclass_detail.html:37
-#: templates/learning/timetable_student.html:99
-#: templates/learning/timetable_teacher.html:95
-msgid "Slides"
-msgstr "Слайды"
-
-#: learning/forms.py:121 templates/learning/assignment_detail.html:38
-#: templates/learning/courseclass_detail.html:65
-msgid "Attached files"
-msgstr "Приложенные файлы"
-
 #: learning/forms.py:123 learning/forms.py:296
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
@@ -206,11 +1196,6 @@ msgstr "пожалуйста, вставьте HTML для встроенног�
 msgid "Other materials"
 msgstr "Материалы"
 
-#: learning/forms.py:138 learning/models.py:329 learning/models.py:774
-#: templates/learning/courseoffering_detail.html:92
-msgid "Date"
-msgstr "Дата"
-
 #: learning/forms.py:142 learning/models.py:330 learning/models.py:775
 msgid "Starts at"
 msgstr "Начало"
@@ -218,13 +1203,6 @@ msgstr "Начало"
 #: learning/forms.py:146 learning/models.py:331 learning/models.py:776
 msgid "Ends at"
 msgstr "Конец"
-
-#: learning/forms.py:171 templates/learning/courseclass_detail.html:58
-#: templates/learning/courseoffering_detail.html:97
-#: templates/learning/timetable_student.html:67
-#: templates/learning/timetable_teacher.html:63
-msgid "Materials"
-msgstr "Материалы"
 
 #: learning/forms.py:200
 #, python-format
@@ -241,15 +1219,6 @@ msgstr "Требуется текст либо приложенный файл"
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
-#: learning/forms.py:288 templates/learning/assignment_detail.html:29
-#: templates/learning/assignment_list_student.html:45
-#: templates/learning/assignment_list_student.html:101
-#: templates/learning/assignment_list_teacher.html:63
-#: templates/learning/assignment_list_teacher.html:115
-#: templates/learning/assignment_student_detail.html:137
-msgid "Deadline"
-msgstr "Срок сдачи"
-
 #: learning/forms.py:294
 msgid "Attached file"
 msgstr "Приложенный файл"
@@ -257,20 +1226,6 @@ msgstr "Приложенный файл"
 #: learning/forms.py:299
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
-
-#: learning/forms.py:302 learning/models.py:441
-#: templates/learning/assignment_student_detail.html:141
-msgid "Assignment|grade_min"
-msgstr "Проходной балл"
-
-#: learning/forms.py:305 learning/models.py:445
-#: templates/learning/assignment_student_detail.html:139
-msgid "Assignment|grade_max"
-msgstr "Максимальный балл"
-
-#: learning/forms.py:365 templates/learning/markssheet_teacher.html:158
-msgid "Select csv file"
-msgstr "Выбрать csv-файл"
 
 #: learning/models.py:44 news/models.py:27
 msgid "News|slug"
@@ -284,22 +1239,6 @@ msgstr ""
 "Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
 "com/news/<b>some-news</b>/"
 
-#: learning/models.py:56 learning/models.py:142
-#: templates/learning/assignment_list_student.html:49
-#: templates/learning/assignment_list_student.html:105
-#: templates/learning/assignment_list_teacher.html:68
-#: templates/learning/assignment_list_teacher.html:119
-#: templates/learning/timetable_student.html:64
-#: templates/learning/timetable_teacher.html:60
-msgid "Course"
-msgstr "Курс"
-
-#: learning/models.py:57 templates/learning/courses_list_student.html:9
-#: templates/learning/courses_list_teacher.html:9
-#: templates/learning/markssheet_teacher.html:45
-msgid "Courses"
-msgstr "Курсы"
-
 #: learning/models.py:71
 msgid "CSCUser|Year"
 msgstr "Год"
@@ -307,11 +1246,6 @@ msgstr "Год"
 #: learning/models.py:73
 msgid "Semester|type"
 msgstr "Тип"
-
-#: learning/models.py:86 learning/models.py:151
-#: templates/learning/courses_list_student.html:103 users/models.py:292
-msgid "Semester"
-msgstr "Семестр"
 
 #: learning/models.py:87 learning/models.py:827
 msgid "Semesters"
@@ -348,12 +1282,6 @@ msgstr ""
 #: learning/models.py:168
 msgid "Enrolled students"
 msgstr "Записавшиеся студенты"
-
-#: learning/models.py:175 learning/models.py:231 learning/models.py:301
-#: learning/models.py:425 learning/models.py:661
-#: templates/users/user_detail.html:136
-msgid "Course offering"
-msgstr "Прочтение курса"
 
 #: learning/models.py:176
 msgid "Course offerings"
@@ -403,18 +1331,6 @@ msgstr "Отображается  в начале списка мест пров
 msgid "Venues"
 msgstr "Места проведения"
 
-#: learning/models.py:296 templates/learning/courseoffering_detail.html:115
-#: templates/learning/timetable_student.html:89
-#: templates/learning/timetable_teacher.html:85
-msgid "Lecture"
-msgstr "Лекция"
-
-#: learning/models.py:297 templates/learning/courseoffering_detail.html:117
-#: templates/learning/timetable_student.html:91
-#: templates/learning/timetable_teacher.html:87
-msgid "Seminar"
-msgstr "Семинар"
-
 #: learning/models.py:305 learning/models.py:767
 msgid "CourseClass|Venue"
 msgstr "Место проведения"
@@ -426,10 +1342,6 @@ msgstr "Другие материалы"
 #: learning/models.py:335 learning/models.py:396
 msgid "Class"
 msgstr "Занятие"
-
-#: learning/models.py:336 templates/learning/courseoffering_detail.html:88
-msgid "Classes"
-msgstr "Занятия"
 
 #: learning/models.py:351
 msgid "Class should end after it's start"
@@ -462,18 +1374,6 @@ msgstr "Название"
 #: learning/models.py:438
 msgid "Assignment|text"
 msgstr "Текст"
-
-#: learning/models.py:453 learning/models.py:491
-#: templates/users/user_detail.html:137
-msgid "Assignment"
-msgstr "Задание"
-
-#: learning/models.py:454 templates/learning/assignment_list_student.html:11
-#: templates/learning/assignment_list_teacher.html:11
-#: templates/learning/courseoffering_detail.html:134
-#: templates/users/user_detail.html:130
-msgid "Assignments"
-msgstr "Задания"
 
 #: learning/models.py:464
 msgid "Course offering modification is not allowed"
@@ -523,14 +1423,6 @@ msgstr "Задание"
 msgid "AssignmentStudent|student"
 msgstr "Студент"
 
-#: learning/models.py:533
-#: templates/learning/assignment_student_detail.html:112
-#: templates/learning/courses_list_student.html:25
-#: templates/learning/courses_list_student.html:100
-#: templates/users/user_detail.html:138
-msgid "Grade"
-msgstr "Оценка"
-
 #: learning/models.py:537
 msgid "Assignment|grade changed"
 msgstr "Оценка изменена"
@@ -575,13 +1467,6 @@ msgstr "Комментарий к заданию"
 #: learning/models.py:637
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
-
-#: learning/models.py:657 templates/learning/assignment_detail.html:61
-#: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:135 users/models.py:268
-#: users/models.py:286 users/models.py:320
-msgid "Student"
-msgstr "Студент"
 
 #: learning/models.py:664 users/models.py:296
 msgid "Enrollment|grade"
@@ -675,10 +1560,6 @@ msgstr "НИР"
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: learning/models.py:822 templates/users/user_detail.html:61
-msgid "StudentProject|Supervisor"
-msgstr "Руководитель"
-
 #: learning/models.py:824
 msgid "Format: Last_name First_name Patronymic, Organization"
 msgstr "Формат: Фамилия Имя Отчество, Организация"
@@ -687,17 +1568,9 @@ msgstr "Формат: Фамилия Имя Отчество, Организац
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: learning/models.py:833 templates/users/user_detail.html:60
-msgid "Presentation"
-msgstr "Презентация"
-
 #: learning/models.py:841
 msgid "Student project"
 msgstr "Студенческий проект"
-
-#: learning/models.py:842 templates/users/user_detail.html:55
-msgid "Student projects"
-msgstr "Студенческие проекты"
 
 #: learning/models.py:867 learning/models.py:883
 msgid "PK|Code"
@@ -751,10 +1624,6 @@ msgstr "Фото"
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: learning/models.py:918 templates/users/user_detail.html:261
-msgid "Online courses"
-msgstr "Онлайн-курсы"
-
 #: learning/utils.py:119
 msgid "No user with Stepic ID {}"
 msgstr "Пользователь со Stepic ID {} не найден"
@@ -767,20 +1636,10 @@ msgstr "Файлы"
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:513 templates/learning/timetable_student.html:112
-#: templates/learning/timetable_teacher.html:109
-msgid "No"
-msgstr "Нет"
-
 #: learning/views.py:641
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
-
-#: learning/views.py:644 templates/learning/courseoffering_detail.html:40
-#: templates/learning/courses_list_student.html:51
-msgid "Unenroll"
-msgstr "Отказаться"
 
 #: learning/views.py:1068
 msgid "Grading form is invalid"
@@ -814,14 +1673,6 @@ msgstr "Взятие"
 msgid "borrows"
 msgstr "Взятия"
 
-#: library/models.py:31 templates/library/book_list.html:28
-msgid "Book|author"
-msgstr "Автор"
-
-#: library/models.py:32 templates/library/book_list.html:29
-msgid "Book|title"
-msgstr "Заголовок"
-
 #: library/models.py:34
 msgid "Book|description"
 msgstr "Описание"
@@ -837,10 +1688,6 @@ msgstr "Количество копий"
 #: library/models.py:48
 msgid "book"
 msgstr "Книга"
-
-#: library/models.py:49 templates/users/user_detail.html:166
-msgid "books"
-msgstr "Книги"
 
 #: menu_extension/models.py:9
 msgid "Check if visible only for authenticated user"
@@ -1046,612 +1893,6 @@ msgstr "Новость"
 #: news/models.py:45
 msgid "News|news-plural"
 msgstr "Новости"
-
-#: templates/admin/base_site.html:6
-msgid "Django site admin"
-msgstr "Административная панель Django"
-
-#: templates/admin/base_site.html:17
-msgid "Django administration"
-msgstr "Администрирование Django"
-
-#: templates/base.html:59
-msgid "Computer Science Center, 2011–15 гг."
-msgstr "Computer Science Center, 2011–15 гг."
-
-#: templates/base.html:61
-msgid "report a problem"
-msgstr "сообщить об ошибке"
-
-#: templates/base.html:85
-msgid "close all"
-msgstr "закрыть все"
-
-#: templates/base_menu.html:27
-msgid "Admin page"
-msgstr "Админка"
-
-#: templates/base_menu.html:35
-msgid "logout"
-msgstr "выйти"
-
-#: templates/base_menu.html:38 users/forms.py:40
-msgid "Login"
-msgstr "Войти"
-
-#: templates/index.html:16
-msgid "Learn more"
-msgstr "Узнать больше"
-
-#: templates/index.html:20
-msgid "How to enroll"
-msgstr "Как поступить"
-
-#: templates/index.html:30
-msgid "CS Center News"
-msgstr "Новости CS центра"
-
-#: templates/index.html:39 templates/news/news_list.html:19
-msgid "More…"
-msgstr "Далее…"
-
-#: templates/index.html:45
-msgid "All news"
-msgstr "Все новости"
-
-#: templates/index.html:48 templates/news/news_list.html:27
-msgid "No news yet"
-msgstr "Список новостей пуст"
-
-#: templates/index.html:56
-msgid "Supported by"
-msgstr "При поддержке"
-
-#: templates/index.html:61
-msgid "Yandex School of Data Analysis"
-msgstr "Яндекс ШАД"
-
-#: templates/index.html:67
-msgid "JetBrains"
-msgstr "JetBrains"
-
-#: templates/index.html:73
-msgid "Computer Science Club"
-msgstr "Computer Science Club"
-
-#: templates/index.html:79
-msgid "FML #239"
-msgstr "ФМЛ №239"
-
-#: templates/learning/assignment_detail.html:17
-#: templates/learning/assignment_student_detail.html:27
-#: templates/learning/course_detail.html:13
-#: templates/learning/courseclass_detail.html:13
-#: templates/learning/courseoffering_detail.html:31
-#: templates/users/user_detail.html:15
-msgid "Edit"
-msgstr "Редактировать"
-
-#: templates/learning/assignment_detail.html:18
-#: templates/learning/courseclass_detail.html:14
-#: templates/learning/simple_delete_confirmation.html:18
-msgid "Delete"
-msgstr "Удалить"
-
-#: templates/learning/assignment_detail.html:34
-#: templates/learning/assignment_list_student.html:55
-#: templates/learning/assignment_list_student.html:111
-#: templates/learning/assignment_list_teacher.html:122
-msgid "Online"
-msgstr "Онлайн"
-
-#: templates/learning/assignment_detail.html:35
-#: templates/learning/assignment_list_student.html:86
-#: templates/learning/assignment_list_student.html:137
-#: templates/learning/assignment_list_teacher.html:142
-msgid "Yes,No"
-msgstr "Да,Нет"
-
-#: templates/learning/assignment_detail.html:63
-#: templates/learning/assignment_list_student.html:52
-#: templates/learning/assignment_list_student.html:108
-#: templates/learning/assignment_list_teacher.html:71
-msgid "State"
-msgstr "Статус"
-
-#: templates/learning/assignment_list_student.html:22
-#: templates/learning/assignment_list_teacher.html:22
-#: templates/learning/calendar.html:24
-#: templates/learning/timetable_student.html:27
-#: templates/learning/timetable_teacher.html:23
-msgid "Learning"
-msgstr "Обучение"
-
-#: templates/learning/assignment_list_student.html:30
-#: templates/learning/assignment_list_teacher.html:30
-#: templates/learning/calendar.html:32
-#: templates/learning/timetable_student.html:35
-#: templates/learning/timetable_teacher.html:31
-msgid "Teaching"
-msgstr "Преподавание"
-
-#: templates/learning/assignment_list_student.html:41
-msgid "Open assignments"
-msgstr "Открытые задания"
-
-#: templates/learning/assignment_list_student.html:97
-#: templates/learning/courses_list_student.html:92
-#: templates/learning/courses_list_teacher.html:54
-#: templates/learning/markssheet_teacher_dispatch.html:14
-#: templates/learning/semester_list.html:14
-msgid "Archive"
-msgstr "Архив"
-
-#: templates/learning/assignment_list_student.html:151
-#: templates/learning/assignment_list_teacher.html:156
-msgid "No assignments yet"
-msgstr "Список заданий пуст"
-
-#: templates/learning/assignment_list_teacher.html:41
-msgid "Passed online"
-msgstr "Сданные онлайн"
-
-#: templates/learning/assignment_list_teacher.html:49
-msgid "All"
-msgstr "Все"
-
-#: templates/learning/assignment_list_teacher.html:59
-msgid "Without grades"
-msgstr "Без оценки"
-
-#: templates/learning/assignment_list_teacher.html:111
-msgid "All assignments"
-msgstr "Все задания"
-
-#: templates/learning/assignment_student_detail.html:59
-#: templates/learning/assignment_student_detail.html:99
-#: templates/users/user_detail.html:222 users/models.py:127
-msgid "Comment"
-msgstr "Комментарий"
-
-#: templates/learning/assignment_student_detail.html:61
-msgid "Solution"
-msgstr "Решение"
-
-#: templates/learning/assignment_student_detail.html:108
-msgid "Next unchecked[assignment]"
-msgstr "Следующее непроверенное"
-
-#: templates/learning/assignment_student_detail.html:122
-msgid "Professor"
-msgstr "Преподаватель"
-
-#: templates/learning/assignment_student_detail.html:124
-#: templates/learning/courses_list_student.html:22
-#: templates/learning/courses_list_student.html:97
-#: templates/learning/courses_list_teacher.html:22
-#: templates/learning/courses_list_teacher.html:61
-msgid "Professors"
-msgstr "Преподаватели"
-
-#: templates/learning/assignment_student_detail.html:143
-msgid "Assignment created"
-msgstr "Задание добавлено"
-
-#: templates/learning/assignment_student_detail.html:146
-msgid "Can be passed online "
-msgstr "Можно сдать онлайн"
-
-#: templates/learning/assignment_student_detail.html:148
-msgid "Should be passed offline "
-msgstr "Должно быть сдано оффлайн"
-
-#: templates/learning/calendar.html:43
-#: templates/learning/timetable_student.html:46
-#: templates/learning/timetable_teacher.html:42
-msgid "List"
-msgstr "Список"
-
-#: templates/learning/calendar.html:50
-#: templates/learning/timetable_student.html:49
-#: templates/learning/timetable_teacher.html:45
-msgid "Calendar"
-msgstr "Календарь"
-
-#: templates/learning/calendar.html:61
-msgid "Monday"
-msgstr "Понедельник"
-
-#: templates/learning/calendar.html:62
-msgid "Tuesday"
-msgstr "Вторник"
-
-#: templates/learning/calendar.html:63
-msgid "Wednesday"
-msgstr "Среда"
-
-#: templates/learning/calendar.html:64
-msgid "Thursday"
-msgstr "Четверг"
-
-#: templates/learning/calendar.html:65
-msgid "Friday"
-msgstr "Пятница"
-
-#: templates/learning/calendar.html:66
-msgid "Saturday"
-msgstr "Суббота"
-
-#: templates/learning/calendar.html:67
-msgid "Sunday"
-msgstr "Воскресенье"
-
-#: templates/learning/course_detail.html:25
-msgid "Course offerings:|course-singular"
-msgstr "Прочтения курса:"
-
-#: templates/learning/courseclass_detail.html:24
-msgid "What"
-msgstr "Что"
-
-#: templates/learning/courseclass_detail.html:28
-#: templates/learning/noncourseevent_detail.html:18
-msgid "When"
-msgstr "Когда"
-
-#: templates/learning/courseclass_detail.html:32
-#: templates/learning/noncourseevent_detail.html:22
-msgid "Where"
-msgstr "Где"
-
-#: templates/learning/courseclass_detail.html:51
-#: templates/learning/timetable_student.html:106
-#: templates/learning/timetable_teacher.html:102
-msgid "Video"
-msgstr "Видео"
-
-#: templates/learning/courseoffering_detail.html:18
-msgid "Add assignment"
-msgstr "Добавить задание"
-
-#: templates/learning/courseoffering_detail.html:23
-#: templates/learning/courses_list_teacher.html:42
-#: templates/learning/courses_list_teacher.html:84
-msgid "Add news"
-msgstr "Добавить новость"
-
-#: templates/learning/courseoffering_detail.html:27
-msgid "Add class"
-msgstr "Добавить занятие"
-
-#: templates/learning/courseoffering_detail.html:47
-#: templates/learning/courses_list_student.html:79
-msgid "Enroll"
-msgstr "Записаться"
-
-#: templates/learning/courseoffering_detail.html:93
-#: templates/learning/timetable_student.html:62
-#: templates/learning/timetable_teacher.html:58
-msgid "Time"
-msgstr "Время"
-
-#: templates/learning/courseoffering_detail.html:94
-#: templates/learning/timetable_student.html:63
-#: templates/learning/timetable_teacher.html:59
-msgid "Class|Name"
-msgstr "Название"
-
-#: templates/learning/courseoffering_detail.html:95
-#: templates/learning/timetable_student.html:65
-#: templates/learning/timetable_teacher.html:61
-msgid "Venue|short"
-msgstr "Место"
-
-#: templates/learning/courseoffering_detail.html:156
-msgid "News"
-msgstr "Новости"
-
-#: templates/learning/courseoffering_detail.html:164
-msgid "edit"
-msgstr "редактировать"
-
-#: templates/learning/courseoffering_detail.html:165
-msgid "delete"
-msgstr "удалить"
-
-#: templates/learning/courses_list_student.html:17
-msgid "Current semester"
-msgstr "Текущий семестр"
-
-#: templates/learning/courses_list_student.html:140
-#: templates/learning/courses_list_teacher.html:100
-#: templates/learning/markssheet_teacher_dispatch.html:44
-#: templates/learning/semester_list.html:50
-msgid "No courses yet"
-msgstr "Список курсов пуст"
-
-#: templates/learning/courses_list_teacher.html:17
-#: templates/learning/markssheet_teacher_dispatch.html:12
-#: templates/learning/semester_list.html:12
-msgid "Ongoing|plural"
-msgstr "Текущие"
-
-#: templates/learning/courses_video_list.html:9
-msgid "Videos"
-msgstr "Видео"
-
-#: templates/learning/courses_video_list.html:38
-msgid "No videos yet"
-msgstr "Список видео пуст"
-
-#: templates/learning/markssheet_teacher.html:22
-msgid "Marks sheet"
-msgstr "Ведомость"
-
-#: templates/learning/markssheet_teacher.html:38
-msgid "From Stepic"
-msgstr "Из Stepic"
-
-#: templates/learning/markssheet_teacher.html:81
-msgid "Total score"
-msgstr "Суммарный балл"
-
-#: templates/learning/markssheet_teacher.html:140
-msgid "Import stepic statements"
-msgstr "Импортировать баллы Stepic"
-
-#: templates/learning/markssheet_teacher.html:147
-msgid "Select assignment"
-msgstr "Выбрать задание"
-
-#: templates/learning/markssheet_teacher.html:155
-msgid "Score will be imported for selected assignment"
-msgstr "Оценки будут импортированы для выбранного задания"
-
-#: templates/learning/markssheet_teacher.html:160
-msgid ""
-"Should contains comma-separated values of user stepic id and assignment "
-"score. First row is header. Example:"
-msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
-
-#: templates/learning/markssheet_teacher.html:166
-msgid "Close"
-msgstr "Закрыть"
-
-#: templates/learning/markssheet_teacher.html:167
-msgid "Import"
-msgstr "Импортировать"
-
-#: templates/learning/simple_delete_confirmation.html:12
-msgid "Are you sure you want to delete"
-msgstr "Вы уверены, что хотите удалить"
-
-#: templates/learning/timetable_student.html:126
-#: templates/learning/timetable_teacher.html:124
-msgid "No classes yet"
-msgstr "Список занятий пуст"
-
-#: templates/learning/venue_list.html:8
-msgid "CSCenter learning venues"
-msgstr "Места проведения занятий CSC"
-
-#: templates/library/book_detail.html:30 templates/library/book_list.html:30
-msgid "Book|read by"
-msgstr "Читают"
-
-#: templates/library/book_list.html:11
-msgid "library"
-msgstr "Библиотека"
-
-#: templates/library/book_list.html:20
-msgid ""
-"\n"
-"                    HOWTO instructions. Do we even need i18n here?\n"
-"                "
-msgstr ""
-"\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
-"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
-"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
-"сейчас читают другие студенты."
-
-#: templates/library/book_list.html:31
-msgid "Book|number of copies left"
-msgstr "Количество оставшихся копий"
-
-#: templates/registration/password_change_done.html:5
-#: templates/registration/password_reset_complete.html:5
-#: templates/registration/password_reset_done.html:5
-#: templates/registration/password_reset_form.html:5
-#: templates/registration/password_reset_form.html:16
-msgid "Reset password"
-msgstr "Сменить пароль"
-
-#: templates/registration/password_change_done.html:11
-#: templates/registration/password_reset_complete.html:11
-msgid "Password changed"
-msgstr "Пароль изменён"
-
-#: templates/registration/password_change_form.html:5
-#: templates/registration/password_change_form.html:16
-#: templates/registration/password_reset_confirm.html:5
-#: templates/registration/password_reset_confirm.html:17
-#: templates/users/user_detail.html:25
-msgid "Change password"
-msgstr "Сменить пароль"
-
-#: templates/registration/password_reset_confirm.html:22
-msgid "Sorry, the link is invalid"
-msgstr "Извините, ссылка устарела"
-
-#: templates/registration/password_reset_done.html:11
-msgid "An email with instructions for setting a new password has been sent"
-msgstr "Инструкции по смене пароля были высланы на указанный почтовый адрес"
-
-#: templates/staff/student_search.html:10
-msgid "Student search"
-msgstr "Поиск студентов"
-
-#: templates/staff/student_search.html:21
-msgid "Name, full or partial"
-msgstr "Имя, целиком или часть"
-
-#: templates/staff/student_search.html:26 users/models.py:75
-msgid "CSCUser|enrollment year"
-msgstr "Год поступления"
-
-#: templates/staff/student_search.html:42
-msgid "Found"
-msgstr "Найдено"
-
-#: templates/unsubscribe.html:11
-msgid "Disable subscription"
-msgstr "Отмена подписки"
-
-#: templates/unsubscribe.html:24
-msgid "Do you want to unsubscribe from"
-msgstr "Вы действительно хотите отменить подписку "
-
-#: templates/users/alumni_list.html:33
-msgid "No alumni yet"
-msgstr "Список выпускников пуст"
-
-#: templates/users/reference_detail.html:14
-msgid "Reference|Detail|request"
-msgstr "Справка дана по месту требования"
-
-#: templates/users/reference_detail.html:16
-msgid "Reference|Detail|title"
-msgstr "СПРАВКА"
-
-#: templates/users/reference_detail.html:17
-#, python-format
-msgid ""
-"Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
-"            сентября %(enrollment_year)s года. За время обучения "
-"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
-"            "
-msgstr ""
-
-#: templates/users/reference_detail.html:40
-msgid "Reference|Detail|signature"
-msgstr "Куратор в Computer Science центре"
-
-#: templates/users/reference_detail.html:45
-msgid "Reference|Detail|info"
-msgstr "Информация"
-
-#: templates/users/teacher_list.html:27
-msgid "No professors yet"
-msgstr "Преподавателей ещё нет"
-
-#: templates/users/user_detail.html:19 users/tests.py:441 users/tests.py:449
-msgid "Create reference"
-msgstr "Выдать справку"
-
-#: templates/users/user_detail.html:22
-msgid "Edit info record"
-msgstr "Редактировать карточку"
-
-#: templates/users/user_detail.html:39
-msgid "student"
-msgstr "студент"
-
-#: templates/users/user_detail.html:40
-msgid "enrolled in"
-msgstr "год поступления"
-
-#: templates/users/user_detail.html:40
-msgid "courseoffering|took"
-msgstr "курсы"
-
-#: templates/users/user_detail.html:75
-#, python-format
-msgid "graduated in %(year)s"
-msgstr "выпускник %(year)s года"
-
-#: templates/users/user_detail.html:79
-msgid "teacher"
-msgstr "преподаватель"
-
-#: templates/users/user_detail.html:93
-#, python-format
-msgid "%(name)s about CSC"
-msgstr "%(name)s о Центре"
-
-#: templates/users/user_detail.html:99 users/models.py:106
-msgid "Contact information"
-msgstr "Контактная информация"
-
-#: templates/users/user_detail.html:107
-msgid ".iCal classes calendar"
-msgstr ".iCal-календарь занятий"
-
-#: templates/users/user_detail.html:114
-msgid ".iCal assignments calendar"
-msgstr ".iCal-календарь заданий"
-
-#: templates/users/user_detail.html:121
-msgid ".iCal events calendar"
-msgstr ".iCal-календарь событий"
-
-#: templates/users/user_detail.html:175 users/admin.py:135
-msgid "Student info record"
-msgstr "Карточка студента"
-
-#: templates/users/user_detail.html:178 users/models.py:113
-msgid "University"
-msgstr "Университет"
-
-#: templates/users/user_detail.html:182 users/models.py:117
-msgid "Phone"
-msgstr "Телефон"
-
-#: templates/users/user_detail.html:186 users/models.py:85
-msgid "Yandex ID"
-msgstr "Yandex ID"
-
-#: templates/users/user_detail.html:190 users/models.py:92
-msgid "Github ID"
-msgstr "Github ID"
-
-#: templates/users/user_detail.html:200 users/models.py:98
-msgid "Stepic ID"
-msgstr "Stepic ID"
-
-#: templates/users/user_detail.html:211
-#, fuzzy
-#| msgid "email"
-msgid "Email"
-msgstr "email"
-
-#: templates/users/user_detail.html:218 users/models.py:121
-msgid "StudentInfo|University year"
-msgstr "Курс"
-
-#: templates/users/user_detail.html:236 users/models.py:142
-msgid "Status"
-msgstr "Статус"
-
-#: templates/users/user_detail.html:240
-msgid "Non-degree student"
-msgstr "Вольнослушатель"
-
-#: templates/users/user_detail.html:245
-msgid "StudentInfo|Study program"
-msgstr "Учебная программа"
-
-#: templates/users/user_detail.html:277
-msgid "School of Data Analysis courses"
-msgstr "Курсы ШАД"
-
-#: templates/users/user_detail.html:293 users/models.py:150
-msgid "Workplace"
-msgstr "Место работы"
-
-#: templates/users/user_detail.html:300 users/tests.py:464 users/tests.py:469
-msgid "Student references"
-msgstr "Справки студента"
 
 #: users/admin.py:28
 msgid "Username must be unique"
