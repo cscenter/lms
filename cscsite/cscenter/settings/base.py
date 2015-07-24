@@ -23,7 +23,7 @@ STATICFILES_DIRS = (
 )
 
 TEMPLATE_DIRS = (
-    PROJECT_DIR.child("templates"),
+    BASE_DIR.child("templates"),
 )
 
 TEMPLATE_LOADERS = (
