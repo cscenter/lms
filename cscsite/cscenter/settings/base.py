@@ -8,7 +8,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from unipath import Path
 
 BASE_DIR = Path(__file__).ancestor(2)
@@ -16,11 +15,6 @@ PROJECT_DIR = Path(__file__).ancestor(3)
 
 MEDIA_ROOT = PROJECT_DIR.child("media")
 MEDIA_URL = "/media/"
-STATIC_ROOT = PROJECT_DIR.child("static")
-
-STATICFILES_DIRS = (
-    PROJECT_DIR.child("assets"),
-)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
@@ -170,10 +164,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = "users.CSCUser"
 AUTHENTICATION_BACKENDS = (
@@ -235,9 +226,16 @@ NEWRELIC_ENV = 'development'
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
 
-# Js/Css compression settings
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.6/howto/static-files/
+STATIC_URL = '/static/'
+STATIC_ROOT = PROJECT_DIR.child("static")
 
-# Enable versioning
+STATICFILES_DIRS = (
+    PROJECT_DIR.child("assets"),
+)
+
+# See django-pipeline for details
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 STATICFILES_FINDERS = (
