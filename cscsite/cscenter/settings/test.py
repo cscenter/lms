@@ -54,5 +54,7 @@ class DisableMigrations(object):
 # MIGRATION_MODULES = DisableMigrations()
 MIGRATION_MODULES = {}
 
+LANGUAGE_CODE = 'en'
+
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
