@@ -5,7 +5,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check-app-specified check-src-specified
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined
 
 run:
 	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
@@ -29,11 +29,13 @@ freeze:
 pip:
 	pip install -r requirements.txt
 
-dumpdemo: check-app-specified
+dumpdemo:
+	$(call check_defined, app)
 	python cscsite/manage.py dumpdata $(DJANGO_POSTFIX) --indent=2 $(app) --output=./fixture_$(app).json
 
-loaddemo: check-src-specified
-	python cscsite/manage.py loaddata $(DJANGO_POSTFIX) $(SRC)
+loaddemo:
+	$(call check_defined, src)
+	python cscsite/manage.py loaddata $(DJANGO_POSTFIX) $(src)
 
 coverage:
 	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
@@ -58,13 +60,26 @@ clean:
 cmd:
 	cscsite/manage.py $(CMD) $(DJANGO_POSTFIX)
 
-# Prerequisite
-check-app-specified:
-	ifndef app
-	    $(error APP is undefined)
-	endif
+refresh:
+	touch $(PROJECT)/*wsgi.py
 
-check-src-specified:
-	ifndef src
-	    $(error src is undefined)
-	endif
+deploy:
+	$(call check_defined, app)
+	$(call check_defined, conf)
+	git pull
+	pip install -r requirements.txt
+	python cscsite/manage.py compilemessages --settings=$(app).settings.$(conf)
+	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
+	python cscsite/manage.py collectstatic --settings=$(app).settings.$(conf)
+
+# Check that given variables are set and all have non-empty values,
+# die with an error otherwise.
+# http://stackoverflow.com/a/10858332/1341309
+# Params:
+#   1. Variable name(s) to test.
+#   2. (optional) Error message to print.
+check_defined = \
+    $(foreach 1,$1,$(__check_defined))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $(value 2), ($(strip $2)))))
