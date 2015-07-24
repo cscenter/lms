@@ -33,7 +33,7 @@ class IndexView(generic.TemplateView):
 
 # TODO: test it
 class AlumniView(generic.ListView):
-    template_name = "alumni_list.html"
+    template_name = "users/alumni_list.html"
 
     def get_queryset(self):
         user_model = get_user_model()
@@ -47,7 +47,7 @@ class AlumniView(generic.ListView):
 #       courses and that who don't
 # TODO: test it
 class TeachersView(generic.ListView):
-    template_name = "teacher_list.html"
+    template_name = "users/teacher_list.html"
 
     def get_queryset(self):
         user_model = get_user_model()

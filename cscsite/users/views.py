@@ -97,7 +97,7 @@ class LogoutView(LoginRequiredMixin,
 
 
 class TeacherDetailView(generic.DetailView):
-    template_name = "teacher_detail.html"
+    template_name = "users/teacher_detail.html"
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
@@ -116,7 +116,7 @@ class TeacherDetailView(generic.DetailView):
 
 
 class UserDetailView(generic.DetailView):
-    template_name = "user_detail.html"
+    template_name = "users/user_detail.html"
     context_object_name = 'user_object'
 
     def get_queryset(self, *args, **kwargs):

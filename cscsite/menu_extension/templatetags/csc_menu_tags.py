@@ -77,7 +77,7 @@ def csc_menu(context, menu_name):
     context['menu'] = menu_tree
     context['menu_name'] = menu_name
     return context
-register.inclusion_tag('menu.html', takes_context=True)(csc_menu)
+register.inclusion_tag('base_menu.html', takes_context=True)(csc_menu)
 
 
 def children(parent_id, items):
