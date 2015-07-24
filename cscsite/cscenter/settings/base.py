@@ -22,14 +22,37 @@ STATICFILES_DIRS = (
     PROJECT_DIR.child("assets"),
 )
 
-TEMPLATE_DIRS = (
-    BASE_DIR.child("templates"),
-)
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
 
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader'
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': False,
+        'DIRS': [
+            BASE_DIR.child("templates"),
+        ],
+        'OPTIONS': {
+            'loaders': (
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader'
+            ),
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+
+                'core.context_processors.redirect_bases'
+            )
+            # TEMPLATE_DEBUG deprecated, but still usefull then `debug` here
+        }
+    },
+]
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,9 +60,6 @@ TEMPLATE_LOADERS = (
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -107,18 +127,6 @@ ROOT_URLCONF = 'cscenter.urls'
 
 WSGI_APPLICATION = 'cscenter.wsgi.application'
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-
-    'core.context_processors.redirect_bases'
-)
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
