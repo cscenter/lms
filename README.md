@@ -62,6 +62,10 @@ in tmux: one with `sudo su - cscweb` (this will "switch" the tab to `cscweb`
 user) and other with `ubuntu` user;
 * `git pull` in `cscweb` "tab", optionally followed by
 
+always run `./manage.py compilemessages --settings=cscenter.settings.production`
+
+then
+
 ```
 ./manage.py migrate MIGRATED_APP --settings=cscenter.settings.production
 ```
