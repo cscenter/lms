@@ -74,7 +74,9 @@ deploy:
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
 less:
-	cd cscsite/assets/src/less/ && lessc --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css
+	cd cscsite/assets/src/less/; \
+	lessc --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
+	lessc --clean-css="--compatibility=ie8" style.less > ../../css/style.css
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
