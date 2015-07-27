@@ -24,7 +24,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            BASE_DIR.child("templates"),
+            PROJECT_DIR.child("templates"),
         ],
         'OPTIONS': {
             'loaders': (
