@@ -14,6 +14,8 @@ BASE_DIR = Path(__file__).ancestor(2)
 LOCALE_PATHS = (
     Path(BASE_DIR, "locale"),
 )
+# Add site specific templates
+TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'

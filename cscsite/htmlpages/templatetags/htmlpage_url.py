@@ -19,7 +19,8 @@ def htmlpage_url(context, url_name, **kwargs):
         else:
             site_pk = settings.SITE_ID
         qs = HtmlPage.objects.filter(sites__id=site_pk).values('url')
-        FLATPAGE_URL_CACHE = [p['url'] for p in qs]
+        FLATPAGE_URL_CACHE[:] = [p['url'] for p in qs]
     if url_name not in FLATPAGE_URL_CACHE:
-        raise TemplateSyntaxError('"htmlpage_url" tag got an unknown variable: %r' % url_name)
+        if settings.DEBUG:
+            raise TemplateSyntaxError('"htmlpage_url" tag got an unknown variable: %r' % url_name)
     return url_name
