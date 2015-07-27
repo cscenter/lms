@@ -64,8 +64,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 # use dummy password to avoid accidental messing of real data
 EMAIL_HOST_PASSWORD = 'dummy_password'
 EMAIL_PORT = 465
-# XXX remove after Django 1.7 is out.
-EMAIL_BACKEND = 'crutches.compat.SSLEmailBackend'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # Application definition
 
