@@ -257,14 +257,14 @@ PIPELINE_DISABLE_WRAPPER = True
 PIPELINE_JS = {
     'base': {
         'source_filenames': (
-            'js/holder.js',
-            'js/readmore.min.js',
-            'js/md5.js',
-            'js/EpicEditor-v0.2.2/js/epiceditor.min.js',
+            'js/vendor/holder.js',
+            'js/vendor/readmore.min.js',
+            'js/vendor/md5.js',
+            'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
             # custom marked build clashes with the one in EpicEditor,
             # therefore this include should be *after* EpicEditor
-            'js/marked.js',
-            'js/bootstrap.min.js',
+            'js/vendor/marked.js',
+            'js/vendor/bootstrap.min.js',
             'js/vendor/jquery.jgrowl.min.js',
             'js/main.js',
         ),
@@ -272,9 +272,9 @@ PIPELINE_JS = {
     },
     'fileinput': {
         'source_filenames': (
-            'js/bootstrap-fileinput/fileinput.min.js',
-            'js/bootstrap-fileinput/fileinput_locale_ru.js',
-            'js/bootstrap-fileinput/main.js',
+            'js/vendor/bootstrap-fileinput/fileinput.min.js',
+            'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
+            'js/vendor/bootstrap-fileinput/main.js',
         ),
         'output_filename': 'js/dist/fileinput.js',
     }
