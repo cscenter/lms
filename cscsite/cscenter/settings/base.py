@@ -274,7 +274,7 @@ PIPELINE_JS = {
         'source_filenames': (
             'js/vendor/bootstrap-fileinput/fileinput.min.js',
             'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
-            'js/vendor/bootstrap-fileinput/main.js',
+            'js/teaching-sheet__fileinput.js',
         ),
         'output_filename': 'js/dist/fileinput.js',
     }
