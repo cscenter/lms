@@ -73,6 +73,9 @@ deploy:
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
+less:
+	cd cscsite/assets/src/less/ && lessc --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css
+
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
 # http://stackoverflow.com/a/10858332/1341309

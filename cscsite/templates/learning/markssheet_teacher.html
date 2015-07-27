@@ -5,7 +5,7 @@
 {% load i18n %}
 
 {% block stylesheets %}
-    <link href="{% static "css/fileinput/vendor/fileinput.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/vendor/fileinput/fileinput.min.css" %}" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block content %}
@@ -32,15 +32,12 @@
              class="btn btn-default marks-sheet-csv-link" role="button"><i class="fa fa-download"></i></a>
         </div>
         <div class="btn-group">
-            <div class="dropdown">
-                <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
-                <ul class="dropdown-menu pull-right" role="menu">
-                    <li role="presentation"><a href="#import-csv" role="menuitem" data-toggle="modal">{% trans "From Stepic" %}</a></li>
-                </ul>
-            </div>
+          <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
+          <ul class="dropdown-menu pull-right" role="menu">
+              <li role="presentation"><a href="#import-csv" role="menuitem" data-toggle="modal">{% trans "From Stepic" %}</a></li>
+          </ul>
         </div>
         <div class="btn-group">
-          <div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
               {% trans "Courses" %}
               <span class="caret"></span>
@@ -54,7 +51,6 @@
               {% endfor %}
               {% endfor %}
             </ul>
-          </div>
         </div>
       </div>
       <hr>
