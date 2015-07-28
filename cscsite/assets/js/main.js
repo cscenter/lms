@@ -96,7 +96,7 @@ $(document).ready(function () {
             textarea: $textarea[0],
             parser: null,
             focusOnLoad: shouldFocus,
-            basePath: "/static/js/EpicEditor-v0.2.2",
+            basePath: "/static/js/vendor/EpicEditor-v0.2.2",
             clientSideStorage: ubereditorRestoration,
             autogrow: {minHeight: 200},
             button: {bar: "show"},
