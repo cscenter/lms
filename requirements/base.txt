@@ -43,6 +43,9 @@ slideshare==0.1dev
 raven==5.0.0
 newrelic==2.44.0.36
 
+# Localization
+solid_i18n==1.1.0
+
 # Misc utils
 #django-import-export==0.2.7
 git+https://github.com/django-import-export/django-import-export.git@9767f89e29ef356dd142121ae3c5015bafbf4fd9
