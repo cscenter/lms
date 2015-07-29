@@ -2,9 +2,13 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
+from django.conf import settings
 from django.utils.encoding import smart_text
+from django.utils.translation import get_language
 
 from news.models import News
+from news.factories import NewsFactory
 
 
 class assertItemsEqualMixin(object):
@@ -30,32 +34,20 @@ class IndexTests(assertItemsEqualMixin, TestCase):
         self.assertEqual(response.content.count(b"current"), 0)
 
     def test_news(self):
-        News1 = News(title="FooBarUniqueNews1",
-                     slug="foo-bar-unique-1",
-                     published=False)
-        News1.save()
+        current_site = Site.objects.get(pk=settings.SITE_ID)
+
+        news1 = NewsFactory(language=get_language(), sites=(current_site,), published=False)
         response = self.client.get(reverse('index'))
         self.assertItemsEqual(response.context['news_objects'], [])
-        News1.published = True
-        News1.save()
+        news1.published = True
+        news1.save()
         response = self.client.get(reverse('index'))
-        self.assertItemsEqual(response.context['news_objects'], [News1])
-        News2 = News(title="FooBarUniqueNews2",
-                     slug="foo-bar-unique-2",
-                     published=True)
-        News3 = News(title="FooBarUniqueNews3",
-                     slug="foo-bar-unique-3",
-                     published=True)
-        News4 = News(title="FooBarUniqueNews4",
-                     slug="foo-bar-unique-4",
-                     published=True)
-        News2.save()
-        News3.save()
-        News4.save()
+        self.assertItemsEqual(response.context['news_objects'], [news1])
+
+        last3_news = NewsFactory.create_batch(3,
+          language=get_language(), sites=(current_site,), published=True)
         response = self.client.get(reverse('index'))
         self.assertEqual(len(response.context['news_objects']), 3)
-        self.assertItemsEqual(response.context['news_objects'],
-                              [News2, News3, News4])
-        self.assertEqual(response.content.count(b"FooBarUniqueNews3"), 1)
+        self.assertItemsEqual(response.context['news_objects'], last3_news)
         self.assertEqual(smart_text(response.content)
-                         .count(News3.get_absolute_url()), 1)
+                         .count(last3_news[0].get_absolute_url()), 1)
