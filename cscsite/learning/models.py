@@ -877,25 +877,6 @@ class StudyProgram(models.Model):
 
 
 @python_2_unicode_compatible
-class City(models.Model):
-    ## NOTE(Dmitry): this is UN/LOCODE
-    code = models.CharField(
-        _("PK|Code"),
-        max_length=6,
-        help_text=_("This should be UN/LOCODE, e.g. \"RU LED\""),
-        primary_key=True)
-    name = models.CharField(_("City|Name"), max_length=255)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = _("City")
-        verbose_name_plural = _("Cities")
-
-    def __str__(self):
-        return smart_text(self.name)
-
-
-@python_2_unicode_compatible
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)
     teachers = models.TextField(

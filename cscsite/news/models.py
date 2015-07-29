@@ -39,6 +39,8 @@ class News(TimeStampedModel):
                    .format(n_par=SPLIT_DEFAULT_PARAGRAPHS,
                            marker=escape(SPLIT_MARKER))))
 
+
+
     class Meta(object):
         ordering = ["-created", "author"]
         verbose_name = _("News|news-singular")
