@@ -1,0 +1,88 @@
+{% load i18n %}
+{% load pipeline %}
+{% load staticfiles %}
+{% load csc_menu from csc_menu_tags %}
+{% load sitemetrics %}
+
+{% get_current_language as LANGUAGE_CODE %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=960">
+    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
+    <title>{% block title %}Computer Science Club{% endblock title %}</title>
+    <link rel="shortcut icon" href="{% static "img/club/favicon.ico" %}" >
+    {% comment %} Bootstrap inside style.css {% endcomment %}
+    <link href="{% static "css/club/style.css" %}" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static "css/vendor/highlight-styles/solarized_light.css" %}" rel="stylesheet">
+    {% block stylesheets %} {% endblock stylesheets %}
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- support for HTML5 forms for older browsers and Firefox -->
+    <script src="{% static "js/vendor/modernizr.custom.js" %}"></script>
+    <script src="{% static "js/vendor/js-webshim/minified/polyfiller.js" %}"></script>
+
+    <script>
+      webshims.polyfill("forms forms-ext");
+    </script>
+
+    {% include "mathjax.html" %}
+  </head>
+  <body class="tex2jax_ignore">
+    {{ LANGUAGE_CODE }}
+    {% if LANGUAGE_CODE == 'en' %}
+        {% csc_menu "compsciclub_en" %}
+    {% else %}
+        {% csc_menu "compsciclub_ru" %}
+    {% endif %}
+
+    {% block content %}
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          hello world
+        </div>
+      </div>
+    </div>
+    {% endblock content %}
+
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12 text-center">{% trans "Computer Science Club, 2007–15 гг."%}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script src="{% static "js/vendor/jquery-1.10.2.min.js" %}"><\/script>')</script>
+    <script type="text/javascript" src="//cdn.ravenjs.com/1.1.16/raven.min.js"></script>
+    <script type="text/javascript" src="{% static "js/raven_conf.js" %}"></script>
+    <script type="text/javascript" src="//yastatic.net/underscore/1.6.0/underscore-min.js"></script>
+    <script type="text/javascript" src="{% static "js/vendor/highlight.pack.js" %}"></script>
+
+    {% javascript 'base' %}
+    {% if messages %}
+      <script type="text/javascript">
+        $(function() {
+          $.jGrowl.defaults.closerTemplate = '<div>[{% trans "close all" %}]</div>';
+          {% for message in messages %}
+            $.jGrowl("{{ message | safe }}", { position: 'bottom-right', life: 15000 });
+          {% endfor %}
+        });
+      </script>
+    {% endif %}
+
+    {% block javascripts %}{% endblock javascripts %}
+
+    {% sitemetrics by yandex for "25844420" %}
+  </body>
+</html>

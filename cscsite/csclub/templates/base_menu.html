@@ -1,0 +1,88 @@
+{% load i18n %}
+{% load staticfiles %}
+{% load getattribute from core_tags %}
+
+<div class="header lvl1">
+  <div class="container">
+    <div class="row">
+        <div class="col-xs-9">
+            <div class="logo-cell">
+              <a href="{% url 'index' %}">
+                <div class="logo-container">
+                  <img src="{% static "img/club/logo.png" %}" alt="Computer Science Center">
+                </div>
+              </a>
+            </div>
+            <ul>
+                {% for menu_item in menu %}
+                    {% if not menu_item.hidden %}
+                    <li {% if menu_item.extension.classes %}class="{{menu_item.extension.classes}}"{% endif %}>
+                        <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-caret-down"></i>{% endif %}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-xs-3 login">
+            <div class="btn-group">
+                <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ LANGUAGE_CODE|language_name_local}}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% get_language_info_list for LANGUAGES as languages %}
+                    {% for language in languages %}
+                        <li>
+                            <a href="{% if language.code != 'ru' %}{{ language.code }}{% endif %}{% if LANGUAGE_CODE != 'ru' %}{{request.get_full_path|slice:'3:'}}{% else %}{{request.get_full_path}}{% endif %}">{{ language.name_local }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <a class="btn" href="{% url 'admin:index' %}" target="_blank" title="Admin section">
+                        <i class="fa fa-lock fa-2x"></i>
+                    </a>
+                {% endif %}
+                    <a class="btn" href="{{ user.get_absolute_url }}">
+                        <i class="fa fa-cog fa-2x"></i>
+                    </a>
+                    <a class="btn" href="{% url 'logout' %}"><i class="fa fa-sign-out fa-2x"></i></a>
+                {% else %}
+                <a href="{% url 'login' %}">
+                  {% trans "Login" %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+</div>
+
+{% for menu_item in menu %}
+    {% if 'current' in menu_item.extension.classes and menu_item.children and not menu_item.hidden %}
+          <div class="header lvl2 {{menu_item.extension.classes}}">
+            <div class="container">
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="logo-cell"></div>
+                  <ul>
+                    {% for second_level in menu_item.children %}
+                        <li {% if second_level.extension.classes %}class="{{second_level.extension.classes}}"{% endif %}>
+                            <a href="{{ second_level.url }}">
+                                {% trans second_level.caption context 'menu' %}
+
+                                {% if second_level.extension.budge and request.unread_notifications_cache|getattribute:second_level.extension.budge %}
+                                <span class="badge">
+                                  {{ request.unread_notifications_cache|getattribute:second_level.extension.budge|length }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+    {% endif %}
+{% endfor %}
