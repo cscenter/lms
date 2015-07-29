@@ -42,7 +42,7 @@ class News(TimeStampedModel):
                    .format(n_par=SPLIT_DEFAULT_PARAGRAPHS,
                            marker=escape(SPLIT_MARKER))))
 
-    cities = models.ManyToManyField(City, null=True, blank=True)
+    cities = models.ManyToManyField(City, blank=True)
 
     sites = models.ManyToManyField(Site)
 
