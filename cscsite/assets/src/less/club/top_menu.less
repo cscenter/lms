@@ -1,0 +1,168 @@
+@header-lvl1-bg:                 #7A9CC6;
+@header-lvl2-bg:                 #9FBBCC;
+
+.header {
+    &.lvl1 {
+        background-color: @header-lvl1-bg;
+        color: white;
+        margin-bottom: 60px;
+    }
+
+    &.lvl2 {
+        width: 100%;
+        /* width: 960px; */
+        color: white;
+        display: none;
+        z-index: -1;
+        background-color: @header-lvl2-bg;
+        margin: -60px 0 20px;
+
+        &.current {
+            display: block;
+            z-index: 100;  
+        }
+
+        li {
+            line-height: 40px;
+
+            &.current, &:hover {
+                background-color: darken(@header-lvl2-bg, 10%);
+            }
+        }
+
+        &.for-students {
+            background-color: #FBAA9F;
+
+            .row {
+                background-color: #FBAA9F;
+            }
+        }
+
+        &.for-teachers {
+            background-color: #A6A8CD;
+
+            .row {
+                background-color: #A6A8CD;
+            }
+        }
+
+        .logo-cell {
+            margin: 0;
+        }
+    }
+
+    ul {
+        padding-left: 0px;
+
+        li {
+            list-style: none;
+            float: left;
+            line-height: 50px;
+            padding: 0px 7px;
+            font-weight: bolder;
+            cursor: pointer;
+
+            &.current, &:hover {
+                background-color: darken(@header-lvl1-bg, 10%);
+            }
+
+            a {
+                display: block;
+            }
+
+            i {
+                font-weight: normal;
+            }
+        }
+
+        &.dropdown-menu {
+            li {
+                float: none;
+                padding: 0;
+            }
+        }
+    }
+
+    a {
+       color: white;
+       font-weight: normal;
+
+       &:hover {
+            text-decoration: none;
+        }
+    }
+
+    .badge {
+        background-color: transparent;
+        border: 1px solid white;
+    }
+
+    .login {
+        line-height: 50px;
+        text-align: right;
+
+        .btn {
+            padding: 6px 8px;
+            background: none;
+        }
+
+        .logout-url {
+            font-weight: normal;
+        }
+    }
+
+    .logo-cell {
+        position: relative;
+        margin-left: 0px;
+        margin-right: 10px;
+        width: 40px;
+        float: left;
+        margin: 5px 0;
+        height: 36px;
+    }
+
+    .logo-container {
+        position: absolute;
+        z-index: 1000;
+    }
+}
+
+
+li.for-students.current {
+  background-color: #A84234 !important;
+}
+.header.for-students li:hover {
+  background-color: #D37265;
+}
+.header.for-students li.current {
+  background-color: #A84234 !important;
+}
+
+
+
+li.for-teachers.current {
+  background-color: #515492 !important;
+}
+.header.for-teachers li:hover {
+  background-color: #787AAE;
+}
+.header.for-teachers li.current {
+  background-color: #515492 !important;
+}
+
+.header.lvl2.for-staff {
+  background-color: #E4C46C;
+}
+.header.lvl2.for-staff .row {
+  background-color: #E4C46C;
+}
+li.for-staff.current {
+  background-color: #D3B665 !important;
+}
+.header.for-staff li:hover {
+  background-color: #DBBD68;
+}
+.header.for-staff li.current {
+  background-color: #D3B665 !important;
+}
+
