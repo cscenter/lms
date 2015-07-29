@@ -1,5 +1,5 @@
 from modeltranslation.translator import register, TranslationOptions
-from htmlpages.models import HtmlPage
+from .models import HtmlPage
 
 
 @register(HtmlPage)

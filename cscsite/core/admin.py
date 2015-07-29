@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 from .forms import Ubereditor
+from .models import City
 
 from sitemetrics.models import Keycode
 
@@ -97,4 +98,9 @@ class UbereditorMixin(object):
 class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}
+
+class CityAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(City, CityAdmin)
 

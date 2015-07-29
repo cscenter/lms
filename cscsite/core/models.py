@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from django.db import models
+from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -37,3 +39,22 @@ def apply_related_spec(qs, related_spec):
     if 'prefetch' in related_spec:
         qs = qs.prefetch_related(*related_spec_to_list(related_spec['prefetch']))
     return qs
+
+
+@python_2_unicode_compatible
+class City(models.Model):
+    code = models.CharField(
+        _("Code"),
+        max_length=6,
+        help_text=_("UN/LOCODE notification preferable"),
+        primary_key=True)
+    name = models.CharField(_("City name"), max_length=255)
+
+    class Meta:
+        db_table = 'cities'
+        ordering = ["name"]
+        verbose_name = _("City")
+        verbose_name_plural = _("Cities")
+
+    def __str__(self):
+        return smart_text(self.name)
