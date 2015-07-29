@@ -83,19 +83,6 @@ INSTALLED_APPS = (
     'pipeline',
 )
 
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'core.notifications.UnreadNotificationsCacheMiddleware',
-)
-
 # Email settings
 EMAIL_HOST = 'smtp.yandex.ru'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'dummy@dummy'
@@ -126,14 +113,15 @@ CACHES = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'ru'
 LANGUAGES = (
     ('ru', "Russian"),
     ('en', "English"),
 )
-TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_L10N = True
+
+TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
 AUTH_USER_MODEL = "users.CSCUser"

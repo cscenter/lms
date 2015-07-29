@@ -1,0 +1,147 @@
+.header {
+    &.lvl1 {
+        height: 40px;
+        background-color: #678D9E;
+        color: white;
+    }
+
+    &.lvl2 {
+        width: 100%;
+        /* width: 960px; */
+        height: 40px;
+        color: white;
+        display: none;
+        position: absolute;
+        z-index: -1;
+        background-color: #99B6C3;
+
+        &.current {
+            display: block;
+            z-index: 100;  
+        }
+
+        li {
+            line-height: 40px;
+        }
+
+        &.for-students {
+            background-color: #FBAA9F;
+        }
+
+        &.for-teachers {
+            background-color: #A6A8CD;
+        }
+    }
+
+    ul {
+        padding-left: 0px;
+
+        a {
+            display: block;
+        }
+
+        li {
+            list-style: none;
+            float: left;
+            line-height: 40px;
+            padding: 0px 7px;
+            font-weight: bolder;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #437185;
+            }
+
+            &.current {
+                background-color: #24556A !important;
+            }
+
+            i {
+                font-weight: normal;
+            }
+        }
+    }
+
+    a {
+       color: white;
+
+       &:hover {
+            text-decoration: none;
+        }
+    }
+
+    .badge {
+        background-color: transparent;
+        border: 1px solid white;
+    }
+
+    .login {
+        line-height: 40px;
+        font-weight: bolder;
+        text-align: right;
+
+        .logout-url {
+            font-weight: normal;
+        }
+    }
+
+    .logo-cell {
+        position: relative;
+        margin-left: 15px;
+        margin-right: 10px;
+        width: 80px;
+        float: left;
+        height: 40px;
+    }
+
+    .logo-container {
+        position: absolute;
+        z-index: 1000;
+    }
+}
+
+
+.header-lvl2-container {
+  position: relative;
+  height: 40px;
+  margin-bottom: 20px;
+}
+
+li.for-students.current {
+  background-color: #A84234 !important;
+}
+.header.for-students li:hover {
+  background-color: #D37265;
+}
+.header.for-students li.current {
+  background-color: #A84234 !important;
+}
+
+
+
+li.for-teachers.current {
+  background-color: #515492 !important;
+}
+.header.for-teachers li:hover {
+  background-color: #787AAE;
+}
+.header.for-teachers li.current {
+  background-color: #515492 !important;
+}
+
+.header.lvl2.for-staff {
+  background-color: #E4C46C;
+}
+.header.lvl2.for-staff .row {
+  background-color: #E4C46C;
+}
+li.for-staff.current {
+  background-color: #D3B665 !important;
+}
+.header.for-staff li:hover {
+  background-color: #DBBD68;
+}
+.header.for-staff li.current {
+  background-color: #D3B665 !important;
+}
+

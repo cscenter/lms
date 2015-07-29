@@ -14,6 +14,18 @@ BASE_DIR = Path(__file__).ancestor(2)
 LOCALE_PATHS = (
     Path(BASE_DIR, "locale"),
 )
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.notifications.UnreadNotificationsCacheMiddleware',
+)
+
 # Add site specific templates
 TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 

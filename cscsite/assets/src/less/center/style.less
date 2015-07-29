@@ -1,4 +1,8 @@
-/* Local styles. */
+// CENTER main styles
+
+@import "../bootstrap.custom.less";
+@import "../jgrowl.customize.less";
+@import "top_menu.less";
 
 // TODO: Rewrite it all with less
 
@@ -38,142 +42,6 @@ h4.no-top-margin {
 .logo-container {
   position: absolute;
   z-index: 1000;
-}
-
-.header.lvl1 {
-  height: 40px;
-  background-color: #678D9E;
-  color: white;
-}
-
-.header.lvl1 .row {
-  background-color: #678D9E;
-}
-
-.header-lvl2-container {
-  position: relative;
-  height: 40px;
-  margin-bottom: 20px;
-}
-
-.header.lvl2 {
-  width: 100%;
-  /* width: 960px; */
-  height: 40px;
-  color: white;
-  display: none;
-  position: absolute;
-  z-index: -1;
-}
-
-.header.lvl2.current {
-  display: block;
-  z-index: 100;
-}
-
-.header ul {
-  padding-left: 0px;
-}
-
-.header a {
-  color: white;
-}
-
-.header ul a {
-  display: block;
-}
-
-
-.header a:hover {
-  text-decoration: none;
-}
-
-.header li {
-  list-style: none;
-  float: left;
-  line-height: 40px;
-  padding: 0px 7px;
-  font-weight: bolder;
-  cursor: pointer;
-}
-
-.header.lvl2,
-.header.lvl2 .row {
-  background-color: #99B6C3;
-}
-
-.header li:hover {
-  background-color: #437185;
-}
-.header li.current {
-  background-color: #24556A !important;
-}
-
-.header.lvl2.for-students {
-  background-color: #FBAA9F;
-}
-.header.lvl2.for-students .row {
-  background-color: #FBAA9F;
-}
-li.for-students.current {
-  background-color: #A84234 !important;
-}
-.header.for-students li:hover {
-  background-color: #D37265;
-}
-.header.for-students li.current {
-  background-color: #A84234 !important;
-}
-
-.header.lvl2.for-teachers {
-  background-color: #A6A8CD;
-}
-.header.lvl2.for-teachers .row {
-  background-color: #A6A8CD;
-}
-li.for-teachers.current {
-  background-color: #515492 !important;
-}
-.header.for-teachers li:hover {
-  background-color: #787AAE;
-}
-.header.for-teachers li.current {
-  background-color: #515492 !important;
-}
-
-.header.lvl2.for-staff {
-  background-color: #E4C46C;
-}
-.header.lvl2.for-staff .row {
-  background-color: #E4C46C;
-}
-li.for-staff.current {
-  background-color: #D3B665 !important;
-}
-.header.for-staff li:hover {
-  background-color: #DBBD68;
-}
-.header.for-staff li.current {
-  background-color: #D3B665 !important;
-}
-
-.header li i {
-  font-weight: normal;
-}
-
-.header .badge {
-  background-color: transparent;
-  border: 1px solid white;
-}
-
-.header .login {
-  line-height: 40px;
-  font-weight: bolder;
-  text-align: right;
-}
-
-.header .login .logout-url {
-  font-weight: normal;
 }
 
 body {
@@ -796,14 +664,3 @@ tr.unread {
   color: #999;
   font-size: 0.75em;
 }
-
-
-/* jGrowl overrides */
-.jGrowl {
-  color: #000;
-}
-.jGrowl-notification {
-  background-color: #A6A8CD;
-  border-color: #A6A8CD;
-}
-.jGrowl-closer { background-color: #fff;}
