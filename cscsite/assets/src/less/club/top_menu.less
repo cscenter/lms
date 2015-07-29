@@ -1,5 +1,5 @@
 @header-lvl1-bg:                 #7A9CC6;
-@header-lvl2-bg:                 #9FBBCC;
+@header-lvl2-bg:                 #E6E6E6;
 
 .header {
     &.lvl1 {
@@ -48,6 +48,10 @@
 
         .logo-cell {
             margin: 0;
+        }
+
+        a {
+            color: darken(@header-lvl2-bg, 80%);
         }
     }
 
@@ -108,6 +112,11 @@
 
         .logout-url {
             font-weight: normal;
+        }
+
+        a.login-link {
+            padding-left: 10px;
+            border-left: 1px solid #fff;
         }
     }
 
