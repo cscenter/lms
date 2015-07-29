@@ -36,12 +36,8 @@
     {% include "mathjax.html" %}
   </head>
   <body class="tex2jax_ignore">
-    {{ LANGUAGE_CODE }}
-    {% if LANGUAGE_CODE == 'en' %}
-        {% csc_menu "compsciclub_en" %}
-    {% else %}
-        {% csc_menu "compsciclub_ru" %}
-    {% endif %}
+
+    {% csc_menu "compsciclub_"|add:LANGUAGE_CODE %}
 
     {% block content %}
     <div class="container">
