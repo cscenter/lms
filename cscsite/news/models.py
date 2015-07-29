@@ -2,6 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import escape
 
@@ -9,6 +10,8 @@ from model_utils.models import TimeStampedModel
 from model_utils.fields import SplitField, \
     SPLIT_MARKER, SPLIT_DEFAULT_PARAGRAPHS
 from model_utils.managers import QueryManager
+
+from core.models import City
 
 
 # TODO: "published" should be a date in future
@@ -39,7 +42,13 @@ class News(TimeStampedModel):
                    .format(n_par=SPLIT_DEFAULT_PARAGRAPHS,
                            marker=escape(SPLIT_MARKER))))
 
+    cities = models.ManyToManyField(City, null=True, blank=True)
 
+    sites = models.ManyToManyField(Site)
+
+    language = models.CharField(max_length=5, db_index=True,
+                                choices=settings.LANGUAGES,
+                                default=settings.LANGUAGE_CODE)
 
     class Meta(object):
         ordering = ["-created", "author"]

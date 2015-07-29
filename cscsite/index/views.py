@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language, ugettext_lazy as _
 from django.views import generic
 
 import requests
@@ -27,7 +27,9 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['news_objects'] = News.public.all()[:3]
+        context['news_objects'] = News.public.filter(
+            sites__id=settings.SITE_ID,
+            language=get_language())[:3]
         return context
 
 

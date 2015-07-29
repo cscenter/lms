@@ -46,7 +46,7 @@ class City(models.Model):
     code = models.CharField(
         _("Code"),
         max_length=6,
-        help_text=_("UN/LOCODE notification preferable"),
+        help_text=_("UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/locode/service/location' target='_blank'>Hint</a>"),
         primary_key=True)
     name = models.CharField(_("City name"), max_length=255)
 
