@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined less_center less_club
 
 run:
 	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
@@ -73,10 +73,18 @@ deploy:
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
-less:
+less_center:
 	cd cscsite/assets/src/less/; \
-	lessc --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
-	lessc --clean-css="--compatibility=ie8" style.less > ../../css/style.css
+	lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
+	lessc --relative-urls --clean-css="--compatibility=ie8" center/style.less > ../../css/center/style.css;
+
+less_club:
+	cd cscsite/assets/src/less/; \
+	lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
+	lessc --relative-urls --clean-css="--compatibility=ie8" club/style.less > ../../css/club/style.css;
+
+less: less_center less_club
+
 
 # Mac users tip: `brew install fswatch`
 less_watch:
