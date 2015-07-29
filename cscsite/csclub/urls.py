@@ -274,5 +274,5 @@ if settings.DEBUG:
     ]
 
 # Htmlpages should be the last one
-urlpatterns += patterns('',
+urlpatterns += solid_i18n_patterns('',
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'))
