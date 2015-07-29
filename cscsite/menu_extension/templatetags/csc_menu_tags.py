@@ -19,8 +19,7 @@ register = template.Library()
 
 def csc_menu(context, menu_name):
     """Caching version of show_menu template tag"""
-    # TODO: Multiple menu's cache
-    if not CSCMENU_CACHE:
+    if menu_name not in CSCMENU_CACHE:
         try:
             menu = Menu.objects.get(name=menu_name)
             flattened = list(MenuItem.objects.filter(menu__pk=menu.id)
@@ -33,7 +32,7 @@ def csc_menu(context, menu_name):
                 # Override url from named_url if specified
                 if item.named_url:
                     item.url = reverse(item.named_url)
-            CSCMENU_CACHE[:] = flattened
+            CSCMENU_CACHE[menu_name] = flattened
         except (MenuItem.DoesNotExist, Menu.DoesNotExist,
                 NoReverseMatch) as e:
             if settings.TEMPLATE_DEBUG:
@@ -41,7 +40,7 @@ def csc_menu(context, menu_name):
             else:
                 return context
     else:
-        flattened = CSCMENU_CACHE
+        flattened = CSCMENU_CACHE[menu_name]
 
     flattened_copy = copy.deepcopy(flattened)
 
