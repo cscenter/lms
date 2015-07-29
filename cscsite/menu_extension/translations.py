@@ -9,6 +9,7 @@ def dummy_for_makemessages():
     Removing this code causes makemessages to comment out those PO entries, so don't do that
     unless you find a better way to do this
     """
+    # cscenter menu translation
     pgettext('menu', 'About CSC')
     pgettext('menu', 'Syllabus')
     pgettext('menu', 'Courses')
@@ -38,9 +39,11 @@ def dummy_for_makemessages():
     pgettext('menu', 'Timetable')
     pgettext('menu', 'Calendar')
     pgettext('menu', 'Marks sheet')
-    
+
     pgettext('menu', 'Enrollment')
     pgettext('menu', 'Information')
     pgettext('menu', 'Application')
 
     pgettext('menu', 'Contacts')
+
+    # In club we have 2 languages menu version. No translation needed here.

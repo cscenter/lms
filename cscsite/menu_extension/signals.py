@@ -15,4 +15,4 @@ def menuitem_postsave(sender, created, instance, **kwargs):
     if created:
         menu_item_extension = MenuItemExtension(menu_item=instance)
         menu_item_extension.save()
-    del CSCMENU_CACHE[:]
+    CSCMENU_CACHE.clear()
