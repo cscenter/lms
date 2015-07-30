@@ -38,6 +38,7 @@ PASSWORD_HASHERS = (
 )
 DEBUG = False
 TEMPLATE_DEBUG = False
+MODELTRANSLATION_DEBUG = False
 
 MEDIA_ROOT = '/tmp/django_test_media/'
 
