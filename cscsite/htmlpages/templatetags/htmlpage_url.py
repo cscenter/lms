@@ -1,3 +1,5 @@
+import logging
+
 from django import template
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
@@ -6,6 +8,7 @@ from django.template import TemplateSyntaxError
 from core import FLATPAGE_URL_CACHE
 from htmlpages.models import HtmlPage
 
+logger = logging.getLogger('root')
 register = template.Library()
 
 
@@ -21,6 +24,9 @@ def htmlpage_url(context, url_name, **kwargs):
         qs = HtmlPage.objects.filter(sites__id=site_pk).values('url')
         FLATPAGE_URL_CACHE[:] = [p['url'] for p in qs]
     if url_name not in FLATPAGE_URL_CACHE:
+        msg = '"htmlpage_url" tag got an unknown variable: %r' % url_name
         if settings.DEBUG:
-            raise TemplateSyntaxError('"htmlpage_url" tag got an unknown variable: %r' % url_name)
+            raise TemplateSyntaxError(msg)
+        else:
+            logger.warning(msg)
     return url_name
