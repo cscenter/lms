@@ -17,9 +17,11 @@ migrate:
 
 msg:
 	cd cscsite && python manage.py makemessages -l ru
-	
+# https://code.djangoproject.com/ticket/24159
+# Should set apps in LOCALE_PATHS explicitly until patch been released
 msgcompile:
-	cd cscsite && python manage.py compilemessages
+	cd cscsite && python manage.py compilemessages --settings=cscenter.settings.local
+	cd cscsite && python manage.py compilemessages --settings=csclub.settings.local
 
 static:
 	cd cscsite && python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
