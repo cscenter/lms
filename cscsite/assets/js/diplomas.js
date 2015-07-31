@@ -4,6 +4,10 @@ $(function() {
         hljs.highlightBlock(block);
     });
 
+    if (ZeroClipboard.isFlashUnusable()) {
+        $('#diplomas-code .btn-clipboard').html('Enable Flash to activate <b>copy</b> feature');
+    }
+
     // Copy to clipboard
     var client = new ZeroClipboard( $(".btn-clipboard") );
     client.on({
