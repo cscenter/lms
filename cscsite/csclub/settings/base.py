@@ -5,6 +5,8 @@ CS center app specific settings
 from unipath import Path
 from core.settings.base import *
 
+BASE_DIR = Path(__file__).ancestor(2)
+
 SITE_ID = 2
 ROOT_URLCONF = 'csclub.urls'
 WSGI_APPLICATION = 'csclub.wsgi.application'
@@ -26,11 +28,12 @@ SOLID_I18N_USE_REDIRECTS = False
 # Redirect from /ru/... to /... if default_lang == 'ru'
 SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
-BASE_DIR = Path(__file__).ancestor(2)
-
-LOCALE_PATHS = (
+# FIXME: Remove after Django 1.8.4 would been released? 
+# https://code.djangoproject.com/ticket/24159
+LOCALE_PATHS += (
     Path(BASE_DIR, "locale"),
 )
+
 # Template overrides
 TEMPLATES[0]['DIRS'] = [BASE_DIR.child("templates")] + TEMPLATES[0]['DIRS']
 
