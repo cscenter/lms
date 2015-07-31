@@ -23,16 +23,14 @@ django-floppyforms==1.1.1
 git+https://github.com/maraujop/django-crispy-forms.git@c790055fa7e6810703599bc0124507133b8a55fc
 
 # Models
-# django-model-utils==2.2
-# because newer version that fixes migrations on 1.8 is not released yet
-git+https://github.com/carljm/django-model-utils.git@fb20a1390f365854538aa7f17c04fc5f870a0f5e
+django-model-utils==2.3.1
 
 # Html parsing
 beautifulsoup4==4.4.0
 
 # Translation utils
-django-rosetta==0.7.3
-git+https://github.com/deschler/django-modeltranslation.git@2f7cfe70bc76bb67645a65151f36251504f0cb1a
+django-rosetta==0.7.6
+django-modeltranslation==0.10
 
 # Amazon services
 boto==2.35.2
@@ -47,8 +45,7 @@ newrelic==2.44.0.36
 solid_i18n==1.1.0
 
 # Misc utils
-#django-import-export==0.2.7
-git+https://github.com/django-import-export/django-import-export.git@9767f89e29ef356dd142121ae3c5015bafbf4fd9
+django-import-export==0.2.8
 django-fixture-media==0.1.4
 django-annoying==0.8.1
 django-bootstrap3==4.8.2
