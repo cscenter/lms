@@ -1,14 +1,6 @@
 [
 {
   "fields": {
-    "root_item": 1,
-    "name": "compscicenter"
-  },
-  "model": "treemenus.menu",
-  "pk": 1
-},
-{
-  "fields": {
     "parent": null,
     "level": 0,
     "url": "",
@@ -396,5 +388,276 @@
   },
   "model": "treemenus.menuitem",
   "pk": 30
+},
+{
+  "fields": {
+    "root_item": 1,
+    "name": "compscicenter"
+  },
+  "model": "treemenus.menu",
+  "pk": 1
+},
+{
+  "fields": {
+    "parent": null,
+    "level": 0,
+    "url": "",
+    "menu": 2,
+    "rank": 0,
+    "caption": "root",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 31
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "/about/",
+    "menu": 2,
+    "rank": 0,
+    "caption": "\u041e \u043a\u043b\u0443\u0431\u0435",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 32
+},
+{
+  "fields": {
+    "parent": 32,
+    "level": 2,
+    "url": "/faq/",
+    "menu": 2,
+    "rank": 0,
+    "caption": "\u0412\u043e\u043f\u0440\u043e\u0441\u044b \u0438 \u043e\u0442\u0432\u0435\u0442\u044b",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 33
+},
+{
+  "fields": {
+    "parent": 32,
+    "level": 2,
+    "url": "/socialnetworks/",
+    "menu": 2,
+    "rank": 1,
+    "caption": "\u041f\u043e\u0434\u043f\u0438\u0441\u0430\u0442\u044c\u0441\u044f \u043d\u0430 \u043d\u043e\u0432\u043e\u0441\u0442\u0438",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 34
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 1,
+    "caption": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438",
+    "named_url": "news_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 35
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "/schedule/",
+    "menu": 2,
+    "rank": 2,
+    "caption": "\u0420\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 36
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 3,
+    "caption": "\u041a\u0443\u0440\u0441\u044b",
+    "named_url": "course_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 37
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 4,
+    "caption": "\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u0438",
+    "named_url": "teachers"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 38
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "/cscenter/",
+    "menu": 2,
+    "rank": 5,
+    "caption": "CS \u0446\u0435\u043d\u0442\u0440",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 39
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 6,
+    "caption": "\u0412\u0438\u0434\u0435\u043e",
+    "named_url": "course_video_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 40
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "/other/",
+    "menu": 2,
+    "rank": 7,
+    "caption": "\u041f\u0440\u043e\u0447\u0435\u0435",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 41
+},
+{
+  "fields": {
+    "parent": 41,
+    "level": 2,
+    "url": "/schools/",
+    "menu": 2,
+    "rank": 0,
+    "caption": "\u041c\u0435\u0436\u0434\u0443\u043d\u0430\u0440\u043e\u0434\u043d\u044b\u0435 \u0448\u043a\u043e\u043b\u044b",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 42
+},
+{
+  "fields": {
+    "parent": 32,
+    "level": 2,
+    "url": "/about/press/",
+    "menu": 2,
+    "rank": 2,
+    "caption": "\u041f\u0440\u0435\u0441\u0441\u0430 \u043e \u043d\u0430\u0441",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 43
+},
+{
+  "fields": {
+    "parent": null,
+    "level": 0,
+    "url": "",
+    "menu": 3,
+    "rank": 0,
+    "caption": "root",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 44
+},
+{
+  "fields": {
+    "parent": 44,
+    "level": 1,
+    "url": "/en/about/",
+    "menu": 3,
+    "rank": 0,
+    "caption": "About CS Club",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 45
+},
+{
+  "fields": {
+    "parent": 45,
+    "level": 2,
+    "url": "/en/faq/",
+    "menu": 3,
+    "rank": 0,
+    "caption": "FAQ",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 46
+},
+{
+  "fields": {
+    "parent": 44,
+    "level": 1,
+    "url": "",
+    "menu": 3,
+    "rank": 1,
+    "caption": "Courses",
+    "named_url": "course_list"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 47
+},
+{
+  "fields": {
+    "parent": 44,
+    "level": 1,
+    "url": "",
+    "menu": 3,
+    "rank": 2,
+    "caption": "Lecturers",
+    "named_url": "teachers"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 48
+},
+{
+  "fields": {
+    "parent": 44,
+    "level": 1,
+    "url": "/schools/",
+    "menu": 3,
+    "rank": 3,
+    "caption": "Schools",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 49
+},
+{
+  "fields": {
+    "root_item": 31,
+    "name": "compsciclub_ru"
+  },
+  "model": "treemenus.menu",
+  "pk": 2
+},
+{
+  "fields": {
+    "root_item": 44,
+    "name": "compsciclub_en"
+  },
+  "model": "treemenus.menu",
+  "pk": 3
 }
 ]
