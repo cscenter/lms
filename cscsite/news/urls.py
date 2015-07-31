@@ -10,6 +10,7 @@ urlpatterns = \
              url(regex=r"^update/(?P<slug>[-\w]+)/$",
                  view=views.NewsUpdateView.as_view(),
                  name="news_update"),
+             url(r'^rss/$', views.NewsFeed()),
              url(regex=r"^(?P<slug>[-\w]+)/$",
                  view=views.NewsDetailView.as_view(),
                  name="news_detail"),
