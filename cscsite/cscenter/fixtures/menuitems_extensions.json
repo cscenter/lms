@@ -422,5 +422,271 @@
   },
   "model": "menu_extension.menuitemextension",
   "pk": 30
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 31
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 32
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": "^/about/$"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 33
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 34
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 35
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 36
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 37
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 38
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 39
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 40
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 41
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 42
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 43
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 44
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 45
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 46
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 47
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 48
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 49
 }
 ]
