@@ -5,63 +5,25 @@
 
 {% block content %}
 <div class="container">
-  <div class="row">
-    <div class="col-xs-2"></div>
-    <div class="col-xs-10">
-      <h1 class="bigger-margin">{% trans "CS Center News" %}</h1>
-
-      {% if news_objects %}
-      <ul class="index-news">
-        {% for news in news_objects %}
-        <li>
-          <span class="date">{{ news.created|date }}</span>
-          <h3><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h3>
-          <div class="ubertext">
-            {{ news.text.excerpt|safe }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>
-          {% endif %}
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'news_list' %}"><h4 class="bigger-margin">{% trans "All news" %}</h4></a>
-
-      {% else %}
-      <p>{% trans "No news yet" %}</p>
-      {% endif %}
-
+    <div class="row">
+        <div class="news">
+          <h1>{% trans "Latest News" %}</h1>
+            {% if news_objects %}
+                {% for news in news_objects %}
+                    <article>
+                        <div class="post-date">
+                        {{ news.created|date }}{% comment %} | <a href="">Melissa Sing </a> <!--  <span><a href="">11 Comments</a></span> -->{% endcomment %}
+                        </div>    
+                        <h2><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h2>
+                        <p class="lead">{{ news.text.excerpt|safe }} {% if news.text.has_more %}<br><a href="{% url 'news_detail' slug=news.slug %}">{% trans "Read more" %}</a>
+                        {% endif %}</p>
+                    </article>
+                {% endfor %}
+                <a href="{% url 'news_list' %}"><h4 class="bigger-margin">{% trans "All news" %}</h4></a>
+            {% else %}
+                <p>{% trans "No news yet" %}</p>
+            {% endif %}
+        </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2"></div>
-    <div class="col-xs-10">
-      <h1 class="bigger-margin">{% trans "Supported by" %}</h1>
-      <ul class="supported-by">
-        <li>
-          <a href="https://yandexdataschool.ru/" target="_blank">
-            <img src="{% static "img/logo/sda.png" %}"
-                 alt="{% trans "Yandex School of Data Analysis" %}">
-          </a>
-        </li>
-        <li>
-          <a href="http://jetbrains.ru/students" target="_blank">
-            <img src="{% static "img/logo/jetbrains.png" %}"
-                 alt="{% trans "JetBrains" %}">
-          </a>
-        </li>
-        <li>
-          <a href="http://compsciclub.ru/" target="_blank">
-            <img src="{% static "img/logo/csclub.png" %}"
-                 alt={% trans "Computer Science Club" %}>
-          </a>
-        </li>
-        <li>
-          <a href="http://239.ru/" target="_blank">
-            <img src="{% static "img/logo/239.png" %}"
-                 alt="{% trans "FML #239" %}">
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
 </div>
 {% endblock content %}

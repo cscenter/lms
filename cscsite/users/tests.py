@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text
+from django.utils import translation
 from django.utils.translation import ugettext as _
 
 from bs4 import BeautifulSoup
@@ -56,18 +57,19 @@ class UserTests(MyUtilitiesMixin, TestCase):
         We need to be sure, that migrations creates groups with desired pk's.
         Not so actual for prod db, but we still should check it.
         """
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CENTER],
-                         Group.objects.get(pk=1).name)
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CENTER],
-                         Group.objects.get(pk=2).name)
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.GRADUATE_CENTER],
-                         Group.objects.get(pk=3).name)
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.VOLUNTEER],
-                         Group.objects.get(pk=4).name)
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CLUB],
-                         Group.objects.get(pk=5).name)
-        self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CLUB],
-                         Group.objects.get(pk=6).name)
+        with translation.override('en'):
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CENTER],
+                             Group.objects.get(pk=1).name)
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CENTER],
+                             Group.objects.get(pk=2).name)
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.GRADUATE_CENTER],
+                             Group.objects.get(pk=3).name)
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.VOLUNTEER],
+                             Group.objects.get(pk=4).name)
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CLUB],
+                             Group.objects.get(pk=5).name)
+            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CLUB],
+                             Group.objects.get(pk=6).name)
 
     def test_student_should_have_enrollment_year(self):
         """
