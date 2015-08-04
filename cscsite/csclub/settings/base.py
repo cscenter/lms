@@ -8,8 +8,6 @@ from core.settings.base import *
 BASE_DIR = Path(__file__).ancestor(2)
 
 SITE_ID = 2
-CITY_CODE = "RU SPB"
-CITY_SESSION_KEY = CITY_COOKIE_NAME = '_city_code'
 ROOT_URLCONF = 'csclub.urls'
 WSGI_APPLICATION = 'csclub.wsgi.application'
 
