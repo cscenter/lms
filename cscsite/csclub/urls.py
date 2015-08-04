@@ -45,7 +45,7 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView
 
-from csclub.views import set_city
+from csclub.views import set_city, CalendarClubScheduleView
 
 
 admin.autodiscover()
@@ -85,6 +85,10 @@ urlpatterns = solid_i18n_patterns(
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/classes/(?P<pk>\d+)/$",
         CourseClassDetailView.as_view(),
         name="class_detail"),
+    # Schedule
+    url(r"^schedule/$",
+        CalendarClubScheduleView.as_view(),
+        name="public_schedule"),
 )
 
 urlpatterns += patterns('',

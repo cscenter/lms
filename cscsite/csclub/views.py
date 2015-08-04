@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.http import JsonResponse
+from django.views import generic
 
 from .utils import check_for_city
+from learning.views import CalendarMixin
+from learning.models import NonCourseEvent
 
 def set_city(request, city_code):
     success = False
@@ -19,3 +22,10 @@ def set_city(request, city_code):
             success = True
 
     return JsonResponse({'success': success})
+
+
+class CalendarClubScheduleView(CalendarMixin, generic.ListView):
+    user_type = 'public_full'         
+
+    def noncourse_events(self, month, year, prev_month_date, next_month_date):
+        return NonCourseEvent.objects.none()

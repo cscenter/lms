@@ -26,7 +26,7 @@ class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
 
 
 class CourseOfferingAdmin(UbereditorMixin,
-                          WiderLabelsMixin,
+                          WiderLabelsMixin, TranslationAdmin, 
                           admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
