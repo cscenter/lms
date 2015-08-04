@@ -19,7 +19,7 @@ from learning.views import \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
-    SemesterListView, CourseDetailView, CourseUpdateView, \
+    CoursesListView, CourseDetailView, CourseUpdateView, \
     CourseOfferingDetailView, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
@@ -45,12 +45,50 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView
 
+from csclub.views import set_city
+
 
 admin.autodiscover()
 
 urlpatterns = solid_i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^news/', include('news.urls')),
+    # Courses
+    url(r"^courses/$", CoursesListView.as_view(),
+        name="course_list"),
+    url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
+        name="course_detail"),
+    url(r"^courses/(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
+        name="course_edit"),
+    # Course Readings
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
+        CourseOfferingDetailView.as_view(),
+        name="course_offering_detail"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-descr$",
+        CourseOfferingEditDescrView.as_view(),
+        name="course_offering_edit_descr"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/add$",
+        CourseOfferingNewsCreateView.as_view(),
+        name="course_offering_news_create"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/(?P<pk>\d+)/edit$",
+        CourseOfferingNewsUpdateView.as_view(),
+        name="course_offering_news_update"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/(?P<pk>\d+)/delete$",
+        CourseOfferingNewsDeleteView.as_view(),
+        name="course_offering_news_delete"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/enroll$",
+        CourseOfferingEnrollView.as_view(),
+        name="course_offering_enroll"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/unenroll$",
+        CourseOfferingUnenrollView.as_view(),
+        name="course_offering_unenroll"),
+    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/classes/(?P<pk>\d+)/$",
+        CourseClassDetailView.as_view(),
+        name="class_detail"),
+)
+
+urlpatterns += patterns('',
+    url(r'^setcity/(?P<city_code>[-\w]+)/$', set_city, name='set_city'),
 )
 
 urlpatterns += patterns('',
@@ -83,8 +121,6 @@ urlpatterns += patterns('',
     # url(r'^student-info/(?P<pk>\d+)/edit$', StudentInfoUpdateView.as_view(),
     #     name='student_info_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
-
-    url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
     url(r'^learning/$',
         RedirectView.as_view(pattern_name=settings.LEARNING_BASE, permanent=True),
@@ -159,37 +195,7 @@ urlpatterns += patterns('',
         MarksSheetTeacherImportCSVFromStepicView.as_view(),
         name='markssheet_teacher_csv_import_stepic'),
 
-    url(r"^courses/$", SemesterListView.as_view(),
-        name="course_list"),
-    url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
-        name="course_detail"),
-    url(r"^courses/(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
-        name="course_edit"),
 
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
-        CourseOfferingDetailView.as_view(),
-        name="course_offering_detail"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-descr$",
-        CourseOfferingEditDescrView.as_view(),
-        name="course_offering_edit_descr"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/add$",
-        CourseOfferingNewsCreateView.as_view(),
-        name="course_offering_news_create"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/(?P<pk>\d+)/edit$",
-        CourseOfferingNewsUpdateView.as_view(),
-        name="course_offering_news_update"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/news/(?P<pk>\d+)/delete$",
-        CourseOfferingNewsDeleteView.as_view(),
-        name="course_offering_news_delete"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/enroll$",
-        CourseOfferingEnrollView.as_view(),
-        name="course_offering_enroll"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/unenroll$",
-        CourseOfferingUnenrollView.as_view(),
-        name="course_offering_unenroll"),
-    url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/classes/(?P<pk>\d+)/$",
-        CourseClassDetailView.as_view(),
-        name="class_detail"),
 
     url(r'^staff/course-marks/$',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
