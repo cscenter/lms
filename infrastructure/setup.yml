@@ -57,6 +57,7 @@
       - nginx
       - postgresql-9.4
       - libpq-dev
+      - gettext
       - python-setuptools
       - python-dev
       - git

@@ -1,8 +1,6 @@
 Computer Science Center/Club websites
 =====================================
 
-ADD apt-get install gettext TO `infrastructure`
-
 [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
 Dev setup
