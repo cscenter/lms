@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-04 11:24+0300\n"
+"POT-Creation-Date: 2015-08-04 15:46+0300\n"
 "PO-Revision-Date: 2015-04-02 17:41+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -320,7 +320,8 @@ msgstr ""
 msgid "Course"
 msgstr "Курс"
 
-#: learning/models.py:57 templates/learning/courses_list_student.html:9
+#: learning/models.py:57 templates/learning/courses_list.html:10
+#: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:42
 msgid "Courses"
@@ -1049,11 +1050,11 @@ msgstr ""
 "Первые {n_par} параграфов или всё до {marker} будут выдержкой; доступны "
 "LaTeX и Markdown"
 
-#: news/models.py:55
+#: news/models.py:54
 msgid "News|news-singular"
 msgstr "Новость"
 
-#: news/models.py:56
+#: news/models.py:55
 msgid "News|news-plural"
 msgstr "Новости"
 
@@ -1064,41 +1065,6 @@ msgstr "Административная панель Django"
 #: templates/admin/base_site.html:16
 msgid "Django administration"
 msgstr "Администрирование Django"
-
-#: templates/admin/index.html:20
-#, python-format
-msgid "Models in the %(name)s application"
-msgstr ""
-
-#: templates/admin/index.html:31
-msgid "Add"
-msgstr ""
-
-#: templates/admin/index.html:37
-msgid "Change"
-msgstr ""
-
-#: templates/admin/index.html:47
-msgid "You don't have permission to edit anything."
-msgstr ""
-
-#: templates/admin/index.html:55
-#, fuzzy
-#| msgid "Presentation"
-msgid "Recent Actions"
-msgstr "Презентация"
-
-#: templates/admin/index.html:56
-msgid "My Actions"
-msgstr ""
-
-#: templates/admin/index.html:60
-msgid "None available"
-msgstr ""
-
-#: templates/admin/index.html:74
-msgid "Unknown content"
-msgstr ""
 
 #: templates/learning/assignment_detail.html:17
 #: templates/learning/assignment_student_detail.html:27
@@ -1157,10 +1123,10 @@ msgid "Open assignments"
 msgstr "Открытые задания"
 
 #: templates/learning/assignment_list_student.html:97
+#: templates/learning/courses_list.html:15
 #: templates/learning/courses_list_student.html:92
 #: templates/learning/courses_list_teacher.html:54
 #: templates/learning/markssheet_teacher_dispatch.html:14
-#: templates/learning/semester_list.html:14
 msgid "Archive"
 msgstr "Архив"
 
@@ -1336,20 +1302,23 @@ msgstr "редактировать"
 msgid "delete"
 msgstr "удалить"
 
+#: templates/learning/courses_list.html:13
+msgid "Ongoing"
+msgstr "Текущие"
+
+#: templates/learning/courses_list.html:51
+#: templates/learning/courses_list_student.html:140
+#: templates/learning/courses_list_teacher.html:100
+#: templates/learning/markssheet_teacher_dispatch.html:44
+msgid "No courses yet"
+msgstr "Список курсов пуст"
+
 #: templates/learning/courses_list_student.html:17
 msgid "Current semester"
 msgstr "Текущий семестр"
 
-#: templates/learning/courses_list_student.html:140
-#: templates/learning/courses_list_teacher.html:100
-#: templates/learning/markssheet_teacher_dispatch.html:44
-#: templates/learning/semester_list.html:50
-msgid "No courses yet"
-msgstr "Список курсов пуст"
-
 #: templates/learning/courses_list_teacher.html:17
 #: templates/learning/markssheet_teacher_dispatch.html:12
-#: templates/learning/semester_list.html:12
 msgid "Ongoing|plural"
 msgstr "Текущие"
 
@@ -1836,3 +1805,8 @@ msgstr "Справка пользователя"
 #: users/models.py:326
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#, fuzzy
+#~| msgid "Presentation"
+#~ msgid "Recent Actions"
+#~ msgstr "Презентация"

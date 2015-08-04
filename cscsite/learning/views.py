@@ -156,6 +156,16 @@ class CalendarMixin(object):
         self._non_course_events = None
         super(CalendarMixin, self).__init__(*args, **kwargs)
 
+    def noncourse_events(self, month, year, prev_month_date, next_month_date):
+        return (NonCourseEvent.objects
+               .filter(Q(date__month=month, date__year=year)
+                       | Q(date__month=prev_month_date.month,
+                           date__year=prev_month_date.year)
+                       | Q(date__month=next_month_date.month,
+                           date__year=next_month_date.year))
+               .order_by('date', 'starts_at')
+               .select_related('venue'))
+
     def get_queryset(self):
         year_qstr = self.request.GET.get('year')
         month_qstr = self.request.GET.get('month')
@@ -170,18 +180,10 @@ class CalendarMixin(object):
         next_month_date = self._month_date + relativedelta(months=+1)
 
         # FIXME(Dmitry): somewhat dirty, come up with better generalization
-        self._non_course_events \
-            = (NonCourseEvent.objects
-               .filter(Q(date__month=month,
-                         date__year=year)
-                       | Q(date__month=prev_month_date.month,
-                           date__year=prev_month_date.year)
-                       | Q(date__month=next_month_date.month,
-                           date__year=next_month_date.year))
-               .order_by('date', 'starts_at')
-               .select_related('venue'))
+        self._non_course_events = \
+            self.noncourse_events(month, year, prev_month_date, next_month_date)
 
-        return (CourseClass.objects
+        q = (CourseClass.objects
                 .filter(Q(date__month=month,
                           date__year=year)
                         | Q(date__month=prev_month_date.month,
@@ -193,6 +195,9 @@ class CalendarMixin(object):
                                 'course_offering',
                                 'course_offering__course',
                                 'course_offering__semester'))
+        if self.request.site.domain == 'compsciclub.ru':
+            q = q.filter(course_offering__is_open=True)
+        return q
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
@@ -252,30 +257,32 @@ class CalendarFullView(LoginRequiredMixin,
 
 class CoursesListView(generic.ListView):
     model = Semester
-    template_name = "learning/courses_list.html"
+    template_name = "learning/courses/list.html"
 
     def get_queryset(self):
-        return (self.model.objects
-                .prefetch_related("courseoffering_set",
-                                  "courseoffering_set__course",
-                                  "courseoffering_set__teachers"))
+        co_queryset = (CourseOffering.objects
+            .select_related('course')
+            .prefetch_related('teachers')
+            .order_by('course__name'))
+        if self.request.site.domain == 'compsciclub.ru':
+            co_queryset = co_queryset.filter(is_open=True)
+        q = (self.model.objects.prefetch_related(
+                Prefetch(
+                    'courseoffering_set',
+                    queryset=co_queryset,
+                    to_attr='courseofferings'
+                ),
+            )
+        )
+        return q
 
     def get_context_data(self, **kwargs):
-        context = (super(CoursesListView, self)
-                   .get_context_data(**kwargs))
+        context = super(CoursesListView, self).get_context_data(**kwargs)
         # skip summer semesters
         semester_list = [s for s in context["semester_list"]
                            if s.type != Semester.TYPES.summer]
         if not semester_list:
             return context
-        for semester in semester_list:
-            # HACK(lebedev): since we don't have a 'Prefetch' object
-            # yet, there's no way to impose ordering on the related
-            # table.
-            semester.courseofferings = sorted(
-                semester.courseoffering_set.all(),
-                key=lambda co: co.course.name)
-
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
         if current.type == Semester.TYPES.autumn:
@@ -285,7 +292,8 @@ class CoursesListView(generic.ListView):
             semester_list.insert(0, semester)
 
         context["semester_list"] = [
-            (a, s) for s, a in utils.grouper(semester_list, 2)
+            (a, s) for s, a in utils.grouper(semester_list, 2) if \
+                a.courseofferings or s.courseofferings
         ]
         return context
 
@@ -293,7 +301,6 @@ class CoursesListView(generic.ListView):
 class CourseTeacherListView(TeacherOnlyMixin,
                             generic.ListView):
     model = CourseOffering
-    template_name = "learning/courses_list.html"
     context_object_name = 'course_list'
     template_name = "learning/courses_list_teacher.html"
 
@@ -317,7 +324,6 @@ class CourseTeacherListView(TeacherOnlyMixin,
 class CourseStudentListView(StudentOnlyMixin,
                             generic.TemplateView):
     model = CourseOffering
-    template_name = "learning/courses_list.html"
     context_object_name = 'course_list'
     template_name = "learning/courses_list_student.html"
 
@@ -376,7 +382,7 @@ class CourseVideoListView(generic.ListView):
 
 class CourseDetailView(generic.DetailView):
     model = Course
-    template_name = "learning/course_detail.html"
+    template_name = "learning/courses/detail.html"
     context_object_name = 'course'
 
     def get_context_data(self, **kwargs):

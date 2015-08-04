@@ -11,4 +11,3 @@ class CourseTranslationOptions(TranslationOptions):
 @register(CourseOffering)
 class CourseOfferingTranslationOptions(TranslationOptions):
     fields = ('description',)
-    fallback_values = '-- sorry, no translation provided --'

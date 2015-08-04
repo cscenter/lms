@@ -12,7 +12,7 @@
           <a href="?year={{ prev_date|date:"Y" }}&month={{ prev_date|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
           <a href="?year={{ next_date|date:"Y" }}&month={{ next_date|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
-        {% if not user_type == 'full' %}
+        {% if user_type != 'full' and user_type != 'public_full' %}
           {% if user.is_teacher and user.is_student %}
           <div class="btn-group">
             <a href="{% url 'calendar_student' %}"
@@ -73,7 +73,11 @@
             {% if forloop.first %}
             <div class="week-num-container">
               <div class="week-num">
-                <a href="{% if user_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ month_date|date:"Y" }}&week={{ week_num }}">{{ week_num }}</a>
+                {% if user_type != 'public_full' %}
+                  <a href="{% if user_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ month_date|date:"Y" }}&week={{ week_num }}">{{ week_num }}</a>
+                {% else %}
+                  {{ week_num }}
+                {% endif %}
               </div>
             </div>
             {% endif %}
