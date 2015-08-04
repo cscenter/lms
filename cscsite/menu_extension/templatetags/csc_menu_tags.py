@@ -16,9 +16,12 @@ from ..models import MenuItemExtension
 
 register = template.Library()
 
+def csc_menu_section(context, menu_name, section_url):
+    return csc_menu(context, menu_name, section_url)
+register.inclusion_tag('menu_section.html', takes_context=True)(csc_menu_section)
 
-def csc_menu(context, menu_name):
-    """Caching version of show_menu template tag"""
+def csc_menu(context, menu_name, section_url=False):
+    """Caching version of show_menu template tag."""
     if menu_name not in CSCMENU_CACHE:
         try:
             menu = Menu.objects.get(name=menu_name)
@@ -42,7 +45,10 @@ def csc_menu(context, menu_name):
     else:
         flattened = CSCMENU_CACHE[menu_name]
 
-    flattened_copy = copy.deepcopy(flattened)
+    if section_url:
+        flattened_copy = copy.deepcopy([x for x in flattened if x.url.startswith(section_url)])
+    else:
+        flattened_copy = copy.deepcopy(flattened)
 
     def allowed_for_user(item, user, **kwargs):
         """Validate item visibility for current user"""

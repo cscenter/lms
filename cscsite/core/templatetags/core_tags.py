@@ -48,3 +48,9 @@ def getattribute(value, arg):
         return value[int(arg)]
     else:
         return None
+
+
+@register.filter
+def startswith(value, arg):
+    """Usage, {% if value|startswith:"arg" %}"""
+    return value.startswith(arg)

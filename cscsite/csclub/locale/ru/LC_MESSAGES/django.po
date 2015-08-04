@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-31 12:27+0300\n"
+"POT-Creation-Date: 2015-08-04 11:24+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,11 +19,23 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: csclub/templates/base.html:56
+#: csclub/templates/base.html:48
+msgid "Supervision"
+msgstr "Курирование"
+
+#: csclub/templates/base.html:52
+msgid "Admin"
+msgstr "Админка"
+
+#: csclub/templates/base.html:58
+msgid "Club city"
+msgstr "Город клуба"
+
+#: csclub/templates/base.html:91
 msgid "Computer Science Club, 2007–15 гг."
 msgstr ""
 
-#: csclub/templates/base.html:73
+#: csclub/templates/base.html:108
 msgid "close all"
 msgstr "Закрыть все"
 
@@ -46,3 +58,9 @@ msgstr "Все новости"
 #: csclub/templates/index.html:25
 msgid "No news yet"
 msgstr "Новостей пока нет"
+
+#~ msgid "Teaching"
+#~ msgstr "Преподавание"
+
+#~ msgid "Studying"
+#~ msgstr "Обучение"

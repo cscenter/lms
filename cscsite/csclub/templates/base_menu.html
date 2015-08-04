@@ -39,11 +39,6 @@
                 </ul>
             </div>
             {% if user.is_authenticated %}
-                {% if user.is_staff %}
-                    <a class="btn" href="{% url 'admin:index' %}" target="_blank" title="Admin section">
-                        <i class="fa fa-lock fa-2x"></i>
-                    </a>
-                {% endif %}
                     <a class="btn" href="{{ user.get_absolute_url }}">
                         <i class="fa fa-cog fa-2x"></i>
                     </a>

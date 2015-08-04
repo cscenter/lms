@@ -28,8 +28,8 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['news_objects'] = News.public.filter(
-            sites__id=settings.SITE_ID,
-            language=get_language())[:3]
+            site__id=settings.SITE_ID,
+            language=get_language()).select_related('city')[:3]
         return context
 
 

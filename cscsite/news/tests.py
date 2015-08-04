@@ -40,12 +40,20 @@ class NewsTests(TestCase):
 
         self.assertIsNotNone(current_site)
         news = NewsFactory.create(language=current_language,
-                                  sites=(current_site,),
+                                  site=current_site,
                                   published=True)
         response = self.client.get(reverse('news_list'))
         self.assertEqual(len(response.context['object_list']), 1)
         news_detail_url = reverse('news_detail', kwargs={'slug': news.slug})
         self.assertEquals(200, self.client.get(news_detail_url).status_code)
+        # Change language
+        news.language = next_language
+        news.save()
+        response = self.client.get(reverse('news_list'))
+        self.assertEqual(len(response.context['object_list']), 0)
+        # Revert back language
+        news.language = current_language
+        news.save()
 
         # Trying to get first news in other language
         # TODO: uncomment after delete LANGUAGE_CODE from test.py settings
@@ -56,39 +64,9 @@ class NewsTests(TestCase):
         
         # Add news to other site
         news2 = NewsFactory.create(language=current_language,
-                                   sites=(other_site,),
+                                   site=other_site,
                                    published=True)
         response = self.client.get(reverse('news_list'))
         self.assertEqual(len(response.context['object_list']), 1)
         news_other_url = reverse('news_detail', kwargs={'slug': news2.slug})
         self.assertEquals(404, self.client.get(news_other_url).status_code)
-        # Add news to both sites
-        news_common = NewsFactory.create(language=current_language, sites=sites,
-                                         published=True)
-        response = self.client.get(reverse('news_list'))
-        self.assertEqual(len(response.context['object_list']), 2)
-        news_common_url = reverse('news_detail', kwargs={'slug': news_common.slug})
-        self.assertEquals(200, self.client.get(news_common_url).status_code)
-        # Change language for common_news
-        news_common.language = next_language
-        news_common.save()
-        response = self.client.get(reverse('news_list'))
-        self.assertEqual(len(response.context['object_list']), 1)
-
-
-
-
-        
-
-        # news1.published = True
-        # news1.save()
-        # response = self.client.get(reverse('index'))
-        # self.assertItemsEqual(response.context['news_objects'], [news1])
-
-        # last3_news = NewsFactory.create_batch(3,
-        #   language=get_language(), sites=(current_site,), published=True)
-        # response = self.client.get(reverse('index'))
-        # self.assertEqual(len(response.context['news_objects']), 3)
-        # self.assertItemsEqual(response.context['news_objects'], last3_news)
-        # self.assertEqual(smart_text(response.content)
-        #                  .count(last3_news[0].get_absolute_url()), 1)
