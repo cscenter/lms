@@ -3,7 +3,23 @@
 var ends_at_touched = false;
 var marks_sheet_unsaved = 0;
 
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
 $(document).ready(function () {
+
+
+    var csrftoken = $.cookie('csrftoken');
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
     //
     // State
     //
@@ -366,4 +382,16 @@ $(document).ready(function () {
             });
 
     }
+
+    $('.dropdown-menu.cities a').click(function() {
+        var link = $(this).attr('href');
+        $.post(link, function( data ) {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Something go wrong. Try to reload page');
+            }
+        });
+        return false;
+    })
 });

@@ -1,0 +1,21 @@
+from django.conf import settings
+from django.http import JsonResponse
+
+from .utils import check_for_city
+
+def set_city(request, city_code):
+    success = False
+    city_code = city_code.replace('-', ' ').upper()
+    if request.method == 'POST':
+        if check_for_city(city_code):
+            if hasattr(request, 'session'):
+                request.session[settings.CITY_SESSION_KEY] = city_code
+            else:
+                response.set_cookie(settings.CITY_COOKIE_NAME, city_code,
+                                    max_age=settings.LANGUAGE_COOKIE_AGE,
+                                    path=settings.LANGUAGE_COOKIE_PATH,
+                                    domain=settings.LANGUAGE_COOKIE_DOMAIN)
+
+            success = True
+
+    return JsonResponse({'success': success})
