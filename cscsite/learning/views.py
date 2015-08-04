@@ -290,7 +290,7 @@ class CoursesListView(generic.ListView):
                                 year=current.year + 1)
             semester.courseofferings = []
             semester_list.insert(0, semester)
-
+        # Hide empty pairs
         context["semester_list"] = [
             (a, s) for s, a in utils.grouper(semester_list, 2) if \
                 a.courseofferings or s.courseofferings

@@ -19,6 +19,9 @@ MEDIA_URL = "/media/"
 DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
 THUMBNAIL_DEBUG = False
 
+CITY_CODE = "RU SPB"
+CITY_SESSION_KEY = CITY_COOKIE_NAME = '_city_code'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
