@@ -18,7 +18,7 @@ from learning.views import \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
-    SemesterListView, CourseDetailView, CourseUpdateView, \
+    CoursesListView, CourseDetailView, CourseUpdateView, \
     CourseOfferingDetailView, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
@@ -154,7 +154,7 @@ urlpatterns = patterns('',
         MarksSheetTeacherImportCSVFromStepicView.as_view(),
         name='markssheet_teacher_csv_import_stepic'),
 
-    url(r"^courses/$", SemesterListView.as_view(),
+    url(r"^courses/$", CoursesListView.as_view(),
         name="course_list"),
     url(r"^courses/(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
         name="course_detail"),

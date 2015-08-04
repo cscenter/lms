@@ -36,7 +36,7 @@ class IndexTests(assertItemsEqualMixin, TestCase):
     def test_news(self):
         current_site = Site.objects.get(pk=settings.SITE_ID)
 
-        news1 = NewsFactory(language=get_language(), sites=(current_site,), published=False)
+        news1 = NewsFactory(language=get_language(), site=current_site, published=False)
         response = self.client.get(reverse('index'))
         self.assertItemsEqual(response.context['news_objects'], [])
         news1.published = True
@@ -45,7 +45,7 @@ class IndexTests(assertItemsEqualMixin, TestCase):
         self.assertItemsEqual(response.context['news_objects'], [news1])
 
         last3_news = NewsFactory.create_batch(3,
-          language=get_language(), sites=(current_site,), published=True)
+          language=get_language(), site=current_site, published=True)
         response = self.client.get(reverse('index'))
         self.assertEqual(len(response.context['news_objects']), 3)
         self.assertItemsEqual(response.context['news_objects'], last3_news)

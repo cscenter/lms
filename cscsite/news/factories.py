@@ -5,10 +5,22 @@ import datetime
 import factory
 
 from django.conf import settings
-from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.utils import timezone
 
 from .models import News
+from core.models import City
+
+
+class CityFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = City
+
+    code = factory.Sequence(lambda n: "COD %02d" % n)
+
+class SiteFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Site
 
 
 class NewsFactory(factory.DjangoModelFactory):
@@ -21,20 +33,6 @@ class NewsFactory(factory.DjangoModelFactory):
 
     language = factory.List(list(code for code, name in settings.LANGUAGES))
 
-    @factory.post_generation
-    def sites(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, do nothing.
-            return
+    city = factory.SubFactory(CityFactory)
+    site = factory.SubFactory(SiteFactory)
 
-        if extracted:
-            for site in extracted:
-                self.sites.add(site)
-
-    @factory.post_generation
-    def cities(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            for city in extracted:
-                self.cities.add(city)

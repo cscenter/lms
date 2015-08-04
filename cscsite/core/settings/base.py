@@ -222,6 +222,7 @@ PIPELINE_JS = {
             'js/vendor/marked.js',
             'js/vendor/bootstrap.min.js',
             'js/vendor/jquery.jgrowl.min.js',
+            'js/vendor/jquery.cookie.js',
             'js/main.js',
         ),
         'output_filename': 'js/dist/base.js',

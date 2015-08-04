@@ -250,9 +250,9 @@ class CalendarFullView(LoginRequiredMixin,
     user_type = 'full'
 
 
-class SemesterListView(generic.ListView):
+class CoursesListView(generic.ListView):
     model = Semester
-    template_name = "learning/semester_list.html"
+    template_name = "learning/courses_list.html"
 
     def get_queryset(self):
         return (self.model.objects
@@ -261,7 +261,7 @@ class SemesterListView(generic.ListView):
                                   "courseoffering_set__teachers"))
 
     def get_context_data(self, **kwargs):
-        context = (super(SemesterListView, self)
+        context = (super(CoursesListView, self)
                    .get_context_data(**kwargs))
         # skip summer semesters
         semester_list = [s for s in context["semester_list"]

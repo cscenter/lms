@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from modeltranslation.admin import TranslationAdmin
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
 from core.models import apply_related_spec
@@ -9,6 +10,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse
+
 
 from users.models import CSCUser
 
@@ -19,7 +21,7 @@ class RelatedSpecMixin(object):
         return apply_related_spec(qs, self.related_spec)
 
 
-class CourseAdmin(UbereditorMixin, admin.ModelAdmin):
+class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
     pass
 
 

@@ -42,9 +42,8 @@ class News(TimeStampedModel):
                    .format(n_par=SPLIT_DEFAULT_PARAGRAPHS,
                            marker=escape(SPLIT_MARKER))))
 
-    cities = models.ManyToManyField(City, blank=True)
-
-    sites = models.ManyToManyField(Site)
+    city = models.ForeignKey(City, null=True, blank=True)
+    site = models.ForeignKey(Site)
 
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,

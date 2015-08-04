@@ -1,7 +1,8 @@
 {% load i18n %}
 {% load pipeline %}
 {% load staticfiles %}
-{% load csc_menu from csc_menu_tags %}
+{% load csc_menu_tags %}
+{% load startswith from core_tags %}
 {% load sitemetrics %}
 
 {% get_current_language as LANGUAGE_CODE %}
@@ -37,7 +38,41 @@
   </head>
   <body class="tex2jax_ignore">
 
+    <div class="container _top">
+      {% if request.user.is_authenticated %}
+      <ul>
+        {% if request.user.is_curator %}
+        <li class="_curator">
+            <a href="{% url 'staff_exports' %}">
+                {% trans 'Supervision' %}
+            </a>
+        </li>
+        <li class="_admin">
+            <i class="fa fa-lock"></i> <a href="{% url 'admin:index' %}" target="_blank" title="Admin section">{% trans 'Admin' %}</a>
+        </li>
+        {% endif %}
+      </ul>
+      {% endif %}
+      
+      {% trans 'City' %}: <div class="btn-group"><a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.city.name }}</a>
+      <ul class="dropdown-menu pull-right cities">
+          {% for city in CITIES_LIST %}
+              <li>
+                  <a href="{% url 'set_city' city_code=city.code|slugify %}">{{ city.name }}</a>
+              </li>
+          {% endfor %}
+      </ul></div>
+
+
+    </div>
+
+
     {% csc_menu "compsciclub_"|add:LANGUAGE_CODE %}
+
+    {% if request.path|startswith:"/staff/" %}
+        {% csc_menu_section "compscicenter" "/staff/" %}
+    {% endif %}
+
 
     {% block content %}
     <div class="container">
