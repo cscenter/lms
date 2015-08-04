@@ -10,7 +10,7 @@ DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
 run:
 	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
-	cd cscsite && python manage.py runserver $(DJANGO_POSTFIX) $(PORT)
+	cd cscsite && python manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
 
 migrate:
 	python cscsite/manage.py migrate $(DJANGO_POSTFIX)
@@ -91,6 +91,10 @@ less: less_center less_club
 # Mac users tip: `brew install fswatch`
 less_watch:
 	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less
+
+less_watch_club:
+	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_club
+
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
