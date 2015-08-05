@@ -8,7 +8,7 @@ from django.conf import settings
 
 def forwards_func(apps, schema_editor):
     # Add cities
-    City = apps.get_model('learning', 'City')
+    City = apps.get_model('core', 'City')
     db_alias = schema_editor.connection.alias
     City.objects.using(db_alias).bulk_create([
         City(code="RU SPB", name="Saint Petersburg"),
@@ -39,6 +39,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('learning', '0001_initial'),
+        ('core', '0002_city'),
     ]
 
     operations = [
