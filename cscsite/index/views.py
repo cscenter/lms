@@ -7,6 +7,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.utils.translation import get_language, ugettext_lazy as _
 from django.views import generic
@@ -27,9 +28,13 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['news_objects'] = News.public.filter(
+        queryset = News.public.filter(
             site__id=settings.SITE_ID,
-            language=get_language()).select_related('city')[:3]
+            language=get_language()).select_related('city')
+        if hasattr(self.request, 'city'):
+            queryset = queryset.filter(
+                Q(city__pk=self.request.city.code) | Q(city__isnull=True))
+        context['news_objects'] = queryset[:3]
         return context
 
 

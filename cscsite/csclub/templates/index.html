@@ -13,7 +13,7 @@
                 {% for news in news_objects %}
                     <article>
                         <div class="post-date">
-                        {{ news.created|date }}{% if news.city %} | {{ news.city }}{% endif %}{% comment %} | <a href="">Melissa Sing </a> <!--  <span><a href="">11 Comments</a></span> -->{% endcomment %}
+                        {{ news.created|date }} | {% if news.city %}{{ news.city }}{% else %}{% trans 'All cities' %}{% endif %}{% comment %} | <a href="">Melissa Sing </a> <!--  <span><a href="">11 Comments</a></span> -->{% endcomment %}
                         </div>    
                         <h2><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h2>
                         <p class="lead">{{ news.text.excerpt|safe }} {% if news.text.has_more %}<br><a href="{% url 'news_detail' slug=news.slug %}">{% trans "Read more" %}</a>

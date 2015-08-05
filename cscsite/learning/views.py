@@ -197,6 +197,9 @@ class CalendarMixin(object):
                                 'course_offering__semester'))
         if self.request.site.domain == 'compsciclub.ru':
             q = q.filter(course_offering__is_open=True)
+            if hasattr(self.request, 'city'):
+                q = q.filter(Q(course_offering__city__pk=self.request.city.code) 
+                             | Q(course_offering__city__isnull=True))
         return q
 
     def get_context_data(self, *args, **kwargs):
@@ -266,6 +269,10 @@ class CoursesListView(generic.ListView):
             .order_by('course__name'))
         if self.request.site.domain == 'compsciclub.ru':
             co_queryset = co_queryset.filter(is_open=True)
+            if hasattr(self.request, 'city'):
+                co_queryset = co_queryset.filter(
+                    Q(city__pk=self.request.city.code) 
+                    | Q(city__isnull=True))
         q = (self.model.objects.prefetch_related(
                 Prefetch(
                     'courseoffering_set',
