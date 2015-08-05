@@ -89,6 +89,10 @@ urlpatterns = solid_i18n_patterns(
     url(r"^schedule/$",
         CalendarClubScheduleView.as_view(),
         name="public_schedule"),
+    # Teachers/Lecturers
+    url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
+    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
+        name='teacher_detail'),
 )
 
 urlpatterns += patterns('',
@@ -102,9 +106,6 @@ urlpatterns += patterns('',
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
     url(r'^private/enrollment_gform_callback/',
         EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
-    url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
-    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
-        name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
     url(r'^users/(?P<pk>\d+)/reference/add$',

@@ -58,8 +58,10 @@ class TeachersView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        teacher_pk = user_model.group_pks.TEACHER_CENTER
-        return user_model.objects.filter(groups__pk=teacher_pk)
+        teacher_groups = [user_model.group_pks.TEACHER_CLUB]
+        if self.request.site.domain != 'compsciclub.ru':
+            teacher_groups.append(user_model.group_pks.TEACHER_CENTER)
+        return user_model.objects.filter(groups__in=teacher_groups)
 
 
 class RobotsView(generic.TemplateView):

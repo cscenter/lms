@@ -344,6 +344,13 @@ class CourseStudentListView(StudentOnlyMixin,
                                'course__name')
                      .select_related('course', 'semester')
                      .prefetch_related('teachers'))
+
+        if self.request.site.domain == 'compsciclub.ru':
+            available = available.filter(is_open=True)
+            if hasattr(self.request, 'city'):
+                available = available.filter(
+                    Q(city__pk=self.request.city.code) 
+                    | Q(city__isnull=True))
         enrolled_on = (Enrollment.objects
                        .filter(student=self.request.user)
                        .order_by('course_offering__semester__year',
