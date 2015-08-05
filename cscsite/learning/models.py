@@ -257,6 +257,8 @@ class CourseOfferingNews(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Venue(models.Model):
+    city = models.ForeignKey(City, null=True, blank=True, \
+                                   default=settings.CITY_CODE)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(
         _("Venue|Address"),
