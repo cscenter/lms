@@ -42,6 +42,22 @@ class CSCUserChangeForm(UserChangeForm):
         fields = '__all__'
         model = CSCUser
 
+    def clean(self):
+        cleaned_data = super(CSCUserChangeForm, self).clean()
+        enrollment_year = cleaned_data.get('enrollment_year')
+        groups = [x.pk for x in cleaned_data.get('groups', [])]
+        if self.instance.group_pks.STUDENT_CENTER in groups \
+           and enrollment_year is None:
+            self.add_error('enrollment_year', ValidationError(
+                _("CSCUser|enrollment year should be provided for students")))
+
+        graduation_year = cleaned_data.get('graduation_year')
+        if self.instance.group_pks.GRADUATE_CENTER in groups \
+           and graduation_year is None:
+            self.add_error('graduation_year', ValidationError(
+                _("CSCUser|graduation year should be provided for graduates")))
+
+
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
     model = OnlineCourseRecord

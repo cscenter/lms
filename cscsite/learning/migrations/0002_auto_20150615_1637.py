@@ -11,7 +11,7 @@ def forwards_func(apps, schema_editor):
     City = apps.get_model('learning', 'City')
     db_alias = schema_editor.connection.alias
     City.objects.using(db_alias).bulk_create([
-        City(code="RU LED", name="Saint Petersburg"),
+        City(code="RU SPB", name="Saint Petersburg"),
         City(code="RU KZN", name="Kazan"),
     ])
     # Add venues
