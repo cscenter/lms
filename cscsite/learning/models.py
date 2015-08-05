@@ -16,6 +16,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist, \
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.encoding import smart_text, python_2_unicode_compatible
@@ -259,6 +260,7 @@ class CourseOfferingNews(TimeStampedModel):
 class Venue(models.Model):
     city = models.ForeignKey(City, null=True, blank=True, \
                                    default=settings.CITY_CODE)
+    sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(
         _("Venue|Address"),

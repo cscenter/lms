@@ -12,6 +12,7 @@ from calendar import Calendar
 from collections import OrderedDict, defaultdict
 from itertools import chain
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
@@ -819,11 +820,17 @@ class VenueListView(generic.ListView):
     model = Venue
     template_name = "learning/venue_list.html"
 
+    def get_queryset(self):
+        q = Venue.objects.filter(sites__pk=settings.SITE_ID)
+        if hasattr(self.request, 'city'):
+            q = q.filter(
+                Q(city__pk=self.request.city.code) | Q(city__isnull=True))
+        return q
+
 
 class VenueDetailView(generic.DetailView):
     model = Venue
     template_name = "learning/venue_detail.html"
-
 
 class AssignmentStudentListView(StudentOnlyMixin,
                                 generic.ListView):
