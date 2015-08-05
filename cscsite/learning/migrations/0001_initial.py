@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='City',
             fields=[
-                ('code', models.CharField(help_text='This should be UN/LOCODE, e.g. "RU LED"', max_length=6, serialize=False, verbose_name='PK|Code', primary_key=True)),
+                ('code', models.CharField(help_text='This should be UN/LOCODE, e.g. "RU SPB"', max_length=6, serialize=False, verbose_name='PK|Code', primary_key=True)),
                 ('name', models.CharField(max_length=255, verbose_name='City|Name')),
             ],
             options={
