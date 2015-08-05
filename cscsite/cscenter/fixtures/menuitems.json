@@ -94,7 +94,7 @@
   "fields": {
     "parent": 1,
     "level": 1,
-    "url": "/learning/assignments/",
+    "url": "",
     "menu": 1,
     "rank": 3,
     "caption": "Learning",
@@ -107,7 +107,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "/learning/assignments/",
+    "url": "",
     "menu": 1,
     "rank": 0,
     "caption": "Assignments",
@@ -120,7 +120,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "/learning/timetable/",
+    "url": "",
     "menu": 1,
     "rank": 1,
     "caption": "My timetable",
@@ -133,7 +133,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "/learning/full-calendar/",
+    "url": "",
     "menu": 1,
     "rank": 2,
     "caption": "Calendar",
@@ -146,7 +146,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "/learning/courses/",
+    "url": "",
     "menu": 1,
     "rank": 3,
     "caption": "My courses",
@@ -391,14 +391,6 @@
 },
 {
   "fields": {
-    "root_item": 1,
-    "name": "compscicenter"
-  },
-  "model": "treemenus.menu",
-  "pk": 1
-},
-{
-  "fields": {
     "parent": null,
     "level": 0,
     "url": "",
@@ -503,11 +495,11 @@
 },
 {
   "fields": {
-    "parent": 31,
-    "level": 1,
+    "parent": 41,
+    "level": 2,
     "url": "/cscenter/",
     "menu": 2,
-    "rank": 5,
+    "rank": 2,
     "caption": "CS \u0446\u0435\u043d\u0442\u0440",
     "named_url": ""
   },
@@ -516,13 +508,13 @@
 },
 {
   "fields": {
-    "parent": 31,
-    "level": 1,
-    "url": "",
+    "parent": 41,
+    "level": 2,
+    "url": "/other/videos/",
     "menu": 2,
-    "rank": 6,
+    "rank": 1,
     "caption": "\u0412\u0438\u0434\u0435\u043e",
-    "named_url": "course_video_list"
+    "named_url": ""
   },
   "model": "treemenus.menuitem",
   "pk": 40
@@ -533,7 +525,7 @@
     "level": 1,
     "url": "/other/",
     "menu": 2,
-    "rank": 7,
+    "rank": 5,
     "caption": "\u041f\u0440\u043e\u0447\u0435\u0435",
     "named_url": ""
   },
@@ -643,6 +635,157 @@
   },
   "model": "treemenus.menuitem",
   "pk": 49
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 6,
+    "caption": "Learning",
+    "named_url": "assignment_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 50
+},
+{
+  "fields": {
+    "parent": 50,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 0,
+    "caption": "Assignments",
+    "named_url": "assignment_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 51
+},
+{
+  "fields": {
+    "parent": 50,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 1,
+    "caption": "My timetable",
+    "named_url": "timetable_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 52
+},
+{
+  "fields": {
+    "parent": 50,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 2,
+    "caption": "Calendar",
+    "named_url": "calendar_full_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 53
+},
+{
+  "fields": {
+    "parent": 50,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 3,
+    "caption": "My courses",
+    "named_url": "course_list_student"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 54
+},
+{
+  "fields": {
+    "parent": 31,
+    "level": 1,
+    "url": "",
+    "menu": 2,
+    "rank": 7,
+    "caption": "Teaching",
+    "named_url": "assignment_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 55
+},
+{
+  "fields": {
+    "parent": 55,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 0,
+    "caption": "Assignments",
+    "named_url": "assignment_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 56
+},
+{
+  "fields": {
+    "parent": 55,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 1,
+    "caption": "Timetable",
+    "named_url": "timetable_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 57
+},
+{
+  "fields": {
+    "parent": 55,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 2,
+    "caption": "Calendar",
+    "named_url": "calendar_full_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 58
+},
+{
+  "fields": {
+    "parent": 55,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 3,
+    "caption": "My courses",
+    "named_url": "course_list_teacher"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 59
+},
+{
+  "fields": {
+    "parent": 55,
+    "level": 2,
+    "url": "",
+    "menu": 2,
+    "rank": 4,
+    "caption": "Marks sheet",
+    "named_url": "markssheet_teacher_dispatch"
+  },
+  "model": "treemenus.menuitem",
+  "pk": 60
+},
+{
+  "fields": {
+    "root_item": 1,
+    "name": "compscicenter"
+  },
+  "model": "treemenus.menu",
+  "pk": 1
 },
 {
   "fields": {

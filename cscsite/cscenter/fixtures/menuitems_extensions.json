@@ -136,7 +136,7 @@
     "staff_only": false,
     "groups": [],
     "classes": "",
-    "select_patterns": " "
+    "select_patterns": "^/learning/calendar/"
   },
   "model": "menu_extension.menuitemextension",
   "pk": 10
@@ -292,7 +292,7 @@
     "staff_only": false,
     "groups": [],
     "classes": "",
-    "select_patterns": " "
+    "select_patterns": "^/teaching/calendar/"
   },
   "model": "menu_extension.menuitemextension",
   "pk": 21
@@ -688,5 +688,163 @@
   },
   "model": "menu_extension.menuitemextension",
   "pk": 49
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [
+      5
+    ],
+    "classes": "for-students",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 50
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "assignments_student",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 51
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": "  ^/learning/calendar/"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 52
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 53
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "courseoffering_news",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 54
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [
+      6
+    ],
+    "classes": "for-teachers",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 55
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "assignments_teacher",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " ^/courses/.*/assignments/add$\r\n^/courses/.*/assignments/\\d+/edit$"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 56
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " ^/teaching/calendar/"
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 57
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 58
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "courseoffering_news",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 59
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 60
 }
 ]
