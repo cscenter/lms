@@ -28,7 +28,8 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
-from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
+from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED, \
+    City
 from core.notifications import get_unread_notifications_cache
 from learning import slides
 from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
@@ -169,6 +170,11 @@ class CourseOffering(TimeStampedModel):
         related_name='enrolled_on_set',
         blank=True,
         through='Enrollment')
+    city = models.ForeignKey(City, null=True, blank=True, \
+                                   default=settings.CITY_CODE)
+    language = models.CharField(max_length=5, db_index=True,
+                                choices=settings.LANGUAGES,
+                                default=settings.LANGUAGE_CODE)
 
     class Meta(object):
         ordering = ["-semester", "course__created"]

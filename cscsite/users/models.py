@@ -162,17 +162,6 @@ class CSCUser(AbstractUser):
         super(CSCUser, self).__init__(*args, **kwargs)
         self._original_comment = self.comment
 
-    def clean(self):
-        # avoid checking if the model wasn't yet saved, otherwise exception
-        # will be thrown about missing many-to-many relation
-        if self.pk:
-            if self.is_student and self.enrollment_year is None:
-                raise ValidationError(_("CSCUser|enrollment year should be "
-                                        "provided for students"))
-            if self.is_graduate and self.graduation_year is None:
-                raise ValidationError(_("CSCUser|graduation year should be "
-                                        " provided for graduates"))
-
     def save(self, **kwargs):
         if self.email and not self.yandex_id:
             username, domain = self.email.split("@", 1)
@@ -240,8 +229,12 @@ class CSCUser(AbstractUser):
 
     @property
     def is_student(self):
-        return self.group_pks.STUDENT_CENTER in self._cs_group_pks or \
+        return self.is_student_center or \
                self.group_pks.STUDENT_CLUB in self._cs_group_pks
+
+    @property
+    def is_student_center(self):
+        return self.group_pks.STUDENT_CENTER in self._cs_group_pks
 
     @property
     def is_teacher(self):
