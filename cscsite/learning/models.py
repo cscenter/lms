@@ -147,7 +147,8 @@ class CourseOffering(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         related_name='teaching_set',
-        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
+        limit_choices_to={'groups__in': [CSCUser.group_pks.TEACHER_CENTER,
+            CSCUser.group_pks.TEACHER_CLUB]})
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
