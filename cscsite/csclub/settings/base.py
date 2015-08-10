@@ -26,11 +26,18 @@ MIDDLEWARE_CLASSES = (
     'csclub.middleware.CurrentCityMiddleware',
 )
 
+INSTALLED_APPS += (
+    'registration',
+)
+ACCOUNT_ACTIVATION_DAYS = 3
+INCLUDE_AUTH_URLS = False
+REGISTRATION_FORM = 'csclub.forms.RegistrationUniqueEmailAndUsernameForm'
+
 SOLID_I18N_USE_REDIRECTS = False
 # Redirect from /ru/... to /... if default_lang == 'ru'
 SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
-# FIXME: Remove after Django 1.8.4 is released? 
+# FIXME: Remove after Django 1.8.4 is released?
 # https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS += (
     Path(BASE_DIR, "locale"),

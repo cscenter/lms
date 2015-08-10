@@ -93,9 +93,36 @@ urlpatterns = solid_i18n_patterns(
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
         name='teacher_detail'),
+    # Registration
+    url(r'^', include('registration.backends.default.urls')),
+    # Auth
+    url(r'^login/$', LoginView.as_view(), name='login'),
+    url(r'^users/password_change$',
+        'django.contrib.auth.views.password_change',
+        {'post_change_redirect': 'password_change_complete'},
+        name='password_change'),
+    url(r'^users/password_change/done$',
+        'django.contrib.auth.views.password_change_done',
+        name='password_change_complete'),
+    url(r'^users/password_reset$',
+       'django.contrib.auth.views.password_reset',
+       {'post_reset_redirect' : 'password_reset_done'},
+       name='password_reset'),
+    url(r'^users/password_reset/done$',
+        'django.contrib.auth.views.password_reset_done',
+        name='password_reset_done'),
+    url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+        'django.contrib.auth.views.password_reset_confirm',
+        {'post_reset_redirect' : 'password_reset_complete'},
+       name='password_reset_confirm'),
+    url(r'^users/reset/done$',
+        'django.contrib.auth.views.password_reset_complete',
+        name='password_reset_complete'),
 )
 
 urlpatterns += patterns('',
+    url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
+    
     url(r'^setcity/(?P<city_code>[-\w]+)/$', set_city, name='set_city'),
 )
 
@@ -237,32 +264,8 @@ urlpatterns += patterns('',
 
 
 
-    url(r'^library/', include("library.urls")),
 
-    url(r'^login/$', LoginView.as_view(), name='login'),
-    url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
 
-    url(r'^users/password_change$',
-        'django.contrib.auth.views.password_change',
-        {'post_change_redirect': 'password_change_complete'},
-        name='password_change'),
-    url(r'^users/password_change/done$',
-        'django.contrib.auth.views.password_change_done',
-        name='password_change_complete'),
-    url(r'^users/password_reset$',
-       'django.contrib.auth.views.password_reset',
-       {'post_reset_redirect' : 'password_reset_done'},
-       name='password_reset'),
-    url(r'^users/password_reset/done$',
-        'django.contrib.auth.views.password_reset_done',
-        name='password_reset_done'),
-    url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        'django.contrib.auth.views.password_reset_confirm',
-        {'post_reset_redirect' : 'password_reset_complete'},
-       name='password_reset_confirm'),
-    url(r'^users/reset/done$',
-        'django.contrib.auth.views.password_reset_complete',
-        name='password_reset_complete'),
 
     url(r'^narnia/', include(admin.site.urls)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

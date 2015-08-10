@@ -8,16 +8,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-04 15:46+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-08-07 17:32+0300\n"
+"PO-Revision-Date: 2015-08-07 17:32+0230\n"
+"Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Translated-Using: django-rosetta 0.7.6\n"
+
+#: csclub/forms.py:19
+msgid "This username is already in use. Please supply a different username."
+msgstr "Извините, но никнейм уже занят."
 
 #: csclub/templates/base.html:48
 msgid "Supervision"
@@ -29,35 +33,156 @@ msgstr "Админка"
 
 #: csclub/templates/base.html:58
 msgid "City"
-msgstr ""
+msgstr "Город"
 
-#: csclub/templates/base.html:91
+#: csclub/templates/base.html:65
+msgid "Language"
+msgstr "Язык"
+
+#: csclub/templates/base.html:107
 msgid "Computer Science Club, 2007–15 гг."
 msgstr ""
 
-#: csclub/templates/base.html:108
+#: csclub/templates/base.html:124
 msgid "close all"
 msgstr "Закрыть все"
 
-#: csclub/templates/base_menu.html:48
+#: csclub/templates/base_menu.html:34
 msgid "Login"
 msgstr "Логин"
 
-#: csclub/templates/index.html:10
+#: csclub/templates/base_menu.html:37
+#: csclub/templates/registration/registration_form.html:10
+msgid "Registration"
+msgstr "Регистрация"
+
+#: csclub/templates/index.html:11
 msgid "Latest News"
 msgstr "Последние новости"
 
-#: csclub/templates/index.html:19
+#: csclub/templates/index.html:16
+msgid "All cities"
+msgstr "Все города"
+
+#: csclub/templates/index.html:20
 msgid "Read more"
 msgstr "Читать далее"
 
-#: csclub/templates/index.html:23
+#: csclub/templates/index.html:24
 msgid "All news"
 msgstr "Все новости"
 
-#: csclub/templates/index.html:25
+#: csclub/templates/index.html:26
 msgid "No news yet"
 msgstr "Новостей пока нет"
+
+#: csclub/templates/registration/activate.html:5
+msgid "Account activation failed."
+msgstr "Не удалось активировать аккаунт."
+
+#: csclub/templates/registration/activation_complete.html:4
+msgid "Account Activated"
+msgstr "Аккаунт успешно активирован."
+
+#: csclub/templates/registration/activation_complete.html:8
+msgid "Your account is now activated."
+msgstr "Ваш аккаунт ещё не активирован."
+
+#: csclub/templates/registration/activation_complete.html:10
+msgid "You can log in."
+msgstr "Вы можете войти."
+
+#: csclub/templates/registration/activation_email.html:7
+msgid "registration"
+msgstr "регистрация"
+
+#: csclub/templates/registration/activation_email.html:12
+#, python-format
+msgid ""
+"\n"
+"    You (or someone pretending to be you) have asked to register an account at\n"
+"    %(site_name)s.  If this wasn't you, please ignore this email\n"
+"    and your address will be removed from our records.\n"
+"    "
+msgstr ""
+"\n"
+"С вашего email поступила заявка на регистрацию на сайте\n"
+"%(site_name)s. Если это были не Вы, пожалуйста, проигнорируйте письмо."
+
+#: csclub/templates/registration/activation_email.html:19
+#, python-format
+msgid ""
+"\n"
+"    To activate this account, please click the following link within the next\n"
+"    %(expiration_days)s days:\n"
+"    "
+msgstr ""
+"\n"
+"Чтобы активировать аккаунт, пожалуйста, нажмите на ссылку ниже. Будьте внимательны, через %(expiration_days)s дня ключ активации будет просрочен:"
+
+#: csclub/templates/registration/activation_email.html:31
+#, python-format
+msgid ""
+"\n"
+"    Sincerely,\n"
+"    %(site_name)s Management\n"
+"    "
+msgstr ""
+"\n"
+"С уважением, администрация %(site_name)s"
+
+#: csclub/templates/registration/activation_email.txt:3
+#, python-format
+msgid ""
+"\n"
+"You (or someone pretending to be you) have asked to register an account at\n"
+"%(site_name)s.  If this wasn't you, please ignore this email\n"
+"and your address will be removed from our records.\n"
+msgstr ""
+
+#: csclub/templates/registration/activation_email.txt:8
+#, python-format
+msgid ""
+"\n"
+"To activate this account, please click the following link within the next\n"
+"%(expiration_days)s days:\n"
+msgstr ""
+
+#: csclub/templates/registration/activation_email.txt:15
+#, python-format
+msgid ""
+"\n"
+"Sincerely,\n"
+"%(site_name)s Management\n"
+msgstr ""
+
+#: csclub/templates/registration/activation_email_subject.txt:1
+msgid "Account activation on"
+msgstr ""
+
+#: csclub/templates/registration/registration_closed.html:4
+msgid "Registration is closed"
+msgstr "Регистрация на данный момент закрыта"
+
+#: csclub/templates/registration/registration_closed.html:7
+msgid "Sorry, but registration is closed at this moment. Come back later."
+msgstr "Извините, но регистрация временно закрыта. Возвращайтесь позже."
+
+#: csclub/templates/registration/registration_complete.html:4
+msgid "Activation email sent"
+msgstr "Письмо с ключом активации успешно отправлено."
+
+#: csclub/templates/registration/registration_complete.html:7
+msgid "Please check your email to complete the registration process."
+msgstr "Проверьте ваш почтовый ящик для завершения процесса регистрации."
+
+#: csclub/templates/registration/registration_form.html:5
+msgid "Register for an account"
+msgstr "Регистрация аккаунта на"
+
+#: csclub/templates/registration/registration_form.html:14
+msgid "Submit"
+msgstr "Отправить"
 
 #~ msgid "Club city"
 #~ msgstr "Город клуба"
