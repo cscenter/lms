@@ -15,7 +15,6 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def htmlpage_url(context, url_name, **kwargs):
     """Chaching flatpage urls. Check url exist in DB"""
-    global FLATPAGE_URL_CACHE
     if not FLATPAGE_URL_CACHE:
         if 'request' in context:
             site_pk = get_current_site(context['request']).pk
