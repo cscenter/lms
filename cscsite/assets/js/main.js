@@ -97,6 +97,8 @@ $(document).ready(function () {
         })();
     };
 
+    var editors = [];
+
     $ubereditors.each(function(i, textarea) {
         var $textarea = $(textarea);
         var $container = $("<div/>").insertAfter($textarea);
@@ -133,6 +135,7 @@ $(document).ready(function () {
         };
 
         var editor = new EpicEditor(opts);
+
 
         editor.load();
 
@@ -171,6 +174,24 @@ $(document).ready(function () {
                 };
             });
         }
+
+        editors.push(editor);
+    });
+
+
+    // Tab toggle events
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var activeTab = $($(e.target).attr('href'));
+        var editorIframes = activeTab.find('iframe[id^=epiceditor-]');
+        var editorIDs = [];
+        editorIframes.each(function(i, iframe) {
+            editorIDs.push($(iframe).attr('id'));
+        });
+        $(editors).each(function(i, editor) {
+            if ($.inArray(editor._instanceId, editorIDs) !== -1) {
+                editor.reflow();
+            }
+        });
     });
 
     //
