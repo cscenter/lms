@@ -24,20 +24,6 @@
             </ul>
         </div>
         <div class="col-xs-3 login">
-            <div class="btn-group">
-                <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ LANGUAGE_CODE|language_name_local}}
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    {% get_language_info_list for LANGUAGES as languages %}
-                    {% for language in languages %}
-                        <li>
-                            <a href="{% if language.code != 'ru' %}/{{ language.code }}{% endif %}{% if LANGUAGE_CODE != 'ru' %}{{request.get_full_path|slice:'3:'}}{% else %}{{request.get_full_path}}{% endif %}">{{ language.name_local }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
             {% if user.is_authenticated %}
                     <a class="btn" href="{{ user.get_absolute_url }}">
                         <i class="fa fa-cog fa-2x"></i>
@@ -46,6 +32,9 @@
                 {% else %}
                 <a href="{% url 'login' %}" class="login-link">
                   {% trans "Login" %}
+                </a>
+                <a href="{% url 'registration_register' %}" class="reg">
+                  {% trans "Registration" %}
                 </a>
             {% endif %}
         </div>

@@ -65,11 +65,18 @@ h4.no-top-margin {
         }
     }
 
-    .btn-group > a {
-        text-decoration: none;
-        &:hover {
-            border-bottom: 1px dashed;
-        }
+    .btn-group {
+      vertical-align: inherit;
+      > a {
+          text-decoration: none;
+          &:hover {
+              border-bottom: 1px dashed;
+          }
+      }
+
+      .dropdown-menu {
+        min-width: 100px;
+      }
     }
   }
 }
