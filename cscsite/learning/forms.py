@@ -1,13 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
-from crispy_forms.bootstrap import StrictButton
+from crispy_forms.bootstrap import StrictButton, Tab, TabHolder
+
 import floppyforms as forms
+from modeltranslation.forms import TranslationModelForm
 
 from core.forms import Ubereditor
 from core.validators import FileValidator
@@ -16,7 +19,6 @@ from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
     Enrollment, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-
 
 CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
@@ -74,27 +76,47 @@ class CourseOfferingNewsForm(forms.ModelForm):
 
 
 class CourseForm(forms.ModelForm):
-    name = forms.CharField(
+    name_ru = forms.CharField(
         label=_("Course|name"),
         required=True,
         widget=forms.TextInput(attrs={'autocomplete': 'off',
                                       'autofocus': 'autofocus'}))
-    description = forms.CharField(
+    description_ru = forms.CharField(
         label=_("Course|description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         required=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
+        widget=Ubereditor)
+    description_en = forms.CharField(
+        label=_("Course|description"),
+        required=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor)
 
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div('name', 'description'),
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'RU',
+                    'name_ru',
+                    'description_ru',
+                ),
+                Tab(
+                    'EN',
+                    'name_en',
+                    'description_en',
+                ),
+            ),
             CANCEL_SAVE_PAIR)
-        super(CourseForm, self).__init__(*args, **kwargs)
+        return helper
 
     class Meta:
         model = Course
-        fields = ['name', 'description']
+        fields = ['name_ru', 'name_en', 'description_ru', 'description_en']
+
+
+
 
 
 class CourseClassForm(forms.ModelForm):

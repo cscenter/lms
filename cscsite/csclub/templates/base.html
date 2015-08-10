@@ -43,11 +43,6 @@
       <ul>
         {% if request.user.is_curator %}
         <li class="_curator">
-            <a href="{% url 'staff_exports' %}">
-                {% trans 'Supervision' %}
-            </a>
-        </li>
-        <li class="_admin">
             <i class="fa fa-lock"></i> <a href="{% url 'admin:index' %}" target="_blank" title="Admin section">{% trans 'Admin' %}</a>
         </li>
         {% endif %}
@@ -82,11 +77,6 @@
 
 
     {% csc_menu "compsciclub_"|add:LANGUAGE_CODE %}
-
-    {% if request.path|startswith:"/staff/" %}
-        {% csc_menu_section "compscicenter" "/staff/" %}
-    {% endif %}
-
 
     {% block content_top %}{% endblock content_top %}
     {% block content %}
