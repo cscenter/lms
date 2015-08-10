@@ -17,6 +17,7 @@ from ..models import MenuItemExtension
 register = template.Library()
 
 def csc_menu_section(context, menu_name, section_url):
+    # XXX: Shouldn't depend on full menu array due to NoReverseMatch exception in unnecessary sections
     return csc_menu(context, menu_name, section_url)
 register.inclusion_tag('menu_section.html', takes_context=True)(csc_menu_section)
 
@@ -94,7 +95,7 @@ def children(parent_id, items):
 
 def handle_selected(menu, request):
     class_selected = ' current'
-    for item in menu:            
+    for item in menu:
         if item.children:
             selected_item = handle_selected(item.children, request)
             if selected_item is not None:
