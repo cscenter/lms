@@ -28,7 +28,7 @@ class CurrentCityMiddleware(object):
         if request.session.get(settings.CITY_SESSION_KEY):
             current_city_code = request.session.get(settings.CITY_COOKIE_NAME)
         elif settings.CITY_COOKIE_NAME in request.COOKIES:
-            current_city_code = request.COOKIES[settings.CITY_COOKIE_KEY]
+            current_city_code = request.COOKIES[settings.CITY_COOKIE_NAME]
         else:
             current_city_code = settings.CITY_CODE
 
@@ -36,4 +36,3 @@ class CurrentCityMiddleware(object):
             request.city = [x for x in CITIES_LIST if x.code == current_city_code][0]
         except Exception:
             request.city = [x for x in CITIES_LIST if x.code == settings.CITY_CODE][0]
-
