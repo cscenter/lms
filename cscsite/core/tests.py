@@ -13,7 +13,7 @@ from mock import Mock
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
-from learning.tests.factories import AssignmentNotificationFactory, \
+from learning.factories import AssignmentNotificationFactory, \
     CourseOfferingNewsNotificationFactory, AssignmentStudentFactory
 
 from .management.commands.notify import Command
