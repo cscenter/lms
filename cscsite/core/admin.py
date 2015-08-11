@@ -9,12 +9,12 @@ from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-
+from sitemetrics.models import Keycode
+from modeltranslation.admin import TranslationAdmin
 
 from .forms import Ubereditor
 from .models import City
 
-from sitemetrics.models import Keycode
 
 # Remove groups app from django admin
 admin.site.unregister(Group)
@@ -99,8 +99,7 @@ class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}
 
-class CityAdmin(admin.ModelAdmin):
+class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
 admin.site.register(City, CityAdmin)
-
