@@ -154,13 +154,25 @@ $(document).ready(function () {
             var target = $("#epiceditor-preview", contentDocument).get(0);
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
                 target.innerHTML = marked(_.unescape(target.innerHTML));
-                $container.height($(target).height() + 20);
+                if (!editor.is('fullscreen')) {
+                    var height = Math.max(
+                        $(target).height() + 20,
+                        editor.settings.autogrow.minHeight
+                    );
+                    $container.height(height);
+                }
                 editor.reflow();
             }]);
         });
 
         editor.on('edit', function() {
-            $container.height($(editor.getElement('editor').body).height() + 20);
+            if (!editor.is('fullscreen')) {
+                var height = Math.max(
+                    $(editor.getElement('editor').body).height() + 20,
+                    editor.settings.autogrow.minHeight
+                );
+                $container.height(height);
+            }
             editor.reflow();
         });
 
