@@ -32,23 +32,31 @@ class CourseOfferingPKForm(forms.Form):
 
 
 class CourseOfferingEditDescrForm(forms.ModelForm):
-    description = forms.CharField(
-        label=_("Description"),
-        help_text="{0}; {1}".format(LATEX_MARKDOWN_HTML_ENABLED,
-                                    _("empty description will be "
-                                      "replaced by course description")),
-        widget=Ubereditor)
-
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('description'),
+            TabHolder(
+                Tab(
+                    'RU',
+                    'description_ru',
+                ),
+                Tab(
+                    'EN',
+                    'description_en',
+                ),
+            ),
             CANCEL_SAVE_PAIR)
         super(CourseOfferingEditDescrForm, self).__init__(*args, **kwargs)
 
+        self.fields['description_ru'].required = True
+
     class Meta:
         model = CourseOffering
-        fields = ['description']
+        fields = ['description_ru', 'description_en']
+        widgets = {
+            'description_ru': Ubereditor,
+            'description_en': Ubereditor,
+        }
 
 
 class CourseOfferingNewsForm(forms.ModelForm):
@@ -86,11 +94,7 @@ class CourseForm(forms.ModelForm):
         required=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor)
-    description_en = forms.CharField(
-        label=_("Course|description"),
-        required=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor)
+
 
     @property
     def helper(self):
