@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 
 import re
+import unittest
+import copy
 
 from itertools import chain
 
@@ -21,23 +23,15 @@ from bs4 import BeautifulSoup
 import factory
 from icalendar import Calendar, Event
 
-from learning.tests.factories import StudentProjectFactory, SemesterFactory, \
+from learning.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
-    AssignmentFactory, NonCourseEventFactory, \
-    UserFactory as LearningUserFactory, CourseFactory
+    AssignmentFactory, NonCourseEventFactory, CourseFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
+from .admin import CSCUserCreationForm, CSCUserChangeForm
 from .models import CSCUser, CSCUserReference
-from .admin import CSCUserCreationForm
+from .factories import UserFactory
 
-
-class UserFactory(factory.Factory):
-    class Meta:
-        model = CSCUser
-
-    username = "testuser"
-    password = "test123foobar@!"
-    email = "foo@bar.net"
 
 class CSCUserReferenceFactory(factory.DjangoModelFactory):
     class Meta:
@@ -77,12 +71,17 @@ class UserTests(MyUtilitiesMixin, TestCase):
         should also provide an enrollment year, otherwise they should get
         ValidationError
         """
-        user = CSCUser()
-        user.save()
-        user.groups = [user.group_pks.STUDENT_CENTER]
-        self.assertRaises(ValidationError, user.clean)
-        user.enrollment_year = 2010
-        self.assertIsNone(user.clean())
+        user = UserFactory()
+        user_data = model_to_dict(user)
+        user_data.update({
+            'groups': [user.group_pks.STUDENT_CENTER],
+        })
+        form = CSCUserChangeForm(user_data, instance=user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('enrollment_year', form.errors.keys())
+        user_data.update({'enrollment_year': 2010})
+        form = CSCUserChangeForm(user_data, instance=user)
+        self.assertTrue(form.is_valid())
 
     def test_graduate_should_have_graduation_year(self):
         """
@@ -90,12 +89,17 @@ class UserTests(MyUtilitiesMixin, TestCase):
         should also provide graduation year, otherwise they should get
         ValidationError
         """
-        user = CSCUser()
-        user.save()
-        user.groups = [user.group_pks.GRADUATE_CENTER]
-        self.assertRaises(ValidationError, user.clean)
-        user.graduation_year = 2011
-        self.assertIsNone(user.clean())
+        user = UserFactory()
+        user_data = model_to_dict(user)
+        user_data.update({
+            'groups': [user.group_pks.GRADUATE_CENTER],
+        })
+        form = CSCUserChangeForm(user_data, instance=user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('graduation_year', form.errors.keys())
+        user_data.update({'graduation_year': 2015})
+        form = CSCUserChangeForm(user_data, instance=user)
+        self.assertTrue(form.is_valid())
 
     def test_full_name_contains_patronymic(self):
         """
@@ -171,17 +175,16 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(len(form.select('input[type="submit"]')), 1)
 
     def test_login_works(self):
-        CSCUser.objects.create_user(**UserFactory.attributes())
+        good_user = UserFactory.attributes()
+        CSCUser.objects.create_user(**good_user)
         self.assertNotIn('_auth_user_id', self.client.session)
-        bad_user = UserFactory.attributes()
+        bad_user = copy.copy(good_user)
         bad_user['password'] = "BAD"
-        resp = self.client.post(reverse('login'),
-                                bad_user)
+        resp = self.client.post(reverse('login'), bad_user)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "alert")
-        resp = self.client.post(reverse('login'),
-                                UserFactory.attributes())
+        resp = self.client.post(reverse('login'), good_user)
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
 
@@ -189,11 +192,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
         def assertLoginRedirect(url):
             self.assertRedirects(self.client.get(url),
                                  "{}?next={}".format(settings.LOGIN_URL, url))
-
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = UserFactory.attributes()
+        user = CSCUser.objects.create_user(**user_data)
         url = reverse('assignment_list_teacher')
         assertLoginRedirect(url)
-        self.client.post(reverse('login'), UserFactory.attributes())
+        self.client.post(reverse('login'), user_data)
         assertLoginRedirect(url)
         user.groups = [user.group_pks.STUDENT_CENTER]
         user.save()
@@ -205,8 +208,9 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):
-        CSCUser.objects.create_user(**UserFactory.attributes())
-        login = self.client.login(**UserFactory.attributes())
+        user_data = UserFactory.attributes()
+        CSCUser.objects.create_user(**user_data)
+        login = self.client.login(**user_data)
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
         resp = self.client.get(reverse('logout'))
@@ -215,8 +219,9 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_logout_redirect_works(self):
-        CSCUser.objects.create_user(**UserFactory.attributes())
-        login = self.client.login(**UserFactory.attributes())
+        user_data = UserFactory.attributes()
+        CSCUser.objects.create_user(**user_data)
+        login = self.client.login(**user_data)
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('course_video_list')})
         self.assertRedirects(resp, reverse('course_video_list'),
@@ -265,10 +270,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_user_can_update_profile(self):
         test_note = "The best user in the world"
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = UserFactory.attributes()
+        user = CSCUser.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertFalse(resp.context['is_extended_profile_available'])
-        self.client.login(**UserFactory.attributes())
+        self.client.login(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.context['user_object'], user)
         self.assertTrue(resp.context['is_extended_profile_available'])
@@ -289,8 +295,9 @@ class UserTests(MyUtilitiesMixin, TestCase):
         profiles
         """
         test_review = "CSC are the bollocks"
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
-        self.client.login(**UserFactory.attributes())
+        user_data = UserFactory.attributes()
+        user = CSCUser.objects.create_user(**user_data)
+        self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
         user.groups = [user.group_pks.GRADUATE_CENTER]
@@ -309,8 +316,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         It should be impossible to create users with equal names
         """
-        CSCUser.objects.create_user(**UserFactory.attributes())
-        form_data = {'username': "testuser",
+        user = UserFactory()
+        form_data = {'username': user.username,
                      'password1': "test123foobar@!",
                      'password2': "test123foobar@!"}
         form = CSCUserCreationForm(data=form_data)
@@ -340,7 +347,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
     def test_email_on_detail(self):
         """Email field should be displayed only to curators (superuser)"""
         student_mail = "student@student.mail"
-        student = LearningUserFactory.create(
+        student = UserFactory.create(
             groups=['Student [CENTER]'],
             email = student_mail)
         self.doLogin(student)
@@ -348,7 +355,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(url)
         self.assertNotContains(resp, student_mail)
         # check with curator credentials
-        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         resp = self.client.get(url)
         self.assertContains(resp, student_mail)
@@ -434,7 +441,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = LearningUserFactory.create(groups=['Student [CENTER]'], enrollment_year=2011)
+        student = UserFactory.create(groups=['Student [CENTER]'], enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         response = self.client.get(url)
@@ -443,7 +450,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         button = soup.find('a', text=_("Create reference"))
         self.assertIsNone(button)
         # check with curator credentials
-        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         response = self.client.get(url)
         self.assertEquals(response.context['has_curator_permissions'], True)
@@ -453,10 +460,10 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_user_detail_reference_list_view(self):
         """Check reference list appears on student profile page for curators only"""
-        student = LearningUserFactory.create(groups=['Student [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         EnrollmentFactory.create()
         CSCUserReferenceFactory.create(student=student)
-        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        curator = UserFactory.create(is_superuser=True, is_staff=True)
         url = reverse('user_detail', args=[student.pk])
         self.doLogin(curator)
         response = self.client.get(url)
@@ -475,7 +482,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         """Check FIO substitues in signature input field
            Check redirect to reference detail after form submit
         """
-        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         user = CSCUser.objects.create_user(**UserFactory.attributes())
         form_url = reverse('user_reference_add', args=[user.id])
@@ -484,7 +491,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         sig_input = soup.find(id="id_signature")
         self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
 
-        student = LearningUserFactory.create(groups=['Student [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         reference = CSCUserReferenceFactory.build(student=student)
         expected_reference_id = 1
         form_url = reverse('user_reference_add', args=[student.id])
@@ -497,7 +504,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = LearningUserFactory.create(groups=['Student [CENTER]'])
+        student = UserFactory.create(groups=['Student [CENTER]'])
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
@@ -519,7 +526,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
                              args=[student.id, reference.id])
         self.doLogin(student)
         self.assertLoginRedirect(url)
-        curator = LearningUserFactory.create(is_superuser=True, is_staff=True)
+        curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         response  = self.client.get(url)
         self.assertEqual(response.context['object'].note, "TEST")

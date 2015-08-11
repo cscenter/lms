@@ -2,45 +2,17 @@
 from __future__ import unicode_literals, absolute_import
 
 import datetime
-from django.contrib.auth.models import Group
-from django.utils import timezone
-
 import factory
 
-from learning.models import Course, Semester, CourseOffering, CourseOfferingNews, \
+from django.utils import timezone
+
+from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    AssignmentAttachment, \
+    AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, StudentProject
-from users.models import CSCUser
 
-
-class UserFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = CSCUser
-
-    username = factory.Sequence(lambda n: "testuser%03d" % n)
-    password = "test123foobar@!"
-    email = "user@foobar.net"
-    first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
-    last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
-
-    @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            for group_name in extracted:
-                self.groups.add(Group.objects.get(name=group_name))
-
-    @factory.post_generation
-    def raw_password(self, create, extracted, **kwargs):
-        if not create:
-            return
-        raw_password = self.password
-        self.set_password(raw_password)
-        self.save()
-        self.raw_password = raw_password
+from users.factories import UserFactory
 
 
 class CourseFactory(factory.DjangoModelFactory):
