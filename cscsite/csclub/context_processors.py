@@ -11,3 +11,5 @@ def cities(request):
     else:
         cities = CITIES_LIST
     return {'CITIES_LIST': cities}
+
+from .signals import *
