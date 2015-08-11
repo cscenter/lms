@@ -19,7 +19,7 @@ from django.test import TestCase
 from django.utils.encoding import smart_text
 
 from learning.utils import get_current_semester_pair
-from .factories import *
+from ..factories import *
 from .mixins import *
 from learning.forms import MarksSheetTeacherImportGradesForm
 
@@ -294,7 +294,7 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
                                      semester__year=now_year-1)
         resp = self.client.get(reverse(self.url_name))
         teacher_url = reverse('teacher_detail', args=[teacher.pk])
-        self.assertContains(resp, teacher_url, count=5+1)
+        self.assertContains(resp, teacher_url, count=6)
         self.assertEqual(5, len(resp.context['course_list_ongoing']))
         self.assertEqual(1, len(resp.context['course_list_archive']))
 
@@ -366,9 +366,11 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
         url = reverse('course_edit', args=[c.slug])
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
         fields = model_to_dict(c)
-        fields.update({'name': "foobar"})
+        # Note: Create middleware for lang request support in cscenter app
+        # or define locale value explicitly
+        fields.update({'name_ru': "foobar"})
         self.assertEqual(302, self.client.post(url, fields).status_code)
-        self.assertEqual("foobar", Course.objects.get(pk=c.pk).name)
+        self.assertEqual("foobar", Course.objects.get(pk=c.pk).name_ru)
 
 
 class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):

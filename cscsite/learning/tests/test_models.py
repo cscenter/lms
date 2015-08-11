@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from .factories import *
+from ..factories import *
 
 
 class CommonTests(TestCase):

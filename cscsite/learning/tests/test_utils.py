@@ -11,7 +11,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from learning.utils import get_current_semester_pair, split_list, import_stepic
-from .factories import *
+from ..factories import *
 
 
 class UtilTests(TestCase):

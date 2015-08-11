@@ -20,7 +20,7 @@ from django.utils.encoding import smart_text
 import cscenter.urls
 from learning.utils import get_current_semester_pair
 from learning.models import AssignmentNotification
-from .factories import *
+from ..factories import *
 from .mixins import *
 
 

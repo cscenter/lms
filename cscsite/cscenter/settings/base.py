@@ -26,7 +26,7 @@ MIDDLEWARE_CLASSES = (
 # Add site specific templates
 TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 
-# FIXME: Remove after Django 1.8.4 would been released? 
+# FIXME: Remove after Django 1.8.4 would been released?
 # https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS += (
     Path(BASE_DIR, "locale"),

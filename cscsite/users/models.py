@@ -185,10 +185,10 @@ class CSCUser(AbstractUser):
         return smart_text(self.get_full_name(True))
 
     def get_absolute_url(self):
-        if self.is_teacher:
-            return reverse('teacher_detail', args=[self.pk])
-        else:
-            return reverse('user_detail', args=[self.pk])
+        return reverse('user_detail', args=[self.pk])
+
+    def teacher_profile_url(self):
+        return reverse('teacher_detail', args=[self.pk])
 
     def get_full_name(self, last_name_first=False):
         if last_name_first:

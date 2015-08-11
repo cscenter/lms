@@ -32,7 +32,7 @@
                 whitespace stripping, like {%- in Jinja.
                 {% endcomment %}
                 <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
-                ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.get_absolute_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+                ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
               </li>
             {% endfor %}
             </ul>
