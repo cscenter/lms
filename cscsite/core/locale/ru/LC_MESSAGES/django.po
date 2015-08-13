@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-07 17:32+0300\n"
-"PO-Revision-Date: 2015-08-07 17:08+0230\n"
+"POT-Creation-Date: 2015-08-13 16:17+0300\n"
+"PO-Revision-Date: 2015-08-13 16:17+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -151,119 +151,115 @@ msgstr "лето"
 msgid "autumn"
 msgstr "осень"
 
-#: learning/forms.py:21 templates/learning/simple_delete_confirmation.html:14
+#: learning/forms.py:23 templates/learning/simple_delete_confirmation.html:14
 msgid "Cancel"
 msgstr "Отмена"
 
-#: learning/forms.py:24 learning/forms.py:225
-#: templates/learning/markssheet_teacher.html:27 users/forms.py:92
+#: learning/forms.py:26 learning/forms.py:251
+#: templates/learning/markssheet_teacher.html:27 users/forms.py:107
 msgid "Save"
 msgstr "Сохранить"
 
-#: learning/forms.py:34 learning/forms.py:112 learning/models.py:157
-#: learning/models.py:272 learning/models.py:323 learning/models.py:782
-#: learning/models.py:824 templates/learning/courseclass_detail.html:44
-#: templates/learning/noncourseevent_detail.html:28
-msgid "Description"
-msgstr "Описание"
-
-#: learning/forms.py:36
-msgid "empty description will be replaced by course description"
-msgstr "пустое описание будет заменено на описание курса"
-
-#: learning/forms.py:54 learning/forms.py:280
+#: learning/forms.py:64 learning/forms.py:306
 msgid "Title"
 msgstr "Название"
 
-#: learning/forms.py:59 learning/forms.py:210 learning/forms.py:283
+#: learning/forms.py:69 learning/forms.py:236 learning/forms.py:309
 msgid "Text"
 msgstr "Текст"
 
-#: learning/forms.py:78 learning/models.py:44 learning/models.py:892
+#: learning/forms.py:88 learning/models.py:44 learning/models.py:892
 #: users/models.py:266 users/models.py:284
 msgid "Course|name"
 msgstr "Название"
 
-#: learning/forms.py:83 learning/models.py:53
+#: learning/forms.py:93 learning/models.py:53
 msgid "Course|description"
 msgstr "Описание"
 
-#: learning/forms.py:103 learning/models.py:281
+#: learning/forms.py:129 learning/models.py:281
 msgid "Venue"
 msgstr "Место проведения"
 
-#: learning/forms.py:106 learning/models.py:319 learning/models.py:367
+#: learning/forms.py:132 learning/models.py:319 learning/models.py:367
 msgid "Type"
 msgstr "Тип"
 
-#: learning/forms.py:109 learning/models.py:321 learning/models.py:780
+#: learning/forms.py:135 learning/models.py:321 learning/models.py:780
 msgid "CourseClass|Name"
 msgstr "Название"
 
-#: learning/forms.py:117 learning/models.py:327 learning/views.py:500
+#: learning/forms.py:138 learning/models.py:157 learning/models.py:272
+#: learning/models.py:323 learning/models.py:782 learning/models.py:824
+#: templates/learning/courseclass_detail.html:44
+#: templates/learning/noncourseevent_detail.html:28
+msgid "Description"
+msgstr "Описание"
+
+#: learning/forms.py:143 learning/models.py:327 learning/views.py:500
 #: templates/learning/courseclass_detail.html:37
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
 msgid "Slides"
 msgstr "Слайды"
 
-#: learning/forms.py:121 templates/learning/assignment_detail.html:38
+#: learning/forms.py:147 templates/learning/assignment_detail.html:38
 #: templates/learning/courseclass_detail.html:65
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
-#: learning/forms.py:123 learning/forms.py:296
+#: learning/forms.py:149 learning/forms.py:322
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
-#: learning/forms.py:126 learning/models.py:331 learning/views.py:507
+#: learning/forms.py:152 learning/models.py:331 learning/views.py:507
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: learning/forms.py:130 learning/models.py:335
+#: learning/forms.py:156 learning/models.py:335
 msgid "please insert HTML for embedded video player"
 msgstr "пожалуйста, вставьте HTML для встроенного видеоплеера"
 
-#: learning/forms.py:133
+#: learning/forms.py:159
 msgid "Other materials"
 msgstr "Материалы"
 
-#: learning/forms.py:138 learning/models.py:340 learning/models.py:785
+#: learning/forms.py:164 learning/models.py:340 learning/models.py:785
 #: templates/learning/courseoffering_detail.html:92
 msgid "Date"
 msgstr "Дата"
 
-#: learning/forms.py:142 learning/models.py:341 learning/models.py:786
+#: learning/forms.py:168 learning/models.py:341 learning/models.py:786
 msgid "Starts at"
 msgstr "Начало"
 
-#: learning/forms.py:146 learning/models.py:342 learning/models.py:787
+#: learning/forms.py:172 learning/models.py:342 learning/models.py:787
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:171 templates/learning/courseclass_detail.html:58
+#: learning/forms.py:197 templates/learning/courseclass_detail.html:58
 #: templates/learning/courseoffering_detail.html:97
 #: templates/learning/timetable_student.html:67
 #: templates/learning/timetable_teacher.html:63
 msgid "Materials"
 msgstr "Материалы"
 
-#: learning/forms.py:200
+#: learning/forms.py:226
 #, python-format
 msgid ""
 "Incosistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: learning/forms.py:240
+#: learning/forms.py:266
 msgid "Either text or file should be non-empty"
 msgstr "Требуется текст либо приложенный файл"
 
-#: learning/forms.py:272 learning/models.py:566
+#: learning/forms.py:298 learning/models.py:566
 #, python-brace-format
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
-#: learning/forms.py:288 templates/learning/assignment_detail.html:29
+#: learning/forms.py:314 templates/learning/assignment_detail.html:29
 #: templates/learning/assignment_list_student.html:45
 #: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:63
@@ -272,25 +268,25 @@ msgstr "Оценка не может быть больше максимальн�
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: learning/forms.py:294
+#: learning/forms.py:320
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: learning/forms.py:299
+#: learning/forms.py:325
 msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
-#: learning/forms.py:302 learning/models.py:452
+#: learning/forms.py:328 learning/models.py:452
 #: templates/learning/assignment_student_detail.html:141
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
-#: learning/forms.py:305 learning/models.py:456
+#: learning/forms.py:331 learning/models.py:456
 #: templates/learning/assignment_student_detail.html:139
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
-#: learning/forms.py:365 templates/learning/markssheet_teacher.html:154
+#: learning/forms.py:391 templates/learning/markssheet_teacher.html:154
 msgid "Select csv file"
 msgstr "Выбрать csv-файл"
 
@@ -754,11 +750,15 @@ msgstr "Ссылка на курс"
 msgid "Online Course|photo"
 msgstr "Фото"
 
-#: learning/models.py:909
+#: learning/models.py:906
+msgid "Collaboration with AY"
+msgstr "Совместно с АУ"
+
+#: learning/models.py:912
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: learning/models.py:910 templates/users/user_detail.html:261
+#: learning/models.py:913 templates/users/user_detail.html:261
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -866,10 +866,8 @@ msgid "Variable name for unred_notifications_cache"
 msgstr ""
 
 #: menu_extension/models.py:13
-#, fuzzy
-#| msgid "Add class"
 msgid "Additional classes"
-msgstr "Добавить занятие"
+msgstr "Дополнительные css-классы"
 
 #: menu_extension/models.py:14
 msgid "groups"
@@ -1364,6 +1362,18 @@ msgstr "Закрыть"
 msgid "Import"
 msgstr "Импортировать"
 
+#: templates/learning/onlinecourse_list.html:22
+msgid "Go to course"
+msgstr "Перейти к курсу"
+
+#: templates/learning/onlinecourse_list.html:25
+msgid "The course was developed in collaboration with the Academic University."
+msgstr "Курс подготовлен совместно с Академическим университетом."
+
+#: templates/learning/onlinecourse_list.html:32
+msgid "No online courses for now"
+msgstr "На текущий момент нет открытых онлайн-курсов."
+
 #: templates/learning/simple_delete_confirmation.html:12
 msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
@@ -1495,7 +1505,7 @@ msgstr "Информация"
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
-#: templates/users/user_detail.html:19 users/tests.py:443 users/tests.py:451
+#: templates/users/user_detail.html:19 users/tests.py:450 users/tests.py:458
 msgid "Create reference"
 msgstr "Выдать справку"
 
@@ -1597,7 +1607,7 @@ msgstr "Курсы ШАД"
 msgid "Workplace"
 msgstr "Место работы"
 
-#: templates/users/user_detail.html:300 users/tests.py:466 users/tests.py:471
+#: templates/users/user_detail.html:300 users/tests.py:473 users/tests.py:478
 msgid "Student references"
 msgstr "Справки студента"
 
@@ -1629,32 +1639,36 @@ msgstr "Внешние сервисы"
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: users/forms.py:20
+#: users/forms.py:22
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: users/forms.py:24
+#: users/forms.py:26
 msgid "Password"
 msgstr "Пароль"
 
-#: users/forms.py:31
+#: users/forms.py:33
 #, python-brace-format
 msgid "You can also <a href=\"{0}\">reset your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">сменить ваш пароль</a>"
 
-#: users/forms.py:40
+#: users/forms.py:42
 msgid "Login"
 msgstr "Войти"
 
-#: users/forms.py:79 users/models.py:109
+#: users/forms.py:55
+msgid "Students of CS-club can't login on CS-center site"
+msgstr "Студенты клуба не могут пользоваться сайтом CS Центра"
+
+#: users/forms.py:94 users/models.py:109
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
-#: users/forms.py:80
+#: users/forms.py:95
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: users/forms.py:82
+#: users/forms.py:97
 msgid "stepic.org/users/<b>STEPIC-ID</b>"
 msgstr "stepic.org/users/<b>STEPIC-ID</b>"
 
@@ -1789,6 +1803,9 @@ msgstr "Справка пользователя"
 #: users/models.py:322
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "empty description will be replaced by course description"
+#~ msgstr "пустое описание будет заменено на описание курса"
 
 #~ msgid "Recent Actions"
 #~ msgstr "Презентация"

@@ -32,13 +32,13 @@ from dateutil.relativedelta import relativedelta
 from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
     ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from core import comment_persistence
-from learning.models import Course, CourseClass, CourseOffering, Venue, \
+from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
     AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    StudentProject
-from learning.forms import CourseOfferingPKForm, \
+    StudentProject, OnlineCourse
+from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
@@ -1558,3 +1558,12 @@ class NonCourseEventDetailView(generic.DetailView):
     model = NonCourseEvent
     context_object_name = 'event'
     template_name = "learning/noncourseevent_detail.html"
+
+
+class OnlineCoursesListView(generic.ListView):
+    model = OnlineCourse
+
+    def get_queryset(self):
+        return (OnlineCourse.objects
+                            .filter(end__gt=datetime.date.today())
+                            .order_by("start", "name"))

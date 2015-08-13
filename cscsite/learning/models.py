@@ -902,6 +902,9 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
         _("Online Course|photo"),
         upload_to="online_courses/",
         blank=True)
+    is_au_collaboration = models.BooleanField(
+        _("Collaboration with AY"),
+        default=False)
 
     class Meta:
         db_table = 'online_courses'
