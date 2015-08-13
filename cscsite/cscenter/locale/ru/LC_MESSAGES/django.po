@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-07 17:32+0300\n"
+"POT-Creation-Date: 2015-08-13 16:17+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,11 +23,7 @@ msgstr ""
 msgid "Computer Science Center, 2011–15 гг."
 msgstr ""
 
-#: cscenter/templates/base.html:57
-msgid "report a problem"
-msgstr "сообщить об ошибке"
-
-#: cscenter/templates/base.html:81
+#: cscenter/templates/base.html:79
 msgid "close all"
 msgstr "закрыть все"
 
@@ -86,3 +82,6 @@ msgstr ""
 #: cscenter/templates/index.html:79
 msgid "FML #239"
 msgstr "ФМЛ №239"
+
+#~ msgid "report a problem"
+#~ msgstr "сообщить об ошибке"

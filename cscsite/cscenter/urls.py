@@ -38,7 +38,7 @@ from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherDispatchView, \
-    NonCourseEventDetailView
+    NonCourseEventDetailView, OnlineCoursesListView
 
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
@@ -77,6 +77,7 @@ urlpatterns = patterns('',
     # url(r'^student-info/(?P<pk>\d+)/edit$', StudentInfoUpdateView.as_view(),
     #     name='student_info_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
+    url(r'^online/$', OnlineCoursesListView.as_view(), name='onlinecourses_list'),
     url(r'^news/', include('news.urls')),
 
     url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),

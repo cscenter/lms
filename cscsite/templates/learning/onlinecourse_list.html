@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="onlinecourses-list">
+    {% for online_course in object_list %}
+    <div class="onlinecourses-list__item">
+        <div class="row">
+            <h3>{{ online_course.name }} / {{ online_course.teachers|safe }}</h3>
+            <div class="col-xs-2">
+                {% if online_course.photo %}<img src="{{ online_course.photo.url }}">{% endif %}
+            </div>
+            <div class="col-xs-9">
+                <h2><small>{% if online_course.start %}{{ online_course.start|date:"l, d E Y" }} — {{ online_course.end|date:"l, d E Y" }}{% endif %}</small></h2>
+                <div class="ubertext">
+                    <p>{{ online_course.description|safe|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-2">
+                <a class="btn btn-primary btn-block" href="{{ online_course.link|safe }}" role="button">{% trans "Go to course" %}</a>
+            </div>
+            <div class="col-xs-9 collaboration">
+                {% if online_course.is_au_collaboration %}{% trans "The course was developed in collaboration with the Academic University." %}{% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-xs-12">
+          {% trans "No online courses for now" %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}
+
+
+
