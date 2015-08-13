@@ -1564,6 +1564,4 @@ class OnlineCoursesListView(generic.ListView):
     model = OnlineCourse
 
     def get_queryset(self):
-        return (OnlineCourse.objects
-                            .filter(end__gt=datetime.date.today())
-                            .order_by("start", "name"))
+        return OnlineCourse.objects.order_by("start", "name")
