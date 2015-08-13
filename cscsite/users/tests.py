@@ -504,7 +504,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = UserFactory.create(groups=['Student [CENTER]'])
+        student = UserFactory.create(groups=[CSCUser.group_pks.STUDENT_CLUB])
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
@@ -536,3 +536,21 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         es = soup.find(id='reference-page-body').findAll('li')
         expected_enrollments_count = 1
         self.assertEquals(len(es), expected_enrollments_count)
+
+    def test_club_student_login_on_cscenter_site(self):
+        student = UserFactory.create(is_superuser=False, is_staff=False,
+            groups=[CSCUser.group_pks.STUDENT_CLUB])
+        self.doLogin(student)
+        login_data = {
+            'username': student.username,
+            'password': student.raw_password
+        }
+        response = self.client.post(reverse('login'), login_data)
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        # can't login message in __all__
+        self.assertIn("__all__", form.errors)
+        student.groups = [CSCUser.group_pks.STUDENT_CENTER]
+        student.save()
+        response = self.client.post(reverse('login'), login_data)
+        self.assertEqual(response.status_code, 302)

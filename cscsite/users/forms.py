@@ -1,7 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
+from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
@@ -39,6 +41,19 @@ class LoginForm(AuthenticationForm):
             'password',
             FormActions(Div(Submit('submit', _("Login")),
                             css_class="pull-right")))
+
+    def is_valid(self):
+        is_valid = super(LoginForm, self).is_valid()
+        # Prevent login for club students on cscenter site
+        if is_valid and settings.SITE_ID == 1:
+            user = self.get_user()
+            if user.is_curator:
+                return is_valid
+            user_groups = [g.pk for g in user.groups.all()]
+            if CSCUser.group_pks.STUDENT_CLUB in user_groups:
+                is_valid = False
+                self.add_error(None, ValidationError(_("Students of CS-club can't login on CS-center site")))
+        return is_valid
 
 
 class UserProfileForm(forms.ModelForm):

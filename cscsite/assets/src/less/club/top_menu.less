@@ -1,6 +1,69 @@
 @header-lvl1-bg:                 #7A9CC6;
 @header-lvl2-bg:                 #E6E6E6;
 
+
+.container {
+
+  &._top {
+    text-align: right;
+    font-size: 13px;
+    padding: 4px 15px 4px 0;
+
+    > ul {
+        list-style: none;
+        float: left;
+        margin: 0 0 0 60px;
+        padding: 0;
+
+        li {
+            list-style: none;
+            display: inline-block;
+            padding: 0 10px 0 0;
+
+            &._teacher {
+                a {
+                    color: green;
+                }
+            }
+
+            &._studying {
+                a {
+                    color: purple;
+                }
+            }
+
+            &._curator {
+                a {
+                    color: red;
+                }
+            }
+
+            &._admin {
+                a {
+                    color: #000;
+                }
+            }
+        }
+    }
+
+    .btn-group {
+      vertical-align: inherit;
+      > a {
+          text-decoration: none;
+          &:hover {
+              border-bottom: 1px dashed;
+          }
+      }
+
+      .dropdown-menu {
+        min-width: 100px;
+      }
+    }
+  }
+}
+
+
+
 .header {
     &.lvl1 {
         background-color: @header-lvl1-bg;

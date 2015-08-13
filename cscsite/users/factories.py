@@ -15,7 +15,7 @@ class UserFactory(factory.DjangoModelFactory):
     username = factory.Sequence(lambda n: "testuser%03d" % n)
     gender = factory.Iterator([CSCUser.GENDER_MALE, CSCUser.GENDER_FEMALE])
     password = "test123foobar@!"
-    email = "user@foobar.net"
+    email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
 
@@ -24,8 +24,12 @@ class UserFactory(factory.DjangoModelFactory):
         if not create:
             return
         if extracted:
-            for group_name in extracted:
-                self.groups.add(Group.objects.get(name=group_name))
+            for group in extracted:
+                if isinstance(group, int):
+                    group_add = Group.objects.get(pk=group)
+                else:
+                    group_add = Group.objects.get(name=group)
+                self.groups.add(group_add)
 
     @factory.post_generation
     def raw_password(self, create, extracted, **kwargs):
