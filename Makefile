@@ -75,18 +75,21 @@ deploy:
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
+less_bootstrap:
+	$(eval BS = 1)
+	$(call compile_bootstrap, $(BS))
+
 less_center:
+	$(call compile_bootstrap, $(BS))
 	cd cscsite/assets/src/less/; \
-	lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
 	lessc --relative-urls --clean-css="--compatibility=ie8" center/style.less > ../../css/center/style.css;
 
 less_club:
+	$(call compile_bootstrap, $(BS))
 	cd cscsite/assets/src/less/; \
-	lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css; \
 	lessc --relative-urls --clean-css="--compatibility=ie8" club/style.less > ../../css/club/style.css;
 
-less: less_center less_club
-
+less: less_center less_club less_bootstrap
 
 # Mac users tip: `brew install fswatch`
 less_watch:
@@ -95,6 +98,13 @@ less_watch:
 less_watch_club:
 	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_club
 
+less_watch_center:
+	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_center
+
+define compile_bootstrap
+	$(if $(BS), cd cscsite/assets/src/less/; \
+		lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css;)
+endef
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
