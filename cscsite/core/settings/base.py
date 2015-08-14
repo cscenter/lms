@@ -227,6 +227,7 @@ PIPELINE_JS = {
             'js/vendor/jquery.jgrowl.min.js',
             'js/vendor/jquery.cookie.js',
             'js/main.js',
+            'js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
         ),
         'output_filename': 'js/dist/base.js',
     },

@@ -79,6 +79,11 @@ less_bootstrap:
 	$(eval BS = 1)
 	$(call compile_bootstrap, $(BS))
 
+# Remove after merging with common styles
+tmp_less_cm:
+	cd cscsite/assets/src/less/; \
+	lessc --relative-urls --clean-css="--compatibility=ie8" center/off_canvas_menu.less > ../../css/center/off_canvas_menu.css;
+
 less_center:
 	$(call compile_bootstrap, $(BS))
 	cd cscsite/assets/src/less/; \
@@ -101,6 +106,7 @@ less_watch_club:
 less_watch_center:
 	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_center
 
+# Add jasny.bootstrap css here after merging off canvas menu
 define compile_bootstrap
 	$(if $(BS), cd cscsite/assets/src/less/; \
 		lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css;)
