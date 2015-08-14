@@ -80,7 +80,6 @@ INSTALLED_APPS = (
     'learning',
     'staff',
     'library',
-    'crutches',
     'loginas',
     'import_export',
     'pipeline',
@@ -133,7 +132,7 @@ USE_TZ = True
 AUTH_USER_MODEL = "users.CSCUser"
 # TODO: mv from crutches to users module
 AUTHENTICATION_BACKENDS = (
-    "crutches.compat.EmailOrUsernameModelBackend",
+    "users.backends.EmailOrUsernameModelBackend",
 )
 
 LOGIN_URL = "/login/"
