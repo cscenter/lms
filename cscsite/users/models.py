@@ -49,16 +49,18 @@ class CSCUser(AbstractUser):
                      ('reinstated', _("StudentInfo|Reinstalled")),
                      ('will_graduate', _("StudentInfo|Will graduate")))
 
+    # TODO: django migrations can't automatically change CharField to Integer
+    # Investigate how to do it manually with migrations only, then replace first param with int
     COURSES = Choices(
-        (1, 'BACHELOR_SPECIALITY_1', _('1 course bachelor, speciality')),
-        (2, 'BACHELOR_SPECIALITY_2', _('2 course bachelor, speciality')),
-        (3, 'BACHELOR_SPECIALITY_3', _('3 course bachelor, speciality')),
-        (4, 'BACHELOR_SPECIALITY_4', _('4 course bachelor, speciality')),
-        (5, 'SPECIALITY_5', _('last course speciality')),
-        (6, 'MASTER_1', _('1 course magistracy')),
-        (7, 'MASTER_2', _('2 course magistracy')),
-        (8, 'POSTGRADUATE', _('postgraduate')),
-        (9, 'GRADUATE', _('graduate')),
+        ("1", 'BACHELOR_SPECIALITY_1', _('1 course bachelor, speciality')),
+        ("2", 'BACHELOR_SPECIALITY_2', _('2 course bachelor, speciality')),
+        ("3", 'BACHELOR_SPECIALITY_3', _('3 course bachelor, speciality')),
+        ("4", 'BACHELOR_SPECIALITY_4', _('4 course bachelor, speciality')),
+        ("5", 'SPECIALITY_5', _('last course speciality')),
+        ("6", 'MASTER_1', _('1 course magistracy')),
+        ("7", 'MASTER_2', _('2 course magistracy')),
+        ("8", 'POSTGRADUATE', _('postgraduate')),
+        ("9", 'GRADUATE', _('graduate')),
     )
 
     GENDER_MALE = 'M'
