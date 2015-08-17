@@ -2,7 +2,6 @@
 {% load pipeline %}
 {% load staticfiles %}
 
-{% load csc_menu from csc_menu_tags %}
 
 {% load sitemetrics %}
 
@@ -37,24 +36,36 @@
     {% include "mathjax.html" %}
   </head>
   <body class="tex2jax_ignore">
-<div class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm ">
+<div class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm in">
     <a class="navmenu-brand" href="#">О центре</a>
+
+    {% load csc_menu from csc_menu_tags %}
+    {% load getattribute from core_tags %}
+    {% csc_menu "compscicenter" "15" as menu %}
+
     <ul class="nav navmenu-nav">
-      <li class="active"><a href="../navmenu/">Программа</a></li>
-      <li><a href="../navmenu-push/">Курсы</a></li>
-      <li><a href="../navmenu-push/">Организаторы</a></li>
-      <li><a href="./">Преподаватели</a></li>
-      <li><a href="./">Выпускники</a></li>
+      {% for menu_item in menu %}
+          {% if not menu_item.hidden %}
+              {% for second_level in menu_item.children %}
+                  <li {% if second_level.extension.classes %}class="{{second_level.extension.classes}}"{% endif %}>
+                      <a href="{{ second_level.url }}">
+                          {% trans second_level.caption context 'menu' %}
+
+                          {% if second_level.extension.budge and request.unread_notifications_cache|getattribute:second_level.extension.budge %}
+                          <span class="badge">
+                            {{ request.unread_notifications_cache|getattribute:second_level.extension.budge|length }}
+                          </span>
+                          {% endif %}
+                      </a>
+                  </li>
+              {% endfor %}
+          {% endif %}
+      {% endfor %}
     </ul>
 </div>
 <div class="canvas">
 <div class="navbar navbar-default navbar-fixed-top header lvl1">
-  <button type="button" class="navbar-toggle hidden-md hidden-lg" data-toggle="offcanvas" data-recalc="false" data-target=".navmenu" data-canvas="body">
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-    {% csc_menu "compscicenter" %}
+  {% include "top_menu.html" %}
 </div>
 
 
