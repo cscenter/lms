@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-13 16:17+0300\n"
+"POT-Creation-Date: 2015-08-17 14:33+0300\n"
 "PO-Revision-Date: 2015-08-07 17:32+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,31 +24,31 @@ msgstr ""
 msgid "This username is already in use. Please supply a different username."
 msgstr "Извините, но никнейм уже занят."
 
-#: csclub/templates/base.html:46
+#: csclub/templates/base.html:45
 msgid "Admin"
 msgstr "Админка"
 
-#: csclub/templates/base.html:52
+#: csclub/templates/base.html:51
 msgid "City"
 msgstr "Город"
 
-#: csclub/templates/base.html:59
+#: csclub/templates/base.html:58
 msgid "Language"
 msgstr "Язык"
 
-#: csclub/templates/base.html:94
+#: csclub/templates/base.html:92
 msgid "Computer Science Club, 2007–15 гг."
 msgstr ""
 
-#: csclub/templates/base.html:111
+#: csclub/templates/base.html:109
 msgid "close all"
 msgstr "Закрыть все"
 
-#: csclub/templates/base_menu.html:34
+#: csclub/templates/base_menu.html:38
 msgid "Login"
 msgstr "Логин"
 
-#: csclub/templates/base_menu.html:37
+#: csclub/templates/base_menu.html:41
 #: csclub/templates/registration/registration_form.html:10
 msgid "Registration"
 msgstr "Регистрация"

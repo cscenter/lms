@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-13 16:17+0300\n"
+"POT-Creation-Date: 2015-08-17 14:33+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,23 +19,25 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: cscenter/templates/base.html:55
+#: cscenter/templates/base.html:53
+#: cscenter/templates/base_offcanvas_menu.html:88
 msgid "Computer Science Center, 2011–15 гг."
 msgstr ""
 
-#: cscenter/templates/base.html:79
+#: cscenter/templates/base.html:77
+#: cscenter/templates/base_offcanvas_menu.html:112
 msgid "close all"
 msgstr "закрыть все"
 
-#: cscenter/templates/base_menu.html:27
+#: cscenter/templates/base_menu.html:30 cscenter/templates/top_menu.html:34
 msgid "Admin page"
 msgstr "Админка"
 
-#: cscenter/templates/base_menu.html:35
+#: cscenter/templates/base_menu.html:38 cscenter/templates/top_menu.html:42
 msgid "logout"
 msgstr "выйти"
 
-#: cscenter/templates/base_menu.html:38
+#: cscenter/templates/base_menu.html:41 cscenter/templates/top_menu.html:45
 msgid "Login"
 msgstr ""
 
