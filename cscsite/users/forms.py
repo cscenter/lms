@@ -30,7 +30,7 @@ class LoginForm(AuthenticationForm):
         # NOTE(Dmitry): this should be done after Users app is loaded
         # because of URL name resolutions quirks
         self.fields['password'].help_text = (
-            _("You can also <a href=\"{0}\">reset your password</a>")
+            _("You can also <a href=\"{0}\">restore your password</a>")
             .format(reverse('password_reset')))
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
