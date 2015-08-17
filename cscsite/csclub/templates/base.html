@@ -1,7 +1,6 @@
 {% load i18n %}
 {% load pipeline %}
 {% load staticfiles %}
-{% load csc_menu_tags %}
 {% load startswith from core_tags %}
 {% load sitemetrics %}
 
@@ -72,8 +71,7 @@
             </div>
     </div>
 
-
-    {% csc_menu "compsciclub_"|add:LANGUAGE_CODE %}
+    {% include "base_menu.html" %}
 
     {% block content_top %}{% endblock content_top %}
     {% block content %}

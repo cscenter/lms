@@ -1,6 +1,10 @@
 {% load i18n %}
 {% load staticfiles %}
 {% load getattribute from core_tags %}
+{% load csc_menu_tags %}
+
+{% csc_menu "compsciclub_"|add:LANGUAGE_CODE as menu %}
+
 
 <div class="header lvl1">
   <div class="container">

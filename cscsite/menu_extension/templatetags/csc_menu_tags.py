@@ -1,6 +1,3 @@
-import sys
-
-import django
 import re
 import copy
 
@@ -9,19 +6,18 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 
 from treemenus.models import Menu, MenuItem
-from treemenus.config import APP_LABEL
 
 from .. import CSCMENU_CACHE
-from ..models import MenuItemExtension
 
 register = template.Library()
 
-def csc_menu_section(context, menu_name, section_url):
-    # XXX: Shouldn't depend on full menu array due to NoReverseMatch exception in unnecessary sections
-    return csc_menu(context, menu_name, section_url)
-register.inclusion_tag('menu_section.html', takes_context=True)(csc_menu_section)
 
-def csc_menu(context, menu_name, section_url=False):
+# TODO: Add nested level support
+# TODO: Rewrite like a class
+# FIXME: Remove deepcopy
+# FIXME: Don't modify current list in `handle_selected`
+@register.assignment_tag(takes_context=True)
+def csc_menu(context, menu_name, root_id=False):
     """Caching version of show_menu template tag."""
     if menu_name not in CSCMENU_CACHE:
         try:
@@ -42,48 +38,48 @@ def csc_menu(context, menu_name, section_url=False):
             if settings.TEMPLATE_DEBUG:
                 raise e
             else:
-                return context
+                return []
     else:
         flattened = CSCMENU_CACHE[menu_name]
 
-    if section_url:
-        flattened_copy = copy.deepcopy([x for x in flattened if x.url.startswith(section_url)])
-    else:
-        flattened_copy = copy.deepcopy(flattened)
+    flattened_copy = copy.deepcopy(flattened)
 
-    def allowed_for_user(item, user, **kwargs):
-        """Validate item visibility for current user"""
-        # Current user have no enough group permissions
-        if len(item.groups_allowed) > 0:
-            if user.is_authenticated():
-                user_groups = set(context['request'].user._cs_group_pks)
-            else:
-                user_groups = set()
-            if not set(user_groups).intersection(item.groups_allowed):
-                return False
-        if item.extension.unauthenticated and user.is_authenticated():
-            return False
-        if item.extension.protected and not user.is_authenticated():
-            return False
-        if item.extension.staff_only and not user.is_staff:
-            return False
-        return True
-
+    root_id = int(root_id)
 
     # Flattened to tree
     menu_tree = []
     for item in flattened_copy:
-        if not allowed_for_user(item, context['request'].user):
+        if not allowed_for_user(item, context):
+            continue
+        # FIXME: root_id support only first level. It's stupid.
+        if root_id and item.level == 1 and item.id != root_id:
             continue
         if item.level == 1:
             item.children = children(item.id, flattened_copy)
             menu_tree.append(item)
     # For simplicity at the current time we have only one selected item.
     handle_selected(menu_tree, context['request'])
-    context['menu'] = menu_tree
-    context['menu_name'] = menu_name
-    return context
-register.inclusion_tag('base_menu.html', takes_context=True)(csc_menu)
+    return menu_tree
+
+
+def allowed_for_user(item, context, **kwargs):
+    """Validate item visibility for current user"""
+    # Current user have no enough group permissions
+    user = context['request'].user
+    if len(item.groups_allowed) > 0:
+        if user.is_authenticated():
+            user_groups = set(context['request'].user._cs_group_pks)
+        else:
+            user_groups = set()
+        if not set(user_groups).intersection(item.groups_allowed):
+            return False
+    if item.extension.unauthenticated and user.is_authenticated():
+        return False
+    if item.extension.protected and not user.is_authenticated():
+        return False
+    if item.extension.staff_only and not user.is_staff:
+        return False
+    return True
 
 
 def children(parent_id, items):

@@ -2,8 +2,6 @@
 {% load pipeline %}
 {% load staticfiles %}
 
-{% load csc_menu from csc_menu_tags %}
-
 {% load sitemetrics %}
 
 <!DOCTYPE html>
@@ -36,7 +34,7 @@
     {% include "mathjax.html" %}
   </head>
   <body class="tex2jax_ignore">
-    {% csc_menu "compscicenter" %}
+    {% include "base_menu.html" %}
 
     {% block content %}
     <div class="container">
