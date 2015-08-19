@@ -246,6 +246,10 @@ class CSCUser(AbstractUser):
             return ''
 
     @property
+    def uni_year_at_enrollment_display(self):
+        return self.COURSES[self.uni_year_at_enrollment]
+
+    @property
     def is_student(self):
         return self.is_student_center or \
                self.group_pks.STUDENT_CLUB in self._cs_group_pks
