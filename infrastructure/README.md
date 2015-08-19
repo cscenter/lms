@@ -1,5 +1,21 @@
 # Provisioning and deployment of CSC site
 
+For Dynamic inventory in Ansible used library [EC2 external inventory](https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py)
+
+More read [here](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+
+## How to use
+
+  * `sudo pip install ansible` (1.9.2 and higher)
+  * To configure Boto (the Python interface to AWS) add environment variables:
+
+    ```
+    export AWS_ACCESS_KEY_ID='AK123'
+    export AWS_SECRET_ACCESS_KEY='abc123'
+    ```
+  * Check cache path is available
+    `cache_path = ~/.ansible/tmp`
+
 ## AWS setup
 
 This is already done for you and provided here for documentation purposes
