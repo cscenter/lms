@@ -247,7 +247,10 @@ class CSCUser(AbstractUser):
 
     @property
     def uni_year_at_enrollment_display(self):
-        return self.COURSES[self.uni_year_at_enrollment]
+        if self.uni_year_at_enrollment in self.COURSES:
+            return self.COURSES[self.uni_year_at_enrollment]
+        else:
+            return ''
 
     @property
     def is_student(self):
