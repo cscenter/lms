@@ -160,25 +160,6 @@ YANDEX_DISK_USERNAME = "dummy_ya_username"
 YANDEX_DISK_PASSWORD = "dummy_ya_password"
 YANDEX_DISK_SLIDES_ROOT = "dummy_ya_root"
 
-
-
-# django-dbbackup settings
-DBBACKUP_CLEANUP_KEEP = 30
-DBBACKUP_CLEANUP_KEEP_MEDIA = 30
-# FIXME(Dmitry): for now, django-dbbackup is buggy, see [1] and [2].
-#                Therefore, we provide our own implementation of S3 upload,
-#                so next line is commented out and backups go to /tmp
-#
-#                [1] https://bitbucket.org/mjs7231/django-dbbackup/issue/55/
-#                [2] https://bitbucket.org/mjs7231/django-dbbackup/issue/50/
-#
-# DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
-CSC_TMP_BACKUP_DIR = "/tmp/cscbackup"
-DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
-
-DBBACKUP_S3_BUCKET = 'csc-main-backup'
-DBBACKUP_S3_DIRECTORY = 'cscweb_backups'
-DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
 # special user with access to S3 bucket
 DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
 DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
