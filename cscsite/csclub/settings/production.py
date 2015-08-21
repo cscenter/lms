@@ -86,8 +86,27 @@ YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
 YANDEX_DISK_PASSWORD = "deelthisat"
 YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2014-2015"
 
-DBBACKUP_S3_ACCESS_KEY = ''
-DBBACKUP_S3_SECRET_KEY = ''
+
+# django-dbbackup settings
+DBBACKUP_CLEANUP_KEEP = 30
+DBBACKUP_CLEANUP_KEEP_MEDIA = 30
+# FIXME(Dmitry): for now, django-dbbackup is buggy, see [1] and [2].
+#                Therefore, we provide our own implementation of S3 upload,
+#                so next line is commented out and backups go to /tmp
+#
+#                [1] https://bitbucket.org/mjs7231/django-dbbackup/issue/55/
+#                [2] https://bitbucket.org/mjs7231/django-dbbackup/issue/50/
+#
+# DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
+CSC_TMP_BACKUP_DIR = "/tmp/cscenter_backup"
+DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
+
+DBBACKUP_S3_BUCKET = 'csclub'
+DBBACKUP_S3_DIRECTORY = 'cscweb_backups'
+DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
+# Access Key for csclub backup user
+DBBACKUP_S3_ACCESS_KEY = 'AKIAJWPKEDQ6YJEPKFFQ'
+DBBACKUP_S3_SECRET_KEY = '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'
 
 NEWRELIC_ENV = 'production'
 
