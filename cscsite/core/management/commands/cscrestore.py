@@ -63,19 +63,14 @@ class Command(BaseCommand):
         assert len(backup_keys) == 2
         for key in backup_keys:
             fname = key.name.split("/")[-1]
-            assert fname in ['db.gz', 'media.tar.gz', '']
+            assert fname in ['db.gz', 'media.tar.gz']
             fpath = os.path.join(backup_dir, fname)
             key.get_contents_to_filename(fpath)
             report("{} downloaded to {}".format(key.name, fpath))
 
         report("using django-dbbackup to restore database")
-        # NOTE(Dmitry): awkward hack around django-dbbackup's uncoditional
-        #               input
-        sys_stdin = sys.stdin
-        sys.stdin = BytesIO(b'y')
         management.call_command('dbrestore', uncompress=True,
                                 filepath=os.path.join(backup_dir, 'db.gz'))
-        sys.stdin = sys_stdin
 
         report("manually restoring media")
         # NOTE(Dmitry): assuming it's OK to overwrite MEDIA_ROOT dir without
