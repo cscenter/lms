@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
         report("fetching backup files from S3://{}".format(last_modified_dir))
         backup_keys = list(bucket.list(prefix=last_modified_dir))
-        assert len(backup_keys) == 2
+        assert len(backup_keys) >= 2
         for key in backup_keys:
             fname = key.name.split("/")[-1]
             assert fname in ['db.gz', 'media.tar.gz']
