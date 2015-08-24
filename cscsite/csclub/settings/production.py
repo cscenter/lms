@@ -2,11 +2,15 @@
 
 from __future__ import absolute_import
 
+from unipath import Path
+
 from .base import *
 
 TEMPLATE_DEBUG = DEBUG = False
 
 ALLOWED_HOSTS = ["compsciclub.ru", "www.compsciclub.ru", "*"]
+
+MEDIA_ROOT = Path('/shared', 'media')
 
 # Logging-related stuff
 RAVEN_CONFIG = {
