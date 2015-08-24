@@ -8,6 +8,8 @@ TEMPLATE_DEBUG = DEBUG = False
 
 ALLOWED_HOSTS = ["compscicenter.ru", "www.compscicenter.ru", "*"]
 
+MEDIA_ROOT = Path('/shared', 'media')
+
 # Logging-related stuff
 RAVEN_CONFIG = {
     # Note(lebedev): see https://app.getsentry.com/cscenter/cscenter/docs/django
