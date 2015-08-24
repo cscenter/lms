@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-19 13:09+0300\n"
-"PO-Revision-Date: 2015-08-19 13:10+0230\n"
+"POT-Creation-Date: 2015-08-25 00:31+0300\n"
+"PO-Revision-Date: 2015-08-25 00:31+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -171,7 +171,7 @@ msgid "Text"
 msgstr "Текст"
 
 #: learning/forms.py:88 learning/models.py:44 learning/models.py:892
-#: users/models.py:281 users/models.py:299
+#: users/models.py:288 users/models.py:306
 msgid "Course|name"
 msgstr "Название"
 
@@ -330,7 +330,7 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: learning/models.py:88 learning/models.py:154
-#: templates/learning/courses_list_student.html:103 users/models.py:303
+#: templates/learning/courses_list_student.html:103 users/models.py:310
 msgid "Semester"
 msgstr "Семестр"
 
@@ -599,12 +599,12 @@ msgstr "Комментарии к заданиям"
 
 #: learning/models.py:668 templates/learning/assignment_detail.html:61
 #: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:135 users/models.py:279
-#: users/models.py:297 users/models.py:331
+#: templates/learning/assignment_student_detail.html:135 users/models.py:286
+#: users/models.py:304 users/models.py:338
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:675 users/models.py:307
+#: learning/models.py:675 users/models.py:314
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -922,101 +922,107 @@ msgid "Alumni"
 msgstr "Выпускники"
 
 #: menu_extension/translation.py:20
+#| msgid "Online"
+msgctxt "menu"
+msgid "Online"
+msgstr "Онлайн"
+
+#: menu_extension/translation.py:21
 msgctxt "menu"
 msgid "Video"
 msgstr "Видео"
 
-#: menu_extension/translation.py:22
+#: menu_extension/translation.py:23
 msgctxt "menu"
 msgid "Lyceum"
 msgstr "Лекторий"
 
-#: menu_extension/translation.py:24
+#: menu_extension/translation.py:25
 msgctxt "menu"
 msgid "Learning"
 msgstr "Обучение"
 
-#: menu_extension/translation.py:25 menu_extension/translation.py:38
+#: menu_extension/translation.py:26 menu_extension/translation.py:39
 msgctxt "menu"
 msgid "Assignments"
 msgstr "Задания"
 
-#: menu_extension/translation.py:26
+#: menu_extension/translation.py:27
 msgctxt "menu"
 msgid "My timetable"
 msgstr "Моё расписание"
 
-#: menu_extension/translation.py:27 menu_extension/translation.py:40
+#: menu_extension/translation.py:28 menu_extension/translation.py:41
 msgctxt "menu"
 msgid "Calendar"
 msgstr "Календарь"
 
-#: menu_extension/translation.py:28
+#: menu_extension/translation.py:29
 msgctxt "menu"
 msgid "My courses"
 msgstr "Мои курсы"
 
-#: menu_extension/translation.py:29
+#: menu_extension/translation.py:30
 msgctxt "menu"
 msgid "Library"
 msgstr "Библиотека"
 
-#: menu_extension/translation.py:30
+#: menu_extension/translation.py:31
 msgctxt "menu"
 msgid "Tips"
 msgstr "Полезное"
 
-#: menu_extension/translation.py:32
+#: menu_extension/translation.py:33
 msgctxt "menu"
 msgid "Supervision"
 msgstr "Курирование"
 
-#: menu_extension/translation.py:33
+#: menu_extension/translation.py:34
 msgctxt "menu"
 msgid "Student search"
 msgstr "Поиск студентов"
 
-#: menu_extension/translation.py:34
+#: menu_extension/translation.py:35
 msgctxt "menu"
 msgid "Generate diplomas"
 msgstr "Сгенерировать дипломы"
 
-#: menu_extension/translation.py:35
+#: menu_extension/translation.py:36
 msgctxt "menu"
 msgid "Exports"
 msgstr "Файлы"
 
-#: menu_extension/translation.py:37
+#: menu_extension/translation.py:38
 msgctxt "menu"
 msgid "Teaching"
 msgstr "Преподавание"
 
-#: menu_extension/translation.py:39
+#: menu_extension/translation.py:40
 msgctxt "menu"
 msgid "Timetable"
 msgstr "Расписание"
 
-#: menu_extension/translation.py:41
+#: menu_extension/translation.py:42
 msgctxt "menu"
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: menu_extension/translation.py:43
+#: menu_extension/translation.py:44
 msgctxt "menu"
 msgid "Enrollment"
 msgstr "Поступление"
 
-#: menu_extension/translation.py:44
+#: menu_extension/translation.py:45
 msgctxt "menu"
 msgid "Information"
 msgstr "Информация"
 
-#: menu_extension/translation.py:45
+#: menu_extension/translation.py:46
 msgctxt "menu"
 msgid "Application"
 msgstr "Анкета"
 
-#: menu_extension/translation.py:47
+#: menu_extension/translation.py:48
 msgctxt "menu"
 msgid "Contacts"
 msgstr "Контакты"
@@ -1369,8 +1375,6 @@ msgid "Go to course"
 msgstr "Перейти к курсу"
 
 #: templates/learning/onlinecourse_list.html:25
-#| msgid ""
-#| "The course was developed in collaboration with the Academic University."
 msgid ""
 "The course was developed in collaboration with the <a "
 "href='http://mit.spbau.ru/'>Academic University</a>."
@@ -1811,39 +1815,39 @@ msgstr "Пользователь"
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:285
+#: users/models.py:292
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: users/models.py:286
+#: users/models.py:293
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: users/models.py:300
+#: users/models.py:307
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: users/models.py:313
+#: users/models.py:320
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: users/models.py:314
+#: users/models.py:321
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: users/models.py:326
+#: users/models.py:333
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: users/models.py:327
+#: users/models.py:334
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: users/models.py:336
+#: users/models.py:343
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: users/models.py:337
+#: users/models.py:344
 msgid "User reference records"
 msgstr "Справки пользователей"
 
