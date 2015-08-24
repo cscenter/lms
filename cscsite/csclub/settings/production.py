@@ -102,7 +102,7 @@ DBBACKUP_CLEANUP_KEEP_MEDIA = 30
 #                [2] https://bitbucket.org/mjs7231/django-dbbackup/issue/50/
 #
 # DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
-CSC_TMP_BACKUP_DIR = "/tmp/cscenter_backup"
+CSC_TMP_BACKUP_DIR = "/tmp/csclub_backup"
 DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
 
 DBBACKUP_S3_BUCKET = 'csclub'
