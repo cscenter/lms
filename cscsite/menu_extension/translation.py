@@ -17,6 +17,8 @@ def dummy_for_makemessages():
     pgettext('menu', 'Professors')
     pgettext('menu', 'Alumni')
 
+    pgettext('menu', 'Online courses')
+    pgettext('menu', 'Online')
     pgettext('menu', 'Video')
 
     pgettext('menu', 'Lyceum')
