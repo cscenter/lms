@@ -1,0 +1,46 @@
+---
+- name: daily late-night backup goes in cron
+  sudo_user: "{{ item }}"
+  cron:
+    name: backup CSC website to S3
+    user: "{{ item }}"
+    hour: "4"
+    minute: "0"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/cscsite/manage.py cscbackup
+      --settings={{item}}.settings.production
+      >> /home/{{ item }}/site/logs/cscbackup.log
+      2>&1
+  with_items:
+    - "{{ cscenter_user }}"
+    - "{{ csclub_user }}"
+
+- name: notify people every 5 minutes (cronjob)
+  sudo_user: "{{ item }}"
+  cron:
+    name: CSC mail notifier
+    user: "{{ item }}"
+    minute: "*/5"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/cscsite/manage.py notify
+      --settings={{ item }}.settings.production
+      >> /home/{{ item }}/site/logs/cscnotifier.log
+      2>&1
+  with_items:
+    - "{{ cscenter_user }}"
+
+- name: remove useless notifications each week (cronjob)
+  sudo_user: "{{ item }}"
+  cron:
+    name: CSC notification cleanup
+    user: "{{ item }}"
+    special_time: weekly
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/cscsite/manage.py notification_cleanup
+      --settings={{ item }}.settings.production
+      >> /home/{{ item }}/site/logs/cscnotifier.log
+  with_items:
+    - "{{ cscenter_user }}"

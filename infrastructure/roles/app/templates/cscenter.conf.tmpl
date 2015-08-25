@@ -1,5 +1,5 @@
-upstream django {
-    server unix:///tmp/uwsgi_{{ cscweb_project }}.socket;
+upstream django_{{ cscenter_user }} {
+    server unix:///tmp/uwsgi_{{ cscenter_user }}.socket;
 }
 
 server {
@@ -21,12 +21,12 @@ server {
 
 server {
     listen 80;
-    server_name compscicenter.ru www.compscicenter.ru _;
+    server_name compscicenter.ru www.compscicenter.ru;
     charset utf-8;
     client_max_body_size 42m;
 
     location /media  {
-        alias /home/{{ cscweb_user }}/site/repo/cscsite/media;
+        alias /home/{{ cscenter_user }}/site/repo/cscsite/media;
         access_log off;
         tcp_nodelay off;
         # gzip_static on;
@@ -36,7 +36,7 @@ server {
     }
 
     location /static {
-        alias /home/{{ cscweb_user }}/site/repo/cscsite/static;
+        alias /home/{{ cscenter_user }}/site/repo/cscsite/static;
         access_log off;
         tcp_nodelay off;
         # FIXME(Dmitry): do this statically
@@ -50,7 +50,7 @@ server {
     location / {
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;
-        uwsgi_pass django;
+        uwsgi_pass django_{{ cscenter_user }};
         include uwsgi_params;
     }
 }
@@ -91,7 +91,7 @@ server {
     resolver 8.8.8.8;
 
     location /media  {
-        alias /home/{{ cscweb_user }}/site/repo/cscsite/media;
+        alias /shared/media;
         access_log off;
         tcp_nodelay off;
         # gzip_static on;
@@ -101,7 +101,7 @@ server {
     }
 
     location /static {
-        alias /home/{{ cscweb_user }}/site/repo/cscsite/static;
+        alias /home/{{ cscenter_user }}/site/repo/cscsite/static;
         access_log off;
         tcp_nodelay off;
         # FIXME(Dmitry): do this statically
@@ -115,7 +115,7 @@ server {
     location / {
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;
-        uwsgi_pass django;
+        uwsgi_pass django_{{ cscenter_user }};
         include uwsgi_params;
     }
 }

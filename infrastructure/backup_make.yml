@@ -1,0 +1,27 @@
+---
+- name: Make a backup of db and media/ folder for CSCenter website
+  hosts: "{{ host }}"
+  user: ubuntu
+  sudo: True
+  vars_files:
+    - vars/aws.yml
+
+  tasks:
+  - name: Check app_user value
+    fail:
+      msg: "app_user value should one from [cscenter, csclub]"
+    when: app_user != "cscenter" and app_user != "csclub"
+
+  - name: making a backup for {{ app_user }} site
+    sudo_user: "{{ app_user }}"
+    django_manage:
+      command: "{{ item }}"
+      app_path: "/home/{{ app_user }}/site/repo/cscsite"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "/home/{{ app_user }}/site/env/"
+    with_items:
+      - cscbackup
+    notify: reload uwsgi
+
+  handlers:
+    - include: roles/app/handlers/main.yml

@@ -1,0 +1,47 @@
+---
+- name: Create group for /media folder
+  group: name={{ group_shared }} state=present
+
+- name: create users for websites
+  user:
+    home: "/home/{{ item }}"
+    name: "{{ item }}"
+    state: present
+    groups: shared
+    append: yes
+  with_items:
+    - "{{ cscenter_user }}"
+    - "{{ csclub_user }}"
+
+# Preparing deployment
+- name: create .ssh directory for both website users
+  file:
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+    owner: "{{ item }}"
+  with_items:
+    - "{{ cscenter_user }}"
+    - "{{ csclub_user }}"
+
+- name: ensure github.com is a known host
+  lineinfile:
+    dest: /{{ item }}/.ssh/known_hosts
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    regexp: "^github\\.com"
+  with_items:
+    - "{{ cscenter_user }}"
+    - "{{ csclub_user }}"
+
+- name: ensure ssh key stuff is present
+  copy:
+    src: "cscweb_github_deploy_ssh_key"
+    dest: "/home/{{ item }}/.ssh/id_rsa"
+    mode: 0400
+    owner: "{{ item }}"
+  with_items:
+    - "{{ cscenter_user }}"
+    - "{{ csclub_user }}"
+
+

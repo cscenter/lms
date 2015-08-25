@@ -1,0 +1,25 @@
+[uwsgi]
+# Django-related settings
+chdir           = /home/{{ item }}/site/repo/cscsite
+module          = {{ item }}.wsgi:application
+home            = /home/{{ item }}/site/env
+pythonpath      = /home/{{ item }}/site/env/lib/python2.7/site-packages
+pythonpath      = /home/{{ item }}/site/repo/cscsite
+env             = DJANGO_SETTINGS_MODULE={{ item }}.settings.production
+env             = PYTHONIOENCODING=UTF-8
+env             = LC_ALL=en_US.UTF-8
+env             = LANG=en_US.UTF-8
+
+# process-related settings
+master          = true
+enable-threads  = true
+processes       = 5
+socket          = /tmp/uwsgi_{{ item }}.socket
+die-on-term     = true
+chmod-socket    = 666
+vacuum          = true
+stats           = /tmp/uwsgi_{{ item }}_stats.socket
+uid             = {{ item }}
+gid             = {{ item }}
+logto           = /home/{{ item }}/site/logs/uwsgi.log
+log-maxsize     = 5242880

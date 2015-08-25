@@ -14,3 +14,7 @@
 - name: reload nginx
   service: name=nginx state=reloaded
   sudo: yes
+
+- name: restart postgres
+  service: name=postgresql state=restarted
+  sudo: yes

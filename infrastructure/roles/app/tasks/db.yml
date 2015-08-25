@@ -1,0 +1,58 @@
+---
+- name: ensure the PostgreSQL service is running
+  service: name=postgresql state=started enabled=yes
+
+- name: Change postgres data storage | Drop cluster if exist
+  sudo: yes
+  ignore_errors: yes
+  shell: "pg_dropcluster --stop {{ pg_version }} main"
+
+- name: Change postgres data storage | Drop cluster if exist
+  sudo: yes
+  ignore_errors: yes
+  shell: "pg_createcluster -d /shared/db/data/ --start -e UTF-8 {{ pg_version }} main"
+  notify: restart postgres
+
+- name: ensure user exists
+  become: yes
+  become_user: postgres
+  postgresql_user: state=present name=csc password=FooBar
+
+- name: Create database
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: cscdb
+    encoding: "UTF-8"
+    owner: csc
+    state: present
+  register: cscdb
+
+- name: ensure user has access to the database
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    db: cscdb
+    name: csc
+    priv: ALL
+    state: present
+
+- name: ensure user does not have unnecessary privileges
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: csc
+    role_attr_flags: NOSUPERUSER,CREATEDB
+    state: present
+
+- name: init Django db. *No matter club or center user here*
+  become: yes
+  become_user: "{{ cscenter_user }}"
+  django_manage:
+    command: "migrate"
+    app_path: "/home/{{ cscenter_user }}/site/repo/cscsite"
+    settings: "{{ cscenter_user }}.settings.production"
+    virtualenv: "/home/{{ cscenter_user }}/site/env/"
+
+- name: ensure folder for file-based cache exists
+  file: path=/tmp/django_cache mode=777 state=directory
