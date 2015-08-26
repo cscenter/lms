@@ -136,7 +136,7 @@
     "staff_only": false,
     "groups": [],
     "classes": "",
-    "select_patterns": "^/learning/calendar/"
+    "select_patterns": " ^/learning/calendar/"
   },
   "model": "menu_extension.menuitemextension",
   "pk": 10
@@ -292,7 +292,7 @@
     "staff_only": false,
     "groups": [],
     "classes": "",
-    "select_patterns": "^/teaching/calendar/"
+    "select_patterns": " ^/teaching/calendar/"
   },
   "model": "menu_extension.menuitemextension",
   "pk": 21
@@ -846,5 +846,33 @@
   },
   "model": "menu_extension.menuitemextension",
   "pk": 60
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 61
+},
+{
+  "fields": {
+    "unauthenticated": false,
+    "exclude_patterns": " ",
+    "budge": "",
+    "protected": false,
+    "staff_only": false,
+    "groups": [],
+    "classes": "",
+    "select_patterns": " "
+  },
+  "model": "menu_extension.menuitemextension",
+  "pk": 62
 }
 ]
