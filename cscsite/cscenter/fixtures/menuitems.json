@@ -68,10 +68,10 @@
   "fields": {
     "parent": 1,
     "level": 1,
-    "url": "/videos/",
+    "url": "/online/",
     "menu": 1,
     "rank": 1,
-    "caption": "Video",
+    "caption": "Online",
     "named_url": ""
   },
   "model": "treemenus.menuitem",
@@ -94,7 +94,7 @@
   "fields": {
     "parent": 1,
     "level": 1,
-    "url": "",
+    "url": "/learning/assignments/",
     "menu": 1,
     "rank": 3,
     "caption": "Learning",
@@ -107,7 +107,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "",
+    "url": "/learning/assignments/",
     "menu": 1,
     "rank": 0,
     "caption": "Assignments",
@@ -120,7 +120,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "",
+    "url": "/learning/timetable/",
     "menu": 1,
     "rank": 1,
     "caption": "My timetable",
@@ -133,7 +133,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "",
+    "url": "/learning/full-calendar/",
     "menu": 1,
     "rank": 2,
     "caption": "Calendar",
@@ -146,7 +146,7 @@
   "fields": {
     "parent": 8,
     "level": 2,
-    "url": "",
+    "url": "/learning/courses/",
     "menu": 1,
     "rank": 3,
     "caption": "My courses",
@@ -779,6 +779,33 @@
   "model": "treemenus.menuitem",
   "pk": 60
 },
+{
+  "fields": {
+    "parent": 6,
+    "level": 2,
+    "url": "/online/",
+    "menu": 1,
+    "rank": 0,
+    "caption": "Online courses",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 61
+},
+{
+  "fields": {
+    "parent": 6,
+    "level": 2,
+    "url": "/videos/",
+    "menu": 1,
+    "rank": 1,
+    "caption": "Video",
+    "named_url": ""
+  },
+  "model": "treemenus.menuitem",
+  "pk": 62
+},
+
 {
   "fields": {
     "root_item": 1,
