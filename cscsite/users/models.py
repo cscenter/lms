@@ -236,7 +236,11 @@ class CSCUser(AbstractUser):
 
     @cached_property
     def _cs_group_pks(self):
-        return self.groups.values_list("pk", flat=True)
+        user_groups = self.groups.values_list("pk", flat=True)
+        # Remove student center group if user expelled
+        if self.status == self.STATUS.expelled:
+            user_groups = user_groups.exclude(pk=self.group_pks.STUDENT_CENTER)
+        return user_groups
 
     @property
     def status_display(self):
