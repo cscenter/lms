@@ -1,9 +1,14 @@
+@header-lvl1-bg:                 #678D9E;
+@header-lvl2-bg:                 #99B6C3;
+
 .header {
     line-height: 50px;
     &.lvl1 {
         height: 50px;
-        background-color: #678D9E;
         color: white;
+        background-color: @header-lvl1-bg;
+        min-width: @min-width;
+
     }
 
     &.lvl2 {
@@ -13,7 +18,8 @@
         display: none;
         position: absolute;
         z-index: -1;
-        background-color: #99B6C3;
+        background-color: @header-lvl2-bg;
+        min-width: @min-width;
 
         &.current {
             display: block;
