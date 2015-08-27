@@ -54,7 +54,7 @@ class CSCUserQuerySet(query.QuerySet):
 
         return qs if filtered else qs.none()
 
-    def students_info(self, only_graduate=False):
+    def students_info(self, only_will_graduate=False):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
@@ -62,9 +62,10 @@ class CSCUserQuerySet(query.QuerySet):
         from learning.models import Enrollment, CourseClass, StudentProject
 
         q = self.filter(
-                groups__pk=CSCUser.group_pks.STUDENT_CENTER,
+                groups__in=[CSCUser.group_pks.STUDENT_CENTER,
+                            CSCUser.group_pks.GRADUATE_CENTER]
             )
-        if only_graduate:
+        if only_will_graduate:
             q = q.filter(status=CSCUser.STATUS.will_graduate)
         return (q
             .order_by('last_name', 'first_name')
