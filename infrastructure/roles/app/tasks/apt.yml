@@ -47,6 +47,8 @@
     - postgresql-9.4
     - libpq-dev
     - gettext
+    - libpcre3
+    - libpcre3-dev
     - python-setuptools
     - python-dev
     - git
