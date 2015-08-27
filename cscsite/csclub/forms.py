@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from captcha.fields import ReCaptchaField
 from django.contrib.auth.models import Group
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -9,6 +10,7 @@ from users.models import CSCUser
 
 
 class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
+    captcha = ReCaptchaField()
 
     def clean_username(self):
         """

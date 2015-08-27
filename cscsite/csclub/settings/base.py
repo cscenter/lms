@@ -27,11 +27,10 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS += (
+    'captcha',
     'registration',
 )
-ACCOUNT_ACTIVATION_DAYS = 3
-INCLUDE_AUTH_URLS = False
-REGISTRATION_FORM = 'csclub.forms.RegistrationUniqueEmailAndUsernameForm'
+
 
 SOLID_I18N_USE_REDIRECTS = False
 # Redirect from /ru/... to /... if default_lang == 'ru'
@@ -60,3 +59,13 @@ GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
 NEWRELIC_CONF = Path(BASE_DIR, "newrelic.ini")
 NEWRELIC_ENV = 'development'
+
+# Registration and Recaptcha settings
+RECAPTCHA_PUBLIC_KEY = '01kaSkG0Hb5eG6Ti96ik8UUQ=='
+RECAPTCHA_PRIVATE_KEY = '2a6b2e83685a2ebda9a0803b08f7ebde'
+NOCAPTCHA = True
+RECAPTCHA_USE_SSL = True
+
+ACCOUNT_ACTIVATION_DAYS = 3
+INCLUDE_AUTH_URLS = False
+REGISTRATION_FORM = 'csclub.forms.RegistrationUniqueEmailAndUsernameForm'
