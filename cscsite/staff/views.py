@@ -53,7 +53,7 @@ class StudentsDiplomasView(StaffOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = CSCUser.objects.students_info(only_graduate=True)
+        context['students'] = CSCUser.objects.students_info(only_will_graduate=True)
         for student in context['students']:
             student.projects = StudentProject.sorted(student.projects)
 
@@ -64,7 +64,7 @@ class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(only_graduate=True)
+        students = CSCUser.objects.students_info(only_will_graduate=True)
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
@@ -143,7 +143,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(only_graduate=False)
+        students = CSCUser.objects.students_info(only_will_graduate=False)
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()

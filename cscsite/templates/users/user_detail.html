@@ -15,14 +15,16 @@
         <a href="{% url 'user_update' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
         {% endif %}
 
-        {% if has_curator_permissions and user_object.is_student and user_object.enrollment_year %}
-        <a href="{% url 'user_reference_add' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Create reference" %}</a>
-        {% endif %}
-        {% if has_curator_permissions and user_object.studentinfo %}
-        <a href="{% url 'student_info_update' user_object.studentinfo.pk %}" class="btn btn-primary" role="button">{% trans "Edit info record" %}</a>
-        {% endif %}        
-        {% if user_object.pk == user.pk %}
-        <a href="{% url 'password_change' %}" class="btn btn-primary" role="button">{% trans "Change password" %}</a>
+        {% if has_curator_permissions and user_object.enrollment_year %}
+          {% if user_object.is_student or user_object.is_graduate %}
+          <a href="{% url 'user_reference_add' user_object.pk %}" class="btn btn-primary" role="button">{% trans "Create reference" %}</a>
+          {% endif %}
+          {% if has_curator_permissions and user_object.studentinfo %}
+          <a href="{% url 'student_info_update' user_object.studentinfo.pk %}" class="btn btn-primary" role="button">{% trans "Edit info record" %}</a>
+          {% endif %}
+          {% if user_object.pk == user.pk %}
+          <a href="{% url 'password_change' %}" class="btn btn-primary" role="button">{% trans "Change password" %}</a>
+          {% endif %}
         {% endif %}
       </div>
       <hr>
@@ -34,7 +36,7 @@
       <div class="ubertext">{{ user_object.note }}</div>
       {% endif %}
       <ul class="">
-        {% if user_object.is_student or user_object.enrollment_year %}
+        {% if user_object.is_student or user_object.is_graduate or user_object.enrollment_year %}
         <li>
           {% trans "student" %},
           {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% if user_object.enrollment_set.all %}, {% trans "courseoffering|took" %}:
@@ -171,7 +173,8 @@
       </ul>
       {% endif %}
       {% endwith %}
-      {% if has_curator_permissions and user_object.is_student %}
+      {% if user_object.is_student or user_object.is_graduate %}
+        {% if has_curator_permissions %}
       <h4 class="bigger-margin">{% trans "Student info record" %}:</h4>
       <table class="table table-condensed">
         <tr>
@@ -294,9 +297,11 @@
           <td>{{ user_object.workplace|default:"—" }}</td>
         </tr>
       </table>
+        {% endif %}
       {% endif %}
 
-      {% if has_curator_permissions and user_object.is_student and  user_object.cscuserreference_set.count > 0 %}
+      {% if has_curator_permissions and  user_object.cscuserreference_set.count > 0 %}
+        {% if user_object.is_student or user_object.is_graduate %}
         <h4 class="bigger-margin">{% trans "Student references" %}:</h4>
           <ul>
             {% for reference in user_object.cscuserreference_set.all %}
@@ -307,6 +312,7 @@
             </li>
             {% endfor %}
           </ul>
+        {% endif %}
       {% endif %}
 
     </div>
