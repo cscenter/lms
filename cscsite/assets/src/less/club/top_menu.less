@@ -66,9 +66,10 @@
 
 .header {
     &.lvl1 {
-        background-color: @header-lvl1-bg;
         color: white;
         margin-bottom: 60px;
+        background-color: @header-lvl1-bg;
+        min-width: @min-width;
     }
 
     &.lvl2 {
@@ -77,8 +78,9 @@
         color: white;
         display: none;
         z-index: -1;
-        background-color: @header-lvl2-bg;
         margin: -60px 0 20px;
+        background-color: @header-lvl2-bg;
+        min-width: @min-width;
 
         &.current {
             display: block;

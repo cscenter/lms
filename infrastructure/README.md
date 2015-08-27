@@ -1,3 +1,5 @@
+* change uwsgi process groups to `shared` if u need ability to change files everywhere (created from center site on club site, e.g.)
+
 TODO:
 * restore db from s3
 * deploy for cscenter and csclub
@@ -117,7 +119,7 @@ NAILED IT!
 Note: Бэкап делается bd и media. У сайта клуба и центра это общие ресурсы, поэтому нет смысла делать бэкапы и того и другого
 * Как быть с правами создаваемых файлов в папке media?
 
-rsync -h -v -r -P --ignore-existing ubuntu@compscicenter.ru:/home/cscweb/site/repo/cscsite/media/ ubuntu@LSKDJF:/shared/media
+rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscweb/site/repo/cscsite/media/ /shared/media/
 
 # TAGS
 
@@ -127,3 +129,16 @@ rsync -h -v -r -P --ignore-existing ubuntu@compscicenter.ru:/home/cscweb/site/re
 
 
 pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql
+
+
+## How to restore DB and media/ files
+alter role my_user_name with superuser;
+or you will be have a problem with error `must be owner of extension plpgsql`
+
+
+user must be owner of db `alter database <DB> owner to <currentuser>;`
+1. Create user with previligies to createdb and dropdb or temporary grant current user preveligies `ALTER USER <currentuser> CREATEDB;`
+2. pass parameters to command cscsite/manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local
+
+
+cscsite/manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local
