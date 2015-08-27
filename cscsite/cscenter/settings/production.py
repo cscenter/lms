@@ -86,7 +86,7 @@ SLIDESHARE_PASSWORD = "vorobey"
 
 YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
 YANDEX_DISK_PASSWORD = "deelthisat"
-YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2014-2015"
+YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2015-2016"
 
 
 
