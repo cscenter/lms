@@ -30,10 +30,8 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         queryset = News.public.filter(
             site__id=settings.SITE_ID,
-            language=get_language()).select_related('city')
-        if hasattr(self.request, 'city'):
-            queryset = queryset.filter(
-                Q(city__pk=self.request.city.code) | Q(city__isnull=True))
+            language=get_language()
+        )
         context['news_objects'] = queryset[:3]
         return context
 

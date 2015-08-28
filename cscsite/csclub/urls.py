@@ -7,7 +7,7 @@ from django.contrib import admin
 from htmlpages import views
 
 
-from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
+from index.views import AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
@@ -45,14 +45,13 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView
 
-from csclub.views import set_city, CalendarClubScheduleView
+from csclub.views import set_city, CalendarClubScheduleView, IndexView
 
 
 admin.autodiscover()
 
 urlpatterns = solid_i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^news/', include('news.urls')),
     # Courses
     url(r"^courses/$", CoursesListView.as_view(),
         name="course_list"),

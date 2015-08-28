@@ -46,9 +46,9 @@
     </div>
 </div>
 
-<div class="header-lvl2-container">
 {% for menu_item in menu %}
     {% if 'current' in menu_item.extension.classes and menu_item.children and not menu_item.hidden %}
+        <div class="header-lvl2-container">
           <div class="header lvl2 {{menu_item.extension.classes}}">
             <div class="container">
               <div class="row">
@@ -73,6 +73,6 @@
               </div>
             </div>
           </div>
+        </div>
     {% endif %}
 {% endfor %}
-</div>

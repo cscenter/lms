@@ -7,24 +7,38 @@
 <div class="banner _{{ request.city.code|slugify }}"></div>
 <div class="container">
     <div class="row">
-        <div class="news">
-          <h1>{% trans "Latest News" %}</h1>
-            {% if news_objects %}
-                {% for news in news_objects %}
-                    <article>
-                        <div class="post-date">
-                        {{ news.created|date }} | {% if news.city %}{{ news.city }}{% else %}{% trans 'All cities' %}{% endif %}{% comment %} | <a href="">Melissa Sing </a> <!--  <span><a href="">11 Comments</a></span> -->{% endcomment %}
-                        </div>    
-                        <h2><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h2>
-                        <p class="lead">{{ news.text.excerpt|safe }} {% if news.text.has_more %}<br><a href="{% url 'news_detail' slug=news.slug %}">{% trans "Read more" %}</a>
-                        {% endif %}</p>
-                    </article>
+          <h1>{% trans "Nearest courses" %}</h1>
+            {% if semester_pairs %}
+                {% for autumn_spring in semester_pairs %}
+                  <table class="table table-stripped">
+                    <tr>
+                    {% for semester in autumn_spring %}
+                      <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
+                    {% endfor %}
+                    </tr>
+                    <tr>
+                    {% for semester in autumn_spring %}
+                      <td class="semester-course-list">
+                        <ul>
+                        {% for course_offering in semester.courseofferings %}
+                          <li>
+                            {% comment %}
+                            Note(lebedev): because crappy Django doesn't have proper
+                            whitespace stripping, like {%- in Jinja.
+                            {% endcomment %}
+                            <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                            ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+                          </li>
+                        {% endfor %}
+                        </ul>
+                      </td>
+                    {% endfor %}
+                    </tr>
+                  </table>
                 {% endfor %}
-                <a href="{% url 'news_list' %}"><h4 class="bigger-margin">{% trans "All news" %}</h4></a>
             {% else %}
-                <p>{% trans "No news yet" %}</p>
+                <p>{% trans "No active courses" %}</p>
             {% endif %}
-        </div>
     </div>
 </div>
 {% endblock content %}

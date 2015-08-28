@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.db.models import Q, Prefetch
 from django.http import JsonResponse
 from django.views import generic
 
 from .utils import check_for_city
 from learning.views import CalendarMixin
-from learning.models import NonCourseEvent
+from learning.models import NonCourseEvent, CourseOffering, Semester
+from learning.utils import grouper
 
 
 def set_city(request, city_code):
@@ -31,3 +33,31 @@ class CalendarClubScheduleView(CalendarMixin, generic.ListView):
 
     def noncourse_events(self, month, year, prev_month_date, next_month_date):
         return NonCourseEvent.objects.none()
+
+
+class IndexView(generic.TemplateView):
+    template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        co_queryset = (CourseOffering.objects
+            .filter(is_open=True)
+            .select_related('course')
+            .prefetch_related('teachers')
+            .order_by('course__name'))
+        if hasattr(self.request, 'city'):
+            co_queryset = co_queryset.filter(
+                Q(city__pk=self.request.city.code)
+                | Q(city__isnull=True))
+
+        current_semester = Semester.get_current()
+        semesters_nearest = (Semester.objects.filter(id__gt=current_semester.pk)
+                            .prefetch_related(
+                                Prefetch(
+                                    'courseoffering_set',
+                                    queryset=co_queryset,
+                                    to_attr='courseofferings'
+                                ),
+                            ))
+        context['semester_pairs'] = grouper(semesters_nearest, 2)
+        return context
