@@ -59,18 +59,22 @@
             {% endfor %}
           </ul>
         </li>
+        {% elif user.is_curator %}
+            <li>нет студенческих проектов</li>
         {% endif %}
 
-        {% with recs=user_object.shadcourserecord_set.all %}
-        {% if recs %}
+        {% with shad_courses=user_object.shadcourserecord_set.all %}
+        {% if shad_courses %}
         <li>
             <h4>{% trans "School of Data Analysis courses" %}</h4>
             <ul>
-              {% for rec in recs %}
-              <li>{{ rec.name }}</li>
+              {% for shad in shad_courses %}
+              <li>{{ shad.name }} - {{ shad.teachers }} ({{ shad.grade_display }})</li>
               {% endfor %}
             </ul>
         </li>
+        {% elif user.is_curator %}
+            <li>нет зачтённых ШАД-курсов</li>
         {% endif %}
         {% endwith %}
 
@@ -85,6 +89,8 @@
               {% endfor %}
             </ul>
         </li>
+        {% elif user.is_curator %}
+        <li>нет зачтённых онлайн-курсов</li>
         {% endif %}
         {% endwith %}
         {% endif %}
