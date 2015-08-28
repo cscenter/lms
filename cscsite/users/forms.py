@@ -58,6 +58,8 @@ class LoginForm(AuthenticationForm):
 
 class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
             show_fields = ['photo', 'phone', 'note', 'csc_review',
@@ -67,11 +69,18 @@ class UserProfileForm(forms.ModelForm):
             show_fields = ['photo', 'phone', 'note',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
+
+        club_fields = ['first_name', 'last_name', 'patronymic', 'email']
+        if kwargs['instance'].is_student_club and \
+           not kwargs['instance'].is_student_center:
+            show_fields = club_fields + show_fields
+        else:
+            for field in club_fields:
+                del self.fields[field]
+
         self.helper.layout = Layout(
             Div(*show_fields),
             CANCEL_SAVE_PAIR)
-
-        super(UserProfileForm, self).__init__(*args, **kwargs)
 
         if 'csc_review' not in show_fields:
             del self.fields['csc_review']
@@ -79,7 +88,8 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = CSCUser
         fields = ['photo', 'phone', 'note', 'yandex_id', 'github_id',
-                  'stepic_id', 'csc_review', 'private_contacts']
+                  'stepic_id', 'csc_review', 'private_contacts',
+                  'first_name', 'last_name', 'patronymic', 'email']
         widgets = {
             'note': Ubereditor,
             'csc_review': Ubereditor,
@@ -96,7 +106,6 @@ class UserProfileForm(forms.ModelForm):
             'github_id': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepic.org/users/<b>STEPIC-ID</b>")
         }
-
 
 class CSCUserReferenceCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

@@ -266,6 +266,10 @@ class CSCUser(AbstractUser):
         return self.group_pks.STUDENT_CENTER in self._cs_group_pks
 
     @property
+    def is_student_club(self):
+        return self.group_pks.STUDENT_CLUB in self._cs_group_pks
+
+    @property
     def is_teacher(self):
         return self.group_pks.TEACHER_CENTER in self._cs_group_pks or \
                self.group_pks.TEACHER_CLUB in self._cs_group_pks
