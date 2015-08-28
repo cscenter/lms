@@ -455,7 +455,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.context['has_curator_permissions'], True)
         soup = BeautifulSoup(response.content, "html.parser")
-        button = soup.find('a', text=_("Create reference"))
+        button = soup.find(string=re.compile(_("Create reference")))
         self.assertIsNotNone(button)
 
     def test_user_detail_reference_list_view(self):

@@ -124,6 +124,7 @@ class UserDetailView(generic.DetailView):
                          'teaching_set__semester',
                          'teaching_set__course',
                          'enrollment_set',
+                         'shadcourserecord_set',
                          'enrollment_set__course_offering',
                          'enrollment_set__course_offering__semester',
                          'enrollment_set__course_offering__course']
@@ -132,7 +133,6 @@ class UserDetailView(generic.DetailView):
             prefetch_list += ['borrows',
                               'borrows__book',
                               'onlinecourserecord_set',
-                              'shadcourserecord_set',
                               'study_programs',
                               'cscuserreference_set']
             select_list += ['comment_last_author']
@@ -146,6 +146,7 @@ class UserDetailView(generic.DetailView):
         context = (super(UserDetailView, self)
                    .get_context_data(*args, **kwargs))
         u = self.request.user
+        # FIXME: use it or remove
         context['is_extended_profile_available'] = \
             (u.is_authenticated() and
             (u == self.object or u.is_teacher or u.is_curator))
