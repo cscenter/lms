@@ -16,6 +16,13 @@
         {% trans "enrolled in" %} {{ user_object.enrollment_year }}
     {% endif %}
 
+    {% if user_object.note %}
+        <div class="about-me">
+            <h4>{% trans "About me" %}</h4>
+            <div class="ubertext">{{ user_object.note }}</div>
+        </div>
+    {% endif %}
+
     <ul class="list-unstyled">
     {% if user_object.is_student or user_object.is_graduate or user_object.enrollment_year %}
         {% if user_object.enrollment_set.all %}
@@ -164,13 +171,6 @@
     </div>
     {% endif %}
 
-    {% if user_object.note %}
-        <div class="about-me">
-            <h4>{% trans "About me" %}</h4>
-            <div class="ubertext">{{ user_object.note }}</div>
-        </div>
-    {% endif %}
-
     {% if user_object.csc_review %}
         <div class="review">
             <h4>{% blocktrans with name=user_object.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
@@ -179,8 +179,10 @@
     {% endif %}
 
     {% if user.is_authenticated and user_object.private_contacts %}
-        <h4>{% trans "Contact information" %}:</h4>
-        <div class="ubertext">{{ user_object.private_contacts }}</div>
+        <div class="contact-info">
+            <h4>{% trans "Contact information" %}:</h4>
+            <div class="ubertext">{{ user_object.private_contacts }}</div>
+        </div>
     {% endif %}
 
     {% if a_ss %}
