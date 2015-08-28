@@ -272,7 +272,7 @@ class CoursesListView(generic.ListView):
             co_queryset = co_queryset.filter(is_open=True)
             if hasattr(self.request, 'city'):
                 co_queryset = co_queryset.filter(
-                    Q(city__pk=self.request.city.code) 
+                    Q(city__pk=self.request.city.code)
                     | Q(city__isnull=True))
         q = (self.model.objects.prefetch_related(
                 Prefetch(
