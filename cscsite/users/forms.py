@@ -60,11 +60,11 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
-            show_fields = ['photo', 'note', 'csc_review',
+            show_fields = ['photo', 'phone', 'note', 'csc_review',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
         else:
-            show_fields = ['photo', 'note',
+            show_fields = ['photo', 'phone', 'note',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
         self.helper.layout = Layout(
@@ -78,8 +78,8 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = CSCUser
-        fields = ['photo', 'note', 'yandex_id', 'github_id', 'stepic_id',
-                  'csc_review', 'private_contacts']
+        fields = ['photo', 'phone', 'note', 'yandex_id', 'github_id',
+                  'stepic_id', 'csc_review', 'private_contacts']
         widgets = {
             'note': Ubereditor,
             'csc_review': Ubereditor,

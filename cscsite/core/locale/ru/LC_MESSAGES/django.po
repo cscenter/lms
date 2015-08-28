@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-25 01:01+0300\n"
-"PO-Revision-Date: 2015-08-25 01:01+0230\n"
+"POT-Creation-Date: 2015-08-28 15:17+0300\n"
+"PO-Revision-Date: 2015-08-28 15:17+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -171,7 +171,7 @@ msgid "Text"
 msgstr "Текст"
 
 #: learning/forms.py:88 learning/models.py:44 learning/models.py:892
-#: users/models.py:288 users/models.py:306
+#: users/models.py:292 users/models.py:310
 msgid "Course|name"
 msgstr "Название"
 
@@ -318,6 +318,7 @@ msgstr "Курс"
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
 #: templates/learning/markssheet_teacher.html:42
+#: templates/users/user_detail.html:23
 msgid "Courses"
 msgstr "Курсы"
 
@@ -330,7 +331,7 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: learning/models.py:88 learning/models.py:154
-#: templates/learning/courses_list_student.html:103 users/models.py:310
+#: templates/learning/courses_list_student.html:103 users/models.py:314
 msgid "Semester"
 msgstr "Семестр"
 
@@ -372,7 +373,7 @@ msgstr "Записавшиеся студенты"
 
 #: learning/models.py:183 learning/models.py:239 learning/models.py:312
 #: learning/models.py:436 learning/models.py:672
-#: templates/users/user_detail.html:136
+#: templates/users/user_detail.html:193
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -449,6 +450,7 @@ msgid "Class"
 msgstr "Занятие"
 
 #: learning/models.py:347 templates/learning/courseoffering_detail.html:88
+#: templates/users/user_detail.html:113
 msgid "Classes"
 msgstr "Занятия"
 
@@ -485,14 +487,14 @@ msgid "Assignment|text"
 msgstr "Текст"
 
 #: learning/models.py:464 learning/models.py:502
-#: templates/users/user_detail.html:137
+#: templates/users/user_detail.html:194
 msgid "Assignment"
 msgstr "Задание"
 
 #: learning/models.py:465 templates/learning/assignment_list_student.html:11
 #: templates/learning/assignment_list_teacher.html:11
 #: templates/learning/courseoffering_detail.html:134
-#: templates/users/user_detail.html:130
+#: templates/users/user_detail.html:120 templates/users/user_detail.html:187
 msgid "Assignments"
 msgstr "Задания"
 
@@ -548,7 +550,7 @@ msgstr "Студент"
 #: templates/learning/assignment_student_detail.html:112
 #: templates/learning/courses_list_student.html:25
 #: templates/learning/courses_list_student.html:100
-#: templates/users/user_detail.html:138
+#: templates/users/user_detail.html:195
 msgid "Grade"
 msgstr "Оценка"
 
@@ -599,12 +601,12 @@ msgstr "Комментарии к заданиям"
 
 #: learning/models.py:668 templates/learning/assignment_detail.html:61
 #: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:135 users/models.py:286
-#: users/models.py:304 users/models.py:338
+#: templates/learning/assignment_student_detail.html:135 users/models.py:290
+#: users/models.py:308 users/models.py:342
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:675 users/models.py:314
+#: learning/models.py:675 users/models.py:318
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -696,7 +698,7 @@ msgstr "НИР"
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: learning/models.py:833 templates/users/user_detail.html:61
+#: learning/models.py:833 templates/users/user_detail.html:45
 msgid "StudentProject|Supervisor"
 msgstr "Руководитель"
 
@@ -708,7 +710,7 @@ msgstr "Формат: Фамилия Имя Отчество, Организац
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: learning/models.py:844 templates/users/user_detail.html:60
+#: learning/models.py:844 templates/users/user_detail.html:44
 msgid "Presentation"
 msgstr "Презентация"
 
@@ -716,7 +718,7 @@ msgstr "Презентация"
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: learning/models.py:853 templates/users/user_detail.html:55
+#: learning/models.py:853 templates/users/user_detail.html:39
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
@@ -760,7 +762,7 @@ msgstr "Совместно с АУ"
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: learning/models.py:913 templates/users/user_detail.html:261
+#: learning/models.py:913 templates/users/user_detail.html:74
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -847,7 +849,7 @@ msgstr "Количество копий"
 msgid "book"
 msgstr "Книга"
 
-#: library/models.py:49 templates/users/user_detail.html:166
+#: library/models.py:49 templates/users/user_detail.html:224
 msgid "books"
 msgstr "Книги"
 
@@ -922,7 +924,6 @@ msgid "Alumni"
 msgstr "Выпускники"
 
 #: menu_extension/translation.py:20
-#| msgid "Online courses"
 msgctxt "menu"
 msgid "Online courses"
 msgstr "Онлайн-курсы"
@@ -1078,7 +1079,7 @@ msgstr "Администрирование Django"
 #: templates/learning/courseclass_detail.html:13
 #: templates/learning/courseoffering_detail.html:31
 #: templates/learning/courses/detail.html:13
-#: templates/users/user_detail.html:15
+#: templates/users/user_detail.html:334
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -1160,7 +1161,7 @@ msgstr "Все задания"
 
 #: templates/learning/assignment_student_detail.html:59
 #: templates/learning/assignment_student_detail.html:99
-#: templates/users/user_detail.html:222 users/models.py:142
+#: templates/users/user_detail.html:258 users/models.py:142
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -1448,7 +1449,7 @@ msgstr "Пароль изменён"
 #: templates/registration/password_change_form.html:16
 #: templates/registration/password_reset_confirm.html:5
 #: templates/registration/password_reset_confirm.html:17
-#: templates/users/user_detail.html:25
+#: templates/users/user_detail.html:349
 msgid "Change password"
 msgstr "Сменить пароль"
 
@@ -1521,111 +1522,121 @@ msgstr "Информация"
 msgid "No professors yet"
 msgstr "Преподавателей ещё нет"
 
-#: templates/users/user_detail.html:19 users/tests.py:450 users/tests.py:458
-msgid "Create reference"
-msgstr "Выдать справку"
-
-#: templates/users/user_detail.html:22
-msgid "Edit info record"
-msgstr "Редактировать карточку"
-
-#: templates/users/user_detail.html:39
-msgid "student"
-msgstr "студент"
-
-#: templates/users/user_detail.html:40
-msgid "enrolled in"
-msgstr "год поступления"
-
-#: templates/users/user_detail.html:40
-msgid "courseoffering|took"
-msgstr "курсы"
-
-#: templates/users/user_detail.html:75
+#: templates/users/user_detail.html:13
 #, python-format
 msgid "graduated in %(year)s"
 msgstr "выпускник %(year)s года"
 
-#: templates/users/user_detail.html:79
+#: templates/users/user_detail.html:15
+msgid "student"
+msgstr "студент"
+
+#: templates/users/user_detail.html:16
+msgid "enrolled in"
+msgstr "год поступления"
+
+#: templates/users/user_detail.html:60
+msgid "School of Data Analysis courses"
+msgstr "Курсы ШАД"
+
+#: templates/users/user_detail.html:87
 msgid "teacher"
 msgstr "преподаватель"
 
-#: templates/users/user_detail.html:93
+#: templates/users/user_detail.html:106
+#| msgid ".iCal events calendar"
+msgid ".iCal calendar"
+msgstr ".iCal-календарь"
+
+#: templates/users/user_detail.html:107
+msgid "Link"
+msgstr "Ссылка"
+
+#: templates/users/user_detail.html:127
+msgid "Events"
+msgstr "События"
+
+#: templates/users/user_detail.html:138
+msgid "Social accounts"
+msgstr "Аккаунты"
+
+#: templates/users/user_detail.html:141 users/models.py:99
+msgid "Yandex ID"
+msgstr "Yandex ID"
+
+#: templates/users/user_detail.html:146 users/models.py:106
+msgid "Github ID"
+msgstr "Github ID"
+
+#: templates/users/user_detail.html:156 users/models.py:112
+msgid "Stepic ID"
+msgstr "Stepic ID"
+
+#: templates/users/user_detail.html:169
+msgid "About me"
+msgstr "О себе"
+
+#: templates/users/user_detail.html:176
 #, python-format
 msgid "%(name)s about CSC"
 msgstr "%(name)s о Центре"
 
-#: templates/users/user_detail.html:99 users/models.py:120
+#: templates/users/user_detail.html:182 users/models.py:120
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: templates/users/user_detail.html:107
-msgid ".iCal classes calendar"
-msgstr ".iCal-календарь занятий"
-
-#: templates/users/user_detail.html:114
-msgid ".iCal assignments calendar"
-msgstr ".iCal-календарь заданий"
-
-#: templates/users/user_detail.html:121
-msgid ".iCal events calendar"
-msgstr ".iCal-календарь событий"
-
-#: templates/users/user_detail.html:175 users/admin.py:87
+#: templates/users/user_detail.html:235 users/admin.py:87
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: templates/users/user_detail.html:178 users/models.py:127
+#: templates/users/user_detail.html:238 users/models.py:127
 msgid "University"
 msgstr "Университет"
 
-#: templates/users/user_detail.html:182 users/models.py:131
+#: templates/users/user_detail.html:242 users/models.py:131
 msgid "Phone"
 msgstr "Телефон"
 
-#: templates/users/user_detail.html:186 users/models.py:99
-msgid "Yandex ID"
-msgstr "Yandex ID"
-
-#: templates/users/user_detail.html:190 users/models.py:106
-msgid "Github ID"
-msgstr "Github ID"
-
-#: templates/users/user_detail.html:200 users/models.py:112
-msgid "Stepic ID"
-msgstr "Stepic ID"
-
-#: templates/users/user_detail.html:211
+#: templates/users/user_detail.html:247
 msgid "Email"
 msgstr "Email"
 
-#: templates/users/user_detail.html:218 users/models.py:135
+#: templates/users/user_detail.html:254 users/models.py:135
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: templates/users/user_detail.html:236 users/models.py:157
+#: templates/users/user_detail.html:272 users/models.py:157
 msgid "Status"
 msgstr "Статус"
 
-#: templates/users/user_detail.html:240
+#: templates/users/user_detail.html:276
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: templates/users/user_detail.html:245
+#: templates/users/user_detail.html:281
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: templates/users/user_detail.html:277
-msgid "School of Data Analysis courses"
-msgstr "Курсы ШАД"
-
-#: templates/users/user_detail.html:293 users/models.py:165
+#: templates/users/user_detail.html:297 users/models.py:165
 msgid "Workplace"
 msgstr "Место работы"
 
-#: templates/users/user_detail.html:300 users/tests.py:473 users/tests.py:478
+#: templates/users/user_detail.html:306 users/tests.py:473 users/tests.py:478
 msgid "Student references"
 msgstr "Справки студента"
+
+#: templates/users/user_detail.html:338
+#| msgid "Edit info record"
+msgid "Edit in admin"
+msgstr "Редактировать в админ-панели"
+
+#: templates/users/user_detail.html:343 users/tests.py:450 users/tests.py:458
+msgid "Create reference"
+msgstr "Выдать справку"
+
+#: templates/users/user_detail.html:346
+msgid "Edit info record"
+msgstr "Редактировать карточку"
 
 #: users/admin.py:25
 msgid "Username must be unique"
@@ -1820,41 +1831,50 @@ msgstr "Пользователь"
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:292
+#: users/models.py:296
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: users/models.py:293
+#: users/models.py:297
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: users/models.py:307
+#: users/models.py:311
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: users/models.py:320
+#: users/models.py:324
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: users/models.py:321
+#: users/models.py:325
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: users/models.py:333
+#: users/models.py:337
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: users/models.py:334
+#: users/models.py:338
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: users/models.py:343
+#: users/models.py:347
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: users/models.py:344
+#: users/models.py:348
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "courseoffering|took"
+#~ msgstr "курсы"
+
+#~ msgid ".iCal classes calendar"
+#~ msgstr ".iCal-календарь занятий"
+
+#~ msgid ".iCal assignments calendar"
+#~ msgstr ".iCal-календарь заданий"
 
 #~ msgid "empty description will be replaced by course description"
 #~ msgstr "пустое описание будет заменено на описание курса"
