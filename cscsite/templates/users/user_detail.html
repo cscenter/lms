@@ -132,6 +132,7 @@
       </table>
     {% endif %}
 
+    {% if user.is_authenticated %}
     <div class="accounts">
         <h4>{% trans "Social accounts" %}</h4>
         <table class="table table-condensed table-striped">
@@ -161,6 +162,7 @@
         </tr>
         </table>
     </div>
+    {% endif %}
 
     {% if user_object.note %}
         <div class="about-me">
