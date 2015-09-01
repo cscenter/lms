@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -19,7 +20,9 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="ubertext">
-        {{ course.description|safe }}
+        {% markdown 3600 "course_description" course.pk course.modified %}
+        {{ course.description }}
+        {% endmarkdown %}
       </div>
       <hr>
       <h4>{% trans 'Course offerings:|course-singular' %}</h4>

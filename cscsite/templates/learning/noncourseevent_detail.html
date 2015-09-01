@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -27,7 +28,9 @@
       {% if event.description %}
       <h4 class="bigger-margin">{% trans "Description" %}</h4>
       <div class="ubertext">
-        {{ event.description|safe }}
+        {% markdown 3600 "event_description" event.pk event.modified %}
+          {{ event.description }}
+        {% endmarkdown %}
       </div>
       {% endif %}
     </div>
