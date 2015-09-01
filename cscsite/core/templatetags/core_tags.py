@@ -15,10 +15,10 @@ register = Library()
 
 # More details here https://pypi.python.org/pypi/hoep/1.0
 extensions = h.EXT_FENCED_CODE | h.EXT_AUTOLINK | h.EXT_STRIKETHROUGH | \
-             h.EXT_TABLES | h.EXT_QUOTE | h.EXT_LAX_SPACING | \
+             h.EXT_TABLES | h.EXT_QUOTE | \
              h.EXT_NO_INTRA_EMPHASIS | h.EXT_SPACE_HEADERS | \
-             h.EXT_DISABLE_INDENTED_CODE
-render_flags = h.HTML_SAFELINK
+             h.EXT_DISABLE_INDENTED_CODE | h.EXT_MATH | h.EXT_MATH_EXPLICIT
+render_flags = 0
 allowed_tags = ['p', 'ul', 'ol', 'li', 'em', 'strong', 'pre', 'br', 'code',
                 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
                 'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img']

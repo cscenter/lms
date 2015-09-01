@@ -51,9 +51,7 @@ $(document).ready(function () {
                 : unescaped;
         },
         smartypants: false,
-        sanitize: true,
         langPrefix: 'language-',
-        pedantic: true
     });
 
     $("div.ubertext").each(function(i, target) {

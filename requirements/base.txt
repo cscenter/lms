@@ -45,7 +45,8 @@ newrelic==2.44.0.36
 solid_i18n==1.1.0
 
 # Markdown support
-hoep==1.0.2
+# hoep==1.0.2
+git+https://github.com/pacahon/Hoep.git@5de34245cb00a3bbec758c4db72ae84599a78a59
 # whitelist-based HTML sanitization
 bleach==1.4.1
 
