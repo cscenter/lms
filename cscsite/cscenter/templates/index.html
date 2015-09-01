@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load htmlpage_url %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -35,8 +36,9 @@
           <span class="date">{{ news.created|date }}</span>
           <h3><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h3>
           <div class="ubertext">
-            {{ news.text.excerpt|safe }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>
-          {% endif %}
+            {% markdown 3600 "news_text_excerpt" news.pk news.modified %}
+              {{ news.text.excerpt }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>{% endif %}
+            {% endmarkdown %}
           </div>
         </li>
         {% endfor %}

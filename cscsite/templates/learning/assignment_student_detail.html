@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load crispy_forms_tags %}
 {% load core_tags %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <script type="text/javascript">
@@ -34,7 +35,9 @@
     <div class="col-xs-9">
       <div class="csc-well">
         <div class="ubertext">
-          {{ a_s.assignment.text|safe }}
+          {% markdown 3600 "assignment_text" assignment.pk assignment.modified %}
+            {{ a_s.assignment.text }}
+          {% endmarkdown %}
         </div>
         {% with aas=a_s.assignment.assignmentattachment_set.all %}
           {% if aas %}
@@ -73,7 +76,9 @@
           <div class="csc-well assignment-comment">
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
-              {{ comment.text }}
+              {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
+                {{ comment.text }}
+              {% endmarkdown %}
             </div>
             <div class="metainfo-holder">
               {% if comment.attached_file %}

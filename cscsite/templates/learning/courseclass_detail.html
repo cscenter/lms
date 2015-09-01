@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -43,21 +44,27 @@
       {% if course_class.description %}
       <h4 class="bigger-margin">{% trans "Description" %}</h4>
       <div class="ubertext">
-        {{ course_class.description|safe }}
+        {% markdown 3600 "course_class_description" course_class.pk course_class.modified %}
+          {{ course_class.description }}
+        {% endmarkdown %}
       </div>
       {% endif %}
 
       {% if course_class.video %}
       <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
       <div class="ubertext">
-        {{ course_class.video|safe }}
+        {% markdown 3600 "course_class_video" course_class.pk course_class.modified %}
+          {{ course_class.video }}
+        {% endmarkdown %}
       </div>
       {% endif %}
 
       {% if course_class.other_materials %}
       <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
       <div class="ubertext">
-        {{ course_class.other_materials|safe }}
+        {% markdown 3600 "course_class_materials" course_class.pk course_class.modified %}
+          {{ course_class.other_materials }}
+        {% endmarkdown %}
       </div>
       {% endif %}
 

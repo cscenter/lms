@@ -3,6 +3,7 @@
 {% load thumbnail %}
 {% load core_tags %}
 {% load staticfiles %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -19,7 +20,9 @@
     {% if user_object.note %}
         <div class="about-me">
             <h4>{% trans "About me" %}</h4>
-            <div class="ubertext">{{ user_object.note }}</div>
+            <div class="ubertext">
+              {% markdown 3600 "user_note" user.pk user.note %}{{ user_object.note }}{% endmarkdown %}
+            </div>
         </div>
     {% endif %}
 
@@ -52,7 +55,9 @@
               {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
               {% if project.description %}
               <div class="ubertext">
-                {{ project.description }}
+                {% markdown 3600 "userproject_description" project.pk project.modified %}
+                  {{ project.description }}
+                {% endmarkdown %}
               </div>
               {% endif %}
             </li>
@@ -180,14 +185,20 @@
     {% if user_object.csc_review %}
         <div class="review">
             <h4>{% blocktrans with name=user_object.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
-            <div class="ubertext">{{ user_object.csc_review }}</div>
+            <div class="ubertext">
+              {% markdown 3600 "csc_review" user_object.pk user_object.csc_review %}{{ user_object.csc_review }}{% endmarkdown %}
+            </div>
         </div>
     {% endif %}
 
     {% if user.is_authenticated and user_object.private_contacts %}
         <div class="contact-info">
             <h4>{% trans "Contact information" %}:</h4>
-            <div class="ubertext">{{ user_object.private_contacts }}</div>
+            <div class="ubertext">
+              {% markdown 3600 "user_private_contacts" user_object.pk user_object.private_contacts %}
+                {{ user_object.private_contacts }}
+              {% endmarkdown %}
+            </div>
         </div>
     {% endif %}
 

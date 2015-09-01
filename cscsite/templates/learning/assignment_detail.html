@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load crispy_forms_tags %}
 {% load core_tags %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -23,7 +24,9 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="ubertext">
-        {{ assignment.text|safe }}
+        {% markdown 3600 "assignment_text" assignment.pk assignment.modified %}
+          {{ assignment.text }}
+        {% endmarkdown %}
       </div>
       <p>
         {% trans "Deadline" %}:

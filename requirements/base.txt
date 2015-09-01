@@ -44,6 +44,11 @@ newrelic==2.44.0.36
 # Localization
 solid_i18n==1.1.0
 
+# Markdown support
+hoep==1.0.2
+# whitelist-based HTML sanitization
+bleach==1.4.1
+
 # Misc utils
 django-recaptcha==1.0.4
 django-registration-redux==1.2
