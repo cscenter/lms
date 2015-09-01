@@ -63,7 +63,7 @@
             {{ course_offering.description }}
           {% endmarkdown %}
         {% else %}
-          {% markdown 3600 "course" course_offering.pk course_offering.course.modified %}
+          {% markdown 3600 "course" course_offering.course.pk course_offering.course.modified %}
             {{ course_offering.course.description }}
           {% endmarkdown %}
         {% endif %}

@@ -21,7 +21,9 @@
         <div class="about-me">
             <h4>{% trans "About me" %}</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_note" user.pk user.note %}{{ user_object.note }}{% endmarkdown %}
+              {% markdown 3600 "user_note" user_object.pk user_object.note %}
+                {{ user_object.note }}
+              {% endmarkdown %}
             </div>
         </div>
     {% endif %}
