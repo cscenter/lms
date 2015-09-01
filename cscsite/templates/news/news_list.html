@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -12,7 +13,9 @@
         </a>
       </h2>
       <div class="ubertext">
-        {{ news.text.excerpt|safe|linebreaks }}
+        {% markdown 3600 "news_text_excerpt" news.pk news.modified %}
+          {{ news.text.excerpt }}
+        {% endmarkdown %}
       </div>
 
       {% if news.text.has_more %}

@@ -50,23 +50,19 @@ $(document).ready(function () {
                 ? hljs.highlight(lang, unescaped, true).value
                 : unescaped;
         },
-        smartypants: true
+        smartypants: false,
+        sanitize: true,
+        langPrefix: 'language-',
+        pedantic: true
     });
 
     $("div.ubertext").each(function(i, target) {
-        var $target = $(target);
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
-            target.innerHTML = marked(_.unescape(jQuery.trim(target.innerHTML)));
-            $target.find("pre").addClass("hljs");
-            if ($target.hasClass("shorten")) {
-                $target.readmore({
-                    speed: 75,
-                    collapsedHeight: 150,
-                    moreLink: '<a href="#">Далее…</a>',
-                    lessLink: '<a href="#">Свернуть</a>'
-                });
-            };
+            var $target = $(target);
+            $target.find("pre").addClass("hljs").each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
         }]);
     });
 
@@ -158,6 +154,7 @@ $(document).ready(function () {
             var target = $("#epiceditor-preview", contentDocument).get(0);
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
                 target.innerHTML = marked(_.unescape(target.innerHTML));
+                $(target).find("pre").addClass("hljs");
                 if (!editor.is('fullscreen')) {
                     var height = Math.max(
                         $(target).height() + 20,

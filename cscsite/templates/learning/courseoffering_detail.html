@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load thumbnail %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -56,15 +57,17 @@
   </div>
   <div class="row">
     <div class="col-xs-8">
-      {% if course_offering.description %}
       <div class="ubertext">
-        {{ course_offering.description|safe }}
+        {% if course_offering.description %}
+          {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
+            {{ course_offering.description }}
+          {% endmarkdown %}
+        {% else %}
+          {% markdown 3600 "course" course_offering.pk course_offering.course.modified %}
+            {{ course_offering.course.description }}
+          {% endmarkdown %}
+        {% endif %}
       </div>
-      {% else %}
-      <div class="ubertext">
-        {{ course_offering.course.description|safe }}
-      </div>
-      {% endif %}
     </div>
     <div class="col-xs-4 course-offering-profs">
       <h4 class="no-top-margin">Преподаватели:</h4>
@@ -157,7 +160,9 @@
       {% for news in course_offering.courseofferingnews_set.all %}
       <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
       <div class="ubertext shorten">
-        {{ news.text|safe }}
+        {% markdown 3600 "co_news_text" news.pk news.modified %}
+          {{ news.text }}
+        {% endmarkdown %}
       </div>
       <p class="news-metainfo">
         {% if user.is_curator or user.is_teacher and is_actual_teacher %}
