@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load thumbnail %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -17,7 +18,7 @@
       {% endthumbnail %}
     </div>
     <div class="col-xs-10">
-      <div class="ubertext">{{ teacher.note|safe }}</div>
+      <div class="ubertext">{% markdown 3600 "teacher_note" teacher.pk teacher.note %}{{ teacher.note }}{% endmarkdown %}</div>
     </div>
   </div>
   <div class="row">
