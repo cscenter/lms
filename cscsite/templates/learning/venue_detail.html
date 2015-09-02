@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -9,7 +10,9 @@
         {{ object.name }}
       </h2>
       <div class="ubertext">
-        {{ object.description|safe }}
+        {% markdown 3600 "place_descr" object.pk object.description %}
+          {{ object.description }}
+        {% endmarkdown %}
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@
             </div>
             <div class="onlinecourses-list__item-right">
                 <h2><small>{% if online_course.start %}{{ online_course.start|date:"d E Y" }} — {{ online_course.end|date:"d E Y" }}{% endif %}</small></h2>
-                <div class="ubertext">
+                <div>
                     <p>{{ online_course.description|safe|linebreaks }}</p>
                 </div>
             </div>
