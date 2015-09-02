@@ -21,7 +21,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, F, Prefetch, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
-    HttpResponseRedirect
+    HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.utils.encoding import smart_text
@@ -625,6 +625,14 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         course_offering = get_object_or_404(
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
+        # CourseOffering should be active
+        current_semester = Semester.get_current()
+        if course_offering.semester != current_semester:
+            return HttpResponseForbidden()
+        # Club students can't enroll on center courses
+        if self.request.site.domain == 'compsciclub.ru' and \
+           not course_offering.is_open:
+            return HttpResponseForbidden()
         Enrollment.objects.get_or_create(
             student=self.request.user, course_offering=course_offering)
         if self.request.POST.get('back') == 'course_list_student':
