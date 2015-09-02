@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.db.models import Prefetch
 from django.http import HttpResponseRedirect, Http404, HttpResponse,\
     JsonResponse
 from django.utils.decorators import method_decorator
@@ -28,7 +29,7 @@ import pytz
 
 from core.views import ProtectedFormMixin, StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
-    CourseOffering, NonCourseEvent, Semester, StudentProject
+    CourseOffering, NonCourseEvent, Semester, StudentProject, Enrollment
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
 from .models import CSCUser, CSCUserReference
 
@@ -120,14 +121,21 @@ class UserDetailView(generic.DetailView):
     context_object_name = 'user_object'
 
     def get_queryset(self, *args, **kwargs):
-        prefetch_list = ['teaching_set',
-                         'teaching_set__semester',
-                         'teaching_set__course',
-                         'enrollment_set',
-                         'shadcourserecord_set',
-                         'enrollment_set__course_offering',
-                         'enrollment_set__course_offering__semester',
-                         'enrollment_set__course_offering__course']
+        enrollment_queryset = Enrollment.objects.select_related(
+            'course_offering',
+            'course_offering__semester',
+            'course_offering__course'
+        )
+        if not self.request.user.is_authenticated():
+            enrollment_queryset = enrollment_queryset.exclude(
+                grade__in=['not_graded', 'unsatisfactory'])
+        prefetch_list = [
+            'teaching_set',
+            'teaching_set__semester',
+            'teaching_set__course',
+            'shadcourserecord_set',
+            Prefetch('enrollment_set', queryset=enrollment_queryset)
+        ]
         select_list = []
         if self.request.user.is_authenticated() and self.request.user.is_curator:
             prefetch_list += ['borrows',

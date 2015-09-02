@@ -29,7 +29,7 @@
     {% endif %}
 
     <ul class="list-unstyled">
-    {% if user_object.is_student or user_object.is_graduate or user_object.enrollment_year %}
+    {% if user_object.enrollment_year %}
         {% if user_object.enrollment_set.all %}
         <li>
         <h4>{% trans "Courses" %}</h4>
@@ -67,7 +67,7 @@
           </ul>
         </li>
         {% elif user.is_curator %}
-            <li>нет студенческих проектов</li>
+            <li>Нет студенческих проектов</li>
         {% endif %}
 
         {% with shad_courses=user_object.shadcourserecord_set.all %}
@@ -81,7 +81,7 @@
             </ul>
         </li>
         {% elif user.is_curator %}
-            <li>нет зачтённых ШАД-курсов</li>
+            <li>Нет зачтённых ШАД-курсов</li>
         {% endif %}
         {% endwith %}
 
@@ -97,14 +97,14 @@
             </ul>
         </li>
         {% elif user.is_curator %}
-        <li>нет зачтённых онлайн-курсов</li>
+        <li>Нет зачтённых онлайн-курсов</li>
         {% endif %}
         {% endwith %}
         {% endif %}
 
         {% endif %}
         {% if user_object.is_teacher %}
-        <li>{% trans "teacher" %}{% if user_object.teaching_set.all %}:{% endif %}
+        <li>{% trans "teacher"|title %}{% if user_object.teaching_set.all %}:{% endif %}
           <ul class="">
             {% for courseoffering in user_object.teaching_set.all %}
             <li>
