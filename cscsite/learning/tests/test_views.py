@@ -4,6 +4,7 @@ from __future__ import unicode_literals, absolute_import
 import csv
 import logging
 import os
+import unittest
 
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
@@ -18,7 +19,7 @@ from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from learning.utils import get_current_semester_pair
+from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
 from learning.forms import MarksSheetTeacherImportGradesForm
@@ -555,32 +556,51 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
     def test_enrollment(self):
-        s = UserFactory.create(groups=['Student [CENTER]'])
-        co = CourseOfferingFactory.create()
-        co_other = CourseOfferingFactory.create()
-        as_ = AssignmentFactory.create_batch(3, course_offering=co)
-        self.doLogin(s)
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        self.doLogin(student)
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester)
         url = reverse('course_offering_enroll',
                       args=[co.course.slug, co.semester.slug])
         form = {'course_offering_pk': co.pk}
         self.assertRedirects(self.client.post(url, form),
                              co.get_absolute_url())
         self.assertEquals(1, Enrollment.objects
-                          .filter(student=s, course_offering=co)
+                          .filter(student=student, course_offering=co)
                           .count())
-        self.assertEquals(set((s.pk, a.pk) for a in as_),
+        as_ = AssignmentFactory.create_batch(3, course_offering=co)
+        self.assertEquals(set((student.pk, a.pk) for a in as_),
                           set(AssignmentStudent.objects
-                              .filter(student=s)
+                              .filter(student=student)
                               .values_list('student', 'assignment')))
+        co_other = CourseOfferingFactory.create(semester=current_semester)
         form.update({'back': 'course_list_student'})
         url = reverse('course_offering_enroll',
                       args=[co_other.course.slug, co_other.semester.slug])
         self.assertRedirects(self.client.post(url, form),
                              reverse('course_list_student'))
+        # Try to enroll to old CO
+        old_semester = SemesterFactory.create(year=2010)
+        old_co = CourseOfferingFactory.create(semester=old_semester)
+        form = {'course_offering_pk': old_co.pk}
+        url = reverse('course_offering_enroll',
+                      args=[old_co.course.slug, old_co.semester.slug])
+        self.assertEqual(403, self.client.post(url, form).status_code)
+
+    @unittest.skip('not implemented')
+    def test_security(self):
+        """ Student can enroll only on active course offering """
+        pass
+
+    @unittest.skip('not implemented')
+    def test_enrollment_for_club_students(self):
+        """ Club Student can enroll only on open courses """
+        pass
 
     def test_unenrollment(self):
         s = UserFactory.create(groups=['Student [CENTER]'])
-        co = CourseOfferingFactory.create()
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester)
         as_ = AssignmentFactory.create_batch(3, course_offering=co)
         form = {'course_offering_pk': co.pk}
         url = reverse('course_offering_unenroll',
