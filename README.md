@@ -6,8 +6,8 @@ Computer Science Center/Club websites
 Dev setup
 ---------
 
-* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev` globally; Install hoedown from src https://github.com/hoedown/hoedown.git
-    note for mac users: `brew intall libpng libjpeg libpqxx hoedown smartypants`
+* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev`
+    note for mac users: `brew intall libpng libjpeg libpqxx`
 * create virtualenv for the project and open it;
 * setup PostgreSQL database:
 
