@@ -1,6 +1,5 @@
 
 # TODO (critical):
-* Compile hoedown from github src! https://github.com/hoedown/hoedown.git
 * install and configure memcached
 * restore db and media/ with playbook
 
