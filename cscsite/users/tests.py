@@ -30,16 +30,9 @@ from learning.tests.mixins import MyUtilitiesMixin
 
 from .admin import CSCUserCreationForm, CSCUserChangeForm
 from .models import CSCUser, CSCUserReference
-from .factories import UserFactory, SHADCourseRecordFactory
+from .factories import UserFactory, SHADCourseRecordFactory, \
+    CSCUserReferenceFactory
 
-
-class CSCUserReferenceFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = CSCUserReference
-
-    signature = "FIO"
-    note = ""
-    # student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
 
 class CustomSemesterFactory(SemesterFactory):
     type = factory.Iterator(['spring', 'autumn'])

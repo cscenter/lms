@@ -6,7 +6,7 @@ import factory
 from django.contrib.auth.models import Group
 
 from learning.constants import GRADES
-from users.models import CSCUser, SHADCourseRecord
+from users.models import CSCUser, SHADCourseRecord, CSCUserReference
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -52,3 +52,13 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
                                  groups=[CSCUser.group_pks.STUDENT_CENTER])
     grade = factory.Iterator(list(x[0] for x in GRADES))
     semester = factory.SubFactory('learning.factories.SemesterFactory')
+
+
+class CSCUserReferenceFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CSCUserReference
+
+    signature = "FIO"
+    note = ""
+    student = factory.SubFactory(UserFactory,
+                                 groups=[CSCUser.group_pks.STUDENT_CENTER])
