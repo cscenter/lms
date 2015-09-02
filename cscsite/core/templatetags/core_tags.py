@@ -28,6 +28,7 @@ allowed_attrs = {
     '*': ['class'],
     'a': ['href'],
     'img': ['src'],
+    'iframe': ['src', 'height', 'width', 'allowfullscreen', 'frameborder']
 }
 md = h.Hoep(extensions, render_flags)
 
