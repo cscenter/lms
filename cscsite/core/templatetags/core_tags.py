@@ -6,6 +6,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.template import (
     Library, Node, TemplateSyntaxError, VariableDoesNotExist,
 )
+from django.template.base import TextNode
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
 
@@ -110,6 +111,15 @@ class MarkdownNode(Node):
         value = fragment_cache.get(cache_key)
         if value is None:
             context.autoescape = False
+            # Remove unnecessary line breaks and whitespaces. Example:
+            # {% markdown %}\n <- LB for readability in tpl{% endmarkdown %}
+            if self.nodelist:
+                if isinstance(self.nodelist[0], TextNode) and \
+                   not self.nodelist[0].s.strip():
+                    self.nodelist[0].s = ''
+                if isinstance(self.nodelist[0], TextNode) and \
+                   not self.nodelist[-1].s.strip():
+                    self.nodelist[-1].s = ''
             value = self.nodelist.render(context)
             value = md.render(value)
             value = bleach.clean(value, tags=allowed_tags,
