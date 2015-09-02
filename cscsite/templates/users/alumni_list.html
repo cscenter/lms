@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load thumbnail %}
+{% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
@@ -21,7 +22,9 @@
           </div>
           <div class="col-xs-9">
             <h4><a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a></h4>
-            <div class="ubertext">{{ alumni.get_short_note|safe }}</div>
+            <div class="ubertext">{% markdown 3600 "alumni_short_note" alumni.pk alumni.get_short_note %}
+                {{ alumni.get_short_note }}
+              {% endmarkdown %}</div>
           </div>
         </div>
       {% if not forloop.counter0|divisibleby:2 or forloop.last %}
