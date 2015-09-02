@@ -12,6 +12,7 @@ from learning.models import Course, Semester, CourseOffering, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, StudentProject
 
+from .utils import get_current_semester_pair
 from users.factories import UserFactory
 
 
@@ -27,9 +28,18 @@ class CourseFactory(factory.DjangoModelFactory):
 class SemesterFactory(factory.DjangoModelFactory):
     class Meta:
         model = Semester
+        django_get_or_create = ('year', 'type')
 
     year = 2015
     type = Semester().TYPES['spring']
+
+    @classmethod
+    def create_current(cls, **kwargs):
+        """Get or create semester for current season"""
+        year, type = get_current_semester_pair()
+        kwargs.pop('year', None)
+        kwargs.pop('type', None)
+        return cls.create(year=year, type=type, **kwargs)
 
 
 class CourseOfferingFactory(factory.DjangoModelFactory):
