@@ -22,7 +22,8 @@ extensions = h.EXT_FENCED_CODE | h.EXT_AUTOLINK | h.EXT_STRIKETHROUGH | \
 render_flags = 0
 allowed_tags = ['p', 'ul', 'ol', 'li', 'em', 'strong', 'pre', 'br', 'code',
                 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
-                'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img']
+                'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img',
+                'iframe']
 allowed_attrs = {
     '*': ['class'],
     'a': ['href'],
