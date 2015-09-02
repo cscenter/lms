@@ -30,7 +30,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 
 from .admin import CSCUserCreationForm, CSCUserChangeForm
 from .models import CSCUser, CSCUserReference
-from .factories import UserFactory
+from .factories import UserFactory, SHADCourseRecordFactory
 
 
 class CSCUserReferenceFactory(factory.DjangoModelFactory):
@@ -330,9 +330,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         Students should have "student projects" in their info
         """
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.group_pks.STUDENT_CENTER]
-        user.save()
+        user = UserFactory(groups=[CSCUser.group_pks.STUDENT_CENTER],
+                           enrollment_year='2013')
         semester1 = SemesterFactory.create(year=2014, type='spring')
         semester2 = SemesterFactory.create(year=2014, type='autumn')
         sp1 = StudentProjectFactory.create(student=user, semesters=[semester1])
@@ -343,6 +342,23 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, sp1.name)
         self.assertContains(resp, sp1.description)
         self.assertContains(resp, sp2.name)
+
+    def test_shads(self):
+        """
+        Students should have "shad courses" in profile page
+        """
+        user = UserFactory(groups=[CSCUser.group_pks.STUDENT_CENTER],
+                           enrollment_year='2013')
+        sc = SHADCourseRecordFactory(student=user)
+        resp = self.client.get(reverse('user_detail', args=[user.pk]))
+        self.assertContains(resp, sc.name)
+        self.assertContains(resp, sc.teachers)
+
+    @unittest.skip("not implemented")
+    def test_completed_courses(self):
+        """On profile page unauthenticated users cant' see uncompleted or
+        failed courses
+        """
 
     def test_email_on_detail(self):
         """Email field should be displayed only to curators (superuser)"""
