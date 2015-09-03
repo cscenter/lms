@@ -6,6 +6,9 @@
 @import "../_profile_page.less";
 @import "top_menu.less";
 
+@import "_online_page.less";
+@import "_index_page.less";
+
 // TODO: Rewrite it all with less
 blockquote {
   font-size: 14px;
@@ -94,10 +97,6 @@ html {
   text-align: right;
 }
 
-.index-image-container {
-  background: url("/static/img/center/front_picture.jpg") top center no-repeat;
-  overflow-x: hidden;
-}
 
 .callout h1 {
   margin-top: 50px;
@@ -121,47 +120,8 @@ html {
   margin: 30px 15px;
 }
 
-.row.index-callout-buttons-row {
-  margin-top: 225px;
-}
 
-.index-news {
-  padding-left: 0px;
-}
 
-.index-news>li {
-  position: relative;
-  list-style: none;
-}
-
-.index-news span.date {
-  position: absolute;
-  margin-left: -160px;
-  padding-right: 10px;
-  width: 160px;
-  text-align: right;
-  font-size: 18px;
-  color: #B5B5B5;
-}
-
-.supported-by {
-    line-height: 50px;
-    padding-left: 0;
-    overflow: hidden;
-}
-
-.supported-by li {
-  list-style: none;
-  display: block;
-  float: left;
-  width: 150px;
-  margin: 10px;
-  color: black;
-}
-
-.supported-by img {
-  clear: both;
-}
 
 .col-container {
   width: 940px;
@@ -661,47 +621,6 @@ tr.unread {
   color: #999;
   font-size: 0.75em;
 }
-
-// Online Courses list
-#onlinecourses-list {
-    .onlinecourses-list__item {
-        margin-bottom: 20px;
-
-        h3 {
-            padding: 0 15px;
-        }
-
-        .onlinecourses-list__item-left {
-
-            position: relative;
-            min-height: 1px;
-            padding-left: 15px;
-            padding-right: 15px;
-            float: left;
-            width: 164px;
-
-            img {
-                .img-responsive();
-                margin: 8px 0;
-            }
-        }
-
-        .onlinecourses-list__item-right {
-            position: relative;
-            min-height: 1px;
-            padding-left: 10px;
-            padding-right: 15px;
-            float: left;
-            width: 750px;
-
-            &._collaboration {
-                line-height: 34px;
-            }
-        }
-    }
-
-}
-
 
 .ubertext {
   pre {

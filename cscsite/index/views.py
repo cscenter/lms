@@ -3,11 +3,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import random
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect
 from django.utils.translation import get_language, ugettext_lazy as _
 from django.views import generic
@@ -15,10 +16,10 @@ from django.views import generic
 import requests
 from braces import views
 
-from news.models import News
+from learning.models import OnlineCourse, CourseOffering
+from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
-
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,25 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        queryset = News.public.filter(
-            site__id=settings.SITE_ID,
-            language=get_language()
-        )
-        context['news_objects'] = queryset[:3]
+        # TODO: Add cache
+        pool = list(CourseOffering.objects
+            .filter(is_published_in_video=True)
+            .defer('description')
+            .select_related('course')
+            .prefetch_related('teachers', 'semester')
+            .annotate(Count('courseclass')))
+        random.shuffle(pool)
+        context['courses'] = pool[:3]
+        # TODO: Add cache
+        context['testimonials'] = [(CSCUser.objects
+            .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+            .exclude(csc_review='').exclude(photo='')
+            .order_by('?')
+            .first())]
+        # Don't care about performance for online courses
+        pool = list(OnlineCourse.objects.order_by("start", "name").all())
+        random.shuffle(pool)
+        context['online_courses'] = pool[:1]
         return context
 
 
@@ -59,7 +74,9 @@ class TeachersView(generic.ListView):
         teacher_groups = [user_model.group_pks.TEACHER_CLUB]
         if self.request.site.domain != 'compsciclub.ru':
             teacher_groups.append(user_model.group_pks.TEACHER_CENTER)
-        return user_model.objects.filter(groups__in=teacher_groups)
+        return (user_model.objects
+                          .filter(groups__in=teacher_groups)
+                          .annotate(Count('pk')))
 
 
 class RobotsView(generic.TemplateView):

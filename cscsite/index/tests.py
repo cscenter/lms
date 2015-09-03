@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
@@ -22,6 +24,7 @@ class assertItemsEqualMixin(object):
 class IndexTests(assertItemsEqualMixin, TestCase):
     fixtures = ['cscenter_htmlpages.json']
 
+    @unittest.skip('removed from urls.py')
     def test_no_news(self):
         response = self.client.get(reverse('index'))
         self.assertItemsEqual(response.context['news_objects'], [])
@@ -33,6 +36,7 @@ class IndexTests(assertItemsEqualMixin, TestCase):
         response = self.client.get(reverse('index'))
         self.assertEqual(response.content.count(b"current"), 0)
 
+    @unittest.skip('removed from urls.py')
     def test_news(self):
         current_site = Site.objects.get(pk=settings.SITE_ID)
 

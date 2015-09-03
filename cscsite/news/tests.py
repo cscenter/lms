@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
@@ -15,6 +17,7 @@ from .factories import NewsFactory
 
 class NewsTests(TestCase):
 
+    @unittest.skip('removed from urls.py')
     def test_sites(self):
         """Test news separation by site_id"""
         cscenter_site = Site.objects.get(domain='compscicenter.ru')
