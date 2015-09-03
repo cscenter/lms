@@ -7,6 +7,7 @@ import random
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect
@@ -30,20 +31,27 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         # TODO: Add cache
-        pool = list(CourseOffering.objects
-            .filter(is_published_in_video=True)
-            .defer('description')
-            .select_related('course')
-            .prefetch_related('teachers', 'semester')
-            .annotate(Count('courseclass')))
+        pool = cache.get('index_page_courses')
+        if pool is None:
+            pool = list(CourseOffering.objects
+                .filter(is_published_in_video=True)
+                .defer('description')
+                .select_related('course')
+                .prefetch_related('teachers', 'semester')
+                .annotate(Count('courseclass')))
+            cache.set('index_page_courses', pool, 3600)
         random.shuffle(pool)
         context['courses'] = pool[:3]
         # TODO: Add cache
-        context['testimonials'] = [(CSCUser.objects
-            .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
-            .exclude(csc_review='').exclude(photo='')
-            .order_by('?')
-            .first())]
+        testimonials = cache.get('index_page_testimonials')
+        if testimonials is None:
+            testimonials = [(CSCUser.objects
+                .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+                .exclude(csc_review='').exclude(photo='')
+                .order_by('?')
+                .first())]
+            cache.set('index_page_testimonials', testimonials, 3600)
+        context['testimonials'] = testimonials
         # Don't care about performance for online courses
         pool = list(OnlineCourse.objects.order_by("start", "name").all())
         random.shuffle(pool)
