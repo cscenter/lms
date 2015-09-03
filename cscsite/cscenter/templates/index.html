@@ -2,86 +2,150 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load htmlpage_url %}
+{% load thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="container index-image-container">
-        <div class="row index-callout-buttons-row" style="margin-top: 225px;">
-          <div class="col-xs-12 callout-buttons">
-            <a href="{% htmlpage_url '/syllabus/' %}"
-               role="button" class="btn btn-lg btn-primary">
-              {% trans "Learn more" %}
-            </a>
-            <a href="{% htmlpage_url '/enrollment/' %}"
-               role="button" class="btn btn-lg btn-primary">
-              {% trans "How to enroll" %}
-            </a>
-          </div>
+
+{% comment %}
+<div id="intro">
+    <h1 class="text-center">Центр современной информатики, программирования и анализа данных</h1>
+    <div class="col-xs-12 callout-buttons">
+    <a href="{% htmlpage_url '/syllabus/' %}"
+       role="button" class="btn btn-lg btn-primary">
+      {% trans "Learn more" %}
+    </a>
+    <a href="{% htmlpage_url '/enrollment/' %}"
+       role="button" class="btn btn-lg btn-primary">
+      {% trans "How to enroll" %}
+    </a>
+    </div>
+</div>
+{% endcomment %}
+
+
+<div class="container index-image-container">
+<div class="row index-callout-buttons-row">
+  <div class="col-xs-12 callout-buttons">
+    <a href="{% htmlpage_url '/syllabus/' %}"
+       role="button" class="btn btn-lg btn-primary">
+      {% trans "Learn more" %}
+    </a>
+    <a href="{% htmlpage_url '/enrollment/' %}"
+       role="button" class="btn btn-lg btn-primary">
+      {% trans "How to enroll" %}
+    </a>
+  </div>
+</div>
+</div>
+
+
+{% if testimonials %}
+    <div id="courses">
+        <div class="index-header">
+            <h1>{% trans "Courses" %}</h1>
+            <a href="{% url 'course_list' %}">{% trans "See all courses" %}</a>
         </div>
-      </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="_semester">{% trans "Semester" %}</th>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Teachers" %}</th>
+                    <th class="_lec_cnt">{% trans "Classes" %}</th>
+                    <th class="_video">{% trans "Video" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course_offering in courses %}
+                        <tr>
+                            <td>{{ course_offering.semester }}</td>
+                            <td>
+                                <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                            </td>
+                            <td>
+                                {% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </td>
+                            <td>{{ course_offering.courseclass__count }}</td>
+                            <td><i class="fa fa-check"></i></td>
+                        </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2"></div>
-    <div class="col-xs-10">
-      <h1 class="bigger-margin">{% trans "CS Center News" %}</h1>
+{% endif %}
 
-      {% if news_objects %}
-      <ul class="index-news">
-        {% for news in news_objects %}
-        <li>
-          <span class="date">{{ news.created|date }}</span>
-          <h3><a href="{% url 'news_detail' slug=news.slug %}">{{ news.title }}</a></h3>
-          <div class="ubertext">
-            {% markdown 3600 "news_text_excerpt" news.pk news.modified %}
-              {{ news.text.excerpt }} {% if news.text.has_more %}<a href="{% url 'news_detail' slug=news.slug %}">{% trans "More…" %}</a>{% endif %}
-            {% endmarkdown %}
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'news_list' %}"><h4 class="bigger-margin">{% trans "All news" %}</h4></a>
 
-      {% else %}
-      <p>{% trans "No news yet" %}</p>
-      {% endif %}
 
+{% if testimonials %}
+    <div class="testimonials">
+        <div class="index-header">
+            <h1>{% trans "Graduates about CS Center" %}</h1>
+            <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
+        </div>
+        <div class="row">
+            {% for student in testimonials %}
+            <div class="col-md-12">
+                <div class="testimonial">
+                    <blockquote>
+                        {% markdown 0 "csc_review" student.pk student.csc_review %}
+                            {{ student.csc_review }}
+                        {% endmarkdown %}
+                    </blockquote>
+                    <div>
+                        {% thumbnail student.photo "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                        <span>{{ student.get_full_name }}</span> {% trans "Graduation" %} {{ student.graduation_year }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div> 
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2"></div>
-    <div class="col-xs-10">
-      <h1 class="bigger-margin">{% trans "Supported by" %}</h1>
-      <ul class="supported-by">
-        <li>
-          <a href="https://yandexdataschool.ru/" target="_blank">
-            <img src="{% static "img/logo/yandexdataschool.png" %}"
-                 alt="{% trans "Yandex School of Data Analysis" %}">
-          </a>
-        </li>
-        <li>
-          <a href="http://jetbrains.ru/students" target="_blank">
-            <img src="{% static "img/logo/jetbrains.png" %}"
-                 alt="{% trans "JetBrains" %}">
-          </a>
-        </li>
-        <li>
-          <a href="http://compsciclub.ru/" target="_blank">
-            <img src="{% static "img/logo/csclub.png" %}"
-                 alt={% trans "Computer Science Club" %}>
-          </a>
-        </li>
-        <li>
-          <a href="http://239.ru/" target="_blank">
-            <img src="{% static "img/logo/239.png" %}"
-                 alt="{% trans "FML #239" %}">
-          </a>
-        </li>
-      </ul>
+{% endif %}
+
+
+
+{% if online_courses %}
+    <div id="index-online-courses">
+        <div id="onlinecourses-list">
+            <div class="index-header">
+                <h1>{% trans "Online courses" %}</h1>
+                <a href="{% url 'onlinecourses_list' %}">{% trans "All courses" %}</a>
+            </div>
+            {% for online_course in online_courses %}
+                {% include "learning/_onlinecourse_list__row.html" %}
+            {% endfor %}
+        </div>
     </div>
-  </div>
+{% endif %}
+
+<div class="container">
+    <div class="index-header _supported">
+        <h1>{% trans "Supported by" %}</h1>
+    </div>
+    <div class="row supported-by">
+        <div class="col-xs-4">
+            <a href="https://yandexdataschool.ru/" target="_blank">
+                <img src="{% static "img/logo/yandexdataschool.svg" %}" alt="{% trans "Yandex School of Data Analysis" %}">
+            </a>
+        </div>
+        <div class="col-xs-4">
+              <a href="http://jetbrains.ru/students" target="_blank">
+                <img  src="{% static "img/logo/jetbrains.svg" %}" alt="{% trans "JetBrains" %}">
+              </a>
+        </div>
+        <div class="col-xs-4">
+              <a href="http://239.ru/" target="_blank">
+                <img class="s239" src="{% static "img/logo/239.png" %}" alt="{% trans "FML #239" %}">
+              </a>
+        </div>
+        <div class="col-xs-4 col-xs-offset-4">
+              <a href="http://compsciclub.ru/" target="_blank">
+                <img src="{% static "img/logo/csclub.png" %}" alt={% trans "Computer Science Club" %}>
+              </a>
+        </div>
+    </div>
 </div>
 {% endblock content %}

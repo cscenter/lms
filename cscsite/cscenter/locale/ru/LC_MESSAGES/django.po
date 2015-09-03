@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-28 18:54+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2015-09-03 18:40+0300\n"
+"PO-Revision-Date: 2015-09-03 18:40+0230\n"
+"Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -18,6 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: cscenter/templates/base.html:53
 #: cscenter/templates/base_offcanvas_menu.html:88
@@ -41,49 +42,96 @@ msgstr "выйти"
 msgid "Login"
 msgstr ""
 
-#: cscenter/templates/index.html:16
+#: cscenter/templates/index.html:32
 msgid "Learn more"
 msgstr "Узнать больше"
 
-#: cscenter/templates/index.html:20
+#: cscenter/templates/index.html:36
 msgid "How to enroll"
 msgstr "Как поступить"
 
-#: cscenter/templates/index.html:30
-msgid "CS Center News"
-msgstr "Новости CS центра"
+#: cscenter/templates/index.html:46
+msgid "Courses"
+msgstr "Курсы"
 
-#: cscenter/templates/index.html:39
-msgid "More…"
-msgstr "Далее..."
+#: cscenter/templates/index.html:47
+msgid "See all courses"
+msgstr "Посмотреть все курсы"
 
-#: cscenter/templates/index.html:45
-msgid "All news"
-msgstr "Все новости"
+#: cscenter/templates/index.html:52
+msgid "Semester"
+msgstr ""
 
-#: cscenter/templates/index.html:48
-msgid "No news yet"
-msgstr "Список новостей пуст"
+#: cscenter/templates/index.html:53
+msgid "Name"
+msgstr ""
+
+#: cscenter/templates/index.html:54
+msgid "Teachers"
+msgstr ""
+
+#: cscenter/templates/index.html:55
+msgid "Classes"
+msgstr "Занятий"
 
 #: cscenter/templates/index.html:56
+msgid "Video"
+msgstr ""
+
+#: cscenter/templates/index.html:83
+msgid "Graduates about CS Center"
+msgstr "Выпускники о CS Center"
+
+#: cscenter/templates/index.html:84
+msgid "All graduates"
+msgstr "Все выпускники"
+
+#: cscenter/templates/index.html:99
+msgid "Graduation"
+msgstr "Выпуск"
+
+#: cscenter/templates/index.html:114
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: cscenter/templates/index.html:115
+msgid "All courses"
+msgstr "Все курсы"
+
+#: cscenter/templates/index.html:126
 msgid "Supported by"
 msgstr "При поддержке"
 
-#: cscenter/templates/index.html:61
+#: cscenter/templates/index.html:131
 msgid "Yandex School of Data Analysis"
 msgstr "Яндекс ШАД"
 
-#: cscenter/templates/index.html:67
+#: cscenter/templates/index.html:136
 msgid "JetBrains"
 msgstr ""
 
-#: cscenter/templates/index.html:73
+#: cscenter/templates/index.html:141
+msgid "FML #239"
+msgstr "ФМЛ №239"
+
+#: cscenter/templates/index.html:146
 msgid "Computer Science Club"
 msgstr ""
 
-#: cscenter/templates/index.html:79
-msgid "FML #239"
-msgstr "ФМЛ №239"
+#~ msgid "Lectures"
+#~ msgstr "Лекций"
+
+#~ msgid "CS Center Graduates"
+#~ msgstr "Выпускники CS центра"
+
+#~ msgid "Testimonials"
+#~ msgstr "Отзывы"
+
+#~ msgid "More…"
+#~ msgstr "Далее..."
+
+#~ msgid "No news yet"
+#~ msgstr "Список новостей пуст"
 
 #~ msgid "report a problem"
 #~ msgstr "сообщить об ошибке"
