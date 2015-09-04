@@ -1,35 +1,65 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
 <div class="container">
-  <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>{{ teacher.get_full_name }}</h2>
-      <hr>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2">
-      {% thumbnail teacher.photo "100x100" crop="center" as im %}
-      <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-      {% endthumbnail %}
-    </div>
-    <div class="col-xs-10">
-      <div class="ubertext">{% markdown 3600 "teacher_note" teacher.pk teacher.note %}{{ teacher.note }}{% endmarkdown %}</div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <h3>Курсы</h3>
-      <ul class="list-unstyled">
+<div class="row" id="teachers-detail">
+<div class="col-xs-9 profile-body">
+    <h2>{{ teacher.get_full_name }}</h2>
+
+    {% if teacher.note %}
+        <div class="about-me">
+            <h4>{% trans "About me" %}</h4>
+            <div class="ubertext">
+              {% markdown 3600 "user_note" teacher.pk teacher.modified %}
+                {{ teacher.note }}
+              {% endmarkdown %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if user.is_authenticated and teacher.private_contacts %}
+        <div class="contact-info">
+            <h4>{% trans "Contact information" %}:</h4>
+            <div class="ubertext">
+              {% markdown 3600 "user_private_contacts" teacher.pk teacher.modified %}
+                {{ teacher.private_contacts }}
+              {% endmarkdown %}
+            </div>
+        </div>
+    {% endif %}
+
+    <h3>{% trans "Course readings" %}</h3>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Курс</th>
+          <th>Дата</th>
+        </tr>
+      </thead>
         {% for course_offering in teacher.teaching_set.all %}
-        <li><a href="{{ course_offering.get_absolute_url }}">{{ course_offering }}</a></li>
+          <tr>
+            <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
+            <td>{{ course_offering.semester }}</td>
+          </tr>
         {% endfor %}
-      </ul>
+      </tr>
+    </table>
+</div>
+<div class="col-xs-3 profile-sidebar">
+    <div class="thumbnail text-center">
+    {% if teacher.photo %}
+        {% thumbnail teacher.photo "200x200" crop="center" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+        {% endthumbnail %}
+    {% else %}
+        <img src="{% static 'img/center/brain.jpg' %}">
+    {% endif %}
     </div>
-  </div>
+</div>
+</div>
 </div>
 {% endblock content %}
