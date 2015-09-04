@@ -88,7 +88,7 @@
             <div class="col-md-12">
                 <div class="testimonial">
                     <blockquote>
-                        {% markdown 0 "csc_review" student.pk student.csc_review %}
+                        {% markdown 3600 "csc_review" student.pk student.modified %}
                             {{ student.csc_review }}
                         {% endmarkdown %}
                     </blockquote>
