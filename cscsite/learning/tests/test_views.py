@@ -871,12 +871,10 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
         # no assignments yet
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(0, len(resp.context['assignment_list_open']))
-        self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # enroll at course offering, assignments are shown
         EnrollmentFactory.create(student=u, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(2, len(resp.context['assignment_list_open']))
-        self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # add a few assignments, they should show up
         as2 = AssignmentFactory.create_batch(3, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
@@ -884,23 +882,20 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
-        self.assertEquals(0, len(resp.context['assignment_list_archive']))
-        # add a few old assignments, they should show up in archive
+        # add a few old assignments
         deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                        - datetime.timedelta(days=1))
-        as3 = AssignmentFactory.create_batch(2, course_offering=co,
+        as_olds = AssignmentFactory.create_batch(2, course_offering=co,
                                              deadline_at=deadline_at)
         resp = self.client.get(reverse(self.url_name))
-        for a in as1 + as2 + as3:
+        for a in as1 + as2:
             self.assertContains(resp, a.title)
+        for a in as_olds:
+            self.assertNotContains(resp, a.title)
         self.assertSameObjects([(AssignmentStudent.objects
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
-        self.assertSameObjects([(AssignmentStudent.objects
-                                 .get(assignment=a, student=u))
-                                for a in as3],
-                               resp.context['assignment_list_archive'])
 
 
 class AssignmentTeacherListTests(GroupSecurityCheckMixin,

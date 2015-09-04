@@ -50,7 +50,7 @@ class IndexView(generic.TemplateView):
                 .exclude(csc_review='').exclude(photo='')
                 .order_by('?')
                 .first())
-            if s.csc_review.strip():
+            if s and s.csc_review.strip():
                 testimonials = [s]
             cache.set('index_page_testimonials', testimonials, 3600)
         context['testimonials'] = testimonials
