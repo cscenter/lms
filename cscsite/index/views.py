@@ -45,11 +45,13 @@ class IndexView(generic.TemplateView):
         # TODO: Add cache
         testimonials = cache.get('index_page_testimonials')
         if testimonials is None:
-            testimonials = [(CSCUser.objects
+            s = (CSCUser.objects
                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
                 .order_by('?')
-                .first())]
+                .first())
+            if s.csc_review.strip():
+                testimonials = [s]
             cache.set('index_page_testimonials', testimonials, 3600)
         context['testimonials'] = testimonials
         # Don't care about performance for online courses
