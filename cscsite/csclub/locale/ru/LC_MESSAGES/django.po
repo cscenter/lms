@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-03 18:40+0300\n"
+"POT-Creation-Date: 2015-09-04 18:35+0300\n"
 "PO-Revision-Date: 2015-08-28 18:55+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,11 +36,11 @@ msgstr "Город"
 msgid "Language"
 msgstr "Язык"
 
-#: csclub/templates/base.html:92
+#: csclub/templates/base.html:91
 msgid "Computer Science Club, 2007–15 гг."
 msgstr ""
 
-#: csclub/templates/base.html:109
+#: csclub/templates/base.html:108
 msgid "close all"
 msgstr "Закрыть все"
 
