@@ -136,9 +136,25 @@ class Semester(models.Model):
         return obj
 
 
+class CustomCourseOfferingQuerySet(models.QuerySet):
+    def site_related(self, request):
+        if request.site.domain == settings.CLUB_DOMAIN:
+            qs = self.filter(is_open=True)
+            # TODO: Add city middleware to cscenter site and refactor
+            if hasattr(request, 'city'):
+                qs = qs.filter(
+                    models.Q(city__pk=request.city.code)
+                    | models.Q(city__isnull=True))
+        else:
+            # Restrict by spb for center site
+            qs = self.filter(city__pk=settings.DEFAULT_CITY_CODE)
+        return qs
+
 
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
+    objects = models.Manager()
+    custom = CustomCourseOfferingQuerySet.as_manager()
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
@@ -173,7 +189,7 @@ class CourseOffering(TimeStampedModel):
         blank=True,
         through='Enrollment')
     city = models.ForeignKey(City, null=True, blank=True, \
-                                   default=settings.CITY_CODE)
+                                   default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
@@ -260,7 +276,7 @@ class CourseOfferingNews(TimeStampedModel):
 @python_2_unicode_compatible
 class Venue(models.Model):
     city = models.ForeignKey(City, null=True, blank=True, \
-                                   default=settings.CITY_CODE)
+                                   default=settings.DEFAULT_CITY_CODE)
     sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(

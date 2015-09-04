@@ -2,8 +2,6 @@ import sys
 
 from .base import *
 
-CLUB_DOMAIN = 'club.ru'
-
 INSTALLED_APPS += ('fixture_media',
                    'debug_toolbar',
                    'django_extensions',

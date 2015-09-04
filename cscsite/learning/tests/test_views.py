@@ -631,6 +631,31 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
                                               assignment__course_offering=co)))
 
 
+class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
+    def test_list_center_site(self):
+        """Center students can see club CO only from SPB"""
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester,
+                                          city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseOfferingFactory.create(semester=current_semester,
+                                          city="RU KZN")
+        resp = self.client.get(reverse('course_list'))
+        self.assertContains(resp, co.course.name)
+        self.assertNotContains(resp, co_kzn.course.name)
+        # Note: Club related tests in csclub app
+
+    def test_student_list_center_site(self):
+        s = UserFactory.create(groups=['Student [CENTER]'])
+        self.doLogin(s)
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester,
+                                          city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseOfferingFactory.create(semester=current_semester,
+                                          city="RU KZN")
+        resp = self.client.get(reverse('course_list_student'))
+        self.assertEqual(len(resp.context['course_list_available']), 1)
+
+
 class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
     def test_is_actual_teacher(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])

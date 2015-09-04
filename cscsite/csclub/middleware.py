@@ -14,7 +14,7 @@ class CurrentCityMiddleware(object):
     * user settings (not supported)
     * session
     * cookie
-    * settings.CITY_CODE (should be "RU SPB")
+    * settings.DEFAULT_CITY_CODE (should be "RU SPB")
     """
 
     def process_request(self, request):
@@ -28,9 +28,9 @@ class CurrentCityMiddleware(object):
         elif settings.CITY_COOKIE_NAME in request.COOKIES:
             current_city_code = request.COOKIES[settings.CITY_COOKIE_NAME]
         else:
-            current_city_code = settings.CITY_CODE
+            current_city_code = settings.DEFAULT_CITY_CODE
 
         try:
             request.city = [x for x in CITIES_LIST if x.code == current_city_code][0]
         except Exception:
-            request.city = [x for x in CITIES_LIST if x.code == settings.CITY_CODE][0]
+            request.city = [x for x in CITIES_LIST if x.code == settings.DEFAULT_CITY_CODE][0]

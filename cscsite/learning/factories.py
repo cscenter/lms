@@ -13,6 +13,7 @@ from learning.models import Course, Semester, CourseOffering, \
     CourseOfferingNewsNotification, NonCourseEvent, StudentProject
 
 from .utils import get_current_semester_pair
+from core.models import City
 from users.factories import UserFactory
 
 
@@ -49,6 +50,17 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
+
+    @factory.post_generation
+    def city(self, create, extracted, **kwargs):
+        """ Allow set City instance or pass PK """
+        if not create:
+            return
+        if extracted:
+            if isinstance(extracted, City):
+                self.city = extracted
+            else:
+                self.city = City.objects.get(pk=extracted)
 
     # TODO: add "enrolled students" here
     # TODO: create course offering for current semester by default
