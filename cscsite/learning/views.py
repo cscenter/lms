@@ -264,16 +264,10 @@ class CoursesListView(generic.ListView):
     template_name = "learning/courses/list.html"
 
     def get_queryset(self):
-        co_queryset = (CourseOffering.objects
+        co_queryset = (CourseOffering.custom.site_related(self.request)
             .select_related('course')
             .prefetch_related('teachers')
             .order_by('course__name'))
-        if self.request.site.domain == settings.CLUB_DOMAIN:
-            co_queryset = co_queryset.filter(is_open=True)
-            if hasattr(self.request, 'city'):
-                co_queryset = co_queryset.filter(
-                    Q(city__pk=self.request.city.code)
-                    | Q(city__isnull=True))
         q = (self.model.objects.prefetch_related(
                 Prefetch(
                     'courseoffering_set',
@@ -337,7 +331,7 @@ class CourseStudentListView(StudentOnlyMixin,
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()
-        available = (CourseOffering.objects
+        available = (CourseOffering.custom.site_related(self.request)
                      .filter(semester__type=semester_type,
                              semester__year=year)
                      .exclude(enrolled_students=self.request.user)
@@ -346,12 +340,6 @@ class CourseStudentListView(StudentOnlyMixin,
                      .select_related('course', 'semester')
                      .prefetch_related('teachers'))
 
-        if self.request.site.domain == settings.CLUB_DOMAIN:
-            available = available.filter(is_open=True)
-            if hasattr(self.request, 'city'):
-                available = available.filter(
-                    Q(city__pk=self.request.city.code) 
-                    | Q(city__isnull=True))
         enrolled_on = (Enrollment.objects
                        .filter(student=self.request.user)
                        .order_by('course_offering__semester__year',
@@ -429,7 +417,7 @@ class GetCourseOfferingObjectMixin(object):
             raise Http404
 
         return get_object_or_404(
-            self.model.objects
+            self.get_queryset()
             .filter(semester__type=semester_type,
                     semester__year=year,
                     course__slug=self.kwargs['course_slug'])
@@ -447,6 +435,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                generic.DetailView):
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
+
+
+    def get_queryset(self):
+        return self.model.custom.site_related(self.request)
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)

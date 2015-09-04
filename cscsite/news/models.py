@@ -43,7 +43,7 @@ class News(TimeStampedModel):
                            marker=escape(SPLIT_MARKER))))
 
     city = models.ForeignKey(City, null=True, blank=True, \
-                                   default=settings.CITY_CODE)
+                                   default=settings.DEFAULT_CITY_CODE)
     site = models.ForeignKey(Site)
 
     language = models.CharField(max_length=5, db_index=True,
