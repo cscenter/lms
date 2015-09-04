@@ -3,7 +3,7 @@ from urlparse import urlparse
 from django.conf import settings
 
 from core.models import City
-from .context_processors import CITIES_LIST
+from .context_processors import cities
 
 
 class CurrentCityMiddleware(object):
@@ -18,14 +18,12 @@ class CurrentCityMiddleware(object):
     """
 
     def process_request(self, request):
-        if not CITIES_LIST:
-            CITIES_LIST[:] = City.objects.all()
+        CITIES_LIST = cities(request)['CITIES_LIST']
 
-        # subdomain = request.get_host().rsplit('.', 2)[:-2]
-        # if subdomain:
-        #     try:
-        #         request.city = [x for x in CITIES_LIST if x.code == 'RU ' + subdomain[0].upper()][0]
-        if request.session.get(settings.CITY_SESSION_KEY):
+        subdomain = request.get_host().rsplit('.', 2)[:-2]
+        if subdomain:
+            current_city_code = 'RU ' + subdomain[0].upper()
+        elif request.session.get(settings.CITY_SESSION_KEY):
             current_city_code = request.session.get(settings.CITY_COOKIE_NAME)
         elif settings.CITY_COOKIE_NAME in request.COOKIES:
             current_city_code = request.COOKIES[settings.CITY_COOKIE_NAME]

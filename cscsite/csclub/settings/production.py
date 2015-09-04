@@ -6,7 +6,9 @@ from unipath import Path
 
 from .base import *
 
-TEMPLATE_DEBUG = DEBUG = False
+DEBUG = False
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = ["compsciclub.ru", "www.compsciclub.ru", "*"]
 

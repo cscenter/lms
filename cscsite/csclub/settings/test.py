@@ -37,7 +37,8 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
 DEBUG = False
-TEMPLATE_DEBUG = False
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
 MODELTRANSLATION_DEBUG = False
 
 MEDIA_ROOT = '/tmp/django_test_media/'

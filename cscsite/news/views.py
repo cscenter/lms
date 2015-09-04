@@ -21,7 +21,7 @@ class NewsFeed(Feed):
         pass
     def items(self):
         site = Site.objects.get_current()
-        if site.domain == 'compsciclub.ru':
+        if site.domain == settings.CLUB_DOMAIN:
             self.title = 'Новости Computer Science Клуба'
         else:
             self.title = 'Новости Computer Science Центра'

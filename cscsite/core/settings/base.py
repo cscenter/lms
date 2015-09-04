@@ -16,10 +16,11 @@ MEDIA_ROOT = PROJECT_DIR.child("media")
 MEDIA_URL = "/media/"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = TEMPLATE_DEBUG = MODELTRANSLATION_DEBUG = True
+DEBUG = MODELTRANSLATION_DEBUG = True
 THUMBNAIL_DEBUG = False
 
 CITY_CODE = "RU SPB"
+CLUB_DOMAIN = 'compsciclub.ru'
 CITY_SESSION_KEY = CITY_COOKIE_NAME = '_city_code'
 
 TEMPLATES = [
@@ -45,8 +46,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
 
                 'core.context_processors.redirect_bases'
-            )
-            # TEMPLATE_DEBUG deprecated, but still usefull then `debug` here
+            ),
+            'debug': DEBUG
         }
     },
 ]
