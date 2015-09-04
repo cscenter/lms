@@ -858,9 +858,7 @@ class AssignmentStudentListView(StudentOnlyMixin,
                    .get_context_data(*args, **kwargs))
         open_, archive = utils.split_list(context['assignment_list'],
                                           lambda a_s: a_s.assignment.is_open)
-        archive.reverse()
         context['assignment_list_open'] = open_
-        context['assignment_list_archive'] = archive
         context['user_type'] = self.user_type
         return context
 

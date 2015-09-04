@@ -91,59 +91,8 @@
     </div>
   </div>
   {% endif %}
-  {% if assignment_list_archive %}
-  <div class="row">
-    <div class="col-xs-12">
-      <h3>{% trans "Archive" %}</h3>
-      <table class="table" width="100%">
-        <thead>
-          <th width="10%">
-            {% trans "Deadline" %}
-          </th>
-          <th></th>
-          <th width="20%">
-            {% trans "Course" %}
-          </th>
-          <th width="15%">
-            {% trans "State" %}
-          </th>
-          <th width="5%">
-            {% trans "Online" %}
-          </th>
-        </thead>
-        {% for a_s in assignment_list_archive %}
-        <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span><br>
-            {{ a_s.assignment.deadline_at|time:"H:i" }}
-          </td>
-          <td>
-            <a href="{% url 'a_s_detail_student' a_s.pk %}">
-              {{ a_s.assignment.title }}
-            </a>
-          </td>
-          <td>
-            <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
-              {{ a_s.assignment.course_offering.course.name }}
-            </a>
-          </td>
-          <td>
-            <span style="white-space: nowrap;"
-                  class="badge assignment-status {{ a_s.state|to_css }}">
-              {{ a_s.state_display }}
-            </span>
-          </td>
-          <td>
-            {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
-  {% endif %}
 </div>
-{% if not assignment_list_open and not assignment_list_archive %}
+{% if not assignment_list_open %}
 <div class="container">
   <div class="row">
     <div class="col-xs-3"></div>
