@@ -21,7 +21,7 @@ class NewsTests(TestCase):
     def test_sites(self):
         """Test news separation by site_id"""
         cscenter_site = Site.objects.get(domain='compscicenter.ru')
-        csclub_site = Site.objects.get(domain='compsciclub.ru')
+        csclub_site = Site.objects.get(domain=settings.CLUB_DOMAIN)
         sites = (cscenter_site, csclub_site)
         if settings.SITE_ID == cscenter_site.id:
             current_site = cscenter_site

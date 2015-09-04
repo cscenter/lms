@@ -2,6 +2,8 @@ import sys
 
 from .base import *
 
+CLUB_DOMAIN = 'club.ru'
+
 INSTALLED_APPS += ('fixture_media',
                    'debug_toolbar',
                    'django_extensions',
@@ -23,14 +25,12 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'template_timings_panel.panels.TemplateTimings.TemplateTimings'
 ]
-
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 THUMBNAIL_DEBUG = True
 
 EMAIL_HOST = '127.0.0.1'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compsciclub.ru'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

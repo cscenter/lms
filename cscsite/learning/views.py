@@ -196,7 +196,7 @@ class CalendarMixin(object):
                                 'course_offering',
                                 'course_offering__course',
                                 'course_offering__semester'))
-        if self.request.site.domain == 'compsciclub.ru':
+        if self.request.site.domain == settings.CLUB_DOMAIN:
             q = q.filter(course_offering__is_open=True)
             if hasattr(self.request, 'city'):
                 q = q.filter(Q(course_offering__city__pk=self.request.city.code) 
@@ -268,7 +268,7 @@ class CoursesListView(generic.ListView):
             .select_related('course')
             .prefetch_related('teachers')
             .order_by('course__name'))
-        if self.request.site.domain == 'compsciclub.ru':
+        if self.request.site.domain == settings.CLUB_DOMAIN:
             co_queryset = co_queryset.filter(is_open=True)
             if hasattr(self.request, 'city'):
                 co_queryset = co_queryset.filter(
@@ -346,7 +346,7 @@ class CourseStudentListView(StudentOnlyMixin,
                      .select_related('course', 'semester')
                      .prefetch_related('teachers'))
 
-        if self.request.site.domain == 'compsciclub.ru':
+        if self.request.site.domain == settings.CLUB_DOMAIN:
             available = available.filter(is_open=True)
             if hasattr(self.request, 'city'):
                 available = available.filter(
@@ -630,7 +630,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         if course_offering.semester != current_semester:
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
-        if self.request.site.domain == 'compsciclub.ru' and \
+        if self.request.site.domain == settings.CLUB_DOMAIN and \
            not course_offering.is_open:
             return HttpResponseForbidden()
         Enrollment.objects.get_or_create(

@@ -415,15 +415,4 @@ $(document).ready(function () {
 
     }
 
-    $('.dropdown-menu.cities a').click(function() {
-        var link = $(this).attr('href');
-        $.post(link, function( data ) {
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert('Something go wrong. Try to reload page');
-            }
-        });
-        return false;
-    })
 });

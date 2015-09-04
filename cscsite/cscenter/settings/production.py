@@ -4,7 +4,9 @@ from __future__ import absolute_import
 
 from .base import *
 
-TEMPLATE_DEBUG = DEBUG = False
+DEBUG = False
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = ["compscicenter.ru", "www.compscicenter.ru", "*"]
 
