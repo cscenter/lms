@@ -12,7 +12,7 @@
 
     {% if teacher.note %}
         <div class="about-me">
-            <h4>{% trans "About me" %}</h4>
+            <h4>{% trans "About teacher" %}</h4>
             <div class="ubertext">
               {% markdown 3600 "user_note" teacher.pk teacher.modified %}
                 {{ teacher.note }}

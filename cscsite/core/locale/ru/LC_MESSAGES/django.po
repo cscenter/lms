@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 18:35+0300\n"
-"PO-Revision-Date: 2015-09-04 18:35+0230\n"
+"POT-Creation-Date: 2015-09-04 18:46+0300\n"
+"PO-Revision-Date: 2015-09-04 18:46+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1518,9 +1518,10 @@ msgstr "Куратор в Computer Science центре"
 msgid "Reference|Detail|info"
 msgstr "Информация"
 
-#: templates/users/teacher_detail.html:15 templates/users/user_detail.html:22
-msgid "About me"
-msgstr "О себе"
+#: templates/users/teacher_detail.html:15
+#| msgid "teacher"
+msgid "About teacher"
+msgstr "О преподавателе"
 
 #: templates/users/teacher_detail.html:26 templates/users/user_detail.html:198
 #: users/models.py:122
@@ -1528,7 +1529,6 @@ msgid "Contact information"
 msgstr "Контактная информация"
 
 #: templates/users/teacher_detail.html:35
-#| msgid "Course offerings"
 msgid "Course readings"
 msgstr "Прочтения курсов"
 
@@ -1548,6 +1548,10 @@ msgstr "год поступления"
 #: templates/users/user_detail.html:16
 msgid "student"
 msgstr "студент"
+
+#: templates/users/user_detail.html:22
+msgid "About me"
+msgstr "О себе"
 
 #: templates/users/user_detail.html:76
 msgid "School of Data Analysis courses"
