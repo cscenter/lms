@@ -21,7 +21,7 @@
         <div class="about-me">
             <h4>{% trans "About me" %}</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_note" user_object.pk user_object.note %}
+              {% markdown 3600 "user_note" user_object.pk user_object.modified %}
                 {{ user_object.note }}
               {% endmarkdown %}
             </div>
@@ -188,7 +188,7 @@
         <div class="review">
             <h4>{% blocktrans with name=user_object.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
             <div class="ubertext">
-              {% markdown 3600 "csc_review" user_object.pk user_object.csc_review %}{{ user_object.csc_review }}{% endmarkdown %}
+              {% markdown 3600 "csc_review" user_object.pk user_object.modified %}{{ user_object.csc_review }}{% endmarkdown %}
             </div>
         </div>
     {% endif %}
@@ -197,7 +197,7 @@
         <div class="contact-info">
             <h4>{% trans "Contact information" %}:</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_private_contacts" user_object.pk user_object.private_contacts %}
+              {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
                 {{ user_object.private_contacts }}
               {% endmarkdown %}
             </div>
