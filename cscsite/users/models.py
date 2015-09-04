@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 import logging
 
 from model_utils import Choices
-from model_utils.fields import MonitorField, StatusField
+from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
@@ -72,6 +72,8 @@ class CSCUser(AbstractUser):
     gender = models.CharField(_("Gender"), max_length=1, choices=GENDER_CHOICES)
 
     _original_comment = None
+
+    modified = AutoLastModifiedField(_('modified'))
 
     patronymic = models.CharField(
         _("CSCUser|patronymic"),
