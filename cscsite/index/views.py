@@ -31,15 +31,15 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         # TODO: Add cache
-        pool = cache.get('index_page_courses')
+        pool = cache.get('index_page_spb_courses')
         if pool is None:
-            pool = list(CourseOffering.objects
+            pool = list(CourseOffering.custom.site_related(self.request)
                 .filter(is_published_in_video=True)
                 .defer('description')
                 .select_related('course')
                 .prefetch_related('teachers', 'semester')
                 .annotate(Count('courseclass')))
-            cache.set('index_page_courses', pool, 3600)
+            cache.set('index_page_spb_courses', pool, 3600)
         random.shuffle(pool)
         context['courses'] = pool[:3]
         # TODO: Add cache
