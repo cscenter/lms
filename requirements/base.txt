@@ -50,6 +50,9 @@ git+https://github.com/pacahon/Hoep.git@5de34245cb00a3bbec758c4db72ae84599a78a59
 # whitelist-based HTML sanitization
 bleach==1.4.1
 
+# Admin theme
+django-flat-theme==1.1.1
+
 # Misc utils
 django-recaptcha==1.0.4
 django-registration-redux==1.2
