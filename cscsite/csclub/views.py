@@ -40,18 +40,13 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        co_queryset = (CourseOffering.objects
-            .filter(is_open=True)
+        co_queryset = (CourseOffering.custom.site_related(self.request)
             .select_related('course')
             .prefetch_related('teachers')
             .order_by('course__name'))
-        if hasattr(self.request, 'city'):
-            co_queryset = co_queryset.filter(
-                Q(city__pk=self.request.city.code)
-                | Q(city__isnull=True))
 
         current_semester = Semester.get_current()
-        semesters_nearest = (Semester.objects.filter(id__gt=current_semester.pk)
+        semesters_nearest = (Semester.objects.filter(id=current_semester.pk)
                             .prefetch_related(
                                 Prefetch(
                                     'courseoffering_set',
