@@ -242,7 +242,7 @@ class CSCUser(AbstractUser):
         # Remove student center group if user expelled
         if self.status == self.STATUS.expelled:
             user_groups = user_groups.exclude(pk=self.group_pks.STUDENT_CENTER)
-        return user_groups
+        return user_groups.all()
 
     @property
     def status_display(self):

@@ -102,12 +102,13 @@ class TeacherDetailView(generic.DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
+        co_queryset = (CourseOffering.custom.site_related(self.request)
+            .select_related('semester', 'course'))
         return (auth.get_user_model()
                 ._default_manager
                 .all()
-                .prefetch_related('teaching_set',
-                                  'teaching_set__semester',
-                                  'teaching_set__course'))
+                .prefetch_related(
+                    Prefetch('teaching_set', queryset=co_queryset)))
 
     def get_object(self, *args, **kwargs):
         teacher = super(TeacherDetailView, self).get_object(*args, **kwargs)
