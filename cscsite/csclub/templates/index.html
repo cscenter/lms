@@ -9,7 +9,7 @@
 
 <div class="container">
   {% if request.city.code == 'RU SPB' %}
-  <div id="intro">
+  <div class="font-bigger">
 Основная <strong>цель клуба</strong> — познакомить студентов с
 классическими результатами, современным положением дел и открытыми
 задачами в различных областях Computer Science. Лекции читаются
@@ -18,35 +18,36 @@
 требуются. Приглашаются все желающие.
   </div>
   {% endif %}
-  <h1>{% trans "Nearest courses" %}</h1>
-  {% if semester_pairs %}
-      {% for autumn_spring in semester_pairs %}
-        <table class="table table-stripped">
-          <tr>
-          {% for semester in autumn_spring %}
-            <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
-          {% endfor %}
-          </tr>
-          <tr>
-          {% for semester in autumn_spring %}
-            <td class="semester-course-list">
-              <ul>
-              {% for course_offering in semester.courseofferings %}
-                <li>
-                  {% comment %}
-                  Note(lebedev): because crappy Django doesn't have proper
-                  whitespace stripping, like {%- in Jinja.
-                  {% endcomment %}
-                  <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
-                  ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
-                </li>
+  <h1>{% trans "Courses" %} &mdash; {{ current_semester }}</h1>
+  {% if courses %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Teachers" %}</th>
+                <th>{% trans "Next lecture" %}</th>
+                <th class="_language">{% trans "Language" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+              {% for course_offering in courses %}
+                <tr>
+                  <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
+                  <td>{% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                  <td>
+                    {% if course_offering.classes %}
+                      {% with class=course_offering.classes|first %}
+                      <a href="{{ class.get_absolute_url }}">{{ class.date|date:"l, d E" }}, {{ class.starts_at }}</a>
+                      {% endwith %}
+                    {% else %}
+                      {% trans "To be announced." %}
+                    {% endif %}
+                  </td>
+                  <td>{{ course_offering.language }}</td>
+                </tr>
               {% endfor %}
-              </ul>
-            </td>
-          {% endfor %}
-          </tr>
+          </tbody>
         </table>
-      {% endfor %}
   {% else %}
       <p>{% trans "No active courses" %}</p>
   {% endif %}

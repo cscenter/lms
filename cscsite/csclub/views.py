@@ -1,11 +1,13 @@
 from django.conf import settings
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Count
 from django.http import JsonResponse
 from django.views import generic
+from django.utils.timezone import now
 
 from .utils import check_for_city
 from learning.views import CalendarMixin
-from learning.models import NonCourseEvent, CourseOffering, Semester
+from learning.models import NonCourseEvent, CourseOffering, Semester, \
+    CourseClass
 from learning.utils import grouper
 
 
@@ -37,19 +39,24 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        co_queryset = (CourseOffering.custom.site_related(self.request)
-            .select_related('course')
-            .prefetch_related('teachers')
+        current_semester = Semester.get_current()
+        context['current_semester'] = current_semester
+        today = now().date()
+        # TODO: add cache
+        courseclass_queryset = (CourseClass.objects
+                                           .filter(date__gte=today)
+                                           .order_by('date', 'starts_at'))
+        context['courses'] = (CourseOffering.custom.site_related(self.request)
+            .filter(semester=current_semester.pk)
+            .select_related('course', 'semester')
+            .prefetch_related(
+                'teachers',
+                Prefetch(
+                    'courseclass_set',
+                    queryset=courseclass_queryset,
+                    to_attr='classes'
+                ),
+            )
             .order_by('course__name'))
 
-        current_semester = Semester.get_current()
-        semesters_nearest = (Semester.objects.filter(id=current_semester.pk)
-                            .prefetch_related(
-                                Prefetch(
-                                    'courseoffering_set',
-                                    queryset=co_queryset,
-                                    to_attr='courseofferings'
-                                ),
-                            ))
-        context['semester_pairs'] = grouper(semesters_nearest, 2)
         return context
