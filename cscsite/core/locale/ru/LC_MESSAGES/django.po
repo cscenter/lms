@@ -8,31 +8,30 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-07 13:34+0300\n"
+"POT-Creation-Date: 2015-09-07 16:46+0300\n"
 "PO-Revision-Date: 2015-09-07 13:38+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: core/models.py:11
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
-" enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
+"enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"+HTML"
 
 #: core/models.py:15
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: core/models.py:47
 msgid "Code"
@@ -40,9 +39,8 @@ msgstr "Код"
 
 #: core/models.py:49
 msgid ""
-"UN/LOCODE notification preferable <a "
-"href='http://www.unece.org/cefact/locode/service/location' "
-"target='_blank'>Hint</a>"
+"UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/"
+"locode/service/location' target='_blank'>Hint</a>"
 msgstr ""
 
 #: core/models.py:51
@@ -297,11 +295,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:48 news/models.py:32
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
-">some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/"
+"<b>some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
-"test.com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
+"com/news/<b>some-news</b>/"
 
 #: learning/models.py:58 learning/models.py:160
 #: templates/learning/assignment_list_student.html:49
@@ -343,8 +341,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:174
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
-" description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
+"description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -1078,8 +1076,8 @@ msgstr "Перейти к курсу"
 
 #: templates/learning/_onlinecourse_list__row.html:21
 msgid ""
-"The course was developed in collaboration with the <a "
-"href='http://mit.spbau.ru/'>Academic University</a>."
+"The course was developed in collaboration with the <a href='http://mit.spbau."
+"ru/'>Academic University</a>."
 msgstr ""
 "Курс подготовлен совместно с <a href='http://mit.spbau.ru/'>Академическим "
 "университетом</a>."
@@ -1414,7 +1412,10 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
+"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
+"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
+"сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
@@ -1500,7 +1501,8 @@ msgstr "СПРАВКА"
 #, python-format
 msgid ""
 "Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
-"            сентября %(enrollment_year)s года. За время обучения %(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
+"            сентября %(enrollment_year)s года. За время обучения "
+"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
 "            "
 msgstr ""
 
@@ -1648,7 +1650,6 @@ msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
 #: users/admin.py:54
-#| msgid "CSCUser|enrollment year should be provided for students"
 msgid "CSCUser|enrollment year should be provided for volunteers"
 msgstr "Для вольнослушателя должен быть указан год поступления"
 
