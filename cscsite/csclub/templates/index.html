@@ -5,40 +5,50 @@
 
 {% block content %}
 <div class="banner _{{ request.city.code|slugify }}"></div>
+
+
 <div class="container">
-    <div class="row">
-          <h1>{% trans "Nearest courses" %}</h1>
-            {% if semester_pairs %}
-                {% for autumn_spring in semester_pairs %}
-                  <table class="table table-stripped">
-                    <tr>
-                    {% for semester in autumn_spring %}
-                      <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
-                    {% endfor %}
-                    </tr>
-                    <tr>
-                    {% for semester in autumn_spring %}
-                      <td class="semester-course-list">
-                        <ul>
-                        {% for course_offering in semester.courseofferings %}
-                          <li>
-                            {% comment %}
-                            Note(lebedev): because crappy Django doesn't have proper
-                            whitespace stripping, like {%- in Jinja.
-                            {% endcomment %}
-                            <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
-                            ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
-                          </li>
-                        {% endfor %}
-                        </ul>
-                      </td>
-                    {% endfor %}
-                    </tr>
-                  </table>
-                {% endfor %}
-            {% else %}
-                <p>{% trans "No active courses" %}</p>
-            {% endif %}
-    </div>
+  {% if request.city.code == 'RU SPB' %}
+  <div id="intro">
+Основная <strong>цель клуба</strong> — познакомить студентов с
+классическими результатами, современным положением дел и открытыми
+задачами в различных областях Computer Science. Лекции читаются
+местными и приглашёнными преподавателями в Мраморном зале ПОМИ РАН
+(Фонтанка, 27). Вход на лекции свободный, регистрация и оплата не
+требуются. Приглашаются все желающие.
+  </div>
+  {% endif %}
+  <h1>{% trans "Nearest courses" %}</h1>
+  {% if semester_pairs %}
+      {% for autumn_spring in semester_pairs %}
+        <table class="table table-stripped">
+          <tr>
+          {% for semester in autumn_spring %}
+            <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
+          {% endfor %}
+          </tr>
+          <tr>
+          {% for semester in autumn_spring %}
+            <td class="semester-course-list">
+              <ul>
+              {% for course_offering in semester.courseofferings %}
+                <li>
+                  {% comment %}
+                  Note(lebedev): because crappy Django doesn't have proper
+                  whitespace stripping, like {%- in Jinja.
+                  {% endcomment %}
+                  <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                  ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+                </li>
+              {% endfor %}
+              </ul>
+            </td>
+          {% endfor %}
+          </tr>
+        </table>
+      {% endfor %}
+  {% else %}
+      <p>{% trans "No active courses" %}</p>
+  {% endif %}
 </div>
 {% endblock content %}

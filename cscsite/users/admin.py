@@ -48,6 +48,11 @@ class CSCUserChangeForm(UserChangeForm):
             self.add_error('enrollment_year', ValidationError(
                 _("CSCUser|enrollment year should be provided for students")))
 
+        if self.instance.group_pks.VOLUNTEER in groups \
+           and enrollment_year is None:
+            self.add_error('enrollment_year', ValidationError(
+                _("CSCUser|enrollment year should be provided for volunteers")))
+
         graduation_year = cleaned_data.get('graduation_year')
         if self.instance.group_pks.GRADUATE_CENTER in groups \
            and graduation_year is None:

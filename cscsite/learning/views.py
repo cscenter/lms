@@ -157,7 +157,10 @@ class CalendarMixin(object):
         self._non_course_events = None
         super(CalendarMixin, self).__init__(*args, **kwargs)
 
-    def noncourse_events(self, month, year, prev_month_date, next_month_date):
+    def noncourse_events(self, request, month, year, prev_month_date,
+                         next_month_date):
+        if request.site.domain == settings.CLUB_DOMAIN:
+            return NonCourseEvent.objects.none()
         return (NonCourseEvent.objects
                .filter(Q(date__month=month, date__year=year)
                        | Q(date__month=prev_month_date.month,
@@ -182,7 +185,8 @@ class CalendarMixin(object):
 
         # FIXME(Dmitry): somewhat dirty, come up with better generalization
         self._non_course_events = \
-            self.noncourse_events(month, year, prev_month_date, next_month_date)
+            self.noncourse_events(self.request, month, year, prev_month_date,
+                                  next_month_date)
 
         q = (CourseClass.objects
                 .filter(Q(date__month=month,
@@ -199,7 +203,7 @@ class CalendarMixin(object):
         if self.request.site.domain == settings.CLUB_DOMAIN:
             q = q.filter(course_offering__is_open=True)
             if hasattr(self.request, 'city'):
-                q = q.filter(Q(course_offering__city__pk=self.request.city.code) 
+                q = q.filter(Q(course_offering__city__pk=self.request.city.code)
                              | Q(course_offering__city__isnull=True))
         return q
 

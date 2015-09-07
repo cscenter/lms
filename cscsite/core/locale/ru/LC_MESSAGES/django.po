@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 18:46+0300\n"
-"PO-Revision-Date: 2015-09-04 18:46+0230\n"
+"POT-Creation-Date: 2015-09-07 13:34+0300\n"
+"PO-Revision-Date: 2015-09-07 13:38+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -171,7 +171,7 @@ msgid "Text"
 msgstr "Текст"
 
 #: learning/forms.py:88 learning/models.py:44 learning/models.py:908
-#: users/models.py:298 users/models.py:316
+#: users/models.py:299 users/models.py:317
 msgid "Course|name"
 msgstr "Название"
 
@@ -198,7 +198,7 @@ msgstr "Название"
 msgid "Description"
 msgstr "Описание"
 
-#: learning/forms.py:143 learning/models.py:343 learning/views.py:492
+#: learning/forms.py:143 learning/models.py:343 learning/views.py:496
 #: templates/learning/courseclass_detail.html:38
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
@@ -214,7 +214,7 @@ msgstr "Приложенные файлы"
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
-#: learning/forms.py:152 learning/models.py:347 learning/views.py:499
+#: learning/forms.py:152 learning/models.py:347 learning/views.py:503
 msgid "CourseClass|Video"
 msgstr "Видео"
 
@@ -263,7 +263,6 @@ msgstr "Оценка не может быть больше максимальн�
 
 #: learning/forms.py:314 templates/learning/assignment_detail.html:32
 #: templates/learning/assignment_list_student.html:45
-#: templates/learning/assignment_list_student.html:101
 #: templates/learning/assignment_list_teacher.html:63
 #: templates/learning/assignment_list_teacher.html:115
 #: templates/learning/assignment_student_detail.html:142
@@ -306,7 +305,6 @@ msgstr ""
 
 #: learning/models.py:58 learning/models.py:160
 #: templates/learning/assignment_list_student.html:49
-#: templates/learning/assignment_list_student.html:105
 #: templates/learning/assignment_list_teacher.html:68
 #: templates/learning/assignment_list_teacher.html:119
 #: templates/learning/timetable_student.html:64
@@ -331,7 +329,7 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: learning/models.py:88 learning/models.py:170
-#: templates/learning/courses_list_student.html:103 users/models.py:320
+#: templates/learning/courses_list_student.html:103 users/models.py:321
 msgid "Semester"
 msgstr "Семестр"
 
@@ -601,12 +599,12 @@ msgstr "Комментарии к заданиям"
 
 #: learning/models.py:684 templates/learning/assignment_detail.html:64
 #: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:140 users/models.py:296
-#: users/models.py:314 users/models.py:348
+#: templates/learning/assignment_student_detail.html:140 users/models.py:297
+#: users/models.py:315 users/models.py:349
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:691 users/models.py:324
+#: learning/models.py:691 users/models.py:325
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -770,38 +768,38 @@ msgstr "Онлайн-курсы"
 msgid "No user with Stepic ID {}"
 msgstr "Пользователь со Stepic ID {} не найден"
 
-#: learning/views.py:506
+#: learning/views.py:510
 msgid "Files"
 msgstr "Файлы"
 
-#: learning/views.py:518
+#: learning/views.py:522
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:526 templates/learning/timetable_student.html:112
+#: learning/views.py:530 templates/learning/timetable_student.html:112
 #: templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: learning/views.py:662
+#: learning/views.py:666
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:665 templates/learning/courseoffering_detail.html:41
+#: learning/views.py:669 templates/learning/courseoffering_detail.html:41
 #: templates/learning/courses_list_student.html:51
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1095
+#: learning/views.py:1097
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: learning/views.py:1549
+#: learning/views.py:1551
 msgid "Import results: {}/{} successes"
 msgstr "Импорт из stepic: {}/{} успешно"
 
-#: learning/views.py:1553
+#: learning/views.py:1555
 msgid "Invalid form."
 msgstr ""
 
@@ -855,15 +853,15 @@ msgstr "Книги"
 
 #: menu_extension/models.py:9
 msgid "Check if visible only for authenticated user"
-msgstr ""
+msgstr "Показывать только авторизованным пользователям."
 
 #: menu_extension/models.py:10
 msgid "Check if visible only for unauthenticated user"
-msgstr ""
+msgstr "Показывать только неавторизованным пользователям."
 
 #: menu_extension/models.py:11
 msgid "Check if visible only for staff"
-msgstr ""
+msgstr "Показывать только кураторам."
 
 #: menu_extension/models.py:12
 msgid "Variable name for unred_notifications_cache"
@@ -1103,21 +1101,18 @@ msgstr "Удалить"
 
 #: templates/learning/assignment_detail.html:37
 #: templates/learning/assignment_list_student.html:55
-#: templates/learning/assignment_list_student.html:111
 #: templates/learning/assignment_list_teacher.html:122
 msgid "Online"
 msgstr "Онлайн"
 
 #: templates/learning/assignment_detail.html:38
 #: templates/learning/assignment_list_student.html:86
-#: templates/learning/assignment_list_student.html:137
 #: templates/learning/assignment_list_teacher.html:142
 msgid "Yes,No"
 msgstr "Да,Нет"
 
 #: templates/learning/assignment_detail.html:66
 #: templates/learning/assignment_list_student.html:52
-#: templates/learning/assignment_list_student.html:108
 #: templates/learning/assignment_list_teacher.html:71
 msgid "State"
 msgstr "Статус"
@@ -1142,15 +1137,7 @@ msgstr "Преподавание"
 msgid "Open assignments"
 msgstr "Открытые задания"
 
-#: templates/learning/assignment_list_student.html:97
-#: templates/learning/courses/list.html:15
-#: templates/learning/courses_list_student.html:92
-#: templates/learning/courses_list_teacher.html:54
-#: templates/learning/markssheet_teacher_dispatch.html:14
-msgid "Archive"
-msgstr "Архив"
-
-#: templates/learning/assignment_list_student.html:151
+#: templates/learning/assignment_list_student.html:100
 #: templates/learning/assignment_list_teacher.html:156
 msgid "No assignments yet"
 msgstr "Список заданий пуст"
@@ -1325,6 +1312,13 @@ msgstr "Прочтения курса:"
 #: templates/learning/courses/list.html:13
 msgid "Ongoing"
 msgstr "Текущие"
+
+#: templates/learning/courses/list.html:15
+#: templates/learning/courses_list_student.html:92
+#: templates/learning/courses_list_teacher.html:54
+#: templates/learning/markssheet_teacher_dispatch.html:14
+msgid "Archive"
+msgstr "Архив"
 
 #: templates/learning/courses/list.html:51
 #: templates/learning/courses_list_student.html:140
@@ -1519,7 +1513,6 @@ msgid "Reference|Detail|info"
 msgstr "Информация"
 
 #: templates/users/teacher_detail.html:15
-#| msgid "teacher"
 msgid "About teacher"
 msgstr "О преподавателе"
 
@@ -1594,7 +1587,7 @@ msgstr "Stepic ID"
 msgid "%(name)s about CSC"
 msgstr "%(name)s о Центре"
 
-#: templates/users/user_detail.html:256 users/admin.py:87
+#: templates/users/user_detail.html:256 users/admin.py:92
 msgid "Student info record"
 msgstr "Карточка студента"
 
@@ -1654,23 +1647,28 @@ msgstr "Username должен быть уникальным."
 msgid "CSCUser|enrollment year should be provided for students"
 msgstr "Для студента должен быть указан год поступления"
 
-#: users/admin.py:55
+#: users/admin.py:54
+#| msgid "CSCUser|enrollment year should be provided for students"
+msgid "CSCUser|enrollment year should be provided for volunteers"
+msgstr "Для вольнослушателя должен быть указан год поступления"
+
+#: users/admin.py:60
 msgid "CSCUser|graduation year should be provided for graduates"
 msgstr "Для выпускника должен быть указан год выпуска"
 
-#: users/admin.py:79
+#: users/admin.py:84
 msgid "Personal info"
 msgstr "Персональная информация"
 
-#: users/admin.py:84
+#: users/admin.py:89
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: users/admin.py:86
+#: users/admin.py:91
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: users/admin.py:91
+#: users/admin.py:96
 msgid "Important dates"
 msgstr "Важные даты"
 
@@ -1721,7 +1719,7 @@ msgstr "Выпускник"
 
 #: users/models.py:43
 msgid "Volunteer"
-msgstr ""
+msgstr "Вольнослушатель"
 
 #: users/models.py:44
 msgid "Student [CLUB]"
@@ -1793,7 +1791,7 @@ msgstr "Пол"
 
 #: users/models.py:76
 msgid "modified"
-msgstr ""
+msgstr "изменено"
 
 #: users/models.py:79
 msgid "CSCUser|patronymic"
@@ -1843,39 +1841,39 @@ msgstr "Пользователь"
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:302
+#: users/models.py:303
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: users/models.py:303
+#: users/models.py:304
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: users/models.py:317
+#: users/models.py:318
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: users/models.py:330
+#: users/models.py:331
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: users/models.py:331
+#: users/models.py:332
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: users/models.py:343
+#: users/models.py:344
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: users/models.py:344
+#: users/models.py:345
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: users/models.py:353
+#: users/models.py:354
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: users/models.py:354
+#: users/models.py:355
 msgid "User reference records"
 msgstr "Справки пользователей"
 

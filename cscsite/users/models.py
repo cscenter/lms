@@ -261,30 +261,31 @@ class CSCUser(AbstractUser):
     @property
     def is_student(self):
         return self.is_student_center or \
-               self.group_pks.STUDENT_CLUB in self._cs_group_pks
+               self.is_student_club or \
+               self.is_volunteer
 
-    @property
+    @cached_property
     def is_student_center(self):
         return self.group_pks.STUDENT_CENTER in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_student_club(self):
         return self.group_pks.STUDENT_CLUB in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_teacher(self):
         return self.group_pks.TEACHER_CENTER in self._cs_group_pks or \
                self.group_pks.TEACHER_CLUB in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_graduate(self):
         return self.group_pks.GRADUATE_CENTER in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_volunteer(self):
         return self.group_pks.VOLUNTEER in self._cs_group_pks
 
-    @property
+    @cached_property
     def is_curator(self):
         return self.is_superuser and self.is_staff
 
