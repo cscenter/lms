@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="{% static "img/club/favicon.ico" %}" >
     {% comment %} Bootstrap inside style.css {% endcomment %}
     <link href="{% static "css/club/style.css" %}" rel="stylesheet">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{% static "css/vendor/highlight-styles/solarized_light.css" %}" rel="stylesheet">
     {% block stylesheets %} {% endblock stylesheets %}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -54,20 +54,7 @@
                   <a href="{{city.url}}">{{ city.name }}</a>
               </li>
           {% endfor %}
-      </ul></div> {% trans 'Language' %}: 
-            <div class="btn-group">
-                <a href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ LANGUAGE_CODE|language_name_local}}<span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu pull-right">
-                    {% get_language_info_list for LANGUAGES as languages %}
-                    {% for language in languages %}
-                        <li>
-                            <a href="{% if language.code != 'ru' %}/{{ language.code }}{% endif %}{% if LANGUAGE_CODE != 'ru' %}{{request.get_full_path|slice:'3:'}}{% else %}{{request.get_full_path}}{% endif %}">{{ language.name_local }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
+      </ul></div> {% trans 'Language' %}: {% if LANGUAGE_CODE == "en" %}<a href="/">{{ "ru"|language_name_local}}</a>{% else %}<a href="/en/">{{ "en"|language_name_local}}</a>{% endif %} 
     </div>
 
     {% include "base_menu.html" %}
@@ -87,7 +74,17 @@
     <div class="footer">
       <div class="container">
         <div class="row">
-          <div class="col-xs-12 text-center">{% trans "Computer Science Club, 2007–15 гг."%}</div>
+          <div class="col-xs-9">{% trans "Computer Science Club, 2007–15 гг."%}</div>
+          <div class="col-xs-3 social">
+            {% if request.city.code == 'RU SPB' %}
+            <a href="https://vk.com/club1530671" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+            <a href="https://twitter.com/spbcsclub" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
+            <a href="http://groups.google.com/group/pdmicsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
+            {% else %}
+              <a href="https://vk.com/kazancsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+              <a href="http://groups.google.com/group/kazancsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
