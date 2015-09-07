@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-04 18:46+0300\n"
+"POT-Creation-Date: 2015-09-07 13:34+0300\n"
 "PO-Revision-Date: 2015-09-03 18:53+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,81 +42,79 @@ msgstr "выйти"
 msgid "Login"
 msgstr ""
 
-#: cscenter/templates/index.html:32
-msgid "Learn more"
-msgstr "Узнать больше"
-
-#: cscenter/templates/index.html:36
-msgid "How to enroll"
-msgstr "Как поступить"
-
-#: cscenter/templates/index.html:46
+#: cscenter/templates/index.html:33
 msgid "Courses"
 msgstr "Курсы"
 
-#: cscenter/templates/index.html:47
+#: cscenter/templates/index.html:34
 msgid "See all courses"
 msgstr "Посмотреть все курсы"
 
-#: cscenter/templates/index.html:52
+#: cscenter/templates/index.html:39
 msgid "Semester"
 msgstr ""
 
-#: cscenter/templates/index.html:53
+#: cscenter/templates/index.html:40
 msgid "Name"
 msgstr ""
 
-#: cscenter/templates/index.html:54
+#: cscenter/templates/index.html:41
 msgid "Teachers"
 msgstr ""
 
-#: cscenter/templates/index.html:55
+#: cscenter/templates/index.html:42
 msgid "Classes"
 msgstr "Занятий"
 
-#: cscenter/templates/index.html:56
+#: cscenter/templates/index.html:43
 msgid "Video"
 msgstr ""
 
-#: cscenter/templates/index.html:83
+#: cscenter/templates/index.html:70
 msgid "Graduates about CS Center"
 msgstr "Выпускники о CS Центре"
 
-#: cscenter/templates/index.html:84
+#: cscenter/templates/index.html:71
 msgid "All graduates"
 msgstr "Все выпускники"
 
-#: cscenter/templates/index.html:99
+#: cscenter/templates/index.html:86
 msgid "Graduation"
 msgstr "Выпуск"
 
-#: cscenter/templates/index.html:114
+#: cscenter/templates/index.html:101
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscenter/templates/index.html:115
+#: cscenter/templates/index.html:102
 msgid "All courses"
 msgstr "Все курсы"
 
-#: cscenter/templates/index.html:126
+#: cscenter/templates/index.html:113
 msgid "Supported by"
 msgstr "При поддержке"
 
-#: cscenter/templates/index.html:131
+#: cscenter/templates/index.html:118
 msgid "Yandex School of Data Analysis"
 msgstr "Яндекс ШАД"
 
-#: cscenter/templates/index.html:136
+#: cscenter/templates/index.html:123
 msgid "JetBrains"
 msgstr ""
 
-#: cscenter/templates/index.html:141
+#: cscenter/templates/index.html:128
 msgid "FML #239"
 msgstr "ФМЛ №239"
 
-#: cscenter/templates/index.html:146
+#: cscenter/templates/index.html:133
 msgid "Computer Science Club"
 msgstr ""
+
+#~ msgid "Learn more"
+#~ msgstr "Узнать больше"
+
+#~ msgid "How to enroll"
+#~ msgstr "Как поступить"
 
 #~ msgid "Lectures"
 #~ msgstr "Лекций"

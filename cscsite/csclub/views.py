@@ -31,9 +31,6 @@ def set_city(request, city_code):
 class CalendarClubScheduleView(CalendarMixin, generic.ListView):
     user_type = 'public_full'
 
-    def noncourse_events(self, month, year, prev_month_date, next_month_date):
-        return NonCourseEvent.objects.none()
-
 
 class IndexView(generic.TemplateView):
     template_name = "index.html"
