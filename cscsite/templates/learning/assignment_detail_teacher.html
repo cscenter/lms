@@ -69,9 +69,7 @@
             {% for a_s in a_s_list %}
             <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
               <td>
-                <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
-                  {{ a_s.student.get_short_name }}
-                </a>
+                <a href="{% url 'a_s_detail_teacher' a_s.pk %}">{{ a_s.student.get_short_name }}</a> {% if a_s.student.is_volunteer %}<span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
               </td>
               <td>
                 <span style="white-space: nowrap;"

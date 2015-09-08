@@ -157,6 +157,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
 
+    @unittest.skip('not implemented')
+    def test_expelled(self):
+        """User cant access student section if his status is expelled"""
+        pass
+
     def test_login_page(self):
         response = self.client.get(reverse('login'))
         soup = BeautifulSoup(response.content, "html.parser")

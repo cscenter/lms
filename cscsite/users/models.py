@@ -238,11 +238,16 @@ class CSCUser(AbstractUser):
 
     @cached_property
     def _cs_group_pks(self):
-        user_groups = self.groups.values_list("pk", flat=True)
+        try:
+            user_groups = self._prefetched_objects_cache['groups']
+            user_groups = [group.pk for group in user_groups]
+        except (AttributeError, KeyError):
+            user_groups = self.groups.values_list("pk", flat=True).all()
         # Remove student center group if user expelled
         if self.status == self.STATUS.expelled:
-            user_groups = user_groups.exclude(pk=self.group_pks.STUDENT_CENTER)
-        return user_groups.all()
+            user_groups = [pk for pk in user_groups
+                           if pk != self.group_pks.STUDENT_CENTER]
+        return user_groups
 
     @property
     def status_display(self):
