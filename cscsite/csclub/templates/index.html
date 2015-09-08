@@ -4,26 +4,24 @@
 {% load htmlpage_url %}
 
 {% block content %}
-<div class="banner _{{ request.city.code|slugify }}"></div>
+<div class="banner _{{ request.city.code|slugify }}">{% if request.city.code == 'RU SPB' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
 
 
 <div class="container">
   {% if request.city.code == 'RU SPB' %}
   <div class="font-bigger">
-Основная <strong>цель клуба</strong> — познакомить студентов с
-классическими результатами, современным положением дел и открытыми
-задачами в различных областях Computer Science. Лекции читаются
-местными и приглашёнными преподавателями в Мраморном зале ПОМИ РАН
-(Фонтанка, 27). Вход на лекции свободный, регистрация и оплата не
-требуются. Приглашаются все желающие.
+  {% blocktrans %}
+  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Lectures by local and foreign instructors and researchers are usually held on Saturdays and Sundays at Steklov Institute of Mathematics at St.
+Petersburg. Attendance is open to everyone and is free of charge.
+{% endblocktrans %}
   </div>
   {% endif %}
-  <h1>{% trans "Courses" %} &mdash; {{ current_semester }}</h1>
+  <h1>{% trans "Courses" %}: {{ current_semester }}</h1>
   {% if courses %}
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>{% trans "Name" %}</th>
+                <th>{% trans "Course name" %}</th>
                 <th>{% trans "Teachers" %}</th>
                 <th>{% trans "Next lecture" %}</th>
                 <th class="_language">{% trans "Language" %}</th>
@@ -40,10 +38,10 @@
                       <a href="{{ class.get_absolute_url }}">{{ class.date|date:"l, d E" }}, {{ class.starts_at }}</a>
                       {% endwith %}
                     {% else %}
-                      {% trans "To be announced." %}
+                      {% trans "To be announced" %}
                     {% endif %}
                   </td>
-                  <td>{{ course_offering.language }}</td>
+                  <td>{% if course_offering.language == 'ru' %}{% trans "Russian" %}{% else %}{% trans "English" %}{% endif %}</td>
                 </tr>
               {% endfor %}
           </tbody>

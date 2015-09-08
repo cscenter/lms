@@ -928,7 +928,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
 class AssignmentTeacherDetailView(TeacherOnlyMixin,
                                   generic.DetailView):
     model = Assignment
-    template_name = "learning/assignment_detail.html"
+    template_name = "learning/assignment_detail_teacher.html"
     context_object_name = 'assignment'
 
     def get_queryset(self):
@@ -956,7 +956,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                              'assignment__course_offering',
                              'assignment__course_offering__course',
                              'assignment__course_offering__semester',
-                             'student'))
+                             'student')
+             .prefetch_related('student__groups'))
         return context
 
 
@@ -983,8 +984,7 @@ class AssignmentStudentDetailMixin(object):
 
         # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
-         .filter(assignment_student=a_s,
-                 user=self.request.user)
+         .filter(assignment_student=a_s, user=self.request.user)
          .update(is_unread=False))
 
         # This should guard against reading other's assignments. Not generic
