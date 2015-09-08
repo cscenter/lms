@@ -159,6 +159,9 @@ class CSCUser(AbstractUser):
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
+    status_changed_at = MonitorField(
+        monitor='status',
+        verbose_name=_("Status changed"))
     study_programs = models.ManyToManyField(
         'learning.StudyProgram',
         verbose_name=_("StudentInfo|Study programs"),
