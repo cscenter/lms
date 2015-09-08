@@ -75,8 +75,8 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
-                       'last_login', 'date_joined']
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 
+                       'last_login', 'date_joined', 'status_changed_at']
+    list_display = ('id', 'username', 'email', 'first_name', 'last_name',
         'is_staff')
 
     fieldsets = [
@@ -90,7 +90,7 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
                                        'groups', 'user_permissions']}),
         (_('External services'), {'fields': ['yandex_id', 'stepic_id']}),
         (_('Student info record'),
-         {'fields': ['status', 'study_programs', 'university',
+         {'fields': ['status', 'status_changed_at', 'study_programs', 'university',
                      'workplace', 'uni_year_at_enrollment', 'phone',
                      'comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]

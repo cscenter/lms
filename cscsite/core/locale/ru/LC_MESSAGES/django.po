@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-08 13:49+0300\n"
-"PO-Revision-Date: 2015-09-08 13:52+0230\n"
+"POT-Creation-Date: 2015-09-08 15:59+0300\n"
+"PO-Revision-Date: 2015-09-08 16:00+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -171,7 +171,7 @@ msgid "Text"
 msgstr "Текст"
 
 #: learning/forms.py:88 learning/models.py:44 learning/models.py:908
-#: users/models.py:304 users/models.py:322
+#: users/models.py:311 users/models.py:329
 msgid "Course|name"
 msgstr "Название"
 
@@ -329,7 +329,7 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: learning/models.py:88 learning/models.py:170
-#: templates/learning/courses_list_student.html:103 users/models.py:326
+#: templates/learning/courses_list_student.html:103 users/models.py:333
 msgid "Semester"
 msgstr "Семестр"
 
@@ -599,12 +599,12 @@ msgstr "Комментарии к заданиям"
 
 #: learning/models.py:684 templates/learning/assignment_detail_teacher.html:64
 #: templates/learning/assignment_list_teacher.html:66
-#: templates/learning/assignment_student_detail.html:140 users/models.py:302
-#: users/models.py:320 users/models.py:354
+#: templates/learning/assignment_student_detail.html:140 users/models.py:309
+#: users/models.py:327 users/models.py:361
 msgid "Student"
 msgstr "Студент"
 
-#: learning/models.py:691 users/models.py:330
+#: learning/models.py:691 users/models.py:337
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1625,7 +1625,7 @@ msgstr "Вольнослушатель"
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: templates/users/user_detail.html:318 users/models.py:167
+#: templates/users/user_detail.html:318 users/models.py:170
 msgid "Workplace"
 msgstr "Место работы"
 
@@ -1831,50 +1831,55 @@ msgid "Author of last edit"
 msgstr "Автор последней правки"
 
 #: users/models.py:164
+#| msgid "Password changed"
+msgid "Status changed"
+msgstr "Статус изменён"
+
+#: users/models.py:167
 msgid "StudentInfo|Study programs"
 msgstr "Учебные программы"
 
-#: users/models.py:175
+#: users/models.py:178
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: users/models.py:176
+#: users/models.py:179
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: users/models.py:308
+#: users/models.py:315
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: users/models.py:309
+#: users/models.py:316
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: users/models.py:323
+#: users/models.py:330
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: users/models.py:336
+#: users/models.py:343
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: users/models.py:337
+#: users/models.py:344
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: users/models.py:349
+#: users/models.py:356
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: users/models.py:350
+#: users/models.py:357
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: users/models.py:359
+#: users/models.py:366
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: users/models.py:360
+#: users/models.py:367
 msgid "User reference records"
 msgstr "Справки пользователей"
 
