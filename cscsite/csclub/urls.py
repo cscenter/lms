@@ -262,3 +262,7 @@ if settings.DEBUG:
 # Htmlpages should be the last one
 urlpatterns += solid_i18n_patterns('',
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'))
+
+# XXX: Remove after old.compsciclub.ru termination
+from django.conf.urls import handler404
+handler404 = 'csclub.views.custom_page_not_found'
