@@ -338,12 +338,6 @@ class CourseClass(TimeStampedModel, object):
         _("Slides"),
         blank=True,
         upload_to=courseclass_slides_file_name)
-    video = models.TextField(
-        _("CourseClass|Video"),
-        blank=True,
-        help_text=("{0}; {1}"
-                   .format(LATEX_MARKDOWN_HTML_ENABLED,
-                           _("please insert HTML for embedded video player"))))
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video_url = models.URLField(_("Video URL"), blank=True,
         help_text=_("Both YouTube and Yandex Video are supported"))
