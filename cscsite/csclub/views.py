@@ -60,3 +60,12 @@ class IndexView(generic.TemplateView):
             .order_by('course__name'))
 
         return context
+
+
+# TODO: (XXX) Dont' forget to remove it after old.* termination.
+from django.views.defaults import page_not_found
+from django.views.decorators.csrf import requires_csrf_token
+from django.shortcuts import get_object_or_404, redirect
+@requires_csrf_token
+def custom_page_not_found(request, template_name='404.html'):
+    return redirect('http://old.compsciclub.ru' + request.path)

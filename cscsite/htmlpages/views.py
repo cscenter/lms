@@ -45,9 +45,6 @@ def flatpage(request, url):
                 url=url, sites=site_id)
             return HttpResponsePermanentRedirect('%s/' % request.path)
         else:
-            # XXX: TEMP redirect to old site
-            if settings.SITE_ID == 2:
-                return redirect('http://old.compsciclub.ru' + request.path)
             raise
     return render_flatpage(request, f)
 
