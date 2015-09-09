@@ -2,7 +2,7 @@ from django.conf import settings
 from htmlpages.models import HtmlPage
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template import loader
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
@@ -45,6 +45,9 @@ def flatpage(request, url):
                 url=url, sites=site_id)
             return HttpResponsePermanentRedirect('%s/' % request.path)
         else:
+            # XXX: TEMP redirect to old site
+            if settings.SITE_ID == 2:
+                return redirect('http://old.compsciclub.ru' + request.path)
             raise
     return render_flatpage(request, f)
 
