@@ -23,7 +23,7 @@ render_flags = 0
 allowed_tags = ['p', 'ul', 'ol', 'li', 'em', 'strong', 'pre', 'br', 'code',
                 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
                 'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img',
-                'iframe', 'b', 'i']
+                'iframe', 'b', 'i', 'div']
 allowed_attrs = {
     '*': ['class'],
     'a': ['href'],
