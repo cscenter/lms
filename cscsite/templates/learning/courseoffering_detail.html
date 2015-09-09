@@ -57,6 +57,20 @@
   </div>
   <div class="row">
     <div class="col-xs-8">
+      {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
+        <div class="panel panel-default" id="you-can-register">
+          <div class="panel-body" >
+              {% blocktrans %}
+                Вы можете зарегистрироваться на сайте. Бонусы, которые вы получите:
+                <ul>
+                  <li>1</li>
+                  <li>2</li>
+                  <li>3</li>
+                </ul>
+              {% endblocktrans %}
+          </div>
+        </div>
+      {% endif %}
       <div class="ubertext">
         {% if course_offering.description %}
           {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
