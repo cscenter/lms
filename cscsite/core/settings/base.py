@@ -72,6 +72,8 @@ INSTALLED_APPS = (
     'bootstrap3',
     'taggit',
     'sitemetrics',
+    'micawber.contrib.mcdjango',
+    'slides',
     'dbbackup',
 
     'users',
@@ -86,6 +88,9 @@ INSTALLED_APPS = (
     'import_export',
     'pipeline',
 )
+
+# oEmbed
+MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
 
 # Email settings
 EMAIL_HOST = 'smtp.yandex.ru'

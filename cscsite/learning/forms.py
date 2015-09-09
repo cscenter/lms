@@ -148,13 +148,6 @@ class CourseClassForm(forms.ModelForm):
         required=False,
         help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
-    video = forms.CharField(
-        label=_("CourseClass|Video"),
-        required=False,
-        help_text=("{0}; {1}"
-                   .format(LATEX_MARKDOWN_HTML_ENABLED,
-                           _("please insert HTML for embedded video player"))),
-        widget=Ubereditor)
     other_materials = forms.CharField(
         label=_("Other materials"),
         required=False,
@@ -202,7 +195,7 @@ class CourseClassForm(forms.ModelForm):
                                  css_class='col-xs-6'),
                              css_class='row'),
                          css_class='container inner'),
-                     'video',
+                     'video_url',
                      'other_materials'),
             CANCEL_SAVE_PAIR)
         super(CourseClassForm, self).__init__(*args, **kwargs)
@@ -210,7 +203,7 @@ class CourseClassForm(forms.ModelForm):
     class Meta:
         model = CourseClass
         fields = ['venue', 'type', 'name', 'description',
-                  'slides', 'attachments', 'video', 'other_materials',
+                  'slides', 'attachments', 'video_url', 'other_materials',
                   'date', 'starts_at', 'ends_at']
 
     def clean_date(self):

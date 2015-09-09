@@ -1,13 +1,37 @@
 from __future__ import absolute_import, unicode_literals
 
+import posixpath
 import itertools
 
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from slides import yandex_disk, slideshare
 from .models import Assignment, AssignmentStudent, Enrollment, \
     AssignmentComment, AssignmentNotification, \
-    CourseOfferingNews, CourseOfferingNewsNotification
+    CourseOfferingNews, CourseOfferingNewsNotification, CourseClass
+
+
+@receiver(post_save, sender=CourseClass)
+def maybe_upload_slides(sender, instance, **kwargs):
+    # XXX we might want to delegate this to cron or Celery.
+    # TODO: We want to update slides_url if slides have changed
+    if instance.slides and not instance.slides_url:
+        course_offering = instance.course_offering
+        course = course_offering.course
+
+        # a) Yandex.Disk
+        yandex_disk.upload_slides(
+            instance.slides.file,
+            posixpath.join(course.slug, instance.slides_file_name))
+
+        # b) SlideShare
+        instance.slides_url = slideshare.upload_slides(
+            instance.slides.file,
+            "{0}: {1}".format(course_offering, instance),
+            instance.description, tags=[course.slug])
+        instance.save()
 
 
 @receiver(models.signals.post_save, sender=Assignment)
