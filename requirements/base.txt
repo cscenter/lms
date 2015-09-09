@@ -53,6 +53,11 @@ bleach==1.4.1
 # Admin theme
 django-flat-theme==1.1.1
 
+# Oembed staff
+cssselect==0.9.1
+lxml==3.4.4
+micawber==0.3.3
+
 # Misc utils
 django-recaptcha==1.0.4
 django-registration-redux==1.2

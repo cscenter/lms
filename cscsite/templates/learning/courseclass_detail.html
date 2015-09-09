@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load markdown from core_tags %}
+{% load micawber_tags %}
+{% load cache %}
 
 {% block content %}
 <div class="container">
@@ -23,7 +25,7 @@
       <table class="table table-striped">
         <tr>
           <td>{% trans "What" %}:</td>
-          <td>{{ course_class.type_display }}</td>
+          <td>{{ course_class.get_type_display }}</td>
         </tr>
         <tr>
           <td>{% trans "When" %}:</td>
@@ -50,17 +52,19 @@
       </div>
       {% endif %}
 
-      {% if course_class.video %}
-      <h4 class="bigger-margin" id="video">{% trans "Video" %}</h4>
-      <div class="ubertext">
-        {% markdown 3600 "course_class_video" course_class.pk course_class.modified %}
-          {{ course_class.video }}
-        {% endmarkdown %}
-      </div>
+      {% if course_class.video_oembed %}
+        <a id="video" href="#"></a><h4 class="bigger-margin" >{% trans "Video" %}</h4>
+        {% cache 7200 video_oembed course_class.pk course_class.video_url %}
+          {{ course_class.video_oembed.html|safe }}
+        {% endcache %}
       {% endif %}
 
-      {% if course_class.other_materials %}
+      {% if course_class.other_materials or course_class.slides_url %}
       <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
+        {% comment %} TODO: replace with oembed processing on client {% endcomment %}
+        {% cache 7200 slideshare_oembed course_class.pk course_class.slides_url %}
+          {{ course_class.slides_url|oembed }}
+        {% endcache %}
       <div class="ubertext">
         {% markdown 3600 "course_class_materials" course_class.pk course_class.modified %}
           {{ course_class.other_materials }}

@@ -4,35 +4,30 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import os.path
-import posixpath
 import time
 
 import dateutil.parser as dparser
-from annoying.fields import AutoOneToOneField
+# TODO: investigate `from annoying.fields import AutoOneToOneField`
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError, ObjectDoesNotExist, \
-                                   ImproperlyConfigured
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from micawber.contrib.mcdjango import extract_oembed
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
-from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED, \
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
-from learning import slides
 from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
 from .utils import get_current_semester_pair
 
@@ -349,6 +344,9 @@ class CourseClass(TimeStampedModel, object):
         help_text=("{0}; {1}"
                    .format(LATEX_MARKDOWN_HTML_ENABLED,
                            _("please insert HTML for embedded video player"))))
+    slides_url = models.URLField(_("SlideShare URL"), blank=True)
+    video_url = models.URLField(_("Video URL"), blank=True,
+        help_text=_("Both YouTube and Yandex Video are supported"))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
@@ -375,7 +373,7 @@ class CourseClass(TimeStampedModel, object):
         super(CourseClass, self).clean()
         # ends_at should be later than starts_at
         if self.starts_at >= self.ends_at:
-            raise ValidationError(_("Class should end after it's start"))
+            raise ValidationError(_("Class should end after it started"))
 
     # this is needed to properly set up fields for admin page
     def type_display_prop(self):
@@ -384,7 +382,16 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
 
-    # FIXME(Dmitry): refactor this to use Semester object
+    @cached_property
+    def video_oembed(self):
+        if not self.video_url:
+            return ""
+
+        [(_url, embed)] = extract_oembed(self.video_url)
+        return embed
+
+    # TODO: test this
+    # Note(lebedev): should be a manager, not a class method.
     @classmethod
     def by_semester(cls, semester):
         (year, season) = semester
@@ -395,25 +402,6 @@ class CourseClass(TimeStampedModel, object):
     @property
     def slides_file_name(self):
         return os.path.basename(self.slides.name)
-
-    def upload_slides(self):
-        course_offering = self.course_offering
-        title = "{0}: {1}".format(course_offering, self)
-        course = course_offering.course
-
-        # a) SlideShare
-        self.other_materials = slides.upload_to_slideshare(
-            self.slides.file, title, self.description, tags=[course.slug])
-        self.save()
-        # b) Yandex.Disk
-        yandex_path = posixpath.join(course.slug, self.slides_file_name)
-        slides.upload_to_yandex(self.slides.file, yandex_path)
-
-
-@receiver(post_save, sender=CourseClass)
-def maybe_upload_slides(sender, instance, **kwargs):
-    if instance.slides and not instance.other_materials:
-        instance.upload_slides()
 
 
 @python_2_unicode_compatible
