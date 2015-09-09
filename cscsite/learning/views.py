@@ -494,7 +494,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                     url = base_url + "#slides"
                 materials.append({'url': url,
                                   'name': _("Slides")})
-            if cc.video:
+            if cc.video_url:
                 if is_actual_teacher:
                     url = base_teacher_url + "#div_id_video"
                 else:
