@@ -49,6 +49,8 @@
     - gettext
     - libpcre3
     - libpcre3-dev
+    - libxml2-dev
+    - libxslt1-dev
     - python-setuptools
     - python-dev
     - git

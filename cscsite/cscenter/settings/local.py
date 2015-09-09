@@ -23,8 +23,11 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
-    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
+    'template_timings_panel.panels.TemplateTimings.TemplateTimings',
 ]
+
+FLAMES_DIR = PROJECT_DIR.parent.child("flame_graph")
+MIDDLEWARE_CLASSES += ('core.middleware.FlamesMiddleware',)
 
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'

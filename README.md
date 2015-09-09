@@ -6,7 +6,7 @@ Computer Science Center/Club websites
 Dev setup
 ---------
 
-* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev`
+* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev`, `libxml2-dev`, `libxslt1-dev`
     note for mac users: `brew intall libpng libjpeg libpqxx`
 * create virtualenv for the project and open it;
 * setup PostgreSQL database:
