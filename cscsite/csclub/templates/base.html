@@ -72,10 +72,12 @@
           <div class="col-xs-9">{% trans "Computer Science Club, 2007–15 гг."%}</div>
           <div class="col-xs-3 social">
             {% if request.city.code == 'RU SPB' %}
+            <a href="mailto:spbinfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
             <a href="https://vk.com/spbcsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
             <a href="https://twitter.com/spbcsclub" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
             <a href="http://groups.google.com/group/pdmicsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
             {% else %}
+              <a href="mailto:kazaninfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
               <a href="https://vk.com/kazancsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
               <a href="http://groups.google.com/group/kazancsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
             {% endif %}

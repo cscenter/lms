@@ -440,7 +440,6 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
-
     def get_queryset(self):
         return self.model.custom.site_related(self.request)
 
@@ -478,6 +477,8 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
+        context['can_view_news'] = self.request.user.is_authenticated() or \
+            self.request.site.domain == settings.CLUB_DOMAIN
 
         course_classes = list(self.object.courseclass_set.all())
         for cc in course_classes:

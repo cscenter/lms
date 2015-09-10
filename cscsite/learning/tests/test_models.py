@@ -175,8 +175,8 @@ class CourseClassTests(TestCase):
                                  course_offering__semester__type='spring')
                          .get())
 
-    @patch('learning.slides.upload_to_slideshare')
-    @patch('learning.slides.upload_to_yandex')
+    @patch('slides.slideshare.upload_slides')
+    @patch('slides.yandex_disk.upload_slides')
     def test_slides_file_name(self, upload_to_slideshare, upload_to_yandex):
         slides_fname = "foobar.pdf"
         upload_to_slideshare.return_value = "slideshare_embed_code"

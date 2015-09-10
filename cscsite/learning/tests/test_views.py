@@ -676,6 +676,11 @@ class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(True, self.client.get(url)
                          .context['is_actual_teacher'])
 
+    @unittest.skip('not implemented yet')
+    def test_show_news_only_to_authorized(self):
+        """ On cscenter site only authorized users can see news """
+        pass
+
 
 class CourseClassDetailCRUDTests(MediaServingMixin,
                                  MyUtilitiesMixin, TestCase):

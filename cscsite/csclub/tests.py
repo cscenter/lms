@@ -42,3 +42,8 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
                                           city="RU KZN")
         resp = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(resp.context['course_list_available']), 1)
+
+    @unittest.skip('not implemented yet')
+    def test_show_news_to_all(self):
+        """ On csclub site all users can see news """
+        pass
