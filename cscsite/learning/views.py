@@ -200,11 +200,15 @@ class CalendarMixin(object):
                                 'course_offering',
                                 'course_offering__course',
                                 'course_offering__semester'))
+        # Note: Logic repeated from .site_related() CourseOffering queryset
+        # to avoid additional query.
         if self.request.site.domain == settings.CLUB_DOMAIN:
             q = q.filter(course_offering__is_open=True)
             if hasattr(self.request, 'city'):
                 q = q.filter(Q(course_offering__city__pk=self.request.city.code)
                              | Q(course_offering__city__isnull=True))
+        else:
+            q = q.filter(course_offering__city__pk=settings.DEFAULT_CITY_CODE)
         return q
 
     def get_context_data(self, *args, **kwargs):
