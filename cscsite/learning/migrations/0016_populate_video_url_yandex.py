@@ -11,6 +11,7 @@ from django.db import models, migrations
 
 
 def bruteforce_yandex_embeds():
+    return {}
     embeds = {}
     for idx in range(1, 512):
         url = ("https://video.yandex.ru/users/csc-video/view/{}"
