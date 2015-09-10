@@ -2,6 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import os
+import unittest
 
 from mock import patch
 
@@ -175,6 +176,7 @@ class CourseClassTests(TestCase):
                                  course_offering__semester__type='spring')
                          .get())
 
+    @unittest.skip('FILE UPLOAD DISABLED NOW. FIX AFTER ENABLING')
     @patch('slides.slideshare.upload_slides')
     @patch('slides.yandex_disk.upload_slides')
     def test_slides_file_name(self, upload_to_slideshare, upload_to_yandex):

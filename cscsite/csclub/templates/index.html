@@ -8,14 +8,11 @@
 
 
 <div class="container">
-  {% if request.city.code == 'RU SPB' %}
   <div class="font-bigger">
   {% blocktrans %}
-  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Lectures by local and foreign instructors and researchers are usually held on Saturdays and Sundays at Steklov Institute of Mathematics at St.
-Petersburg. Attendance is open to everyone and is free of charge.
+  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
 {% endblocktrans %}
   </div>
-  {% endif %}
   <h1>{% trans "Courses" %}: {{ current_semester }}</h1>
   {% if courses %}
     <table class="table table-bordered">

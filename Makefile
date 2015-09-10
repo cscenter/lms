@@ -43,10 +43,10 @@ loaddemo:
 coverage:
 	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
-test_travis:
+test_travis: clean
 	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
 
-test:
+test: clean
 	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_nocover
 
 localmail:
