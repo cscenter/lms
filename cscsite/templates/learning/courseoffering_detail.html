@@ -58,17 +58,11 @@
   <div class="row">
     <div class="col-xs-8">
       {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
-        <div class="panel panel-default" id="you-can-register">
-          <div class="panel-body" >
+        <div id="enroll-now">
               {% blocktrans %}
-                Вы можете зарегистрироваться на сайте. Бонусы, которые вы получите:
-                <ul>
-                  <li>1</li>
-                  <li>2</li>
-                  <li>3</li>
-                </ul>
+                Enroll in the course to get notifications and to be able to submit home assignments.<br>
+                <a class="btn btn-success" href="/register/">Register to enroll now</a>
               {% endblocktrans %}
-          </div>
         </div>
       {% endif %}
       <div class="ubertext">
@@ -99,6 +93,7 @@
       </ul>
     </div>
   </div>
+
   {% if course_offering.courseclass_set.all %}
   <div class="row">
     <div class="col-xs-12">
@@ -143,6 +138,7 @@
     </div>
   </div>
   {% endif %}
+
   {% if user.is_authenticated %}
     {% if user.is_student or is_actual_teacher or user.is_curator %}
       {% if course_offering.assignment_set.all %}
@@ -167,7 +163,8 @@
       {% endif %}
     {% endif %}
   {% endif%}
-  {% if user.is_authenticated and course_offering.courseofferingnews_set.all %}
+
+  {% if can_view_news and course_offering.courseofferingnews_set.all %}
   <div class="row">
     <div class="col-xs-12">
       <h3>{% trans "News" %}</h3>
@@ -188,5 +185,6 @@
     </div>
   </div>
   {% endif %}
+
 </div>
 {% endblock content %}
