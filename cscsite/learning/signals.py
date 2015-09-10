@@ -17,6 +17,7 @@ from .models import Assignment, AssignmentStudent, Enrollment, \
 def maybe_upload_slides(sender, instance, **kwargs):
     # XXX we might want to delegate this to cron or Celery.
     # TODO: We want to update slides_url if slides have changed
+    return
     if instance.slides and not instance.slides_url:
         course_offering = instance.course_offering
         course = course_offering.course
