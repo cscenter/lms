@@ -876,10 +876,12 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
         # no assignments yet
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # enroll at course offering, assignments are shown
         EnrollmentFactory.create(student=u, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(2, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # add a few assignments, they should show up
         as2 = AssignmentFactory.create_batch(3, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
@@ -887,20 +889,29 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
-        # add a few old assignments
+        # Add few old assignments from current semester with expired deadline
         deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                        - datetime.timedelta(days=1))
         as_olds = AssignmentFactory.create_batch(2, course_offering=co,
                                              deadline_at=deadline_at)
         resp = self.client.get(reverse(self.url_name))
-        for a in as1 + as2:
+        for a in as1 + as2 + as_olds:
             self.assertContains(resp, a.title)
         for a in as_olds:
-            self.assertNotContains(resp, a.title)
+            self.assertContains(resp, a.title)
         self.assertSameObjects([(AssignmentStudent.objects
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
+        self.assertSameObjects([(AssignmentStudent.objects
+                                .get(assignment=a, student=u)) for a in as_olds],
+                                resp.context['assignment_list_archive'])
+        # Now add assignment from old semester
+        old_s = SemesterFactory.create(year=now_year - 1, type=now_season)
+        old_co = CourseOfferingFactory.create(semester=old_s)
+        as_past = AssignmentFactory(course_offering=old_co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertNotIn(as_past, resp.context['assignment_list_archive'])
 
 
 class AssignmentTeacherListTests(GroupSecurityCheckMixin,
