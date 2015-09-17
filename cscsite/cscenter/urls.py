@@ -44,6 +44,8 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView
 
+from core.views import MarkdownRenderView
+
 
 admin.autodiscover()
 
@@ -247,6 +249,7 @@ urlpatterns = patterns('',
     url(r'^users/reset/done$',
         'django.contrib.auth.views.password_reset_complete',
         name='password_reset_complete'),
+    url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(), name='render_markdown'),
 
     url(r'^narnia/', include(admin.site.urls)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

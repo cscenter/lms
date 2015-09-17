@@ -37,23 +37,6 @@ $(document).ready(function () {
 
     hljs.configure({tabReplace: '    '});
 
-    var renderer = new marked.Renderer();
-    renderer.codespan = function (code) {
-        return "<code>" + _.unescape(code) + "</code>";
-    };
-
-    marked.setOptions({
-        renderer: renderer,
-        highlight: function (code, lang) {
-            var unescaped = _.unescape(code);
-            return typeof lang != "undefined"
-                ? hljs.highlight(lang, unescaped, true).value
-                : unescaped;
-        },
-        smartypants: false,
-        langPrefix: 'language-',
-    });
-
     $("div.ubertext").each(function(i, target) {
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
@@ -150,18 +133,48 @@ $(document).ready(function () {
             var contentDocument
                 = editor.getElement('previewerIframe').contentDocument;
             var target = $("#epiceditor-preview", contentDocument).get(0);
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
-                target.innerHTML = marked(_.unescape(target.innerHTML));
-                $(target).find("pre").addClass("hljs");
-                if (!editor.is('fullscreen')) {
-                    var height = Math.max(
-                        $(target).height() + 20,
-                        editor.settings.autogrow.minHeight
-                    );
-                    $container.height(height);
-                }
-                editor.reflow();
-            }]);
+
+            var text = _.unescape(target.innerHTML);
+            if (text.length > 0) {
+                $.ajax({
+                    method: "POST",
+                    url: "/tools/markdown/preview/",
+                    traditional: true,
+                    data: { text: text},
+                    dataType: "json"
+                  })
+                  .done(function(data) {
+                        if (data.status == 'OK') {
+                            $(target).html(data.text);
+                            MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
+                                $(target).find("pre").addClass("hljs");
+                                if (!editor.is('fullscreen')) {
+                                    var height = Math.max(
+                                        $(target).height() + 20,
+                                        editor.settings.autogrow.minHeight
+                                    );
+                                    $container.height(height);
+                                }
+                                editor.reflow();
+                            }]);
+                        }
+                  }).error(function(data) {
+                    var text;
+                    if (data.status == 403) {
+                        // csrf token wrong?
+                        text = 'Action forbidden';
+                    } else {
+                        text = "Unknown error. Please, save results of your work first, then try to reload page.";
+                    }
+                    swal({
+                        title: "Error",
+                        text: text,
+                        type: "error"
+                    });
+                  });
+                
+            }
+
         });
 
         editor.on('edit', function() {

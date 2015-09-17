@@ -1,10 +1,20 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
+
 import types
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 from django.views import generic
+from django.views.decorators.csrf import requires_csrf_token
+from django.utils.decorators import method_decorator
+from django.utils.encoding import smart_text, python_2_unicode_compatible
 
 from braces.views import UserPassesTestMixin, LoginRequiredMixin
+
+from .utils import render_markdown
 
 
 class LoginRequiredMixin(LoginRequiredMixin):
@@ -77,3 +87,22 @@ class ProtectedFormMixin(object):
         else:
             return (super(ProtectedFormMixin, self)
                     .dispatch(request, *args, **kwargs))
+
+
+@python_2_unicode_compatible
+class MarkdownRenderView(LoginRequiredMixin, generic.base.View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        if 'text' not in request.POST:
+            return JsonResponse({'status': 'ERROR', 'text': 'empty request'})
+        text = smart_text(request.POST['text'])
+        rendered_text = render_markdown(text)
+        return JsonResponse({'status': 'OK', 'text': rendered_text})
+
+    def __str__(self):
+        return ''
+
+    # @method_decorator(requires_csrf_token)
+    # def dispatch(self, *args, **kwargs):
+    #     return super(MarkdownRenderView, self).dispatch(*args, **kwargs)
