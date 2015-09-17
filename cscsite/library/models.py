@@ -16,7 +16,8 @@ class Borrow(models.Model):
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER},
+        limit_choices_to={'groups__in': [
+            CSCUser.group_pks.STUDENT_CENTER, CSCUser.group_pks.VOLUNTEER]},
         related_name="borrows", verbose_name=_("Borrow|student"))
     borrowed_on = models.DateField(_("Borrow|borrowed on"))
 
