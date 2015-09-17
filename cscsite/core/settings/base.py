@@ -207,12 +207,10 @@ PIPELINE_JS = {
             'js/vendor/readmore.min.js',
             'js/vendor/md5.js',
             'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
-            # custom marked build clashes with the one in EpicEditor,
-            # therefore this include should be *after* EpicEditor
-            'js/vendor/marked.js',
             'js/vendor/bootstrap.min.js',
             'js/vendor/jquery.jgrowl.min.js',
             'js/vendor/jquery.cookie.js',
+            'js/vendor/sweet-alerts/sweet-alert.min.js',
             'js/main.js',
             'js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
         ),

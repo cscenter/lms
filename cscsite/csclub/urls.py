@@ -45,6 +45,7 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView
 
+from core.views import MarkdownRenderView
 from csclub.views import set_city, CalendarClubScheduleView, IndexView
 
 
@@ -121,8 +122,7 @@ urlpatterns = solid_i18n_patterns(
 
 urlpatterns += patterns('',
     url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
-    
-    url(r'^setcity/(?P<city_code>[-\w]+)/$', set_city, name='set_city'),
+    url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(), name='render_markdown'),
 )
 
 urlpatterns += patterns('',

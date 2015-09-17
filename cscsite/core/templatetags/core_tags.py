@@ -1,6 +1,3 @@
-import bleach
-import hoep as h
-
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
 from django.template import (
@@ -10,27 +7,10 @@ from django.template.base import TextNode
 from django.utils.timezone import now
 from django.utils.safestring import mark_safe
 
-from core.admin import get_admin_url
+from ..admin import get_admin_url
+from ..utils import render_markdown
 
 register = Library()
-
-# More details here https://pypi.python.org/pypi/hoep/1.0
-extensions = h.EXT_FENCED_CODE | h.EXT_AUTOLINK | h.EXT_STRIKETHROUGH | \
-             h.EXT_TABLES | h.EXT_QUOTE | \
-             h.EXT_NO_INTRA_EMPHASIS | h.EXT_SPACE_HEADERS | \
-             h.EXT_DISABLE_INDENTED_CODE | h.EXT_MATH | h.EXT_MATH_EXPLICIT
-render_flags = 0
-allowed_tags = ['p', 'ul', 'ol', 'li', 'em', 'strong', 'pre', 'br', 'code',
-                'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
-                'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img',
-                'iframe', 'b', 'i', 'div']
-allowed_attrs = {
-    '*': ['class'],
-    'a': ['href'],
-    'img': ['src'],
-    'iframe': ['src', 'height', 'width', 'allowfullscreen', 'frameborder']
-}
-md = h.Hoep(extensions, render_flags)
 
 
 @register.simple_tag
@@ -82,9 +62,7 @@ def startswith(value, arg):
 
 @register.filter
 def markdownify(text):
-    md_rendered = md.render(text)
-    return bleach.clean(md_rendered, tags=allowed_tags,
-                        attributes=allowed_attrs)
+    return render_markdown(text)
 
 
 class MarkdownNode(Node):
@@ -123,9 +101,7 @@ class MarkdownNode(Node):
                    not self.nodelist[-1].s.strip():
                     self.nodelist[-1].s = ''
             value = self.nodelist.render(context)
-            value = md.render(value)
-            value = bleach.clean(value, tags=allowed_tags,
-                                 attributes=allowed_attrs)
+            value = render_markdown(value)
             fragment_cache.set(cache_key, value, expire_time)
         return mark_safe(value)
 
