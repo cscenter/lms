@@ -841,16 +841,20 @@ class VenueDetailView(generic.DetailView):
     model = Venue
     template_name = "learning/venue_detail.html"
 
-class AssignmentStudentListView(StudentOnlyMixin,
-                                generic.ListView):
+
+class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
+    """ Show assignments from current semester only. """
     model = AssignmentStudent
     context_object_name = 'assignment_list'
     template_name = "learning/assignment_list_student.html"
     user_type = 'student'
 
     def get_queryset(self):
+        current_semester = Semester.get_current()
         return (self.model.objects
-                .filter(student=self.request.user)
+                .filter(
+                    student=self.request.user,
+                    assignment__course_offering__semester=current_semester)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
@@ -867,7 +871,9 @@ class AssignmentStudentListView(StudentOnlyMixin,
                    .get_context_data(*args, **kwargs))
         open_, archive = utils.split_list(context['assignment_list'],
                                           lambda a_s: a_s.assignment.is_open)
+        archive.reverse()
         context['assignment_list_open'] = open_
+        context['assignment_list_archive'] = archive
         context['user_type'] = self.user_type
         return context
 
