@@ -549,6 +549,10 @@ class AssignmentStudent(TimeStampedModel):
         verbose_name=_("Is passed"),
         help_text=_("It's online and has comments"),
         default=False)
+    last_commented = models.DateTimeField(
+        verbose_name=_("Last comment"),
+        null=True,
+        blank=True)
 
     class Meta:
         ordering = ["assignment", "student"]
