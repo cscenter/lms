@@ -890,10 +890,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             (self.model.objects
              .filter(assignment__course_offering__teachers=self.request.user,
                      grade__isnull=True)
-             .order_by('-assignment__deadline_at',
-                       'assignment__course_offering__course__name',
+             .order_by('assignment__course_offering__course__name',
+                       'assignment__deadline_at',
                        'assignment__pk',
-                       'student__last_name')
+                       'last_commented')
              .select_related('assignment',
                              'assignment__course_offering',
                              'assignment__course_offering__course',
@@ -911,15 +911,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         if self.request.GET.get('show_all') == 'true':
             open_ = context['assignment_list']
         else:
-            a_s_pks = [a_s.pk for a_s in context['assignment_list']]
-            passed_set = set((AssignmentComment.objects
-                              .filter(assignment_student__in=a_s_pks,
-                                      author=F('assignment_student__student'))
-                              .values_list('assignment_student__pk',
-                                           flat=True)))
             open_ = [a_s
                      for a_s in context['assignment_list']
-                     if a_s.pk in passed_set]
+                     if a_s.last_commented]
         archive = (Assignment.objects
                    .filter(course_offering__teachers=self.request.user)
                    .order_by('-deadline_at',
