@@ -41,7 +41,7 @@ $(document).ready(function () {
 
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             var $target = $(target);
-            $target.find("pre").addClass("hljs").each(function(i, block) {
+            $target.find("pre").addClass("hljs").find('code').each(function(i, block) {
                 hljs.highlightBlock(block);
             });
         }]);
