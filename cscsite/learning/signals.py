@@ -6,6 +6,7 @@ import itertools
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from slides import yandex_disk, slideshare
 from .models import Assignment, AssignmentStudent, Enrollment, \
@@ -96,6 +97,16 @@ def create_assignment_comment_notification(sender, instance, created,
         (AssignmentNotification(user=student,
                                 assignment_student=a_s)
          .save())
+
+
+@receiver(models.signals.post_save, sender=AssignmentComment)
+def update_last_commented_date_on_assignment_student(sender, instance, created,
+                                                     *args, **kwargs):
+    if not created:
+        return
+    a_s = instance.assignment_student
+    a_s.last_commented = timezone.now()
+    a_s.save()
 
 
 @receiver(models.signals.post_save, sender=CourseOfferingNews)
