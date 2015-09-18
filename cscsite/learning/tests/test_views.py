@@ -956,14 +956,14 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
                                 for assignment in as1],
                                resp.context['assignment_list_open'])
         self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        # teacher commented on an assingnment, it still shouldn't show up
+        # teacher commented on an assingnment, now it should show up
         a = as1[0]
         student = students[0]
         a_s = AssignmentStudent.objects.get(student=student, assignment=a)
         AssignmentCommentFactory.create(assignment_student=a_s,
                                         author=teacher)
         resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(1, len(resp.context['assignment_list_open']))
         # but if student have commented, it should show up
         AssignmentCommentFactory.create(assignment_student=a_s,
                                         author=student)
