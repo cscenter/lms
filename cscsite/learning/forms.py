@@ -306,7 +306,8 @@ class AssignmentForm(forms.ModelForm):
     deadline_at = forms.SplitDateTimeField(
         label=_("Deadline"),
         input_date_formats=["%Y-%m-%d"],
-        input_time_formats=["%H:%M"]
+        input_time_formats=["%H:%M"],
+        widget = forms.SplitDateTimeWidget(date_format="%Y-%m-%d", time_format="%H:%M")
         # help_text=_("Example: 1990-07-13 12:00"),
         )
     attachments = forms.FileField(
