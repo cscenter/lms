@@ -108,7 +108,10 @@ class TeacherDetailView(generic.DetailView):
                 ._default_manager
                 .all()
                 .prefetch_related(
-                    Prefetch('teaching_set', queryset=co_queryset)))
+                    Prefetch('teaching_set',
+                             queryset=co_queryset.all(),
+                             to_attr='course_offerings'))
+                )
 
     def get_object(self, *args, **kwargs):
         teacher = super(TeacherDetailView, self).get_object(*args, **kwargs)

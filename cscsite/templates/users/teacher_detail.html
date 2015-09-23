@@ -32,6 +32,7 @@
         </div>
     {% endif %}
 
+    {% if teacher.course_offerings %}
     <h3>{% trans "Course readings" %}</h3>
     <table class="table table-bordered">
       <thead>
@@ -40,7 +41,7 @@
           <th>Дата</th>
         </tr>
       </thead>
-        {% for course_offering in teacher.teaching_set.all %}
+        {% for course_offering in teacher.course_offerings %}
           <tr>
             <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
             <td>{{ course_offering.semester }}</td>
@@ -48,6 +49,7 @@
         {% endfor %}
       </tr>
     </table>
+    {% endif %}
 </div>
 <div class="col-xs-3 profile-sidebar">
     <div class="thumbnail text-center">
