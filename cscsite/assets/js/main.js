@@ -177,6 +177,11 @@ $(document).ready(function () {
 
         });
 
+        // How often people use this button?
+        editor.on('fullscreenenter', function() {
+            yaCounter25844420.reachGoal('MARKDOWN_PREVIEW_FULLSCREEN');
+        });
+
         editor.on('edit', function() {
             if (!editor.is('fullscreen')) {
                 var height = Math.max(
