@@ -94,19 +94,5 @@ every update.
 Misc
 ----
 
-Add `less-plugin-clean-css` plugin for less to minify output version.
-See `less` command in Makefile for details how to use it.
-
-To autorun test on change:
-
-```
-pip install gorun
-gorun.py gorun_settings.py
-```
-
 For details on architecture and general concerns, see
 [about.md](https://github.com/cscenter/site/tree/master/about.md) (in Russian).
-
-TODO:
-
-* Create make cmd for less

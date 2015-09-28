@@ -61,11 +61,12 @@ class CSCUserQuerySet(query.QuerySet):
         from .models import CSCUser
         from learning.models import Enrollment, CourseClass, StudentProject
 
-        # Note: At the same time student must be in student group or graduate
-        # Group by not neccessary for this m2m relationship
+        # Note: At the same time student must be in one of these groups
+        # So, group_by not neccessary for this m2m relationship
         q = self.filter(
                 groups__in=[CSCUser.group_pks.STUDENT_CENTER,
-                            CSCUser.group_pks.GRADUATE_CENTER]
+                            CSCUser.group_pks.GRADUATE_CENTER,
+                            CSCUser.group_pks.VOLUNTEER]
             )
         if only_will_graduate:
             q = q.filter(status=CSCUser.STATUS.will_graduate)
