@@ -42,7 +42,8 @@ from learning.views import \
 
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
-    StudentSearchJSONView, StudentSearchView
+    StudentSearchJSONView, StudentSearchView, \
+    StudentsSheetCurrentSemesterCSVView
 
 from core.views import MarkdownRenderView
 
@@ -212,6 +213,9 @@ urlpatterns = patterns('',
     url(r'^staff/exports/sheet/csv/$',
         StudentsAllSheetCSVView.as_view(),
         name='staff_exports_sheet_all_students_csv'),
+    url(r'^staff/exports/sheet/current_semester/csv/$',
+        StudentsSheetCurrentSemesterCSVView.as_view(),
+        name='staff_exports_students_sheet_current_semester_csv'),
 
     url(r"^venues/$", VenueListView.as_view(),
         name="venue_list"),

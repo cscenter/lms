@@ -54,12 +54,15 @@ class CSCUserQuerySet(query.QuerySet):
 
         return qs if filtered else qs.none()
 
-    def students_info(self, only_will_graduate=False):
+    def students_info(self,
+                      only_will_graduate=False,
+                      enrollments_current_semester_only=False):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
         from .models import CSCUser
-        from learning.models import Enrollment, CourseClass, StudentProject
+        from learning.models import Enrollment, CourseClass, StudentProject, \
+            Semester
 
         # Note: At the same time student must be in one of these groups
         # So, group_by not neccessary for this m2m relationship
@@ -68,20 +71,33 @@ class CSCUserQuerySet(query.QuerySet):
                             CSCUser.group_pks.GRADUATE_CENTER,
                             CSCUser.group_pks.VOLUNTEER]
             )
+
         if only_will_graduate:
             q = q.filter(status=CSCUser.STATUS.will_graduate)
+
+        exclude_enrollments = ['unsatisfactory']
+        if not enrollments_current_semester_only:
+            exclude_enrollments.append('not_graded')
+
+        enrollment_queryset = (Enrollment.objects
+            .exclude(grade__in=exclude_enrollments)
+            .select_related('course_offering',
+                            'course_offering__semester',
+                            'course_offering__course'
+                            )
+            .order_by('course_offering__course__name'))
+
+        if enrollments_current_semester_only:
+            current_semester = Semester.get_current()
+            enrollment_queryset = enrollment_queryset.filter(
+                course_offering__semester=current_semester)
+
         return (q
             .order_by('last_name', 'first_name')
             .prefetch_related(
                 Prefetch(
                     'enrollment_set',
-                    queryset=Enrollment.objects
-                        .exclude(grade__in=['not_graded', 'unsatisfactory'])
-                        .select_related('course_offering',
-                                        'course_offering__semester',
-                                        'course_offering__course'
-                                        )
-                        .order_by('course_offering__course__name'),
+                    queryset=enrollment_queryset,
                     to_attr='enrollments'
                 ),
                 Prefetch(

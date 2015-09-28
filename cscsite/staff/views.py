@@ -13,6 +13,7 @@ from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from core.views import StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import StudentProject
+from learning.utils import get_current_semester_pair
 from users.models import CSCUser
 
 
@@ -260,6 +261,88 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
                     row.extend([online_course.name])
                 else:
                     row.extend([''])
+
+            w.writerow(row)
+
+        return response
+
+
+class StudentsSheetCurrentSemesterCSVView(StaffOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        students = CSCUser.objects.students_info(
+            only_will_graduate=False,
+            enrollments_current_semester_only=True)
+
+        # Prepare courses and student projects data
+        courses_headers = OrderedDict()
+        for s in students:
+            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
+            for e in s.enrollments:
+                courses_headers[e.course_offering.course.id] = \
+                    e.course_offering.course.name
+                teachers = [t.get_full_name() for t
+                            in e.course_offering.teachers.all()]
+                student_courses[e.course_offering.course.id] = dict(
+                    grade=e.grade_display.lower(),
+                    teachers=", ".join(teachers)
+                )
+            s.courses = student_courses
+
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        year, semester_type = get_current_semester_pair()
+        filename = "sheet_{}_{}.csv".format(year, semester_type)
+        response['Content-Disposition'] \
+            = 'attachment; filename="{}"'.format(filename)
+        w = unicodecsv.writer(response, encoding='utf-8')
+
+        headers = [
+            'Фамилия',
+            'Имя',
+            'Отчество',
+            'ВУЗ',
+            'Курс (на момент поступления)',
+            'Год поступления',
+            'Год выпуска',
+            'Почта',
+            'Яндекс ID',
+            'Телефон',
+            'Направления обучения',
+            'Статус',
+            'Дата статуса или итога (изменения)',
+            'Комментарий',
+            'Дата последнего изменения комментария',
+            'Работа',
+        ]
+        for course_id, course_name in courses_headers.iteritems():
+            headers.append(course_name + ', оценка')
+            headers.append(course_name + ', преподаватели')
+        w.writerow(headers)
+
+        for s in students:
+            row = [
+                s.last_name,
+                s.first_name,
+                s.patronymic,
+                s.university,
+                s.uni_year_at_enrollment,
+                s.enrollment_year,
+                s.graduation_year,
+                s.email,
+                s.yandex_id,
+                s.phone,
+                " и ".join((s.name for s in s.study_programs.all())),
+                s.status_display,
+                '',
+                s.comment,
+                s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
+                s.workplace,
+            ]
+
+            for course_id in courses_headers:
+                sc = s.courses[course_id]
+                row.extend([sc['grade'], sc['teachers']])
 
             w.writerow(row)
 
