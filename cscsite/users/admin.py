@@ -43,6 +43,7 @@ class CSCUserChangeForm(UserChangeForm):
         cleaned_data = super(CSCUserChangeForm, self).clean()
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = [x.pk for x in cleaned_data.get('groups', [])]
+        # TODO: Should I move this logic to model?
         if self.instance.group_pks.STUDENT_CENTER in groups \
            and enrollment_year is None:
             self.add_error('enrollment_year', ValidationError(
@@ -58,6 +59,11 @@ class CSCUserChangeForm(UserChangeForm):
            and graduation_year is None:
             self.add_error('graduation_year', ValidationError(
                 _("CSCUser|graduation year should be provided for graduates")))
+
+        if self.instance.group_pks.VOLUNTEER in groups \
+                and self.instance.group_pks.STUDENT_CENTER in groups:
+            self.add_error('groups', ValidationError(
+                _("User can't be simultaneously in volunteer and student group")))
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
