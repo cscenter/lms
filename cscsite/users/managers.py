@@ -95,6 +95,7 @@ class CSCUserQuerySet(query.QuerySet):
         return (q
             .order_by('last_name', 'first_name')
             .prefetch_related(
+                'groups',
                 Prefetch(
                     'enrollment_set',
                     queryset=enrollment_queryset,

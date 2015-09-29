@@ -94,5 +94,10 @@ every update.
 Misc
 ----
 
+toolbar in `base.View`:
+
+    return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
+
+
 For details on architecture and general concerns, see
 [about.md](https://github.com/cscenter/site/tree/master/about.md) (in Russian).
