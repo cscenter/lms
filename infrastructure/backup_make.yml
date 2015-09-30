@@ -1,6 +1,6 @@
 ---
 - name: Make a backup of db and media/ folder for CSCenter website
-  hosts: "{{ host }}"
+  hosts: "{{ aws_ec2_host }}"
   user: ubuntu
   sudo: True
   vars_files:

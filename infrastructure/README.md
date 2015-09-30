@@ -55,7 +55,23 @@ backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` 
 backup_restore.yml | Should restore db and media/ folder. But it doesn't work now.
 provision.yml | Create security groups. Launch instance. Create additional Volume, attach to new instance. Setup LVM on additional Volume
 setup.yml | Part of provision (but can be used independently). Create app on new instance.
+deploy.yml | Deploy one of site (cscenter or csclub)
 
+
+## Deploy
+
+* git pull
+* install requirements from requirements.txt
+* Run django `migrate` command
+* Run django `collectstatic` command
+* Touch uwsgi configuration to reload app
+
+Command to run:
+
+    ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=csclub" -v
+
+
+Variable `app_user` should be one of [cscenter, csclub]
 
 
 ## Create s3 buckets

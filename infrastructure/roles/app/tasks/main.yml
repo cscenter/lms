@@ -92,7 +92,6 @@
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"
   tags:
-    - deploy
     - collectstatic
 
 - name: Create shared media/ folder

@@ -1,6 +1,6 @@
 ---
 - name: restore production backup for CSC website
-  hosts: "{{ host }}"
+  hosts: "{{ aws_ec2_host }}"
   user: ubuntu
   sudo: True
 

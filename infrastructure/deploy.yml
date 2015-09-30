@@ -1,0 +1,48 @@
+---
+- name: Deploy CS Center site
+  hosts: "{{ aws_ec2_host_new }}"
+  user: ubuntu
+  sudo: True
+  vars_files:
+    - vars/aws.yml
+
+  tasks:
+  - name: Check app_user value
+    fail:
+      msg: "`app_user` var should be one of [cscenter, csclub]"
+    when: app_user != "cscenter" and app_user != "csclub"
+
+  - name: Set variables for better readability
+    set_fact:
+      site_src: "/home/{{ app_user }}/site/repo"
+      venv_dir: "/home/{{ app_user }}/site/env"
+
+  - name: Get stuff from git
+    git: repo=git@github.com:cscenter/site.git dest={{ site_src }}
+    sudo_user: "{{ app_user }}"
+
+  - name: Install requirements
+    pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
+    sudo_user: "{{ app_user }}"
+
+  - name: Migrate DB
+    sudo_user: "{{ app_user }}"
+    django_manage:
+      command: "migrate"
+      app_path: "{{ site_src }}/cscsite"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
+  - name: Collectstatic
+    sudo_user: "{{ app_user }}"
+    django_manage:
+      command: "collectstatic"
+      app_path: "{{ site_src }}/cscsite"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
+  - name: Touch config file to reload uwsgi
+    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
+    sudo: True
+
+
