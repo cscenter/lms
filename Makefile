@@ -78,7 +78,7 @@ less_bootstrap:
 	$(eval BS = 1)
 	$(call compile_bootstrap, $(BS))
 
-# Remove after merging with common styles
+# Experimental: remove after merging with common styles
 tmp_less_cm:
 	cd cscsite/assets/src/less/; \
 	lessc --relative-urls --clean-css="--compatibility=ie8" center/off_canvas_menu.less > ../../css/center/off_canvas_menu.css;
