@@ -45,6 +45,7 @@ from .forms import CourseOfferingPKForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, MarksSheetTeacherFormFabrique
 from core.notifications import get_unread_notifications_cache
+from core.utils import hashids
 from . import utils
 from users.models import CSCUser
 
@@ -1572,3 +1573,23 @@ class OnlineCoursesListView(generic.ListView):
 
     def get_queryset(self):
         return OnlineCourse.objects.order_by("start", "name")
+
+
+class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
+
+    def get(self, request, *args, **kwargs):
+        print(args, kwargs, request)
+        sid = kwargs['comment_id_hash']
+        try:
+            comment_id = hashids.decode(sid)[0]
+        except IndexError:
+            raise Http404
+        qs = AssignmentComment.objects.filter(pk=comment_id)
+        if request.user.is_student:
+            qs = qs.filter(assignment_student_id=request.user.pk)
+        comment = get_object_or_404(qs)
+        response = HttpResponse()
+        response['Content-Disposition'] = \
+            "attachment; filename={}".format(comment.attached_file_name)
+        response['X-Accel-Redirect'] = comment.attached_file.url
+        return response

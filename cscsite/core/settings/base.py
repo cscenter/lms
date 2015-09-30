@@ -225,3 +225,5 @@ PIPELINE_JS = {
         'output_filename': 'js/dist/fileinput.js',
     }
 }
+
+HASHIDS_SALT = "***REMOVED***"
