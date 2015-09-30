@@ -1578,7 +1578,6 @@ class OnlineCoursesListView(generic.ListView):
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
-        print(args, kwargs, request)
         sid = kwargs['comment_id_hash']
         try:
             comment_id = hashids.decode(sid)[0]
