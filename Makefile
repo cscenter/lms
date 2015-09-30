@@ -71,7 +71,6 @@ deploy:
 	$(call check_defined, conf)
 	git pull
 	pip install -r requirements.txt
-	python cscsite/manage.py compilemessages --settings=$(app).settings.$(conf)
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
