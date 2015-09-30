@@ -1590,6 +1590,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             qs = qs.filter(assignment_student_id=request.user.pk)
         comment = get_object_or_404(qs)
         response = HttpResponse()
+        del response['Content-Type']
         response['Content-Disposition'] = \
             "attachment; filename={}".format(comment.attached_file_name)
         response['X-Accel-Redirect'] = comment.attached_file.url
