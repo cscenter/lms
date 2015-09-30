@@ -1585,7 +1585,8 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         except IndexError:
             raise Http404
         qs = AssignmentComment.objects.filter(pk=comment_id)
-        if request.user.is_student:
+        if request.user.is_student and not request.user.is_teacher \
+                and not request.user.is_curator:
             qs = qs.filter(assignment_student_id=request.user.pk)
         comment = get_object_or_404(qs)
         response = HttpResponse()
