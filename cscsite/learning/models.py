@@ -28,6 +28,7 @@ from sorl.thumbnail import ImageField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
+from core.utils import hashids
 from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
 from .utils import get_current_semester_pair
 
@@ -659,6 +660,10 @@ class AssignmentComment(TimeStampedModel):
     @property
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
+
+    def attached_file_url(self):
+        return reverse("a_s_comment_attachment",
+                       args=[hashids.encode(self.pk)])
 
 
 @python_2_unicode_compatible

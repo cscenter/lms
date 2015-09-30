@@ -22,6 +22,10 @@ server {
         gzip on;
         expires 6h;
         add_header Cache-Control public,max-age=21600;
+
+        location ~ ^/media/assignment_(.+)$ {
+            internal;
+        }
     }
 
     location /static {

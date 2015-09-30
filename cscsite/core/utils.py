@@ -3,6 +3,11 @@ from __future__ import absolute_import, unicode_literals
 import bleach
 import hoep as h
 
+from django.conf import settings
+from hashids import Hashids
+
+hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
+
 # Some details here https://github.com/Anomareh/Hoep
 MARKDOWN_EXTENSIONS = h.EXT_FENCED_CODE | h.EXT_AUTOLINK | \
              h.EXT_STRIKETHROUGH | h.EXT_TABLES | h.EXT_QUOTE | \

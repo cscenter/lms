@@ -38,7 +38,8 @@ from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherDispatchView, \
-    NonCourseEventDetailView, OnlineCoursesListView
+    NonCourseEventDetailView, OnlineCoursesListView, \
+    AssignmentAttachmentDownloadView
 
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
@@ -93,6 +94,9 @@ urlpatterns = patterns('',
         name='assignment_list_student'),
     url(r'^learning/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
         name='a_s_detail_student'),
+    url(r'^learning/assignments/attachments/(?P<comment_id_hash>[-\w]+)/$',
+        AssignmentAttachmentDownloadView.as_view(),
+        name='a_s_comment_attachment'),
     url(r'^learning/timetable/$', TimetableStudentView.as_view(),
         name='timetable_student'),
     url(r'^learning/calendar/$', CalendarStudentView.as_view(),
