@@ -74,6 +74,10 @@ deploy:
 	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
 	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
+deploy_remote:
+	$(call check_defined, app_user)
+	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
+
 less_bootstrap:
 	$(eval BS = 1)
 	$(call compile_bootstrap, $(BS))
