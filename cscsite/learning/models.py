@@ -420,14 +420,6 @@ class CourseClassAttachment(TimeStampedModel, object):
         return os.path.basename(self.material.name)
 
 
-## NOTE(Dmitry): this is needed because of
-## https://docs.djangoproject.com/en/1.7/topics/migrations/#serializing-values
-def assignment_upload_to(instance, filename):
-    # somewhat protecting against URL enumeration
-    return ("assignments/{0}/{1}"
-            .format(int(time.time()) % 30, filename))
-
-
 @python_2_unicode_compatible
 class Assignment(TimeStampedModel, object):
     course_offering = models.ForeignKey(
@@ -494,13 +486,18 @@ class Assignment(TimeStampedModel, object):
         return os.path.basename(self.attached_file.name)
 
 
+def assignmentattach_upload_to(instance, filename):
+    return ("assignment_{0}/attachments/{1}".format(
+        instance.assignment_id, filename))
+
+
 @python_2_unicode_compatible
 class AssignmentAttachment(TimeStampedModel, object):
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to="assignment_attachments")
+    attachment = models.FileField(upload_to=assignmentattach_upload_to)
 
     class Meta:
         ordering = ["assignment", "-created"]
@@ -508,11 +505,17 @@ class AssignmentAttachment(TimeStampedModel, object):
         verbose_name_plural = _("Assignment attachments")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.attachment_file_name))
+        return "{0}".format(smart_text(self.file_name))
 
     @property
-    def attachment_file_name(self):
+    def file_name(self):
         return os.path.basename(self.attachment.name)
+
+    def file_url(self):
+        return reverse(
+            "assignment_attachments_download",
+            args=[hashids.encode(settings.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
+        )
 
 
 @python_2_unicode_compatible
@@ -662,8 +665,11 @@ class AssignmentComment(TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse("a_s_comment_attachment",
-                       args=[hashids.encode(self.pk)])
+        return reverse(
+            "assignment_attachments_download",
+            args=[hashids.encode(settings.ASSIGNMENT_COMMENT_ATTACHMENT,
+                  self.pk)]
+        )
 
 
 @python_2_unicode_compatible

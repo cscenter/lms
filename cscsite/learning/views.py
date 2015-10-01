@@ -1155,7 +1155,7 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                                               co.semester.slug,
                                               self.object.pk,
                                               aa.pk]),
-                                aa.attachment_file_name)
+                                aa.file_name)
                         for aa
                         in self.object.assignmentattachment_set.all()))
         else:
@@ -1578,19 +1578,26 @@ class OnlineCoursesListView(generic.ListView):
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
-        sid = kwargs['comment_id_hash']
         try:
-            comment_id = hashids.decode(sid)[0]
+            attachment_type, pk = hashids.decode(kwargs['sid'])
         except IndexError:
             raise Http404
-        qs = AssignmentComment.objects.filter(pk=comment_id)
-        if request.user.is_student and not request.user.is_teacher \
-                and not request.user.is_curator:
-            qs = qs.filter(assignment_student_id=request.user.pk)
-        comment = get_object_or_404(qs)
+        if attachment_type == settings.ASSIGNMENT_TASK_ATTACHMENT:
+            qs = AssignmentAttachment.objects.filter(pk=pk)
+            assignment_attachment = get_object_or_404(qs)
+            file_name = assignment_attachment.file_name
+            file_url = assignment_attachment.attachment.url
+        elif attachment_type == settings.ASSIGNMENT_COMMENT_ATTACHMENT:
+            qs = AssignmentComment.objects.filter(pk=pk)
+            if not request.user.is_teacher and not request.user.is_curator:
+                qs = qs.filter(assignment_student__student_id=request.user.pk)
+            comment = get_object_or_404(qs)
+            file_name = comment.attached_file_name
+            file_url = comment.attached_file.url
+
         response = HttpResponse()
         del response['Content-Type']
         response['Content-Disposition'] = \
-            "attachment; filename={}".format(comment.attached_file_name)
-        response['X-Accel-Redirect'] = comment.attached_file.url
+            "attachment; filename={}".format(file_name)
+        response['X-Accel-Redirect'] = file_url
         return response

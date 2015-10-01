@@ -215,7 +215,7 @@ class AssignmentAttachmentTest(TestCase):
     def test_attached_file_name(self):
         fname = "foobar.pdf"
         aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
-        self.assertRegexpMatches(aa.attachment_file_name,
+        self.assertRegexpMatches(aa.file_name,
                                  "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
