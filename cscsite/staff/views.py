@@ -184,6 +184,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
             'Фамилия',
             'Имя',
             'Отчество',
+            'Вольнослушатель',
             'ВУЗ',
             'Курс (на момент поступления)',
             'Год поступления',
@@ -219,6 +220,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
                 s.last_name,
                 s.first_name,
                 s.patronymic,
+                "+" if s.is_volunteer else "",
                 s.university,
                 s.uni_year_at_enrollment,
                 s.enrollment_year,
@@ -263,7 +265,6 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
                     row.extend([''])
 
             w.writerow(row)
-
         return response
 
 
