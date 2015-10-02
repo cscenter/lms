@@ -62,10 +62,10 @@ class CSCUserQuerySet(query.QuerySet):
 
         from .models import CSCUser
         from learning.models import Enrollment, CourseClass, StudentProject, \
-            Semester
+            Semester, CourseOffering
 
         # Note: At the same time student must be in one of these groups
-        # So, group_by not neccessary for this m2m relationship
+        # So, group_by not neccessary for this m2m relationship (in theory)
         q = self.filter(
                 groups__in=[CSCUser.group_pks.STUDENT_CENTER,
                             CSCUser.group_pks.GRADUATE_CENTER,
@@ -81,10 +81,7 @@ class CSCUserQuerySet(query.QuerySet):
 
         enrollment_queryset = (Enrollment.objects
             .exclude(grade__in=exclude_enrollments)
-            .select_related('course_offering',
-                            'course_offering__semester',
-                            'course_offering__course'
-                            )
+
             .order_by('course_offering__course__name'))
 
         if enrollments_current_semester_only:
@@ -92,7 +89,8 @@ class CSCUserQuerySet(query.QuerySet):
             enrollment_queryset = enrollment_queryset.filter(
                 course_offering__semester=current_semester)
 
-        return (q
+        return (
+            q
             .order_by('last_name', 'first_name')
             .prefetch_related(
                 'groups',
@@ -100,6 +98,11 @@ class CSCUserQuerySet(query.QuerySet):
                     'enrollment_set',
                     queryset=enrollment_queryset,
                     to_attr='enrollments'
+                ),
+                Prefetch(
+                    'enrollments__course_offering',
+                    queryset=CourseOffering.objects.select_related(
+                        'semester', 'course'),
                 ),
                 Prefetch(
                     'enrollments__course_offering__courseclass_set',
@@ -112,7 +115,7 @@ class CSCUserQuerySet(query.QuerySet):
                 Prefetch(
                     'studentproject_set',
                     queryset=StudentProject.objects.order_by('project_type')
-                             .prefetch_related('semesters'),
+                                           .prefetch_related('semesters'),
                     to_attr='projects'
                 ),
                 Prefetch(
