@@ -35,7 +35,11 @@
                       <a href="{{ class.get_absolute_url }}">{{ class.date|date:"l, d E" }}, {{ class.starts_at }}</a>
                       {% endwith %}
                     {% else %}
-                      {% trans "To be announced" %}
+                      {% if course_offering.is_completed %}
+                        {% trans "The course is completed." %}
+                      {% else %}
+                        {% trans "To be announced" %}
+                      {% endif %}
                     {% endif %}
                   </td>
                   <td>{% if course_offering.language == 'ru' %}{% trans "Russian" %}{% else %}{% trans "English" %}{% endif %}</td>
