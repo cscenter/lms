@@ -758,7 +758,13 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                           **self.get_form_kwargs())
 
     def form_valid(self, form):
+        # FIXME: Think how to move this logic into form.
         assert self._course_offering is not None
+        # Can't add course classes after course already completed.
+        if self._course_offering.is_completed:
+            form.add_error(None, "Sorry, but you can't update or add classes"
+                " after course was completed.")
+            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
         self.object = form.save(commit=False)
         self.object.course_offering = self._course_offering
         self.object.save()
