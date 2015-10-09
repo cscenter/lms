@@ -99,6 +99,20 @@ class UserEmailWidget(widgets.Widget):
         return value
 
 
+class UserGenderWidget(widgets.Widget):
+    def clean(self, value):
+        if "м" in value:
+            value = "M"
+        if "ж" in value:
+            value = "F"
+        if value not in ["M", "F"]:
+            value = ""
+        return value
+
+    def render(self, value):
+        return value
+
+
 class CSCUserRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
     uni_year_at_enrollment = fields.Field(column_name='uni_year_at_enrollment',
                                           attribute='uni_year_at_enrollment',
@@ -106,12 +120,15 @@ class CSCUserRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
     email = fields.Field(column_name='email', attribute='email',
                          widget=UserEmailWidget())
 
+    gender = fields.Field(column_name='gender', attribute='gender',
+                          widget=UserGenderWidget())
+
     class Meta:
         model = CSCUser
         fields = (
             'id', 'username', 'first_name', 'patronymic', 'last_name',
             'email', 'university', 'uni_year_at_enrollment', 'phone',
-            'yandex_id', 'stepic_id',
+            'yandex_id', 'stepic_id', 'gender', 'note',
         )
         skip_unchanged = True
         import_id_fields = ['id', 'email']
