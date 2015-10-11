@@ -304,7 +304,7 @@ class CoursesListView(generic.ListView):
         # Hide empty pairs
         context["semester_list"] = [
             (a, s) for s, a in utils.grouper(semester_list, 2) if \
-                a.courseofferings or s.courseofferings
+                (a and a.courseofferings) or (s and s.courseofferings)
         ]
         return context
 
