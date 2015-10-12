@@ -19,8 +19,7 @@ sorl-thumbnail==12.2
 
 # Forms
 django-floppyforms==1.1.1
-# django-crispy-forms==1.4.0
-git+https://github.com/maraujop/django-crispy-forms.git@c790055fa7e6810703599bc0124507133b8a55fc
+django-crispy-forms==1.5.2
 
 # Models
 django-model-utils==2.3.1
