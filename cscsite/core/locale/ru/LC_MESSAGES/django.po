@@ -8,31 +8,30 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-02 17:01+0300\n"
+"POT-Creation-Date: 2015-10-12 13:04+0300\n"
 "PO-Revision-Date: 2015-10-02 17:01+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: core/models.py:11
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
-" enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
+"enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"+HTML"
 
 #: core/models.py:15
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a "
-"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: core/models.py:47
 msgid "Code"
@@ -40,9 +39,8 @@ msgstr "Код"
 
 #: core/models.py:49
 msgid ""
-"UN/LOCODE notification preferable <a "
-"href='http://www.unece.org/cefact/locode/service/location' "
-"target='_blank'>Hint</a>"
+"UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/"
+"locode/service/location' target='_blank'>Hint</a>"
 msgstr ""
 
 #: core/models.py:51
@@ -198,7 +196,7 @@ msgstr "Название"
 msgid "Description"
 msgstr "Описание"
 
-#: learning/forms.py:143 learning/models.py:342 learning/views.py:502
+#: learning/forms.py:143 learning/models.py:342 learning/views.py:508
 #: templates/learning/courseclass_detail.html:40
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
@@ -290,11 +288,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:44 news/models.py:32
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
-">some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/"
+"<b>some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
-"test.com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
+"com/news/<b>some-news</b>/"
 
 #: learning/models.py:54 learning/models.py:156
 #: templates/learning/assignment_list_student.html:49
@@ -337,8 +335,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:170
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
-" description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
+"description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -575,7 +573,6 @@ msgid "It's online and has comments"
 msgstr "Можно сдать онлайн и есть комментарий от студента"
 
 #: learning/models.py:560
-#| msgid "at enrollment"
 msgid "Last comment date"
 msgstr "Дата последнего комментария"
 
@@ -783,42 +780,42 @@ msgstr "Онлайн-курсы"
 msgid "No user with Stepic ID {}"
 msgstr "Пользователь со Stepic ID {} не найден"
 
-#: learning/views.py:509
+#: learning/views.py:515
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: learning/views.py:516
+#: learning/views.py:522
 msgid "Files"
 msgstr "Файлы"
 
-#: learning/views.py:528
+#: learning/views.py:534
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:536 templates/learning/timetable_student.html:112
+#: learning/views.py:542 templates/learning/timetable_student.html:112
 #: templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: learning/views.py:672
+#: learning/views.py:678
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:675 templates/learning/courseoffering_detail.html:41
+#: learning/views.py:681 templates/learning/courseoffering_detail.html:41
 #: templates/learning/courses_list_student.html:51
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1109
+#: learning/views.py:1115
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: learning/views.py:1563
+#: learning/views.py:1569
 msgid "Import results: {}/{} successes"
 msgstr "Импорт из stepic: {}/{} успешно"
 
-#: learning/views.py:1567
+#: learning/views.py:1573
 msgid "Invalid form."
 msgstr ""
 
@@ -1098,8 +1095,8 @@ msgstr "Перейти к курсу"
 
 #: templates/learning/_onlinecourse_list__row.html:21
 msgid ""
-"The course was developed in collaboration with the <a "
-"href='http://mit.spbau.ru/'>Academic University</a>."
+"The course was developed in collaboration with the <a href='http://mit.spbau."
+"ru/'>Academic University</a>."
 msgstr ""
 "Курс подготовлен совместно с <a href='http://mit.spbau.ru/'>Академическим "
 "университетом</a>."
@@ -1314,13 +1311,16 @@ msgstr "Записаться"
 #: templates/learning/courseoffering_detail.html:62
 msgid ""
 "\n"
-"                Enroll in the course to get notifications and to be able to submit home assignments.<br>\n"
-"                <a class=\"btn btn-success\" href=\"/register/\">Register to enroll now</a>\n"
+"                Enroll in the course to get notifications and to be able to "
+"submit home assignments.<br>\n"
+"                <a class=\"btn btn-success\" href=\"/register/\">Register to "
+"enroll now</a>\n"
 "              "
 msgstr ""
 "\n"
 "Запишитесь на курс, чтобы получать уведомления и\n"
-"иметь возможность сдавать домашние задания. Для записи требуется регистрация на сайте.<br>\n"
+"иметь возможность сдавать домашние задания. Для записи требуется регистрация "
+"на сайте.<br>\n"
 "<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a>"
 
 #: templates/learning/courseoffering_detail.html:105
@@ -1455,7 +1455,10 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
+"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
+"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
+"сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
@@ -1541,7 +1544,8 @@ msgstr "СПРАВКА"
 #, python-format
 msgid ""
 "Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
-"            сентября %(enrollment_year)s года. За время обучения %(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
+"            сентября %(enrollment_year)s года. За время обучения "
+"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
 "            "
 msgstr ""
 
