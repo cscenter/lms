@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, F, Prefetch, Count
+from django.db.models import Q, F, Prefetch, Count, When, Value, Case
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -287,14 +287,17 @@ class CoursesListView(generic.ListView):
         )
         # Courses in CS Center started at 2011 year
         if self.request.site.domain != settings.CLUB_DOMAIN:
-            q = q.filter(year__gte=2011)
+            q = (q.filter(year__gte=2011)
+                .exclude(type=Case(
+                    When(year=2011, then=Value(Semester.TYPES.spring)),
+                    default=Value(""))
+                ))
         return q
 
     def get_context_data(self, **kwargs):
         context = super(CoursesListView, self).get_context_data(**kwargs)
-        # skip summer semesters
         semester_list = [s for s in context["semester_list"]
-                           if s.type != Semester.TYPES.summer]
+                         if s.type != Semester.TYPES.summer]
         if not semester_list:
             return context
         # Check if we only have the fall semester for the ongoing year.
