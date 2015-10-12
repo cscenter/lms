@@ -8,7 +8,7 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python cscsite/manage.py migrate --noinput --settings=cscenter.settings.test_travis
 env:
-  - DJANGO=1.8.4
+  - DJANGO=1.8.5
 install:
   - pip install pep8
   - pip install pylint
