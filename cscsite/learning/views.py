@@ -285,6 +285,9 @@ class CoursesListView(generic.ListView):
                 ),
             )
         )
+        # Courses in CS Center started at 2011 year
+        if self.request.site.domain != settings.CLUB_DOMAIN:
+            q = q.filter(year__gte=2011)
         return q
 
     def get_context_data(self, **kwargs):
@@ -446,7 +449,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
     template_name = "learning/courseoffering_detail.html"
 
     def get_queryset(self):
-        return self.model.custom.site_related(self.request)
+        q = self.model.custom.site_related(self.request)
+        if self.request.site.domain != settings.CLUB_DOMAIN:
+            q = q.filter(semester__year__gte=2011)
+        return q
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
