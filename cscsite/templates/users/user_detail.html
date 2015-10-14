@@ -279,7 +279,9 @@
           <td>{% trans "Comment" %}:</td>
           <td>
             <div class="ubertext">
-              {{ user_object.comment|default:"—" }}
+              {% markdown 3600 "user_comment" user_object.pk user_object.modified %}
+                {{ user_object.comment|default:"—" }}
+              {% endmarkdown %}
             </div>
             {% if user_object.comment %}
             <span class="student-comment-metainfo pull-right">

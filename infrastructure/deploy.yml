@@ -1,5 +1,5 @@
 ---
-- name: Deploy CS Center site
+- name: Start deployment
   hosts: "{{ aws_ec2_host_new }}"
   user: ubuntu
   sudo: True
