@@ -55,7 +55,9 @@
       {% if course_class.video_oembed %}
         <a id="video" href="#"></a><h4 class="bigger-margin" >{% trans "Video" %}</h4>
         {% cache 7200 video_oembed course_class.pk course_class.video_url %}
+          <div class="embed-responsive embed-responsive-16by9">
           {{ course_class.video_oembed.html|safe }}
+          </div>
         {% endcache %}
       {% endif %}
 
