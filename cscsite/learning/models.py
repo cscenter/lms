@@ -199,11 +199,8 @@ class CourseOffering(TimeStampedModel):
         verbose_name_plural = _("Course offerings")
 
     def __str__(self):
-        s = "{0}, {1}".format(smart_text(self.course),
+        return "{0}, {1}".format(smart_text(self.course),
                               smart_text(self.semester))
-        if self.is_open:
-            s += " [{0}]".format(_("Open course offering"))
-        return s
 
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,
