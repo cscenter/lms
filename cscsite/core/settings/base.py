@@ -229,3 +229,9 @@ PIPELINE_JS = {
 HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
+
+# Oembed defaults
+MICAWBER_DEFAULT_SETTINGS = {
+    'maxwidth': 910,
+    'maxheight': 512,
+}
