@@ -98,7 +98,7 @@ def import_stepic(request, selected_assignment):
                          "have an assignment {}"
                          .format(user.pk, user.stepic_id, assignment_id))
             return False
-        a_s.grade = stepic_points
+        a_s.grade = score
         a_s.save()
         return True
 
@@ -126,6 +126,52 @@ def import_stepic(request, selected_assignment):
             success += int(res)
             logger.debug("Wrote {} points for user {} on assignment {}"
                          .format(stepic_points, user.pk, assignment_id))
+    logger.debug("{}/{} successes".format(success, total))
+    response['success'], response['total'] = success, total
+    return response
+
+
+def import_yandex(request, selected_assignment):
+    from learning.models import AssignmentStudent, Assignment
+    from users.models import CSCUser
+
+    def update_score(assignment_id, user, score):
+        try:
+            a_s = (AssignmentStudent.objects
+                   .get(assignment__pk=assignment_id, student=user))
+        except ObjectDoesNotExist:
+            logger.debug("User ID {} with Yandex ID {} doesn't "
+                         "have an assignment {}"
+                         .format(user.pk, user.stepic_id, assignment_id))
+            return False
+        a_s.grade = score
+        a_s.save()
+        return True
+
+    f = request.FILES['csvfile']
+    reader = csv.DictReader(iter(f), fieldnames=['user_id'], restkey='as_ids')
+    total = 0
+    success = 0
+    response = {'success': 0, 'total': 0, 'errors': []}
+    # skip real headers
+    reader.next()
+    headers = ['user_id', selected_assignment.pk]
+    for entry in reader:
+        total += len(headers) - 1
+        yandex_id = entry['user_id'].strip()
+        try:
+            user = CSCUser.objects.get(yandex_id=yandex_id)
+        except ObjectDoesNotExist:
+            msg = _("No user with Yandex ID {}").format(yandex_id)
+            logger.debug(msg)
+            messages.error(request, msg)
+            continue
+        for assignment_id, score in zip(headers[1:], entry[reader.restkey]):
+            points = int(ceil(float(score)))
+            res = update_score(int(assignment_id), user, points)
+            success += int(res)
+            logger.debug("Wrote {} points for user {} on assignment {}"
+                         .format(points, user.pk, assignment_id))
     logger.debug("{}/{} successes".format(success, total))
     response['success'], response['total'] = success, total
     return response

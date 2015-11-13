@@ -37,6 +37,7 @@ from learning.views import \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherImportCSVFromStepicView, \
+    MarksSheetTeacherImportCSVFromYandexView, \
     MarksSheetTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView
@@ -160,6 +161,9 @@ urlpatterns = patterns('',
     url(r'^teaching/marks/(?P<course_offering_pk>\d+)/import/stepic$',
         MarksSheetTeacherImportCSVFromStepicView.as_view(),
         name='markssheet_teacher_csv_import_stepic'),
+    url(r'^teaching/marks/(?P<course_offering_pk>\d+)/import/yandex$',
+        MarksSheetTeacherImportCSVFromYandexView.as_view(),
+        name='markssheet_teacher_csv_import_yandex'),
 
     url(r"^courses/$", CoursesListView.as_view(),
         name="course_list"),
