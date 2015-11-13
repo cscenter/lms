@@ -1577,6 +1577,29 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
         return HttpResponseRedirect(url)
 
 
+class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
+    """Import students grades by yandex login"""
+    def post(self, request, *args, **kwargs):
+        filter = dict(pk=self.kwargs.get('course_offering_pk'))
+        if not request.user.is_authenticated() or not request.user.is_curator:
+            filter['teachers__in'] = [request.user.pk]
+        co = get_object_or_404(CourseOffering, **filter)
+        url = reverse('markssheet_teacher',
+                      args=[co.course.slug, co.semester.year, co.semester.type])
+        form = MarksSheetTeacherImportGradesForm(
+            request.POST, request.FILES, c_slug = co.course.slug)
+        if form.is_valid():
+            res = utils.import_yandex(
+                request, form.cleaned_data['assignment']
+            )
+            messages.info(request, _("Import results: {}/{} successes").format(
+                res['success'], res['total']))
+        else:
+            # TODO: provide better description
+            messages.info(request, _('Invalid form.'))
+        return HttpResponseRedirect(url)
+
+
 class NonCourseEventDetailView(generic.DetailView):
     model = NonCourseEvent
     context_object_name = 'event'

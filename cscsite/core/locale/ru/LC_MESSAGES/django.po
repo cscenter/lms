@@ -8,30 +8,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-12 13:04+0300\n"
-"PO-Revision-Date: 2015-10-02 17:01+0230\n"
+"POT-Creation-Date: 2015-11-13 14:26+0300\n"
+"PO-Revision-Date: 2015-11-13 14:33+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: core/models.py:11
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
-"enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
+" enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
-"+HTML"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
 
 #: core/models.py:15
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: core/models.py:47
 msgid "Code"
@@ -39,8 +40,9 @@ msgstr "Код"
 
 #: core/models.py:49
 msgid ""
-"UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/"
-"locode/service/location' target='_blank'>Hint</a>"
+"UN/LOCODE notification preferable <a "
+"href='http://www.unece.org/cefact/locode/service/location' "
+"target='_blank'>Hint</a>"
 msgstr ""
 
 #: core/models.py:51
@@ -196,7 +198,7 @@ msgstr "Название"
 msgid "Description"
 msgstr "Описание"
 
-#: learning/forms.py:143 learning/models.py:342 learning/views.py:508
+#: learning/forms.py:143 learning/models.py:342 learning/views.py:511
 #: templates/learning/courseclass_detail.html:40
 #: templates/learning/timetable_student.html:99
 #: templates/learning/timetable_teacher.html:95
@@ -204,7 +206,7 @@ msgid "Slides"
 msgstr "Слайды"
 
 #: learning/forms.py:147 templates/learning/assignment_detail_teacher.html:41
-#: templates/learning/courseclass_detail.html:77
+#: templates/learning/courseclass_detail.html:79
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
@@ -229,7 +231,7 @@ msgstr "Начало"
 msgid "Ends at"
 msgstr "Конец"
 
-#: learning/forms.py:190 templates/learning/courseclass_detail.html:63
+#: learning/forms.py:190 templates/learning/courseclass_detail.html:65
 #: templates/learning/courseoffering_detail.html:109
 #: templates/learning/timetable_student.html:67
 #: templates/learning/timetable_teacher.html:63
@@ -278,7 +280,9 @@ msgstr "Проходной балл"
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
-#: learning/forms.py:385 templates/learning/markssheet_teacher.html:154
+#: learning/forms.py:385
+#: templates/learning/_markssheet_teacher_modal_stepic.html:25
+#: templates/learning/_markssheet_teacher_modal_yandex.html:25
 msgid "Select csv file"
 msgstr "Выбрать csv-файл"
 
@@ -288,11 +292,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:44 news/models.py:32
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/"
-"<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
+">some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
-"com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
+"test.com/news/<b>some-news</b>/"
 
 #: learning/models.py:54 learning/models.py:156
 #: templates/learning/assignment_list_student.html:49
@@ -307,7 +311,7 @@ msgstr "Курс"
 #: learning/models.py:55 templates/learning/courses/list.html:10
 #: templates/learning/courses_list_student.html:9
 #: templates/learning/courses_list_teacher.html:9
-#: templates/learning/markssheet_teacher.html:42
+#: templates/learning/markssheet_teacher.html:43
 #: templates/users/user_detail.html:35
 msgid "Courses"
 msgstr "Курсы"
@@ -335,8 +339,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:170
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
-"description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
+" description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -780,42 +784,47 @@ msgstr "Онлайн-курсы"
 msgid "No user with Stepic ID {}"
 msgstr "Пользователь со Stepic ID {} не найден"
 
-#: learning/views.py:515
+#: learning/utils.py:165
+#| msgid "No user with Stepic ID {}"
+msgid "No user with Yandex ID {}"
+msgstr "Пользователь с Yandex ID {} не найден"
+
+#: learning/views.py:518
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: learning/views.py:522
+#: learning/views.py:525
 msgid "Files"
 msgstr "Файлы"
 
-#: learning/views.py:534
+#: learning/views.py:537
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: learning/views.py:542 templates/learning/timetable_student.html:112
+#: learning/views.py:545 templates/learning/timetable_student.html:112
 #: templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: learning/views.py:678
+#: learning/views.py:681
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: learning/views.py:681 templates/learning/courseoffering_detail.html:41
+#: learning/views.py:684 templates/learning/courseoffering_detail.html:41
 #: templates/learning/courses_list_student.html:51
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: learning/views.py:1115
+#: learning/views.py:1118
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: learning/views.py:1569
+#: learning/views.py:1572 learning/views.py:1595
 msgid "Import results: {}/{} successes"
-msgstr "Импорт из stepic: {}/{} успешно"
+msgstr "Результаты импорта: {} из {} успешно"
 
-#: learning/views.py:1573
+#: learning/views.py:1576 learning/views.py:1599
 msgid "Invalid form."
 msgstr ""
 
@@ -1089,14 +1098,58 @@ msgstr "Административная панель Django"
 msgid "Django administration"
 msgstr "Администрирование Django"
 
+#: templates/learning/_markssheet_teacher_modal_stepic.html:7
+msgid "Import stepic statements"
+msgstr "Импортировать баллы по Stepic ID"
+
+#: templates/learning/_markssheet_teacher_modal_stepic.html:14
+#: templates/learning/_markssheet_teacher_modal_yandex.html:14
+msgid "Select assignment"
+msgstr "Выбрать задание"
+
+#: templates/learning/_markssheet_teacher_modal_stepic.html:22
+#: templates/learning/_markssheet_teacher_modal_yandex.html:22
+msgid "Score will be imported for selected assignment"
+msgstr "Оценки будут импортированы для выбранного задания"
+
+#: templates/learning/_markssheet_teacher_modal_stepic.html:27
+msgid ""
+"Should contains comma-separated values of user stepic id and assignment "
+"score. First row is header. Example:"
+msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
+
+#: templates/learning/_markssheet_teacher_modal_stepic.html:33
+#: templates/learning/_markssheet_teacher_modal_yandex.html:33
+msgid "Close"
+msgstr "Закрыть"
+
+#: templates/learning/_markssheet_teacher_modal_stepic.html:34
+#: templates/learning/_markssheet_teacher_modal_yandex.html:34
+msgid "Import"
+msgstr "Импортировать"
+
+#: templates/learning/_markssheet_teacher_modal_yandex.html:7
+#| msgid "Import stepic statements"
+msgid "Import yandex statements"
+msgstr "Импортировать баллы по Яндекс-логину"
+
+#: templates/learning/_markssheet_teacher_modal_yandex.html:27
+#| msgid ""
+#| "Should contains comma-separated values of user stepic id and assignment "
+#| "score. First row is header. Example:"
+msgid ""
+"Should contains comma-separated values of yandex username and assignment "
+"score. First row is header. Example:"
+msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
+
 #: templates/learning/_onlinecourse_list__row.html:18
 msgid "Go to course"
 msgstr "Перейти к курсу"
 
 #: templates/learning/_onlinecourse_list__row.html:21
 msgid ""
-"The course was developed in collaboration with the <a href='http://mit.spbau."
-"ru/'>Academic University</a>."
+"The course was developed in collaboration with the <a "
+"href='http://mit.spbau.ru/'>Academic University</a>."
 msgstr ""
 "Курс подготовлен совместно с <a href='http://mit.spbau.ru/'>Академическим "
 "университетом</a>."
@@ -1106,7 +1159,7 @@ msgstr ""
 #: templates/learning/courseclass_detail.html:16
 #: templates/learning/courseoffering_detail.html:32
 #: templates/learning/courses/detail.html:14
-#: templates/users/user_detail.html:355
+#: templates/users/user_detail.html:357
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -1311,16 +1364,13 @@ msgstr "Записаться"
 #: templates/learning/courseoffering_detail.html:62
 msgid ""
 "\n"
-"                Enroll in the course to get notifications and to be able to "
-"submit home assignments.<br>\n"
-"                <a class=\"btn btn-success\" href=\"/register/\">Register to "
-"enroll now</a>\n"
+"                Enroll in the course to get notifications and to be able to submit home assignments.<br>\n"
+"                <a class=\"btn btn-success\" href=\"/register/\">Register to enroll now</a>\n"
 "              "
 msgstr ""
 "\n"
 "Запишитесь на курс, чтобы получать уведомления и\n"
-"иметь возможность сдавать домашние задания. Для записи требуется регистрация "
-"на сайте.<br>\n"
+"иметь возможность сдавать домашние задания. Для записи требуется регистрация на сайте.<br>\n"
 "<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a>"
 
 #: templates/learning/courseoffering_detail.html:105
@@ -1391,37 +1441,16 @@ msgstr "Ведомость"
 
 #: templates/learning/markssheet_teacher.html:37
 msgid "From Stepic"
-msgstr "Из Stepic"
+msgstr "По Stepic ID"
 
-#: templates/learning/markssheet_teacher.html:77
+#: templates/learning/markssheet_teacher.html:38
+#| msgid "Yandex ID"
+msgid "From Yandex"
+msgstr "По Yandex-логину"
+
+#: templates/learning/markssheet_teacher.html:78
 msgid "Total score"
 msgstr "Суммарный балл"
-
-#: templates/learning/markssheet_teacher.html:136
-msgid "Import stepic statements"
-msgstr "Импортировать баллы Stepic"
-
-#: templates/learning/markssheet_teacher.html:143
-msgid "Select assignment"
-msgstr "Выбрать задание"
-
-#: templates/learning/markssheet_teacher.html:151
-msgid "Score will be imported for selected assignment"
-msgstr "Оценки будут импортированы для выбранного задания"
-
-#: templates/learning/markssheet_teacher.html:156
-msgid ""
-"Should contains comma-separated values of user stepic id and assignment "
-"score. First row is header. Example:"
-msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
-
-#: templates/learning/markssheet_teacher.html:162
-msgid "Close"
-msgstr "Закрыть"
-
-#: templates/learning/markssheet_teacher.html:163
-msgid "Import"
-msgstr "Импортировать"
 
 #: templates/learning/onlinecourse_list.html:11
 msgid "No online courses for now"
@@ -1455,10 +1484,7 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
-"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
-"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
-"сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
@@ -1487,7 +1513,7 @@ msgstr "Пароль изменён"
 #: templates/registration/password_change_form.html:16
 #: templates/registration/password_reset_confirm.html:5
 #: templates/registration/password_reset_confirm.html:17
-#: templates/users/user_detail.html:370
+#: templates/users/user_detail.html:372
 msgid "Change password"
 msgstr "Сменить пароль"
 
@@ -1544,8 +1570,7 @@ msgstr "СПРАВКА"
 #, python-format
 msgid ""
 "Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
-"            сентября %(enrollment_year)s года. За время обучения "
-"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
+"            сентября %(enrollment_year)s года. За время обучения %(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
 "            "
 msgstr ""
 
@@ -1652,35 +1677,35 @@ msgstr "Email"
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: templates/users/user_detail.html:293 users/models.py:159
+#: templates/users/user_detail.html:295 users/models.py:159
 msgid "Status"
 msgstr "Статус"
 
-#: templates/users/user_detail.html:297
+#: templates/users/user_detail.html:299
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: templates/users/user_detail.html:302
+#: templates/users/user_detail.html:304
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: templates/users/user_detail.html:318 users/models.py:170
+#: templates/users/user_detail.html:320 users/models.py:170
 msgid "Workplace"
 msgstr "Место работы"
 
-#: templates/users/user_detail.html:327 users/tests.py:487 users/tests.py:492
+#: templates/users/user_detail.html:329 users/tests.py:487 users/tests.py:492
 msgid "Student references"
 msgstr "Справки студента"
 
-#: templates/users/user_detail.html:359
+#: templates/users/user_detail.html:361
 msgid "Edit in admin"
 msgstr "Редактировать в админ-панели"
 
-#: templates/users/user_detail.html:364 users/tests.py:464 users/tests.py:472
+#: templates/users/user_detail.html:366 users/tests.py:464 users/tests.py:472
 msgid "Create reference"
 msgstr "Выдать справку"
 
-#: templates/users/user_detail.html:367
+#: templates/users/user_detail.html:369
 msgid "Edit info record"
 msgstr "Редактировать карточку"
 
