@@ -1,0 +1,61 @@
+._students-courses-list {
+  .table>thead>tr>th {
+    border-bottom: 1px solid #e4eaec;
+}
+  .table-hover>tbody>tr:hover {
+    background-color: #FCFDFD;
+  }
+
+  h4 {
+    margin: 0 0 4px 0;
+  }
+
+  .table {
+    td {
+      padding: 10px;
+      font-size: 13px;
+
+      .badge {
+        font-weight: normal;
+        white-space: nowrap;
+        position: relative;
+        bottom: 4px;
+      }
+
+      a {
+
+        &.title {
+          font-size: 18px;
+          font-weight: 500;
+          line-height: 1.1;
+          margin: 0 0 4px 0;
+        }
+      }
+    }
+  }
+}
+
+.courses-list {
+  margin: 0;
+  padding: 0;
+
+  li {
+    padding-right: 0;
+    padding-left: 0;
+    border: 1px solid transparent;
+    border-top-color: #e4eaec;
+
+    &:first-child {
+      border-top-color: transparent;
+    }
+
+    h4 {
+      margin: 0;
+    }
+
+    .btn-success {
+      //background-color: #46be8a;
+      //border-color: #46be8a;
+    }
+  }
+}

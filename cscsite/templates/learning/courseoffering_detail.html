@@ -91,6 +91,10 @@
         </li>
         {% endfor %}
       </ul>
+    {% if is_enrolled and course_offering.survey_url %}
+        <h4 class="no-top-margin">Опрос:</h4>
+        <a class=" btn btn-default btn-block btn-success" href="{{ course_offering.survey_url }}" target="_blank">{% trans "Start survey" %}</a>
+    {% endif %}
     </div>
   </div>
 
