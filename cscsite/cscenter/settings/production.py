@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+from django.utils import timezone
+
 from .base import *
 
 DEBUG = False
@@ -91,27 +93,22 @@ YANDEX_DISK_PASSWORD = "deelthisat"
 YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2015-2016"
 
 
-
 # django-dbbackup settings
-DBBACKUP_CLEANUP_KEEP = 30
-DBBACKUP_CLEANUP_KEEP_MEDIA = 30
-# FIXME(Dmitry): for now, django-dbbackup is buggy, see [1] and [2].
-#                Therefore, we provide our own implementation of S3 upload,
-#                so next line is commented out and backups go to /tmp
-#
-#                [1] https://bitbucket.org/mjs7231/django-dbbackup/issue/55/
-#                [2] https://bitbucket.org/mjs7231/django-dbbackup/issue/50/
-#
-# DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
-CSC_TMP_BACKUP_DIR = "/tmp/cscenter_backup"
-DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
-
-DBBACKUP_S3_BUCKET = 'cscenter'
-DBBACKUP_S3_DIRECTORY = 'cscweb_backups'
-DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
-# Access Key for cscenter backup user
-DBBACKUP_S3_ACCESS_KEY = 'AKIAJMQIFB2CNXR65ALQ'
-DBBACKUP_S3_SECRET_KEY = '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'
+DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
+DBBACKUP_STORAGE_OPTIONS = {
+    'location': PROJECT_DIR.child("backups"),
+    'bucket_name': 'cscenter',
+    'host': 's3.eu-central-1.amazonaws.com',
+    'access_key': 'AKIAJMQIFB2CNXR65ALQ',
+    'secret_key': '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',
+    'calling_format': 'boto.s3.connection.OrdinaryCallingFormat'
+}
+def backup_filename(**params):
+    datetime = timezone.now().strftime('%d.%m.%Y-%H')
+    params['datetime'] = datetime
+    return '/backups/{servername}/{datetime}/{content_type}.{extension}'.format(**params)
+DBBACKUP_FILENAME_TEMPLATE = backup_filename
+DBBACKUP_MEDIA_FILENAME_TEMPLATE = backup_filename
 
 NEWRELIC_ENV = 'production'
 
