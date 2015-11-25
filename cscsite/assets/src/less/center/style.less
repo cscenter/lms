@@ -1,6 +1,12 @@
 // CENTER main styles
 @min-width: 940px;
 
+// Common colors;
+@color-orange: #f2a654;
+@color-green: #8CE087;
+@color-red: #f96868;
+@color-yellow: #f9cd48;
+
 @import "../bootstrap.custom.less";
 @import "../jgrowl.customize.less";
 @import "../bootstrap.sweetalerts/sweet-alert-combine.less";
@@ -507,38 +513,45 @@ h5.assignment {
 }
 
 .assignment-status {
-  color: black;
-  border: 1px solid #D3D3D3;
+  color: #fff;
   font-weight: normal;
   border-radius: 5px;
-}
-.assignment-status.not-checked {
-  background-color: #F9F9F9;
-}
-.assignment-status.being-checked {
-  background-color: #E9E9E9;
-}
-.assignment-status.unsatisfactory {
-  background-color: #FF6B78;
-}
-.assignment-status.pass {
-  background-color: #F39700;
-}
-.assignment-status.good {
-  background-color: #FAEB7D;
-}
-.assignment-status.excellent {
-  background-color: #8CE087;
+
+  &.not-checked {
+    color: #000;
+    border: 1px solid #D3D3D3;
+    background-color: #F9F9F9;
+  }
+
+  &.being-checked {
+    background-color: #E9E9E9;
+  }
+
+  &.unsatisfactory {
+    background-color: @color-red;
+  }
+
+  &.pass {
+    background-color: @color-orange;
+  }
+
+  &.good {
+    background-color: @color-yellow;
+  }
+
+  &.excellent {
+    background-color: @color-green;
+  }
 }
 
 .assignment-date.tomorrow {
-  color: #FF6B78;
+  color: @color-red;
 }
 .assignment-date.today {
-  color: #FF6B78;
+  color: @color-red;
 }
 .assignment-date.day-after-tomorrow {
-  color: #F39700;
+  color: @color-orange;
 }
 
 tr.unread {
