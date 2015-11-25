@@ -342,7 +342,7 @@ class CourseStudentListView(StudentOnlyMixin,
                             generic.TemplateView):
     model = CourseOffering
     context_object_name = 'course_list'
-    template_name = "learning/courses_list_student.html"
+    template_name = "learning/courses/list_student.html"
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()

@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-<div class="container">
+<div class="container _students-courses-list">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
@@ -13,7 +13,7 @@
   </div>
 
   {% if enrollments_ongoing or course_list_available %}
-  <div class="row _students-courses-list">
+  <div class="row ">
     <div class="col-xs-12">
       <h3>{% trans "Current semester" %}</h3>
 
@@ -27,7 +27,7 @@
         <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
             <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}" class="title">
-{{ e.course_offering.course.name }}</a> &nbsp;<span class="badge  {{ e.grade }}">{{ e.grade_display }}</span><br>
+{{ e.course_offering.course.name }}</a> &nbsp;<span class="badge assignment-status {{ e.grade }}">{{ e.grade_display }}</span><br>
 
           {% trans "Professors" %}:
             {% for teacher in e.course_offering.teachers.all %}
@@ -70,11 +70,12 @@
     </div>
   </div>
   {% endif %}
+
   {% if enrollments_archive %}
   <div class="row">
     <div class="col-xs-12">
       <h3>{% trans "Archive" %}</h3>
-      <table class="table" width="100%">
+      <table class="table _archive" width="100%">
         <thead>
           <th></th>
           <th width="20%">
@@ -102,7 +103,7 @@
             </ul>
           </td>
           <td>
-            <span style="white-space: nowrap;" class="badge assignment-status {{ e.grade }}">
+            <span class="badge assignment-status {{ e.grade }}">
               {{ e.grade_display }}
             </span>
           </td>
@@ -115,6 +116,7 @@
     </div>
   </div>
   {% endif %}
+
 </div>
 {% if not enrollments_ongoing and not enrollments_archive and not course_list_available %}
 <div class="container">
