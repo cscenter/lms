@@ -446,76 +446,87 @@ h5.assignment {
   width: 40px;
 }
 
-.calendar th {
-  width: 130px;
+#calendar-container {
+  min-width: 940px;
+  width: 70% !important;
 }
 
-.calendar td {
-  padding: 4px !important;
-  width: 130px;
-}
+.calendar {
+  th {
+    width: 130px;
+  }
 
-.calendar div.week-num-container {
+  td {
+    padding: 4px !important;
+    width: 130px;
+
+    &.today {
+      background-color: #FAFFEC;
+    }
+
+    .cell {
+      min-height: 100px;
+      min-width: 122px;
+    }
+
+    .day {
+      font-weight: bold;
+      color: #BBB;
+      text-align: right;
+    }
+
+    .event {
+      margin-bottom: 3px;
+      border: 1px solid #D3D3D3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 3px 4px;
+      line-height: 1.3;
+
+      &.lecture {
+        background-color: #F9F9F9;
+      }
+
+      &.seminar {
+        background-color: #E9E9E9;
+      }
+
+      &.noncourse {
+        background-color: #ECF9FF;
+      }
+
+      &.times {
+        white-space: nowrap;
+      }
+    }
+
+    .not-in-semester {
+      background-color: #EEE;
+
+    .day {
+      color: #CCC;
+    }
+    }
+  }
+
+}
+div.week-num-container {
   position: relative;
 }
 
-.calendar div.week-num {
+div.week-num {
   margin-left: -25px;
   position: absolute;
   font-weight: bold;
   color: #666;
 }
 
-.calendar td .cell {
-  min-height: 100px;
-  width: 122px;
-}
-
-.calendar td.today {
-  background-color: #FAFFEC;
-}
-
-.calendar .day {
-  font-weight: bold;
-  color: #BBB;
-  text-align: right;
-}
-
-.calendar .event {
-  margin-bottom: 3px;
-  border: 1px solid #D3D3D3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.calendar .event.lecture {
-  background-color: #F9F9F9;
-}
-
-.calendar .event.seminar {
-  background-color: #E9E9E9;
-}
-
-.calendar .event.noncourse {
-  background-color: #ECF9FF;
-}
-
-.calendar .event .times {
-  white-space: nowrap;
-}
-
-.calendar .not-in-semester {
-  background-color: #EEE;
-}
-
-.calendar .not-in-semester .day {
-  color: #CCC;
-}
 
 .assignment-status {
   color: #fff;
   font-weight: normal;
   border-radius: 5px;
+  padding: 4px 6px;
 
   &.not-checked {
     color: #000;

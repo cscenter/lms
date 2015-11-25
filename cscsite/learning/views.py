@@ -319,7 +319,7 @@ class CourseTeacherListView(TeacherOnlyMixin,
                             generic.ListView):
     model = CourseOffering
     context_object_name = 'course_list'
-    template_name = "learning/courses_list_teacher.html"
+    template_name = "learning/courses/list_teacher.html"
 
     def get_queryset(self):
         return (self.model.objects

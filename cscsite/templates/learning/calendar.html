@@ -3,7 +3,7 @@
 
 {% block content %}
 {% regroup object_list by date|date:"l, d E Y" as classes_by_day %}
-<div class="container">
+<div class="container" id="calendar-container">
   <div class="row timetable-header-row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>{{ month_date|date:"F Y" }}</h2>
