@@ -94,7 +94,7 @@ YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2015-2016"
 # django-dbbackup settings
 DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
 DBBACKUP_STORAGE_OPTIONS = {
-    'location': PROJECT_DIR.child("backups"),
+    'location': '/',
     'bucket_name': 'cscenter',
     'host': 's3.eu-central-1.amazonaws.com',
     'access_key': '***REMOVED***',
