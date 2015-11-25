@@ -199,6 +199,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
             'Дата последнего изменения комментария',
             'Работа',
             'Сдано курсов',
+            'Ссылка на профиль',
         ]
         for course_id, course_name in courses_headers.iteritems():
             headers.append(course_name + ', оценка')
@@ -234,7 +235,8 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
                 s.comment,
                 s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
                 s.workplace,
-                len(s.courses) + len(s.shads) + len(s.online_courses)
+                len(s.courses) + len(s.shads) + len(s.online_courses),
+                request.build_absolute_uri(s.get_absolute_url())
             ]
 
             for course_id in courses_headers:
@@ -316,6 +318,7 @@ class StudentsSheetCurrentSemesterCSVView(StaffOnlyMixin, generic.base.View):
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
+            'Ссылка на профиль',
         ]
         for course_id, course_name in courses_headers.iteritems():
             headers.append(course_name + ', оценка')
@@ -341,6 +344,7 @@ class StudentsSheetCurrentSemesterCSVView(StaffOnlyMixin, generic.base.View):
                 s.comment,
                 s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
                 s.workplace,
+                request.build_absolute_uri(s.get_absolute_url())
             ]
 
             for course_id in courses_headers:
