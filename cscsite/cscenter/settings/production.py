@@ -101,9 +101,9 @@ DBBACKUP_STORAGE_OPTIONS = {
     'secret_key': '***REMOVED***',
     'calling_format': 'boto.s3.connection.OrdinaryCallingFormat'
 }
-DBBACKUP_DATE_FORMAT = '%d_%m_%Y-%H'
-DBBACKUP_FILENAME_TEMPLATE = '/cscweb_backups/{servername}/{datetime}/{content_type}.{extension}'
-DBBACKUP_MEDIA_FILENAME_TEMPLATE = '/cscweb_backups/{servername}/{datetime}/{content_type}.{extension}'
+DBBACKUP_DATE_FORMAT = '%d-%m-%Y-%H'
+DBBACKUP_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
+DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
 
 NEWRELIC_ENV = 'production'
 
