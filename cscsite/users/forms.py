@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
 from crispy_forms.bootstrap import FormActions
-import floppyforms as forms
+import floppyforms.__future__ as forms
 
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED

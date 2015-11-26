@@ -1,4 +1,4 @@
-import floppyforms as forms
+import floppyforms.__future__ as forms
 
 
 class Ubereditor(forms.Textarea, object):

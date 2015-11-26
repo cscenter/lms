@@ -846,14 +846,17 @@ class StudentProject(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
+        limit_choices_to={'groups__in': [CSCUser.group_pks.STUDENT_CENTER,
+                                         CSCUser.group_pks.GRADUATE_CENTER]})
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,
         help_text=_("Format: Last_name First_name Patronymic, Organization"))
-    semesters = models.ManyToManyField(
+    semester = models.ForeignKey(
         Semester,
-        verbose_name=_("Semesters"))
+        on_delete=models.CASCADE,
+        related_name="semester_related",
+        verbose_name=_("Semester"))
     project_type = models.CharField(
         choices=PROJECT_TYPES,
         verbose_name=_("StudentProject|Type"),
@@ -884,10 +887,7 @@ class StudentProject(TimeStampedModel):
     @staticmethod
     def sorted(student_projects, reverse=False):
         """Return projects in chronological order"""
-        for i in range(len(student_projects)):
-            semesters = list(reversed(student_projects[i].semesters.all()))
-            setattr(student_projects[i], 'semesters_list', semesters)
-        return sorted(student_projects, key=lambda p: p.semesters_list[0],
+        return sorted(student_projects, key=lambda p: p.semester,
                       reverse=reverse)
 
 

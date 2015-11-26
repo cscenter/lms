@@ -219,11 +219,4 @@ class StudentProjectFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
     supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
     project_type = 'practice'
-
-    @factory.post_generation
-    def semesters(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            for semester in extracted:
-                self.semesters.add(semester)
+    semester = factory.SubFactory(SemesterFactory)

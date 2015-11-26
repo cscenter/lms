@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.utils.translation import ugettext as _
 
-import floppyforms as forms
+import floppyforms.__future__ as forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
