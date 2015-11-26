@@ -332,8 +332,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
                            enrollment_year='2013')
         semester1 = SemesterFactory.create(year=2014, type='spring')
         semester2 = SemesterFactory.create(year=2014, type='autumn')
-        sp1 = StudentProjectFactory.create(student=user, semester=semester1)
-        sp2 = StudentProjectFactory.create(student=user,
+        sp1 = StudentProjectFactory.create(students=[user], semester=semester1)
+        sp2 = StudentProjectFactory.create(students=[user],
                                            semester=semester2,
                                            description="")
         resp = self.client.get(reverse('user_detail', args=[user.pk]))

@@ -842,10 +842,9 @@ class StudentProject(TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    student = models.ForeignKey(
+    students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("AssignmentStudent|student"),
-        on_delete=models.CASCADE,
+        verbose_name=_("Students"),
         limit_choices_to={'groups__in': [CSCUser.group_pks.STUDENT_CENTER,
                                          CSCUser.group_pks.GRADUATE_CENTER]})
     supervisor = models.CharField(
@@ -874,9 +873,6 @@ class StudentProject(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
-
-    def get_absolute_url(self):
-        return self.student.get_absolute_url()
 
     # this is needed to share code between CourseClasses and this model
     @property

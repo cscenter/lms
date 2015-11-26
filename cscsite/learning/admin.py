@@ -114,7 +114,8 @@ class NonCourseEventAdmin(admin.ModelAdmin):
 
 
 class StudentProjectAdmin(admin.ModelAdmin):
-    list_display = ['student', 'name', 'project_type']
+    list_display = ['name', 'project_type']
+    list_filter = ['semester']
 
 
 class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
