@@ -111,11 +111,10 @@ class CSCUserQuerySet(query.QuerySet):
                 Prefetch(
                     'enrollments__course_offering__teachers',
                 ),
-                # FIXME: For some reasons semesters prefetched two times
                 Prefetch(
                     'studentproject_set',
                     queryset=StudentProject.objects.order_by('project_type')
-                                           .prefetch_related('semesters'),
+                                           .select_related('semester'),
                     to_attr='projects'
                 ),
                 Prefetch(

@@ -9,7 +9,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
 from crispy_forms.bootstrap import StrictButton, Tab, TabHolder
 
-import floppyforms as forms
+import floppyforms.__future__ as forms
 from modeltranslation.forms import TranslationModelForm
 
 from core.forms import Ubereditor

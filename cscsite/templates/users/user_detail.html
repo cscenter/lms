@@ -52,7 +52,7 @@
           <ul>
             {% for project in student_projects %}
             <li>
-              {{ project.semesters_list|join:", " }}:
+              {{ project.semester }}:
               «{{ project.name }}»{% if project.presentation %} (<a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>){% endif %},
               {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
               {% if project.description %}

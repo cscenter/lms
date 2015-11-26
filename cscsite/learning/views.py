@@ -37,7 +37,7 @@ from .models import Course, CourseClass, CourseOffering, Venue, \
     AssignmentStudent, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    StudentProject, OnlineCourse
+    OnlineCourse
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \

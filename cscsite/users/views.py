@@ -168,7 +168,7 @@ class UserDetailView(generic.DetailView):
         context['has_curator_permissions'] = \
             u.is_authenticated() and u.is_curator
         student_projects = list(self.object.studentproject_set
-                                .prefetch_related('semesters')
+                                .select_related('semester')
                                 .order_by('pk'))
         context['student_projects'] = StudentProject.sorted(student_projects)
         context['current_semester'] = Semester.get_current()
