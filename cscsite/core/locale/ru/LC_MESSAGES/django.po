@@ -8,30 +8,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-26 15:39+0300\n"
-"PO-Revision-Date: 2015-11-24 20:03+0230\n"
+"POT-Creation-Date: 2015-11-26 16:39+0300\n"
+"PO-Revision-Date: 2015-11-26 16:39+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: core/models.py:11
 msgid ""
-"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is "
-"enabled"
+"LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
+" enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
-"+HTML"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
 
 #: core/models.py:15
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
 msgstr ""
-"Доступны LaTeX+<a href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
+"Доступны LaTeX+<a "
+"href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: core/models.py:47
 msgid "Code"
@@ -39,8 +40,9 @@ msgstr "Код"
 
 #: core/models.py:49
 msgid ""
-"UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/"
-"locode/service/location' target='_blank'>Hint</a>"
+"UN/LOCODE notification preferable <a "
+"href='http://www.unece.org/cefact/locode/service/location' "
+"target='_blank'>Hint</a>"
 msgstr ""
 
 #: core/models.py:51
@@ -168,7 +170,7 @@ msgstr "Название"
 msgid "Text"
 msgstr "Текст"
 
-#: learning/forms.py:88 learning/models.py:40 learning/models.py:912
+#: learning/forms.py:88 learning/models.py:40 learning/models.py:915
 #: users/models.py:311 users/models.py:329
 msgid "Course|name"
 msgstr "Название"
@@ -290,11 +292,11 @@ msgstr "Имя для URL"
 
 #: learning/models.py:44 news/models.py:32
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/"
-"<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in test.com/news/<b"
+">some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
-"com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
+"test.com/news/<b>some-news</b>/"
 
 #: learning/models.py:54 learning/models.py:156
 #: templates/learning/assignment_list_student.html:49
@@ -322,12 +324,12 @@ msgstr "Год"
 msgid "Semester|type"
 msgstr "Тип"
 
-#: learning/models.py:84 learning/models.py:166
+#: learning/models.py:84 learning/models.py:166 learning/models.py:864
 #: templates/learning/courses/list_student.html:88 users/models.py:333
 msgid "Semester"
 msgstr "Семестр"
 
-#: learning/models.py:85 learning/models.py:858
+#: learning/models.py:85
 msgid "Semesters"
 msgstr "Семестры"
 
@@ -337,8 +339,8 @@ msgstr "Преподаватели"
 
 #: learning/models.py:170
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
-"description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
+" description"
 msgstr ""
 "доступны LaTeX, Markdown и HTML; пустое описание будет заменено на описание "
 "курса"
@@ -717,71 +719,76 @@ msgstr "НИР"
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: learning/models.py:851 templates/users/user_detail.html:57
+#: learning/models.py:853
+#| msgid "Student"
+msgid "Students"
+msgstr "Студенты"
+
+#: learning/models.py:858 templates/users/user_detail.html:57
 msgid "StudentProject|Supervisor"
 msgstr "Руководитель"
 
-#: learning/models.py:853
+#: learning/models.py:860
 msgid "Format: Last_name First_name Patronymic, Organization"
 msgstr "Формат: Фамилия Имя Отчество, Организация"
 
-#: learning/models.py:861
+#: learning/models.py:867
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: learning/models.py:864 templates/users/user_detail.html:56
+#: learning/models.py:870 templates/users/user_detail.html:56
 msgid "Presentation"
 msgstr "Презентация"
 
-#: learning/models.py:872
+#: learning/models.py:878
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: learning/models.py:873 templates/users/user_detail.html:51
+#: learning/models.py:879 templates/users/user_detail.html:51
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
-#: learning/models.py:898
+#: learning/models.py:901
 msgid "PK|Code"
 msgstr "Код"
 
-#: learning/models.py:899
+#: learning/models.py:902
 msgid "StudyProgram|Name"
 msgstr "Название"
 
-#: learning/models.py:903
+#: learning/models.py:906
 msgid "Study program"
 msgstr "Учебная программа"
 
-#: learning/models.py:904
+#: learning/models.py:907
 msgid "Study programs"
 msgstr "Учебные программы"
 
-#: learning/models.py:914
+#: learning/models.py:917
 msgid "Online Course|teachers"
 msgstr "Преподаватели"
 
-#: learning/models.py:917
+#: learning/models.py:920
 msgid "Online Course|description"
 msgstr "Описание онлайн-курса"
 
-#: learning/models.py:920
+#: learning/models.py:923
 msgid "Online Course|Link"
 msgstr "Ссылка на курс"
 
-#: learning/models.py:922
+#: learning/models.py:925
 msgid "Online Course|photo"
 msgstr "Фото"
 
-#: learning/models.py:926
+#: learning/models.py:929
 msgid "Collaboration with AY"
 msgstr "Совместно с АУ"
 
-#: learning/models.py:932
+#: learning/models.py:935
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: learning/models.py:933 templates/users/user_detail.html:92
+#: learning/models.py:936 templates/users/user_detail.html:92
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -1147,8 +1154,8 @@ msgstr "Перейти к курсу"
 
 #: templates/learning/_onlinecourse_list__row.html:21
 msgid ""
-"The course was developed in collaboration with the <a href='http://mit.spbau."
-"ru/'>Academic University</a>."
+"The course was developed in collaboration with the <a "
+"href='http://mit.spbau.ru/'>Academic University</a>."
 msgstr ""
 "Курс подготовлен совместно с <a href='http://mit.spbau.ru/'>Академическим "
 "университетом</a>."
@@ -1364,16 +1371,13 @@ msgstr "Записаться"
 #: templates/learning/courseoffering_detail.html:62
 msgid ""
 "\n"
-"                Enroll in the course to get notifications and to be able to "
-"submit home assignments.<br>\n"
-"                <a class=\"btn btn-success\" href=\"/register/\">Register to "
-"enroll now</a>\n"
+"                Enroll in the course to get notifications and to be able to submit home assignments.<br>\n"
+"                <a class=\"btn btn-success\" href=\"/register/\">Register to enroll now</a>\n"
 "              "
 msgstr ""
 "\n"
 "Запишитесь на курс, чтобы получать уведомления и\n"
-"иметь возможность сдавать домашние задания. Для записи требуется регистрация "
-"на сайте.<br>\n"
+"иметь возможность сдавать домашние задания. Для записи требуется регистрация на сайте.<br>\n"
 "<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a>"
 
 #: templates/learning/courseoffering_detail.html:96
@@ -1502,10 +1506,7 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter."
-"ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора "
-"книги и её названия. Обратите внимание: мы не можем выдать книги, которые "
-"сейчас читают другие студенты."
+"Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
 
 #: templates/library/book_list.html:31
 msgid "Book|number of copies left"
@@ -1591,8 +1592,7 @@ msgstr "СПРАВКА"
 #, python-format
 msgid ""
 "Подтверждаю, что %(full_name)s является студентом Computer Science центра с\n"
-"            сентября %(enrollment_year)s года. За время обучения "
-"%(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
+"            сентября %(enrollment_year)s года. За время обучения %(first_name)s %(patronymic)s успешно сдал(а) следующие курсы:\n"
 "            "
 msgstr ""
 

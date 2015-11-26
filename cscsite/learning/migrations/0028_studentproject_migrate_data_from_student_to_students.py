@@ -7,18 +7,13 @@ def forwards(apps, schema_editor):
     StudentProjectClass = apps.get_model('learning', 'StudentProject')
     student_projects = StudentProjectClass.objects.all()
     for project in student_projects:
-        count = 0
-        for semester in project.semesters.all():
-            count += 1
-            if count > 1:
-                print("More then one semester for project {}".format(project.pk))
-            project.semester_id = semester.pk
-            project.save()
+        project.students.add(project.student.pk)
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('learning', '0023_studentproject_semester'),
+        ('learning', '0027_studentproject_students'),
+        ('users', '0004_remove_cscuser_is_center_student'),
     ]
 
     operations = [
