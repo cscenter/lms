@@ -855,7 +855,6 @@ class StudentProject(TimeStampedModel):
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
-        related_name="semester_related",
         verbose_name=_("Semester"))
     project_type = models.CharField(
         choices=PROJECT_TYPES,
