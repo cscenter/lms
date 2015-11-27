@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect
+from django.utils.timezone import now
 from django.utils.translation import get_language, ugettext_lazy as _
 from django.views import generic
 
@@ -55,7 +56,8 @@ class IndexView(generic.TemplateView):
             cache.set('index_page_testimonials', testimonials, 3600)
         context['testimonials'] = testimonials
         # Don't care about performance for online courses
-        pool = list(OnlineCourse.objects.order_by("start", "name").all())
+        today = now().date()
+        pool = list(OnlineCourse.objects.filter(end__gt=today).order_by("start", "name").all())
         random.shuffle(pool)
         context['online_courses'] = pool[:1]
         return context

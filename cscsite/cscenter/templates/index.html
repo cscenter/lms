@@ -21,88 +21,138 @@
     </a>
     </div>
 </div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Nav tabs -->
+            <div class="card">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#home"
+                                                              aria-controls="home"
+                                                              role="tab"
+                                                              data-toggle="tab">Home</a>
+                    </li>
+                    <li role="presentation"><a href="#profile"
+                                               aria-controls="profile"
+                                               role="tab" data-toggle="tab">Profile</a>
+                    </li>
+                    <li role="presentation"><a href="#messages"
+                                               aria-controls="messages"
+                                               role="tab" data-toggle="tab">Messages</a>
+                    </li>
+                    <li role="presentation"><a href="#settings"
+                                               aria-controls="settings"
+                                               role="tab" data-toggle="tab">Settings</a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        Lorem Ipsum is simply dummy text of the printing and
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="profile">Lorem
+                        Ipsum is simply dummy text of the printing and
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="messages">
+                        Lorem Ipsum is simply dummy text of the printing and
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="settings">
+                        Lorem Ipsum is simply dummy text of the printing and
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endcomment %}
 
 
 <div class="index-image-container"></div>
-
-
-{% if courses %}
-    <div id="courses">
-        <div class="index-header">
-            <h1>{% trans "Courses" %}</h1>
-            <a href="{% url 'course_list' %}">{% trans "See all courses" %}</a>
-        </div>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th class="_semester">{% trans "Semester" %}</th>
-                    <th>{% trans "Name" %}</th>
-                    <th>{% trans "Teachers" %}</th>
-                    <th class="_lec_cnt">{% trans "Classes" %}</th>
-                    <th class="_video">{% trans "Video" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course_offering in courses %}
-                        <tr>
-                            <td>{{ course_offering.semester }}</td>
-                            <td>
-                                <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
-                            </td>
-                            <td>
-                                {% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
-                            </td>
-                            <td>{{ course_offering.courseclass__count }}</td>
-                            <td><i class="fa fa-check"></i></td>
-                        </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endif %}
-
-
-
-{% if testimonials %}
-    <div class="testimonials">
-        <div class="index-header">
-            <h1>{% trans "Graduates about CS Center" %}</h1>
-            <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
-        </div>
-        <div class="row">
-            {% for student in testimonials %}
-            <div class="col-md-12">
-                <div class="testimonial">
-                    <blockquote>
-                        {% markdown 3600 "csc_review" student.pk student.modified %}
-                            {{ student.csc_review }}
-                        {% endmarkdown %}
-                    </blockquote>
-                    <div>
-                        {% thumbnail student.photo "200x200" crop="center" as im %}
-                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
-                        <span>{{ student.get_full_name }}</span> {% trans "Graduation" %} {{ student.graduation_year }}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div> 
-    </div>
-{% endif %}
-
-
 
 {% if online_courses %}
     <div id="index-online-courses">
         <div id="onlinecourses-list">
             <div class="index-header">
                 <h1>{% trans "Online courses" %}</h1>
-                <a href="{% url 'onlinecourses_list' %}">{% trans "All courses" %}</a>
+                <a href="{% url 'onlinecourses_list' %}">{% trans "All online courses" %}</a>
             </div>
             {% for online_course in online_courses %}
                 {% include "learning/_onlinecourse_list__row.html" %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+{% if testimonials %}
+    <div class="testimonials-wrapper">
+        <div class="testimonials">
+            <div class="index-header">
+                <h1>{% trans "Graduates about CS Center" %}</h1>
+                <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
+            </div>
+            <div class="row">
+                {% for student in testimonials %}
+                <div class="col-md-12">
+                    <div class="testimonial">
+                        <blockquote>
+                            {% markdown 3600 "csc_review" student.pk student.modified %}
+                                {{ student.csc_review }}
+                            {% endmarkdown %}
+                        </blockquote>
+                        <div>
+                            {% thumbnail student.photo "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            {% endthumbnail %}
+                            <span>{{ student.get_full_name }}</span> {% trans "Graduation" %} {{ student.graduation_year }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if courses %}
+    <div id="courses">
+        <div class="index-header">
+            <h1>{% trans "Full-time courses on video" %}</h1>
+            <a href="{% url 'course_list' %}">{% trans "All courses" %}</a>
+        </div>
+
+        <div class="row">
+            {% for course_offering in courses %}
+                <div class="col-xs-4">
+                    <div class="card">
+                        <div class="card-header ch-alt m-b-20">
+                            <h2>{{ course_offering.course.name }}</h2>
+                        </div>
+
+                        <div class="card-body card-padding">
+
+                            <ul class="list-group list-group-dividered list-group-full">
+                                <li class="list-group-item">
+                                    <strong>{% trans "Semester" %}</strong>:<br> {{ course_offering.semester }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>{% trans "Teachers" %}</strong>:<br>
+                                    {% for teacher in course_offering.teachers.all %}
+                                        <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </li>
+                                <li class="list-group-item">
+                                    {% blocktrans count counter=course_offering.courseclass__count %}{{ counter }} class{% plural %}{{ counter }} classes{% endblocktrans %}
+                                    <span class="label label-outline label-primary"><i class="fa fa-check"></i> {% trans "Lectures video" %}</span>
+                                </li>
+                            </ul>
+                        <a href="{{ course_offering.get_absolute_url }}" class="btn btn-outline btn-block btn-primary">Посмотреть курс</a>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
         </div>
     </div>
@@ -135,4 +185,5 @@
         </div>
     </div>
 </div>
+
 {% endblock content %}
