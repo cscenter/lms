@@ -236,16 +236,13 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = (super(UserReferenceDetailView, self)
                    .get_context_data(*args, **kwargs))
-        enrollments_query = (self.object.student.enrollment_set
-            .filter(created__lte=self.object.created)
-            .exclude(grade__in=['not_graded', 'unsatisfactory'])
-            .select_related('course_offering',
-                            'course_offering__course',
-                            'course_offering__semester')
-            .order_by('pk'))
-        # remove duplicates (store enrollment with higher grade)
+        student_info = CSCUser.objects.students_info().get(
+            pk=self.object.student.pk)
         enrollments = {}
-        for e in enrollments_query:
+        # From duplicated enrollments get one with higher grade
+        for e in student_info.enrollments:
+            if e.created > self.object.created:
+                continue
             course_id = e.course_offering.course_id
             if course_id in enrollments:
                 if e.grade > enrollments[course_id].grade:
@@ -253,6 +250,11 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
             else:
                 enrollments[course_id] = e
         context['user_enrollments'] = enrollments
+        context['shads'] = filter(lambda x: x.created < self.object.created,
+                                  student_info.shads)
+        context['online_courses'] = filter(
+            lambda x: x.created < self.object.created,
+            student_info.online_courses)
 
         return context
 
