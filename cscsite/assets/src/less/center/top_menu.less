@@ -55,6 +55,41 @@
 
         &.for-teachers {
             background-color: #A6A8CD;
+
+            li {
+                &:hover {
+                    background-color: #787AAE;
+                }
+
+                &.current {
+                    background-color: #515492 !important;
+                }
+            }
+        }
+
+        &.for-staff {
+            background-color: #bad896;
+
+            li {
+                &:hover {
+                    background-color: darken(#bad896, 10%);
+                    a {
+                        color: #fff;
+                    }
+                }
+
+                &.current {
+                    background-color: darken(#bad896, 20%)!important;
+                    a {
+                        color: #fff;
+                    }
+                }
+
+                a {
+                    color: #37474f;
+                    font-weight:400;
+                }
+            }
         }
     }
 
@@ -120,35 +155,3 @@
         z-index: 1000;
     }
 }
-
-
-
-
-
-
-li.for-teachers.current {
-  background-color: #515492 !important;
-}
-.header.for-teachers li:hover {
-  background-color: #787AAE;
-}
-.header.for-teachers li.current {
-  background-color: #515492 !important;
-}
-
-.header.lvl2.for-staff {
-  background-color: #E4C46C;
-}
-.header.lvl2.for-staff .row {
-  background-color: #E4C46C;
-}
-li.for-staff.current {
-  background-color: #D3B665 !important;
-}
-.header.for-staff li:hover {
-  background-color: #DBBD68;
-}
-.header.for-staff li.current {
-  background-color: #D3B665 !important;
-}
-
