@@ -518,7 +518,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = UserFactory.create(groups=[CSCUser.group_pks.STUDENT_CLUB])
+        student = UserFactory.create(groups=[CSCUser.group_pks.STUDENT_CENTER])
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
