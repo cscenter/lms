@@ -252,9 +252,6 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
         context['user_enrollments'] = enrollments
         context['shads'] = filter(lambda x: x.created < self.object.created,
                                   student_info.shads)
-        context['online_courses'] = filter(
-            lambda x: x.created < self.object.created,
-            student_info.online_courses)
 
         return context
 
