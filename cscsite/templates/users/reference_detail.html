@@ -26,12 +26,7 @@
                 {% endfor %}
                 {% for shad in shads %}
                     <li>
-                    {{ shad.name }}
-                    </li>
-                {% endfor %}
-                {% for course in online_courses %}
-                    <li>
-                    {{ course.name }}
+                    {{ shad.name }} ({{ shad.grade_display|lower }})
                     </li>
                 {% endfor %}
             </ol>
