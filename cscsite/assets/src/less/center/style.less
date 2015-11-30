@@ -41,6 +41,11 @@ h4.no-top-margin {
 
 .container {
   width: @min-width !important;
+
+  &.container-responsive {
+    width: 90% !important;
+    min-width: @min-width;
+  }
 }
 
 .container.inner {
@@ -330,20 +335,19 @@ h5.assignment {
 }
 
 .marks-table-container-outer {
-  width: 920px;
   margin-bottom: 15px;
   padding-bottom: 15px;
   position: relative;
+
+  .marks-table-container-inner {
+    margin-left: 135px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
-.marks-table-container-inner {
-  margin-left: 135px;
-  width: 785px;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-  -webkit-overflow-scrolling: touch;
-}
 
 .marks-table {
   table-layout: fixed;
