@@ -114,7 +114,7 @@ class NonCourseEventAdmin(admin.ModelAdmin):
 
 
 class StudentProjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'project_type']
+    list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
 
 
