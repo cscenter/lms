@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-11-27 17:23+0300\n"
-"PO-Revision-Date: 2015-11-27 17:23+0230\n"
+"PO-Revision-Date: 2015-11-30 15:25+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -112,7 +112,7 @@ msgstr ""
 
 #: cscenter/templates/index.html:193
 msgid "Full-time courses on video"
-msgstr "Видео-записи очных курсов"
+msgstr "Видео очных курсов"
 
 #: cscenter/templates/index.html:194
 #| msgid "See all courses"
