@@ -180,10 +180,8 @@ class UserDetailView(generic.DetailView):
             a_ss = (AssignmentStudent.objects
                     .filter(student=self.object)
                     .filter(assignment__course_offering__semester_id=context['current_semester'].id)
-                    .order_by('assignment__course_offering__semester__year',
-                              '-assignment__course_offering__semester__type',
-                              'assignment__course_offering__course__name',
-                              'assignment__deadline_at')
+                    .order_by('assignment__course_offering__course__name',
+                              'assignment__deadline_at',)
                     .select_related(*related))
             # NOTE(Dmitry): this is needed to skip duplicated CourseOfferings
             #               in the table (works if objs are sorted by
