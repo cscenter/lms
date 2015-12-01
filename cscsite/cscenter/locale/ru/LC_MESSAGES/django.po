@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-27 17:23+0300\n"
-"PO-Revision-Date: 2015-11-30 15:25+0230\n"
+"POT-Creation-Date: 2015-12-01 12:53+0300\n"
+"PO-Revision-Date: 2015-12-01 12:54+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -62,64 +62,28 @@ msgstr "Все выпускники"
 msgid "Graduation"
 msgstr "Выпуск"
 
-#: cscenter/templates/index.html:127
-msgid "Full-time courses"
-msgstr "Очные курсы"
-
-#: cscenter/templates/index.html:128
-msgid "See all courses"
-msgstr "Посмотреть все курсы"
-
-#: cscenter/templates/index.html:133 cscenter/templates/index.html.py:209
-msgid "Semester"
-msgstr ""
-
-#: cscenter/templates/index.html:134
-msgid "Name"
-msgstr ""
-
-#: cscenter/templates/index.html:135 cscenter/templates/index.html.py:212
-msgid "Teachers"
-msgstr ""
-
-#: cscenter/templates/index.html:136
-msgid "Classes"
-msgstr "Занятий"
-
-#: cscenter/templates/index.html:137
-msgid "Video"
-msgstr "Видео"
-
-#: cscenter/templates/index.html:161
-msgid "Supported by"
-msgstr "При поддержке"
-
-#: cscenter/templates/index.html:166
-msgid "Yandex School of Data Analysis"
-msgstr "Яндекс ШАД"
-
-#: cscenter/templates/index.html:171
-msgid "JetBrains"
-msgstr ""
-
-#: cscenter/templates/index.html:176
-msgid "FML #239"
-msgstr "ФМЛ №239"
-
-#: cscenter/templates/index.html:181
-msgid "Computer Science Club"
-msgstr ""
-
-#: cscenter/templates/index.html:193
+#: cscenter/templates/index.html:124
 msgid "Full-time courses on video"
 msgstr "Видео очных курсов"
 
-#: cscenter/templates/index.html:194
-#| msgid "See all courses"
+#: cscenter/templates/index.html:125
 msgid "All courses"
 msgstr "Все курсы"
 
-#: cscenter/templates/index.html:218
+#: cscenter/templates/index.html:125
+#| msgid "All online courses"
+msgid "All video courses"
+msgstr "Все курсы с видео"
+
+#: cscenter/templates/index.html:140
+msgid "Semester"
+msgstr ""
+
+#: cscenter/templates/index.html:143
+msgid "Teachers"
+msgstr ""
+
+#: cscenter/templates/index.html:148
 #, python-format
 msgid "%(counter)s class"
 msgid_plural "%(counter)s classes"
@@ -127,9 +91,41 @@ msgstr[0] "%(counter)s занятие"
 msgstr[1] "%(counter)s занятия"
 msgstr[2] "%(counter)s занятий"
 
-#: cscenter/templates/index.html:219
+#: cscenter/templates/index.html:149
 msgid "Lectures video"
 msgstr "есть видео"
+
+#: cscenter/templates/index.html:163
+msgid "Supported by"
+msgstr "При поддержке"
+
+#: cscenter/templates/index.html:168
+msgid "Yandex School of Data Analysis"
+msgstr "Яндекс ШАД"
+
+#: cscenter/templates/index.html:173
+msgid "JetBrains"
+msgstr ""
+
+#: cscenter/templates/index.html:178
+msgid "FML #239"
+msgstr "ФМЛ №239"
+
+#: cscenter/templates/index.html:183
+msgid "Computer Science Club"
+msgstr ""
+
+#~ msgid "Full-time courses"
+#~ msgstr "Очные курсы"
+
+#~ msgid "See all courses"
+#~ msgstr "Посмотреть все курсы"
+
+#~ msgid "Classes"
+#~ msgstr "Занятий"
+
+#~ msgid "Video"
+#~ msgstr "Видео"
 
 #~ msgid "Courses"
 #~ msgstr "Курсы"

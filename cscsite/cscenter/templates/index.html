@@ -122,7 +122,7 @@
     <div id="courses">
         <div class="index-header">
             <h1>{% trans "Full-time courses on video" %}</h1>
-            <a href="{% url 'course_list' %}">{% trans "All courses" %}</a>
+            <a href="{% url 'course_list' %}">{% trans "All courses" %}</a><a href="{% url 'course_video_list' %}">{% trans "All video courses" %}</a>
         </div>
 
         <div class="row">
@@ -137,7 +137,7 @@
 
                             <ul class="list-group list-group-dividered list-group-full">
                                 <li class="list-group-item">
-                                    <strong>{% trans "Semester" %}</strong>:<br> {{ course_offering.semester }}
+                                    <strong>{% trans "Semester" %}</strong>: {{ course_offering.semester }}
                                 </li>
                                 <li class="list-group-item">
                                     <strong>{% trans "Teachers" %}</strong>:<br>
