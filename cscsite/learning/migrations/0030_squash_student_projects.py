@@ -6,7 +6,8 @@ from django.db import migrations, models
 
 def forwards(apps, schema_editor):
     StudentProjectClass = apps.get_model('learning', 'StudentProject')
-    student_projects = StudentProjectClass.objects.order_by("name").all()
+    student_projects = StudentProjectClass.objects.order_by("name",
+                                                            "semester_id").all()
     for name, group_by_name in groupby(student_projects,
                                        key=lambda x: (x.name, x.semester_id)):
         group = list(group_by_name)
