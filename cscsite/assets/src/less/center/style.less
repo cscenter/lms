@@ -103,7 +103,7 @@ html {
     }
 
     i {
-        vertical-align: middle;
+      vertical-align: middle;
     }
   }
 }
@@ -112,7 +112,6 @@ html {
   color: #AAA;
   text-align: right;
 }
-
 
 .callout h1 {
   margin-top: 50px;
@@ -135,9 +134,6 @@ html {
 .callout-buttons a {
   margin: 30px 15px;
 }
-
-
-
 
 .col-container {
   width: 940px;
@@ -227,7 +223,9 @@ h2 small a {
   border-radius: 0px !important;
 }
 
-.badge.lecture, .badge.seminar { width: 6em; }
+.badge.lecture, .badge.seminar {
+  width: 6em;
+}
 
 .csc-well {
   background-color: #F1F1F1;
@@ -244,25 +242,23 @@ h5.assignment {
   color: #999;
 }
 
-
-
 .assignment-comment {
-    .metainfo {
-      color: #999;
+  .metainfo {
+    color: #999;
 
-      &.first {
-        color: #888;
-        font-weight: bold;
-      }
+    &.first {
+      color: #888;
+      font-weight: bold;
     }
+  }
 
-    .metainfo-holder {
-      min-height: 20px;
-    }
+  .metainfo-holder {
+    min-height: 20px;
+  }
 
-    hr {
-      border-color: #CFCFCF;
-    }
+  hr {
+    border-color: #CFCFCF;
+  }
 }
 
 .comment-list {
@@ -348,7 +344,6 @@ h5.assignment {
   }
 }
 
-
 .marks-table {
   table-layout: fixed;
 }
@@ -376,11 +371,11 @@ h5.assignment {
   filter: flipv fliph;
   /* CSS3 specific totation code */
   /* translate should have the same negative dimension as head height */
-  transform: rotate(315deg) translate(-9em,10em);
+  transform: rotate(315deg) translate(-9em, 10em);
   transform-origin: 0 0;
-  -moz-transform: rotate(315deg) translate(-9em,10em);
+  -moz-transform: rotate(315deg) translate(-9em, 10em);
   -moz-transform-origin: 0 0;
-  -webkit-transform: rotate(315deg) translate(-9em,10em);
+  -webkit-transform: rotate(315deg) translate(-9em, 10em);
   -webkit-transform-origin: 0 0;
 }
 
@@ -401,14 +396,14 @@ h5.assignment {
 
 .marks-table.staff.focused td.content {
   color: transparent;
-  text-shadow: 0 0 3px rgba(0,0,0,0.5);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
   opacity: 0.7;
   z-index: -5;
 }
 
 .marks-table.staff.focused td.content.enrolled {
   color: transparent;
-  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
   opacity: 0.7;
   z-index: -5;
@@ -510,13 +505,14 @@ h5.assignment {
     .not-in-semester {
       background-color: #EEE;
 
-    .day {
-      color: #CCC;
-    }
+      .day {
+        color: #CCC;
+      }
     }
   }
 
 }
+
 div.week-num-container {
   position: relative;
 }
@@ -527,7 +523,6 @@ div.week-num {
   font-weight: bold;
   color: #666;
 }
-
 
 .assignment-status {
   color: #fff;
@@ -565,9 +560,11 @@ div.week-num {
 .assignment-date.tomorrow {
   color: @color-red;
 }
+
 .assignment-date.today {
   color: @color-red;
 }
+
 .assignment-date.day-after-tomorrow {
   color: @color-orange;
 }
@@ -584,7 +581,7 @@ tr.unread {
   margin-bottom: 0px !important;
 }
 
-.marks-sheet-form-cell>input[type="number"] {
+.marks-sheet-form-cell > input[type="number"] {
   width: 43px;
 }
 
@@ -598,11 +595,29 @@ tr.unread {
   margin-left: 3px;
 }
 
-#course-list > li:first-child { padding-left: 5px !important; }
+#course-list > li:first-child {
+  padding-left: 5px !important;
+}
 
-.semester-course-list ul { padding-left: 15px; }
+.semester-course-list ul {
+  padding-left: 15px;
+}
 
-.course-offering-profs ul > li { padding-bottom: 10px; }
+.course-offering-profs {
+  ul {
+
+    li {
+      padding-bottom: 10px;
+      &:extend(.clearfix all);
+
+      img {
+        float: left;
+        margin-right: 10px;
+      }
+    }
+
+  }
+}
 
 .input-grade {
   width: 100px !important;
@@ -676,7 +691,7 @@ tr.unread {
 }
 
 .scrollable-menu {
-    height: auto;
-    max-height: 600px;
-    overflow-x: hidden;
+  height: auto;
+  max-height: 600px;
+  overflow-x: hidden;
 }
