@@ -660,7 +660,21 @@ tr.unread {
 
 .semester-course-list ul { padding-left: 15px; }
 
-.course-offering-profs ul > li { padding-bottom: 10px; }
+.course-offering-profs {
+  ul {
+
+    li {
+      padding-bottom: 10px;
+      &:extend(.clearfix all);
+
+      img {
+        float: left;
+        margin-right: 10px;
+      }
+    }
+
+  }
+}
 
 .input-grade {
   width: 100px !important;

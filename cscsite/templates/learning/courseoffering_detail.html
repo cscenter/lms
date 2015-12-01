@@ -83,7 +83,7 @@
         {% for teacher in course_offering.teachers.all %}
         <li>
           <a href="{% url 'teacher_detail' teacher.pk %}">
-          {% thumbnail teacher.photo "50x50" crop="center" as im %}
+          {% thumbnail teacher.photo "60x60" crop="center" as im %}
           <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
           {% endthumbnail %}
           {{ teacher.get_full_name }}
