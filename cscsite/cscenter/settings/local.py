@@ -67,6 +67,11 @@ LOGGING = {
             'propagate': False,
             'level': 'DEBUG',
         },
+        'learning.models': {
+            'handlers': ['console'],
+            'propagate': False,
+            'level': 'DEBUG',
+        },
     },
 }
 

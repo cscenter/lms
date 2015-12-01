@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import logging
 import os.path
 import time
 
@@ -33,6 +34,8 @@ from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
 from .utils import get_current_semester_pair
 
 from users.models import CSCUser
+
+logger = logging.getLogger(__name__)
 
 
 @python_2_unicode_compatible
@@ -386,8 +389,13 @@ class CourseClass(TimeStampedModel, object):
     def video_oembed(self):
         if not self.video_url:
             return ""
-
-        [(_url, embed)] = extract_oembed(self.video_url)
+        try:
+            [(_url, embed)] = extract_oembed(self.video_url)
+        except ValueError:
+            logger.info("Extract oembed error. Return default iframe")
+            embed = dict(
+                html="<iframe src={} allowfullscreen=1></iframe>".format(
+                    self.video_url))
         return embed
 
     # TODO: test this
@@ -873,6 +881,9 @@ class StudentProject(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
+
+    def get_absolute_url(self):
+        return self.student.get_absolute_url()
 
     # this is needed to share code between CourseClasses and this model
     @property
