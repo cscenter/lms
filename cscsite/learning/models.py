@@ -11,6 +11,8 @@ import dateutil.parser as dparser
 # TODO: investigate `from annoying.fields import AutoOneToOneField`
 from django.db import models
 from django.conf import settings
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.urlresolvers import reverse
@@ -385,17 +387,21 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
 
-    @cached_property
     def video_oembed(self):
         if not self.video_url:
             return ""
-        try:
-            [(_url, embed)] = extract_oembed(self.video_url)
-        except ValueError:
-            logger.info("Extract oembed error. Return default iframe")
-            embed = dict(
-                html="<iframe src={} allowfullscreen=1></iframe>".format(
-                    self.video_url))
+        cache_key = make_template_fragment_key('video_oembed',
+                                               [self.pk, self.video_url])
+        embed = cache.get(cache_key)
+        if not embed:
+            try:
+                [(_url, embed)] = extract_oembed(self.video_url)
+                cache.set(cache_key, embed, 3600 * 2)
+            except ValueError:
+                logger.info("Extract oembed error. Return default iframe")
+                embed = dict(
+                    html="<iframe src={} allowfullscreen=1></iframe>".format(
+                        self.video_url))
         return embed
 
     # TODO: test this
