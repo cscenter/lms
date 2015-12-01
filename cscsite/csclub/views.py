@@ -57,7 +57,7 @@ class IndexView(generic.TemplateView):
                     to_attr='classes'
                 ),
             )
-            .order_by('course__name'))
+            .order_by('is_completed', 'course__name'))
 
         return context
 
