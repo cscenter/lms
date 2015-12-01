@@ -36,6 +36,14 @@ $ python cscsite/manage.py syncdb --settings=cscenter.settings.local
 
 * run with `python manage.py runserver --settings=cscenter.settings.local`
 
+## Recreate DB snippet
+
+    psql -h localhost postgres -c "DROP DATABASE cscdb;"
+    psql -h localhost postgres -c "CREATE DATABASE cscdb;"
+    psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
+    psql -h localhost cscdb csc < /path/to/dump.sql
+    cscsite/manage.py changepassword admin
+
 
 Production setup
 ----------------
