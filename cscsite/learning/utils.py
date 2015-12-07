@@ -135,6 +135,9 @@ def import_yandex(request, selected_assignment):
     from learning.models import AssignmentStudent, Assignment
     from users.models import CSCUser
 
+    assignment_id = int(selected_assignment.pk)
+    assert assignment_id > 0
+
     def update_score(assignment_id, user, score):
         try:
             a_s = (AssignmentStudent.objects
@@ -148,17 +151,21 @@ def import_yandex(request, selected_assignment):
         a_s.save()
         return True
 
+
     f = request.FILES['csvfile']
-    reader = csv.DictReader(iter(f), fieldnames=['user_id'], restkey='as_ids')
+    reader = csv.DictReader(iter(f))
     total = 0
     success = 0
     response = {'success': 0, 'total': 0, 'errors': []}
     # skip real headers
-    reader.next()
-    headers = ['user_id', selected_assignment.pk]
-    for entry in reader:
-        total += len(headers) - 1
-        yandex_id = entry['user_id'].strip()
+    headers = reader.next()
+    if "login" not in headers or "total" not in headers:
+        messages.error(request, "ERROR: `login` or `total` header not found")
+        return response
+
+    for row in reader:
+        total += 1
+        yandex_id = row['login'].strip()
         try:
             user = CSCUser.objects.get(yandex_id__iexact=yandex_id)
         except ObjectDoesNotExist:
@@ -171,12 +178,11 @@ def import_yandex(request, selected_assignment):
             messages.error(request, msg)
             continue
 
-        for assignment_id, score in zip(headers[1:], entry[reader.restkey]):
-            points = int(ceil(float(score)))
-            res = update_score(int(assignment_id), user, points)
-            success += int(res)
-            logger.debug("Wrote {} points for user {} on assignment {}"
-                         .format(points, user.pk, assignment_id))
+        points = int(ceil(float(row['total'])))
+        res = update_score(assignment_id, user, points)
+        success += int(res)
+        logger.debug("Wrote {} points for user {} on assignment {}"
+                     .format(points, user.pk, assignment_id))
     logger.debug("{}/{} successes".format(success, total))
     response['success'], response['total'] = success, total
     return response
