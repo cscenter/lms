@@ -470,7 +470,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         is_actual_teacher = (self.request.user.is_authenticated() and
                              self.request.user in self.object.teachers.all())
         context['is_actual_teacher'] = is_actual_teacher
-        assignments = self.object.assignment_set.all().order_by('created')
+        assignments = self.object.assignment_set.all().order_by('deadline_at', 'title')
         for assignment in assignments:
             if is_actual_teacher or \
               (self.request.user.is_authenticated() and
