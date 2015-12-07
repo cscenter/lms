@@ -2,6 +2,12 @@
 # TODO (critical):
 * install and configure memcached
 * restore db and media/ with playbook
+* `apt-get install ntpd` with servers in /etc/ntp.conf
+    server ru.pool.ntp.org
+    server pool.ntp.org
+    server time.nist.gov
+    server ntp.psn.ru
+    server ntp1.imvp.ru
 
 
 TODO (important):

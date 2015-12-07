@@ -7,7 +7,7 @@ from math import ceil
 import dateutil.parser as dparser
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -160,12 +160,17 @@ def import_yandex(request, selected_assignment):
         total += len(headers) - 1
         yandex_id = entry['user_id'].strip()
         try:
-            user = CSCUser.objects.get(yandex_id=yandex_id)
+            user = CSCUser.objects.get(yandex_id__iexact=yandex_id)
         except ObjectDoesNotExist:
             msg = _("No user with Yandex ID {}").format(yandex_id)
             logger.debug(msg)
             messages.error(request, msg)
             continue
+        except MultipleObjectsReturned:
+            msg = _("Multiple user with Yandex ID {}").format(yandex_id)
+            messages.error(request, msg)
+            continue
+
         for assignment_id, score in zip(headers[1:], entry[reader.restkey]):
             points = int(ceil(float(score)))
             res = update_score(int(assignment_id), user, points)
