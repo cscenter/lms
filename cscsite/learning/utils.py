@@ -200,7 +200,6 @@ class ImportGradesByStepicID(ImportGrades):
             msg = "User ID {} with stepic ID {} doesn't have an assignment " \
                   "{}".format(user.pk, user.stepic_id, assignment_id)
             logger.debug(msg)
-            self.errors.append(msg)
             return False
         a_s.grade = score
         a_s.save()
@@ -257,7 +256,6 @@ class ImportGradesByYandexLogin(ImportGrades):
             msg = "User ID {} with Yandex ID {} doesn't have an assignment " \
                   "{}".format(user.pk, user.yandex_id, assignment_id)
             logger.debug(msg)
-            self.errors.append(msg)
             return False
         a_s.grade = score
         a_s.save()
