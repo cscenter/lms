@@ -118,7 +118,7 @@ class ImportGrades(object):
         return self.import_results()
 
     def validate_headers(self):
-        headers = self.reader.next()
+        headers = self.reader.fieldnames
         valid = True
         for header in self.headers:
             if header not in headers:

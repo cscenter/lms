@@ -10,7 +10,7 @@ import pytz
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from learning.utils import get_current_semester_pair, split_list, import_stepic
+from learning.utils import get_current_semester_pair, split_list, ImportGradesByStepicID
 from ..factories import *
 
 
@@ -34,7 +34,7 @@ class UtilTests(TestCase):
         self.assertEquals(([], xs), split_list(xs, lambda x: False))
 
 
-    @patch('django.contrib.messages.error')
+    @patch('django.contrib.messages.api.add_message')
     def test_import_stepic(self, mock_messages):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
@@ -45,12 +45,12 @@ class UtilTests(TestCase):
         assignments = AssignmentFactory.create_batch(3, course_offering=co)
         assignment = assignments[0]
         expected_grade = 13
-        csv_input = ('user_id,всего\n' + 
-                      str(student.stepic_id) + ',' + str(expected_grade) +
-                      '\n').encode('utf-8')
+        csv_input = ('user_id,total\n' +
+                     "{},{}\n".format(student.stepic_id,
+                                      expected_grade)).encode('utf-8')
         request = MagicMock()
         request.FILES = {'csvfile': cStringIO.StringIO(csv_input)}
-        import_stepic(request, assignment)
+        ImportGradesByStepicID(request, assignment).process()
         a_s = AssignmentStudent.objects.get(student=student,
                                             assignment=assignment)
         self.assertEquals(a_s.grade, expected_grade)
