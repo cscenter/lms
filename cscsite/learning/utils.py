@@ -1,4 +1,4 @@
-import csv
+import unicodecsv
 import datetime
 import itertools
 import logging
@@ -7,7 +7,7 @@ from math import ceil
 import dateutil.parser as dparser
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError, ImproperlyConfigured
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -85,104 +85,184 @@ def co_from_kwargs(kwargs):
     return (course_slug, semester_year, semester_type)
 
 
-def import_stepic(request, selected_assignment):
-    from learning.models import AssignmentStudent, Assignment
-    from users.models import CSCUser
+class ImportGrades(object):
 
-    def update_score(assignment_id, user, score):
+    headers = []
+
+    def __init__(self, request, assignment):
+        self.assignment = assignment
+        self.request = request
+        file = request.FILES['csvfile']
+        self.reader = unicodecsv.DictReader(iter(file))
+        self.total = 0
+        self.success = 0
+        self.errors = []
+        if not self.headers:
+            raise ImproperlyConfigured(
+                "subclasses of ImportGrade must provide headers attribute")
+
+    def process(self):
+        if not self.validate_headers():
+            return self.import_results()
+
+        for row in self.reader:
+            self.total += 1
+            try:
+                data = self.clean_data(row)
+            except ValidationError as e:
+                logger.debug(e.message)
+                continue
+
+            res = self.update_score(data)
+            self.success += int(res)
+        return self.import_results()
+
+    def validate_headers(self):
+        headers = self.reader.next()
+        valid = True
+        for header in self.headers:
+            if header not in headers:
+                valid = False
+                self.errors.append(
+                    "ERROR: header `{}` not found".format(header))
+        return valid
+
+    def import_results(self):
+        if self.errors:
+            for error_msg in self.errors:
+                messages.error(self.request, error_msg)
+        messages.info(self.request,
+                      _("<b>Import results</b>: {}/{} successes").format(
+                          self.success, self.total))
+        return {'success': self.success, 'total': self.total,
+                'errors': self.errors}
+
+    def clean_data(self, row):
+        raise NotImplementedError(
+            'subclasses of ImportGrade must provide an clean_data() method')
+
+    def update_score(self, data):
+        raise NotImplementedError(
+            'subclasses of ImportGrade must provide an update_score() method')
+
+
+class ImportGradesByStepicID(ImportGrades):
+
+    headers = ["user_id", "total"]
+
+    def clean_data(self, row):
+        stepic_id = row["user_id"].strip()
         try:
-            a_s = (AssignmentStudent.objects
-                   .get(assignment__pk=assignment_id, student=user))
-        except ObjectDoesNotExist:
-            logger.debug("User ID {} with stepic ID {} doesn't "
-                         "have an assignment {}"
-                         .format(user.pk, user.stepic_id, assignment_id))
-            return False
-        a_s.grade = score
-        a_s.save()
-        return True
+            stepic_id = int(stepic_id)
+        except ValueError:
+            msg = _("Can't convert user_id to int '{}'").format(stepic_id)
+            logger.debug(msg)
+            raise ValidationError(msg, code='invalid_user_id')
+        try:
+            score = int(ceil(float(row["total"])))
+        except ValueError:
+            msg = _("Can't convert points for user '{}'").format(stepic_id)
+            logger.debug(msg)
+            raise ValidationError(msg, code='invalid_score_value')
+        if score > self.assignment.grade_max:
+            msg = _("Score greater then max grade for user '{}'").format(stepic_id)
+            logger.debug(msg)
+            raise ValidationError(msg, code='invalid_score_value')
+        return stepic_id, score
 
-    f = request.FILES['csvfile']
-    reader = csv.DictReader(iter(f), fieldnames=['user_id'], restkey='as_ids')
-    total = 0
-    success = 0
-    response = {'success': 0, 'total': 0, 'errors': []}
-    # skip real headers
-    reader.next()
-    headers = ['user_id', selected_assignment.pk]
-    for entry in reader:
-        total += len(headers) - 1
-        stepic_id = int(entry['user_id'])
+    def _get_user(self, stepic_id):
+        from users.models import CSCUser
         try:
             user = CSCUser.objects.get(stepic_id=stepic_id)
+            return user
         except ObjectDoesNotExist:
-            msg = _("No user with Stepic ID {}").format(stepic_id)
+            msg = _("No user with stepic ID {}").format(stepic_id)
             logger.debug(msg)
-            messages.error(request, msg)
-            continue
-        for assignment_id, score in zip(headers[1:], entry[reader.restkey]):
-            stepic_points = int(ceil(float(score)))
-            res = update_score(int(assignment_id), user, stepic_points)
-            success += int(res)
-            logger.debug("Wrote {} points for user {} on assignment {}"
-                         .format(stepic_points, user.pk, assignment_id))
-    logger.debug("{}/{} successes".format(success, total))
-    response['success'], response['total'] = success, total
-    return response
+        except MultipleObjectsReturned:
+            msg = _("Multiple objects for user ID: {}".format(stepic_id))
+            logger.error(msg)
+            messages.error(self.request, msg)
 
+    def update_score(self, data):
+        stepic_id, score = data
+        from learning.models import AssignmentStudent
 
-def import_yandex(request, selected_assignment):
-    from learning.models import AssignmentStudent, Assignment
-    from users.models import CSCUser
+        assignment_id = self.assignment.pk
 
-    assignment_id = int(selected_assignment.pk)
-    assert assignment_id > 0
+        user = self._get_user(stepic_id)
+        if not user:
+            return False
 
-    def update_score(assignment_id, user, score):
         try:
-            a_s = (AssignmentStudent.objects
-                   .get(assignment__pk=assignment_id, student=user))
+            a_s = (AssignmentStudent.objects.get(assignment__pk=assignment_id,
+                                                 student=user))
         except ObjectDoesNotExist:
-            logger.debug("User ID {} with Yandex ID {} doesn't "
-                         "have an assignment {}"
-                         .format(user.pk, user.stepic_id, assignment_id))
+            msg = "User ID {} with stepic ID {} doesn't have an assignment " \
+                  "{}".format(user.pk, user.stepic_id, assignment_id)
+            logger.debug(msg)
+            self.errors.append(msg)
             return False
         a_s.grade = score
         a_s.save()
+        logger.debug("Wrote {} points for user {} on assignment {}"
+                     .format(score, user.pk, assignment_id))
         return True
 
 
-    f = request.FILES['csvfile']
-    reader = csv.DictReader(iter(f))
-    total = 0
-    success = 0
-    response = {'success': 0, 'total': 0, 'errors': []}
-    # skip real headers
-    headers = reader.next()
-    if "login" not in headers or "total" not in headers:
-        messages.error(request, "ERROR: `login` or `total` header not found")
-        return response
+class ImportGradesByYandexLogin(ImportGrades):
 
-    for row in reader:
-        total += 1
+    headers = ["login", "total"]
+
+    def clean_data(self, row):
         yandex_id = row['login'].strip()
         try:
+            score = int(ceil(float(row["total"])))
+        except ValueError:
+            msg = _("Can't convert points for user '{}'").format(yandex_id)
+            logger.debug(msg)
+            raise ValidationError(msg, code='invalid_score_value')
+        if score > self.assignment.grade_max:
+            msg = _("Score greater then max grade for user '{}'").format(yandex_id)
+            logger.debug(msg)
+            raise ValidationError(msg, code='invalid_score_value')
+        return yandex_id, score
+
+    def _get_user(self, yandex_id):
+        from users.models import CSCUser
+        try:
             user = CSCUser.objects.get(yandex_id__iexact=yandex_id)
+            return user
         except ObjectDoesNotExist:
             msg = _("No user with Yandex ID {}").format(yandex_id)
             logger.debug(msg)
-            messages.error(request, msg)
-            continue
         except MultipleObjectsReturned:
-            msg = _("Multiple user with Yandex ID {}").format(yandex_id)
-            messages.error(request, msg)
-            continue
+            msg = _("Multiple objects for Yandex ID: {}".format(yandex_id))
+            logger.debug(msg)
+            messages.error(self.request, msg)
 
-        points = int(ceil(float(row['total'])))
-        res = update_score(assignment_id, user, points)
-        success += int(res)
+    def update_score(self, data):
+        yandex_id, score = data
+        from learning.models import AssignmentStudent
+
+        assignment_id = self.assignment.pk
+
+        user = self._get_user(yandex_id)
+        if not user:
+            return False
+
+        try:
+            a_s = (AssignmentStudent.objects.get(assignment__pk=assignment_id,
+                                                 student=user))
+        except ObjectDoesNotExist:
+            msg = "User ID {} with Yandex ID {} doesn't have an assignment " \
+                  "{}".format(user.pk, user.yandex_id, assignment_id)
+            logger.debug(msg)
+            self.errors.append(msg)
+            return False
+        a_s.grade = score
+        a_s.save()
         logger.debug("Wrote {} points for user {} on assignment {}"
-                     .format(points, user.pk, assignment_id))
-    logger.debug("{}/{} successes".format(success, total))
-    response['success'], response['total'] = success, total
-    return response
+                     .format(score, user.pk, assignment_id))
+        return True
+
+

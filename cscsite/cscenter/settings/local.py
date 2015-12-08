@@ -91,3 +91,5 @@ PIPELINE_ENABLED = False
 FILE_UPLOAD_HANDLERS = (
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 )
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
