@@ -1566,11 +1566,9 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():
-            res = utils.import_stepic(
-                request, form.cleaned_data['assignment']
-            )
-            messages.info(request, _("Import results: {}/{} successes").format(
-                res['success'], res['total']))
+            utils.ImportGradesByStepicID(request,
+                                         form.cleaned_data[
+                                             'assignment']).process()
         else:
             # TODO: provide better description
             messages.info(request, _('Invalid form.'))
@@ -1589,11 +1587,9 @@ class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():
-            res = utils.import_yandex(
-                request, form.cleaned_data['assignment']
-            )
-            messages.info(request, _("Import results: {}/{} successes").format(
-                res['success'], res['total']))
+            utils.ImportGradesByYandexLogin(request,
+                                            form.cleaned_data[
+                                                'assignment']).process()
         else:
             # TODO: provide better description
             messages.info(request, _('Invalid form.'))

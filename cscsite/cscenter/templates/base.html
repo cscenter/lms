@@ -75,7 +75,7 @@
         $(function() {
           $.jGrowl.defaults.closerTemplate = '<div>[{% trans "close all" %}]</div>';
           {% for message in messages %}
-            $.jGrowl("{{ message | safe }}", { position: 'bottom-right', life: 15000 });
+            $.jGrowl("{{ message | safe }}", { position: 'bottom-right', sticky: true });
           {% endfor %}
         });
       </script>
