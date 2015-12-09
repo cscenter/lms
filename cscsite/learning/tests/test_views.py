@@ -1324,13 +1324,13 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
     # TODO(Dmitry): test security
 
     def test_empty_markssheet(self):
+        """Test marksheet with empty assignments list"""
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co1 = CourseOfferingFactory.create(teachers=[teacher])
         co2 = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
-            EnrollmentFactory.create(student=student,
-                                     course_offering=co1)
+            EnrollmentFactory.create(student=student, course_offering=co1)
             EnrollmentFactory.create(student=student,
                                      course_offering=co2)
         url = reverse('markssheet_teacher', args=[co1.course.slug,
@@ -1342,7 +1342,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             name = "{}&nbsp;{}.".format(student.last_name,
                                         student.first_name[0])
             self.assertContains(resp, name, 1)
-            field = 'final_grade_{}_{}'.format(co1.pk, student.pk)
+            field = 'final_grade_{}'.format(student.pk)
             self.assertIn(field, resp.context['form'].fields)
         for co in [co1, co2]:
             url = reverse('markssheet_teacher',
@@ -1408,7 +1408,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
-        self.assertEquals(resp.context['structured'][0][3], expected_total_score)
+        self.assertEquals(resp.context['structured'][0][2], expected_total_score)
 
     def test_save_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -1432,7 +1432,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         for a_s, grade in pairs:
             form['a_s_{}'.format(a_s.pk)] = grade
         for student in students:
-            field = 'final_grade_{}_{}'.format(co.pk, student.pk)
+            field = 'final_grade_{}'.format(student.pk)
             form[field] = 'good'
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
