@@ -1322,74 +1322,74 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
 
 class MarksSheetTeacherView(TeacherOnlyMixin,
                             generic.FormView):
-    is_for_staff = None
+    is_for_staff = False
     user_type = 'teacher'
     template_name = "learning/markssheet_teacher.html"
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
-        self.a_s_list = None
+        self.assignment_students = None
         self.enrollment_list = None
         self.course_offering_list = None
         self.course_offering = None
         super(MarksSheetTeacherView, self).__init__(*args, **kwargs)
-        if kwargs.get('is_for_staff'):
-            self.is_for_staff = True
-        else:
-            self.is_for_staff = False
+        self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get_form_class(self):
         try:
             semester_year = int(self.kwargs['semester_year'])
         except ValueError, TypeError:
             raise Http404('Course offering not found')
-        if self.request.user.is_authenticated() and self.request.user.is_curator:
-            base_qs = CourseOffering.objects
-        else:
-            base_qs = (CourseOffering.objects
-                       .filter(teachers=self.request.user))
+
+        co_queryset = CourseOffering.objects
+        if not self.request.user.is_curator:
+            co_queryset = co_queryset.filter(teachers=self.request.user)
+
         try:
-            co = (base_qs
+            course_offering = (co_queryset
                   .select_related('semester', 'course')
                   .get(course__slug=self.kwargs['course_slug'],
                        semester__type=self.kwargs['semester_type'],
                        semester__year=semester_year))
         except ObjectDoesNotExist:
             raise Http404('Course offering not found')
-        a_s_list = (AssignmentStudent.objects
-                    .filter(assignment__course_offering=co)
-                    .order_by('assignment__course_offering',
-                              'student',
-                              'assignment')
-                    .select_related('assignment',
-                                    'assignment__course_offering',
-                                    'assignment__course_offering__course',
-                                    'assignment__course_offering__semester',
-                                    'student'))
-        enrollment_list = (Enrollment.objects
-                           .filter(course_offering=co)
-                           .order_by('course_offering__semester__year',
-                                     'course_offering__semester__type',
-                                     'course_offering',
-                                     'student__last_name',
-                                     'student__first_name')
-                           .select_related('course_offering', 'student'))
-        course_offering_list = (base_qs
+        self.course_offering = course_offering
+
+        # Sacrifice attributes access for better performance
+        assignment_students = (AssignmentStudent.objects
+                    .filter(assignment__course_offering=course_offering)
+                    .values("pk",
+                            "grade",
+                            "is_passed",
+                            "assignment__pk",
+                            "assignment__title",
+                            "assignment__is_online",
+                            "assignment__grade_max",
+                            "assignment__grade_min",
+                            "student__pk")
+                    .order_by("assignment__pk",
+                              "student__last_name",
+                              "student__first_name")
+                    )
+        self.assignment_students = assignment_students
+
+        enrollment_list = Enrollment.objects.filter(
+            course_offering=course_offering).select_related("student")
+        self.enrollment_list = enrollment_list
+
+        course_offering_list = (co_queryset
                                 .order_by('-semester__year',
                                           '-semester__type',
                                           '-pk')
                                 .select_related('semester', 'course'))
-        self.a_s_list = a_s_list
-        self.enrollment_list = enrollment_list
-        self.course_offering = co
         self.course_offering_list = course_offering_list
-        return (MarksSheetTeacherFormFabrique
-                .build_form_class(a_s_list,
-                                  enrollment_list))
+
+        return (MarksSheetTeacherFormFabrique.build_form_class(assignment_students,
+                                                               enrollment_list))
 
     def get_initial(self):
         return (MarksSheetTeacherFormFabrique
-                .transform_to_initial(self.a_s_list, self.enrollment_list))
+                .transform_to_initial(self.assignment_students, self.enrollment_list))
 
     def get_success_url(self):
         co = self.course_offering
@@ -1403,14 +1403,14 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
-            MarksSheetTeacherFormFabrique.build_indexes(self.a_s_list,
+            MarksSheetTeacherFormFabrique.build_indexes(self.assignment_students,
                                                         self.enrollment_list)
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
-                a_s.grade = form.cleaned_data[field]
-                a_s.save()
+                AssignmentStudent.objects.filter(pk=a_s["pk"]).update(grade=form.cleaned_data[field])
                 continue
+            # Looking for final_grade_*
             elif field in enrollment_index:
                 enrollment = enrollment_index[field]
                 enrollment.grade = form.cleaned_data[field]
@@ -1419,61 +1419,74 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
-        def get_a_s_field(a_s_pk):
-            return kwargs['form']['a_s_{0}'.format(a_s_pk)]
+        def get_cell(a_s):
+            cell = a_s
+            if not a_s["assignment__is_online"]:
+                # provide ModelForm  if assignment is "offline"
+                cell["form_field"] = \
+                    '<input type="number" name="a_s_{}" max="{}" min="0" value={}>'.format(
+                    a_s["pk"], a_s["assignment__grade_max"],
+                    a_s["grade"])
+            else:
+                state = AssignmentStudent.calculate_state(
+                    a_s["grade"],
+                    a_s["assignment__is_online"],
+                    a_s["is_passed"],
+                    a_s["assignment__grade_min"],
+                    a_s["assignment__grade_max"]
+                )
+                if a_s["grade"] is not None:
+                    cell["form_field"] = "{0}/{1}".format(
+                        a_s["grade"], a_s["assignment__grade_max"])
+                else:
+                    cell["form_field"] = AssignmentStudent.SHORT_STATES[state]
 
-        def get_final_grade_field(course_offering_pk, student_pk):
-            key = 'final_grade_{0}_{1}'.format(course_offering_pk, student_pk)
+            return cell
+
+        def get_final_grade_field(enrollment_pk):
+            key = 'final_grade_{0}'.format(enrollment_pk)
             return kwargs['form'][key]
 
         context = (super(MarksSheetTeacherView, self)
                    .get_context_data(*args, **kwargs))
-        data = self.a_s_list
-        # implying that the data is already sorted
-        structured = OrderedDict()
-        for enrollment in self.enrollment_list:
-            student = enrollment.student
-            if student not in structured:
-                structured[student] = OrderedDict()
-        total_score = defaultdict(int)
-        for a_s in data:
-            if a_s.student not in structured:
-                continue  # student isn't enrolled
-            # if assignment is "offline", provide ModelForm instead of
-            # the object itself
-            if a_s.assignment.is_online:
-                cell = a_s
-            else:
-                cell = get_a_s_field(a_s.pk)
-            structured[a_s.student][a_s.assignment] = cell
 
-            if a_s.grade is not None:
-                key = str(a_s.student.pk) + '_' + \
-                      str(a_s.assignment.course_offering.pk)
-                total_score[key] += int(a_s.grade)
+        structured = OrderedDict()
+        total_score = defaultdict(int)
+        students = {}
+        for enrollment in self.enrollment_list:
+            student_id = enrollment.student_id
+            if student_id not in structured:
+                structured[student_id] = OrderedDict()
+            if student_id not in students:
+                students[student_id] = enrollment.student
+
+        for a_s in self.assignment_students:
+            student_id = a_s["student__pk"]
+            if student_id not in structured:
+                continue  # student isn't enrolled
+
+            structured[student_id][a_s["assignment__pk"]] = get_cell(a_s)
+            if a_s["grade"] is not None:
+                total_score[student_id] += int(a_s["grade"])
         if len(structured) > 0:
-            header = structured.values()[0].keys()
+            header = structured.values()[0]
         else:
-            header = []
-        for _, by_assignment in structured.items():
+            header = {}
+        for by_assignment in structured.values():
             # we should check for "assignment consistency": that all
             # assignments are similar for all students in particular
             # course offering
-            assert by_assignment.keys() == header
+            assert by_assignment.keys() == header.keys()
 
         context['course_offering'] = self.course_offering
         context['course_offering_list'] = self.course_offering_list
         context['header'] = header
-        context['structured'] = [(student,
-                                  get_final_grade_field(
-                                      self.course_offering.pk,
-                                      student.pk),
-                                  by_assignment,
-                                  total_score[str(student.pk) + '_' +
-                                            str(self.course_offering.pk)]
-                                  )
-                                 for student, by_assignment
-                                 in structured.iteritems()]
+        context['structured'] = \
+            [(students.get(student_id, None),
+              by_assignment,
+              total_score[student_id],
+              get_final_grade_field(student_id),
+              ) for student_id, by_assignment in structured.iteritems()]
         context['user_type'] = self.user_type
         return context
 

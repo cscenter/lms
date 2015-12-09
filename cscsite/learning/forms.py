@@ -396,36 +396,28 @@ class MarksSheetTeacherFormFabrique(object):
         """New form.Form subclass with AssignmentStudent's list and Enrollment
         grade
         """
-        fields = {'a_s_{0}'.format(a_s.pk):
-                  forms.IntegerField(show_hidden_initial=True,
-                                     min_value=0,
-                                     max_value=a_s.assignment.grade_max,
-                                     required=False)
-                  for a_s in a_s_list
-                  if not a_s.assignment.is_online}
-        fields.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
-                                                    e.student.pk):
-                       forms.ChoiceField(GRADES,
-                                         show_hidden_initial=True)
+        fields = {'a_s_{0}'.format(a_s["pk"]):
+                      forms.IntegerField(show_hidden_initial=True,
+                                         min_value=0,
+                                         max_value=a_s["assignment__grade_max"],
+                                         required=False)
+                  for a_s in a_s_list if not a_s["assignment__is_online"]}
+        fields.update({'final_grade_{0}'.format(e.student_id): forms.ChoiceField(GRADES,
+                                                                         show_hidden_initial=True)
                        for e in enrollment_list})
         return type(b'MarksSheetTeacherForm', (forms.Form,), fields)
 
     @staticmethod
     def build_indexes(a_s_list, enrollment_list):
-        a_s_index = {'a_s_{0}'.format(a_s.pk): a_s
-                     for a_s in a_s_list}
-        enrollment_index = {'final_grade_{0}_{1}'.format(e.course_offering.pk,
-                                                         e.student.pk): e
-                            for e in enrollment_list}
+        a_s_index = {'a_s_{0}'.format(a_s["pk"]): a_s for a_s in a_s_list}
+        enrollment_index = {'final_grade_{0}'.format(e.student_id): e for e in
+                            enrollment_list}
         return a_s_index, enrollment_index
 
     @staticmethod
     def transform_to_initial(a_s_list, enrollment_list):
-        initial = {'a_s_{0}'.format(a_s.pk): a_s.grade
-                   for a_s in a_s_list
-                   if not a_s.assignment.is_online}
-        initial.update({'final_grade_{0}_{1}'.format(e.course_offering.pk,
-                                                     e.student.pk):
-                        e.grade
-                        for e in enrollment_list})
+        initial = {'a_s_{0}'.format(a_s["pk"]): a_s["grade"] for a_s in a_s_list
+                   if not a_s["assignment__is_online"]}
+        initial.update({'final_grade_{0}'.format(e.student_id): e.grade for e in
+                        enrollment_list})
         return initial
