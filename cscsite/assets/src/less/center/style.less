@@ -344,109 +344,119 @@ h5.assignment {
   }
 }
 
+// MARKS TABLE
 .marks-table {
   table-layout: fixed;
+
+  &.teacher {
+    tr.active {
+      background-color: #E2F9FF;
+    }
+    td.active {
+      background-color: #E2F9FF;
+    }
+  }
+
+  &.staff {
+
+    td.active {
+      /* border-left: solid 1px #BBB; */
+      /* border-right: solid 1px #BBB; */
+      color: black !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    tr.active td.content {
+      /* border-bottom: solid 1px #BBB; */
+      /* border-top: solid 1px #BBB; */
+      color: black !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    &.focused {
+      td.content {
+        color: transparent;
+        text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+        z-index: -5;
+
+        &.enrolled {
+          color: transparent;
+          text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+          box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
+          opacity: 0.7;
+          z-index: -5;
+        }
+      }
+    }
+  }
+
+  td {
+    vertical-align: middle;
+    text-align: center;
+    margin: 10px;
+    box-sizing: border-box;
+
+    input[type=number] {
+      width: 48px;
+    }
+
+    &.marks-header-horiz {
+      text-align: left;
+      white-space: nowrap;
+      width: 135px;
+      padding-right: 10px;
+      position: absolute;
+      left: 0px;
+      margin-top: 0px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &.content {
+      padding: 0px 10px;
+      width: 40px;
+    }
+  }
+
+  th {
+    &.rotate {
+      height: 18em;
+      white-space: nowrap;
+      vertical-align: bottom;
+
+      > div {
+        width: 40px;
+        /* CSS3 specific totation code */
+        /* translate should have the same negative dimension as head height */
+        transform: rotate(315deg) translate(25px, 0px);
+        //-moz-transform: rotate(315deg) translate(-25px, 50px);
+        //-webkit-transform: rotate(315deg) translate(-25px, 50px);
+
+        span {
+          //line-height: 1.5em;
+          width: 18em;
+          display: block;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          ///* setting background may yield better results in IE text clear type rendering */
+          background: #fff;
+          ///* IE specific rotation code */
+          writing-mode: tb-rl;
+          filter: flipv fliph;
+        }
+      }
+    }
+  }
+
 }
 
-.marks-table .marks-header-vert {
-  vertical-align: top;
-  height: 15em;
-  max-width: 1.7em;
-  /* overflow: hidden; */
-}
 
-.marks-table .marks-header-vert .inner {
-  line-height: 1.5em;
-  width: 20em;
-  text-overflow: ellipsis;
-  text-align: left;
-  overflow: hidden;
-  /* setting background may yield better results in IE text clear type rendering */
-  background: #fff;
-  display: block;
-  white-space: nowrap;
-  padding-left: 3px;
-  /* IE specific rotation code */
-  writing-mode: tb-rl;
-  filter: flipv fliph;
-  /* CSS3 specific totation code */
-  /* translate should have the same negative dimension as head height */
-  transform: rotate(315deg) translate(-9em, 10em);
-  transform-origin: 0 0;
-  -moz-transform: rotate(315deg) translate(-9em, 10em);
-  -moz-transform-origin: 0 0;
-  -webkit-transform: rotate(315deg) translate(-9em, 10em);
-  -webkit-transform-origin: 0 0;
-}
-
-.marks-table td {
-  vertical-align: middle;
-  text-align: center;
-  margin: 10px;
-  box-sizing: border-box;
-}
-
-.marks-table.teacher tr.active {
-  background-color: #E2F9FF;
-}
-
-.marks-table.teacher td.active {
-  background-color: #E2F9FF;
-}
-
-.marks-table.staff.focused td.content {
-  color: transparent;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-  opacity: 0.7;
-  z-index: -5;
-}
-
-.marks-table.staff.focused td.content.enrolled {
-  color: transparent;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
-  opacity: 0.7;
-  z-index: -5;
-}
-
-.marks-table.staff tr.active td.content {
-  /* border-bottom: solid 1px #BBB; */
-  /* border-top: solid 1px #BBB; */
-  color: black !important;
-  text-shadow: none !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-}
-
-.marks-table.staff td.active {
-  /* border-left: solid 1px #BBB; */
-  /* border-right: solid 1px #BBB; */
-  color: black !important;
-  text-shadow: none !important;
-  box-shadow: none !important;
-  opacity: 1 !important;
-}
-
-.marks-table td.marks-header {
-  font-weight: bold;
-}
-
-.marks-table td.marks-header-horiz {
-  text-align: left;
-  white-space: nowrap;
-  width: 135px;
-  padding-right: 10px;
-  position: absolute;
-  left: 0px;
-  margin-top: 0px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.marks-table td.content {
-  padding: 0px 10px;
-  width: 40px;
-}
 
 #calendar-container {
   min-width: 940px;
