@@ -7,12 +7,7 @@ setup(
     name='cscsite',
     version='1.0.0',
     description='Computer Science Center',
-    long_description="No long description provided",
-    # The project's main homepage.
     url='https://compscicenter.ru/',
-    # Author details
-    author='CSC',
-    author_email='sergey.zherevchuk@jetbrains.com',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',

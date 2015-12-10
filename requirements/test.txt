@@ -32,3 +32,8 @@ django-debug-toolbar==1.4
 ### OUTDATED (not support Django 1.8) or python 3.x or something else)
 django-coverage==1.2.4
 ipdb==0.8.1
+
+pytest==2.8.4
+pytest-django==2.9.1
+pytest-cov==2.2.0
+pytest-xdist==1.13.1

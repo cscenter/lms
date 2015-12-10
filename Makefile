@@ -47,7 +47,7 @@ test_travis: clean
 	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
 
 test: clean
-	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_nocover
+	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
 localmail:
 	python -m smtpd -n -c DebuggingServer localhost:1025
