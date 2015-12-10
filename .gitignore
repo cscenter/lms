@@ -12,3 +12,5 @@ cscsite/coverage/
 csc3/
 cscsite/static/
 local/
+.cache/
+.coverage
