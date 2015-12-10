@@ -1422,11 +1422,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         def get_cell(a_s):
             cell = a_s
             if not a_s["assignment__is_online"]:
-                # provide ModelForm  if assignment is "offline"
                 cell["form_field"] = \
                     '<input type="number" name="a_s_{}" max="{}" min="0" value={}>'.format(
                     a_s["pk"], a_s["assignment__grade_max"],
-                    a_s["grade"])
+                    a_s["grade"] if a_s["grade"] is not None else "")
             else:
                 state = AssignmentStudent.calculate_state(
                     a_s["grade"],

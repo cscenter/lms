@@ -62,63 +62,66 @@
       <div class="offering">
         <div class="marks-table-container-outer">
           <div class="marks-table-container-inner">
-            <table class="marks-table teacher">
-              <tr>
-                <td></td>
-                {% for assignment_id, assignment_student in header.iteritems %}
-                    <td class="marks-header marks-header-vert">
-                        <div class="inner">
-                            {{ assignment }}
-                            <a href="{% url 'assignment_detail_teacher' assignment_id %}">
-                                {{ assignment_student.assignment__title }}
-                            </a>
-                        </div>
-                    </td>
-                {% endfor %}
-                <td class="marks-header marks-header-vert">
-                  {% if header %}<div class="inner">{% trans "Total score" %}</div>{% endif %}
-                </td>
-                <td></td>
-              </tr>
+              <table class="marks-table teacher">
+                  <thead>
+                  <tr>
+                      <th class="rotate"></th>
+                      {% for assignment_id, assignment_student in header.iteritems %}
+                          <th class="rotate">
+                              <div>
+                                  <span>
+                                  <a href="{% url 'assignment_detail_teacher' assignment_id %}">
+                                      {{ assignment_student.assignment__title }}
+                                  </a>
+                                  </span>
+                              </div>
+                          </th>
+                      {% endfor %}
+                      <th class="rotate">{% if header %}<div><span>{% trans "Total score" %}</span></div>{% endif %}</th>
+                      <th></th>
+                  </tr>
+                  </thead>
 
-              {% for student, by_assignment, total_score, final_grade in structured %}
-              <tr>
-                <td class="marks-header marks-header-horiz">
-                  <a href="{{ student.get_absolute_url }}">
-                    {% if student.last_name %}
-                    {{ student.last_name}}&nbsp;{{ student.first_name|first }}.
-                    {% else %}
-                    {{ student.username }}
-                    {% endif %}
-                  </a>
-                </td>
-                {% for assignment_id, assignment_student in by_assignment.iteritems %}
-                <td class="content">
-                  {% if assignment_student.assignment__is_online %}
-                  <a href="{% url 'a_s_detail_teacher' assignment_student.pk %}">{{ assignment_student.form_field }}</a>
-                  {% else %}
-                    {{ assignment_student.form_field|safe }}
-                  {% endif %}
-                </td>
-                {% endfor %}
-                <td>{% if header %}{{ total_score }}{% endif %}</td>
-                <td>
+                  <tfoot>
+                  <tr>
+                      <td></td>
+                      {% for assignment_id, assignment_student in header.iteritems %}
+                          <td>{{ assignment_student.assignment__grade_min }}–{{ assignment_student.assignment__grade_max }}</td>
+                      {% endfor %}
+                  </tr>
+                  </tfoot>
+
+                  <tbody>
+                  {% for student, by_assignment, total_score, final_grade in structured %}
+                      <tr>
+                          <td class="marks-header marks-header-horiz">
+                              <a href="{{ student.get_absolute_url }}">
+                                  {% if student.last_name %}
+                                      {{ student.last_name }}&nbsp;{{ student.first_name|first }}.
+                                  {% else %}
+                                      {{ student.username }}
+                                  {% endif %}
+                              </a>
+                          </td>
+                          {% for assignment_id, assignment_student in by_assignment.iteritems %}
+                              <td class="content">
+                                  {% if assignment_student.assignment__is_online %}
+                                      <a href="{% url 'a_s_detail_teacher' assignment_student.pk %}">{{ assignment_student.form_field }}</a>
+                                  {% else %}
+                                      {{ assignment_student.form_field|safe }}
+                                  {% endif %}
+                              </td>
+                          {% endfor %}
+                          <td>{% if header %}{{ total_score }}{% endif %}</td>
+                          <td>
                   <span class="marks-sheet-form-cell final-grade-cell">
                     {{ final_grade }}
                   </span>
-                </td>
-              </tr>
-              {% endfor %}
-              <tr>
-                <td></td>
-                {% for assignment_id, assignment_student in header.iteritems %}
-                <td>
-                  {{ assignment_student.assignment__grade_min }}–{{ assignment_student.assignment__grade_max }}
-                </td>
-                {% endfor %}
-              </tr>
-
-            </table>
+                          </td>
+                      </tr>
+                  {% endfor %}
+                  </tbody>
+              </table>
           </div>
         </div>
       </div>
