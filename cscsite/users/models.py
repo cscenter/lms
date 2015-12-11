@@ -2,12 +2,15 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
+import django_filters
+from django.http import QueryDict
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from django.db import models
+from django.db.models import IntegerField, Sum, Case, When, Value
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
@@ -18,6 +21,7 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.text import normalize_newlines
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
+from django.contrib.auth.models import Group
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.constants import GRADES
@@ -368,3 +372,99 @@ class CSCUserReference(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.student)
+
+
+class ListFilter(django_filters.Filter):
+    """key=value1,value2,value3 filter for django_filters"""
+    def filter(self, qs, value):
+        value_list = value.split(u',')
+        value_list = filter(None, value_list)
+        return super(ListFilter, self).filter(qs, django_filters.fields.Lookup(
+            value_list, 'in'))
+
+
+class CSCUserFilter(django_filters.FilterSet):
+    FILTERING_GROUPS = [CSCUser.group_pks.VOLUNTEER,
+                        CSCUser.group_pks.STUDENT_CENTER,
+                        CSCUser.group_pks.GRADUATE_CENTER]
+
+    ENROLLMENTS_CNT_LIMIT = 12
+
+    _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
+
+    name = django_filters.MethodFilter(action='name_filter')
+    cnt_enrollments = django_filters.MethodFilter(action='cnt_enrollments_filter')
+    # FIXME: replace with range?
+    enrollment_year = ListFilter(name='enrollment_year')
+    status = django_filters.MultipleChoiceFilter(choices=CSCUser.STATUS)
+
+    class Meta:
+        model = CSCUser
+        fields = ["name", "enrollment_year", "groups", "status", "cnt_enrollments"]
+
+    def __init__(self, *args, **kwargs):
+        self.empty_query = False
+        super(CSCUserFilter, self).__init__(*args, **kwargs)
+        # Remove empty values
+        cleaned_data = QueryDict(mutable=True)
+        if self.data:
+            for (filter_name, filter_values) in self.data.iterlists():
+                filter_values = filter(None, filter_values)
+                if filter_values:
+                    cleaned_data.setlist(filter_name, set(filter_values))
+        self.data = cleaned_data
+        if not "groups" in self.data:
+            if not self.data:
+                self.empty_query = True
+            self.data.setlist("groups", self.FILTERING_GROUPS)
+
+    def cnt_enrollments_filter(self, queryset, value):
+        try:
+            value = int(value)
+        except ValueError:
+            return queryset
+        assert value >= 0
+        queryset = queryset.annotate(
+        cnt_enrollments=Sum(
+            Case(
+                When(enrollment__grade=GRADES.unsatisfactory, then=0),
+                When(enrollment__grade=GRADES.not_graded, then=0),
+                default=Value('1'),
+                output_field=IntegerField()
+            )
+        ))
+
+        if value > self.ENROLLMENTS_CNT_LIMIT:
+            return queryset.filter(
+                cnt_enrollments__gt=self.ENROLLMENTS_CNT_LIMIT)
+        else:
+            return queryset.filter(cnt_enrollments=value)
+
+
+    # FIXME: Difficult and unpredictable
+    def name_filter(self, queryset, value):
+        qstr = value.strip()
+        tsquery = self._form_name_tsquery(qstr)
+        if tsquery is None:
+            return queryset
+        else:
+            return (queryset
+                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
+                                  "@@ to_tsquery(%s)"],
+                           params=[tsquery])
+                    .exclude(first_name__exact='',
+                             last_name__exact=''))
+
+    def _form_name_tsquery(self, qstr):
+        if qstr is None or not (2 < len(qstr) < 100):
+            return
+        lexems = []
+        for s in qstr.split(' '):
+            lexeme = s.translate(self._lexeme_trans_map).strip()
+            if len(lexeme) > 0:
+                lexems.append(lexeme)
+        if len(lexems) > 3:
+            return
+        return " & ".join("{}:*".format(l) for l in lexems)
+
+
