@@ -380,21 +380,40 @@ $(document).ready(function () {
 
     if ($('.user-search').length > 0) {
         var enrollmentYears = {};
+        var groups = {};
+        var status = {};
         var qstr = "";
+        var cnt_enrollments = "";
         var ajaxURI = $('.user-search #ajax-uri').val();
         var query = function() {
-            var flatYears;
+            var flatYears,
+                flatGroups,
+                flatStatuses;
 
             flatYears = _.chain(enrollmentYears)
                 .pairs()
                 .filter(function(x) {return x[1]})
                 .map(function(x) {return x[0]})
+                .value().join(",");
+            flatStatuses = _.chain(status)
+                .pairs()
+                .filter(function(x) {return x[1]})
+                .map(function(x) {return x[0]})
                 .value();
-            console.log(flatYears);
+            flatGroups = _.chain(groups)
+                .pairs()
+                .filter(function(x) {return x[1]})
+                .map(function(x) {return x[0]})
+                .value();
             $.ajax({
                 url: ajaxURI,
-                data: {name: qstr,
-                       enrollment_years: flatYears},
+                data: {
+                    name: qstr,
+                    enrollment_year: flatYears,
+                    groups: flatGroups,
+                    status: flatStatuses,
+                    cnt_enrollments: cnt_enrollments,
+                },
                 dataType: "json",
                 traditional: true
             }).done(function(msg) {
@@ -430,6 +449,18 @@ $(document).ready(function () {
             })
             .on('change', '[name="enrollment_year_cb"]', function (e) {
                 enrollmentYears[$(this).val()] = this.checked;
+                query();
+            })
+            .on('change', '[name="group"]', function (e) {
+                groups[$(this).val()] = this.checked;
+                query();
+            })
+            .on('change', '[name="status"]', function (e) {
+                status[$(this).val()] = this.checked;
+                query();
+            })
+            .on('change', '[name="cnt_enrollments"]', function (e) {
+                cnt_enrollments = $(this).val();
                 query();
             });
 

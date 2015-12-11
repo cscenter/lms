@@ -5,54 +5,6 @@ from django.db.models import Prefetch, Count, query
 
 
 class CSCUserQuerySet(query.QuerySet):
-    _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
-
-    def _form_name_tsquery(self, qstr):
-        if qstr is None or not (2 < len(qstr) < 100):
-            return
-        lexems = []
-        for s in qstr.split(' '):
-            lexeme = s.translate(self._lexeme_trans_map).strip()
-            if len(lexeme) > 0:
-                lexems.append(lexeme)
-        if len(lexems) > 3:
-            return
-        return " & ".join("{}:*".format(l) for l in lexems)
-
-    def search_names(self, qstr):
-        qstr = qstr.strip()
-        tsquery = self._form_name_tsquery(qstr)
-        if tsquery is None:
-            return self.none()
-        else:
-            return (self
-                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
-                                  "@@ to_tsquery(%s)"],
-                           params=[tsquery])
-                    .exclude(first_name__exact='',
-                             last_name__exact=''))
-
-    def search(self, request=False):
-        """Search by predefined query field list. Returns empty query_set if no
-           filter parameters defined
-        """
-        qs = self
-        filtered = False
-
-        if request:
-            # FIXME: Mb should rewrite with django-filter app
-            name_qstr = request.GET.get('name', "")
-            if len(name_qstr.strip()) > 0:
-                qs = qs.search_names(name_qstr)
-                filtered = True
-
-            enrollemnt_years = request.GET.getlist('enrollment_years')
-            eys = [int(x) for x in enrollemnt_years]
-            if len(eys) > 0:
-                qs = qs.filter(enrollment_year__in=eys)
-                filtered = True
-
-        return qs if filtered else qs.none()
 
     def students_info(self,
                       only_will_graduate=False,

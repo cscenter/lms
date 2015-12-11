@@ -8,13 +8,13 @@ from collections import OrderedDict, defaultdict
 
 from django.core.urlresolvers import reverse
 from django.views import generic
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from core.views import StaffOnlyMixin, SuperUserOnlyMixin
 from learning.models import StudentProject
 from learning.utils import get_current_semester_pair
-from users.models import CSCUser
+from users.models import CSCUser, CSCUserFilter
 
 
 class StudentSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
@@ -22,17 +22,20 @@ class StudentSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
     limit = 1000
 
     def get(self, request, *args, **kwargs):
-        qs = (CSCUser.objects.search(request)
-                     .filter(groups__pk=CSCUser.group_pks.STUDENT_CENTER)
-                     .values('first_name', 'last_name', 'pk'))
-
-        users_list = list(qs[:self.limit + 1])
-        for u in users_list:
+        qs = CSCUser.objects.values('first_name', 'last_name', 'pk')
+        filter = CSCUserFilter(request.GET, qs)
+        # FIXME: move to CSCUserFilter
+        if filter.empty_query:
+            return JsonResponse(dict(users=[], there_is_more=False))
+        filtered_users = filter.qs[:self.limit + 1]
+        for u in filtered_users:
             u['url'] = reverse('user_detail', args=[u['pk']])
-
+        # return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
+        # TODO: JsonResponse returns unicode. Hard to debug.
         return self.render_json_response({
-            "users": users_list[:self.limit],
-            "there_is_more": len(users_list) > self.limit
+            "total": len(filtered_users[:self.limit]),
+            "users": filtered_users[:self.limit],
+            "there_is_more": len(filtered_users) > self.limit
         })
 
 
@@ -47,6 +50,12 @@ class StudentSearchView(StaffOnlyMixin, generic.TemplateView):
                                        .filter(enrollment_year__isnull=False)
                                        .order_by('enrollment_year')
                                        .distinct())
+        context['groups'] = CSCUserFilter.FILTERING_GROUPS
+        context['groups'] = {gid: CSCUser.group_pks[gid] for gid in
+                             context["groups"]}
+        context['status'] = CSCUser.STATUS
+        context["status"] = {sid: name for sid, name in context["status"]}
+        context["cnt_enrollments"] = range(CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
         return context
 
 class StudentsDiplomasView(StaffOnlyMixin, generic.TemplateView):

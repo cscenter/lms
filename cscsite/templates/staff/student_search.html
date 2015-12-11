@@ -23,9 +23,8 @@
                  autofocus autocomplete="off">
         </div>
         <div class="form-group">
-          <label>{% trans "CSCUser|enrollment year" %}</label>
-          <div class="btn-group btn-group-sm" data-toggle="buttons"
-               style="display: block;">
+          <label>{% trans "CSCUser|enrollment year" %}</label><br>
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
             {% for year in enrollment_years %}
               <label class="btn btn-default">
                 <input type="checkbox" name="enrollment_year_cb"
@@ -33,6 +32,52 @@
                        autocomplete="off">{{ year }}
               </label>
             {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{% trans "Groups" %}</label><br>
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
+            {% for group_id, group_name in groups.items %}
+              <label class="btn btn-default">
+                <input type="checkbox" name="group"
+                       value="{{ group_id }}"
+                       autocomplete="off">{% trans group_name %}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{% trans "Status" %}</label><br>
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
+            {% for status_id, status_name in status.items %}
+              <label class="btn btn-default">
+                <input type="checkbox" name="status"
+                       value="{{ status_id }}"
+                       autocomplete="off">{% trans status_name %}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{% trans "Passed courses" %}</label><br>
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
+              <label class="btn btn-default">
+                <input type="radio" name="cnt_enrollments"
+                       value=""
+                       autocomplete="off">Не выбрано
+              </label>
+            {% for cnt in cnt_enrollments %}
+              <label class="btn btn-default">
+                <input type="radio" name="cnt_enrollments"
+                       value="{{ cnt }}"
+                       autocomplete="off">{{ cnt }}
+              </label>
+            {% endfor %}
+              <label class="btn btn-default">
+                <input type="radio" name="cnt_enrollments"
+                       value="42"
+                       autocomplete="off">>12
+              </label>
           </div>
         </div>
       </form>

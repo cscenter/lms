@@ -38,7 +38,6 @@ boto==2.35.2
 yandexwebdav==0.2.11
 slideshare==0.1dev
 raven==5.8.1
-newrelic==2.44.0.36
 
 # Localization
 solid_i18n==1.1.0
@@ -62,6 +61,7 @@ django-storages-redux==1.3
 django-dbbackup==2.3.2
 
 # Misc utils
+django-filter==0.11.0
 hashids==1.1.0
 django-recaptcha==1.0.4
 django-registration-redux==1.2

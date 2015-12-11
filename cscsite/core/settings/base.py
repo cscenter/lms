@@ -137,7 +137,6 @@ TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
 AUTH_USER_MODEL = "users.CSCUser"
-# TODO: mv from crutches to users module
 AUTHENTICATION_BACKENDS = (
     "users.backends.EmailOrUsernameModelBackend",
 )
