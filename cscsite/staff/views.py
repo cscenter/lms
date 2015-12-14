@@ -116,7 +116,7 @@ class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
         for i in xrange(1, projects_max + 1):
             headers.append('Проект {}, оценка'.format(i))
             headers.append('Проект {}, руководитель(и)'.format(i))
-            headers.append('Проект {}, семестр(ы)'.format(i))
+            headers.append('Проект {}, семестр'.format(i))
         w.writerow(headers)
 
         for s in students:
@@ -136,8 +136,7 @@ class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
             s.projects.extend([None] * (projects_max - len(s.projects)))
             for p in s.projects:
                 if p is not None:
-                    semesters = [unicode(sem) for sem in p.semesters.all()]
-                    row.extend([p.name, p.supervisor, ", ".join(semesters)])
+                    row.extend([p.name, p.supervisor, p.semester])
                 else:
                     row.extend(['', '', ''])
             w.writerow(row)
