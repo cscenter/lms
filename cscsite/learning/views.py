@@ -1552,7 +1552,8 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
 
         writer = csv.writer(response)
         writer.writerow(['Фамилия'.encode('utf8'),
-                         'Имя'.encode('utf8')]
+                         'Имя'.encode('utf8'),
+                         'Яндекс ID'.encode('utf8')]
                         + [smart_text(a.title).encode('utf8')
                            for a in header]
                         + ['Итоговая оценка'.encode('utf8')])
@@ -1560,7 +1561,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             writer.writerow([(smart_text(x if x is not None else '')
                               .encode('utf8'))
                              for x in
-                             ([student.last_name, student.first_name]
+                             ([student.last_name, student.first_name, student.yandex_id]
                               + by_assignment.values()
                               + [enrollment_grades[student]])])
         return response
