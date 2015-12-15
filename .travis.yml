@@ -6,7 +6,7 @@ addons:
   postgresql: '9.4'
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
-  - python cscsite/manage.py migrate --noinput --settings=cscenter.settings.test_travis
+  - python manage.py migrate --noinput --settings=cscenter.settings.test_travis
 env:
   - DJANGO=1.8.6
 install:
@@ -15,5 +15,6 @@ install:
   - pip install -q Django==$DJANGO
   - pip install -q psycopg2==2.6
   - pip install -r requirements/test.txt
+  - pip install -e cscsite
 script:
   - python cscsite/manage.py test core index news users learning --settings=cscenter.settings.test_travis
