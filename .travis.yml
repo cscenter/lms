@@ -17,4 +17,4 @@ install:
   - pip install -r requirements/test.txt
   - pip install -e cscsite
 script:
-  - python cscsite/manage.py test core index news users learning --settings=cscenter.settings.test_travis
+  - python manage.py test core index news users learning --settings=cscenter.settings.test_travis
