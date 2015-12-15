@@ -50,7 +50,7 @@
   become_user: "{{ cscenter_user }}"
   django_manage:
     command: "migrate"
-    app_path: "/home/{{ cscenter_user }}/site/repo/cscsite"
+    app_path: "/home/{{ cscenter_user }}/site/repo"
     settings: "{{ cscenter_user }}.settings.production"
     virtualenv: "/home/{{ cscenter_user }}/site/env/"
 

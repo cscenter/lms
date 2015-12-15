@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'loginas',
     'import_export',
     'pipeline',
+    'webpack_loader',
 )
 
 # oEmbed
@@ -234,3 +235,5 @@ MICAWBER_DEFAULT_SETTINGS = {
     'maxwidth': 910,
     'maxheight': 512,
 }
+
+WEBPACK_LOADER = {}

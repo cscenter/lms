@@ -9,7 +9,7 @@
     sudo_user: "{{ app_user }}"
     django_manage:
       command: "{{ item }}"
-      app_path: "/home/{{ app_user }}/site/repo/cscsite"
+      app_path: "/home/{{ app_user }}/site/repo"
       settings: "{{ app_user }}.settings.production"
       virtualenv: "/home/{{ app_user }}/site/env/"
     with_items:

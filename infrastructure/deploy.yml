@@ -29,7 +29,7 @@
     sudo_user: "{{ app_user }}"
     django_manage:
       command: "migrate"
-      app_path: "{{ site_src }}/cscsite"
+      app_path: "{{ site_src }}"
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 
@@ -37,7 +37,7 @@
     sudo_user: "{{ app_user }}"
     django_manage:
       command: "collectstatic"
-      app_path: "{{ site_src }}/cscsite"
+      app_path: "{{ site_src }}"
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 

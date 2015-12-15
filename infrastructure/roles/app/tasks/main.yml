@@ -85,7 +85,7 @@
   sudo_user: "{{ item }}"
   django_manage:
     command: "collectstatic"
-    app_path: "/home/{{ item }}/site/repo/cscsite"
+    app_path: "/home/{{ item }}/site/repo"
     settings: "{{ item }}.settings.production"
     virtualenv: "/home/{{ item }}/site/env/"
   with_items:

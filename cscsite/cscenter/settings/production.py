@@ -108,3 +108,11 @@ DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_typ
 NEWRELIC_ENV = 'production'
 
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': PROJECT_DIR.child("webpack-stats-prod.json"),
+        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+    }
+}

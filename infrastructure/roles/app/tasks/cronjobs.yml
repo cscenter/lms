@@ -8,7 +8,7 @@
     minute: "0"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/cscsite/manage.py cscbackup
+      /home/{{ item }}/site/repo/manage.py cscbackup
       --settings={{item}}.settings.production
       >> /home/{{ item }}/site/logs/cscbackup.log
       2>&1
@@ -24,7 +24,7 @@
     minute: "*/5"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/cscsite/manage.py notify
+      /home/{{ item }}/site/repo/manage.py notify
       --settings={{ item }}.settings.production
       >> /home/{{ item }}/site/logs/cscnotifier.log
       2>&1
@@ -39,7 +39,7 @@
     special_time: weekly
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/cscsite/manage.py notification_cleanup
+      /home/{{ item }}/site/repo/manage.py notification_cleanup
       --settings={{ item }}.settings.production
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:

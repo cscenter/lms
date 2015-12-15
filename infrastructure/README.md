@@ -131,7 +131,7 @@ Explicitly set host and app_user due to high risk of mix up hosts :<
 DB user must be owner `alter database <DB> owner to <db_user>;` and have previligies to createdb and dropdb. `ALTER USER <currentuser> CREATEDB;`
 You can temporary set current user as superuser `alter role <db_user> with superuser;`
 or you can have a problem with error `must be owner of extension plpgsql`
-~~2. pass parameters to command cscsite/manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local~~
+~~2. pass parameters to command ./manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local~~
 
 Note: Бэкап делается bd и media. У сайта клуба и центра это общие ресурсы, поэтому нет смысла делать бэкапы и того и другого
 
