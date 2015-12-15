@@ -87,7 +87,7 @@ INSTALLED_APPS = (
     'loginas',
     'import_export',
     'pipeline',
-    'webpack_loader',
+    # 'webpack_loader',
 )
 
 # oEmbed
