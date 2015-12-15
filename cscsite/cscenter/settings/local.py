@@ -93,3 +93,11 @@ FILE_UPLOAD_HANDLERS = (
 )
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': PROJECT_DIR.child("webpack-stats-local.json"),
+        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+    }
+}

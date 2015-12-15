@@ -6,25 +6,24 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined less_center less_club
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined less_center less_club webpack
 
 run:
-	# Sergey Zh: run from cscsite dir due to LOCALE_PATHS settings
-	cd cscsite && python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
+	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
 
 migrate:
-	python cscsite/manage.py migrate $(DJANGO_POSTFIX)
+	python manage.py migrate $(DJANGO_POSTFIX)
 
 msg:
-	cd cscsite && python manage.py makemessages -l ru
+	python manage.py makemessages -l ru
 # https://code.djangoproject.com/ticket/24159
 # Should set apps in LOCALE_PATHS explicitly until patch been released
 msgcompile:
-	cd cscsite && python manage.py compilemessages --settings=cscenter.settings.local
-	cd cscsite && python manage.py compilemessages --settings=csclub.settings.local
+	python manage.py compilemessages --settings=cscenter.settings.local
+	python manage.py compilemessages --settings=csclub.settings.local
 
 static:
-	cd cscsite && python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
+	python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
 
 freeze:
 	pip freeze --local > requirements.txt
@@ -34,20 +33,20 @@ pip:
 
 dumpdemo:
 	$(call check_defined, app)
-	python cscsite/manage.py dumpdata $(DJANGO_POSTFIX) --indent=2 $(app) --output=./fixture_$(app).json
+	python manage.py dumpdata $(DJANGO_POSTFIX) --indent=2 $(app) --output=./fixture_$(app).json
 
 loaddemo:
 	$(call check_defined, src)
-	python cscsite/manage.py loaddata $(DJANGO_POSTFIX) $(src)
+	python manage.py loaddata $(DJANGO_POSTFIX) $(src)
 
 coverage:
-	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
+	python manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
 test_travis: clean
-	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
+	python manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
 
 test: clean
-	python cscsite/manage.py test core index news users learning --settings=$(PROJECT).settings.test
+	python manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
 localmail:
 	python -m smtpd -n -c DebuggingServer localhost:1025
@@ -61,7 +60,7 @@ clean:
 	-rm -rf src/*.egg-info
 
 cmd:
-	cscsite/manage.py $(CMD) $(DJANGO_POSTFIX)
+	manage.py $(CMD) $(DJANGO_POSTFIX)
 
 refresh:
 	touch $(PROJECT)/*wsgi.py
@@ -71,8 +70,8 @@ deploy:
 	$(call check_defined, conf)
 	git pull
 	pip install -r requirements.txt
-	python cscsite/manage.py migrate --settings=$(app).settings.$(conf)
-	python cscsite/manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
+	python manage.py migrate --settings=$(app).settings.$(conf)
+	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
 
 deploy_remote:
 	$(call check_defined, app_user)
