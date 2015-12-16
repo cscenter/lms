@@ -5,7 +5,7 @@ var BundleTracker = require('webpack-bundle-tracker')
 module.exports = {
   context: __dirname,
 
-  entry: './cscsite/assets/js/index',
+  entry: './cscsite/assets/js/index.jsx',
 
   output: {
       path: path.resolve('./cscsite/assets/bundles/'),
