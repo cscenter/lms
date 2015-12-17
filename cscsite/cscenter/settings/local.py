@@ -62,7 +62,7 @@ LOGGING = {
         'level': 'DEBUG',
     },
     'loggers': {
-        'learning.utils': {
+        'learning.management.imports': {
             'handlers': ['console'],
             'propagate': False,
             'level': 'DEBUG',

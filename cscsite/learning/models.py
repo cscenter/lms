@@ -32,10 +32,8 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
-from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES
+from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES, PARTICIPANT_GROUPS
 from .utils import get_current_semester_pair
-
-from users.models import CSCUser
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +69,7 @@ class Semester(models.Model):
     TYPES = SEMESTER_TYPES
 
     year = models.PositiveSmallIntegerField(
-        _("CSCUser|Year"),
+        _("Year"),
         validators=[MinValueValidator(1990)])
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
@@ -164,8 +162,8 @@ class CourseOffering(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         related_name='teaching_set',
-        limit_choices_to={'groups__in': [CSCUser.group_pks.TEACHER_CENTER,
-            CSCUser.group_pks.TEACHER_CLUB]})
+        limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.TEACHER_CENTER,
+            PARTICIPANT_GROUPS.TEACHER_CLUB]})
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
@@ -194,8 +192,8 @@ class CourseOffering(TimeStampedModel):
         related_name='enrolled_on_set',
         blank=True,
         through='Enrollment')
-    city = models.ForeignKey(City, null=True, blank=True, \
-                                   default=settings.DEFAULT_CITY_CODE)
+    city = models.ForeignKey(City, null=True, blank=True,
+                             default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
@@ -560,7 +558,7 @@ class AssignmentStudent(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("AssignmentStudent|student"),
         on_delete=models.CASCADE,
-        limit_choices_to={'groups__pk': CSCUser.group_pks.STUDENT_CENTER})
+        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.STUDENT_CENTER})
     grade = models.PositiveSmallIntegerField(
         verbose_name=_("Grade"),
         null=True,
@@ -865,8 +863,8 @@ class StudentProject(TimeStampedModel):
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
-        limit_choices_to={'groups__in': [CSCUser.group_pks.STUDENT_CENTER,
-                                         CSCUser.group_pks.GRADUATE_CENTER]})
+        limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
+                                         PARTICIPANT_GROUPS.GRADUATE_CENTER]})
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,

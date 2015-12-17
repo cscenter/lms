@@ -47,6 +47,7 @@ from .forms import CourseOfferingPKForm, \
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from . import utils
+from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
 from users.models import CSCUser
 
 
@@ -1579,7 +1580,7 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():
-            utils.ImportGradesByStepicID(request,
+            ImportGradesByStepicID(request,
                                          form.cleaned_data[
                                              'assignment']).process()
         else:
@@ -1600,9 +1601,8 @@ class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():
-            utils.ImportGradesByYandexLogin(request,
-                                            form.cleaned_data[
-                                                'assignment']).process()
+            ImportGradesByYandexLogin(request,
+                                      form.cleaned_data['assignment']).process()
         else:
             # TODO: provide better description
             messages.info(request, _('Invalid form.'))
