@@ -10,7 +10,8 @@ import pytz
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from learning.utils import get_current_semester_pair, split_list, ImportGradesByStepicID
+from learning.utils import get_current_semester_pair, split_list
+from learning.management.imports import ImportGradesByStepicID
 from ..factories import *
 
 

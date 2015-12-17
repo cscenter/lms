@@ -24,7 +24,7 @@ from django.utils.functional import cached_property
 from django.contrib.auth.models import Group
 
 from core.models import LATEX_MARKDOWN_ENABLED
-from learning.constants import GRADES
+from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
 
 from .managers import CustomUserManager
 
@@ -40,18 +40,9 @@ logger = logging.getLogger(__name__)
 class CSCUser(AbstractUser):
 
     # FIXME: replace `groups__name` with groups__pk in learning.signals
-    group_pks = Choices(
-        (1, 'STUDENT_CENTER', _('Student [CENTER]')),
-        (2, 'TEACHER_CENTER', _('Teacher [CENTER]')),
-        (3, 'GRADUATE_CENTER', _('Graduate')),
-        (4, 'VOLUNTEER', _('Volunteer')),
-        (5, 'STUDENT_CLUB', _('Student [CLUB]')),
-        (6, 'TEACHER_CLUB', _('Teacher [CLUB]')),
-    )
+    group_pks = PARTICIPANT_GROUPS
 
-    STATUS = Choices(('expelled', _("StudentInfo|Expelled")),
-                     ('reinstated', _("StudentInfo|Reinstalled")),
-                     ('will_graduate', _("StudentInfo|Will graduate")))
+    STATUS = STUDENT_STATUS
 
     # TODO: django migrations can't automatically change CharField to Integer
     # Investigate how to do it manually with migrations only, then replace first param with int
