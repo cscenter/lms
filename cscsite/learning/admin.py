@@ -12,7 +12,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse
 
 
-from users.models import CSCUser
+from .constants import PARTICIPANT_GROUPS
 
 
 class RelatedSpecMixin(object):
@@ -88,7 +88,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
             kwargs['queryset'] = (get_user_model().objects
-                                  .filter(groups__pk=CSCUser.group_pks.STUDENT_CENTER))
+                                  .filter(groups__pk=PARTICIPANT_GROUPS.STUDENT_CENTER))
         return (super(EnrollmentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 

@@ -48,7 +48,6 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from . import utils
 from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
-from users.models import CSCUser
 
 
 logger = logging.getLogger(__name__)

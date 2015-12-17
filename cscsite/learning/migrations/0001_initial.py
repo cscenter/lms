@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
             name='Semester',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('year', models.PositiveSmallIntegerField(verbose_name='CSCUser|Year', validators=[django.core.validators.MinValueValidator(1990)])),
+                ('year', models.PositiveSmallIntegerField(verbose_name='Year', validators=[django.core.validators.MinValueValidator(1990)])),
                 ('type', model_utils.fields.StatusField(default='spring', max_length=100, verbose_name='Semester|type', no_check_for_status=True, choices=[('spring', 'spring'), ('summer', 'summer'), ('autumn', 'autumn')])),
             ],
             options={
