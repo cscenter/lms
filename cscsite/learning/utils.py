@@ -1,5 +1,6 @@
 import datetime
 import itertools
+from collections import namedtuple
 
 import dateutil.parser as dparser
 from django.conf import settings
@@ -7,6 +8,8 @@ from django.http import Http404
 from django.utils import timezone
 
 from .constants import SEMESTER_TYPES
+
+CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
 
 def get_current_semester_pair():
@@ -29,7 +32,7 @@ def get_current_semester_pair():
         current_season = SEMESTER_TYPES.summer
     else:
         current_season = SEMESTER_TYPES.autumn
-    return (now.year, current_season)
+    return CurrentSemester(now.year, current_season)
 
 
 def split_list(iterable, predicate):
