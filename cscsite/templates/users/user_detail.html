@@ -12,9 +12,8 @@
     <h2>{{ user_object.get_full_name }}</h2>
     {% if user_object.is_graduate %}
       {% blocktrans with year=user_object.graduation_year %}graduated in {{ year }}{% endblocktrans %} ({% trans "enrolled in" %} {{ user_object.enrollment_year }})
-    {% elif user_object.is_student or user_object.enrollment_year %}
-        {% trans "student"|title %},
-        {% trans "enrolled in" %} {{ user_object.enrollment_year }}
+    {% elif user_object.is_student %}
+        {% trans "student"|title %}{% if user_object.enrollment_year %}, {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% endif %}
     {% endif %}
 
     {% if user_object.note %}
