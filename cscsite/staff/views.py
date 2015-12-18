@@ -11,13 +11,14 @@ from django.views import generic
 from django.http import HttpResponse, JsonResponse
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 
-from core.views import StaffOnlyMixin, SuperUserOnlyMixin
+from core.views import SuperUserOnlyMixin
+from learning.viewmixins import CuratorOnlyMixin
 from learning.models import StudentProject
 from learning.utils import get_current_semester_pair
 from users.models import CSCUser, CSCUserFilter
 
 
-class StudentSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
+class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
     content_type = u"application/javascript; charset=utf-8"
     limit = 1000
 
@@ -39,7 +40,7 @@ class StudentSearchJSONView(StaffOnlyMixin, JSONResponseMixin, generic.View):
         })
 
 
-class StudentSearchView(StaffOnlyMixin, generic.TemplateView):
+class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/student_search.html"
 
     def get_context_data(self, **kwargs):
@@ -58,7 +59,7 @@ class StudentSearchView(StaffOnlyMixin, generic.TemplateView):
         context["cnt_enrollments"] = range(CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
         return context
 
-class StudentsDiplomasView(StaffOnlyMixin, generic.TemplateView):
+class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, **kwargs):
@@ -70,7 +71,7 @@ class StudentsDiplomasView(StaffOnlyMixin, generic.TemplateView):
         return context
 
 
-class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
+class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -144,11 +145,11 @@ class StudentsDiplomasCSVView(StaffOnlyMixin, generic.base.View):
         return response
 
 
-class ExportsView(StaffOnlyMixin, generic.TemplateView):
+class ExportsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/exports.html"
 
 
-class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
+class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -278,7 +279,7 @@ class StudentsAllSheetCSVView(StaffOnlyMixin, generic.base.View):
         return response
 
 
-class StudentsSheetCurrentSemesterCSVView(StaffOnlyMixin, generic.base.View):
+class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):

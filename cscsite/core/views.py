@@ -4,44 +4,17 @@ from __future__ import absolute_import, unicode_literals
 
 import types
 
-from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
-from django.views import generic
-from django.views.decorators.csrf import requires_csrf_token
-from django.utils.decorators import method_decorator
-from django.utils.encoding import smart_text, python_2_unicode_compatible
-
 from braces.views import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.views import redirect_to_login
+from django.http import JsonResponse
+from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.views import generic
 
 from .utils import render_markdown
 
 
 class LoginRequiredMixin(LoginRequiredMixin):
     raise_exception = False
-
-
-class StudentOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return (user.is_authenticated() and
-               (user.is_student or user.is_curator))
-
-
-class TeacherOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return (user.is_authenticated() and
-               (user.is_teacher or user.is_curator))
-
-
-class StaffOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return user.is_authenticated() and user.is_curator
 
 
 class SuperUserOnlyMixin(UserPassesTestMixin):

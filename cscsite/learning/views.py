@@ -29,8 +29,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 
-from core.views import StudentOnlyMixin, TeacherOnlyMixin, StaffOnlyMixin, \
-    ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
+from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
+from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
+    CuratorOnlyMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -410,7 +411,7 @@ class CourseDetailView(generic.DetailView):
         return context
 
 
-class CourseUpdateView(StaffOnlyMixin,
+class CourseUpdateView(CuratorOnlyMixin,
                        ProtectedFormMixin,
                        generic.UpdateView):
     model = Course

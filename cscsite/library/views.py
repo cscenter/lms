@@ -1,8 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.views import generic
-
-from core.views import StudentOnlyMixin
+from learning.viewmixins import StudentOnlyMixin
 from .models import Book
 
 
