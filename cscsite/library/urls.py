@@ -6,9 +6,9 @@ from django.contrib.auth.decorators import login_required
 from .views import BookListView, BookDetailView
 
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r"^$", login_required(BookListView.as_view()),
         name="library_book_list"),
     url(r"(?P<pk>\d+)/", login_required(BookDetailView.as_view()),
         name="library_book_detail")
-)
+]

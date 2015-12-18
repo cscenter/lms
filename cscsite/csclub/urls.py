@@ -247,14 +247,12 @@ urlpatterns += patterns('',
 
 
     url(r'^narnia/', include(admin.site.urls)),
+    url(r'^narnia/', include('loginas.urls')),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'rosetta' in settings.INSTALLED_APPS:
-    urlpatterns += patterns('', url(r'^rosetta/', include('rosetta.urls')))
+    urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
 
-urlpatterns += patterns('loginas.views',
-    url(r"^login/user/(?P<user_id>.+)/$", "user_login", name="loginas-user-login"),
-)
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit
