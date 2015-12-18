@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-01 12:53+0300\n"
+"POT-Creation-Date: 2015-12-18 12:50+0300\n"
 "PO-Revision-Date: 2015-10-12 13:04+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,11 +20,11 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
-#: csclub/forms.py:21
+#: cscsite/csclub/forms.py:21
 msgid "This username is already in use. Please supply a different username."
 msgstr "Извините, но никнейм уже занят."
 
-#: csclub/templates/base.html:41
+#: cscsite/csclub/templates/base.html:41
 msgid ""
 "\n"
 "      You are currently at the new webpage of the Club. The list of all "
@@ -37,44 +37,45 @@ msgstr ""
 "версии сайта по адресу <a href=\"http://old.compsciclub.ru/\">old."
 "compsciclub.ru</a>"
 
-#: csclub/templates/base.html:50
+#: cscsite/csclub/templates/base.html:50
 msgid "Admin"
 msgstr "Админка"
 
-#: csclub/templates/base.html:56
+#: cscsite/csclub/templates/base.html:56
 msgid "City"
 msgstr "Город"
 
-#: csclub/templates/base.html:57 csclub/templates/index.html:24
+#: cscsite/csclub/templates/base.html:57
+#: cscsite/csclub/templates/index.html:24
 msgid "Language"
 msgstr "Язык"
 
-#: csclub/templates/base.html:78
+#: cscsite/csclub/templates/base.html:78
 msgid "Computer Science Club, 2007–15 гг."
 msgstr ""
 
-#: csclub/templates/base.html:106
+#: cscsite/csclub/templates/base.html:106
 msgid "close all"
 msgstr "Закрыть все"
 
-#: csclub/templates/base_menu.html:38
+#: cscsite/csclub/templates/base_menu.html:38
 msgid "Login"
 msgstr "Логин"
 
-#: csclub/templates/base_menu.html:41
-#: csclub/templates/registration/registration_form.html:10
+#: cscsite/csclub/templates/base_menu.html:41
+#: cscsite/csclub/templates/registration/registration_form.html:10
 msgid "Registration"
 msgstr "Регистрация"
 
-#: csclub/templates/index.html:7
+#: cscsite/csclub/templates/index.html:7
 msgid "Author photo"
 msgstr "Автор фото"
 
-#: csclub/templates/index.html:7
+#: cscsite/csclub/templates/index.html:7
 msgid "Andrey Salnikov"
 msgstr ""
 
-#: csclub/templates/index.html:12
+#: cscsite/csclub/templates/index.html:12
 msgid ""
 "\n"
 "  The main goal of the Club is to provide undergraduate and graduate "
@@ -88,63 +89,63 @@ msgstr ""
 "задачами в различных областях Computer Science. Вход на лекции свободный, "
 "регистрация не требуется. Приглашаются все желающие.\n"
 
-#: csclub/templates/index.html:16
+#: cscsite/csclub/templates/index.html:16
 msgid "Courses"
 msgstr "Курсы"
 
-#: csclub/templates/index.html:21
+#: cscsite/csclub/templates/index.html:21
 msgid "Course name"
 msgstr "Название курса"
 
-#: csclub/templates/index.html:22
+#: cscsite/csclub/templates/index.html:22
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: csclub/templates/index.html:23
+#: cscsite/csclub/templates/index.html:23
 msgid "Next lecture"
 msgstr "Следующая лекция"
 
-#: csclub/templates/index.html:39
+#: cscsite/csclub/templates/index.html:39
 msgid "The course is completed"
 msgstr "Курс завершён"
 
-#: csclub/templates/index.html:41
+#: cscsite/csclub/templates/index.html:41
 msgid "To be announced"
 msgstr "Дата будет объявлена позже"
 
-#: csclub/templates/index.html:45
+#: cscsite/csclub/templates/index.html:45
 msgid "Russian"
 msgstr ""
 
-#: csclub/templates/index.html:45
+#: cscsite/csclub/templates/index.html:45
 msgid "English"
 msgstr ""
 
-#: csclub/templates/index.html:51
+#: cscsite/csclub/templates/index.html:51
 msgid "No active courses"
 msgstr "На ближайшее время нет курсов"
 
-#: csclub/templates/registration/activate.html:5
+#: cscsite/csclub/templates/registration/activate.html:5
 msgid "Account activation failed."
 msgstr "Не удалось активировать аккаунт."
 
-#: csclub/templates/registration/activation_complete.html:4
+#: cscsite/csclub/templates/registration/activation_complete.html:4
 msgid "Account Activated"
 msgstr "Аккаунт успешно активирован."
 
-#: csclub/templates/registration/activation_complete.html:8
+#: cscsite/csclub/templates/registration/activation_complete.html:8
 msgid "Your account is now activated."
 msgstr "Ваш аккаунт теперь активен."
 
-#: csclub/templates/registration/activation_complete.html:10
+#: cscsite/csclub/templates/registration/activation_complete.html:10
 msgid "You can log in."
 msgstr "Вы можете войти."
 
-#: csclub/templates/registration/activation_email.html:7
+#: cscsite/csclub/templates/registration/activation_email.html:7
 msgid "registration"
 msgstr "регистрация"
 
-#: csclub/templates/registration/activation_email.html:12
+#: cscsite/csclub/templates/registration/activation_email.html:12
 #, python-format
 msgid ""
 "\n"
@@ -158,7 +159,7 @@ msgstr ""
 "С вашего email поступила заявка на регистрацию на сайте\n"
 "%(site_name)s. Если это были не Вы, пожалуйста, проигнорируйте письмо."
 
-#: csclub/templates/registration/activation_email.html:19
+#: cscsite/csclub/templates/registration/activation_email.html:19
 #, python-format
 msgid ""
 "\n"
@@ -171,7 +172,7 @@ msgstr ""
 "Чтобы активировать аккаунт, пожалуйста, нажмите на ссылку ниже. Будьте "
 "внимательны, через %(expiration_days)s дня ключ активации будет просрочен:"
 
-#: csclub/templates/registration/activation_email.html:31
+#: cscsite/csclub/templates/registration/activation_email.html:31
 #, python-format
 msgid ""
 "\n"
@@ -182,7 +183,7 @@ msgstr ""
 "\n"
 "С уважением, администрация %(site_name)s"
 
-#: csclub/templates/registration/activation_email.txt:3
+#: cscsite/csclub/templates/registration/activation_email.txt:3
 #, python-format
 msgid ""
 "\n"
@@ -191,7 +192,7 @@ msgid ""
 "and your address will be removed from our records.\n"
 msgstr ""
 
-#: csclub/templates/registration/activation_email.txt:8
+#: cscsite/csclub/templates/registration/activation_email.txt:8
 #, python-format
 msgid ""
 "\n"
@@ -199,7 +200,7 @@ msgid ""
 "%(expiration_days)s days:\n"
 msgstr ""
 
-#: csclub/templates/registration/activation_email.txt:15
+#: cscsite/csclub/templates/registration/activation_email.txt:15
 #, python-format
 msgid ""
 "\n"
@@ -207,31 +208,31 @@ msgid ""
 "%(site_name)s Management\n"
 msgstr ""
 
-#: csclub/templates/registration/activation_email_subject.txt:1
+#: cscsite/csclub/templates/registration/activation_email_subject.txt:1
 msgid "Account activation on"
 msgstr ""
 
-#: csclub/templates/registration/registration_closed.html:4
+#: cscsite/csclub/templates/registration/registration_closed.html:4
 msgid "Registration is closed"
 msgstr "Регистрация на данный момент закрыта"
 
-#: csclub/templates/registration/registration_closed.html:7
+#: cscsite/csclub/templates/registration/registration_closed.html:7
 msgid "Sorry, but registration is closed at this moment. Come back later."
 msgstr "Извините, но регистрация временно закрыта. Возвращайтесь позже."
 
-#: csclub/templates/registration/registration_complete.html:4
+#: cscsite/csclub/templates/registration/registration_complete.html:4
 msgid "Activation email sent"
 msgstr "Письмо с ключом активации успешно отправлено."
 
-#: csclub/templates/registration/registration_complete.html:7
+#: cscsite/csclub/templates/registration/registration_complete.html:7
 msgid "Please check your email to complete the registration process."
 msgstr "Проверьте ваш почтовый ящик для завершения процесса регистрации."
 
-#: csclub/templates/registration/registration_form.html:5
+#: cscsite/csclub/templates/registration/registration_form.html:5
 msgid "Register for an account"
 msgstr "Регистрация аккаунта на"
 
-#: csclub/templates/registration/registration_form.html:14
+#: cscsite/csclub/templates/registration/registration_form.html:14
 msgid "Submit"
 msgstr "Отправить"
 

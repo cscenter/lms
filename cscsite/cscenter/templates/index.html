@@ -146,7 +146,7 @@
                                 </li>
                                 <li class="list-group-item">
                                     {% blocktrans count counter=course_offering.courseclass__count %}{{ counter }} class{% plural %}{{ counter }} classes{% endblocktrans %}
-                                    <span class="label label-outline label-primary"><i class="fa fa-check"></i> {% trans "Lectures video" %}</span>
+                                    <span class="label label-outline label-primary"><i class="fa fa-check"></i> {% if course_offering.is_completed %}{% trans "Completed course" %}{% else %}{% trans "Lectures video" %}{% endif %}</span>
                                 </li>
                             </ul>
                         <a href="{{ course_offering.get_absolute_url }}" class="btn btn-outline btn-block btn-primary">Посмотреть курс</a>

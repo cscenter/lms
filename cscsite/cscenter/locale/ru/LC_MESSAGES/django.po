@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-01 12:53+0300\n"
-"PO-Revision-Date: 2015-12-01 12:54+0230\n"
+"POT-Creation-Date: 2015-12-18 12:50+0300\n"
+"PO-Revision-Date: 2015-12-18 12:51+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,70 +20,72 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
-#: cscenter/templates/base.html:53
-#: cscenter/templates/base_offcanvas_menu.html:88
+#: cscsite/cscenter/templates/base.html:53
+#: cscsite/cscenter/templates/base_offcanvas_menu.html:88
 msgid "Computer Science Center, 2011–15 гг."
 msgstr ""
 
-#: cscenter/templates/base.html:77
-#: cscenter/templates/base_offcanvas_menu.html:112
+#: cscsite/cscenter/templates/base.html:77
+#: cscsite/cscenter/templates/base_offcanvas_menu.html:112
 msgid "close all"
 msgstr "закрыть все"
 
-#: cscenter/templates/base_menu.html:30 cscenter/templates/top_menu.html:34
+#: cscsite/cscenter/templates/base_menu.html:30
+#: cscsite/cscenter/templates/top_menu.html:34
 msgid "Admin page"
 msgstr "Админка"
 
-#: cscenter/templates/base_menu.html:38 cscenter/templates/top_menu.html:42
+#: cscsite/cscenter/templates/base_menu.html:38
+#: cscsite/cscenter/templates/top_menu.html:42
 msgid "logout"
 msgstr "выйти"
 
-#: cscenter/templates/base_menu.html:41 cscenter/templates/top_menu.html:45
+#: cscsite/cscenter/templates/base_menu.html:41
+#: cscsite/cscenter/templates/top_menu.html:45
 msgid "Login"
 msgstr ""
 
-#: cscenter/templates/index.html:81
+#: cscsite/cscenter/templates/index.html:81
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscenter/templates/index.html:82
+#: cscsite/cscenter/templates/index.html:82
 msgid "All online courses"
 msgstr "Все онлайн-курсы"
 
-#: cscenter/templates/index.html:95
+#: cscsite/cscenter/templates/index.html:95
 msgid "Graduates about CS Center"
 msgstr "Выпускники о CS Центре"
 
-#: cscenter/templates/index.html:96
+#: cscsite/cscenter/templates/index.html:96
 msgid "All graduates"
 msgstr "Все выпускники"
 
-#: cscenter/templates/index.html:111
+#: cscsite/cscenter/templates/index.html:111
 msgid "Graduation"
 msgstr "Выпуск"
 
-#: cscenter/templates/index.html:124
+#: cscsite/cscenter/templates/index.html:124
 msgid "Full-time courses on video"
 msgstr "Видео очных курсов"
 
-#: cscenter/templates/index.html:125
+#: cscsite/cscenter/templates/index.html:125
 msgid "All courses"
 msgstr "Все курсы"
 
-#: cscenter/templates/index.html:125
-#| msgid "All online courses"
+#: cscsite/cscenter/templates/index.html:125
 msgid "All video courses"
 msgstr "Все курсы с видео"
 
-#: cscenter/templates/index.html:140
+#: cscsite/cscenter/templates/index.html:140
 msgid "Semester"
 msgstr ""
 
-#: cscenter/templates/index.html:143
+#: cscsite/cscenter/templates/index.html:143
 msgid "Teachers"
 msgstr ""
 
-#: cscenter/templates/index.html:148
+#: cscsite/cscenter/templates/index.html:148
 #, python-format
 msgid "%(counter)s class"
 msgid_plural "%(counter)s classes"
@@ -91,32 +93,34 @@ msgstr[0] "%(counter)s занятие"
 msgstr[1] "%(counter)s занятия"
 msgstr[2] "%(counter)s занятий"
 
-#: cscenter/templates/index.html:149
-msgid "Lectures video"
-msgstr "есть видео"
+#: cscsite/cscenter/templates/index.html:149
+#| msgid "Full-time courses"
+msgid "Completed course"
+msgstr "Полный курс"
 
-#: cscenter/templates/index.html:163
+#: cscsite/cscenter/templates/index.html:149
+msgid "Lectures video"
+msgstr "Есть видео"
+
+#: cscsite/cscenter/templates/index.html:163
 msgid "Supported by"
 msgstr "При поддержке"
 
-#: cscenter/templates/index.html:168
+#: cscsite/cscenter/templates/index.html:168
 msgid "Yandex School of Data Analysis"
 msgstr "Яндекс ШАД"
 
-#: cscenter/templates/index.html:173
+#: cscsite/cscenter/templates/index.html:173
 msgid "JetBrains"
 msgstr ""
 
-#: cscenter/templates/index.html:178
+#: cscsite/cscenter/templates/index.html:178
 msgid "FML #239"
 msgstr "ФМЛ №239"
 
-#: cscenter/templates/index.html:183
+#: cscsite/cscenter/templates/index.html:183
 msgid "Computer Science Club"
 msgstr ""
-
-#~ msgid "Full-time courses"
-#~ msgstr "Очные курсы"
 
 #~ msgid "See all courses"
 #~ msgstr "Посмотреть все курсы"
