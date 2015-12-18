@@ -27,7 +27,8 @@ from icalendar import Calendar, Event, vText, vUri
 from icalendar.prop import vInline
 import pytz
 
-from core.views import ProtectedFormMixin, StaffOnlyMixin, SuperUserOnlyMixin
+from core.views import ProtectedFormMixin, SuperUserOnlyMixin
+from learning.viewmixins import CuratorOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent, Semester, StudentProject, Enrollment
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
