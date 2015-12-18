@@ -141,6 +141,7 @@ AUTH_USER_MODEL = "users.CSCUser"
 AUTHENTICATION_BACKENDS = (
     "users.backends.EmailOrUsernameModelBackend",
 )
+CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
