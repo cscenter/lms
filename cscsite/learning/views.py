@@ -31,7 +31,7 @@ from dateutil.relativedelta import relativedelta
 
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin
+    CuratorOnlyMixin, FailedCourseCompletionMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -448,6 +448,7 @@ class GetCourseOfferingObjectMixin(object):
 
 
 class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
+                               FailedCourseCompletionMixin,
                                generic.DetailView):
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
@@ -492,8 +493,9 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
-        context['can_view_news'] = self.request.user.is_authenticated() or \
-            self.request.site.domain == settings.CLUB_DOMAIN
+        context['can_view_news'] = not context['is_failed_completed_course'] and (
+                                   self.request.user.is_authenticated() or
+                                   self.request.site.domain == settings.CLUB_DOMAIN)
 
         course_classes = list(self.object.courseclass_set.all())
         for cc in course_classes:
@@ -1017,6 +1019,7 @@ class AssignmentStudentDetailMixin(object):
             raise PermissionDenied
 
         context['a_s'] = a_s
+        context['course_offering'] = a_s.assignment.course_offering
         comments = (AssignmentComment.objects
                     .filter(assignment_student=a_s)
                     .order_by('created')
@@ -1052,9 +1055,17 @@ class AssignmentStudentDetailMixin(object):
 
 # shitty name :(
 class ASStudentDetailView(StudentOnlyMixin,
+                          FailedCourseCompletionMixin,
                           AssignmentStudentDetailMixin,
                           generic.CreateView):
     user_type = 'student'
+
+    def get_context_data(self, *args, **kwargs):
+        context = (super(ASStudentDetailView, self)
+                   .get_context_data(*args, **kwargs))
+        if context['is_failed_completed_course']:
+            raise HttpResponseForbidden
+        return context
 
 
 class ASTeacherDetailView(TeacherOnlyMixin,
