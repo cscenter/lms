@@ -3,29 +3,26 @@ from __future__ import unicode_literals, absolute_import
 import logging
 
 import django_filters
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser, AnonymousUser
+from django.contrib.auth.models import Group
+from django.core.urlresolvers import reverse
+from django.core.validators import MinValueValidator, RegexValidator
+from django.db import models
+from django.db.models import IntegerField, Sum, Case, When, Value
 from django.http import QueryDict
+from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.functional import cached_property
+from django.utils.text import normalize_newlines
+from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from django.db import models
-from django.db.models import IntegerField, Sum, Case, When, Value
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator, \
-    RegexValidator
-from django.core.urlresolvers import reverse
-from django.utils.encoding import smart_text, python_2_unicode_compatible
-from django.utils.text import normalize_newlines
-from django.utils.translation import ugettext_lazy as _
-from django.utils.functional import cached_property
-from django.contrib.auth.models import Group
-
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
-
+from learning.utils import LearningPermissionsMixin
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -37,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 @python_2_unicode_compatible
-class CSCUser(AbstractUser):
+class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     # FIXME: replace `groups__name` with groups__pk in learning.signals
     group_pks = PARTICIPANT_GROUPS
@@ -459,3 +456,5 @@ class CSCUserFilter(django_filters.FilterSet):
         return " & ".join("{}:*".format(l) for l in lexems)
 
 
+class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
+    pass

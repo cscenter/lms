@@ -88,7 +88,9 @@ class EnrollmentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
             kwargs['queryset'] = (get_user_model().objects
-                                  .filter(groups__pk=PARTICIPANT_GROUPS.STUDENT_CENTER))
+                                  .filter(groups__in=[
+                                        PARTICIPANT_GROUPS.STUDENT_CENTER,
+                                        PARTICIPANT_GROUPS.VOLUNTEER]))
         return (super(EnrollmentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 

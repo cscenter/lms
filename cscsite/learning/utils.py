@@ -83,9 +83,27 @@ def co_from_kwargs(kwargs):
     return (course_slug, semester_year, semester_type)
 
 
+class LearningPermissionsMixin(object):
+    @property
+    def is_student_center(self):
+        return False
 
+    @property
+    def is_student_club(self):
+        return False
 
+    @property
+    def is_teacher(self):
+        return False
 
+    @property
+    def is_graduate(self):
+        return False
 
+    @property
+    def is_volunteer(self):
+        return False
 
-
+    @property
+    def is_curator(self):
+        return False
