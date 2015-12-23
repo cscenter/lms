@@ -3,8 +3,11 @@ from __future__ import unicode_literals, print_function
 
 import posixpath
 import sys
-from urlparse import urlparse
 from lxml import html
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 from django.db import models, migrations
 
