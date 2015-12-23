@@ -1462,7 +1462,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         form = MarksSheetTeacherImportGradesForm(form_fields,
                                                  c_slug=co.course.slug)
         self.assertFalse(form.is_valid())
-        self.assertListEqual(form.errors.keys(), ['csvfile'])
+        self.assertListEqual(list(form.errors.keys()), ['csvfile'])
         # Teachers can import grades only for own CO
         teacher2 = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher2)
