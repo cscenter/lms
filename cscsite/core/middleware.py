@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import, unicode_literals
+
 """
 https://gist.github.com/1ddc318b4124ed152f6d.git
 Django middleware for generating request flame graphs.
@@ -156,7 +158,7 @@ class FlamesMiddleware(object):
                     ],
                     stdout=out_svg
                 )
-            print out_svg_path
+            print(out_svg_path)
             # subprocess.call(['google-chrome', 'file://' + out_svg_path])
 
         return response
