@@ -26,6 +26,8 @@ GRANT
 ^D
 ```
 
+* Install `cscsite locally` with `pip install -e ./` and `manage.py` should work now 
+
 * do the Django part of the database configuration:
 
 ```bash

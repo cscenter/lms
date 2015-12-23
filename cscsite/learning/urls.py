@@ -10,7 +10,7 @@ from .views import \
     CourseTeacherListView, \
     CourseStudentListView, \
     CoursesListView, CourseDetailView, CourseUpdateView, \
-    CourseOfferingDetailView, \
+    CourseOfferingDetailViewContext, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
@@ -128,7 +128,7 @@ urlpatterns = [
         name="course_edit"),
 
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
-        CourseOfferingDetailView.as_view(),
+        CourseOfferingDetailViewContext.as_view(),
         name="course_offering_detail"),
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-descr$",
         CourseOfferingEditDescrView.as_view(),
