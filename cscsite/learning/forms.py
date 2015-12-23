@@ -405,7 +405,7 @@ class MarksSheetTeacherFormFabrique(object):
         fields.update({'final_grade_{0}'.format(e.student_id): forms.ChoiceField(GRADES,
                                                                          show_hidden_initial=True)
                        for e in enrollment_list})
-        return type(b'MarksSheetTeacherForm', (forms.Form,), fields)
+        return type(str('MarksSheetTeacherForm'), (forms.Form,), fields)
 
     @staticmethod
     def build_indexes(a_s_list, enrollment_list):
