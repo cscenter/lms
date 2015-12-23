@@ -832,8 +832,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         cca_to_delete = [a for a in response.context['attachments']
                          if a.material.path == cca_files[1]][0]
         as_ = sorted((span.a.contents[0].strip(),
-                      "".join(self.client.get(span.a['href'])
-                              .streaming_content))
+                      b"".join(self.client.get(span.a['href']).streaming_content))
                      for span in spans)
         self.assertRegexpMatches(as_[0][0], "attachment1(_[0-9a-zA-Z]+)?.txt")
         self.assertRegexpMatches(as_[1][0], "attachment2(_[0-9a-zA-Z]+)?.txt")
