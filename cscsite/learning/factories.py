@@ -6,6 +6,7 @@ import factory
 
 from django.utils import timezone
 
+from learning.constants import PARTICIPANT_GROUPS
 from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
@@ -176,7 +177,8 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Enrollment
 
-    student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
+    student = factory.SubFactory(UserFactory,
+                                 groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
     course_offering = factory.SubFactory(CourseOfferingFactory)
 
 

@@ -4,8 +4,9 @@ from __future__ import unicode_literals, absolute_import
 import factory
 
 from django.contrib.auth.models import Group
+from django.core.exceptions import ImproperlyConfigured
 
-from learning.constants import GRADES
+from learning.constants import GRADES, PARTICIPANT_GROUPS
 from users.models import CSCUser, SHADCourseRecord, CSCUserReference
 
 
@@ -40,6 +41,18 @@ class UserFactory(factory.DjangoModelFactory):
         self.set_password(raw_password)
         self.save()
         self.raw_password = raw_password
+
+
+class StudentFactory(UserFactory):
+    groups = [PARTICIPANT_GROUPS.STUDENT_CENTER,
+              PARTICIPANT_GROUPS.STUDENT_CLUB]
+
+class StudentClubFactory(UserFactory):
+    groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
+
+
+class TeacherFactory(UserFactory):
+    groups = [PARTICIPANT_GROUPS.TEACHER_CENTER]
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):

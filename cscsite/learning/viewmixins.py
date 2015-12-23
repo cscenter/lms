@@ -26,13 +26,13 @@ class CuratorOnlyMixin(UserPassesTestMixin):
         return user.is_authenticated() and user.is_curator
 
 
-class FailedCourseCompletionMixin(object):
+class FailedCourseContextMixin(object):
     """Set context variable `is_failed_completed_course` to True
     if student failed current completed course."""
 
     def get_context_data(self, *args, **kwargs):
-        context = super(FailedCourseCompletionMixin, self).get_context_data(
-            *args, **kwargs)
+        context = super(FailedCourseContextMixin,
+                        self).get_context_data(*args, **kwargs)
 
         if "course_offering" not in context:
             raise NotImplementedError(
@@ -41,12 +41,13 @@ class FailedCourseCompletionMixin(object):
 
         co = context["course_offering"]
         context["is_failed_completed_course"] = False
-        if not co.is_completed or self.request.user.is_anonymous() or self.request.user.is_curator:
+        user = self.request.user
+        if not co.is_completed or user.is_anonymous() or user.is_curator:
             return context
 
         if co.is_completed:
-            enrollment = Enrollment.objects.filter(student=self.request.user,
-                                                course_offering=co).first()
+            enrollment = Enrollment.objects.filter(student=user,
+                                                   course_offering=co).first()
             if enrollment and enrollment.grade in (
             Enrollment.GRADES.unsatisfactory, Enrollment.GRADES.not_graded):
                 context["is_failed_completed_course"] = True

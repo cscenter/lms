@@ -8,6 +8,7 @@ import copy
 
 from itertools import chain
 
+import pytest
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
@@ -23,6 +24,7 @@ from bs4 import BeautifulSoup
 import factory
 from icalendar import Calendar, Event
 
+from learning.constants import PARTICIPANT_GROUPS
 from learning.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory
@@ -373,6 +375,21 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.doLogin(curator)
         resp = self.client.get(url)
         self.assertContains(resp, student_mail)
+
+@pytest.mark.django_db
+def test_prevent_show_club_students_profiles_on_cscenter_site(client,
+                                                              user_factory,
+                                                              student_club_factory,
+                                                              student_factory):
+    student_club = student_club_factory.create()
+    url = reverse('user_detail', args=[student_club.pk])
+    response = client.get(url)
+    assert response.status_code == 404
+    student = student_factory()
+    url = reverse('user_detail', args=[student.pk])
+    response = client.get(url)
+    assert response.status_code == 200
+
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):

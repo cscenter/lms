@@ -6,6 +6,7 @@ import logging
 import os
 import unittest
 
+import pytest
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from testfixtures import LogCapture
@@ -18,7 +19,9 @@ from django.forms.models import model_to_dict
 from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text
+from django.utils.translation import ugettext as _
 
+from learning.constants import GRADES
 from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
@@ -1550,3 +1553,64 @@ class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(url)
         self.assertContains(evt.name, resp)
         self.assertContains(evt.venue.get_absolute_url(), resp)
+
+
+# Ok, py.test starts here
+
+@pytest.mark.django_db
+class TestCompletedCourseOfferingBehaviour(object):
+    def test_security_assignmentstudent_detail(self, client,
+                                               teacher_factory,
+                                               student_factory):
+        """Students can't see assignments from completed course, which they failed"""
+        teacher = teacher_factory()
+        student = student_factory()
+        past_year = datetime.datetime.now().year - 3
+        past_semester = SemesterFactory.create(year=past_year)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
+                                   is_completed=True)
+        enrollment = EnrollmentFactory(student=student, course_offering=co,
+                                       grade=GRADES.unsatisfactory)
+        a = AssignmentFactory(course_offering=co)
+        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
+        url = reverse('a_s_detail_student', args=[a_s.pk])
+        client.login(student)
+        response = client.get(url)
+        assert response.status_code == 403
+        # Teacher still can view student assignment
+        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        client.login(teacher)
+        response = client.get(url)
+        assert response.status_code == 200
+
+    def test_security_courseoffering_detail(self, client,
+                                            teacher_factory,
+                                            student_factory):
+        """Students can't see news from completed course, which they failed"""
+        teacher = teacher_factory()
+        student = student_factory()
+        past_year = datetime.datetime.now().year - 3
+        past_semester = SemesterFactory.create(year=past_year)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
+                                   is_completed=True)
+        enrollment = EnrollmentFactory(student=student, course_offering=co,
+                                       grade=GRADES.unsatisfactory)
+        a = AssignmentFactory(course_offering=co)
+        client.login(student)
+        url = reverse('course_offering_detail',
+                      kwargs={"course_slug": co.course.slug,
+                              "semester_slug": past_semester.slug})
+        response = client.get(url)
+        assert response.context["is_failed_completed_course"]
+        soup = BeautifulSoup(response.content, "html.parser")
+        assert soup.find(text=_("News")) is None
+        # Change student co mark
+        enrollment.grade = GRADES.excellent
+        enrollment.save()
+        response = client.get(url)
+        assert not response.context["is_failed_completed_course"]
+        # Change course offering state to not completed
+        co.is_completed = False
+        co.save()
+        response = client.get(url)
+        assert not response.context["is_failed_completed_course"]

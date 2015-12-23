@@ -31,7 +31,7 @@ from dateutil.relativedelta import relativedelta
 
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin, FailedCourseCompletionMixin
+    CuratorOnlyMixin, FailedCourseContextMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -447,9 +447,9 @@ class GetCourseOfferingObjectMixin(object):
                               'assignment_set'))
 
 
-class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
-                               FailedCourseCompletionMixin,
-                               generic.DetailView):
+class CourseOfferingDetailViewContext(GetCourseOfferingObjectMixin,
+                                      FailedCourseContextMixin,
+                                      generic.DetailView):
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
@@ -460,7 +460,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         return q
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseOfferingDetailView, self)
+        context = (super(CourseOfferingDetailViewContext, self)
                    .get_context_data(*args, **kwargs))
         is_enrolled = (self.request.user.is_authenticated() and
                        self.request.user.is_student and
@@ -1055,7 +1055,7 @@ class AssignmentStudentDetailMixin(object):
 
 # shitty name :(
 class ASStudentDetailView(StudentOnlyMixin,
-                          FailedCourseCompletionMixin,
+                          FailedCourseContextMixin,
                           AssignmentStudentDetailMixin,
                           generic.CreateView):
     user_type = 'student'
@@ -1064,7 +1064,7 @@ class ASStudentDetailView(StudentOnlyMixin,
         context = (super(ASStudentDetailView, self)
                    .get_context_data(*args, **kwargs))
         if context['is_failed_completed_course']:
-            raise HttpResponseForbidden
+            raise PermissionDenied
         return context
 
 
