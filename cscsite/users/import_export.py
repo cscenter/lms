@@ -14,7 +14,7 @@ from .models import CSCUser, SHADCourseRecord
 
 # Customize widgets
 class GradeWidget(widgets.Widget):
-    MAPPING = {v.lower(): k for k, v in GRADES._display_map.iteritems()}
+    MAPPING = {v.lower(): k for k, v in GRADES._display_map.items()}
 
     def clean(self, value):
         if value in self.MAPPING:
@@ -24,13 +24,13 @@ class GradeWidget(widgets.Widget):
                                    unicode(value))
 
     def render(self, value):
-        for k, v in self.MAPPING.iteritems():
+        for k, v in self.MAPPING.items():
             if value == v:
                 return k
 
 
 class SemesterWidget(widgets.Widget):
-    MAPPING = {v.lower(): k for k, v in SEMESTER_TYPES._display_map.iteritems()}
+    MAPPING = {v.lower(): k for k, v in SEMESTER_TYPES._display_map.items()}
 
     def clean(self, value):
         from learning.models import Semester
@@ -72,7 +72,7 @@ class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
 
 
 class UserCourseWidget(widgets.Widget):
-    MAPPING = {v.lower(): k for k, v in CSCUser.COURSES._display_map.iteritems()}
+    MAPPING = {v.lower(): k for k, v in CSCUser.COURSES._display_map.items()}
 
     def clean(self, value):
         # Replace non-breaking space and tabs with common white space

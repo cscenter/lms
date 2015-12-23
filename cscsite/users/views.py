@@ -3,8 +3,10 @@
 from __future__ import absolute_import, unicode_literals
 
 from datetime import datetime, time, timedelta
-from itertools import chain, izip, repeat
+from itertools import chain, repeat
 
+from six import iteritems
+from six.moves import zip
 from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
@@ -332,7 +334,7 @@ def create_timezone(tz, first_date=None, last_date=None):
     timezone.add('TZID', tz)
 
     dst = {one[2]: 'DST' in two.__repr__()
-           for one, two in tz._tzinfos.iteritems()}
+           for one, two in iteritems(tz._tzinfos)}
 
     # looking for the first and last transition time we need to include
     first_num, last_num = 0, len(tz._utc_transition_times) - 1
@@ -488,8 +490,8 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
 
     def get_events(self, context):
         tz = context['tz']
-        data = chain(izip(repeat('teaching'), context['teacher_ccs']),
-                     izip(repeat('learning'), context['student_ccs']))
+        data = chain(zip(repeat('teaching'), context['teacher_ccs']),
+                     zip(repeat('learning'), context['student_ccs']))
         events = []
         for cc_type, cc in data:
             uid = ("courseclasses-{}-{}@compscicenter.ru"
@@ -573,8 +575,8 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
     def get_events(self, context):
         tz = context['tz']
         user = context['user']
-        data = chain(izip(repeat('teaching'), context['teacher_as']),
-                     izip(repeat('learning'), context['student_as']))
+        data = chain(zip(repeat('teaching'), context['teacher_as']),
+                     zip(repeat('learning'), context['student_as']))
         events = []
         for a_type, a in data:
             uid = ("assignments-{}-{}-{}@compscicenter.ru"

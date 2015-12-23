@@ -3,6 +3,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+
+import six
 import unicodecsv
 from collections import OrderedDict, defaultdict
 
@@ -108,7 +110,7 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         w = unicodecsv.writer(response, encoding='utf-8')
 
         headers = ['Фамилия', 'Имя', 'Отчество', 'Университет', 'Направления']
-        for course_id, course_name in courses_headers.iteritems():
+        for course_id, course_name in six.iteritems(courses_headers):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
         for i in xrange(1, shads_max + 1):
@@ -210,7 +212,7 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
             'Сдано курсов',
             'Ссылка на профиль',
         ]
-        for course_id, course_name in courses_headers.iteritems():
+        for course_id, course_name in six.iteritems(courses_headers):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
         for i in xrange(1, projects_max + 1):
@@ -329,7 +331,7 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
             'Работа',
             'Ссылка на профиль',
         ]
-        for course_id, course_name in courses_headers.iteritems():
+        for course_id, course_name in six.iteritems(courses_headers):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
         w.writerow(headers)
