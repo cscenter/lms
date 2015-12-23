@@ -5,7 +5,12 @@ from __future__ import absolute_import
 import logging
 import mimetypes
 import os.path
-import urllib2
+try:
+    # For Python 3.0 and later
+    from urllib.error import URLError
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import URLError
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -56,6 +61,6 @@ def upload_slides(handle, title, description, tags):
         sl_id = sls["SlideShowUploaded"]["SlideShowID"]
         sl_meta = api.get_slideshow(sl_id)
         return sl_meta["Slideshow"]["URL"]
-    except (SlideShareServiceError, urllib2.URLError) as e:
+    except (SlideShareServiceError, URLError) as e:
         logger.error(e)
         return ""

@@ -5,7 +5,6 @@ import hoep as h
 
 from django.conf import settings
 from hashids import Hashids
-
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
 # Some details here https://github.com/Anomareh/Hoep
