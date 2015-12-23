@@ -1350,7 +1350,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
     def get_form_class(self):
         try:
             semester_year = int(self.kwargs['semester_year'])
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             raise Http404('Course offering not found')
 
         co_queryset = CourseOffering.objects
@@ -1512,7 +1512,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
         try:
             semester_year, semester_type = semester_slug.split('-')
             semester_year = int(semester_year)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             raise Http404('Course offering not found')
         if request.user.is_authenticated() and request.user.is_curator:
             base_qs = CourseOffering.objects
