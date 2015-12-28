@@ -10,6 +10,7 @@ import unicodecsv
 
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
+from six import viewvalues
 from itertools import chain
 
 from django.conf import settings
@@ -1548,7 +1549,8 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                 continue  # student isn't enrolled
             structured[a_s.student][a_s.assignment] = a_s.grade
 
-        header = structured.values()[0].keys()
+        header = viewvalues(structured)
+        header = next(iter(header)).keys()
         for _, by_assignment in structured.items():
             # we should check for "assignment consistency": that all
             # assignments are similar for all students in particular
