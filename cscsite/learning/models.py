@@ -97,6 +97,9 @@ class Semester(models.Model):
         else:
             return self.type_index - other.type_index
 
+    def __lt__(self, other):
+        return self.__cmp__(other)
+
     @property
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
