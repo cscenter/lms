@@ -14,9 +14,9 @@
         <div id="reference-page-request">{% trans "Reference|Detail|request" %}</div>
         <div id="reference-page-body">
             <div class="title">{% trans "Reference|Detail|title" %}</div>
-            {% blocktrans with full_name=object.student.get_full_name enrollment_year=object.student.enrollment_year first_name=object.student.first_name patronymic=object.student.patronymic %}Подтверждаю, что {{ full_name }} является студентом Computer Science центра с
-            сентября {{ enrollment_year }} года. За время обучения {{ first_name }} {{ patronymic }} успешно сдал(а) следующие курсы:
-            {% endblocktrans %}
+            Подтверждаю, что {{ object.student.get_full_name }} является {% if object.student.gender == object.student.GENDER_MALE %}студентом{% else %}студенткой{% endif %}
+            Computer Science центра с сентября {{ object.student.enrollment_year }} года. За время обучения {{ object.student.first_name }} {{ object.student.patronymic }}
+            успешно сдал{% if object.student.gender == object.student.GENDER_FEMALE %}а{% endif %} следующие курсы:
             <ol>
                 {% for course_id, enrollment in user_enrollments.items %}
                     <li>
