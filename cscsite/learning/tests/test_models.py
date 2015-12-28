@@ -4,12 +4,14 @@ from __future__ import unicode_literals, absolute_import
 import os
 import unittest
 
+import pytest
 from mock import patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
+from learning.constants import SEMESTER_TYPES
 from ..factories import *
 
 
@@ -338,3 +340,90 @@ class AssignmentNotificationTests(TestCase):
             user=UserFactory.create(groups=['Student [CENTER]']),
             is_about_passed=True)
         self.assertRaises(ValidationError, an.clean)
+
+
+# py.test starts here
+@pytest.mark.django_db
+def test_latest_academic_year_autumn(mocker):
+    """Get semesters from last N academic years with current semester = autumn"""
+    current_year = 2015
+    current_semester_type = SEMESTER_TYPES.autumn
+    # academic years
+    for semester_type, _ in SEMESTER_TYPES:
+        SemesterFactory(year=current_year, type=semester_type)
+        SemesterFactory(year=current_year - 1, type=semester_type)
+        SemesterFactory(year=current_year - 2, type=semester_type)
+        SemesterFactory(year=current_year - 3, type=semester_type)
+
+    mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
+    mocked_model_util.return_value = (current_year, current_semester_type)
+    queryset = Semester.latest_academic_years(year_count=1)
+    assert queryset.count() == 1
+    assert Semester.objects.get(year=current_year, type=current_semester_type) in queryset.all()
+    queryset = Semester.latest_academic_years(year_count=2)
+    assert queryset.count() == 4
+    assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.spring) not in queryset.all()
+    assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.summer) not in queryset.all()
+
+    queryset = Semester.latest_academic_years(year_count=3)
+    assert queryset.count() == 7
+
+
+@pytest.mark.django_db
+def test_latest_academic_year_summer(mocker):
+    """Get semesters from last N academic years with current semester = summer"""
+    current_year = 2015
+    current_semester_type = SEMESTER_TYPES.summer
+    # academic years
+    for semester_type, _ in SEMESTER_TYPES:
+        SemesterFactory(year=current_year, type=semester_type)
+        SemesterFactory(year=current_year - 1, type=semester_type)
+        SemesterFactory(year=current_year - 2, type=semester_type)
+        SemesterFactory(year=current_year - 3, type=semester_type)
+
+    mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
+    mocked_model_util.return_value = (current_year, current_semester_type)
+    queryset = Semester.latest_academic_years(year_count=1)
+    assert queryset.count() == 3
+    assert Semester.objects.get(year=current_year, type=current_semester_type) in queryset.all()
+    assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
+    assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.autumn) in queryset.all()
+    queryset = Semester.latest_academic_years(year_count=2)
+    assert queryset.count() == 6
+    assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.autumn) not in queryset.all()
+    # check 2014 year
+    for semester_type, _ in SEMESTER_TYPES:
+        assert Semester.objects.get(year=current_year - 1, type=semester_type) in queryset.all()
+    assert Semester.objects.get(year=current_year - 2, type=SEMESTER_TYPES.autumn) in queryset.all()
+    assert Semester.objects.get(year=current_year - 2, type=SEMESTER_TYPES.summer) not in queryset.all()
+    assert Semester.objects.get(year=current_year - 2, type=SEMESTER_TYPES.spring) not in queryset.all()
+
+@pytest.mark.django_db
+def test_latest_academic_year_spring(mocker):
+    """Get semesters from last N academic years with current semester = spring"""
+    current_year = 2015
+    current_semester_type = SEMESTER_TYPES.spring
+    # academic years
+    for semester_type, _ in SEMESTER_TYPES:
+        SemesterFactory(year=current_year, type=semester_type)
+        SemesterFactory(year=current_year - 1, type=semester_type)
+        SemesterFactory(year=current_year - 2, type=semester_type)
+        SemesterFactory(year=current_year - 3, type=semester_type)
+
+    mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
+    mocked_model_util.return_value = (current_year, current_semester_type)
+
+    queryset = Semester.latest_academic_years(year_count=1)
+    assert queryset.count() == 2
+    assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
+    assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.autumn) in queryset.all()
+    queryset = Semester.latest_academic_years(year_count=2)
+    assert queryset.count() == 5
+    assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
+    # check 2014 year
+    for semester_type, _ in SEMESTER_TYPES:
+        assert Semester.objects.get(year=current_year - 1, type=semester_type) in queryset.all()
+    assert Semester.objects.get(year=current_year - 2, type=SEMESTER_TYPES.autumn) in queryset.all()
+
+    queryset = Semester.latest_academic_years(year_count=3)
+    assert queryset.count() == 8
