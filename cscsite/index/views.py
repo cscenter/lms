@@ -4,12 +4,14 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import random
+from collections import Counter
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, Count
+from django.db import transaction
+from django.db.models import Q, Count, Prefetch
 from django.http import HttpResponseRedirect
 from django.utils.timezone import now
 from django.utils.translation import get_language, ugettext_lazy as _
@@ -33,9 +35,8 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         pool = cache.get('index_page_spb_courses_with_video')
         if pool is None:
-            semester_pks = [item.get("id") for item in
-                            Semester.latest_academic_years(year_count=2).values(
-                                "id").all()]
+            semester_pks = list(Semester.latest_academic_years(
+                year_count=2).values_list("id", flat=True))
             pool = list(CourseOffering.custom.site_related(self.request)
                 .filter(is_published_in_video=True, semester__in=semester_pks)
                 .defer('description')
@@ -45,7 +46,6 @@ class IndexView(generic.TemplateView):
             cache.set('index_page_spb_courses_with_video', pool, 3600)
         random.shuffle(pool)
         context['courses'] = pool[:3]
-        # TODO: Add cache
         testimonials = cache.get('index_page_testimonials')
         if testimonials is None:
             s = (CSCUser.objects
@@ -77,20 +77,26 @@ class AlumniView(generic.ListView):
                 .order_by("-graduation_year", "last_name", "first_name"))
 
 
-# TODO: this view should make a distinction between professors that have active
-#       courses and that who don't
-# TODO: test it
 class TeachersView(generic.ListView):
     template_name = "users/teacher_list.html"
 
     def get_queryset(self):
         user_model = get_user_model()
+        semesters = list(Semester.latest_academic_years(year_count=2).values_list(
+            "id", flat=True))
+        active_teachers_pks = Counter(CourseOffering.objects.filter(
+            semester__in=semesters).values_list("teachers__pk", flat=True))
+
         teacher_groups = [user_model.group_pks.TEACHER_CLUB]
         if self.request.site.domain != settings.CLUB_DOMAIN:
             teacher_groups.append(user_model.group_pks.TEACHER_CENTER)
-        return (user_model.objects
-                          .filter(groups__in=teacher_groups)
-                          .annotate(Count('pk')))
+        queryset = user_model.objects.filter(groups__in=teacher_groups).distinct()
+        teachers = {}
+        teachers["active"] = filter(lambda t: t.pk in active_teachers_pks, queryset)
+        teachers["other"] = filter(lambda t: t.pk not in active_teachers_pks, queryset)
+        print(teachers)
+
+        return teachers
 
 
 class RobotsView(generic.TemplateView):

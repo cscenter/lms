@@ -1,35 +1,73 @@
 {% extends "base.html" %}
 
 {% load i18n %}
+{% load static %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
-<div class="container">
-  {% for user in object_list %}
-  {% if forloop.counter0|divisibleby:2 %}
-  <div class="row">
-  {% endif %}
-    <div class="col-xs-6 user-tile">
-      <div class="col-xs-3">
-      {% thumbnail user.photo "100x100" crop="center" as im %}
-        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-      {% endthumbnail %}
-      </div>
-      <div class="col-xs-9">
-        <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
-        <div class="ubertext">
-          {% markdown 3600 "user_note" user.pk user.note %}
-            {{ user.get_short_note }}
-          {% endmarkdown %}
-          </div>
-      </div>
+    <div class="container teachers-list">
+        <h1>Преподаватели</h1>
+        {% for user in object_list.active %}
+        {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
+        <div class="col-xs-6">{% spaceless %}
+            {% if user.photo %}
+                  {% thumbnail user.photo "100x100" crop="center" as im %}
+                    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                  {% endthumbnail %}
+            {% else %}
+                <img src="{% static "img/center/brain.jpg" %}" width="100" height="100" alt="">
+            {% endif %}{% endspaceless %}
+            <div class="ubertext">
+                <a class="h4" href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a>
+                {% markdown 3600 "user_note" user.pk user.note %}
+                    {{ user.get_short_note }}
+                {% endmarkdown %}
+            </div>
+        </div>{% if not forloop.counter0|divisibleby:2 or forloop.last %}</div>{% endif %}
+        {% empty %}
+            {% trans "No professors yet" %}
+        {% endfor %}
+    <br>
+
+        <div class="panel-group" id="teachers-earlier-group" aria-multiselectable="true" role="tablist">
+            <div class="panel panel-default">
+                <div class="panel-heading" id="teachers-earlier-heading" role="tab">
+                    <a class="panel-title" data-toggle="collapse"
+                       href="#teachers-earlier"
+                       data-parent="#teachers-earlier-group" aria-expanded="false"
+                       aria-controls="teachers-earlier">
+                        Ранее преподаватели
+                    </a>
+                </div>
+                <div class="panel-collapse collapse" id="teachers-earlier"
+                     aria-labelledby="teachers-earlier-heading" role="tabpanel">
+                    <div class="panel-body">
+                        {% for user in object_list.other %}
+                            {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
+                        <div class="col-xs-6">
+                                {% if user.photo %}
+                                      {% thumbnail user.photo "100x100" crop="center" as im %}
+                                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                      {% endthumbnail %}
+                                {% else %}
+                                    <img src="{% static "img/center/brain.jpg" %}" width="100" alt="">
+                                {% endif %}
+                                <div class="ubertext">
+                                    <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
+                                    {% markdown 3600 "user_note" user.pk user.note %}
+                                        {{ user.get_short_note }}
+                                    {% endmarkdown %}
+                                </div>
+                        </div>
+                        {% if not forloop.counter0|divisibleby:2 or forloop.last %}</div>{% endif %}
+                        {% empty %}
+                            {% trans "No professors yet" %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  {% if not forloop.counter0|divisibleby:2 or forloop.last %}
-  </div>
-  {% endif %}
-  {% empty %}
-    {% trans "No professors yet" %}
-  {% endfor %}
-</div>
+
 {% endblock content %}
