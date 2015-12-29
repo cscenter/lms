@@ -94,8 +94,6 @@ class TeachersView(generic.ListView):
         teachers = {}
         teachers["active"] = filter(lambda t: t.pk in active_teachers_pks, queryset)
         teachers["other"] = filter(lambda t: t.pk not in active_teachers_pks, queryset)
-        print(teachers)
-
         return teachers
 
 
