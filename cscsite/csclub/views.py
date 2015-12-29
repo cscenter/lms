@@ -70,11 +70,6 @@ class TeachersView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        semesters = list(Semester.latest_academic_years(year_count=2).values_list(
-            "id", flat=True))
-        active_teachers_pks = Counter(CourseOffering.objects.filter(
-            semester__in=semesters).values_list("teachers__pk", flat=True))
-
         teacher_groups = [user_model.group_pks.TEACHER_CLUB]
         return user_model.objects.filter(groups__in=teacher_groups).distinct()
 
