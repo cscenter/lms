@@ -18,9 +18,7 @@ from django.views import generic
 import requests
 from braces import views
 
-from learning.constants import SEMESTER_TYPES
 from learning.models import OnlineCourse, CourseOffering, Semester
-from learning.utils import get_current_semester_pair
 from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
@@ -33,22 +31,11 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        # TODO: Add cache
-        # TODO: add test for semester_pks
         pool = cache.get('index_page_spb_courses_with_video')
         if pool is None:
-            current_year, current_semester_type = get_current_semester_pair()
-            year = current_year - 2
-            semesters = Semester.objects.filter(year__gte=year).exclude(
-                type=SEMESTER_TYPES.summer)
-            semester_pks = []
-            for semester in semesters:
-                if current_semester_type == SEMESTER_TYPES.autumn:
-                    if semester.year == year:
-                        continue
-                elif semester.year == year and semester.type == SEMESTER_TYPES.spring:
-                    continue
-                semester_pks.append(semester.pk)
+            semester_pks = [item.get("id") for item in
+                            Semester.latest_academic_years(year_count=2).values(
+                                "id").all()]
             pool = list(CourseOffering.custom.site_related(self.request)
                 .filter(is_published_in_video=True, semester__in=semester_pks)
                 .defer('description')
