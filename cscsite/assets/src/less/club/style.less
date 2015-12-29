@@ -9,6 +9,8 @@
 @import "../center/_learning.less";
 @import "top_menu.less";
 
+@color-blue: #337ab7;
+
 // index page
 .font-bigger {
   font-size: 18px;
@@ -733,4 +735,31 @@ tr.unread {
 .student-comment-metainfo {
   color: #999;
   font-size: 0.75em;
+}
+
+
+// Teachers list
+.teachers-list {
+
+  margin-bottom: 20px;
+
+  h1 {
+    margin-bottom: 40px;
+  }
+
+  .col-xs-6 {
+    img {
+      float: left;
+      margin: 0 10px 20px 0;
+    }
+
+    .ubertext {
+
+      .h4 {
+        color: @color-blue;
+      }
+
+      margin-left: 110px;
+    }
+  }
 }
