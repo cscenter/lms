@@ -1,4 +1,7 @@
+from collections import Counter
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db.models import Q, Prefetch, Count
 from django.http import JsonResponse
 from django.views import generic
@@ -60,6 +63,20 @@ class IndexView(generic.TemplateView):
             .order_by('is_completed', 'course__name'))
 
         return context
+
+
+class TeachersView(generic.ListView):
+    template_name = "users/teacher_list.html"
+
+    def get_queryset(self):
+        user_model = get_user_model()
+        semesters = list(Semester.latest_academic_years(year_count=2).values_list(
+            "id", flat=True))
+        active_teachers_pks = Counter(CourseOffering.objects.filter(
+            semester__in=semesters).values_list("teachers__pk", flat=True))
+
+        teacher_groups = [user_model.group_pks.TEACHER_CLUB]
+        return user_model.objects.filter(groups__in=teacher_groups).distinct()
 
 
 # TODO: (XXX) Dont' forget to remove it after old.* termination.

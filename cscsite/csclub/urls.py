@@ -7,7 +7,7 @@ from django.contrib import admin
 from htmlpages import views
 
 
-from index.views import AlumniView, TeachersView, RobotsView, \
+from index.views import AlumniView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
@@ -47,7 +47,7 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentSearchJSONView, StudentSearchView
 
 from core.views import MarkdownRenderView
-from csclub.views import set_city, CalendarClubScheduleView, IndexView
+from csclub.views import set_city, CalendarClubScheduleView, IndexView, TeachersView
 
 
 admin.autodiscover()
