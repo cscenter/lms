@@ -193,8 +193,7 @@ class CourseOffering(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         related_name='teaching_set',
-        limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.TEACHER_CENTER,
-            PARTICIPANT_GROUPS.TEACHER_CLUB]})
+        through='CourseOfferingTeacher')
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
@@ -281,6 +280,28 @@ class CourseOffering(TimeStampedModel):
                  now >= next_spring_term_start)):
             return False
         return True
+
+
+from bitfield import BitField
+@python_2_unicode_compatible
+class CourseOfferingTeacher(models.Model):
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, limit_choices_to={
+        'groups__in': [PARTICIPANT_GROUPS.TEACHER_CENTER,
+                       PARTICIPANT_GROUPS.TEACHER_CLUB]})
+    course_offering = models.ForeignKey(CourseOffering)
+    roles = BitField(flags=(
+        ('lecturer', _('Lecturer')),
+        ('reviewer', _('Reviewer')),
+    ), default=('lecturer',))
+
+    class Meta:
+        verbose_name = _("Course Offering teacher")
+        verbose_name_plural = _("Course Offering teachers")
+
+    def __str__(self):
+        return "{0}-{1}-{2}".format(smart_text(self.course_offering),
+                                    smart_text(self.teacher),
+                                    smart_text(self.roles))
 
 
 @python_2_unicode_compatible

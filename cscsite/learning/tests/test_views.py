@@ -414,13 +414,11 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         ctx = self.client.get(url).context
         self.assertEqual(False, ctx['is_enrolled'])
         self.assertEqual(False, ctx['is_actual_teacher'])
-        co_other.teachers.add(teacher)
-        co_other.save()
+        CourseOfferingTeacherFactory(course_offering=co_other, teacher=teacher)
         ctx = self.client.get(url).context
         self.assertEqual(False, ctx['is_enrolled'])
         self.assertEqual(False, ctx['is_actual_teacher'])
-        co.teachers.add(teacher)
-        co.save()
+        CourseOfferingTeacherFactory(course_offering=co, teacher=teacher)
         ctx = self.client.get(url).context
         self.assertEqual(False, ctx['is_enrolled'])
         self.assertEqual(True, ctx['is_actual_teacher'])
@@ -670,12 +668,12 @@ class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(teacher)
         self.assertEqual(False, self.client.get(url)
                          .context['is_actual_teacher'])
-        cc_other.course_offering.teachers.add(teacher)
-        cc_other.course_offering.save()
+        CourseOfferingTeacherFactory(course_offering=cc_other.course_offering,
+                                     teacher=teacher)
         self.assertEqual(False, self.client.get(url)
                          .context['is_actual_teacher'])
-        cc.course_offering.teachers.add(teacher)
-        cc.course_offering.save()
+        CourseOfferingTeacherFactory(course_offering=cc.course_offering,
+                                     teacher=teacher)
         self.assertEqual(True, self.client.get(url)
                          .context['is_actual_teacher'])
 

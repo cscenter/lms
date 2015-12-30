@@ -9,10 +9,11 @@ from core.models import apply_related_spec
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, AssignmentStudent, \
-    AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse
-
-
+    AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
+    CourseOfferingTeacher
 from .constants import PARTICIPANT_GROUPS
+from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 
 
 class RelatedSpecMixin(object):
@@ -25,10 +26,18 @@ class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
     pass
 
 
+class CourseOfferingTeacherInline(admin.TabularInline):
+    model = CourseOfferingTeacher
+    extra = 0
+    formfield_overrides = {
+            BitField: {'widget': BitFieldCheckboxSelectMultiple},
+    }
+
 class CourseOfferingAdmin(UbereditorMixin, WiderLabelsMixin, TranslationAdmin,
                           admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
+    inlines = (CourseOfferingTeacherInline,)
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):

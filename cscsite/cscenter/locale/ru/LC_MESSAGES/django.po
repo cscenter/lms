@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-18 12:50+0300\n"
-"PO-Revision-Date: 2015-12-18 12:51+0230\n"
+"POT-Creation-Date: 2015-12-30 12:09+0300\n"
+"PO-Revision-Date: 2015-12-30 12:10+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -79,11 +79,11 @@ msgstr "Все курсы с видео"
 
 #: cscsite/cscenter/templates/index.html:140
 msgid "Semester"
-msgstr ""
+msgstr "Семестр"
 
 #: cscsite/cscenter/templates/index.html:143
 msgid "Teachers"
-msgstr ""
+msgstr "Преподаватели"
 
 #: cscsite/cscenter/templates/index.html:148
 #, python-format
@@ -94,7 +94,6 @@ msgstr[1] "%(counter)s занятия"
 msgstr[2] "%(counter)s занятий"
 
 #: cscsite/cscenter/templates/index.html:149
-#| msgid "Full-time courses"
 msgid "Completed course"
 msgstr "Полный курс"
 
