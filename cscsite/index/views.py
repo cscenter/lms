@@ -87,10 +87,11 @@ class TeachersView(generic.ListView):
         active_teachers_pks = Counter(CourseOffering.objects.filter(
             semester__in=semesters).values_list("teachers__pk", flat=True))
 
-        teacher_groups = [user_model.group_pks.TEACHER_CLUB]
-        if self.request.site.domain != settings.CLUB_DOMAIN:
-            teacher_groups.append(user_model.group_pks.TEACHER_CENTER)
-        queryset = user_model.objects.filter(groups__in=teacher_groups).distinct()
+        teacher_groups = user_model.group_pks.TEACHER_CENTER
+        if self.request.site.domain == settings.CLUB_DOMAIN:
+            teacher_groups = user_model.group_pks.TEACHER_CLUB
+        queryset = user_model.objects.filter(groups=teacher_groups).distinct()
+        print(queryset.count())
         teachers = {}
         teachers["active"] = filter(lambda t: t.pk in active_teachers_pks, queryset)
         teachers["other"] = filter(lambda t: t.pk not in active_teachers_pks, queryset)
