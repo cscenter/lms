@@ -29,44 +29,30 @@
             {% trans "No professors yet" %}
         {% endfor %}
     <br>
-
-        <div class="panel-group" id="teachers-earlier-group" aria-multiselectable="true" role="tablist">
-            <div class="panel panel-default">
-                <div class="panel-heading" id="teachers-earlier-heading" role="tab">
-                    <a class="panel-title" data-toggle="collapse"
-                       href="#teachers-earlier"
-                       data-parent="#teachers-earlier-group" aria-expanded="false"
-                       aria-controls="teachers-earlier">
-                        Ранее преподаватели
-                    </a>
-                </div>
-                <div class="panel-collapse collapse" id="teachers-earlier"
-                     aria-labelledby="teachers-earlier-heading" role="tabpanel">
-                    <div class="panel-body">
-                        {% for user in object_list.other %}
-                            {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
-                        <div class="col-xs-6">
-                                {% if user.photo %}
-                                      {% thumbnail user.photo "100x100" crop="center" as im %}
-                                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                                      {% endthumbnail %}
-                                {% else %}
-                                    <img src="{% static "img/center/brain.jpg" %}" width="100" alt="">
-                                {% endif %}
-                                <div class="ubertext">
-                                    <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
-                                    {% markdown 3600 "user_note" user.pk user.note %}
-                                        {{ user.get_short_note }}
-                                    {% endmarkdown %}
-                                </div>
-                        </div>
-                        {% if not forloop.counter0|divisibleby:2 or forloop.last %}</div>{% endif %}
-                        {% empty %}
-                            {% trans "No professors yet" %}
-                        {% endfor %}
+    <a href="#teachers-earlier" data-toggle="collapse" aria-expanded="false" class="collapse-link">Ранее преподавали</a><br>
+    <div class="panel-collapse ">
+        <div class="collapse" id="teachers-earlier">
+            {% for user in object_list.other %}
+                {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
+            <div class="col-xs-6">
+                    {% if user.photo %}
+                          {% thumbnail user.photo "100x100" crop="center" as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                          {% endthumbnail %}
+                    {% else %}
+                        <img src="{% static "img/center/brain.jpg" %}" width="100" alt="">
+                    {% endif %}
+                    <div class="ubertext">
+                        <h4><a href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a></h4>
+                        {% markdown 3600 "user_note" user.pk user.note %}
+                            {{ user.get_short_note }}
+                        {% endmarkdown %}
                     </div>
-                </div>
             </div>
+            {% if not forloop.counter0|divisibleby:2 or forloop.last %}</div>{% endif %}
+            {% empty %}
+                {% trans "No professors yet" %}
+            {% endfor %}
         </div>
     </div>
 
