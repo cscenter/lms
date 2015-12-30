@@ -59,6 +59,14 @@ class LoginView(generic.FormView):
     def get_success_url(self):
         redirect_to = self.request.GET.get(self.redirect_field_name)
 
+        if not redirect_to:
+            user_groups = list(
+                self.request.user.groups.values_list("id", flat=True))
+            if user_groups == [CSCUser.group_pks.STUDENT_CENTER]:
+                redirect_to = reverse(settings.LEARNING_BASE)
+            elif user_groups == [CSCUser.group_pks.TEACHER_CENTER]:
+                redirect_to = reverse(settings.TEACHING_BASE)
+
         if not is_safe_url(redirect_to, self.request.get_host()):
             redirect_to = settings.LOGOUT_REDIRECT_URL
 
