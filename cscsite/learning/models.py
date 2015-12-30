@@ -1000,8 +1000,3 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
 
     def __str__(self):
         return smart_text(self.name)
-
-
-# XXX this is a gross hack of course. A better solution imo would be
-# to put signal handlers right next to the models.
-from .signals import *
