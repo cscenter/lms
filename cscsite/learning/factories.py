@@ -11,8 +11,8 @@ from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, StudentProject
-
+    CourseOfferingNewsNotification, NonCourseEvent, StudentProject, \
+    CourseOfferingTeacher
 from .utils import get_current_semester_pair
 from core.models import City
 from users.factories import UserFactory
@@ -72,7 +72,16 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
             return
         if extracted:
             for teacher in extracted:
-                self.teachers.add(teacher)
+                CourseOfferingTeacher(course_offering=self,
+                                      teacher=teacher).save()
+
+class CourseOfferingTeacherFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseOfferingTeacher
+
+    teacher = factory.SubFactory(UserFactory)
+    course_offering = factory.SubFactory(CourseOfferingFactory)
+    roles = CourseOfferingTeacher.roles.lecturer
 
 
 class CourseOfferingNewsFactory(factory.DjangoModelFactory):
