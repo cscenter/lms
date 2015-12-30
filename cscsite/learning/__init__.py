@@ -11,3 +11,4 @@ default_app_config = 'learning.apps.LearningConfig'
 # TODO: app cache
 # TODO: managers
 # TODO: combine urls into groups and refactor club urls!
+# TODO: create Student Model???
