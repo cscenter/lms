@@ -3,43 +3,18 @@ from __future__ import absolute_import, unicode_literals
 import posixpath
 import itertools
 
-from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.apps import apps
 from django.utils import timezone
 
 from slides import yandex_disk, slideshare
-from .models import Assignment, AssignmentStudent, Enrollment, \
-    AssignmentComment, AssignmentNotification, \
-    CourseOfferingNews, CourseOfferingNewsNotification, CourseClass
 
 
-@receiver(post_save, sender=CourseClass)
-def maybe_upload_slides(sender, instance, **kwargs):
-    # XXX we might want to delegate this to cron or Celery.
-    # TODO: We want to update slides_url if slides have changed
-    if instance.slides and not instance.slides_url:
-        course_offering = instance.course_offering
-        course = course_offering.course
-
-        # a) Yandex.Disk
-        yandex_disk.upload_slides(
-            instance.slides.file,
-            posixpath.join(course.slug, instance.slides_file_name))
-
-        # b) SlideShare
-        instance.slides_url = slideshare.upload_slides(
-            instance.slides.file,
-            "{0}: {1}".format(course_offering, instance),
-            instance.description, tags=[course.slug])
-        instance.save()
-
-
-@receiver(models.signals.post_save, sender=Assignment)
 def populate_assignment_students(sender, instance, created,
                                  *args, **kwargs):
     if not created:
         return
+    AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
+    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
     students = instance.course_offering.enrolled_students.all()
     for student in students:
         a_s = AssignmentStudent.objects.create(assignment=instance,
@@ -55,23 +30,28 @@ def populate_assignment_students(sender, instance, created,
          .save())
 
 
-@receiver(models.signals.post_save, sender=Enrollment)
-def populate_student_assignments(sender, instance, created,
-                                 *args, **kwargs):
-    if not created:
+def create_deadline_change_notification(sender, instance, created,
+                                        *args, **kwargs):
+    if created:
         return
-    assignments = instance.course_offering.assignment_set.all()
-    for a in assignments:
-        (AssignmentStudent.objects
-         .get_or_create(assignment=a,
-                        student=instance.student))
+    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
+    AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
+    if 'deadline_at' in instance.tracker.changed():
+        students = instance.course_offering.enrolled_students.all()
+        for student in students:
+            a_s = AssignmentStudent.objects.get(student=student,
+                                                assignment=instance)
+            (AssignmentNotification(user=student,
+                                    assignment_student=a_s,
+                                    is_about_deadline=True)
+             .save())
 
 
-@receiver(models.signals.post_save, sender=AssignmentComment)
 def create_assignment_comment_notification(sender, instance, created,
                                            *args, **kwargs):
     if not created:
         return
+    AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     a_s = instance.assignment_student
     if instance.author.pk == a_s.student.pk:
         teachers = (instance
@@ -98,8 +78,6 @@ def create_assignment_comment_notification(sender, instance, created,
                                 assignment_student=a_s)
          .save())
 
-
-@receiver(models.signals.post_save, sender=AssignmentComment)
 def update_last_commented_date_on_assignment_student(sender, instance, created,
                                                      *args, **kwargs):
     if not created:
@@ -108,8 +86,36 @@ def update_last_commented_date_on_assignment_student(sender, instance, created,
     a_s.last_commented = timezone.now()
     a_s.save()
 
+def mark_assignment_passed(sender, instance, created,
+                           *args, **kwargs):
+    if not created:
+        return
+    a_s = instance.assignment_student
+    if not a_s.is_passed\
+       and instance.author.pk == a_s.student.pk\
+       and a_s.assignment.is_online:
+        a_s.is_passed = True
+        a_s.save()
 
-@receiver(models.signals.post_save, sender=CourseOfferingNews)
+def maybe_upload_slides(sender, instance, **kwargs):
+    # XXX we might want to delegate this to cron or Celery.
+    # TODO: We want to update slides_url if slides have changed
+    if instance.slides and not instance.slides_url:
+        course_offering = instance.course_offering
+        course = course_offering.course
+
+        # a) Yandex.Disk
+        yandex_disk.upload_slides(
+            instance.slides.file,
+            posixpath.join(course.slug, instance.slides_file_name))
+
+        # b) SlideShare
+        instance.slides_url = slideshare.upload_slides(
+            instance.slides.file,
+            "{0}: {1}".format(course_offering, instance),
+            instance.description, tags=[course.slug])
+        instance.save()
+
 def create_course_offering_news_notification(sender, instance, created,
                                              *args, **kwargs):
     if not created:
@@ -123,6 +129,8 @@ def create_course_offering_news_notification(sender, instance, created,
                 .course_offering
                 .teachers
                 .all())
+    CourseOfferingNewsNotification = apps.get_model('learning',
+                                                    'CourseOfferingNewsNotification')
     # this loop can be optimized using bulk_create at the expence of
     # pre/post_save signals on CourseOfferingNewsNotification
     for user in itertools.chain(students, teachers):
@@ -132,30 +140,13 @@ def create_course_offering_news_notification(sender, instance, created,
          .save())
 
 
-@receiver(models.signals.post_save, sender=Assignment)
-def create_deadline_change_notification(sender, instance, created,
-                                        *args, **kwargs):
-    if created:
-        return
-    if 'deadline_at' in instance.tracker.changed():
-        students = instance.course_offering.enrolled_students.all()
-        for student in students:
-            a_s = AssignmentStudent.objects.get(student=student,
-                                                assignment=instance)
-            (AssignmentNotification(user=student,
-                                    assignment_student=a_s,
-                                    is_about_deadline=True)
-             .save())
-
-
-@receiver(models.signals.post_save, sender=AssignmentComment)
-def mark_assignment_passed(sender, instance, created,
-                           *args, **kwargs):
+def populate_student_assignments(sender, instance, created,
+                                 *args, **kwargs):
     if not created:
         return
-    a_s = instance.assignment_student
-    if not a_s.is_passed\
-       and instance.author.pk == a_s.student.pk\
-       and a_s.assignment.is_online:
-        a_s.is_passed = True
-        a_s.save()
+    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
+    assignments = instance.course_offering.assignment_set.all()
+    for a in assignments:
+        (AssignmentStudent.objects
+         .get_or_create(assignment=a,
+                        student=instance.student))
