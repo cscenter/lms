@@ -254,32 +254,9 @@ class CourseOffering(TimeStampedModel):
 
     @cached_property
     def is_ongoing(self):
-        now = timezone.now()
-
-        spring_term_start = (dparser
-                             .parse(settings.SPRING_TERM_START)
-                             .replace(tzinfo=timezone.utc))
-        next_year = now + datetime.timedelta(days=365)
-        # safer against leap years
-        next_spring_term_start = (dparser
-                                  .parse(settings.SPRING_TERM_START,
-                                         default=next_year)
-                                  .replace(tzinfo=timezone.utc))
-        autumn_term_start = (dparser
-                             .parse(settings.AUTUMN_TERM_START)
-                             .replace(tzinfo=timezone.utc))
-
-        if self.semester.year != now.year:
-            return False
-        if (self.semester.type == 'spring' and
-                (now >= autumn_term_start or
-                 now < spring_term_start)):
-            return False
-        if (self.semester.type == 'autumn' and
-                (now < autumn_term_start or
-                 now >= next_spring_term_start)):
-            return False
-        return True
+        current_semester = get_current_semester_pair()
+        return (current_semester.year == self.semester.year
+                and current_semester.type == self.semester.type)
 
 
 from bitfield import BitField
