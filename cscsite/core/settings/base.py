@@ -154,9 +154,10 @@ TEACHING_BASE = 'assignment_list_teacher'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # don't know what will happen if we change this when there are models in DB
+AUTUMN_TERM_START = '1 sep'
+# Note: sprint semester must be later than 1 jan
 SPRING_TERM_START = '10 jan'
 SUMMER_TERM_START = '1 jul'
-AUTUMN_TERM_START = '1 sep'
 
 # use dummy values to avoid accidental messing of real data
 SLIDESHARE_API_KEY = "dummy_ss_key"
