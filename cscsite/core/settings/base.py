@@ -45,7 +45,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
 
-                'core.context_processors.redirect_bases'
+                'learning.context_processors.redirect_bases'
             ),
             'debug': DEBUG
         }
@@ -147,9 +147,6 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
-# this urls will be used to redirect from '/learning/' and '/teaching/'
-LEARNING_BASE = 'assignment_list_student'
-TEACHING_BASE = 'assignment_list_teacher'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
@@ -229,8 +226,6 @@ PIPELINE_JS = {
 }
 
 HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
-ASSIGNMENT_TASK_ATTACHMENT = 0
-ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
 # Oembed defaults
 MICAWBER_DEFAULT_SETTINGS = {

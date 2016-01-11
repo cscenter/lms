@@ -1,4 +1,4 @@
-from django.conf import settings
+from learning import settings
 
 
 def redirect_bases(request):

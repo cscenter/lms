@@ -29,7 +29,8 @@ from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
-
+from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
+    ASSIGNMENT_TASK_ATTACHMENT
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin, FailedCourseContextMixin
@@ -1642,12 +1643,12 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             attachment_type, pk = hashids.decode(kwargs['sid'])
         except IndexError:
             raise Http404
-        if attachment_type == settings.ASSIGNMENT_TASK_ATTACHMENT:
+        if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
             qs = AssignmentAttachment.objects.filter(pk=pk)
             assignment_attachment = get_object_or_404(qs)
             file_name = assignment_attachment.file_name
             file_url = assignment_attachment.attachment.url
-        elif attachment_type == settings.ASSIGNMENT_COMMENT_ATTACHMENT:
+        elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
             if not request.user.is_teacher and not request.user.is_curator:
                 qs = qs.filter(assignment_student__student_id=request.user.pk)

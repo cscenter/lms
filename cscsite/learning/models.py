@@ -29,6 +29,8 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
+from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
+    ASSIGNMENT_TASK_ATTACHMENT
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
@@ -560,7 +562,7 @@ class AssignmentAttachment(TimeStampedModel, object):
     def file_url(self):
         return reverse(
             "assignment_attachments_download",
-            args=[hashids.encode(settings.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
+            args=[hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
         )
 
 
@@ -719,8 +721,9 @@ class AssignmentComment(TimeStampedModel):
     def attached_file_url(self):
         return reverse(
             "assignment_attachments_download",
-            args=[hashids.encode(settings.ASSIGNMENT_COMMENT_ATTACHMENT,
-                  self.pk)]
+            args=[hashids.encode(
+                ASSIGNMENT_COMMENT_ATTACHMENT,
+                self.pk)]
         )
 
 
