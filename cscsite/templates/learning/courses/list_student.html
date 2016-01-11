@@ -78,9 +78,6 @@
       <table class="table _archive" width="100%">
         <thead>
           <th></th>
-          <th width="20%">
-            {% trans "Professors" %}
-          </th>
           <th width="10%">
             {% trans "Grade" %}
           </th>
@@ -94,13 +91,6 @@
             <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
               {{ e.course_offering.course.name }}
             </a>
-          </td>
-          <td>
-            <ul class="list-unstyled">
-            {% for teacher in e.course_offering.teachers.all %}
-            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a></li>
-            {% endfor %}
-            </ul>
           </td>
           <td>
             <span class="badge assignment-status {{ e.grade }}">
