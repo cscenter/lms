@@ -30,6 +30,7 @@ from icalendar.prop import vInline
 import pytz
 
 from core.views import ProtectedFormMixin, SuperUserOnlyMixin
+from learning.settings import LEARNING_BASE, TEACHING_BASE
 from learning.viewmixins import CuratorOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent, Semester, StudentProject, Enrollment
@@ -55,7 +56,6 @@ class LoginView(generic.FormView):
         auth.login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
 
-    # TODO: redirect on user-specific page?
     def get_success_url(self):
         redirect_to = self.request.GET.get(self.redirect_field_name)
 
@@ -63,9 +63,9 @@ class LoginView(generic.FormView):
             user_groups = list(
                 self.request.user.groups.values_list("id", flat=True))
             if user_groups == [CSCUser.group_pks.STUDENT_CENTER]:
-                redirect_to = reverse(settings.LEARNING_BASE)
+                redirect_to = reverse(LEARNING_BASE)
             elif user_groups == [CSCUser.group_pks.TEACHER_CENTER]:
-                redirect_to = reverse(settings.TEACHING_BASE)
+                redirect_to = reverse(TEACHING_BASE)
 
         if not is_safe_url(redirect_to, self.request.get_host()):
             redirect_to = settings.LOGOUT_REDIRECT_URL

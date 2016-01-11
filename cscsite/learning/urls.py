@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
-
+from learning.settings import LEARNING_BASE, TEACHING_BASE
 from .views import \
     TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, CalendarFullView, \
@@ -38,7 +38,7 @@ urlpatterns = [
     url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
     url(r'^learning/$',
-        RedirectView.as_view(pattern_name=settings.LEARNING_BASE, permanent=True),
+        RedirectView.as_view(pattern_name=LEARNING_BASE, permanent=True),
         name='learning_base'),
     url(r'^learning/courses/$', CourseStudentListView.as_view(),
         name='course_list_student'),
@@ -57,7 +57,7 @@ urlpatterns = [
         name='calendar_full_student'),
 
     url(r'^teaching/$',
-        RedirectView.as_view(pattern_name=settings.TEACHING_BASE, permanent=True),
+        RedirectView.as_view(pattern_name=TEACHING_BASE, permanent=True),
         name='teaching_base'),
     url(r'^teaching/timetable/$', TimetableTeacherView.as_view(),
         name='timetable_teacher'),

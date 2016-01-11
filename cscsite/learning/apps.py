@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-from django.core import checks
 from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
 
@@ -11,24 +10,12 @@ from .signals import (maybe_upload_slides, populate_assignment_students,
                       create_course_offering_news_notification,
                       mark_assignment_passed)
 
-def check_learning_app_default_settings(**kwargs):
-    from django.conf import settings
-    errors = []
-    # FIXME: Really don't know is it appropriate place or not. Maybe replace with default settings?
-    if not settings.LEARNING_BASE:
-        errors.extend([checks.Error(
-            "'{}' setting must be specified".format("LEARNING_BASE"))])
-    if not settings.TEACHING_BASE:
-        errors.extend([checks.Error(
-            "'{}' setting must be specified".format("TEACHING_BASE"))])
-    return errors
 
 class LearningConfig(AppConfig):
     name = 'learning'
     verbose_name = _("Learning")
 
     def ready(self):
-        checks.register(check_learning_app_default_settings)
         post_save.connect(populate_assignment_students,
                           sender=self.get_model('Assignment'))
         post_save.connect(create_deadline_change_notification,
