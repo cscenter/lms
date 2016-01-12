@@ -422,8 +422,8 @@ class CSCUserFilter(django_filters.FilterSet):
         ).extra(where=["learning_enrollment.grade NOT IN ('not_graded', 'unsatisfactory')"])
         # FIXME: replace "learning_enrollment.grade" with pk???
 
-        print(queryset.query)
-        print(queryset.get(id=793))
+        # print(queryset.query)
+        # print(queryset.get(id=793))
 
         if value > self.ENROLLMENTS_CNT_LIMIT:
             return queryset.filter(
