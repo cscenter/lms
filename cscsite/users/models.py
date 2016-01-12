@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import IntegerField, Sum, Case, When, Value
+from django.db.models import IntegerField, Sum, Case, When, Value, Count
 from django.http import QueryDict
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -412,21 +412,25 @@ class CSCUserFilter(django_filters.FilterSet):
         except ValueError:
             return queryset
         assert value >= 0
+
         queryset = queryset.annotate(
-        cnt_enrollments=Sum(
-            Case(
-                When(enrollment__grade=GRADES.unsatisfactory, then=0),
-                When(enrollment__grade=GRADES.not_graded, then=0),
-                default=Value('1'),
-                output_field=IntegerField()
+            courses_cnt=Sum(
+                Case(
+                    When(enrollment__grade=GRADES.unsatisfactory, then=0),
+                    When(enrollment__grade=GRADES.not_graded, then=0),
+                    default=Value('1'),
+                    output_field=IntegerField()
+                )
             )
-        ))
+            + Count("shadcourserecord", distinct=True)
+            + Count("onlinecourserecord", distinct=True)
+        )
 
         if value > self.ENROLLMENTS_CNT_LIMIT:
             return queryset.filter(
-                cnt_enrollments__gt=self.ENROLLMENTS_CNT_LIMIT)
+                courses_cnt__gt=self.ENROLLMENTS_CNT_LIMIT)
         else:
-            return queryset.filter(cnt_enrollments=value)
+            return queryset.filter(courses_cnt=value)
 
     def status_filter(self, queryset, value):
         value_list = value.split(u',')
