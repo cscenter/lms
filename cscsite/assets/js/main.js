@@ -399,7 +399,7 @@ $(document).ready(function () {
                 .pairs()
                 .filter(function(x) {return x[1]})
                 .map(function(x) {return x[0]})
-                .value();
+                .value().join(",");
             flatGroups = _.chain(groups)
                 .pairs()
                 .filter(function(x) {return x[1]})

@@ -14,7 +14,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-5">
+    <div class="col-xs-6">
       <form class="user-search">
         <input type="hidden" id="ajax-uri" value="{{ json_api_uri }}">
         <div class="form-group">
@@ -49,6 +49,11 @@
         <div class="form-group">
           <label>{% trans "Status" %}</label><br>
           <div class="btn-group btn-group-sm" data-toggle="buttons">
+                <label class="btn btn-default">
+                <input type="checkbox" name="status"
+                       value="studying"
+                       autocomplete="off">Учится
+              </label>
             {% for status_id, status_name in status.items %}
               <label class="btn btn-default">
                 <input type="checkbox" name="status"
@@ -82,7 +87,7 @@
         </div>
       </form>
     </div>
-    <div class="col-xs-7">
+    <div class="col-xs-6">
       <p id="user-num-container" style="display: none; font-weight: bold;">
         {% trans "Found" %}:
         <span id="user-num"></span>
