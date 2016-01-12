@@ -384,7 +384,7 @@ class CSCUserFilter(django_filters.FilterSet):
     cnt_enrollments = django_filters.MethodFilter(action='cnt_enrollments_filter')
     # FIXME: replace with range?
     enrollment_year = ListFilter(name='enrollment_year')
-    status = django_filters.MultipleChoiceFilter(choices=CSCUser.STATUS)
+    status = django_filters.MethodFilter(action='status_filter')
 
     class Meta:
         model = CSCUser
@@ -397,9 +397,9 @@ class CSCUserFilter(django_filters.FilterSet):
         cleaned_data = QueryDict(mutable=True)
         if self.data:
             for (filter_name, filter_values) in self.data.iterlists():
-                filter_values = filter(None, filter_values)
-                if filter_values:
-                    cleaned_data.setlist(filter_name, set(filter_values))
+                values = filter(None, filter_values)
+                if values:
+                    cleaned_data.setlist(filter_name, set(values))
         self.data = cleaned_data
         if not "groups" in self.data:
             if not self.data:
@@ -427,6 +427,19 @@ class CSCUserFilter(django_filters.FilterSet):
                 cnt_enrollments__gt=self.ENROLLMENTS_CNT_LIMIT)
         else:
             return queryset.filter(cnt_enrollments=value)
+
+    def status_filter(self, queryset, value):
+        value_list = value.split(u',')
+        value_list = filter(None, value_list)
+        if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
+            return queryset
+        elif "studying" in value_list:
+            return queryset.exclude(status=CSCUser.STATUS.expelled)
+        for value in value_list:
+            if value not in CSCUser.STATUS:
+                raise ValueError(
+                    "CSCUserFilter: unrecognized status_filter choice")
+        return queryset.filter(status__in=value_list).distinct()
 
 
     # FIXME: Difficult and unpredictable
