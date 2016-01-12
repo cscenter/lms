@@ -257,8 +257,7 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
             s.projects.extend([None] * (projects_max - len(s.projects)))
             for p in s.projects:
                 if p is not None:
-                    semesters = [unicode(sem) for sem in p.semesters.all()]
-                    row.extend([p.name, p.supervisor, ", ".join(semesters)])
+                    row.extend([p.name, p.supervisor, p.semester])
                 else:
                     row.extend(['', '', ''])
 
