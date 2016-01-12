@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import IntegerField, Sum, Case, When, Value, Count
+from django.db.models import Count
 from django.http import QueryDict
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -22,6 +22,7 @@ from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
+from learning.models import Enrollment
 from learning.utils import LearningPermissionsMixin
 from .managers import CustomUserManager
 
@@ -414,17 +415,15 @@ class CSCUserFilter(django_filters.FilterSet):
         assert value >= 0
 
         queryset = queryset.annotate(
-            courses_cnt=Sum(
-                Case(
-                    When(enrollment__grade=GRADES.unsatisfactory, then=0),
-                    When(enrollment__grade=GRADES.not_graded, then=0),
-                    default=Value('1'),
-                    output_field=IntegerField()
-                )
-            )
+            courses_cnt=
+            Count("enrollment", distinct=True)
             + Count("shadcourserecord", distinct=True)
             + Count("onlinecourserecord", distinct=True)
-        )
+        ).extra(where=["learning_enrollment.grade NOT IN ('not_graded', 'unsatisfactory')"])
+        # FIXME: replace "learning_enrollment.grade" with pk???
+
+        print(queryset.query)
+        print(queryset.get(id=793))
 
         if value > self.ENROLLMENTS_CNT_LIMIT:
             return queryset.filter(
