@@ -13,30 +13,35 @@ CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
 
 def get_current_semester_pair():
-    now = timezone.now()
+    date = timezone.now()
+    return date_to_semester_pair(date)
+
+def date_to_semester_pair(date):
+    assert timezone.is_aware(date)
     spring_term_start = (dparser
                          .parse(settings.SPRING_TERM_START)
                          .replace(tzinfo=timezone.utc,
-                                  year=now.year))
+                                  year=date.year))
     autumn_term_start = (dparser
                          .parse(settings.AUTUMN_TERM_START)
                          .replace(tzinfo=timezone.utc,
-                                  year=now.year))
+                                  year=date.year))
     summer_term_start = (dparser
                          .parse(settings.SUMMER_TERM_START)
                          .replace(tzinfo=timezone.utc,
-                                  year=now.year))
-    year = now.year
-    if spring_term_start <= now < summer_term_start:
+                                  year=date.year))
+    year = date.year
+    if spring_term_start <= date < summer_term_start:
         current_season = SEMESTER_TYPES.spring
-    elif summer_term_start <= now < autumn_term_start:
+    elif summer_term_start <= date < autumn_term_start:
         current_season = SEMESTER_TYPES.summer
     else:
         current_season = SEMESTER_TYPES.autumn
         # Fix year inaccuracy, when spring semester starts later than 1 jan
-        if now.month <= spring_term_start.month:
+        if date.month <= spring_term_start.month:
             year -= 1
     return CurrentSemester(year, current_season)
+
 
 
 def split_list(iterable, predicate):
