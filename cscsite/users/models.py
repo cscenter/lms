@@ -2,6 +2,7 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
+import datetime
 import django_filters
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
@@ -14,6 +15,7 @@ from django.http import QueryDict
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
+from django.utils.timezone import now, make_aware
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
@@ -23,7 +25,7 @@ from sorl.thumbnail import ImageField
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.models import Enrollment
-from learning.utils import LearningPermissionsMixin
+from learning.utils import LearningPermissionsMixin, date_to_semester_pair
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -32,6 +34,137 @@ YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
 
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: mv to db/ package. Should be more generic?
+class LoggingMonitorField(models.DateField):
+    """ MonitorField from django.utils + added logging for monitored field.
+    Also you can manually set date if required
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        log_class = kwargs.pop('log_class', None)
+        if not log_class:
+            raise TypeError(
+                '%s requires a "log_class" argument' % self.__class__.__name__)
+        self.log_class = log_class
+        monitor = kwargs.pop('monitor', None)
+        if not monitor:
+            raise TypeError(
+                '%s requires a "monitor" argument' % self.__class__.__name__)
+        self.monitor = monitor
+        kwargs.setdefault('help_text', _("Automatically updated when {} "
+                                         "changed. Add log action silently "
+                                         "failed if nonvalid date manually "
+                                         "specified!").format(monitor))
+        when = kwargs.pop('when', None)
+        if when is not None:
+            when = set(when)
+        self.when = when
+        super(LoggingMonitorField, self).__init__(*args, **kwargs)
+
+    def contribute_to_class(self, cls, name, **kwargs):
+        self.old_value_attname = '_old_value_%s' % name
+        self.monitor_attname = '_monitor_%s' % name
+        models.signals.post_init.connect(self._save_initial, sender=cls)
+        models.signals.post_save.connect(self._post_save, sender=cls)
+        super(LoggingMonitorField, self).contribute_to_class(cls, name, **kwargs)
+
+    def get_monitored_value(self, instance):
+        return getattr(instance, self.monitor)
+
+    def _save_initial(self, sender, instance, **kwargs):
+        setattr(instance, self.old_value_attname,
+                getattr(instance, self.attname))
+        setattr(instance, self.monitor_attname,
+                self.get_monitored_value(instance))
+
+    def pre_save(self, model_instance, add):
+        value = now()
+        previous_date = getattr(model_instance, self.old_value_attname, None)
+        current_date = getattr(model_instance, self.attname)
+        previous = getattr(model_instance, self.monitor_attname, None)
+        current = self.get_monitored_value(model_instance)
+        # TODO: Update log entry if date only was changed?
+        if previous != current and (
+                previous_date == current_date or not current_date):
+            if self.when is None or current in self.when:
+                setattr(model_instance, self.attname, value)
+        return super(LoggingMonitorField, self).pre_save(model_instance, add)
+
+    def _post_save(self, instance, created, **kwargs):
+        previous = getattr(instance, self.monitor_attname, None)
+        current = self.get_monitored_value(instance)
+        if previous != current:
+            self._save_initial(instance.__class__, instance)
+            self.create_log_entry(instance, created)
+
+    def create_log_entry(self, instance, created):
+        if created:
+            return False
+        attrs = {}
+        attrs[self.monitor] = self.get_monitored_value(instance)
+        instance_fields = [f.attname for f in instance._meta.fields]
+        # Note: No idea how it works with FK, m2m, etc
+        for field in self.log_class._meta.fields:
+            if isinstance(field, models.AutoField):
+                continue
+            if field.attname not in instance_fields:
+                continue
+            attrs[field.attname] = getattr(instance, field.attname)
+
+        model = self.log_class(**attrs)
+        if model._prepare_fields(instance, self.attname):
+            model.save()
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(LoggingMonitorField, self).deconstruct()
+        kwargs['monitor'] = self.monitor
+        kwargs['log_class'] = self.log_class
+        if self.when is not None:
+            kwargs['when'] = self.when
+        return name, path, args, kwargs
+
+
+@python_2_unicode_compatible
+class CSCUserStatusLog(models.Model):
+    created = models.DateField(_("created"), default=now)
+    semester = models.ForeignKey(
+        "learning.Semester",
+        verbose_name=_("Semester"))
+    status = models.CharField(
+        choices=STUDENT_STATUS,
+        verbose_name=_("Status"),
+        max_length=15)
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student"))
+
+    def _prepare_fields(self, monitored_instance, observer_field_attname):
+        """Autofill necessary fields."""
+        from learning.models import Semester
+        if not self.student_id:
+            self.student_id = monitored_instance.pk
+        if not self.semester_id:
+            date = getattr(monitored_instance, observer_field_attname, None)
+            if not date:
+                return False
+            # date to datetime
+            date = datetime.datetime.combine(date, datetime.datetime.min.time())
+            date = make_aware(date)
+            year, semester_type = date_to_semester_pair(date)
+            try:
+                semester = Semester.objects.get(year=year, type=semester_type)
+            except Semester.DoesNotExist:
+                return False
+            self.semester_id = semester.pk
+        return True
+
+
+    def __str__(self):
+        return smart_text(
+            "{} [{}]".format(self.student.get_full_name(True), self.semester))
 
 
 @python_2_unicode_compatible
@@ -152,9 +285,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
-    status_changed_at = MonitorField(
+    status_changed_at = LoggingMonitorField(
         monitor='status',
-        verbose_name=_("Status changed"))
+        log_class=CSCUserStatusLog,
+        verbose_name=_("Status changed"),
+        blank=True,
+        null=True)
     study_programs = models.ManyToManyField(
         'learning.StudyProgram',
         verbose_name=_("StudentInfo|Study programs"),

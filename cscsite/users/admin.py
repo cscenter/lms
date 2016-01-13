@@ -12,7 +12,7 @@ from import_export.admin import ImportExportMixin, ImportMixin
 
 from core.admin import UbereditorMixin
 from .models import CSCUser, CSCUserReference, \
-    OnlineCourseRecord, SHADCourseRecord
+    OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
 from .import_export import SHADCourseRecordResource, CSCUserRecordResource
 
 
@@ -65,6 +65,13 @@ class CSCUserChangeForm(UserChangeForm):
             self.add_error('groups', ValidationError(
                 _("User can't be simultaneously in volunteer and student group")))
 
+class CSCUserStatusLogAdmin(admin.StackedInline):
+    model = CSCUserStatusLog
+    extra = 0
+    readonly_fields = ('created', 'semester', 'status')
+    def has_add_permission(self, request, obj=None):
+        return False
+
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
     model = OnlineCourseRecord
@@ -79,9 +86,9 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     add_form = CSCUserCreationForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
-    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin]
+    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin, CSCUserStatusLogAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
-                       'last_login', 'date_joined', 'status_changed_at']
+                       'last_login', 'date_joined']
     list_display = ('id', 'username', 'email', 'first_name', 'last_name',
         'is_staff')
 
