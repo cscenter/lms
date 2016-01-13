@@ -1,4 +1,5 @@
 from braces.views import UserPassesTestMixin
+from django.conf import settings
 
 from learning.models import AssignmentStudent, CourseOffering, Enrollment
 
@@ -41,6 +42,10 @@ class FailedCourseContextMixin(object):
 
         co = context["course_offering"]
         context["is_failed_completed_course"] = False
+        # Skip for club site
+        if self.request.site.domain == settings.CLUB_DOMAIN:
+            return context
+
         user = self.request.user
         if not co.is_completed or user.is_anonymous() or user.is_curator:
             return context
