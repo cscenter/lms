@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cscuser',
             name='status_changed_at',
-            field=users.models.LoggingMonitorField(monitor='status', log_class=users.models.CSCUserStatusLog, blank=True, help_text="Don't touch this field to automatically update it when status field changed", null=True, verbose_name='Status changed'),
+            field=users.models.MonitorDateField(monitor='status', log_class=users.models.CSCUserStatusLog, blank=True, help_text="Don't touch this field to automatically update it when status field changed", null=True, verbose_name='Status changed'),
         ),
         migrations.AddField(
             model_name='cscuserstatuslog',
