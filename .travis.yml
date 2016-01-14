@@ -14,6 +14,8 @@ install:
   - pip install pylint
   - pip install -q Django==$DJANGO
   - pip install -q psycopg2==2.6
+  #  Speed up lxml installation
+  - CFLAGS="-O0"  pip install lxml
   - pip install -r requirements/test.txt
   - pip install -e cscsite
 script:
