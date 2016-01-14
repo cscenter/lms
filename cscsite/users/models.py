@@ -25,7 +25,8 @@ from sorl.thumbnail import ImageField
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.models import Enrollment
-from learning.utils import LearningPermissionsMixin, date_to_semester_pair
+from learning.utils import LearningPermissionsMixin, date_to_semester_pair, \
+    SortBySemesterMethodMixin
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -466,7 +467,7 @@ class OnlineCourseRecord(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class SHADCourseRecord(TimeStampedModel):
+class SHADCourseRecord(SortBySemesterMethodMixin, TimeStampedModel):
     GRADES = GRADES
     student = models.ForeignKey(
         CSCUser,
