@@ -99,9 +99,17 @@ class Semester(models.Model):
             return self.year - other.year
         else:
             return self.type_index - other.type_index
-
+    # TODO: add fucking tests or refactor with `sort` column
     def __lt__(self, other):
-        return self.__cmp__(other)
+        return self.__cmp__(other) < 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+
 
     @property
     def slug(self):

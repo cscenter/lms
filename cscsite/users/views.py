@@ -186,7 +186,7 @@ class UserDetailView(generic.DetailView):
         student_projects = list(self.object.studentproject_set
                                 .select_related('semester')
                                 .order_by('pk'))
-        context['student_projects'] = StudentProject.sorted(student_projects, reverse=True)
+        context['student_projects'] = StudentProject.sorted(student_projects)
         context['current_semester'] = Semester.get_current()
         if self.request.user.is_authenticated() and self.request.user.is_curator:
             related = ['assignment',
