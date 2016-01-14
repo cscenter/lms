@@ -75,10 +75,12 @@ class CSCUserStatusLogAdmin(admin.StackedInline):
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
     model = OnlineCourseRecord
+    extra = 0
 
 
 class SHADCourseRecordAdmin(admin.StackedInline):
     model = SHADCourseRecord
+    extra = 0
 
 
 class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
