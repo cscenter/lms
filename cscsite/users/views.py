@@ -35,7 +35,7 @@ from learning.viewmixins import CuratorOnlyMixin
 from learning.models import CourseClass, Assignment, AssignmentStudent, \
     CourseOffering, NonCourseEvent, Semester, StudentProject, Enrollment
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
-from .models import CSCUser, CSCUserReference
+from .models import CSCUser, CSCUserReference, SHADCourseRecord
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -173,6 +173,9 @@ class UserDetailView(generic.DetailView):
         if (list(context["user_object"]._cs_group_pks) == [CSCUser.group_pks.STUDENT_CLUB]
                 and self.request.site.domain != settings.CLUB_DOMAIN):
             raise Http404
+
+        context[self.context_object_name].shad_courses = SHADCourseRecord.sorted(
+            context[self.context_object_name].shadcourserecord_set.all(), reverse=True)
 
         # FIXME: use it or remove
         context['is_extended_profile_available'] = \
