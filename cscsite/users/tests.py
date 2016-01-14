@@ -351,6 +351,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
                            enrollment_year='2013')
         sc = SHADCourseRecordFactory(student=user)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
+        print(resp.content)
         assert str(sc.name) in resp.content
         assert str(sc.teachers) in resp.content
 
