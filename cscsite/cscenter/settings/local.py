@@ -80,14 +80,6 @@ STATICFILES_FINDERS += (
     'pipeline.finders.ManifestFinder',
 )
 
-# Only concatenate files for debug purpose
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-
-# Versioning disabled if DEBUG=True
-PIPELINE_ENABLED = False
-
-
 FILE_UPLOAD_HANDLERS = (
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 )

@@ -189,41 +189,39 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
-# Disable compression
-PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
-
-# Enable concatenation and compression.
-PIPELINE_ENABLED = True
-
-# Do not wrap js output with anonymous function
-PIPELINE_DISABLE_WRAPPER = True
-
-PIPELINE_JS = {
-    'base': {
-        'source_filenames': (
-            'js/vendor/holder.js',
-            'js/vendor/readmore.min.js',
-            'js/vendor/md5.js',
-            'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
-            'js/vendor/bootstrap.min.js',
-            'js/vendor/jquery.jgrowl.min.js',
-            'js/vendor/jquery.cookie.js',
-            'js/vendor/sweet-alerts/sweet-alert.min.js',
-            'js/main.js',
-            'js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
-        ),
-        'output_filename': 'js/dist/base.js',
-    },
-    'fileinput': {
-        'source_filenames': (
-            'js/vendor/bootstrap-fileinput/fileinput.min.js',
-            'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
-            'js/teaching-sheet__fileinput.js',
-        ),
-        'output_filename': 'js/dist/fileinput.js',
+PIPELINE = {
+    # Disable compression, enable only concatenation
+    'CSS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+    'JS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
+    # Do not wrap js output with anonymous function
+    'DISABLE_WRAPPER': True,
+    'JAVASCRIPT': {
+        'base': {
+            'source_filenames': (
+                'js/vendor/holder.js',
+                'js/vendor/readmore.min.js',
+                'js/vendor/md5.js',
+                'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
+                'js/vendor/bootstrap.min.js',
+                'js/vendor/jquery.jgrowl.min.js',
+                'js/vendor/jquery.cookie.js',
+                'js/vendor/sweet-alerts/sweet-alert.min.js',
+                'js/main.js',
+                'js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
+            ),
+            'output_filename': 'js/dist/base.js',
+        },
+        'fileinput': {
+            'source_filenames': (
+                'js/vendor/bootstrap-fileinput/fileinput.min.js',
+                'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
+                'js/teaching-sheet__fileinput.js',
+            ),
+            'output_filename': 'js/dist/fileinput.js',
+        }
     }
 }
+
 
 HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
 
@@ -232,5 +230,9 @@ MICAWBER_DEFAULT_SETTINGS = {
     'maxwidth': 910,
     'maxheight': 512,
 }
+
+# SORL settings
+THUMBNAIL_DUMMY = True
+THUMBNAIL_DUMMY_SOURCE = "http://dummyimage.com/220x40/000000/ffffff&text=404+(Not+Found)"
 
 WEBPACK_LOADER = {}
