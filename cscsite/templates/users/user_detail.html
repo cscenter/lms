@@ -69,11 +69,12 @@
             <li>Нет студенческих проектов</li>
         {% endif %}
 
-        {% if user_object.shad_courses %}
+        {% with shad_courses=user_object.shadcourserecord_set.all %}
+        {% if shad_courses %}
         <li>
             <h4>{% trans "School of Data Analysis courses" %}</h4>
             <ul>
-              {% for shad in user_object.shad_courses %}
+              {% for shad in shad_courses %}
               <li>{{ shad.name }} - {{ shad.teachers }} ({{ shad.grade_display }})</li>
               {% endfor %}
             </ul>
@@ -81,6 +82,7 @@
         {% elif user.is_curator %}
             <li>Нет зачтённых ШАД-курсов</li>
         {% endif %}
+        {% endwith %}
 
         {% if user_object.pk == user.pk or user.is_curator %}
         {% with recs=user_object.onlinecourserecord_set.all %}
