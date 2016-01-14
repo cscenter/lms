@@ -174,9 +174,6 @@ class UserDetailView(generic.DetailView):
                 and self.request.site.domain != settings.CLUB_DOMAIN):
             raise Http404
 
-        context[self.context_object_name].shad_courses = SHADCourseRecord.sorted(
-            context[self.context_object_name].shadcourserecord_set.all(), reverse=True)
-
         # FIXME: use it or remove
         context['is_extended_profile_available'] = \
             (u.is_authenticated() and
@@ -189,7 +186,7 @@ class UserDetailView(generic.DetailView):
         student_projects = list(self.object.studentproject_set
                                 .select_related('semester')
                                 .order_by('pk'))
-        context['student_projects'] = StudentProject.sorted(student_projects)
+        context['student_projects'] = StudentProject.sorted(student_projects, reverse=True)
         context['current_semester'] = Semester.get_current()
         if self.request.user.is_authenticated() and self.request.user.is_curator:
             related = ['assignment',
