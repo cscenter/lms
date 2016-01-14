@@ -36,7 +36,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES, PARTICIPANT_GROUPS
-from .utils import get_current_semester_pair
+from .utils import get_current_semester_pair, SortBySemesterMethodMixin
 
 logger = logging.getLogger(__name__)
 
@@ -883,7 +883,7 @@ def studentproject_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
-class StudentProject(TimeStampedModel):
+class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))
 
@@ -931,12 +931,6 @@ class StudentProject(TimeStampedModel):
     @property
     def project_type_display(self):
         return self.PROJECT_TYPES[self.project_type]
-
-    @staticmethod
-    def sorted(student_projects, reverse=False):
-        """Return projects in chronological order"""
-        return sorted(student_projects, key=lambda p: p.semester,
-                      reverse=reverse)
 
 
 @python_2_unicode_compatible
