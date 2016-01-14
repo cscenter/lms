@@ -19,7 +19,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.utils.encoding import smart_text, python_2_unicode_compatible
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, total_ordering
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from micawber.contrib.mcdjango import extract_oembed
@@ -68,6 +68,7 @@ class Course(TimeStampedModel):
 
 
 @python_2_unicode_compatible
+@total_ordering
 class Semester(models.Model):
     TYPES = SEMESTER_TYPES
 
@@ -102,9 +103,6 @@ class Semester(models.Model):
     # TODO: add fucking tests or refactor with `sort` column
     def __lt__(self, other):
         return self.__cmp__(other) < 0
-
-    def __ge__(self, other):
-        return self.__cmp__(other) > 0
 
     def __eq__(self, other):
         return self.__cmp__(other) == 0
