@@ -164,7 +164,7 @@ SLIDESHARE_PASSWORD = "dummy_ss_password"
 
 YANDEX_DISK_USERNAME = "dummy_ya_username"
 YANDEX_DISK_PASSWORD = "dummy_ya_password"
-YANDEX_DISK_SLIDES_ROOT = "dummy_ya_root"
+YANDEX_DISK_SLIDES_ROOT = "/dummy_ya_root"
 
 # special user with access to S3 bucket
 DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
