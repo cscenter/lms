@@ -878,8 +878,10 @@ class NonCourseEvent(TimeStampedModel):
 
 
 def studentproject_slides_file_name(self, filename):
+    year, type = get_current_semester_pair()
     return os.path.join('project_presentations',
-                        str(self.student.pk), filename)
+                        '{}-{}'.format(self.semester.year, self.semester.type),
+                        filename)
 
 
 @python_2_unicode_compatible
