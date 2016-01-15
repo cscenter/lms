@@ -177,8 +177,7 @@ class CourseClassTests(TestCase):
                          .filter(course_offering__semester__year=2014,
                                  course_offering__semester__type='spring')
                          .get())
-
-    @unittest.skip('FILE UPLOAD DISABLED NOW. FIX AFTER ENABLING')
+    # TODO: refactor with pytest tmp file, fuck this patching
     @patch('slides.slideshare.upload_slides')
     @patch('slides.yandex_disk.upload_slides')
     def test_slides_file_name(self, upload_to_slideshare, upload_to_yandex):

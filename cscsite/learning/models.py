@@ -915,6 +915,9 @@ class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
         _("Presentation"),
         blank=True,
         upload_to=studentproject_slides_file_name)
+    is_external = models.BooleanField(
+        _("External project"),
+        default=False)
 
     class Meta:
         # NOTE(Dmitry): we should probably order by min of semesters,
