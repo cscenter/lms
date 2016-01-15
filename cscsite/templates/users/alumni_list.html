@@ -16,9 +16,11 @@
       {% endif %}
         <div class="col-xs-6 user-tile">
           <div class="col-xs-3">
+          {% if alumni.photo %}
           {% thumbnail alumni.photo "100x100" crop="center" as im %}
             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
           {% endthumbnail %}
+          {% endif %}
           </div>
           <div class="col-xs-9">
             <h4><a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a></h4>
