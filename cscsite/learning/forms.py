@@ -2,13 +2,13 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
-from crispy_forms.bootstrap import StrictButton, Tab, TabHolder
-
+from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions
 import floppyforms.__future__ as forms
 from modeltranslation.forms import TranslationModelForm
 
@@ -20,11 +20,12 @@ from .models import Course, CourseOffering, CourseOfferingNews, \
     Enrollment, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
-CANCEL_SAVE_PAIR = Div(Button('cancel', _('Cancel'),
+CANCEL_BUTTON = Button('cancel', _('Cancel'),
                               onclick='history.go(-1);',
-                              css_class="btn btn-default"),
-                       Submit('save', _('Save')),
-                       css_class="pull-right")
+                              css_class="btn btn-default")
+SUBMIT_BUTTON = Submit('save', _('Save'))
+CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
+
 
 
 class CourseOfferingPKForm(forms.Form):
@@ -197,7 +198,13 @@ class CourseClassForm(forms.ModelForm):
                          css_class='container inner'),
                      'video_url',
                      'other_materials'),
-            CANCEL_SAVE_PAIR)
+            FormActions(
+                StrictButton(_('<i class="fa fa-plus"></i> Save and add'),
+                             name='_addanother', type="submit",
+                             css_class="btn-primary"),
+                CANCEL_SAVE_PAIR
+            )
+        )
         super(CourseClassForm, self).__init__(*args, **kwargs)
 
     class Meta:
