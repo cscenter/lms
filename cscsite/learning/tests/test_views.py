@@ -720,6 +720,41 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form.update({'course_offering': co.pk})
         self.assertEqual(302, self.client.post(url, form).status_code)
 
+    def test_create_and_add(self):
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        co_other = CourseOfferingFactory.create(semester=s)
+        form = CourseClassFactory.attributes(create=True)
+        form.update({'venue': VenueFactory.create().pk, '_addanother': True})
+        del form['slides']
+        self.doLogin(teacher)
+        url = reverse('course_class_add',
+                      args=[co.course.slug, co.semester.slug])
+        # should save with course_offering = co
+        response = self.client.post(url, form)
+        expected_url = reverse('course_class_add', args=[co.course.slug,
+                                                         co.semester.slug])
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, expected_url)
+        self.assertEqual(1, (CourseClass.objects
+                             .filter(course_offering=co).count()))
+        self.assertEqual(0, (CourseClass.objects
+                             .filter(course_offering=co_other).count()))
+        self.assertEqual(0, (CourseClass.objects
+                             .filter(course_offering=form['course_offering']).count()))
+        self.assertEqual(CourseClass.objects.get(course_offering=co).name,
+                         form['name'])
+        form.update({'course_offering': co.pk})
+        self.assertEqual(302, self.client.post(url, form).status_code)
+        del form['_addanother']
+        response = self.client.post(url, form)
+        self.assertEqual(3, (CourseClass.objects
+                             .filter(course_offering=co).count()))
+        last_added_class = CourseClass.objects.order_by("-id").first()
+        self.assertRedirects(response, last_added_class.get_absolute_url())
+
     def test_update(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         now_year, now_season = get_current_semester_pair()
@@ -737,6 +772,28 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertEquals(form['name'],
                           self.client.get(cc.get_absolute_url())
                           .context['object'].name)
+
+    def test_update_and_add(self):
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        cc = CourseClassFactory.create(course_offering=co)
+        url = reverse('course_class_edit',
+                      args=[co.course.slug, co.semester.slug, cc.pk])
+        self.doLogin(teacher)
+        form = model_to_dict(cc)
+        del form['slides']
+        form['name'] += " foobar"
+        self.assertRedirects(self.client.post(url, form),
+                             cc.get_absolute_url())
+        self.assertEquals(form['name'],
+                          self.client.get(cc.get_absolute_url())
+                          .context['object'].name)
+        form.update({'_addanother': True})
+        expected_url = reverse('course_class_add',
+                      args=[co.course.slug, co.semester.slug])
+        self.assertRedirects(self.client.post(url, form), expected_url)
 
     def test_delete(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
