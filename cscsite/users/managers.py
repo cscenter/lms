@@ -3,6 +3,8 @@ from __future__ import unicode_literals, absolute_import
 from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, Count, query
 
+from learning.models import CourseOfferingTeacher
+
 
 class CSCUserQuerySet(query.QuerySet):
 
@@ -54,7 +56,7 @@ class CSCUserQuerySet(query.QuerySet):
                 Prefetch(
                     'enrollments__course_offering',
                     queryset=CourseOffering.objects.select_related(
-                        'semester', 'course'),
+                        'semester', 'course')
                 ),
                 Prefetch(
                     'enrollments__course_offering__courseclass_set',
@@ -62,6 +64,10 @@ class CSCUserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'enrollments__course_offering__teachers',
+                    # Note (Zh): Can't solve it with standard ORM instruments
+                    queryset=CSCUser.objects.extra(select={
+                        'is_lector': '1 & %s.roles' % CourseOfferingTeacher._meta.db_table}).order_by(
+                        "-is_lector", "last_name"),
                 ),
                 Prefetch(
                     'studentproject_set',
