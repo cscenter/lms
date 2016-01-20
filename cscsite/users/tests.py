@@ -183,7 +183,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         resp = self.client.post(reverse('login'), bad_user)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "alert")
+        assert len(resp.context['form'].errors) > 0
         resp = self.client.post(reverse('login'), good_user)
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
