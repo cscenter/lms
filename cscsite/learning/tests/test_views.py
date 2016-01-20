@@ -1072,7 +1072,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         student = UserFactory.create(groups=['Student [CENTER]'])
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (AssignmentStudent.objects
@@ -1082,15 +1084,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == ['Student [CENTER]']:
-                # special case :(
-                self.assertEquals(403, self.client.get(url).status_code)
-            else:
-                self.assertLoginRedirect(url)
+            self.assertLoginRedirect(url)
             self.doLogout()
-        self.doLogin(teacher)
-        self.assertLoginRedirect(url)
-        self.doLogout()
         self.doLogin(student)
         self.assertEquals(200, self.client.get(url).status_code)
 
@@ -1105,6 +1100,23 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         url = reverse('a_s_detail_student', args=[a_s.pk])
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.text)
+
+    def test_teacher_redirect_to_appropriate_link(self):
+        student = UserFactory.create(groups=['Student [CENTER]'])
+        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        co = CourseOfferingFactory.create(teachers=[teacher])
+        EnrollmentFactory.create(student=student, course_offering=co)
+        a = AssignmentFactory.create(course_offering=co)
+        a_s = (AssignmentStudent.objects
+               .filter(assignment=a, student=student)
+               .get())
+        url = reverse('a_s_detail_student', args=[a_s.pk])
+        self.doLogin(student)
+        self.assertEquals(200, self.client.get(url).status_code)
+        self.doLogin(teacher)
+        expected_url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        self.assertEquals(302, self.client.get(url).status_code)
+        self.assertRedirects(self.client.get(url), expected_url)
 
     def test_comment(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
