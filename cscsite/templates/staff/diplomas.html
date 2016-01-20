@@ -22,7 +22,7 @@
 {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{% if s.shads|length > 0 %}{% for project in s.shads %}
 {% spaceless %}
-\shad{{ '{' }}{{project.name}}{{ '}' }}{{ '{' }}{{project.teachers}}{{ '}' }}{{ '{' }}{{project.grade_display}}{{ '}' }}
+\shad{{ '{' }}{{project.name}}{{ '}' }}{{ '{' }}{{project.teachers}}{{ '}' }}{{ '{' }}{{project.grade_display|lower}}{{ '}' }}
 {% endspaceless %}{% endfor %}
 {% endif %}{{ '}' }}
 {{ '{' }}{% if s.projects|length > 0 %}
