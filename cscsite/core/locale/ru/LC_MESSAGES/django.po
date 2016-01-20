@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-20 14:33+0300\n"
-"PO-Revision-Date: 2016-01-20 14:34+0230\n"
+"POT-Creation-Date: 2016-01-20 16:25+0300\n"
+"PO-Revision-Date: 2016-01-20 16:26+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -962,11 +962,11 @@ msgstr "Занятие успешно создано."
 msgid "The class was successfully updated."
 msgstr "Занятие успешно обновлено."
 
-#: cscsite/learning/views.py:1159
+#: cscsite/learning/views.py:1157
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: cscsite/learning/views.py:1633 cscsite/learning/views.py:1653
+#: cscsite/learning/views.py:1631 cscsite/learning/views.py:1651
 msgid "Invalid form."
 msgstr ""
 
@@ -1630,15 +1630,14 @@ msgid "Book|number of copies left"
 msgstr "Количество оставшихся копий"
 
 #: cscsite/templates/login.html:13
-#| msgid "Login"
 msgid "Login form"
 msgstr "Авторизация"
 
-#: cscsite/templates/login.html:39
+#: cscsite/templates/login.html:35
 msgid "Forgot?"
 msgstr "Забыли пароль?"
 
-#: cscsite/templates/login.html:42
+#: cscsite/templates/login.html:38
 msgid "Sign in"
 msgstr "Войти"
 
@@ -1650,14 +1649,20 @@ msgstr "Далее…"
 msgid "No news yet"
 msgstr "Список новостей пуст"
 
+#: cscsite/templates/registration/_password_reset_container.html:4
+#: cscsite/templates/registration/password_reset_complete.html:8
+#: cscsite/templates/registration/password_reset_done.html:4
+#: cscsite/templates/registration/password_reset_done.html:8
+#: cscsite/templates/registration/password_reset_form.html:6
+msgid "Password recovery"
+msgstr "Восстановление пароля"
+
 #: cscsite/templates/registration/password_change_done.html:5
-#: cscsite/templates/registration/password_reset_complete.html:5
-#: cscsite/templates/registration/password_reset_done.html:5
 msgid "Reset password"
 msgstr "Сменить пароль"
 
 #: cscsite/templates/registration/password_change_done.html:11
-#: cscsite/templates/registration/password_reset_complete.html:11
+#: cscsite/templates/registration/password_reset_complete.html:9
 msgid "Password changed"
 msgstr "Пароль изменён"
 
@@ -1669,16 +1674,24 @@ msgstr "Пароль изменён"
 msgid "Change password"
 msgstr "Сменить пароль"
 
+#: cscsite/templates/registration/password_reset_complete.html:4
+msgid "Password successfully changed."
+msgstr "Пароль успешно изменён"
+
 #: cscsite/templates/registration/password_reset_confirm.html:22
 msgid "Sorry, the link is invalid"
 msgstr "Извините, ссылка устарела"
 
-#: cscsite/templates/registration/password_reset_done.html:11
+#: cscsite/templates/registration/password_reset_done.html:9
 msgid "An email with instructions for setting a new password has been sent"
 msgstr "Инструкции по смене пароля были высланы на указанный почтовый адрес"
 
-#: cscsite/templates/registration/password_reset_form.html:5
-#: cscsite/templates/registration/password_reset_form.html:16
+#: cscsite/templates/registration/password_reset_form.html:8
+#| msgid "Your email"
+msgid "Enter your email"
+msgstr "Введите ваш email"
+
+#: cscsite/templates/registration/password_reset_form.html:17
 msgid "Restore password"
 msgstr "Восстановить пароль"
 
@@ -2091,6 +2104,12 @@ msgstr "Справка пользователя"
 #: cscsite/users/models.py:513
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "Forgot your password?"
+#~ msgstr "Забыли свой пароль?"
+
+#~ msgid "Password recovery completed."
+#~ msgstr "Курс завершён."
 
 #~ msgid "Save and add another class"
 #~ msgstr "Сохранить и добавить ещё"
