@@ -10,6 +10,8 @@ import unicodecsv
 
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
+
+from annoying.exceptions import Redirect
 from six import viewvalues
 from itertools import chain
 
@@ -1020,19 +1022,15 @@ class AssignmentStudentDetailMixin(object):
          .filter(assignment_student=a_s, user=self.request.user)
          .update(is_unread=False))
 
-        # This should guard against reading other's assignments. Not generic
-        # enough, but can't think of better way
-        if ((not self.request.user.is_authenticated() or not self.request.user.is_curator)
-            and self.user_type == 'student'
-            and not a_s.student == self.request.user):
-            raise PermissionDenied
+        self._additional_permissions_check(a_s=a_s)
 
         context['a_s'] = a_s
         context['course_offering'] = a_s.assignment.course_offering
-        comments = (AssignmentComment.objects
-                    .filter(assignment_student=a_s)
-                    .order_by('created')
-                    .select_related('author'))
+        context['user_type'] = self.user_type
+
+        comments = (AssignmentComment.objects.filter(assignment_student=a_s)
+                                             .order_by('created')
+                                             .select_related('author'))
         for c in comments:
             if c.author == a_s.student:
                 setattr(c, 'first_student_comment', True)
@@ -1043,9 +1041,11 @@ class AssignmentStudentDetailMixin(object):
                                   .course_offering
                                   .teachers
                                   .count() == 1)
-        context['user_type'] = self.user_type
         context['hashes_json'] = comment_persistence.get_hashes_json()
         return context
+
+    def _additional_permissions_check(self, *args, **kwargs):
+        pass
 
     def form_valid(self, form):
         pk = self.kwargs.get('pk')
@@ -1055,19 +1055,24 @@ class AssignmentStudentDetailMixin(object):
         comment.author = self.request.user
         comment.save()
         comment_persistence.report_saved(comment.text)
-        if self.user_type == 'student':
-            url = reverse('a_s_detail_student', args=[a_s.pk])
-        else:
-            url = reverse('a_s_detail_teacher', args=[a_s.pk])
-        return redirect(url)
+        return redirect(self.get_success_url())
 
 
 # shitty name :(
-class ASStudentDetailView(StudentOnlyMixin,
+# Note: We should redirects teacher, so replace StudentOnlyMixin with LoginRequired.
+class ASStudentDetailView(LoginRequiredMixin,
                           FailedCourseContextMixin,
                           AssignmentStudentDetailMixin,
                           generic.CreateView):
     user_type = 'student'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            response = super(ASStudentDetailView, self).get(request, *args,
+                                                            **kwargs)
+        except Redirect as e:
+            return HttpResponseRedirect(e.kwargs.get('url'))
+        return response
 
     def get_context_data(self, *args, **kwargs):
         context = (super(ASStudentDetailView, self)
@@ -1075,6 +1080,21 @@ class ASStudentDetailView(StudentOnlyMixin,
         if context['is_failed_completed_course']:
             raise PermissionDenied
         return context
+
+    def _additional_permissions_check(self, *args, **kwargs):
+        a_s = kwargs.get("a_s")
+        user = self.request.user
+        if user in a_s.assignment.course_offering.teachers.all():
+            raise Redirect(url=reverse("a_s_detail_teacher", args=[a_s.pk]))
+        # This should guard against reading other's assignments. Not generic
+        # enough, but can't think of better way
+        if not a_s.student == user and not user.is_curator:
+            raise Redirect(url="{}?next={}".format(settings.LOGIN_URL,
+                                                   self.request.get_full_path()))
+
+    def get_success_url(self):
+        pk = self.kwargs.get('pk')
+        return reverse('a_s_detail_student', args=[pk])
 
 
 class ASTeacherDetailView(TeacherOnlyMixin,
@@ -1141,6 +1161,10 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         else:
             return (super(ASTeacherDetailView, self)
                     .post(request, *args, **kwargs))
+
+    def get_success_url(self):
+        pk = self.kwargs.get('pk')
+        return reverse('a_s_detail_teacher', args=[pk])
 
 
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):

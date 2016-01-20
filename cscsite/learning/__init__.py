@@ -16,3 +16,4 @@ default_app_config = 'learning.apps.LearningConfig'
 # TODO: add LEARNING_FOUNDATION_DATETIME to settings
 # TODO: replace constants.py with settings.py
 # TODO: mv templates?
+# TODO: /learning/assignments/xxx/ to learning/assignments/submissions/xxx/ ?
