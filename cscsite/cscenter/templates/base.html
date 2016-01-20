@@ -33,7 +33,7 @@
 
     {% include "mathjax.html" %}
   </head>
-  <body class="tex2jax_ignore">
+  <body class="tex2jax_ignore{% block body_class %}{% endblock body_class %}">
     {% include "base_menu.html" %}
 
     {% block content %}

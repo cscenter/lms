@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-19 14:47+0300\n"
-"PO-Revision-Date: 2016-01-19 14:48+0230\n"
+"POT-Creation-Date: 2016-01-20 14:33+0300\n"
+"PO-Revision-Date: 2016-01-20 14:34+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -254,7 +254,7 @@ msgid "Description"
 msgstr "Описание"
 
 #: cscsite/learning/forms.py:144 cscsite/learning/models.py:378
-#: cscsite/learning/views.py:516
+#: cscsite/learning/views.py:518
 #: cscsite/templates/learning/courseclass_detail.html:40
 #: cscsite/templates/learning/timetable_student.html:99
 #: cscsite/templates/learning/timetable_teacher.html:95
@@ -921,35 +921,35 @@ msgstr "Онлайн-курс"
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscsite/learning/tests/test_views.py:1603
+#: cscsite/learning/tests/test_views.py:1672
 #: cscsite/templates/learning/courseoffering_detail.html:178
 msgid "News"
 msgstr "Новости"
 
-#: cscsite/learning/views.py:523
+#: cscsite/learning/views.py:525
 msgid "CourseClass|Video"
 msgstr "Видео"
 
-#: cscsite/learning/views.py:530
+#: cscsite/learning/views.py:532
 msgid "Files"
 msgstr "Файлы"
 
-#: cscsite/learning/views.py:542
+#: cscsite/learning/views.py:544
 msgid "CourseClass|Other [materials]"
 msgstr "Другие"
 
-#: cscsite/learning/views.py:550
+#: cscsite/learning/views.py:552
 #: cscsite/templates/learning/timetable_student.html:112
 #: cscsite/templates/learning/timetable_teacher.html:109
 msgid "No"
 msgstr "Нет"
 
-#: cscsite/learning/views.py:686
+#: cscsite/learning/views.py:688
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: cscsite/learning/views.py:689
+#: cscsite/learning/views.py:691
 #: cscsite/templates/learning/courseoffering_detail.html:41
 msgid "Unenroll"
 msgstr "Отказаться"
@@ -962,11 +962,11 @@ msgstr "Занятие успешно создано."
 msgid "The class was successfully updated."
 msgstr "Занятие успешно обновлено."
 
-#: cscsite/learning/views.py:1141
+#: cscsite/learning/views.py:1159
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: cscsite/learning/views.py:1611 cscsite/learning/views.py:1631
+#: cscsite/learning/views.py:1633 cscsite/learning/views.py:1653
 msgid "Invalid form."
 msgstr ""
 
@@ -1628,6 +1628,19 @@ msgstr ""
 #: cscsite/templates/library/book_list.html:31
 msgid "Book|number of copies left"
 msgstr "Количество оставшихся копий"
+
+#: cscsite/templates/login.html:13
+#| msgid "Login"
+msgid "Login form"
+msgstr "Авторизация"
+
+#: cscsite/templates/login.html:39
+msgid "Forgot?"
+msgstr "Забыли пароль?"
+
+#: cscsite/templates/login.html:42
+msgid "Sign in"
+msgstr "Войти"
 
 #: cscsite/templates/news/news_list.html:22
 msgid "More…"

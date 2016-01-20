@@ -56,6 +56,12 @@ class LoginView(generic.FormView):
         auth.login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
 
+    def get_context_data(self, **kwargs):
+        context = super(LoginView, self).get_context_data(**kwargs)
+        context["has_next"] = (self.redirect_field_name in self.request.POST
+                               or self.redirect_field_name in self.request.GET)
+        return context
+
     def get_success_url(self):
         redirect_to = self.request.GET.get(self.redirect_field_name)
 
