@@ -2,14 +2,43 @@
 {% load staticfiles %}
 {% load i18n %}
 
-{% load crispy_forms_tags %}
+{% block body_class %} sign-in{% endblock body_class %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      {% crispy form %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="container-box panel panel-body panel-default">
+                <form id="sign-in" method="POST">
+                    <h4>{% trans "Login form" %}</h4>
+                    {% if has_next %}
+                        {% if user.is_authenticated %}
+                            <p>У вас недостаточно прав для просмотра данной страницы.
+                                Чтобы продолжить, пожалуйста, авторизуйтесь под аккаунтом с достаточным уровнем прав.</p>
+                        {% else %}
+                            <p>Пожалуйста, авторизуйтесь, чтобы увидеть страницу.</p>
+                        {% endif %}
+                    {% endif %}
+                    {% csrf_token %}
+
+                    <label for="{{ form.username.id_for_label }}">
+                        <input class="form-control" type="text" name="{{ form.username.name }}" required="" class="form-control" {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+                               placeholder="{{ form.username.label }}" id="{{ form.username.id_for_label }}" tabindex="3">
+                        <span class="error-message">{{ form.username.errors }}</span>
+                    </label>
+                    <label for="{{ form.password.id_for_label }}" class="password-block">
+                        <input class="form-control" type="password" name="{{ form.password.name }}" required="" {% if form.username.value %}value="{{ form.password.value }}"{% endif %}
+                               placeholder="{{ form.password.label }}" id="{{ form.username.id_for_label }}" tabindex="4"
+                               autocomplete="off">
+                        <a class="forgot" title="Password Reset"
+                           href="{% url 'password_reset' %}" target="_blank"
+                           tabindex="5">{% trans "Forgot?" %}</a>
+                        <span class="error-message">{{ form.password.errors }}{% for error in form.non_field_errors  %}{{ error }}<br>{% endfor %}</span>
+                    </label>
+                    <input type="submit" class="btn btn-primary sign-up-in" value="{% trans "Sign in" %}" tabindex="6">
+                </form>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 {% endblock content %}

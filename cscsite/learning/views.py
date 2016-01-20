@@ -1113,9 +1113,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                                   .assignment
                                   .course_offering
                                   .teachers.all()))
-        if (not is_actual_teacher and
-           (not self.request.user.is_authenticated() or
-            not self.request.user.is_curator)):
+        if (not is_actual_teacher and not self.request.user.is_curator):
             raise PermissionDenied
         context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
