@@ -48,7 +48,7 @@ from .forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetTeacherImportGradesForm, MarksSheetTeacherFormFabrique
+    MarksSheetTeacherImportGradesForm, GradeBookFormFactory
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from . import utils
@@ -1060,6 +1060,7 @@ class AssignmentStudentDetailMixin(object):
 
 # shitty name :(
 # Note: We should redirects teacher, so replace StudentOnlyMixin with LoginRequired.
+# TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
 class ASStudentDetailView(LoginRequiredMixin,
                           FailedCourseContextMixin,
                           AssignmentStudentDetailMixin,
@@ -1427,11 +1428,11 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                 .select_related('semester', 'course'))
         self.course_offering_list = course_offering_list
 
-        return (MarksSheetTeacherFormFabrique.build_form_class(assignment_students,
-                                                               enrollment_list))
+        return (GradeBookFormFactory.build_form_class(assignment_students,
+                                                      enrollment_list))
 
     def get_initial(self):
-        return (MarksSheetTeacherFormFabrique
+        return (GradeBookFormFactory
                 .transform_to_initial(self.assignment_students, self.enrollment_list))
 
     def get_success_url(self):
@@ -1446,8 +1447,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
-            MarksSheetTeacherFormFabrique.build_indexes(self.assignment_students,
-                                                        self.enrollment_list)
+            GradeBookFormFactory.build_indexes(self.assignment_students,
+                                               self.enrollment_list)
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
@@ -1462,7 +1463,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
-        def get_cell(a_s):
+
+        # TODO: 1. Move to get_form_class method http://concentricsky.com/blog/2014/feb/custom-django-widget
+        def get_grade_widget(a_s):
+            # Note: Django's widgets soooo sloooooow
             cell = a_s
             if not a_s["assignment__is_online"]:
                 cell["form_field"] = \
@@ -1485,51 +1489,57 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
             return cell
 
-        def get_final_grade_field(enrollment_pk):
-            key = 'final_grade_{0}'.format(enrollment_pk)
+        def get_final_grade_widget(enrollment_pk):
+            key = GradeBookFormFactory.FINAL_GRADE_PREFIX.format(enrollment_pk)
             return kwargs['form'][key]
 
         context = (super(MarksSheetTeacherView, self)
                    .get_context_data(*args, **kwargs))
 
+        context['course_offering'] = self.course_offering
+        context['course_offering_list'] = self.course_offering_list
+        context['user_type'] = self.user_type
+
         structured = OrderedDict()
-        total_score = defaultdict(int)
-        students = {}
+        assignment_headers = OrderedDict()
         for enrollment in self.enrollment_list:
             student_id = enrollment.student_id
             if student_id not in structured:
-                structured[student_id] = OrderedDict()
-            if student_id not in students:
-                students[student_id] = enrollment.student
+                structured[student_id] = OrderedDict({
+                    "student": enrollment.student,
+                    "grade": get_final_grade_widget(enrollment.pk),
+                    "assignments": OrderedDict(),
+                    "total": 0
+                })
 
         for a_s in self.assignment_students:
             student_id = a_s["student__pk"]
+            assignment_id = a_s["assignment__pk"]
+            # The student unsubscribed from the course
             if student_id not in structured:
-                continue  # student isn't enrolled
+                continue
 
-            structured[student_id][a_s["assignment__pk"]] = get_cell(a_s)
+            structured[student_id]["assignments"][assignment_id] = get_grade_widget(a_s)
             if a_s["grade"] is not None:
-                total_score[student_id] += int(a_s["grade"])
-        if len(structured) > 0:
-            header = structured.values()[0]
-        else:
-            header = {}
-        for by_assignment in structured.values():
+                structured[student_id]["total"] += int(a_s["grade"])
+            if assignment_id not in assignment_headers:
+                assignment_headers[assignment_id] = {
+                    "pk": a_s["assignment__pk"],
+                    "title": a_s["assignment__title"],
+                    "is_online" : a_s["assignment__is_online"],
+                    "grade_min": a_s["assignment__grade_min"],
+                    "grade_max": a_s["assignment__grade_min"],
+                }
+        for student in structured.values():
             # we should check for "assignment consistency": that all
             # assignments are similar for all students in particular
             # course offering
-            assert by_assignment.keys() == header.keys()
+            assert student["assignments"].keys() == assignment_headers.keys()
 
-        context['course_offering'] = self.course_offering
-        context['course_offering_list'] = self.course_offering_list
-        context['header'] = header
-        context['structured'] = \
-            [(students.get(student_id, None),
-              by_assignment,
-              total_score[student_id],
-              get_final_grade_field(student_id),
-              ) for student_id, by_assignment in structured.iteritems()]
-        context['user_type'] = self.user_type
+        context['assignment_headers'] = assignment_headers
+        context['structured'] = structured
+
+
         return context
 
 

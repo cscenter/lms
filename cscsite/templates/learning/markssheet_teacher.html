@@ -66,18 +66,18 @@
                   <thead>
                   <tr>
                       <th class="rotate"></th>
-                      {% for assignment_id, assignment_student in header.iteritems %}
+                      {% for _, assignment in assignment_headers.items %}
                           <th class="rotate">
                               <div>
                                   <span>
-                                  <a href="{% url 'assignment_detail_teacher' assignment_id %}">
-                                      {{ assignment_student.assignment__title }}
+                                  <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
+                                      {{ assignment.title }}
                                   </a>
                                   </span>
                               </div>
                           </th>
                       {% endfor %}
-                      <th class="rotate">{% if header %}<div><span>{% trans "Total score" %}</span></div>{% endif %}</th>
+                      <th class="rotate">{% if assignment_headers %}<div><span>{% trans "Total score" %}</span></div>{% endif %}</th>
                       <th></th>
                   </tr>
                   </thead>
@@ -85,14 +85,17 @@
                   <tfoot>
                   <tr>
                       <td></td>
-                      {% for assignment_id, assignment_student in header.iteritems %}
-                          <td>{{ assignment_student.assignment__grade_min }}–{{ assignment_student.assignment__grade_max }}</td>
+                      {% for _, assignment in assignment_headers.items %}
+                          <td>{{ assignment.grade_min }}–{{ assignment.grade_max }}</td>
                       {% endfor %}
+                        <td></td>
+                        <td></td>
                   </tr>
                   </tfoot>
 
                   <tbody>
-                  {% for student, by_assignment, total_score, final_grade in structured %}
+                  {% for student_id, row in structured.items %}
+                      {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
                       <tr>
                           <td class="marks-header marks-header-horiz">
                               <a href="{{ student.get_absolute_url }}">
@@ -113,13 +116,14 @@
                                   </td>
                               {% endfor %}
                           {% endspaceless %}
-                          <td>{% if header %}{{ total_score }}{% endif %}</td>
+                          <td>{% if assignment_headers %}{{ total_score }}{% endif %}</td>
                           <td>
                   <span class="marks-sheet-form-cell final-grade-cell">
                     {{ final_grade }}
                   </span>
                           </td>
                       </tr>
+                      {% endwith %}
                   {% endfor %}
                   </tbody>
               </table>
