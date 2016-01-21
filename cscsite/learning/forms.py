@@ -397,34 +397,40 @@ class MarksSheetTeacherImportGradesForm(forms.Form):
 
 
 # Hipster factory class!
-class MarksSheetTeacherFormFabrique(object):
-    @staticmethod
-    def build_form_class(a_s_list, enrollment_list):
-        """New form.Form subclass with AssignmentStudent's list and Enrollment
-        grade
+class GradeBookFormFactory(object):
+
+    GRADE_PREFIX = "a_s_{0}"
+    FINAL_GRADE_PREFIX = "final_grade_{0}"
+
+    @classmethod
+    def build_form_class(cls, a_s_list, enrollment_list):
+        """New form.Form subclass with AssignmentStudent's list and Enrollment's grade
+
+        Note:
+            Django's widget with show_hidden_initial=True is rendered
+            extremely slow. We get all initial values in  .get_form_class method,
+            so it's unceccessary at all to use this feature.
         """
-        fields = {'a_s_{0}'.format(a_s["pk"]):
-                      forms.IntegerField(show_hidden_initial=True,
-                                         min_value=0,
+        fields = {cls.GRADE_PREFIX.format(a_s["pk"]):
+                      forms.IntegerField(min_value=0,
                                          max_value=a_s["assignment__grade_max"],
                                          required=False)
                   for a_s in a_s_list if not a_s["assignment__is_online"]}
-        fields.update({'final_grade_{0}'.format(e.student_id): forms.ChoiceField(GRADES,
-                                                                         show_hidden_initial=True)
-                       for e in enrollment_list})
+        fields.update({cls.FINAL_GRADE_PREFIX.format(e.pk):
+                           forms.ChoiceField(GRADES) for e in enrollment_list})
         return type(str('MarksSheetTeacherForm'), (forms.Form,), fields)
 
-    @staticmethod
-    def build_indexes(a_s_list, enrollment_list):
-        a_s_index = {'a_s_{0}'.format(a_s["pk"]): a_s for a_s in a_s_list}
-        enrollment_index = {'final_grade_{0}'.format(e.student_id): e for e in
+    @classmethod
+    def build_indexes(cls, a_s_list, enrollment_list):
+        a_s_index = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s for a_s in a_s_list}
+        enrollment_index = {cls.FINAL_GRADE_PREFIX.format(e.pk): e for e in
                             enrollment_list}
         return a_s_index, enrollment_index
 
-    @staticmethod
-    def transform_to_initial(a_s_list, enrollment_list):
-        initial = {'a_s_{0}'.format(a_s["pk"]): a_s["grade"] for a_s in a_s_list
-                   if not a_s["assignment__is_online"]}
-        initial.update({'final_grade_{0}'.format(e.student_id): e.grade for e in
+    @classmethod
+    def transform_to_initial(cls, a_s_list, enrollment_list):
+        initial = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s["grade"] for a_s in
+                   a_s_list if not a_s["assignment__is_online"]}
+        initial.update({cls.FINAL_GRADE_PREFIX.format(e.pk): e.grade for e in
                         enrollment_list})
         return initial

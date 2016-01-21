@@ -1411,7 +1411,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             name = "{}&nbsp;{}.".format(student.last_name,
                                         student.first_name[0])
             self.assertContains(resp, name, 1)
-            field = 'final_grade_{}'.format(student.pk)
+            enrollment = Enrollment.objects.get(student=student,
+                                        course_offering=co1)
+            field = 'final_grade_{}'.format(enrollment.pk)
             self.assertIn(field, resp.context['form'].fields)
         for co in [co1, co2]:
             url = reverse('markssheet_teacher',
@@ -1477,7 +1479,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
-        self.assertEquals(resp.context['structured'][0][2], expected_total_score)
+        self.assertEquals(resp.context['structured'].items()[0][1]["total"], expected_total_score)
 
     def test_save_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -1500,8 +1502,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                     [2, 3, 4, 5])
         for a_s, grade in pairs:
             form['a_s_{}'.format(a_s.pk)] = grade
-        for student in students:
-            field = 'final_grade_{}'.format(student.pk)
+            field = 'final_grade_{}'.format(a_s.assignment.pk)
             form[field] = 'good'
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
