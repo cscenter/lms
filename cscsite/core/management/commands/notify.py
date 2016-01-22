@@ -106,14 +106,14 @@ class Command(BaseCommand):
                .filter(is_unread=True, is_notified=False)
                .prefetch_related(
                    'user',
-                   'assignment_student',
-                   'assignment_student__assignment',
-                   'assignment_student__assignment__course_offering',
-                   'assignment_student__assignment__course_offering__course',
-                   'assignment_student__student'))
+                   'student_assignment',
+                   'student_assignment__assignment',
+                   'student_assignment__assignment__course_offering',
+                   'student_assignment__assignment__course_offering__course',
+                   'student_assignment__student'))
 
         for notification in notifications_assignments:
-            a_s = notification.assignment_student
+            a_s = notification.student_assignment
             context = {'a_s_link_student':
                        BASE_URL + reverse('a_s_detail_student',
                                           args=[a_s.pk]),

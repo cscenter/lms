@@ -39,7 +39,7 @@ from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
-    AssignmentStudent, AssignmentComment, \
+    StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
     OnlineCourse
@@ -486,14 +486,14 @@ class CourseOfferingDetailViewContext(GetCourseOfferingObjectMixin,
                                 args=[assignment.pk]))
             elif is_enrolled:
                 try:
-                    a_s = (AssignmentStudent.objects
+                    a_s = (StudentAssignment.objects
                            .filter(assignment=assignment,
                                    student=self.request.user)
                            .get())
                     setattr(assignment, 'magic_link',
                             reverse("a_s_detail_student", args=[a_s.pk]))
                 except ObjectDoesNotExist:
-                    logger.error("can't find AssignmentStudent for "
+                    logger.error("can't find StudentAssignment for "
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
@@ -872,9 +872,9 @@ class VenueDetailView(generic.DetailView):
     template_name = "learning/venue_detail.html"
 
 
-class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
+class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
     """ Show assignments from current semester only. """
-    model = AssignmentStudent
+    model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/assignment_list_student.html"
     user_type = 'student'
@@ -897,7 +897,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
                                 'student'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentStudentListView, self)
+        context = (super(StudentAssignmentListView, self)
                    .get_context_data(*args, **kwargs))
         open_, archive = utils.split_list(context['assignment_list'],
                                           lambda a_s: a_s.assignment.is_open)
@@ -910,7 +910,7 @@ class AssignmentStudentListView(StudentOnlyMixin, generic.ListView):
 
 class AssignmentTeacherListView(TeacherOnlyMixin,
                                 generic.ListView):
-    model = AssignmentStudent
+    model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
@@ -985,7 +985,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
            or not self.request.user.is_curator):
             raise PermissionDenied
         context['a_s_list'] = \
-            (AssignmentStudent.objects
+            (StudentAssignment.objects
              .filter(assignment__pk=self.object.pk)
              .select_related('assignment',
                              'assignment__course_offering',
@@ -996,17 +996,17 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         return context
 
 
-class AssignmentStudentDetailMixin(object):
+class StudentAssignmentDetailMixin(object):
     model = AssignmentComment
-    template_name = "learning/assignment_student_detail.html"
+    template_name = "learning/student_assignment_detail.html"
     form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentStudentDetailMixin, self)
+        context = (super(StudentAssignmentDetailMixin, self)
                    .get_context_data(*args, **kwargs))
         pk = self.kwargs.get('pk')
         a_s = get_object_or_404(
-            AssignmentStudent
+            StudentAssignment
             .objects
             .filter(pk=pk)
             .select_related('assignment',
@@ -1019,7 +1019,7 @@ class AssignmentStudentDetailMixin(object):
 
         # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
-         .filter(assignment_student=a_s, user=self.request.user)
+         .filter(student_assignment=a_s, user=self.request.user)
          .update(is_unread=False))
 
         self._additional_permissions_check(a_s=a_s)
@@ -1028,7 +1028,7 @@ class AssignmentStudentDetailMixin(object):
         context['course_offering'] = a_s.assignment.course_offering
         context['user_type'] = self.user_type
 
-        comments = (AssignmentComment.objects.filter(assignment_student=a_s)
+        comments = (AssignmentComment.objects.filter(student_assignment=a_s)
                                              .order_by('created')
                                              .select_related('author'))
         for c in comments:
@@ -1049,9 +1049,9 @@ class AssignmentStudentDetailMixin(object):
 
     def form_valid(self, form):
         pk = self.kwargs.get('pk')
-        a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+        a_s = get_object_or_404(StudentAssignment.objects.filter(pk=pk))
         comment = form.save(commit=False)
-        comment.assignment_student = a_s
+        comment.student_assignment = a_s
         comment.author = self.request.user
         comment.save()
         comment_persistence.report_saved(comment.text)
@@ -1063,7 +1063,7 @@ class AssignmentStudentDetailMixin(object):
 # TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
 class ASStudentDetailView(LoginRequiredMixin,
                           FailedCourseContextMixin,
-                          AssignmentStudentDetailMixin,
+                          StudentAssignmentDetailMixin,
                           generic.CreateView):
     user_type = 'student'
 
@@ -1099,7 +1099,7 @@ class ASStudentDetailView(LoginRequiredMixin,
 
 
 class ASTeacherDetailView(TeacherOnlyMixin,
-                          AssignmentStudentDetailMixin,
+                          StudentAssignmentDetailMixin,
                           generic.CreateView):
     user_type = 'teacher'
 
@@ -1120,7 +1120,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
         context['grade_form'] = AssignmentGradeForm(
             initial, grade_max=a_s.assignment.grade_max)
         base = (
-            AssignmentStudent.objects
+            StudentAssignment.objects
             .filter(grade__isnull=True,
                     is_passed=True,
                     assignment__course_offering=co,
@@ -1136,7 +1136,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
     def post(self, request, *args, **kwargs):
         if 'grading_form' in request.POST:
             pk = self.kwargs.get('pk')
-            a_s = get_object_or_404(AssignmentStudent.objects.filter(pk=pk))
+            a_s = get_object_or_404(StudentAssignment.objects.filter(pk=pk))
             form = AssignmentGradeForm(request.POST,
                                        grade_max=a_s.assignment.grade_max)
 
@@ -1372,7 +1372,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
-        self.assignment_students = None
+        self.student_assignments = None
         self.enrollment_list = None
         self.course_offering_list = None
         self.course_offering = None
@@ -1400,9 +1400,9 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         self.course_offering = course_offering
 
         # Sacrifice attributes access for better performance
-        assignment_students = (AssignmentStudent.objects
-                    .filter(assignment__course_offering=course_offering)
-                    .values("pk",
+        student_assignments = (StudentAssignment.objects
+                               .filter(assignment__course_offering=course_offering)
+                               .values("pk",
                             "grade",
                             "is_passed",
                             "assignment__pk",
@@ -1411,11 +1411,11 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                             "assignment__grade_max",
                             "assignment__grade_min",
                             "student__pk")
-                    .order_by("assignment__pk",
+                               .order_by("assignment__pk",
                               "student__last_name",
                               "student__first_name")
-                    )
-        self.assignment_students = assignment_students
+                               )
+        self.student_assignments = student_assignments
 
         enrollment_list = Enrollment.objects.filter(
             course_offering=course_offering).select_related("student")
@@ -1428,12 +1428,12 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                                 .select_related('semester', 'course'))
         self.course_offering_list = course_offering_list
 
-        return (GradeBookFormFactory.build_form_class(assignment_students,
+        return (GradeBookFormFactory.build_form_class(student_assignments,
                                                       enrollment_list))
 
     def get_initial(self):
         return (GradeBookFormFactory
-                .transform_to_initial(self.assignment_students, self.enrollment_list))
+                .transform_to_initial(self.student_assignments, self.enrollment_list))
 
     def get_success_url(self):
         co = self.course_offering
@@ -1447,12 +1447,12 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
-            GradeBookFormFactory.build_indexes(self.assignment_students,
+            GradeBookFormFactory.build_indexes(self.student_assignments,
                                                self.enrollment_list)
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
-                AssignmentStudent.objects.filter(pk=a_s["pk"]).update(grade=form.cleaned_data[field])
+                StudentAssignment.objects.filter(pk=a_s["pk"]).update(grade=form.cleaned_data[field])
                 continue
             # Looking for final_grade_*
             elif field in enrollment_index:
@@ -1474,7 +1474,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                     a_s["pk"], a_s["assignment__grade_max"],
                     a_s["grade"] if a_s["grade"] is not None else "")
             else:
-                state = AssignmentStudent.calculate_state(
+                state = StudentAssignment.calculate_state(
                     a_s["grade"],
                     a_s["assignment__is_online"],
                     a_s["is_passed"],
@@ -1485,7 +1485,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                     cell["form_field"] = "{0}/{1}".format(
                         a_s["grade"], a_s["assignment__grade_max"])
                 else:
-                    cell["form_field"] = AssignmentStudent.SHORT_STATES[state]
+                    cell["form_field"] = StudentAssignment.SHORT_STATES[state]
 
             return cell
 
@@ -1512,7 +1512,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                     "total": 0
                 })
 
-        for a_s in self.assignment_students:
+        for a_s in self.student_assignments:
             student_id = a_s["student__pk"]
             assignment_id = a_s["assignment__pk"]
             # The student unsubscribed from the course
@@ -1566,7 +1566,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                 semester__year=semester_year)
         except ObjectDoesNotExist:
             raise Http404('Course offering not found')
-        a_ss = (AssignmentStudent.objects
+        a_ss = (StudentAssignment.objects
                 .filter(assignment__course_offering=co)
                 .order_by('student', 'assignment')
                 .select_related('assignment',
@@ -1690,7 +1690,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
             if not request.user.is_teacher and not request.user.is_curator:
-                qs = qs.filter(assignment_student__student_id=request.user.pk)
+                qs = qs.filter(student_assignment__student_id=request.user.pk)
             comment = get_object_or_404(qs)
             file_name = comment.attached_file_name
             file_url = comment.attached_file.url

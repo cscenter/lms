@@ -37,7 +37,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         student_url = reverse('a_s_detail_student', args=[a_s.pk])

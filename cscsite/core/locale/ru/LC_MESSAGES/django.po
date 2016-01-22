@@ -145,7 +145,7 @@ msgstr "Выпускник"
 
 #: cscsite/learning/constants.py:13
 #: cscsite/templates/learning/assignment_detail_teacher.html:72
-#: cscsite/templates/learning/assignment_student_detail.html:140
+#: cscsite/templates/learning/student_assignment_detail.html:140
 msgid "Volunteer"
 msgstr "Вольнослушатель"
 
@@ -324,7 +324,7 @@ msgstr "Оценка не может быть больше максимальн�
 #: cscsite/templates/learning/assignment_list_student.html:101
 #: cscsite/templates/learning/assignment_list_teacher.html:63
 #: cscsite/templates/learning/assignment_list_teacher.html:115
-#: cscsite/templates/learning/assignment_student_detail.html:142
+#: cscsite/templates/learning/student_assignment_detail.html:142
 msgid "Deadline"
 msgstr "Срок сдачи"
 
@@ -337,12 +337,12 @@ msgid "Can be passed online"
 msgstr "Можно сдать онлайн"
 
 #: cscsite/learning/forms.py:329 cscsite/learning/models.py:491
-#: cscsite/templates/learning/assignment_student_detail.html:146
+#: cscsite/templates/learning/student_assignment_detail.html:146
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
 #: cscsite/learning/forms.py:332 cscsite/learning/models.py:495
-#: cscsite/templates/learning/assignment_student_detail.html:144
+#: cscsite/templates/learning/student_assignment_detail.html:144
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
@@ -681,15 +681,15 @@ msgid "Assignment|excellent"
 msgstr "Отлично"
 
 #: cscsite/learning/models.py:586
-msgid "AssignmentStudent|assignment"
+msgid "StudentAssignment|assignment"
 msgstr "Задание"
 
 #: cscsite/learning/models.py:590
-msgid "AssignmentStudent|student"
+msgid "StudentAssignment|student"
 msgstr "Студент"
 
 #: cscsite/learning/models.py:594
-#: cscsite/templates/learning/assignment_student_detail.html:117
+#: cscsite/templates/learning/student_assignment_detail.html:117
 #: cscsite/templates/learning/courses/list_student.html:82
 #: cscsite/templates/users/user_detail.html:215
 msgid "Grade"
@@ -724,7 +724,7 @@ msgid "Student field should point to an actual student"
 msgstr "Поле \"Студент\" должно указывать на студента"
 
 #: cscsite/learning/models.py:691
-msgid "AssignmentComment|assignment_student"
+msgid "AssignmentComment|student_assignment"
 msgstr "Выполнение задания"
 
 #: cscsite/learning/models.py:694
@@ -747,7 +747,7 @@ msgstr "Комментарии к заданиям"
 #: cscsite/learning/models.py:736
 #: cscsite/templates/learning/assignment_detail_teacher.html:64
 #: cscsite/templates/learning/assignment_list_teacher.html:66
-#: cscsite/templates/learning/assignment_student_detail.html:140
+#: cscsite/templates/learning/student_assignment_detail.html:140
 #: cscsite/users/models.py:156 cscsite/users/models.py:455
 #: cscsite/users/models.py:473 cscsite/users/models.py:507
 msgid "Student"
@@ -778,7 +778,7 @@ msgid "User"
 msgstr "Имя пользователя"
 
 #: cscsite/learning/models.py:781
-msgid "assignment_student"
+msgid "student_assignment"
 msgstr "Выполнение задания"
 
 #: cscsite/learning/models.py:783
@@ -1295,7 +1295,7 @@ msgstr ""
 "университетом</a>."
 
 #: cscsite/templates/learning/assignment_detail_teacher.html:18
-#: cscsite/templates/learning/assignment_student_detail.html:28
+#: cscsite/templates/learning/student_assignment_detail.html:28
 #: cscsite/templates/learning/courseclass_detail.html:16
 #: cscsite/templates/learning/courseoffering_detail.html:32
 #: cscsite/templates/learning/courses/detail.html:14
@@ -1371,25 +1371,25 @@ msgstr "Без оценки"
 msgid "All assignments"
 msgstr "Все задания"
 
-#: cscsite/templates/learning/assignment_student_detail.html:62
-#: cscsite/templates/learning/assignment_student_detail.html:104
+#: cscsite/templates/learning/student_assignment_detail.html:62
+#: cscsite/templates/learning/student_assignment_detail.html:104
 #: cscsite/templates/users/user_detail.html:278 cscsite/users/models.py:284
 msgid "Comment"
 msgstr "Комментарий"
 
-#: cscsite/templates/learning/assignment_student_detail.html:64
+#: cscsite/templates/learning/student_assignment_detail.html:64
 msgid "Solution"
 msgstr "Решение"
 
-#: cscsite/templates/learning/assignment_student_detail.html:113
+#: cscsite/templates/learning/student_assignment_detail.html:113
 msgid "Next unchecked[assignment]"
 msgstr "Следующее непроверенное"
 
-#: cscsite/templates/learning/assignment_student_detail.html:127
+#: cscsite/templates/learning/student_assignment_detail.html:127
 msgid "Professor"
 msgstr "Преподаватель"
 
-#: cscsite/templates/learning/assignment_student_detail.html:129
+#: cscsite/templates/learning/student_assignment_detail.html:129
 #: cscsite/templates/learning/courses/list_student.html:32
 #: cscsite/templates/learning/courses/list_student.html:51
 #: cscsite/templates/learning/courses/list_teacher.html:22
@@ -1397,15 +1397,15 @@ msgstr "Преподаватель"
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: cscsite/templates/learning/assignment_student_detail.html:148
+#: cscsite/templates/learning/student_assignment_detail.html:148
 msgid "Assignment created"
 msgstr "Задание добавлено"
 
-#: cscsite/templates/learning/assignment_student_detail.html:151
+#: cscsite/templates/learning/student_assignment_detail.html:151
 msgid "Can be passed online "
 msgstr "Можно сдать онлайн"
 
-#: cscsite/templates/learning/assignment_student_detail.html:153
+#: cscsite/templates/learning/student_assignment_detail.html:153
 msgid "Should be passed offline "
 msgstr "Должно быть сдано оффлайн"
 

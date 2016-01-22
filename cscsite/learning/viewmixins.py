@@ -1,7 +1,7 @@
 from braces.views import UserPassesTestMixin
 from django.conf import settings
 
-from learning.models import AssignmentStudent, CourseOffering, Enrollment
+from learning.models import StudentAssignment, CourseOffering, Enrollment
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):

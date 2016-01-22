@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, 
     ValidationError, ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 
-from learning.models import AssignmentStudent
+from learning.models import StudentAssignment
 
 logger = logging.getLogger(__name__)
 user_model = get_user_model()
@@ -125,7 +125,7 @@ class ImportGradesByStepicID(ImportGrades):
             return False
 
         try:
-            a_s = (AssignmentStudent.objects.get(assignment__pk=assignment_id,
+            a_s = (StudentAssignment.objects.get(assignment__pk=assignment_id,
                                                  student=user))
         except ObjectDoesNotExist:
             msg = "User ID {} with stepic ID {} doesn't have an assignment " \
@@ -171,7 +171,7 @@ class ImportGradesByYandexLogin(ImportGrades):
 
     def update_score(self, data):
         yandex_id, score = data
-        from learning.models import AssignmentStudent
+        from learning.models import StudentAssignment
 
         assignment_id = self.assignment.pk
 
@@ -180,7 +180,7 @@ class ImportGradesByYandexLogin(ImportGrades):
             return False
 
         try:
-            a_s = (AssignmentStudent.objects.get(assignment__pk=assignment_id,
+            a_s = (StudentAssignment.objects.get(assignment__pk=assignment_id,
                                                  student=user))
         except ObjectDoesNotExist:
             msg = "User ID {} with Yandex ID {} doesn't have an assignment " \

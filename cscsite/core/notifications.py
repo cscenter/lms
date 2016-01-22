@@ -27,7 +27,7 @@ class UnreadNotificationsCache(object):
 
     @cached_property
     def assignments(self):
-        return {obj.assignment_student: obj
+        return {obj.student_assignment: obj
                 for obj in self.assignments_qs.all()}
 
     @cached_property
@@ -64,7 +64,7 @@ class UnreadNotificationsCacheMiddleware(object):
                 (request.user
                  .assignmentnotification_set
                  .filter(is_unread=True)
-                 .select_related('assignment_student')),
+                 .select_related('student_assignment')),
                 (request.user
                  .courseofferingnewsnotification_set
                  .filter(is_unread=True)

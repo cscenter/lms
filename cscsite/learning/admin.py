@@ -8,7 +8,7 @@ from core.admin import UbereditorMixin, WiderLabelsMixin
 from core.models import apply_related_spec
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
-    Assignment, AssignmentAttachment, AssignmentStudent, \
+    Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
     CourseOfferingTeacher
 from .constants import PARTICIPANT_GROUPS
@@ -77,8 +77,8 @@ class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
 class AssignmentCommentAdmin(RelatedSpecMixin,
                              UbereditorMixin,
                              admin.ModelAdmin):
-    readonly_fields = ['assignment_student']
-    related_spec = {'select': [('assignment_student',
+    readonly_fields = ['student_assignment']
+    related_spec = {'select': [('student_assignment',
                                 [('assignment',
                                   [('course_offering',
                                     ['semester', 'course'])]),
@@ -105,7 +105,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class AssignmentStudentAdmin(RelatedSpecMixin,
+class StudentAssignmentAdmin(RelatedSpecMixin,
                              admin.ModelAdmin):
     list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
     related_spec = {'select': [('assignment',
@@ -144,7 +144,7 @@ admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentAttachment)
-admin.site.register(AssignmentStudent, AssignmentStudentAdmin)
+admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)

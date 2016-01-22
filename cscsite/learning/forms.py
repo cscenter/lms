@@ -16,7 +16,7 @@ from core.forms import Ubereditor
 from core.validators import FileValidator
 from .constants import GRADES
 from .models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, Assignment, AssignmentComment, AssignmentStudent, \
+    CourseClass, Venue, Assignment, AssignmentComment, StudentAssignment, \
     Enrollment, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
@@ -404,7 +404,7 @@ class GradeBookFormFactory(object):
 
     @classmethod
     def build_form_class(cls, a_s_list, enrollment_list):
-        """New form.Form subclass with AssignmentStudent's list and Enrollment's grade
+        """New form.Form subclass with StudentAssignment's list and Enrollment's grade
 
         Note:
             Django's widget with show_hidden_initial=True is rendered

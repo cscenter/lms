@@ -433,7 +433,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         self.assertNotContains(self.client.get(url), a.title)
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.title)
-        a_s = AssignmentStudent.objects.get(assignment=a, student=student)
+        a_s = StudentAssignment.objects.get(assignment=a, student=student)
         self.assertContains(self.client.get(url),
                             reverse('a_s_detail_student', args=[a_s.pk]))
         a_s.delete()
@@ -441,7 +441,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
             self.assertEqual(200, self.client.get(url).status_code)
             l.check(('learning.views',
                      'ERROR',
-                     "can't find AssignmentStudent for "
+                     "can't find StudentAssignment for "
                      "student ID {0}, assignment ID {1}"
                      .format(student.pk, a.pk)))
         self.client.logout()
@@ -571,7 +571,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
                           .count())
         as_ = AssignmentFactory.create_batch(3, course_offering=co)
         self.assertEquals(set((student.pk, a.pk) for a in as_),
-                          set(AssignmentStudent.objects
+                          set(StudentAssignment.objects
                               .filter(student=student)
                               .values_list('student', 'assignment')))
         co_other = CourseOfferingFactory.create(semester=current_semester)
@@ -617,7 +617,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(0, Enrollment.objects
                           .filter(student=s, course_offering=co)
                           .count())
-        a_ss = (AssignmentStudent.objects
+        a_ss = (StudentAssignment.objects
                 .filter(student=s,
                         assignment__course_offering=co))
         self.assertEquals(3, len(a_ss))
@@ -627,7 +627,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
         url += "?back=course_list_student"
         self.assertRedirects(self.client.post(url, form),
                              reverse('course_list_student'))
-        self.assertSameObjects(a_ss, (AssignmentStudent.objects
+        self.assertSameObjects(a_ss, (StudentAssignment.objects
                                       .filter(student=s,
                                               assignment__course_offering=co)))
 
@@ -918,7 +918,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertFalse(os.path.isfile(cca_files[1]))
 
 
-class AssignmentStudentListTests(GroupSecurityCheckMixin,
+class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'
     groups_allowed = ['Student [CENTER]']
@@ -942,7 +942,7 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
         # add a few assignments, they should show up
         as2 = AssignmentFactory.create_batch(3, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
-        self.assertSameObjects([(AssignmentStudent.objects
+        self.assertSameObjects([(StudentAssignment.objects
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
@@ -956,12 +956,12 @@ class AssignmentStudentListTests(GroupSecurityCheckMixin,
             self.assertContains(resp, a.title)
         for a in as_olds:
             self.assertContains(resp, a.title)
-        self.assertSameObjects([(AssignmentStudent.objects
+        self.assertSameObjects([(StudentAssignment.objects
                                  .get(assignment=a, student=u))
                                 for a in (as1 + as2)],
                                resp.context['assignment_list_open'])
-        self.assertSameObjects([(AssignmentStudent.objects
-                                .get(assignment=a, student=u)) for a in as_olds],
+        self.assertSameObjects([(StudentAssignment.objects
+                                 .get(assignment=a, student=u)) for a in as_olds],
                                 resp.context['assignment_list_archive'])
         # Now add assignment from old semester
         old_s = SemesterFactory.create(year=now_year - 1, type=now_season)
@@ -1006,7 +1006,7 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertSameObjects(as1, resp.context['assignment_list_archive'])
         resp = self.client.get(reverse(self.url_name) + "?show_all=true")
-        self.assertSameObjects([(AssignmentStudent.objects
+        self.assertSameObjects([(StudentAssignment.objects
                                  .get(student=student,
                                       assignment=assignment))
                                 for student in students
@@ -1016,13 +1016,13 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
         # teacher commented on an assingnment, now it should show up
         a = as1[0]
         student = students[0]
-        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
-        AssignmentCommentFactory.create(assignment_student=a_s,
+        a_s = StudentAssignment.objects.get(student=student, assignment=a)
+        AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=teacher)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(1, len(resp.context['assignment_list_open']))
         # but if student have commented, it should show up
-        AssignmentCommentFactory.create(assignment_student=a_s,
+        AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=student)
         resp = self.client.get(reverse(self.url_name))
         self.assertSameObjects([a_s], resp.context['assignment_list_open'])
@@ -1062,7 +1062,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         self.assertEquals(a, resp.context['assignment'])
         self.assertEquals(0, len(resp.context['a_s_list']))
         EnrollmentFactory.create(student=student, course_offering=co)
-        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
+        a_s = StudentAssignment.objects.get(student=student, assignment=a)
         resp = self.client.get(url)
         self.assertEquals(a, resp.context['assignment'])
         self.assertSameObjects([a_s], resp.context['a_s_list'])
@@ -1077,7 +1077,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
@@ -1094,7 +1094,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
@@ -1107,7 +1107,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
@@ -1123,7 +1123,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_student', args=[a_s.pk])
@@ -1147,7 +1147,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
@@ -1182,7 +1182,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
@@ -1195,7 +1195,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
@@ -1218,7 +1218,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co,
                                      grade_max=13)
-        a_s = (AssignmentStudent.objects
+        a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
         url = reverse('a_s_detail_teacher', args=[a_s.pk])
@@ -1226,7 +1226,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                       'grade': 11}
         self.doLogin(teacher)
         self.assertRedirects(self.client.post(url, grade_dict), url)
-        self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
+        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)
         resp = self.client.get(url)
         self.assertContains(resp, "value=\"11\"")
         self.assertContains(resp, "/{}".format(13))
@@ -1234,7 +1234,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         grade_dict['grade'] = 42
         self.client.post(url, grade_dict)
         self.assertEqual(400, self.client.post(url, grade_dict).status_code)
-        self.assertEqual(11, AssignmentStudent.objects.get(pk=a_s.pk).grade)
+        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)
 
     def test_next_unchecked(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -1245,13 +1245,13 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         EnrollmentFactory.create(student=student, course_offering=co_other)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         a_other = AssignmentFactory.create(course_offering=co_other)
-        a_s1 = (AssignmentStudent.objects
+        a_s1 = (StudentAssignment.objects
                 .filter(assignment=a1, student=student)
                 .get())
-        a_s2 = (AssignmentStudent.objects
+        a_s2 = (StudentAssignment.objects
                 .filter(assignment=a2, student=student)
                 .get())
-        a_s_other = (AssignmentStudent.objects
+        a_s_other = (StudentAssignment.objects
                      .filter(assignment=a_other, student=student)
                      .get())
         url1 = reverse('a_s_detail_teacher', args=[a_s1.pk])
@@ -1260,7 +1260,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(None, self.client.get(url1).context['next_a_s_pk'])
         self.assertEqual(None, self.client.get(url2).context['next_a_s_pk'])
         [AssignmentCommentFactory.create(author=a_s.student,
-                                         assignment_student=a_s)
+                                         student_assignment=a_s)
          for a_s in [a_s1, a_s2]]
         self.assertEqual(a_s2.pk, self.client.get(url1).context['next_a_s_pk'])
         self.assertEqual(a_s1.pk, self.client.get(url2).context['next_a_s_pk'])
@@ -1445,14 +1445,14 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         for as_ in as_online:
             self.assertContains(resp, as_.title)
             for student in students:
-                a_s = AssignmentStudent.objects.get(student=student,
+                a_s = StudentAssignment.objects.get(student=student,
                                                     assignment=as_)
                 a_s_url = reverse('a_s_detail_teacher', args=[a_s.pk])
                 self.assertContains(resp, a_s_url)
         for as_ in as_offline:
             self.assertContains(resp, as_.title)
             for student in students:
-                a_s = AssignmentStudent.objects.get(student=student,
+                a_s = StudentAssignment.objects.get(student=student,
                                                     assignment=as_)
                 self.assertIn('a_s_{}'.format(a_s.pk),
                               resp.context['form'].fields)
@@ -1465,11 +1465,11 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         EnrollmentFactory.create(student=student, course_offering=co)
         as_cnt = 2
         assignments = AssignmentFactory.create_batch(as_cnt, course_offering=co)
-        # AssignmentFactory implicitly create AssignmentStudent instances
+        # AssignmentFactory implicitly create StudentAssignment instances
         # with empty grade value.
         default_grade = 10
         for assignment in assignments:
-            a_s = AssignmentStudent.objects.get(student=student,
+            a_s = StudentAssignment.objects.get(student=student,
                                                 assignment=assignment)
             a_s.grade = default_grade
             a_s.save()
@@ -1495,9 +1495,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         form = {}
-        pairs = zip([AssignmentStudent.objects.get(student=student, assignment=a)
-            for student in students
-            for a in [a1, a2]],
+        pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
+                     for student in students
+                     for a in [a1, a2]],
             [2, 3, 4, 5])
         for submission, grade in pairs:
             enrollment = Enrollment.objects.get(student=submission.student,
@@ -1507,7 +1507,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             form[field] = 'good'
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
-            self.assertEqual(grade, (AssignmentStudent.objects
+            self.assertEqual(grade, (StudentAssignment.objects
                                      .get(pk=a_s.pk)
                                      .grade))
         for student in students:
@@ -1523,7 +1523,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         EnrollmentFactory.create(student=student, course_offering=co)
         assignments = AssignmentFactory.create_batch(3, course_offering=co)
         # for assignment in assignments:
-        #     a_s = AssignmentStudent.objects.get(student=student,
+        #     a_s = StudentAssignment.objects.get(student=student,
         #                                         assignment=assignment)
         # Import grades allowed only for particular course offering
         form_fields = {'assignment': assignments[0].pk}
@@ -1598,7 +1598,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
                           for s in [student1, student2]],
                          range(4))]
         for a, s, grade in combos:
-            a_s = AssignmentStudent.objects.get(student=s, assignment=a)
+            a_s = StudentAssignment.objects.get(student=s, assignment=a)
             a_s.grade = grade
             a_s.save()
         self.doLogin(teacher)
@@ -1640,7 +1640,7 @@ class TestCompletedCourseOfferingBehaviour(object):
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
-        a_s = AssignmentStudent.objects.get(student=student, assignment=a)
+        a_s = StudentAssignment.objects.get(student=student, assignment=a)
         url = reverse('a_s_detail_student', args=[a_s.pk])
         client.login(student)
         response = client.get(url)

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from learning.constants import PARTICIPANT_GROUPS
 from learning.models import Course, Semester, CourseOffering, \
-    Assignment, Venue, CourseClass, CourseClassAttachment, AssignmentStudent, \
+    Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, StudentProject, \
@@ -141,7 +141,7 @@ class CourseClassAttachmentFactory(factory.DjangoModelFactory):
 
 
 class AssignmentFactory(factory.DjangoModelFactory):
-    # Note(Sergey Zh): implicitly create AssignmentStudent record through assigned_to
+    # Note(Sergey Zh): implicitly create StudentAssignment record through assigned_to
     class Meta:
         model = Assignment
 
@@ -164,9 +164,9 @@ class AssignmentAttachmentFactory(factory.DjangoModelFactory):
     attachment = factory.django.FileField()
 
 
-class AssignmentStudentFactory(factory.DjangoModelFactory):
+class StudentAssignmentFactory(factory.DjangoModelFactory):
     class Meta:
-        model = AssignmentStudent
+        model = StudentAssignment
 
     assignment = factory.SubFactory(AssignmentFactory)
     student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
@@ -176,7 +176,7 @@ class AssignmentCommentFactory(factory.DjangoModelFactory):
     class Meta:
         model = AssignmentComment
 
-    assignment_student = factory.SubFactory(AssignmentStudentFactory)
+    student_assignment = factory.SubFactory(StudentAssignmentFactory)
     text = factory.Sequence(lambda n: "Test comment %03d" % n)
     author = factory.SubFactory(UserFactory)
     attached_file = factory.django.FileField()
@@ -196,7 +196,7 @@ class AssignmentNotificationFactory(factory.DjangoModelFactory):
         model = AssignmentNotification
 
     user = factory.SubFactory(UserFactory)
-    assignment_student = factory.SubFactory(AssignmentStudentFactory)
+    student_assignment = factory.SubFactory(StudentAssignmentFactory)
 
 
 class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):

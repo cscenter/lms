@@ -32,7 +32,7 @@ import pytz
 from core.views import ProtectedFormMixin, SuperUserOnlyMixin
 from learning.settings import LEARNING_BASE, TEACHING_BASE
 from learning.viewmixins import CuratorOnlyMixin
-from learning.models import CourseClass, Assignment, AssignmentStudent, \
+from learning.models import CourseClass, Assignment, StudentAssignment, \
     CourseOffering, NonCourseEvent, Semester, StudentProject, Enrollment
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
 from .models import CSCUser, CSCUserReference, SHADCourseRecord
@@ -199,7 +199,7 @@ class UserDetailView(generic.DetailView):
                        'assignment__course_offering',
                        'assignment__course_offering__course',
                        'assignment__course_offering__semester']
-            a_ss = (AssignmentStudent.objects
+            a_ss = (StudentAssignment.objects
                     .filter(student=self.object)
                     .filter(assignment__course_offering__semester_id=context['current_semester'].id)
                     .order_by('assignment__course_offering__course__name',
@@ -541,7 +541,7 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
         user = context['user']
 
         student_a_ss = (
-            AssignmentStudent.objects
+            StudentAssignment.objects
             .filter(student=user,
                     assignment__deadline_at__gt=timezone.now())
             .select_related('assignment',

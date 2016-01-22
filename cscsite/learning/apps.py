@@ -6,7 +6,7 @@ from .signals import (maybe_upload_slides, populate_assignment_students,
                         create_deadline_change_notification,
                       populate_student_assignments,
                       create_assignment_comment_notification,
-                      update_last_commented_date_on_assignment_student,
+                      update_last_commented_date_on_student_assignment,
                       create_course_offering_news_notification,
                       mark_assignment_passed)
 
@@ -16,13 +16,14 @@ class LearningConfig(AppConfig):
     verbose_name = _("Learning")
 
     def ready(self):
+        # FIXME:????
         post_save.connect(populate_assignment_students,
                           sender=self.get_model('Assignment'))
         post_save.connect(create_deadline_change_notification,
                           sender=self.get_model('Assignment'))
         post_save.connect(create_assignment_comment_notification,
                           sender=self.get_model('AssignmentComment'))
-        post_save.connect(update_last_commented_date_on_assignment_student,
+        post_save.connect(update_last_commented_date_on_student_assignment,
                           sender=self.get_model('AssignmentComment'))
         post_save.connect(mark_assignment_passed,
                           sender=self.get_model('AssignmentComment'))
