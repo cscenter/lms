@@ -1495,14 +1495,15 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         form = {}
-        pairs = zip([AssignmentStudent.objects.get(student=student,
-                                                   assignment=a)
-                     for student in students
-                     for a in [a1, a2]],
-                    [2, 3, 4, 5])
-        for a_s, grade in pairs:
-            form['a_s_{}'.format(a_s.pk)] = grade
-            field = 'final_grade_{}'.format(a_s.assignment.pk)
+        pairs = zip([AssignmentStudent.objects.get(student=student, assignment=a)
+            for student in students
+            for a in [a1, a2]],
+            [2, 3, 4, 5])
+        for submission, grade in pairs:
+            enrollment = Enrollment.objects.get(student=submission.student,
+                                                course_offering=co)
+            form['a_s_{}'.format(submission.pk)] = grade
+            field = 'final_grade_{}'.format(enrollment.pk)
             form[field] = 'good'
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
