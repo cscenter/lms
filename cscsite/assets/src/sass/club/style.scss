@@ -1,6 +1,8 @@
 // CLUB main styles
 
 $min-width: 940px;
+$color-blue: #337ab7;
+$btn-primary-bg: #7a9cc6;
 
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
@@ -10,8 +12,6 @@ $min-width: 940px;
 @import "../center/_learning.scss";
 @import "top_menu.scss";
 
-$color-blue: #337ab7;
-$btn-primary-bg: #7a9cc6;
 
 // index page
 .font-bigger {
