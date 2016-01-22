@@ -29,5 +29,9 @@
     "webpack": "^1.12.9",
     "webpack-bundle-tracker": "0.0.8",
     "webpack-dev-server": "^1.14.0"
+  },
+  "dependencies": {
+    "clean-css": "^3.4.9",
+    "node-sass": "^3.4.2"
   }
 }
