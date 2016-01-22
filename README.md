@@ -104,6 +104,8 @@ every update.
 Misc
 ----
 
+`npm install -g node-sass` to compile scss to css with libsass
+
 toolbar in `base.View`:
 
     return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')

@@ -1,0 +1,18 @@
+// Vanilla Bootstrap's "variables.scss" should already be imported
+
+// Core variables
+@import "jasny.bootstrap/variables";
+
+// Core CSS
+@import "jasny.bootstrap/grid-container-smooth";
+@import "jasny.bootstrap/button-labels";
+
+// Components
+//@import "jasny.bootstrap/nav-tab-alignment";
+@import "jasny.bootstrap/navmenu";
+//@import "jasny.bootstrap/alerts-fixed";
+
+// Components w/ JavaScript
+@import "jasny.bootstrap/offcanvas";
+//@import "jasny.bootstrap/rowlink";
+@import "jasny.bootstrap/fileinput";

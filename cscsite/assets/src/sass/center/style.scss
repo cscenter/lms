@@ -1,0 +1,743 @@
+// CENTER main styles
+$min-width: 940px;
+
+// Common colors;
+$color-grey: #9B9B9B;
+$color-blue: #337ab7;
+$color-orange: #f2a654;
+$color-green: #8CE087;
+$color-red: #f96868;
+$color-yellow: #f9cd48;
+
+@import "../bourbon/bourbon.scss"; // sass mixins lib
+@import "../bootstrap.custom.scss";
+@import "../jgrowl.customize.scss";
+@import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
+@import "../_profile_page.scss";
+@import "../_login_page.scss";
+@import "top_menu.scss";
+@import "_material_design.scss";
+
+@import "_online_page.scss";
+@import "_index_page.scss";
+//@import "_gradebook.scss";
+@import "_learning.scss";
+
+// TODO: Rewrite it all with less
+blockquote {
+  font-size: 14px;
+}
+
+h1.bigger-margin {
+  margin-top: 40px !important;
+  margin-bottom: 20px !important;
+}
+
+h4.bigger-margin {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+h4.no-top-margin {
+  margin-top: 0px !important;
+}
+
+.container {
+  width: $min-width !important;
+
+  &.container-responsive {
+    width: 90% !important;
+    min-width: $min-width;
+  }
+}
+
+.container.inner {
+  padding-left: 0px;
+  padding-right: 0px;
+  width: 940px !important;
+}
+
+.logo-cell {
+  position: relative;
+  margin-left: 15px;
+  margin-right: 10px;
+  width: 80px;
+  float: left;
+  height: 40px;
+}
+
+.logo-container {
+  position: absolute;
+  z-index: 1000;
+}
+
+body {
+  margin-bottom: 90px;
+  /* min-height: 100%; */
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  min-width: 940px;
+  margin-bottom: 0;
+  background-color: #EDEDED;
+  line-height: 60px;
+  color: #9B9B9B;
+  margin-top: 75px;
+
+  .social {
+    text-align: right;
+
+    a {
+      text-align: center;
+      color: #9B9B9B;
+      padding: 0 0 0 12px;
+
+      &:hover {
+        color: #777;
+      }
+    }
+
+    i {
+      vertical-align: middle;
+    }
+  }
+}
+
+.news-metainfo {
+  color: #AAA;
+  text-align: right;
+}
+
+.callout h1 {
+  margin-top: 50px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  text-align: justify;
+}
+
+.callout p {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  font-weight: 200;
+  font-size: 23px;
+}
+
+.callout-buttons {
+  text-align: right;
+}
+
+.callout-buttons a {
+  margin: 30px 15px;
+}
+
+.col-container {
+  width: 940px;
+}
+
+.columns {
+  -webkit-column-count: 2;
+  -webkit-column-gap: 10px;
+  -webkit-column-fill: auto;
+  -moz-column-count: 2;
+  -moz-column-gap: 10px;
+  -moz-column-fill: auto;
+  column-count: 2;
+  column-gap: 10px;
+  column-fill: auto;
+}
+
+.user-tile {
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;
+  margin-bottom: 10px;
+}
+
+.user-tile .user-info h4 {
+  margin-top: 0px;
+}
+
+.timetable .badge {
+  color: black;
+  border: 1px solid #D3D3D3;
+  font-weight: normal;
+  border-radius: 5px;
+}
+
+.timetable .badge.lecture {
+  background-color: #F9F9F9;
+}
+
+.timetable .badge.seminar {
+  background-color: #E9E9E9;
+}
+
+.timetable-header-row .center {
+  text-align: center;
+}
+
+.timetable-header-row .center h2 {
+  margin: 0px;
+}
+
+.timetable-main-row h4 {
+  margin-top: 40px;
+}
+
+.center-aligned {
+  text-align: center;
+}
+
+h2 small a {
+  color: #999;
+}
+
+.h2-and-buttons h2 {
+  float: left;
+}
+
+.h2-and-buttons .btn-toolbar {
+  float: right;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.h2-and-buttons hr {
+  clear: both;
+}
+
+.h2-and-buttons small {
+  white-space: nowrap;
+}
+
+.btn {
+  border-radius: 0px !important;
+}
+
+.badge {
+  border-radius: 0px !important;
+}
+
+.badge.lecture, .badge.seminar {
+  width: 6em;
+}
+
+.csc-well {
+  background-color: #F1F1F1;
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+}
+
+h5.assignment {
+  font-weight: bold;
+}
+
+.assignment-attachment {
+  color: #999;
+}
+
+.assignment-comment {
+  .metainfo {
+    color: #999;
+
+    &.first {
+      color: #888;
+      font-weight: bold;
+    }
+  }
+
+  .metainfo-holder {
+    min-height: 20px;
+  }
+
+  hr {
+    border-color: #CFCFCF;
+  }
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0px;
+}
+
+.comment-list li.student {
+  margin-right: 80px;
+  margin-left: 0px;
+}
+
+.comment-list li.teacher {
+  margin-right: 0px;
+  margin-left: 80px;
+}
+
+#div_id_deadline_at {
+  width: 400px;
+}
+
+#div_id_deadline_at input#id_deadline_at_0 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}
+
+#div_id_deadline_at input#id_deadline_at_1 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}
+
+.marks-sheet-csv-link .reason {
+  display: none;
+}
+
+.link-disabled {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:hover {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:active {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:visited {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled .reason {
+  opacity: 0;
+  display: inline;
+}
+
+.link-disabled .reason.active {
+  opacity: 1;
+  -webkit-transition: opacity .15s ease-in-out;
+  -moz-transition: opacity .15s ease-in-out;
+  -ms-transition: opacity .15s ease-in-out;
+  -o-transition: opacity .15s ease-in-out;
+  transition: opacity .15s ease-in-out;
+}
+
+.marks-table-container-outer {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  position: relative;
+
+  .marks-table-container-inner {
+    margin-left: 135px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// MARKS TABLE
+.marks-table {
+  table-layout: fixed;
+
+  &.teacher {
+    tr.active {
+      background-color: #E2F9FF;
+    }
+    td.active {
+      background-color: #E2F9FF;
+    }
+  }
+
+  &.staff {
+
+    td.active {
+      /* border-left: solid 1px #BBB; */
+      /* border-right: solid 1px #BBB; */
+      color: black !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    tr.active td.content {
+      /* border-bottom: solid 1px #BBB; */
+      /* border-top: solid 1px #BBB; */
+      color: black !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    &.focused {
+      td.content {
+        color: transparent;
+        text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        opacity: 0.7;
+        z-index: -5;
+
+        &.enrolled {
+          color: transparent;
+          text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+          box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
+          opacity: 0.7;
+          z-index: -5;
+        }
+      }
+    }
+  }
+
+  td {
+    vertical-align: middle;
+    text-align: center;
+    margin: 10px;
+    box-sizing: border-box;
+
+    input[type=number] {
+      width: 48px;
+    }
+
+    &.marks-header-horiz {
+      text-align: left;
+      white-space: nowrap;
+      width: 135px;
+      padding-right: 10px;
+      position: absolute;
+      left: 0px;
+      margin-top: 0px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &.content {
+      padding: 0px 10px;
+      width: 40px;
+    }
+  }
+
+  th {
+    &.rotate {
+      height: 18em;
+      white-space: nowrap;
+      vertical-align: bottom;
+
+      > div {
+        width: 40px;
+        /* CSS3 specific totation code */
+        /* translate should have the same negative dimension as head height */
+        transform: rotate(315deg) translate(25px, 0px);
+        //-moz-transform: rotate(315deg) translate(-25px, 50px);
+        //-webkit-transform: rotate(315deg) translate(-25px, 50px);
+
+        span {
+          //line-height: 1.5em;
+          width: 18em;
+          display: block;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          ///* setting background may yield better results in IE text clear type rendering */
+          background: #fff;
+          ///* IE specific rotation code */
+          filter: flipv fliph;
+        }
+      }
+    }
+  }
+
+}
+
+
+
+#calendar-container {
+  min-width: 940px;
+  width: 70% !important;
+}
+
+.calendar {
+  th {
+    width: 130px;
+  }
+
+  td {
+    padding: 4px !important;
+    width: 130px;
+
+    &.today {
+      background-color: #FAFFEC;
+    }
+
+    .cell {
+      min-height: 100px;
+      min-width: 122px;
+    }
+
+    .day {
+      font-weight: bold;
+      color: #BBB;
+      text-align: right;
+    }
+
+    .event {
+      margin-bottom: 3px;
+      border: 1px solid #D3D3D3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 3px 4px;
+      line-height: 1.3;
+
+      &.lecture {
+        background-color: #F9F9F9;
+      }
+
+      &.seminar {
+        background-color: #E9E9E9;
+      }
+
+      &.noncourse {
+        background-color: #ECF9FF;
+      }
+
+      &.times {
+        white-space: nowrap;
+      }
+    }
+
+    .not-in-semester {
+      background-color: #EEE;
+
+      .day {
+        color: #CCC;
+      }
+    }
+  }
+
+}
+
+div.week-num-container {
+  position: relative;
+}
+
+div.week-num {
+  margin-left: -25px;
+  position: absolute;
+  font-weight: bold;
+  color: #666;
+}
+
+.assignment-status {
+  color: #fff;
+  font-weight: normal;
+  border-radius: 5px;
+  padding: 4px 6px;
+
+  &.not-checked {
+    color: #000;
+    border: 1px solid #D3D3D3;
+    background-color: #F9F9F9;
+  }
+
+  &.being-checked {
+    background-color: #E9E9E9;
+  }
+
+  &.unsatisfactory {
+    background-color: $color-red;
+  }
+
+  &.pass {
+    background-color: $color-orange;
+  }
+
+  &.good {
+    background-color: $color-yellow;
+  }
+
+  &.excellent {
+    background-color: $color-green;
+  }
+}
+
+.assignment-date.tomorrow {
+  color: $color-red;
+}
+
+.assignment-date.today {
+  color: $color-red;
+}
+
+.assignment-date.day-after-tomorrow {
+  color: $color-orange;
+}
+
+tr.unread {
+  background-color: #E2F9FF;
+}
+
+.marks-table .enrolled {
+  background-color: #E2F9FF;
+}
+
+.list-unstyled.no-margin {
+  margin-bottom: 0px !important;
+}
+
+.marks-sheet-form-cell > input[type="number"] {
+  width: 43px;
+}
+
+.marks-sheet-unsaved-cell {
+  border-left: 2px solid #428bca;
+  padding-left: 3px;
+  margin-left: -3px;
+}
+
+.final-grade-cell {
+  margin-left: 3px;
+}
+
+#course-list > li:first-child {
+  padding-left: 5px !important;
+}
+
+.semester-course-list ul {
+  padding-left: 15px;
+}
+
+.course-offering-profs {
+  ul {
+
+    li {
+      padding-bottom: 10px;
+      @extend .clearfix;
+
+      img {
+        float: left;
+        margin-right: 10px;
+      }
+    }
+
+  }
+}
+
+.input-grade {
+  width: 100px !important;
+}
+
+.form-group div.controls {
+  margin-right: 1%;
+}
+
+.nobreak {
+  white-space: nowrap;
+}
+
+.grade-cell {
+  text-align: center;
+}
+
+.video-container {
+  margin: auto;
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  line-height: 150px;
+  margin-bottom: 30px;
+  opacity: 0.65;
+  position: relative;
+}
+
+.video-bg {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 250px;
+  height: 150px;
+  opacity: 0.45;
+  z-index: -5;
+}
+
+.video-container:hover {
+  opacity: 1;
+}
+
+.video-inner {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-weight: bold;
+  font-size: 20px;
+  color: #1F4C66;
+}
+
+.csc-well blockquote {
+  border-left-color: #CFCFCF;
+}
+
+.student-comment-metainfo {
+  color: #999;
+  font-size: 0.75em;
+}
+
+.ubertext {
+  pre {
+    padding: 0.5em;
+  }
+  table {
+    @extend .table;
+    @extend .table-bordered;
+    @extend .table-condensed;
+    @extend .table-striped;
+  }
+}
+
+.scrollable-menu {
+  height: auto;
+  max-height: 600px;
+  overflow-x: hidden;
+}
+
+// Teachers list
+.collapse-link {
+  color: $color-grey;
+  border-bottom: 1px dashed $color-grey;
+  font-size: 28px;
+  text-decoration: none!important;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.teachers-list {
+
+  margin-bottom: 20px;
+
+  h1 {
+    margin-bottom: 40px;
+  }
+
+  .col-xs-6 {
+    img {
+      float: left;
+      margin: 0 10px 20px 0;
+    }
+
+    .ubertext {
+
+      .h4 {
+        color: $color-blue;
+      }
+
+      margin-left: 110px;
+    }
+  }
+}
