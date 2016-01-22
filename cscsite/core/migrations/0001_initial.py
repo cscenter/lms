@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
+from django.db import migrations, models
 
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
-
 
 def update_forward(apps, schema_editor):
     """Add sites list"""
@@ -46,5 +45,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='City',
+            fields=[
+                ('code', models.CharField(help_text="UN/LOCODE notification preferable <a href='http://www.unece.org/cefact/locode/service/location' target='_blank'>Hint</a>", max_length=6, serialize=False, verbose_name='Code', primary_key=True)),
+                ('name', models.CharField(max_length=255, verbose_name='City name')),
+                ('name_ru', models.CharField(max_length=255, null=True, verbose_name='City name')),
+                ('name_en', models.CharField(max_length=255, null=True, verbose_name='City name')),
+            ],
+            options={
+                'ordering': ['name'],
+                'db_table': 'cities',
+                'verbose_name': 'City',
+                'verbose_name_plural': 'Cities',
+            },
+        ),
         migrations.RunPython(update_forward, update_backward),
     ]
