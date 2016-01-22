@@ -21,7 +21,7 @@ from django.utils.encoding import smart_text
 
 import cscenter.urls
 from learning.utils import get_current_semester_pair
-from learning.models import AssignmentStudent
+from learning.models import StudentAssignment
 from ..factories import *
 from .mixins import *
 
@@ -80,7 +80,7 @@ class SmokeTests(MyUtilitiesMixin, TestCase):
                     student=student,
                     course_offering=course_offering))
             for course_offering in course_offering_sample:
-                a_ss = AssignmentStudent.objects.filter(
+                a_ss = StudentAssignment.objects.filter(
                     assignment__course_offering=course_offering,
                     student=student)
                 for a_s in a_ss:
@@ -89,13 +89,13 @@ class SmokeTests(MyUtilitiesMixin, TestCase):
                     for _ in range(num_student_comments):
                         assignment_comments.append(
                             AssignmentCommentFactory.create(
-                                assignment_student=a_s,
+                                student_assignment=a_s,
                                 author=student))
                     for _ in range(num_teacher_comments):
                         teacher = random.choice(course_offering.teachers.all())
                         assignment_comments.append(
                             AssignmentCommentFactory.create(
-                                assignment_student=a_s,
+                                student_assignment=a_s,
                                 author=teacher))
 
     def test_num_queries(self):

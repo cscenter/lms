@@ -22,7 +22,7 @@ from .views import \
     CourseClassDeleteView, \
     CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
-    AssignmentStudentListView, AssignmentTeacherListView, \
+    StudentAssignmentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
@@ -117,7 +117,7 @@ urlpatterns = [
             name='learning_base'),
         url(r'^/courses/$', CourseStudentListView.as_view(),
             name='course_list_student'),
-        url(r'^/assignments/$', AssignmentStudentListView.as_view(),
+        url(r'^/assignments/$', StudentAssignmentListView.as_view(),
             name='assignment_list_student'),
         url(r'^/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
             name='a_s_detail_student'),

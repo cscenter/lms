@@ -478,7 +478,7 @@ class Assignment(TimeStampedModel, object):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Assignment|assigned_to"),
         blank=True,
-        through='AssignmentStudent')
+        through='StudentAssignment')
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
@@ -567,7 +567,7 @@ class AssignmentAttachment(TimeStampedModel, object):
 
 
 @python_2_unicode_compatible
-class AssignmentStudent(TimeStampedModel):
+class StudentAssignment(TimeStampedModel):
     STATES = Choices(('not_submitted', _("Assignment|not submitted")),
                      ('not_checked', _("Assignment|not checked")),
                      ('unsatisfactory', _("Assignment|unsatisfactory")),
@@ -583,11 +583,11 @@ class AssignmentStudent(TimeStampedModel):
 
     assignment = models.ForeignKey(
         Assignment,
-        verbose_name=_("AssignmentStudent|assignment"),
+        verbose_name=_("StudentAssignment|assignment"),
         on_delete=models.CASCADE)
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("AssignmentStudent|student"),
+        verbose_name=_("StudentAssignment|student"),
         on_delete=models.CASCADE,
         limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.STUDENT_CENTER})
     grade = models.PositiveSmallIntegerField(
@@ -677,8 +677,8 @@ class AssignmentStudent(TimeStampedModel):
 ## https://docs.djangoproject.com/en/1.7/topics/migrations/#serializing-values
 def assignmentcomment_upload_to(instance, filename):
     return ("assignment_{0}/user_{1}/{2}/{3}"
-            .format(instance.assignment_student.assignment.pk,
-                    instance.assignment_student.student.pk,
+            .format(instance.student_assignment.assignment.pk,
+                    instance.student_assignment.student.pk,
                     # somewhat protecting against URL enumeration
                     int(time.time()) % 30,
                     filename))
@@ -686,9 +686,9 @@ def assignmentcomment_upload_to(instance, filename):
 
 @python_2_unicode_compatible
 class AssignmentComment(TimeStampedModel):
-    assignment_student = models.ForeignKey(
-        AssignmentStudent,
-        verbose_name=_("AssignmentComment|assignment_student"),
+    student_assignment = models.ForeignKey(
+        'StudentAssignment',
+        verbose_name=_("AssignmentComment|student_assignment"),
         on_delete=models.CASCADE)
     text = models.TextField(
         _("AssignmentComment|text"),
@@ -709,9 +709,9 @@ class AssignmentComment(TimeStampedModel):
 
     def __str__(self):
         return ("Comment to {0} by {1}"
-                .format(smart_text(self.assignment_student
+                .format(smart_text(self.student_assignment
                                    .assignment),
-                        smart_text(self.assignment_student
+                        smart_text(self.student_assignment
                                    .student.get_full_name())))
 
     @property
@@ -776,9 +776,9 @@ class AssignmentNotification(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("User"),
         on_delete=models.CASCADE)
-    assignment_student = models.ForeignKey(
-        AssignmentStudent,
-        verbose_name=_("assignment_student"),
+    student_assignment = models.ForeignKey(
+        'StudentAssignment',
+        verbose_name=_("student_assignment"),
         on_delete=models.CASCADE)
     is_about_passed = models.BooleanField(_("About passed assignment"),
                                           default=False)
@@ -807,7 +807,7 @@ class AssignmentNotification(TimeStampedModel):
     def __str__(self):
         return ("notification for {0} on {1}"
                 .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.assignment_student)))
+                        smart_text(self.student_assignment)))
 
 
 @python_2_unicode_compatible

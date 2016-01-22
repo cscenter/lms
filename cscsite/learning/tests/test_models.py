@@ -37,13 +37,13 @@ class CommonTests(TestCase):
         a = AssignmentFactory.create()
         self.assertIn(a.title, smart_text(a))
         self.assertIn(smart_text(a.course_offering), smart_text(a))
-        as_ = AssignmentStudentFactory.create()
+        as_ = StudentAssignmentFactory.create()
         self.assertIn(smart_text(as_.student.get_full_name()), smart_text(as_))
         self.assertIn(smart_text(as_.assignment), smart_text(as_))
         ac = AssignmentCommentFactory.create()
-        self.assertIn(smart_text(ac.assignment_student.assignment),
+        self.assertIn(smart_text(ac.student_assignment.assignment),
                       smart_text(ac))
-        self.assertIn(smart_text(ac.assignment_student
+        self.assertIn(smart_text(ac.student_assignment
                                  .student.get_full_name()),
                       smart_text(ac))
         e = EnrollmentFactory.create()
@@ -51,7 +51,7 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(e.student.get_full_name()), smart_text(e))
         an = AssignmentNotificationFactory.create()
         self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
-        self.assertIn(smart_text(an.assignment_student), smart_text(an))
+        self.assertIn(smart_text(an.student_assignment), smart_text(an))
         conn = CourseOfferingNewsNotificationFactory.create()
         self.assertIn(smart_text(conn.user.get_full_name()), smart_text(conn))
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
@@ -220,11 +220,11 @@ class AssignmentAttachmentTest(TestCase):
                                  "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
-class AssignmentStudentTests(TestCase):
+class StudentAssignmentTests(TestCase):
     def test_clean(self):
         u1 = UserFactory.create(groups=['Student [CENTER]'])
         u2 = UserFactory.create(groups=[])
-        as_ = AssignmentStudentFactory.create(student=u1)
+        as_ = StudentAssignmentFactory.create(student=u1)
         as_.student = u2
         self.assertRaises(ValidationError, as_.clean)
         as_.student = u1
@@ -237,81 +237,81 @@ class AssignmentStudentTests(TestCase):
     def test_is_passed(self):
         u_student = UserFactory.create(groups=['Student [CENTER]'])
         u_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        as_ = AssignmentStudentFactory(
+        as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
         # teacher comments first
         self.assertFalse(as_.is_passed)
-        AssignmentCommentFactory.create(assignment_student=as_,
+        AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_teacher)
         self.assertFalse(as_.is_passed)
-        AssignmentCommentFactory.create(assignment_student=as_,
+        AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         self.assertTrue(as_.is_passed)
         # student comments first
-        as_ = AssignmentStudentFactory(
+        as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
         self.assertFalse(as_.is_passed)
-        AssignmentCommentFactory.create(assignment_student=as_,
+        AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         self.assertTrue(as_.is_passed)
-        AssignmentCommentFactory.create(assignment_student=as_,
+        AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         self.assertTrue(as_.is_passed)
         # assignment is offline
-        as_ = AssignmentStudentFactory(
+        as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=False)
         self.assertFalse(as_.is_passed)
-        AssignmentCommentFactory.create(assignment_student=as_,
+        AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         self.assertFalse(as_.is_passed)
 
-    def test_assignment_student_state(self):
+    def test_student_assignment_state(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
         a_online = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=True,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx = {'student': student, 'assignment': a_online}
-        a_s = AssignmentStudent(grade=0, **ctx)
+        a_s = StudentAssignment(grade=0, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
-        a_s = AssignmentStudent(grade=4, **ctx)
+        a_s = StudentAssignment(grade=4, **ctx)
         self.assertEqual(a_s.state, 'unsatisfactory')
-        a_s = AssignmentStudent(grade=5, **ctx)
+        a_s = StudentAssignment(grade=5, **ctx)
         self.assertEqual(a_s.state, 'pass')
-        a_s = AssignmentStudent(grade=8, **ctx)
+        a_s = StudentAssignment(grade=8, **ctx)
         self.assertEqual(a_s.state, 'good')
-        a_s = AssignmentStudent(grade=10, **ctx)
+        a_s = StudentAssignment(grade=10, **ctx)
         self.assertEqual(a_s.state, 'excellent')
-        a_s = AssignmentStudent(**ctx)
+        a_s = StudentAssignment(**ctx)
         self.assertEqual(a_s.state, 'not_submitted')
         a_offline = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=False,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline
-        a_s = AssignmentStudent(**ctx)
+        a_s = StudentAssignment(**ctx)
         self.assertEqual(a_s.state, 'not_checked')
 
     def test_state_display(self):
-        as_ = AssignmentStudentFactory(grade=30,
+        as_ = StudentAssignmentFactory(grade=30,
                                        assignment__grade_max=50)
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_display)
         self.assertIn(smart_text(as_.grade), as_.state_display)
-        as_ = AssignmentStudentFactory(assignment__grade_max=50)
+        as_ = StudentAssignmentFactory(assignment__grade_max=50)
         self.assertEqual(as_.STATES['not_submitted'], as_.state_display)
 
     def test_state_short(self):
-        as_ = AssignmentStudentFactory(grade=30,
+        as_ = StudentAssignmentFactory(grade=30,
                                        assignment__grade_max=50)
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_short)
         self.assertIn(smart_text(as_.grade), as_.state_short)
-        as_ = AssignmentStudentFactory(assignment__grade_max=50)
+        as_ = StudentAssignmentFactory(assignment__grade_max=50)
         self.assertEqual(as_.SHORT_STATES['not_submitted'], as_.state_short)
 
 
@@ -319,9 +319,9 @@ class AssignmentCommentTests(TestCase):
     def test_attached_file(self):
         ac = AssignmentCommentFactory.create(
             attached_file__filename="foobar.pdf")
-        self.assertIn(smart_text(ac.assignment_student.assignment.pk),
+        self.assertIn(smart_text(ac.student_assignment.assignment.pk),
                       ac.attached_file.name)
-        self.assertIn(smart_text(ac.assignment_student.student.pk),
+        self.assertIn(smart_text(ac.student_assignment.student.pk),
                       ac.attached_file.name)
         self.assertRegexpMatches(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
         self.assertRegexpMatches(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")

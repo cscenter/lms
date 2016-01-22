@@ -107,12 +107,12 @@
                               </a>
                           </td>
                           {% spaceless %}
-                              {% for assignment_id, assignment_student in by_assignment.iteritems %}
+                              {% for assignment_id, student_assignment in by_assignment.iteritems %}
                                   <td class="content">
-                                      {% if assignment_student.assignment__is_online %}
-                                          <a href="{% url 'a_s_detail_teacher' assignment_student.pk %}">{{ assignment_student.form_field }}</a>
+                                      {% if student_assignment.assignment__is_online %}
+                                          <a href="{% url 'a_s_detail_teacher' student_assignment.pk %}">{{ student_assignment.form_field }}</a>
                                       {% else %}
-                                          {{ assignment_student.form_field|safe }}{% endif %}
+                                          {{ student_assignment.form_field|safe }}{% endif %}
                                   </td>
                               {% endfor %}
                           {% endspaceless %}

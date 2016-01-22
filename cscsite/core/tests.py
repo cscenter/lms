@@ -14,7 +14,7 @@ from mock import Mock
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
 from learning.factories import AssignmentNotificationFactory, \
-    CourseOfferingNewsNotificationFactory, AssignmentStudentFactory
+    CourseOfferingNewsNotificationFactory, StudentAssignmentFactory
 
 from .management.commands.notify import Command
 from .models import related_spec_to_list, apply_related_spec
@@ -50,7 +50,7 @@ class NotifyCommandTest(TestCase):
                         .get(pk=an.pk)
                         .is_notified)
         self.assertIn(reverse('a_s_detail_teacher',
-                              args=[an.assignment_student.pk]),
+                              args=[an.student_assignment.pk]),
                       mail.outbox[0].body)
         self.assertIn("sending notification for", out.getvalue())
 
@@ -78,29 +78,29 @@ class NotifyCommandTest(TestCase):
 
 class RelatedSpec(TestCase):
     def test_to_list(self):
-        spec_form = [('assignment_student',
+        spec_form = [('student_assignment',
                       [('assignment',
                         [('course_offering', ['semester', 'course'])]),
                        'student'])]
         list_form \
-            = ['assignment_student',
-               'assignment_student__assignment',
-               'assignment_student__assignment__course_offering',
-               'assignment_student__assignment__course_offering__semester',
-               'assignment_student__assignment__course_offering__course',
-               'assignment_student__student']
+            = ['student_assignment',
+               'student_assignment__assignment',
+               'student_assignment__assignment__course_offering',
+               'student_assignment__assignment__course_offering__semester',
+               'student_assignment__assignment__course_offering__course',
+               'student_assignment__student']
         self.assertEqual(list_form, related_spec_to_list(spec_form))
 
-        spec_form = [('assignment_student',
+        spec_form = [('student_assignment',
                       [('assignment',
                         [('course_offering', ['semester', 'course'])])]),
                      'student']
         list_form \
-            = ['assignment_student',
-               'assignment_student__assignment',
-               'assignment_student__assignment__course_offering',
-               'assignment_student__assignment__course_offering__semester',
-               'assignment_student__assignment__course_offering__course',
+            = ['student_assignment',
+               'student_assignment__assignment',
+               'student_assignment__assignment__course_offering',
+               'student_assignment__assignment__course_offering__semester',
+               'student_assignment__assignment__course_offering__course',
                'student']
         self.assertEqual(list_form, related_spec_to_list(spec_form))
 

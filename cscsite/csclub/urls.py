@@ -33,7 +33,7 @@ from learning.views import \
     CourseClassDeleteView, \
     CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
-    AssignmentStudentListView, AssignmentTeacherListView, \
+    StudentAssignmentListView, AssignmentTeacherListView, \
     AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
@@ -161,7 +161,7 @@ urlpatterns += patterns('',
         name='learning_base'),
     url(r'^learning/courses/$', CourseStudentListView.as_view(),
         name='course_list_student'),
-    url(r'^learning/assignments/$', AssignmentStudentListView.as_view(),
+    url(r'^learning/assignments/$', StudentAssignmentListView.as_view(),
         name='assignment_list_student'),
     url(r'^learning/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
         name='a_s_detail_student'),

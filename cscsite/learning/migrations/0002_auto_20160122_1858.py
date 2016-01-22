@@ -106,19 +106,19 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, verbose_name='CourseClass|Venue', to='learning.Venue'),
         ),
         migrations.AddField(
-            model_name='assignmentstudent',
+            model_name='StudentAssignment',
             name='assignment',
-            field=models.ForeignKey(verbose_name='AssignmentStudent|assignment', to='learning.Assignment'),
+            field=models.ForeignKey(verbose_name='StudentAssignment|assignment', to='learning.Assignment'),
         ),
         migrations.AddField(
-            model_name='assignmentstudent',
+            model_name='StudentAssignment',
             name='student',
-            field=models.ForeignKey(verbose_name='AssignmentStudent|student', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(verbose_name='StudentAssignment|student', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='assignmentnotification',
-            name='assignment_student',
-            field=models.ForeignKey(verbose_name='assignment_student', to='learning.AssignmentStudent'),
+            name='student_assignment',
+            field=models.ForeignKey(verbose_name='student_assignment', to='learning.StudentAssignment'),
         ),
         migrations.AddField(
             model_name='assignmentnotification',
@@ -127,8 +127,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='assignmentcomment',
-            name='assignment_student',
-            field=models.ForeignKey(verbose_name='AssignmentComment|assignment_student', to='learning.AssignmentStudent'),
+            name='student_assignment',
+            field=models.ForeignKey(verbose_name='AssignmentComment|student_assignment', to='learning.StudentAssignment'),
         ),
         migrations.AddField(
             model_name='assignmentcomment',
@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assignment',
             name='assigned_to',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name='Assignment|assigned_to', through='learning.AssignmentStudent', blank=True),
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name='Assignment|assigned_to', through='learning.StudentAssignment', blank=True),
         ),
         migrations.AddField(
             model_name='assignment',
@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
             unique_together=set([('student', 'course_offering')]),
         ),
         migrations.AlterUniqueTogether(
-            name='assignmentstudent',
+            name='StudentAssignment',
             unique_together=set([('assignment', 'student')]),
         ),
     ]

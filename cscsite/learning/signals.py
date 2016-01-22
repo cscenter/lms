@@ -14,18 +14,18 @@ def populate_assignment_students(sender, instance, created,
     if not created:
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
-    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
+    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     students = instance.course_offering.enrolled_students.all()
     for student in students:
-        a_s = AssignmentStudent.objects.create(assignment=instance,
+        a_s = StudentAssignment.objects.create(assignment=instance,
                                                student=student)
         # Note(Dmitry): we create notifications here instead of a separate
         #               receiver because it's much more efficient than getting
-        #               AssignmentStudent objects back one by one. It seems
+        #               StudentAssignment objects back one by one. It seems
         #               reasonable that 2*N INSERTs are better than bulk_create
         #               + N SELECTs + N INSERTs.
         (AssignmentNotification(user=student,
-                                assignment_student=a_s,
+                                student_assignment=a_s,
                                 is_about_creation=True)
          .save())
 
@@ -34,15 +34,15 @@ def create_deadline_change_notification(sender, instance, created,
                                         *args, **kwargs):
     if created:
         return
-    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
+    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     if 'deadline_at' in instance.tracker.changed():
         students = instance.course_offering.enrolled_students.all()
         for student in students:
-            a_s = AssignmentStudent.objects.get(student=student,
+            a_s = StudentAssignment.objects.get(student=student,
                                                 assignment=instance)
             (AssignmentNotification(user=student,
-                                    assignment_student=a_s,
+                                    student_assignment=a_s,
                                     is_about_deadline=True)
              .save())
 
@@ -52,10 +52,10 @@ def create_assignment_comment_notification(sender, instance, created,
     if not created:
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
-    a_s = instance.assignment_student
+    a_s = instance.student_assignment
     if instance.author.pk == a_s.student.pk:
         teachers = (instance
-                    .assignment_student
+                    .student_assignment
                     .assignment
                     .course_offering
                     .teachers
@@ -69,20 +69,20 @@ def create_assignment_comment_notification(sender, instance, created,
         # pre/post_save signals on AssigmentNotification
         for teacher in teachers:
             (AssignmentNotification(user=teacher,
-                                    assignment_student=a_s,
+                                    student_assignment=a_s,
                                     is_about_passed=is_about_passed)
              .save())
     else:
-        student = instance.assignment_student.student
+        student = instance.student_assignment.student
         (AssignmentNotification(user=student,
-                                assignment_student=a_s)
+                                student_assignment=a_s)
          .save())
 
-def update_last_commented_date_on_assignment_student(sender, instance, created,
+def update_last_commented_date_on_student_assignment(sender, instance, created,
                                                      *args, **kwargs):
     if not created:
         return
-    a_s = instance.assignment_student
+    a_s = instance.student_assignment
     a_s.last_commented = timezone.now()
     a_s.save()
 
@@ -90,7 +90,7 @@ def mark_assignment_passed(sender, instance, created,
                            *args, **kwargs):
     if not created:
         return
-    a_s = instance.assignment_student
+    a_s = instance.student_assignment
     if not a_s.is_passed\
        and instance.author.pk == a_s.student.pk\
        and a_s.assignment.is_online:
@@ -147,9 +147,9 @@ def populate_student_assignments(sender, instance, created,
                                  *args, **kwargs):
     if not created:
         return
-    AssignmentStudent = apps.get_model('learning', 'AssignmentStudent')
+    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     assignments = instance.course_offering.assignment_set.all()
     for a in assignments:
-        (AssignmentStudent.objects
+        (StudentAssignment.objects
          .get_or_create(assignment=a,
                         student=instance.student))
