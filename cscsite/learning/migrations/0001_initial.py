@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
+import bitfield.models
+import sorl.thumbnail.fields
+import learning.utils
+import model_utils.fields
 import learning.models
 import django.utils.timezone
-import model_utils.fields
 import django.core.validators
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('sites', '0001_initial'),
+        ('core', '0001_initial'),
     ]
 
     operations = [
@@ -40,7 +45,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('attachment', models.FileField(upload_to='assignment_attachments')),
+                ('attachment', models.FileField(upload_to=learning.models.assignmentattach_upload_to)),
             ],
             options={
                 'ordering': ['assignment', '-created'],
@@ -91,23 +96,12 @@ class Migration(migrations.Migration):
                 ('grade', models.PositiveSmallIntegerField(null=True, verbose_name='Grade', blank=True)),
                 ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, verbose_name='Assignment|grade changed', monitor='grade')),
                 ('is_passed', models.BooleanField(default=False, help_text="It's online and has comments", verbose_name='Is passed')),
+                ('last_commented', models.DateTimeField(null=True, verbose_name='Last comment date', blank=True)),
             ],
             options={
                 'ordering': ['assignment', 'student'],
                 'verbose_name': 'Assignment-student',
                 'verbose_name_plural': 'Assignment-students',
-            },
-        ),
-        migrations.CreateModel(
-            name='City',
-            fields=[
-                ('code', models.CharField(help_text='This should be UN/LOCODE, e.g. "RU SPB"', max_length=6, serialize=False, verbose_name='PK|Code', primary_key=True)),
-                ('name', models.CharField(max_length=255, verbose_name='City|Name')),
-            ],
-            options={
-                'ordering': ['name'],
-                'verbose_name': 'City',
-                'verbose_name_plural': 'Cities',
             },
         ),
         migrations.CreateModel(
@@ -117,8 +111,12 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('name', models.CharField(max_length=140, verbose_name='Course|name')),
+                ('name_ru', models.CharField(max_length=140, null=True, verbose_name='Course|name')),
+                ('name_en', models.CharField(max_length=140, null=True, verbose_name='Course|name')),
                 ('slug', models.SlugField(help_text='Short dash-separated string for human-readable URLs, as in test.com/news/<b>some-news</b>/', unique=True, max_length=70, verbose_name='News|slug')),
                 ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Course|description')),
+                ('description_ru', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', null=True, verbose_name='Course|description')),
+                ('description_en', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', null=True, verbose_name='Course|description')),
             ],
             options={
                 'ordering': ['name'],
@@ -136,7 +134,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
                 ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
                 ('slides', models.FileField(upload_to=learning.models.courseclass_slides_file_name, verbose_name='Slides', blank=True)),
-                ('video', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled; please insert HTML for embedded video player', verbose_name='CourseClass|Video', blank=True)),
+                ('slides_url', models.URLField(verbose_name='SlideShare URL', blank=True)),
+                ('video_url', models.URLField(help_text='Both YouTube and Yandex Video are supported', verbose_name='Video URL', blank=True)),
                 ('other_materials', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='CourseClass|Other materials', blank=True)),
                 ('date', models.DateField(verbose_name='Date')),
                 ('starts_at', models.TimeField(verbose_name='Starts at')),
@@ -171,8 +170,13 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('description', models.TextField(help_text='LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description', verbose_name='Description', blank=True)),
+                ('description_ru', models.TextField(help_text='LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description', null=True, verbose_name='Description', blank=True)),
+                ('description_en', models.TextField(help_text='LaTeX+Markdown+HTML is enabled; empty description will be replaced by course description', null=True, verbose_name='Description', blank=True)),
+                ('survey_url', models.URLField(help_text='Link to Survey', verbose_name='Survey URL', blank=True)),
                 ('is_published_in_video', models.BooleanField(default=False, verbose_name='Published in video section')),
                 ('is_open', models.BooleanField(default=False, help_text='This course offering will be available on ComputerScience Club website so anyone can join', verbose_name='Open course offering')),
+                ('is_completed', models.BooleanField(default=False, verbose_name='Course already completed')),
+                ('language', models.CharField(default=b'ru', max_length=5, db_index=True, choices=[(b'ru', b'Russian'), (b'en', b'English')])),
             ],
             options={
                 'ordering': ['-semester', 'course__created'],
@@ -211,6 +215,17 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='CourseOfferingTeacher',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('roles', bitfield.models.BitField((('lecturer', 'Lecturer'), ('reviewer', 'Reviewer')), default=1)),
+            ],
+            options={
+                'verbose_name': 'Course Offering teacher',
+                'verbose_name_plural': 'Course Offering teachers',
+            },
+        ),
+        migrations.CreateModel(
             name='Enrollment',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -244,6 +259,28 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='OnlineCourse',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('start', models.DateTimeField(null=True, verbose_name='start', blank=True)),
+                ('end', models.DateTimeField(null=True, verbose_name='end', blank=True)),
+                ('name', models.CharField(max_length=255, verbose_name='Course|name')),
+                ('teachers', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Online Course|teachers')),
+                ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Online Course|description')),
+                ('link', models.URLField(verbose_name='Online Course|Link')),
+                ('photo', sorl.thumbnail.fields.ImageField(upload_to='online_courses/', verbose_name='Online Course|photo', blank=True)),
+                ('is_au_collaboration', models.BooleanField(default=False, verbose_name='Collaboration with AY')),
+            ],
+            options={
+                'ordering': ['name'],
+                'db_table': 'online_courses',
+                'verbose_name': 'Online course',
+                'verbose_name_plural': 'Online courses',
+            },
+        ),
+        migrations.CreateModel(
             name='Semester',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -267,13 +304,15 @@ class Migration(migrations.Migration):
                 ('supervisor', models.CharField(help_text='Format: Last_name First_name Patronymic, Organization', max_length=255, verbose_name='StudentProject|Supervisor')),
                 ('project_type', models.CharField(max_length=10, verbose_name='StudentProject|Type', choices=[('practice', 'StudentProject|Practice'), ('research', 'StudentProject|Research')])),
                 ('presentation', models.FileField(upload_to=learning.models.studentproject_slides_file_name, verbose_name='Presentation', blank=True)),
-                ('semesters', models.ManyToManyField(to='learning.Semester', verbose_name='Semesters')),
+                ('is_external', models.BooleanField(default=False, verbose_name='External project')),
+                ('semester', models.ForeignKey(verbose_name='Semester', to='learning.Semester')),
             ],
             options={
                 'ordering': ['name'],
                 'verbose_name': 'Student project',
                 'verbose_name_plural': 'Student projects',
             },
+            bases=(learning.utils.SortBySemesterMethodMixin, models.Model),
         ),
         migrations.CreateModel(
             name='StudyProgram',
@@ -295,6 +334,8 @@ class Migration(migrations.Migration):
                 ('address', models.CharField(help_text='Should be resolvable by Google Maps', max_length=500, verbose_name='Venue|Address', blank=True)),
                 ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description')),
                 ('is_preferred', models.BooleanField(default=False, help_text='Will be displayed on top of the venue list', verbose_name='Preferred')),
+                ('city', models.ForeignKey(default=b'RU SPB', blank=True, to='core.City', null=True)),
+                ('sites', models.ManyToManyField(to='sites.Site')),
             ],
             options={
                 'ordering': ['-is_preferred', 'name'],
