@@ -82,7 +82,7 @@ sass:
 	cd cscsite/assets/; node-sass -w src/sass/center/style.scss css/center/style.css --output-style=compressed --source-map=true
 
 sass_club:
-	cd cscsite/assets/; node-sass -w src/sass/club/style.scss css/club/style.css
+	cd cscsite/assets/; node-sass -w src/sass/club/style.scss css/club/style.css --output-style=compressed --source-map=true
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
