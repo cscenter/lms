@@ -1,0 +1,399 @@
+
+#gradebook {
+  margin: 0;
+  line-height: 24px;
+  background: rgb(255, 255, 255);
+
+  .title {
+    display: block;
+    padding: 10px 5px;
+    background: rgb(240, 240, 240);
+    border-right: 1px solid rgb(225, 225, 225);
+    border-bottom: 1px solid rgb(225, 225, 225);
+    line-height: 130%;
+    color: rgb(85, 85, 85);
+    height: 90px;
+    padding: 5px;
+  }
+
+  &:after {
+    content: ' ';
+    display: block;
+    clear: both;
+  }
+
+  .columns .column:last-child .title,
+  .columns .column:last-child .cell {
+    border-right: 0;
+  }
+
+  .cell {
+    display: block;
+    padding: 7px 6px;
+    overflow: hidden;
+    border-right: 1px solid rgb(230, 230, 230);
+    &.even {
+      background: rgb(245, 245, 245);
+      border-right-color: rgb(220, 220, 220);
+    }
+  }
+
+  #students .cell, #grades .cell,
+  .column .cell,
+  #students .title,
+  .column .title {
+    //border-bottom:1px solid rgb(255,255,255);
+    border-right: 1px solid rgb(255, 255, 255);
+  }
+
+  .cell.mark {
+    cursor: pointer;
+    color: rgb(128, 128, 128);
+  }
+
+
+  #assignments {
+    .assignment {
+      float: left;
+      width: 100px;
+    }
+  }
+}
+
+
+//.header {
+//  display: block;
+//  font-weight: bold;
+//  padding: 6px 0;
+//  text-indent: 6px;
+//  font-size: 10pt;
+//  font-family: Verdana;
+//  line-height: 35px;
+//  height: 35px;
+//  background: rgb(235, 235, 235);
+//  border-bottom: 1px solid rgb(230, 230, 230);
+//  color: rgb(0, 0, 0);
+//  position: relative;
+//  clear: both;
+//  margin-right: 20px;
+//
+//  * {
+//    text-indent: 0;
+//  }
+//
+//  a.op {
+//    float: right;
+//    padding: 8px 14px;
+//    font-size: 11px;
+//    line-height: 11px;
+//    background: url('/i/buttonbg2.png') 0 0 repeat-x #FAFAFA;
+//    border: 1px solid rgb(213, 213, 213);
+//    color: rgb(85, 85, 85);
+//    border-radius: 4px;
+//    margin-right: 6px;
+//
+//    &.off {
+//      opacity: 0.33;
+//    }
+//
+//    img {
+//      float: left;
+//      height: 12px;
+//      width: 12px;
+//      margin-right: 5px;
+//    }
+//
+//    .topop {
+//      input {
+//        font-size: 15px;
+//        line-height: 15px;
+//        padding: 6px 2px;
+//        margin: 0;
+//      }
+//
+//      a {
+//        padding: 8px 14px;
+//        font-size: 11px;
+//        line-height: 11px;
+//        background: url('/i/buttonbg2.png') 0 0 repeat-x #FAFAFA;
+//        border: 1px solid rgb(213, 213, 213);
+//        color: rgb(85, 85, 85);
+//        border-radius: 4px;
+//        margin: 0;
+//        &.on {
+//          background: rgb(255, 255, 230);
+//        }
+//      }
+//
+//    }
+//  }
+//}
+
+
+#gradebook #students {
+	width: 200px;
+	float: left;
+	overflow: hidden;
+}
+
+#gradebook #grades {
+	width: 100px;
+	float: left;
+	overflow: hidden;
+}
+
+#gradebook #at {
+	height:101px;
+	overflow-y: scroll;
+	overflow-x:hidden;
+	float: left;
+}
+
+#gradebook #as {
+	overflow: scroll;
+	float: left;
+}
+
+#gradebook #gs,
+#gradebook #ss {
+	overflow-y: hidden;
+	overflow-x:scroll;
+}
+
+
+
+
+#gradebook .columns {
+	float: left;
+}
+
+#gradebook .columns .column {
+	width: 100px;
+	float:left;
+}
+
+
+
+#gradebook .columns .assignment {
+}
+
+#gradebook .columns .assignment .cat {
+	font-size:8px;
+	color:rgb(128,128,128);
+}
+
+
+#gradebook .columns .column.mark {
+	width: 60px;
+}
+
+#gradebook .columns .column.mark2 {
+	width: 80px;
+}
+
+#gradebook .columns .column.day {
+	width: 40px;
+}
+
+#gradebook .columns .column.comment {
+	width: 300px;
+}
+
+#gradebook .columns .column.longcomment {
+	width: 430px;
+}
+
+
+
+
+
+#gradebook .columns .column input {
+	font-family:Verdana;
+	font-size:10pt;
+	height:19px;
+	line-height:19px;
+	border:0;
+	padding:0;
+	margin:0;
+	background:none;
+	line-height:100%;
+	cursor:pointer;
+}
+
+#gradebook .columns .column.comment input {
+	text-align:left;
+	width:290px !important;
+	font-size:8pt;
+}
+
+#gradebook .columns .column.longcomment input {
+	text-align:left;
+	width:420px !important;
+	font-size:8pt;
+}
+
+
+#gradebook .score {
+	text-align:right;
+}
+
+#gradebook .score input {
+	text-align:right;
+}
+
+
+
+#gradebook  .per,
+#gradebook .letter {
+	width:40px;
+	float:left;
+	position:relative;
+}
+
+#gradebook .per {
+	text-align:right;
+}
+
+
+
+
+#gradebook .student.focus {
+}
+
+
+#gradebook .columns .column .title.focus {
+}
+
+#gradebook .columns .column.assignment .title.focus {
+}
+
+
+
+#gradebook .columns .column .cell.focus {
+	background:rgb(220,240,255) !important;
+}
+
+
+#gradebook .note {
+	font-size:8pt;
+	color:rgb(85,85,85);
+}
+
+
+#gradebook .scroll {
+	color:rgb(128,128,128);
+	font-size:13px;
+	background:rgb(245,245,245);
+	padding:0 14px;
+	line-height:30px;
+	height:30px;
+	border:1px solid rgb(220,220,220);
+	position:absolute;
+	cursor:pointer;
+}
+
+#gradebook .scroll.left {
+	left: 300px;
+}
+
+#gradebook .scroll.right {
+	right: 10px;
+}
+
+#gradebook .attmarkbox {
+	float:none;
+	margin:0 auto;
+	font-weight:bold;
+	text-align:center;
+	padding:2px;
+	width:30px;
+	line-height:16px;
+	border:2px solid transparent;
+	border-radius:4px;
+	cursor:pointer;
+}
+
+.legend {
+	text-align:center;
+	margin-bottom:8px;
+	background:rgb(235,235,235);
+	font-size:8pt;
+	padding: 6px;
+	clear:both;
+	margin-top:10px;
+}
+
+a#coltitle0 {
+	color:rgb(0,0,0);
+}
+
+
+
+
+
+
+
+
+#gradebook.stdtable .header {
+	border-bottom:1px solid rgb(255,255,255);
+
+}
+
+
+#gradebook .cell {
+	line-height:24px;
+}
+
+#gradebook.stdtable .cell.score {
+	text-align:center;
+	font-weight:bold;
+
+}
+
+
+/* SCROLLTABLE */
+
+#gradebook.info #students .title, #gradebook.info .student.info {
+	width:251px;
+	}
+
+#gradebook.info  .columns .column {
+	width: 199px;
+	}
+
+#gradebook.info .columns .column.icon {
+	width: 49px;
+	}
+
+#gradebook.info .columns .column.icon .title {
+	padding:9px 5px;
+	text-align:center;
+	}
+
+#gradebook.info .columns .column.icon .title img {
+	width: 16px;
+	height: 16px;
+	}
+
+#gradebook.info .columns .column.icon .title img#arrow {
+	display:none;
+	}
+
+#gradebook.info .columns .column.icon .cell {
+	text-align:center;
+	}
+
+#gradebook.info #students {
+		width:262px;
+	}
+
+#gradebook.info .cell{
+	text-align:left;
+	}
+
+#gradebook.info a:hover {
+	color:#0055FF;
+	}
+
+
+
