@@ -13,10 +13,4 @@ csc3/
 cscsite/static/
 local/
 .cache/
-/node_modules
-/cscsite/webpack-stats-local.json
-/cscsite/assets/bundles
 .coverage
-# sass specific files
-**/.sass-cache/
-*.css.map
