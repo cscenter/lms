@@ -139,6 +139,68 @@
 {% include "learning/_markssheet_teacher_modal_yandex.html" %}
 
 
+{% comment %}
+<div id="gradebook">
+{#	<div class="header">#}
+{#		Gradebook#}
+{#        <span onclick="gbscroll(-1,0);" class="scroll left">«</span>#}
+{#		<span onclick="gbscroll(1,0)" class="scroll right">»</span>#}
+{#	</div>#}
+
+	<div id="students">
+		<div class="title">{% trans "Students" %}</div>
+		<div>
+            {% for student_id, row in structured.items %}
+                {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
+                  <a class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}">
+                      {% if student.last_name %}
+                          {{ student.last_name }}&nbsp;{{ student.first_name|first }}.
+                      {% else %}
+                          {{ student.username }}
+                      {% endif %}
+                  </a>
+                {% endwith %}
+            {% endfor %}
+            <div class="cell student  gray">///</div>
+		</div>
+	</div>
+
+	<div id="grades">
+		<div class="title">{% trans "Grades" %}</div>
+		<div>
+            {% for student_id, row in structured.items %}
+                {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
+                  <div class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}">{{ final_grade }}</div>
+                {% endwith %}
+            {% endfor %}
+            <div class="cell student  gray">Grade Average</div>
+		</div>
+	</div>
+    <div id="assignments">
+        <div class="scrollable">
+            {% for assignment_id, assignment in assignment_headers.items %}
+                <div class="assignment">
+                    <div class="title">
+                                <a href="{% url 'assignment_detail_teacher' assignment.pk %}">
+                                      {{ assignment.title }}
+                                  </a>
+
+                    </div>
+                      {% spaceless %}
+                          {% for student_id, row in structured.items %}
+                              <div class="cell score{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                    INPUT
+                              </div>
+                          {% endfor %}
+                      {% endspaceless %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endcomment %}
+
+
 {% endblock content %}
 
 {% block javascripts %}
