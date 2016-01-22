@@ -1,0 +1,767 @@
+// CLUB main styles
+
+$min-width: 940px;
+
+@import "../bootstrap.custom.scss";
+@import "../jgrowl.customize.scss";
+@import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
+@import "../_profile_page.scss";
+@import "../_login_page.scss";
+@import "../center/_learning.scss";
+@import "top_menu.scss";
+
+$color-blue: #337ab7;
+$btn-primary-bg: #7a9cc6;
+
+// index page
+.font-bigger {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+table {
+  th._language {
+    width: 84px;
+  }
+}
+
+#index-notice {
+  @extend .bg-info;
+   text-align: center; 
+   font-size: 13px;
+}
+
+.banner {
+
+    min-width: $min-width;
+    min-height: 180px;
+    padding-top: 19%;
+    max-height: 360px;
+    margin: -60px 0 20px;
+    position: relative;
+
+    #copyright {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: #fff;
+      font-size: 10px;
+
+      a {
+        color: #fff;
+      }
+    }
+
+    &._ru-spb {
+        background: url(../../img/club/banner_spbw.jpg) top center no-repeat;
+        background-size: 100%;
+    }
+
+    &._ru-kzn {
+        background: url(../../img/club/banner_kazan.jpg) top center no-repeat;
+        background-size: 100%;
+    }
+}
+// index page ends
+
+// Course offering page
+#enroll-now {
+  @extend .bg-info;
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 15px;
+  margin-bottom: 20px;
+
+  .btn {
+    margin-top: 10px;
+  }
+}
+
+// TODO: Rewrite it all with less
+
+blockquote {
+  font-size: 14px;
+}
+
+h1.bigger-margin {
+  margin-top: 40px !important;
+  margin-bottom: 20px !important;
+}
+
+h4.bigger-margin {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+h4.no-top-margin {
+  margin-top: 0px !important;
+}
+
+.container {
+    min-width: $min-width !important;
+}
+
+
+.container.inner {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+
+
+
+
+
+body {
+  margin-bottom: 90px;
+  /* min-height: 100%; */
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  min-width: 940px;
+  margin-bottom: 0;
+  background-color: #E6E6E6;
+  line-height: 55px;
+  color: #9B9B9B;
+  margin-top: 75px;
+
+  .social {
+    text-align: right;
+
+    a {
+      text-align: center;
+      color: #9B9B9B;
+      padding: 0 0 0 12px;
+
+      &:hover {
+        color: #777;
+      }
+    }
+
+    i {
+        vertical-align: middle;
+
+        &.fa-twitter {
+          position: relative;
+          top: 2px;
+        }
+
+        &.fa-google {
+          position: relative;
+          top: 4px;
+          left: -4px;
+        }
+    }
+  }
+}
+
+.news-metainfo {
+  color: #AAA;
+  text-align: right;
+}
+
+.index-image-container {
+  margin-top: -40px;
+  background: url("") repeat-x;
+  width: 920px !important;
+  overflow-x: hidden;
+}
+
+.callout h1 {
+  margin-top: 50px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  text-align: justify;
+}
+
+.callout p {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  font-weight: 200;
+  font-size: 23px;
+}
+
+.callout-buttons {
+  text-align: right;
+}
+
+.callout-buttons a {
+  margin: 30px 15px;
+}
+
+.row.index-callout-buttons-row {
+  margin-top: 225px;
+}
+
+.index-news {
+  padding-left: 0px;
+}
+
+.index-news>li {
+  position: relative;
+  list-style: none;
+}
+
+.index-news span.date {
+  position: absolute;
+  margin-left: -160px;
+  padding-right: 10px;
+  width: 160px;
+  text-align: right;
+  font-size: 18px;
+  color: #B5B5B5;
+}
+
+.col-container {
+  width: 940px;
+}
+
+.columns {
+  -webkit-column-count: 2;
+  -webkit-column-gap: 10px;
+  -webkit-column-fill: auto;
+  -moz-column-count: 2;
+  -moz-column-gap: 10px;
+  -moz-column-fill: auto;
+  column-count: 2;
+  column-gap: 10px;
+  column-fill: auto;
+}
+
+.user-tile {
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;
+  margin-bottom: 10px;
+}
+
+.user-tile .user-info h4 {
+  margin-top: 0px;
+}
+
+.timetable .badge {
+  color: black;
+  border: 1px solid #D3D3D3;
+  font-weight: normal;
+  border-radius: 5px;
+}
+
+.timetable .badge.lecture {
+  background-color: #F9F9F9;
+}
+
+.timetable .badge.seminar {
+  background-color: #E9E9E9;
+}
+
+.timetable-header-row .center {
+  text-align: center;
+}
+
+.timetable-header-row .center h2 {
+  margin: 0px;
+}
+
+.timetable-main-row h4 {
+  margin-top: 40px;
+}
+
+.center-aligned {
+  text-align: center;
+}
+
+h2 small a {
+  color: #999;
+}
+
+.h2-and-buttons h2 {
+  float: left;
+}
+
+.h2-and-buttons .btn-toolbar {
+  float: right;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.h2-and-buttons hr {
+  clear: both;
+}
+
+.h2-and-buttons small {
+  white-space: nowrap;
+}
+
+.btn {
+  border-radius: 0px !important;
+}
+
+.badge {
+  border-radius: 0px !important;
+}
+
+.badge.lecture, .badge.seminar { width: 6em; }
+
+.csc-well {
+  background-color: #F1F1F1;
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+}
+
+h5.assignment {
+  font-weight: bold;
+}
+
+.assignment-attachment {
+  color: #999;
+}
+
+.assignment-comment {
+    .metainfo {
+      color: #999;
+
+      &.first {
+        color: #888;
+        font-weight: bold;
+      }
+    }
+
+    .metainfo-holder {
+      min-height: 20px;
+    }
+
+    hr {
+      border-color: #CFCFCF;
+    }
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0px;
+}
+
+.comment-list li.student {
+  margin-right: 80px;
+  margin-left: 0px;
+}
+
+.comment-list li.teacher {
+  margin-right: 0px;
+  margin-left: 80px;
+}
+
+#div_id_deadline_at {
+  width: 400px;
+}
+
+#div_id_deadline_at input#id_deadline_at_0 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}
+
+#div_id_deadline_at input#id_deadline_at_1 {
+  width: 49%;
+  float: left;
+  margin-right: 1%;
+}
+
+.marks-sheet-csv-link .reason {
+  display: none;
+}
+
+.link-disabled {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:hover {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:active {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:visited {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled .reason {
+  opacity: 0;
+  display: inline;
+}
+
+.link-disabled .reason.active {
+  opacity: 1;
+  -webkit-transition: opacity .15s ease-in-out;
+  -moz-transition: opacity .15s ease-in-out;
+  -ms-transition: opacity .15s ease-in-out;
+  -o-transition: opacity .15s ease-in-out;
+  transition: opacity .15s ease-in-out;
+}
+
+.marks-table-container-outer {
+  width: 920px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  position: relative;
+}
+
+.marks-table-container-inner {
+  margin-left: 135px;
+  width: 785px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marks-table {
+  table-layout: fixed;
+}
+
+.marks-table .marks-header-vert {
+  vertical-align: top;
+  height: 15em;
+  max-width: 1.7em;
+  /* overflow: hidden; */
+}
+
+.marks-table .marks-header-vert .inner {
+  line-height: 1.5em;
+  width: 20em;
+  text-overflow: ellipsis;
+  text-align: left;
+  overflow: hidden;
+  /* setting background may yield better results in IE text clear type rendering */
+  background: #fff;
+  display: block;
+  white-space: nowrap;
+  padding-left: 3px;
+  /* IE specific rotation code */
+  writing-mode: tb-rl;
+  filter: flipv fliph;
+  /* CSS3 specific totation code */
+  /* translate should have the same negative dimension as head height */
+  transform: rotate(315deg) translate(-9em,10em);
+  transform-origin: 0 0;
+  -moz-transform: rotate(315deg) translate(-9em,10em);
+  -moz-transform-origin: 0 0;
+  -webkit-transform: rotate(315deg) translate(-9em,10em);
+  -webkit-transform-origin: 0 0;
+}
+
+.marks-table td {
+  vertical-align: middle;
+  text-align: center;
+  margin: 10px;
+  box-sizing: border-box;
+}
+
+.marks-table.teacher tr.active {
+  background-color: #E2F9FF;
+}
+
+.marks-table.teacher td.active {
+  background-color: #E2F9FF;
+}
+
+.marks-table.staff.focused td.content {
+  color: transparent;
+  text-shadow: 0 0 3px rgba(0,0,0,0.5);
+  opacity: 0.7;
+  z-index: -5;
+}
+
+.marks-table.staff.focused td.content.enrolled {
+  color: transparent;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
+  opacity: 0.7;
+  z-index: -5;
+}
+
+.marks-table.staff tr.active td.content {
+  /* border-bottom: solid 1px #BBB; */
+  /* border-top: solid 1px #BBB; */
+  color: black !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.marks-table.staff td.active {
+  /* border-left: solid 1px #BBB; */
+  /* border-right: solid 1px #BBB; */
+  color: black !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.marks-table td.marks-header {
+  font-weight: bold;
+}
+
+.marks-table td.marks-header-horiz {
+  text-align: left;
+  white-space: nowrap;
+  width: 135px;
+  padding-right: 10px;
+  position: absolute;
+  left: 0px;
+  margin-top: 0px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.marks-table td.content {
+  padding: 0px 10px;
+  width: 40px;
+}
+
+.calendar th {
+  width: 130px;
+}
+
+.calendar td {
+  padding: 4px !important;
+  width: 130px;
+}
+
+.calendar div.week-num-container {
+  position: relative;
+}
+
+.calendar div.week-num {
+  margin-left: -25px;
+  position: absolute;
+  font-weight: bold;
+  color: #666;
+}
+
+.calendar td .cell {
+  min-height: 100px;
+}
+
+.calendar td.today {
+  background-color: #FAFFEC;
+}
+
+.calendar .day {
+  font-weight: bold;
+  color: #BBB;
+  text-align: right;
+}
+
+.calendar .event {
+  padding: 3px;
+  margin-bottom: 3px;
+  border: 1px solid #D3D3D3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar .event.lecture {
+  background-color: #F9F9F9;
+}
+
+.calendar .event.seminar {
+  background-color: #E9E9E9;
+}
+
+.calendar .event.noncourse {
+  background-color: #ECF9FF;
+}
+
+.calendar .event .times {
+  white-space: nowrap;
+}
+
+.calendar .not-in-semester {
+  background-color: #EEE;
+}
+
+.calendar .not-in-semester .day {
+  color: #CCC;
+}
+
+.assignment-status {
+  color: black;
+  border: 1px solid #D3D3D3;
+  font-weight: normal;
+  border-radius: 5px;
+}
+.assignment-status.not-checked {
+  background-color: #F9F9F9;
+}
+.assignment-status.being-checked {
+  background-color: #E9E9E9;
+}
+.assignment-status.unsatisfactory {
+  background-color: #FF6B78;
+}
+.assignment-status.pass {
+  background-color: #F39700;
+}
+.assignment-status.good {
+  background-color: #FAEB7D;
+}
+.assignment-status.excellent {
+  background-color: #8CE087;
+}
+
+.assignment-date.tomorrow {
+  color: #FF6B78;
+}
+.assignment-date.today {
+  color: #FF6B78;
+}
+.assignment-date.day-after-tomorrow {
+  color: #F39700;
+}
+
+tr.unread {
+  background-color: #E2F9FF;
+}
+
+.marks-table .enrolled {
+  background-color: #E2F9FF;
+}
+
+.list-unstyled.no-margin {
+  margin-bottom: 0px !important;
+}
+
+.marks-sheet-form-cell>input[type="number"] {
+  width: 43px;
+}
+
+.marks-sheet-unsaved-cell {
+  border-left: 2px solid #428bca;
+  padding-left: 3px;
+  margin-left: -3px;
+}
+
+.final-grade-cell {
+  margin-left: 3px;
+}
+
+#course-list > li:first-child { padding-left: 5px !important; }
+
+.semester-course-list ul { padding-left: 15px; }
+
+.course-offering-profs {
+  ul {
+
+    li {
+      padding-bottom: 10px;
+      @extend .clearfix;
+
+      img {
+        float: left;
+        margin-right: 10px;
+      }
+    }
+
+  }
+}
+
+.input-grade {
+  width: 100px !important;
+}
+
+.form-group div.controls {
+  margin-right: 1%;
+}
+
+.nobreak {
+  white-space: nowrap;
+}
+
+.grade-cell {
+  text-align: center;
+}
+
+.video-container {
+  margin: auto;
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  line-height: 150px;
+  margin-bottom: 30px;
+  opacity: 0.65;
+  position: relative;
+}
+
+.video-bg {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 250px;
+  height: 150px;
+  opacity: 0.45;
+  z-index: -5;
+}
+
+.video-container:hover {
+  opacity: 1;
+}
+
+.video-inner {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-weight: bold;
+  font-size: 20px;
+  color: #1F4C66;
+}
+
+.csc-well blockquote {
+  border-left-color: #CFCFCF;
+}
+
+.student-comment-metainfo {
+  color: #999;
+  font-size: 0.75em;
+}
+
+
+// Teachers list
+.teachers-list {
+
+  margin-bottom: 20px;
+
+  h1 {
+    margin-bottom: 40px;
+  }
+
+  .col-xs-6 {
+    img {
+      float: left;
+      margin: 0 10px 20px 0;
+    }
+
+    .ubertext {
+
+      .h4 {
+        color: $color-blue;
+      }
+
+      margin-left: 110px;
+    }
+  }
+}

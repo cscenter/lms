@@ -17,3 +17,6 @@ local/
 /cscsite/webpack-stats-local.json
 /cscsite/assets/bundles
 .coverage
+# sass specific files
+**/.sass-cache/
+*.css.map

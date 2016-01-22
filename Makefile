@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined less_center less_club webpack
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined sass sass_club webpack run_club
 
 run:
 	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
@@ -78,42 +78,11 @@ deploy_remote:
 	git push
 	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
 
-less_bootstrap:
-	$(eval BS = 1)
-	$(call compile_bootstrap, $(BS))
+sass:
+	cd cscsite/assets/; node-sass -w src/sass/center/style.scss css/center/style.css
 
-# Experimental: remove after merging with common styles
-tmp_less_cm:
-	cd cscsite/assets/src/less/; \
-	lessc --relative-urls --clean-css="--compatibility=ie8" center/off_canvas_menu.less > ../../css/center/off_canvas_menu.css;
-
-less_center:
-	$(call compile_bootstrap, $(BS))
-	cd cscsite/assets/src/less/; \
-	lessc --relative-urls --clean-css="--compatibility=ie8" center/style.less > ../../css/center/style.css;
-
-less_club:
-	$(call compile_bootstrap, $(BS))
-	cd cscsite/assets/src/less/; \
-	lessc --relative-urls --clean-css="--compatibility=ie8" club/style.less > ../../css/club/style.css;
-
-less: less_center less_club less_bootstrap
-
-# Mac users tip: `brew install fswatch`
-less_watch:
-	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less
-
-less_watch_club:
-	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_club
-
-less_watch_center:
-	fswatch -o cscsite/assets/src/less/ | xargs -n1 -I{} make less_center
-
-# Add jasny.bootstrap css here after merging off canvas menu
-define compile_bootstrap
-	$(if $(BS), cd cscsite/assets/src/less/; \
-		lessc --relative-urls --clean-css="--compatibility=ie8" bootstrap.custom.less > ../../css/bootstrap.custom.css;)
-endef
+sass_club:
+	cd cscsite/assets/; node-sass -w src/sass/club/style.scss css/club/style.css
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.

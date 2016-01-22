@@ -1,0 +1,98 @@
+// TODO: Merge with top_menu. after testing
+@import "../jasny.bootstrap.custom.scss";
+
+.container {
+    // FIXME: REMOVE 940px!important later. Now crutch
+    width: inherit !important;
+    max-width: 100%;
+
+
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+    margin-bottom: 0;
+
+    .navbar-toggle {
+        float: left;
+        margin-left: 15px;
+    }
+
+    .navmenu {
+        z-index: 1;
+        padding-top: 50px;
+    }
+
+    .canvas {
+        position: relative;
+        left: 0;
+        z-index: 2;
+        min-height: 100%;
+        padding: 50px 0 0 0;
+        background: #fff;
+        min-height: 100%;
+        margin-bottom: -60px;
+
+        .header {
+            .container {
+                margin-left: auto;
+            }
+
+            &.lvl1 {
+                &.navbar-default {
+                    border-color: transparent;
+
+                    .navbar-toggle {
+                        border-color: #fff;
+
+                        &:focus, &:hover {
+                            background-color: #fff;
+                        }
+
+                        .icon-bar {
+                            background-color: #ccc;
+                        }
+                    }
+                }
+            }
+        }
+
+        .container {
+            padding-left: 20px;
+            margin-left: 0;
+        }
+    }
+
+    .footer {
+        bottom: 0;
+        width: auto;
+        min-width: inherit;
+        position: relative;
+        z-index: 1080;
+        margin-bottom: 0;
+        margin-top: -60px;
+        background-color: #EDEDED;
+        line-height: 60px;
+        color: #9B9B9B;
+    }
+}
+
+@media (min-width: 0) {
+  .navbar-toggle {
+    display: block; /* force showing the toggle */
+  }
+}
+
+@media (min-width: 992px) {
+
+  body {
+    padding: 0 0 0 300px;
+  }
+  .canvas {
+    padding: 0;
+    z-index: 1070;
+  }
+}

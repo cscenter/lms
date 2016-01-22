@@ -1,0 +1,27 @@
+@import "jgrowl/jgrowl.scss";
+
+/* jGrowl overrides */
+.jGrowl {
+  color: #fff;
+  font-size: 14px;
+}
+.jGrowl-notification {
+  background-color: rgba(76, 175, 80, 0.7);
+  border-color: transparent;
+  padding: 10px 10px 10px 25px;
+  width: 350px;
+}
+
+.jGrowl-notification .jGrowl-close {
+  background-color: rgba(0, 0, 0, 0);
+  font-size: 18px;
+  top: -7px;
+  position: relative;
+}
+
+.jGrowl-closer {
+  width: 350px;
+  background: none;
+  color: #000;
+
+}
