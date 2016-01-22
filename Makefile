@@ -79,7 +79,7 @@ deploy_remote:
 	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
 
 sass:
-	cd cscsite/assets/; node-sass -w src/sass/center/style.scss css/center/style.css
+	cd cscsite/assets/; node-sass -w src/sass/center/style.scss css/center/style.css --output-style=compressed --source-map=true
 
 sass_club:
 	cd cscsite/assets/; node-sass -w src/sass/club/style.scss css/club/style.css
