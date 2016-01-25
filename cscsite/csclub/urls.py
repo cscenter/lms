@@ -34,7 +34,7 @@ from learning.views import \
     CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
     StudentAssignmentListView, AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
+    AssignmentTeacherDetailView, StudentAssignmentStudentDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
@@ -163,7 +163,7 @@ urlpatterns += patterns('',
         name='course_list_student'),
     url(r'^learning/assignments/$', StudentAssignmentListView.as_view(),
         name='assignment_list_student'),
-    url(r'^learning/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
+    url(r'^learning/assignments/(?P<pk>\d+)/$', StudentAssignmentStudentDetailView.as_view(),
         name='a_s_detail_student'),
     url(r'^assignments/attachments/(?P<sid>[-\w]+)/$',
         AssignmentAttachmentDownloadView.as_view(),
@@ -205,7 +205,7 @@ urlpatterns += patterns('',
         AssignmentTeacherListView.as_view(),
         name='assignment_list_teacher'),
     url(r'^teaching/assignments/submissions/(?P<pk>\d+)/$',
-        ASTeacherDetailView.as_view(),
+        StudentAssignmentTeacherDetailView.as_view(),
         name='a_s_detail_teacher'),
     url(r'^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/assignments/add$',
         AssignmentCreateView.as_view(),
