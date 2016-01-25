@@ -23,7 +23,7 @@ from .views import \
     CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
     StudentAssignmentListView, AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, ASStudentDetailView, ASTeacherDetailView, \
+    AssignmentTeacherDetailView, StudentAssignmentStudentDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
@@ -119,7 +119,7 @@ urlpatterns = [
             name='course_list_student'),
         url(r'^/assignments/$', StudentAssignmentListView.as_view(),
             name='assignment_list_student'),
-        url(r'^/assignments/(?P<pk>\d+)/$', ASStudentDetailView.as_view(),
+        url(r'^/assignments/(?P<pk>\d+)/$', StudentAssignmentStudentDetailView.as_view(),
             name='a_s_detail_student'),
         # TODO: learning/assignments/attachments/?
         url(r'^/attachments/(?P<sid>[-\w]+)/$',
@@ -154,7 +154,7 @@ urlpatterns = [
                 AssignmentTeacherDetailView.as_view(),
                 name='assignment_detail_teacher'),
             url(r'^/submissions/(?P<pk>\d+)/$',
-                ASTeacherDetailView.as_view(),
+                StudentAssignmentTeacherDetailView.as_view(),
                 name='a_s_detail_teacher'),
         ])),
         url(r'^/marks', include([

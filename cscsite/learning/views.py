@@ -734,9 +734,10 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     def get_initial(self, *args, **kwargs):
         initial = (super(CourseClassCreateUpdateMixin, self)
                    .get_initial(*args, **kwargs))
+        # Prefetch Course Offering model
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_authenticated() and self.request.user.is_curator:
+        if self.request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = (CourseOffering.objects
@@ -745,7 +746,18 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             base_qs.filter(course__slug=course_slug,
                            semester__year=semester_year,
                            semester__type=semester_type))
-        initial['course_offering'] = self._course_offering
+        # TODO: Add tests for initial data after discussion
+        previous_class = (CourseClass.objects
+                          .filter(course_offering=self._course_offering.pk)
+                          .defer("description")
+                          .order_by("-date", "starts_at")
+                          .first())
+        if previous_class is not None:
+            initial["type"] = previous_class.type
+            initial["venue"] = previous_class.venue
+            initial["starts_at"] = previous_class.starts_at
+            initial["ends_at"] = previous_class.ends_at
+            initial["date"] = previous_class.date + datetime.timedelta(weeks=1)
         return initial
 
     def get_form(self, form_class=None):
@@ -774,8 +786,9 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                           **self.get_form_kwargs())
 
     def form_valid(self, form):
-        # FIXME: Think how to move this logic into form.
         assert self._course_offering is not None
+        # FIXME: Think how to move this logic into form.
+        # TODO: Move to get_form_class? Show this error ASAP
         # Can't add course classes after course already completed.
         if self._course_offering.is_completed:
             form.add_error(None, "Sorry, course already completed. "
@@ -1061,22 +1074,22 @@ class StudentAssignmentDetailMixin(object):
 # shitty name :(
 # Note: We should redirects teacher, so replace StudentOnlyMixin with LoginRequired.
 # TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
-class ASStudentDetailView(LoginRequiredMixin,
-                          FailedCourseContextMixin,
-                          StudentAssignmentDetailMixin,
-                          generic.CreateView):
+class StudentAssignmentStudentDetailView(LoginRequiredMixin,
+                                         FailedCourseContextMixin,
+                                         StudentAssignmentDetailMixin,
+                                         generic.CreateView):
     user_type = 'student'
 
     def get(self, request, *args, **kwargs):
         try:
-            response = super(ASStudentDetailView, self).get(request, *args,
-                                                            **kwargs)
+            response = super(StudentAssignmentStudentDetailView, self).get(request, *args,
+                                                                           **kwargs)
         except Redirect as e:
             return HttpResponseRedirect(e.kwargs.get('url'))
         return response
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(ASStudentDetailView, self)
+        context = (super(StudentAssignmentStudentDetailView, self)
                    .get_context_data(*args, **kwargs))
         if context['is_failed_completed_course']:
             raise PermissionDenied
@@ -1098,13 +1111,13 @@ class ASStudentDetailView(LoginRequiredMixin,
         return reverse('a_s_detail_student', args=[pk])
 
 
-class ASTeacherDetailView(TeacherOnlyMixin,
-                          StudentAssignmentDetailMixin,
-                          generic.CreateView):
+class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
+                                         StudentAssignmentDetailMixin,
+                                         generic.CreateView):
     user_type = 'teacher'
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(ASTeacherDetailView, self)
+        context = (super(StudentAssignmentTeacherDetailView, self)
                    .get_context_data(*args, **kwargs))
         a_s = context['a_s']
         co = a_s.assignment.course_offering
@@ -1158,7 +1171,7 @@ class ASTeacherDetailView(TeacherOnlyMixin,
                 return HttpResponseBadRequest(_("Grading form is invalid") +
                                               "{}".format(form.errors))
         else:
-            return (super(ASTeacherDetailView, self)
+            return (super(StudentAssignmentTeacherDetailView, self)
                     .post(request, *args, **kwargs))
 
     def get_success_url(self):
