@@ -61,20 +61,24 @@
     </div>
     <div class="col-xs-4">
         {% if request.user.is_student and course_offering.is_ongoing %}
-          {% if is_enrolled %}
-          <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
-             class="btn btn-danger btn-block">
-            {% trans "Unenroll from the course" %}
-          </a>
-          {% else %}
-          <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
-            {% csrf_token %}
-            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-            <button type="submit" class="btn btn-primary btn-block">
-              {% trans "Enroll in the course" %}
-            </button>
-          </form>
-          {% endif %}
+            <div class="enroll-block">
+                {% if is_enrolled %}
+                    <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
+                       class="btn btn-danger btn-block">
+                        {% trans "Unenroll from the course" %}
+                    </a>
+                {% else %}
+                    <form method="post"
+                          action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="course_offering_pk"
+                               value="{{ course_offering.pk }}">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            {% trans "Enroll in the course" %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
         {% endif %}
         <div class="course-offering-profs">
             <h4>Преподаватели:</h4>

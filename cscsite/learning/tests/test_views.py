@@ -298,7 +298,7 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
                                      semester__year=now_year-1)
         resp = self.client.get(reverse(self.url_name))
         teacher_url = reverse('teacher_detail', args=[teacher.pk])
-        self.assertContains(resp, teacher_url, count=6)
+        self.assertContains(resp, teacher_url, count=5)
         self.assertEqual(5, len(resp.context['course_list_ongoing']))
         self.assertEqual(1, len(resp.context['course_list_archive']))
 

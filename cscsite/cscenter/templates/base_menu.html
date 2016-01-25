@@ -20,7 +20,7 @@
                 {% for menu_item in menu %}
                     {% if not menu_item.hidden %}
                     <li {% if menu_item.extension.classes %}class="{{menu_item.extension.classes}}"{% endif %}>
-                        <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-caret-down"></i>{% endif %}</a>
+                        <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
