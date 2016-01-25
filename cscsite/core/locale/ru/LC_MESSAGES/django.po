@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-20 16:25+0300\n"
-"PO-Revision-Date: 2016-01-20 16:26+0230\n"
-"Last-Translator:   <>\n"
+"POT-Creation-Date: 2016-01-25 13:07+0300\n"
+"PO-Revision-Date: 2016-01-25 13:09+0230\n"
+"Last-Translator:   <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -277,7 +277,7 @@ msgstr "Материалы"
 
 #: cscsite/learning/forms.py:158 cscsite/learning/models.py:388
 #: cscsite/learning/models.py:853
-#: cscsite/templates/learning/courseoffering_detail.html:112
+#: cscsite/templates/learning/courseoffering_detail.html:117
 msgid "Date"
 msgstr "Дата"
 
@@ -293,7 +293,7 @@ msgstr "Конец"
 
 #: cscsite/learning/forms.py:191
 #: cscsite/templates/learning/courseclass_detail.html:63
-#: cscsite/templates/learning/courseoffering_detail.html:117
+#: cscsite/templates/learning/courseoffering_detail.html:122
 #: cscsite/templates/learning/timetable_student.html:67
 #: cscsite/templates/learning/timetable_teacher.html:63
 msgid "Materials"
@@ -551,14 +551,14 @@ msgid "Venues"
 msgstr "Места проведения"
 
 #: cscsite/learning/models.py:358
-#: cscsite/templates/learning/courseoffering_detail.html:135
+#: cscsite/templates/learning/courseoffering_detail.html:140
 #: cscsite/templates/learning/timetable_student.html:89
 #: cscsite/templates/learning/timetable_teacher.html:85
 msgid "Lecture"
 msgstr "Лекция"
 
 #: cscsite/learning/models.py:359
-#: cscsite/templates/learning/courseoffering_detail.html:137
+#: cscsite/templates/learning/courseoffering_detail.html:142
 #: cscsite/templates/learning/timetable_student.html:91
 #: cscsite/templates/learning/timetable_teacher.html:87
 msgid "Seminar"
@@ -589,7 +589,7 @@ msgid "Class"
 msgstr "Занятие"
 
 #: cscsite/learning/models.py:395
-#: cscsite/templates/learning/courseoffering_detail.html:108
+#: cscsite/templates/learning/courseoffering_detail.html:113
 #: cscsite/templates/users/user_detail.html:130
 msgid "Classes"
 msgstr "Занятия"
@@ -634,7 +634,7 @@ msgstr "Задание"
 #: cscsite/learning/models.py:504
 #: cscsite/templates/learning/assignment_list_student.html:11
 #: cscsite/templates/learning/assignment_list_teacher.html:11
-#: cscsite/templates/learning/courseoffering_detail.html:155
+#: cscsite/templates/learning/courseoffering_detail.html:160
 #: cscsite/templates/users/user_detail.html:137
 #: cscsite/templates/users/user_detail.html:207
 msgid "Assignments"
@@ -689,8 +689,8 @@ msgid "StudentAssignment|student"
 msgstr "Студент"
 
 #: cscsite/learning/models.py:594
-#: cscsite/templates/learning/student_assignment_detail.html:117
 #: cscsite/templates/learning/courses/list_student.html:82
+#: cscsite/templates/learning/student_assignment_detail.html:117
 #: cscsite/templates/users/user_detail.html:215
 msgid "Grade"
 msgstr "Оценка"
@@ -921,8 +921,8 @@ msgstr "Онлайн-курс"
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscsite/learning/tests/test_views.py:1672
-#: cscsite/templates/learning/courseoffering_detail.html:178
+#: cscsite/learning/tests/test_views.py:1674
+#: cscsite/templates/learning/courseoffering_detail.html:183
 msgid "News"
 msgstr "Новости"
 
@@ -950,7 +950,6 @@ msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
 #: cscsite/learning/views.py:691
-#: cscsite/templates/learning/courseoffering_detail.html:41
 msgid "Unenroll"
 msgstr "Отказаться"
 
@@ -962,11 +961,11 @@ msgstr "Занятие успешно создано."
 msgid "The class was successfully updated."
 msgstr "Занятие успешно обновлено."
 
-#: cscsite/learning/views.py:1157
+#: cscsite/learning/views.py:1158
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: cscsite/learning/views.py:1631 cscsite/learning/views.py:1651
+#: cscsite/learning/views.py:1641 cscsite/learning/views.py:1661
 msgid "Invalid form."
 msgstr ""
 
@@ -1295,10 +1294,9 @@ msgstr ""
 "университетом</a>."
 
 #: cscsite/templates/learning/assignment_detail_teacher.html:18
-#: cscsite/templates/learning/student_assignment_detail.html:28
 #: cscsite/templates/learning/courseclass_detail.html:16
-#: cscsite/templates/learning/courseoffering_detail.html:32
 #: cscsite/templates/learning/courses/detail.html:14
+#: cscsite/templates/learning/student_assignment_detail.html:28
 #: cscsite/templates/users/user_detail.html:356
 msgid "Edit"
 msgstr "Редактировать"
@@ -1370,44 +1368,6 @@ msgstr "Без оценки"
 #: cscsite/templates/learning/assignment_list_teacher.html:111
 msgid "All assignments"
 msgstr "Все задания"
-
-#: cscsite/templates/learning/student_assignment_detail.html:62
-#: cscsite/templates/learning/student_assignment_detail.html:104
-#: cscsite/templates/users/user_detail.html:278 cscsite/users/models.py:284
-msgid "Comment"
-msgstr "Комментарий"
-
-#: cscsite/templates/learning/student_assignment_detail.html:64
-msgid "Solution"
-msgstr "Решение"
-
-#: cscsite/templates/learning/student_assignment_detail.html:113
-msgid "Next unchecked[assignment]"
-msgstr "Следующее непроверенное"
-
-#: cscsite/templates/learning/student_assignment_detail.html:127
-msgid "Professor"
-msgstr "Преподаватель"
-
-#: cscsite/templates/learning/student_assignment_detail.html:129
-#: cscsite/templates/learning/courses/list_student.html:32
-#: cscsite/templates/learning/courses/list_student.html:51
-#: cscsite/templates/learning/courses/list_teacher.html:22
-#: cscsite/templates/learning/courses/list_teacher.html:61
-msgid "Professors"
-msgstr "Преподаватели"
-
-#: cscsite/templates/learning/student_assignment_detail.html:148
-msgid "Assignment created"
-msgstr "Задание добавлено"
-
-#: cscsite/templates/learning/student_assignment_detail.html:151
-msgid "Can be passed online "
-msgstr "Можно сдать онлайн"
-
-#: cscsite/templates/learning/student_assignment_detail.html:153
-msgid "Should be passed offline "
-msgstr "Должно быть сдано оффлайн"
 
 #: cscsite/templates/learning/calendar.html:43
 #: cscsite/templates/learning/timetable_student.html:46
@@ -1483,12 +1443,12 @@ msgstr "Добавить новость"
 msgid "Add class"
 msgstr "Добавить занятие"
 
-#: cscsite/templates/learning/courseoffering_detail.html:48
-#: cscsite/templates/learning/courses/list_student.html:62
-msgid "Enroll"
-msgstr "Записаться"
+#: cscsite/templates/learning/courseoffering_detail.html:32
+#| msgid "Description"
+msgid "Edit description"
+msgstr "Редактировать описание"
 
-#: cscsite/templates/learning/courseoffering_detail.html:62
+#: cscsite/templates/learning/courseoffering_detail.html:44
 msgid ""
 "\n"
 "                Enroll in the course to get notifications and to be able to submit home assignments.<br>\n"
@@ -1500,33 +1460,42 @@ msgstr ""
 "иметь возможность сдавать домашние задания. Для записи требуется регистрация на сайте.<br>\n"
 "<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a>"
 
-#: cscsite/templates/learning/courseoffering_detail.html:99
+#: cscsite/templates/learning/courseoffering_detail.html:67
+msgid "Unenroll from the course"
+msgstr "Отписаться от курса"
+
+#: cscsite/templates/learning/courseoffering_detail.html:74
+#| msgid "Online course"
+msgid "Enroll in the course"
+msgstr "Записаться на курс"
+
+#: cscsite/templates/learning/courseoffering_detail.html:102
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
-#: cscsite/templates/learning/courseoffering_detail.html:113
+#: cscsite/templates/learning/courseoffering_detail.html:118
 #: cscsite/templates/learning/timetable_student.html:62
 #: cscsite/templates/learning/timetable_teacher.html:58
 msgid "Time"
 msgstr "Время"
 
-#: cscsite/templates/learning/courseoffering_detail.html:114
+#: cscsite/templates/learning/courseoffering_detail.html:119
 #: cscsite/templates/learning/timetable_student.html:63
 #: cscsite/templates/learning/timetable_teacher.html:59
 msgid "Class|Name"
 msgstr "Название"
 
-#: cscsite/templates/learning/courseoffering_detail.html:115
+#: cscsite/templates/learning/courseoffering_detail.html:120
 #: cscsite/templates/learning/timetable_student.html:65
 #: cscsite/templates/learning/timetable_teacher.html:61
 msgid "Venue|short"
 msgstr "Место"
 
-#: cscsite/templates/learning/courseoffering_detail.html:188
+#: cscsite/templates/learning/courseoffering_detail.html:193
 msgid "edit"
 msgstr "редактировать"
 
-#: cscsite/templates/learning/courseoffering_detail.html:189
+#: cscsite/templates/learning/courseoffering_detail.html:194
 msgid "delete"
 msgstr "удалить"
 
@@ -1553,6 +1522,14 @@ msgstr "Текущий семестр"
 msgid "Course Offerings"
 msgstr "Прочтения курсов"
 
+#: cscsite/templates/learning/courses/list_student.html:32
+#: cscsite/templates/learning/courses/list_student.html:51
+#: cscsite/templates/learning/courses/list_teacher.html:22
+#: cscsite/templates/learning/courses/list_teacher.html:61
+#: cscsite/templates/learning/student_assignment_detail.html:129
+msgid "Professors"
+msgstr "Преподаватели"
+
 #: cscsite/templates/learning/courses/list_student.html:36
 msgid "Start survey!"
 msgstr "Оставить отзыв"
@@ -1560,6 +1537,10 @@ msgstr "Оставить отзыв"
 #: cscsite/templates/learning/courses/list_student.html:40
 msgid "Unenrolled"
 msgstr "Отказаться"
+
+#: cscsite/templates/learning/courses/list_student.html:62
+msgid "Enroll"
+msgstr "Записаться"
 
 #: cscsite/templates/learning/courses/list_teacher.html:17
 #: cscsite/templates/learning/markssheet_teacher_dispatch.html:12
@@ -1598,6 +1579,36 @@ msgstr "На текущий момент нет открытых онлайн-к
 msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
 
+#: cscsite/templates/learning/student_assignment_detail.html:62
+#: cscsite/templates/learning/student_assignment_detail.html:104
+#: cscsite/templates/users/user_detail.html:278 cscsite/users/models.py:284
+msgid "Comment"
+msgstr "Комментарий"
+
+#: cscsite/templates/learning/student_assignment_detail.html:64
+msgid "Solution"
+msgstr "Решение"
+
+#: cscsite/templates/learning/student_assignment_detail.html:113
+msgid "Next unchecked[assignment]"
+msgstr "Следующее непроверенное"
+
+#: cscsite/templates/learning/student_assignment_detail.html:127
+msgid "Professor"
+msgstr "Преподаватель"
+
+#: cscsite/templates/learning/student_assignment_detail.html:148
+msgid "Assignment created"
+msgstr "Задание добавлено"
+
+#: cscsite/templates/learning/student_assignment_detail.html:151
+msgid "Can be passed online "
+msgstr "Можно сдать онлайн"
+
+#: cscsite/templates/learning/student_assignment_detail.html:153
+msgid "Should be passed offline "
+msgstr "Должно быть сдано оффлайн"
+
 #: cscsite/templates/learning/timetable_student.html:126
 #: cscsite/templates/learning/timetable_teacher.html:124
 msgid "No classes yet"
@@ -1632,6 +1643,12 @@ msgstr "Количество оставшихся копий"
 #: cscsite/templates/login.html:13
 msgid "Login form"
 msgstr "Авторизация"
+
+#: cscsite/templates/login.html:33
+#, fuzzy
+#| msgid "Password"
+msgid "Password Reset"
+msgstr "Пароль"
 
 #: cscsite/templates/login.html:35
 msgid "Forgot?"
@@ -1669,7 +1686,7 @@ msgstr "Пароль изменён"
 #: cscsite/templates/registration/password_change_form.html:5
 #: cscsite/templates/registration/password_change_form.html:16
 #: cscsite/templates/registration/password_reset_confirm.html:5
-#: cscsite/templates/registration/password_reset_confirm.html:17
+#: cscsite/templates/registration/password_reset_confirm.html:14
 #: cscsite/templates/users/user_detail.html:371
 msgid "Change password"
 msgstr "Сменить пароль"
@@ -1678,7 +1695,13 @@ msgstr "Сменить пароль"
 msgid "Password successfully changed."
 msgstr "Пароль успешно изменён"
 
-#: cscsite/templates/registration/password_reset_confirm.html:22
+#: cscsite/templates/registration/password_reset_confirm.html:8
+#, fuzzy
+#| msgid "Password changed"
+msgid "Password change"
+msgstr "Пароль изменён"
+
+#: cscsite/templates/registration/password_reset_confirm.html:18
 msgid "Sorry, the link is invalid"
 msgstr "Извините, ссылка устарела"
 
@@ -1687,7 +1710,6 @@ msgid "An email with instructions for setting a new password has been sent"
 msgstr "Инструкции по смене пароля были высланы на указанный почтовый адрес"
 
 #: cscsite/templates/registration/password_reset_form.html:8
-#| msgid "Your email"
 msgid "Enter your email"
 msgstr "Введите ваш email"
 
