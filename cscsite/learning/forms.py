@@ -201,7 +201,7 @@ class CourseClassForm(forms.ModelForm):
             FormActions(
                 StrictButton(_('<i class="fa fa-plus"></i> Save and add'),
                              name='_addanother', type="submit",
-                             css_class="btn-primary"),
+                             css_class="btn-primary btn-outline"),
                 CANCEL_SAVE_PAIR
             )
         )
