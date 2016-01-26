@@ -23,8 +23,7 @@ from django.utils.translation import ugettext as _
 from bs4 import BeautifulSoup
 import factory
 from icalendar import Calendar, Event
-
-from learning.constants import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS
 from learning.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory

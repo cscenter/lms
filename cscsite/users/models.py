@@ -23,7 +23,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_ENABLED
-from learning.constants import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.models import Enrollment
 from learning.utils import LearningPermissionsMixin
 from .managers import CustomUserManager

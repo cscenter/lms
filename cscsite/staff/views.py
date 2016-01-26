@@ -9,13 +9,14 @@ import unicodecsv
 from collections import OrderedDict, defaultdict
 
 from django.core.urlresolvers import reverse
+from django.db.models import F, Count
 from django.views import generic
 from django.http import HttpResponse, JsonResponse
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from core.views import SuperUserOnlyMixin
 from learning.viewmixins import CuratorOnlyMixin
-from learning.models import StudentProject
+from learning.models import StudentProject, Semester
 from learning.utils import get_current_semester_pair
 from users.models import CSCUser, CSCUserFilter
 
@@ -364,3 +365,36 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
             w.writerow(row)
 
         return response
+
+
+class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        # TODO: ta-daaam, I wan't sorted order here. Another problem - filter. But how I should get sort number without additional query?!
+        year, season = get_current_semester_pair()
+        # TODO: move to settings
+        semesters = Semester.objects.filter(year__gte=2011).exclude(year=2011, type=Semester.TYPES.spring)
+        semesters = sorted(semesters)
+        print(semesters)
+        # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
+        query = (CSCUser.objects.exclude(enrollment_year__isnull=True)
+                       .values("enrollment_year")
+                       .annotate(acceptances=Count("enrollment_year"))
+                       .order_by("enrollment_year"))
+        acceptances = {}
+        for data in query:
+            acceptances[data["enrollment_year"]] = data["acceptances"]
+
+        statistics = OrderedDict()
+        for semester in semesters:
+            acceptances_count = 0
+            if semester.type == Semester.TYPES.autumn:
+                acceptances_count = acceptances[semester.year]
+            statistics[semester.pk] = {
+                "semester": semester,
+                "acceptances": acceptances_count
+            }
+
+
+        return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')

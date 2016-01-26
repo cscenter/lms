@@ -6,7 +6,7 @@ import factory
 from django.contrib.auth.models import Group
 from django.core.exceptions import ImproperlyConfigured
 
-from learning.constants import GRADES, PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS, GRADES
 from users.models import CSCUser, SHADCourseRecord, CSCUserReference
 
 
