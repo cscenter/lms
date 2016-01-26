@@ -6,8 +6,8 @@ import dateutil.parser as dparser
 from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
-
-from .constants import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
+    SEMESTER_INDEX_START
 
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
@@ -41,6 +41,21 @@ def date_to_semester_pair(date):
         if date.month <= spring_term_start.month:
             year -= 1
     return CurrentSemester(year, current_season)
+
+def get_semester_index(target_year, semester_type):
+    assert target_year >= FOUNDATION_YEAR
+    assert semester_type in SEMESTER_TYPES
+    index = SEMESTER_INDEX_START
+    year = FOUNDATION_YEAR
+    while True:
+        for season, _ in SEMESTER_TYPES:
+            if year == target_year and semester_type == season:
+                return index
+            index += 1
+        year += 1
+        if year > target_year:
+            raise ValueError("get_semester_index: Unreachable target year")
+
 
 
 

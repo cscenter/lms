@@ -10,8 +10,7 @@ from mock import patch
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
-
-from learning.constants import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES
 from ..factories import *
 
 

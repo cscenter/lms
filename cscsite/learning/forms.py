@@ -14,7 +14,7 @@ from modeltranslation.forms import TranslationModelForm
 
 from core.forms import Ubereditor
 from core.validators import FileValidator
-from .constants import GRADES
+from learning.settings import GRADES
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, StudentAssignment, \
     Enrollment, \

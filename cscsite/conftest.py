@@ -7,7 +7,7 @@ from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
-from learning.constants import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory, StudentFactory, StudentClubFactory, \
     TeacherFactory
 

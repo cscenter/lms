@@ -8,7 +8,7 @@ import random
 from django.db.models import Q
 from import_export import resources, fields, widgets
 
-from learning.constants import GRADES, SEMESTER_TYPES
+from learning.settings import GRADES, SEMESTER_TYPES
 from .models import CSCUser, SHADCourseRecord
 
 

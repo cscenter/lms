@@ -11,7 +11,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
     CourseOfferingTeacher
-from .constants import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
 

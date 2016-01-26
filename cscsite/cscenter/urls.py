@@ -12,7 +12,7 @@ from learning.views import \
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView, \
-    StudentsSheetCurrentSemesterCSVView
+    StudentsSheetCurrentSemesterCSVView, TotalStatisticsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -50,6 +50,7 @@ urlpatterns = [
         name='user_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
 
+    # TODO: refactor
     url(r'^staff/course-marks/$',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
@@ -77,6 +78,9 @@ urlpatterns = [
     url(r'^staff/exports/sheet/current_semester/csv/$',
         StudentsSheetCurrentSemesterCSVView.as_view(),
         name='staff_exports_students_sheet_current_semester_csv'),
+    url(r'^staff/statistics/csv/$',
+        TotalStatisticsView.as_view(),
+        name='staff_total_statistics_csv'),
 
     url(r'^library/', include("library.urls")),
 

@@ -30,13 +30,14 @@ from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT
+    ASSIGNMENT_TASK_ATTACHMENT, PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
+    SEMESTER_TYPES, FOUNDATION_YEAR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
-from .constants import GRADES, SHORT_GRADES, SEMESTER_TYPES, PARTICIPANT_GROUPS
-from .utils import get_current_semester_pair, SortBySemesterMethodMixin
+from .utils import get_current_semester_pair, SortBySemesterMethodMixin, \
+    get_semester_index
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,11 @@ class Semester(models.Model):
         validators=[MinValueValidator(1990)])
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
+    # Note: used for sort order and filter
+    index = models.PositiveSmallIntegerField(
+        verbose_name=_("Semester index"),
+        help_text=_("System field. Do not manually edit"),
+        editable=False)
 
     @property
     def type_index(self):
@@ -89,6 +95,7 @@ class Semester(models.Model):
         ordering = ["-year", "type"]
         verbose_name = _("Semester")
         verbose_name_plural = _("Semesters")
+        unique_together = ("year", "type")
 
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
@@ -139,6 +146,10 @@ class Semester(models.Model):
         if created:
             obj.save()
         return obj
+
+    def save(self, *args, **kwargs):
+        self.index = get_semester_index(self.year, self.type)
+        super(Semester, self).save(*args, **kwargs)
 
     # TODO: move to custom manager? Should I return queryset or id values? WIP
     @classmethod

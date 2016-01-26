@@ -5,8 +5,7 @@ import datetime
 import factory
 
 from django.utils import timezone
-
-from learning.constants import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS
 from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
