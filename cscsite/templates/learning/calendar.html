@@ -83,7 +83,7 @@
             {% endif %}
             <div class="cell">
               <div class="day">
-                {{ day|date:"d" }}
+                {{ day|date:"j" }}
               </div>
               {% for event in events %}
               <div class="event {{ event.type }}"
