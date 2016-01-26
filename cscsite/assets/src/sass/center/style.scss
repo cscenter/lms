@@ -486,8 +486,8 @@ h5.assignment {
     }
 
     .day {
-      font-weight: bold;
-      color: #BBB;
+      color: #9E9E9E;
+      font-size: 1.3em;
       text-align: right;
     }
 
@@ -516,11 +516,11 @@ h5.assignment {
       }
     }
 
-    .not-in-semester {
-      background-color: #EEE;
+    &.not-in-semester {
+      //background-color: #EEE;
 
       .day {
-        color: #CCC;
+        color: #ccc;
       }
     }
   }

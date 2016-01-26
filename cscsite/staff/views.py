@@ -9,7 +9,7 @@ import unicodecsv
 from collections import OrderedDict, defaultdict
 
 from django.core.urlresolvers import reverse
-from django.db.models import F, Count
+from django.db.models import F, Count, Case, When, Value, IntegerField
 from django.views import generic
 from django.http import HttpResponse, JsonResponse
 from braces.views import LoginRequiredMixin, JSONResponseMixin
@@ -17,8 +17,9 @@ from braces.views import LoginRequiredMixin, JSONResponseMixin
 from core.views import SuperUserOnlyMixin
 from learning.viewmixins import CuratorOnlyMixin
 from learning.models import StudentProject, Semester
-from learning.utils import get_current_semester_pair
-from users.models import CSCUser, CSCUserFilter
+from learning.utils import get_current_semester_pair, get_semester_index
+from learning.settings import STUDENT_STATUS
+from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
 
 
 class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
@@ -371,30 +372,64 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        # TODO: ta-daaam, I wan't sorted order here. Another problem - filter. But how I should get sort number without additional query?!
-        year, season = get_current_semester_pair()
-        # TODO: move to settings
-        semesters = Semester.objects.filter(year__gte=2011).exclude(year=2011, type=Semester.TYPES.spring)
-        semesters = sorted(semesters)
-        print(semesters)
+        current_year, season = get_current_semester_pair()
+        start_semester_index = get_semester_index(2011, Semester.TYPES.autumn)
+        end_semester_index = get_semester_index(current_year, season)
+        semesters = Semester.objects.filter(index__gte=start_semester_index, index__lte=end_semester_index)
         # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
         query = (CSCUser.objects.exclude(enrollment_year__isnull=True)
                        .values("enrollment_year")
                        .annotate(acceptances=Count("enrollment_year"))
                        .order_by("enrollment_year"))
-        acceptances = {}
-        for data in query:
-            acceptances[data["enrollment_year"]] = data["acceptances"]
+        acceptances = defaultdict(int)
+        for row in query:
+            acceptances[row["enrollment_year"]] = row["acceptances"]
+
+        query = (CSCUser.objects.exclude(graduation_year__isnull=True)
+                       .values("graduation_year")
+                       .annotate(graduated=Count("graduation_year"))
+                       .order_by("graduation_year"))
+        graduated = defaultdict(int)
+        for row in query:
+            graduated[row["graduation_year"]] = row["graduated"]
+        # TODO: graduated and acceptances in 1 query with Django ORM?
+
+        # FIXME: Expressional conditions don't group by items?
+        # Stats for expelled students
+        query = (CSCUserStatusLog.objects.values("semester")
+                 .annotate(expelled=Count("student", distinct=True))
+                 .filter(status=STUDENT_STATUS.expelled)
+                 .order_by("status"))
+        expelled = defaultdict(int)
+        for row in query:
+            expelled[row["semester"]] = row["expelled"]
+        # TODO: Investigate how to aggregate stats for expelled and will_graduate in 1 query
+
+        # Stats for expelled students
+        query = (CSCUserStatusLog.objects
+                 .values("semester")
+                 .annotate(will_graduate=Count("student", distinct=True))
+                 .filter(status=STUDENT_STATUS.will_graduate)
+                 .order_by("status"))
+        will_graduate = defaultdict(int)
+        for row in query:
+            will_graduate[row["semester"]] = row["will_graduate"]
 
         statistics = OrderedDict()
         for semester in semesters:
-            acceptances_count = 0
+            acceptances_cnt, graduated_cnt = 0, 0
             if semester.type == Semester.TYPES.autumn:
-                acceptances_count = acceptances[semester.year]
+                acceptances_cnt = acceptances[semester.year]
+            elif semester.type == Semester.TYPES.spring:
+                graduated_cnt = graduated[semester.year]
             statistics[semester.pk] = {
                 "semester": semester,
-                "acceptances": acceptances_count
+                "acceptances": acceptances_cnt,
+                "graduated": graduated_cnt,
+                "expelled": expelled[semester.pk],
+                "will_graduate": will_graduate[semester.pk],
             }
+        print(statistics)
 
 
         return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
