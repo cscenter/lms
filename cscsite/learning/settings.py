@@ -51,3 +51,5 @@ SEMESTER_TYPES = getattr(settings, 'SEMESTER_TYPES',
 FOUNDATION_YEAR = getattr(settings, 'FOUNDATION_YEAR', 2007)
 # Used for semester index calculation
 SEMESTER_INDEX_START = getattr(settings, 'SEMESTER_INDEX_START', 1)
+
+SEMESTER_AUTUMN_SPRING_INDEX_DIFF = getattr(settings, 'SEMESTER_AUTUMN_SPRING_INDEX_DIFF', 1)
