@@ -59,17 +59,23 @@ h2.right-line:after {
 }
 
 #index-online-courses {
-    min-width: $min-width;
+  min-width: $min-width;
 
-    #onlinecourses-list {
-        @extend .container;
-        padding-bottom: 30px;
+  #onlinecourses-list {
+    @extend .container;
+    padding-bottom: 30px;
 
-        .index-header {
-            border-color: #ddd;
-        }
+    .index-header {
+      border-color: #ddd;
+    }
+
+    .onlinecourses-list__item {
+      font-size: 16px;
+      line-height: 1.5em;
 
     }
+
+  }
 }
 
 .supported-by {
