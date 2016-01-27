@@ -32,8 +32,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT
+    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
+from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin, FailedCourseContextMixin
 from core import comment_persistence
@@ -1332,7 +1333,13 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
             return HttpResponseRedirect(re.url)
 
     def get_queryset(self):
+        current_year, semester_type = get_current_semester_pair()
+        semester_index = get_semester_index(current_year, semester_type)
+        if semester_type == Semester.TYPES.autumn:
+            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF  # skip to spring semester
         return (self.model.objects
+                .filter(index__lte=semester_index)
+                .exclude(type=Semester.TYPES.summer)
                 .prefetch_related("courseoffering_set",
                                   "courseoffering_set__course"))
 
