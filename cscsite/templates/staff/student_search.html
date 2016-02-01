@@ -66,20 +66,15 @@
         <div class="form-group">
           <label>{% trans "Passed courses" %}</label><br>
           <div class="btn-group btn-group-sm" data-toggle="buttons">
-              <label class="btn btn-default">
-                <input type="radio" name="cnt_enrollments"
-                       value=""
-                       autocomplete="off">Не выбрано
-              </label>
             {% for cnt in cnt_enrollments %}
               <label class="btn btn-default">
-                <input type="radio" name="cnt_enrollments"
+                <input type="checkbox" name="cnt_enrollments"
                        value="{{ cnt }}"
                        autocomplete="off">{{ cnt }}
               </label>
             {% endfor %}
               <label class="btn btn-default">
-                <input type="radio" name="cnt_enrollments"
+                <input type="checkbox" name="cnt_enrollments"
                        value="42"
                        autocomplete="off">>12
               </label>
