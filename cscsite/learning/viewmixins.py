@@ -42,8 +42,8 @@ class FailedCourseContextMixin(object):
 
         co = context["course_offering"]
         context["is_failed_completed_course"] = False
-        # Skip for club site
-        if self.request.site.domain == settings.CLUB_DOMAIN:
+        # Skip for open CO
+        if co.is_open:
             return context
 
         user = self.request.user
