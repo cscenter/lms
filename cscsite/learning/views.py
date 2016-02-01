@@ -748,17 +748,19 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                            semester__year=semester_year,
                            semester__type=semester_type))
         # TODO: Add tests for initial data after discussion
-        previous_class = (CourseClass.objects
-                          .filter(course_offering=self._course_offering.pk)
-                          .defer("description")
-                          .order_by("-date", "starts_at")
-                          .first())
-        if previous_class is not None:
-            initial["type"] = previous_class.type
-            initial["venue"] = previous_class.venue
-            initial["starts_at"] = previous_class.starts_at
-            initial["ends_at"] = previous_class.ends_at
-            initial["date"] = previous_class.date + datetime.timedelta(weeks=1)
+        if isinstance(self, generic.CreateView):
+            previous_class = (CourseClass.objects
+                              .filter(course_offering=self._course_offering.pk)
+                              .defer("description")
+                              .order_by("-date", "starts_at")
+                              .first())
+            if previous_class is not None:
+                initial["type"] = previous_class.type
+                initial["venue"] = previous_class.venue
+                initial["starts_at"] = previous_class.starts_at
+                initial["ends_at"] = previous_class.ends_at
+                initial["date"] = previous_class.date + datetime.timedelta(
+                    weeks=1)
         return initial
 
     def get_form(self, form_class=None):
