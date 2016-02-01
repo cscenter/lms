@@ -4,6 +4,13 @@ from django.conf import settings
 from learning.models import StudentAssignment, CourseOffering, Enrollment
 
 
+class ParticipantOnlyMixin(UserPassesTestMixin):
+    raise_exception = False
+
+    def test_func(self, user):
+        return (user.is_authenticated() and
+               (user.is_teacher or user.is_student or user.is_curator))
+
 class TeacherOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
