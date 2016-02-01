@@ -36,7 +36,7 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin, FailedCourseContextMixin
+    CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -1075,9 +1075,9 @@ class StudentAssignmentDetailMixin(object):
 
 
 # shitty name :(
-# Note: We should redirects teacher, so replace StudentOnlyMixin with LoginRequired.
+# Note: We should redirects teacher, so replace StudentOnlyMixin with ParticipantOnlyMixin.
 # TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
-class StudentAssignmentStudentDetailView(LoginRequiredMixin,
+class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
                                          FailedCourseContextMixin,
                                          StudentAssignmentDetailMixin,
                                          generic.CreateView):

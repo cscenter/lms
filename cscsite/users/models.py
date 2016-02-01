@@ -396,10 +396,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups = [group.pk for group in user_groups]
         except (AttributeError, KeyError):
             user_groups = self.groups.values_list("pk", flat=True).all()
-        # Remove student center group if user expelled
+        # Restrict access for expelled students
         if self.status == self.STATUS.expelled:
             user_groups = [pk for pk in user_groups
-                           if pk != self.group_pks.STUDENT_CENTER]
+                           if pk != self.group_pks.STUDENT_CENTER and
+                              pk != self.group_pks.VOLUNTEER]
         return user_groups
 
     @property

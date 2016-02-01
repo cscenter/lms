@@ -160,7 +160,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     @unittest.skip('not implemented')
     def test_expelled(self):
-        """User cant access student section if his status is expelled"""
+        """Center students and volunteers can't access student section
+        if there status equal expelled"""
         pass
 
     def test_login_page(self):
