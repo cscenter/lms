@@ -91,11 +91,6 @@
   tags:
     - lvm
 
-
-    # - name: Configure Volume with upload
-    #   include: setup_shared.yml
-    #   when: ec2_vol.changed
-
   # - name: setup provisioned servers
   #   include: setup.yml
 

@@ -19,7 +19,7 @@ TODO (important):
 Requirements
 ------------
   
-* python
+* python2
 * Ansible (>=2.0.0a for s3 role if needed) `pip install ansible`
 * boto library `pip install boto` (may not work from virtualenv)
 * aws cli (optional) `pip install awscli`
