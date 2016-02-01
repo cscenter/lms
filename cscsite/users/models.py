@@ -597,7 +597,6 @@ class CSCUserFilter(django_filters.FilterSet):
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
             return queryset
         elif "studying" in value_list:
-            print(queryset.exclude(status=CSCUser.STATUS.expelled).query)
             return queryset.exclude(status=CSCUser.STATUS.expelled)
         for value in value_list:
             if value not in CSCUser.STATUS:
