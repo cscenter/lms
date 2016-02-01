@@ -383,12 +383,13 @@ $(document).ready(function () {
         var groups = {};
         var status = {};
         var qstr = "";
-        var cnt_enrollments = "";
+        var cnt_enrollments = {};
         var ajaxURI = $('.user-search #ajax-uri').val();
         var query = function() {
             var flatYears,
                 flatGroups,
-                flatStatuses;
+                flatStatuses,
+                flatEnrollmentsCount;
 
             flatYears = _.chain(enrollmentYears)
                 .pairs()
@@ -396,6 +397,11 @@ $(document).ready(function () {
                 .map(function(x) {return x[0]})
                 .value().join(",");
             flatStatuses = _.chain(status)
+                .pairs()
+                .filter(function(x) {return x[1]})
+                .map(function(x) {return x[0]})
+                .value().join(",");
+            flatEnrollmentsCount = _.chain(cnt_enrollments)
                 .pairs()
                 .filter(function(x) {return x[1]})
                 .map(function(x) {return x[0]})
@@ -412,7 +418,7 @@ $(document).ready(function () {
                     enrollment_year: flatYears,
                     groups: flatGroups,
                     status: flatStatuses,
-                    cnt_enrollments: cnt_enrollments,
+                    cnt_enrollments: flatEnrollmentsCount,
                 },
                 dataType: "json",
                 traditional: true
@@ -460,7 +466,7 @@ $(document).ready(function () {
                 query();
             })
             .on('change', '[name="cnt_enrollments"]', function (e) {
-                cnt_enrollments = $(this).val();
+                cnt_enrollments[$(this).val()] = this.checked;
                 query();
             });
 

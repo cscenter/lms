@@ -558,14 +558,20 @@ class CSCUserFilter(django_filters.FilterSet):
         if not "groups" in self.data:
             if not self.data:
                 self.empty_query = True
-            self.data.setlist("groups", self.FILTERING_GROUPS)
+            groups = self.FILTERING_GROUPS[:]
+            if "status" in self.data and "studying" in self.data["status"]:
+                groups.remove(CSCUser.group_pks.GRADUATE_CENTER)
+            self.data.setlist("groups", groups)
 
     def cnt_enrollments_filter(self, queryset, value):
+        value_list = value.split(u',')
+        value_list = filter(None, value_list)
+        if not value_list:
+            return queryset
         try:
-            value = int(value)
+            value_list = map(int, value_list)
         except ValueError:
             return queryset
-        assert value >= 0
 
         queryset = queryset.annotate(
             courses_cnt=
@@ -579,11 +585,11 @@ class CSCUserFilter(django_filters.FilterSet):
             + Count("onlinecourserecord", distinct=True)
         )
 
-        if value > self.ENROLLMENTS_CNT_LIMIT:
-            return queryset.filter(
-                courses_cnt__gt=self.ENROLLMENTS_CNT_LIMIT)
-        else:
-            return queryset.filter(courses_cnt=value)
+        condition = Q(courses_cnt__in=value_list)
+        if any(value > self.ENROLLMENTS_CNT_LIMIT for value in value_list):
+            condition |= Q(courses_cnt__gt=self.ENROLLMENTS_CNT_LIMIT)
+
+        return queryset.filter(condition)
 
     def status_filter(self, queryset, value):
         value_list = value.split(u',')
@@ -591,6 +597,7 @@ class CSCUserFilter(django_filters.FilterSet):
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
             return queryset
         elif "studying" in value_list:
+            print(queryset.exclude(status=CSCUser.STATUS.expelled).query)
             return queryset.exclude(status=CSCUser.STATUS.expelled)
         for value in value_list:
             if value not in CSCUser.STATUS:
