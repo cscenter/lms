@@ -10,7 +10,7 @@ from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Case, F, When, Value, Q
 from django.http import QueryDict
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -569,14 +569,15 @@ class CSCUserFilter(django_filters.FilterSet):
 
         queryset = queryset.annotate(
             courses_cnt=
-            Count("enrollment", distinct=True)
+            Count(Case(
+                When(Q(enrollment__grade=Enrollment.GRADES.not_graded) | Q(
+                    enrollment__grade=Enrollment.GRADES.unsatisfactory),
+                     then=Value(None)),
+                default=F("enrollment")
+            ), distinct=True)
             + Count("shadcourserecord", distinct=True)
             + Count("onlinecourserecord", distinct=True)
-        ).extra(where=["learning_enrollment.grade NOT IN ('not_graded', 'unsatisfactory')"])
-        # FIXME: replace "learning_enrollment.grade" with pk???
-
-        # print(queryset.query)
-        # print(queryset.get(id=793))
+        )
 
         if value > self.ENROLLMENTS_CNT_LIMIT:
             return queryset.filter(
