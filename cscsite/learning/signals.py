@@ -9,8 +9,8 @@ from django.utils import timezone
 from slides import yandex_disk, slideshare
 
 
-def populate_assignment_students(sender, instance, created,
-                                 *args, **kwargs):
+def create_student_assignments_for_new_assignment(sender, instance, created,
+                                                  *args, **kwargs):
     if not created:
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
@@ -97,9 +97,12 @@ def mark_assignment_passed(sender, instance, created,
         a_s.is_passed = True
         a_s.save()
 
+def track_fields_post_init(sender, instance, **kwargs):
+    instance.__class__.update_track_fields(instance)
+
 def maybe_upload_slides(sender, instance, **kwargs):
+    CourseClass = apps.get_model('learning', 'CourseClass')
     # XXX we might want to delegate this to cron or Celery.
-    # TODO: We want to update slides_url if slides have changed
     if instance.slides and not instance.slides_url:
         course_offering = instance.course_offering
         course = course_offering.course
@@ -114,10 +117,8 @@ def maybe_upload_slides(sender, instance, **kwargs):
             instance.slides.file,
             "{0}: {1}".format(course_offering, instance),
             instance.description, tags=[course.slug])
-        # XXX: evade infinity loop of post_save signals
-        if not instance.slides_url:
-            return
-        instance.save()
+        if instance.slides_url:
+            CourseClass.objects.update(slides_url=instance.slides_url)
 
 def create_course_offering_news_notification(sender, instance, created,
                                              *args, **kwargs):
@@ -143,8 +144,8 @@ def create_course_offering_news_notification(sender, instance, created,
          .save())
 
 
-def populate_student_assignments(sender, instance, created,
-                                 *args, **kwargs):
+def populate_assignments_for_new_enrolled_student(sender, instance, created,
+                                                  *args, **kwargs):
     if not created:
         return
     StudentAssignment = apps.get_model('learning', 'StudentAssignment')

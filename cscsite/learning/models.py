@@ -414,11 +414,31 @@ class CourseClass(TimeStampedModel, object):
                              self.course_offering.semester.slug,
                              self.pk])
 
+    @property
+    def track_fields(self):
+        return ("slides",)
+
+    def update_track_fields(self):
+        for field in self.track_fields:
+            setattr(self, '_original_%s' % field, getattr(self, field))
+
+    def get_track_field(self, field):
+        return getattr(self, '_original_{}'.format(field))
+
     def clean(self):
         super(CourseClass, self).clean()
         # ends_at should be later than starts_at
         if self.starts_at >= self.ends_at:
             raise ValidationError(_("Class should end after it started"))
+
+    def save(self, *args, **kwargs):
+        # It's worth mentioning that logic with tracked fields and post save really complicated
+        # TODO: Delegate upload slides logic to task manager
+        if self.slides != self.get_track_field("slides"):
+            # TODO: Maybe we should try to delete old slides from slideshare
+            self.slides_url = ""
+        super(CourseClass, self).save()
+        self.update_track_fields()
 
     # this is needed to properly set up fields for admin page
     def type_display_prop(self):
