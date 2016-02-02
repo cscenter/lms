@@ -175,10 +175,11 @@ class UserDetailView(generic.DetailView):
         context = (super(UserDetailView, self)
                    .get_context_data(*args, **kwargs))
         u = self.request.user
-        # Prevent to show club students on compscicenter
-        if (list(context["user_object"]._cs_group_pks) == [CSCUser.group_pks.STUDENT_CLUB]
-                and self.request.site.domain != settings.CLUB_DOMAIN):
-            raise Http404
+        # On center site show club students only to teachers and curators
+        if self.request.site.domain != settings.CLUB_DOMAIN:
+            if (list(context["user_object"]._cs_group_pks) == [CSCUser.group_pks.STUDENT_CLUB]
+                    and not(u.is_teacher or u.is_curator)):
+                raise Http404
 
         # FIXME: use it or remove
         context['is_extended_profile_available'] = \
