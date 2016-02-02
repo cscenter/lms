@@ -192,13 +192,11 @@
         </div>
     {% endif %}
 
-    {% if user.is_authenticated and user_object.private_contacts %}
+    {% if user.is_authenticated and user_object.private_contacts.strip %}
         <div class="contact-info">
             <h4>{% trans "Contact information" %}:</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
-                {{ user_object.private_contacts }}
-              {% endmarkdown %}
+              {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}{{ user_object.private_contacts }}{% endmarkdown %}
             </div>
         </div>
     {% endif %}
@@ -240,13 +238,16 @@
     {% endif %}
 
     {% with borrows=user_object.borrows.all %}
-    {% if has_curator_permissions and borrows %}
+    {% if has_curator_permissions and borrows and request.site.domain == "compscicenter.ru" %}
       <h4 class="_mtop-30">{% trans "books" %}:</h4>
       <ul>
         {% for borrow in borrows %}
         <li><a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a></li>
         {% endfor %}
       </ul>
+        {% elif has_curator_permissions and borrows %}
+        <h4 class="_mtop-30">{% trans "books" %}:</h4>
+        Со списком книг можно ознакомиться на сайте центра.
     {% endif %}
     {% endwith %}
 
