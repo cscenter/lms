@@ -117,8 +117,9 @@ def maybe_upload_slides(sender, instance, **kwargs):
             instance.slides.file,
             "{0}: {1}".format(course_offering, instance),
             instance.description, tags=[course.slug])
-        # if instance.slides_url:
-            # CourseClass.objects.update(slides_url=instance.slides_url)
+        if instance.slides_url:
+            CourseClass.objects.filter(pk=instance.pk).update(
+                slides_url=instance.slides_url)
 
 def create_course_offering_news_notification(sender, instance, created,
                                              *args, **kwargs):
