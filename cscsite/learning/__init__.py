@@ -15,3 +15,4 @@ default_app_config = 'learning.apps.LearningConfig'
 # TODO: add dependency checker (django.conrib.sites and... ?)
 # TODO: mv templates?
 # TODO: /learning/assignments/xxx/ to learning/assignments/submissions/xxx/ ?
+# TODO: remove library/ from csclub
