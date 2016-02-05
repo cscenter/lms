@@ -188,7 +188,8 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
             s.projects = StudentProject.sorted(s.projects)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        filename = "sheet_{}.csv".format(datetime.datetime.now().year)
+        now = datetime.datetime.now()
+        filename = "sheet_{}.csv".format(now.strftime("%d.%m.%Y"))
         response['Content-Disposition'] \
             = 'attachment; filename="{}"'.format(filename)
         w = unicodecsv.writer(response, encoding='utf-8')
