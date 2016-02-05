@@ -9,39 +9,48 @@ from learning.models import CourseOfferingTeacher
 class CSCUserQuerySet(query.QuerySet):
 
     def students_info(self,
-                      only_will_graduate=False,
-                      enrollments_current_semester_only=False):
+                      filter=None,
+                      exclude=None,
+                      semester=False):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
-        from .models import CSCUser
+        from .models import CSCUser, SHADCourseRecord
         from learning.models import Enrollment, CourseClass, StudentProject, \
             Semester, CourseOffering
 
         # Note: At the same time student must be in one of these groups
         # So, group_by not neccessary for this m2m relationship (in theory)
-        q = self.filter(
-                groups__in=[CSCUser.group_pks.STUDENT_CENTER,
-                            CSCUser.group_pks.GRADUATE_CENTER,
-                            CSCUser.group_pks.VOLUNTEER]
-            )
+        filter = filter or {}
+        if not "groups__in" in filter:
+            filter["groups__in"] = [
+                CSCUser.group_pks.STUDENT_CENTER,
+                CSCUser.group_pks.GRADUATE_CENTER,
+                CSCUser.group_pks.VOLUNTEER
+            ]
+        q = self.filter(**filter)
 
-        if only_will_graduate:
-            q = q.filter(status=CSCUser.STATUS.will_graduate)
+        if exclude:
+            q = q.exclude(**exclude)
 
-        exclude_enrollments = ['unsatisfactory']
-        if not enrollments_current_semester_only:
-            exclude_enrollments.append('not_graded')
+        exclude_enrollment_grades = ['unsatisfactory']
+
+        current_semester = Semester.get_current()
+        if semester != current_semester:
+            exclude_enrollment_grades.append('not_graded')
 
         enrollment_queryset = (Enrollment.objects
-            .exclude(grade__in=exclude_enrollments)
-
+            .exclude(grade__in=exclude_enrollment_grades)
             .order_by('course_offering__course__name'))
 
-        if enrollments_current_semester_only:
-            current_semester = Semester.get_current()
+        shad_queryset = SHADCourseRecord.objects.get_queryset()
+
+        if semester:
             enrollment_queryset = enrollment_queryset.filter(
-                course_offering__semester=current_semester)
+                course_offering__semester=semester)
+            shad_queryset = shad_queryset.filter(
+                semester=semester
+            )
 
         return (
             q
@@ -80,6 +89,7 @@ class CSCUserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'shadcourserecord_set',
+                    queryset=shad_queryset,
                     to_attr='shads'
                 ),
                 Prefetch(

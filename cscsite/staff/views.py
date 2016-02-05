@@ -10,8 +10,9 @@ from collections import OrderedDict, defaultdict
 
 from django.core.urlresolvers import reverse
 from django.db.models import F, Count, Case, When, Value, IntegerField
+from django.shortcuts import get_object_or_404
 from django.views import generic
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from braces.views import LoginRequiredMixin, JSONResponseMixin
 
 from core.views import SuperUserOnlyMixin
@@ -68,7 +69,9 @@ class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = CSCUser.objects.students_info(only_will_graduate=True)
+        context['students'] = CSCUser.objects.students_info(filter={
+            "status": CSCUser.STATUS.will_graduate
+        })
         for student in context['students']:
             student.projects = StudentProject.sorted(student.projects)
 
@@ -79,7 +82,9 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(only_will_graduate=True)
+        students = CSCUser.objects.students_info(filter={
+            "status": CSCUser.STATUS.will_graduate
+        })
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
@@ -157,7 +162,7 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(only_will_graduate=False)
+        students = CSCUser.objects.students_info()
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
@@ -283,13 +288,33 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
         return response
 
 
-class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
+class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        try:
+            semester_year = int(self.kwargs['semester_year'])
+            semester_type = self.kwargs['semester_type']
+            filter = {
+                "year": semester_year,
+                "type": semester_type
+            }
+            semester = get_object_or_404(Semester, **filter)
+        except KeyError:
+            semester = Semester.get_current()
+
         students = CSCUser.objects.students_info(
-            only_will_graduate=False,
-            enrollments_current_semester_only=True)
+            filter={
+                "groups__in": [
+                    CSCUser.group_pks.STUDENT_CENTER,
+                    CSCUser.group_pks.VOLUNTEER
+                ],
+            },
+            exclude={
+                "status": STUDENT_STATUS.expelled
+            },
+            semester=semester
+        )
 
         # Prepare courses and student projects data
         courses_headers = OrderedDict()
@@ -307,8 +332,7 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
             s.courses = student_courses
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        year, semester_type = get_current_semester_pair()
-        filename = "sheet_{}_{}.csv".format(year, semester_type)
+        filename = "sheet_{}_{}.csv".format(semester.year, semester.type)
         response['Content-Disposition'] \
             = 'attachment; filename="{}"'.format(filename)
         w = unicodecsv.writer(response, encoding='utf-8')
@@ -331,6 +355,7 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
+            'Сдано курсов (Центр/Клуб/ШАД)',
             'Ссылка на профиль',
         ]
         for course_id, course_name in six.iteritems(courses_headers):
@@ -357,6 +382,7 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
                 s.comment,
                 s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
                 s.workplace,
+                len(s.courses) + len(s.shads),
                 request.build_absolute_uri(s.get_absolute_url())
             ]
 
@@ -365,6 +391,8 @@ class StudentsSheetCurrentSemesterCSVView(CuratorOnlyMixin, generic.base.View):
                 row.extend([sc['grade'], sc['teachers']])
 
             w.writerow(row)
+
+        # return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
 
         return response
 
