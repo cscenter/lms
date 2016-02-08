@@ -52,11 +52,13 @@ class CSCUserQuerySet(query.QuerySet):
                 semester=semester
             )
 
+        # Note: No ides how it works with thousands students
+        # due to user_id IN(blabla thousands ids), but it's fine for now.
         return (
             q
             .order_by('last_name', 'first_name')
             .prefetch_related(
-                'groups',
+                'groups',  # Mb we can do it without user_id IN(blabla million ids)
                 Prefetch(
                     'enrollment_set',
                     queryset=enrollment_queryset,

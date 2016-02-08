@@ -392,7 +392,7 @@ class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
 
             w.writerow(row)
 
-        # return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
+        return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
 
         return response
 
