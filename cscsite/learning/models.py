@@ -1001,6 +1001,9 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
     is_au_collaboration = models.BooleanField(
         _("Collaboration with AY"),
         default=False)
+    is_self_paced = models.BooleanField(
+        _("Without deadlines"),
+        default=False)
 
     class Meta:
         db_table = 'online_courses'
@@ -1010,3 +1013,6 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
 
     def __str__(self):
         return smart_text(self.name)
+
+    def is_ongoing(self):
+        return self.start and self.start <= timezone.now()

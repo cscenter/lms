@@ -11,6 +11,8 @@ $color-green: #8CE087;
 $color-red: #f96868;
 $color-yellow: #f9cd48;
 
+$brand-success: $color-green;
+
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";

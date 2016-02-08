@@ -7,7 +7,14 @@
             {% if online_course.photo %}<img src="{{ online_course.photo.url }}">{% endif %}
         </div>
         <div class="onlinecourses-list__item-right">
-            <h2><small>{% if online_course.start %}{{ online_course.start|date:"d E Y" }} — {{ online_course.end|date:"d E Y" }}{% endif %}</small></h2>
+            {% if online_course.is_self_paced %}
+                <h2><small>
+                    <span class="label label-primary">{% trans "Without deadlines" %}{{ now.date }}</span>
+                    {% if online_course.start and not online_course.is_ongoing %}{% trans "The course starts on " %}{{ online_course.start|date:"j E Y" }}{% endif %}
+                </small></h2>
+            {% elif online_course.start and online_course.end %}
+                <h2><small>{% if online_course.start %}{{ online_course.start|date:"j E Y" }} — {{ online_course.end|date:"j E Y" }}{% endif %}</small></h2>
+            {% endif %}
             <div>
                 <p>{{ online_course.description|safe|linebreaks }}</p>
             </div>
