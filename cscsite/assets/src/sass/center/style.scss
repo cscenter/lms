@@ -2,16 +2,19 @@
 $min-width: 940px;
 
 // Common colors;
-$btn-primary-bg:  #337ab7;
-$btn-primary-border:  $btn-primary-bg;
-$color-grey: #9B9B9B;
 $color-blue: #337ab7;
+$color-grey: #9B9B9B;
 $color-orange: #f2a654;
 $color-green: #8CE087;
 $color-red: #f96868;
 $color-yellow: #f9cd48;
+$color-purple: #6a679e;
+
+$btn-primary-bg:  $color-blue;
+$btn-primary-border:  $btn-primary-bg;
 
 $brand-success: $color-green;
+$brand-danger: #ef4036;
 
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";

@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load htmlpage_url %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block content %}
 <div class="banner _{{ request.city.code|slugify }}">{% if request.city.code == 'RU SPB' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
@@ -9,9 +10,15 @@
 
 <div class="container">
   <div class="font-bigger">
-  {% blocktrans %}
-  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
-{% endblocktrans %}
+  {% if request.city.code == 'RU SPB' %}
+      {% blocktrans %}
+      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
+    {% endblocktrans %}
+  {% else %}
+      {% blocktrans %}
+      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
+      {% endblocktrans %}
+  {% endif %}
   </div>
   <h1>{% trans "Courses" %}: {{ current_semester }}</h1>
   {% if courses %}
@@ -49,6 +56,11 @@
         </table>
   {% else %}
       <p>{% trans "No active courses" %}</p>
+  {% endif %}
+  {% if LANGUAGE_CODE == 'ru' %}
+      <div class="font-bigger">
+        Если вы не нашли интересного для себя курса в текущем семестре, проходите онлайн-курсы <a href="https://compscicenter.ru/online/">Computer Science центра</a>.
+      </div>
   {% endif %}
 </div>
 {% endblock content %}
