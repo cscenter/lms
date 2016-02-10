@@ -8,16 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-18 12:50+0300\n"
-"PO-Revision-Date: 2015-10-12 13:04+0230\n"
+"POT-Creation-Date: 2016-02-10 17:36+0300\n"
+"PO-Revision-Date: 2016-02-10 17:39+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.7.6\n"
 
 #: cscsite/csclub/forms.py:21
@@ -27,15 +26,11 @@ msgstr "Извините, но никнейм уже занят."
 #: cscsite/csclub/templates/base.html:41
 msgid ""
 "\n"
-"      You are currently at the new webpage of the Club. The list of all "
-"courses of the Club is available at the old page: <a href=\"http://old."
-"compsciclub.ru/\">old.compsciclub.ru</a>\n"
+"      You are currently at the new webpage of the Club. The list of all courses of the Club is available at the old page: <a href=\"http://old.compsciclub.ru/\">old.compsciclub.ru</a>\n"
 "      "
 msgstr ""
 "\n"
-"Сайт в процессе наполнения. Архив всех прошедших курсов доступен на старой "
-"версии сайта по адресу <a href=\"http://old.compsciclub.ru/\">old."
-"compsciclub.ru</a>"
+"Сайт в процессе наполнения. Архив всех прошедших курсов доступен на старой версии сайта по адресу <a href=\"http://old.compsciclub.ru/\">old.compsciclub.ru</a>"
 
 #: cscsite/csclub/templates/base.html:50
 msgid "Admin"
@@ -46,12 +41,12 @@ msgid "City"
 msgstr "Город"
 
 #: cscsite/csclub/templates/base.html:57
-#: cscsite/csclub/templates/index.html:24
+#: cscsite/csclub/templates/index.html:30
 msgid "Language"
 msgstr "Язык"
 
 #: cscsite/csclub/templates/base.html:78
-msgid "Computer Science Club, 2007–15 гг."
+msgid "Computer Science Club, 2007–16 гг."
 msgstr ""
 
 #: cscsite/csclub/templates/base.html:106
@@ -75,53 +70,67 @@ msgstr "Автор фото"
 msgid "Andrey Salnikov"
 msgstr ""
 
-#: cscsite/csclub/templates/index.html:12
+#: cscsite/csclub/templates/index.html:13
+#| msgid ""
+#| "\n"
+#| "  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
 msgid ""
 "\n"
-"  The main goal of the Club is to provide undergraduate and graduate "
-"students, as well as professionals, access to high quality education in the "
-"area of Computer Science. Attendance is open to everyone and is free of "
-"charge.\n"
+"      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
+"    "
 msgstr ""
 "\n"
-"Основная <strong>цель клуба</strong> — познакомить студентов с\n"
-"классическими результатами, современным положением дел и открытыми\n"
-"задачами в различных областях Computer Science. Вход на лекции свободный, "
-"регистрация не требуется. Приглашаются все желающие.\n"
+"<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, регистрация не требуется, посещать курсы можно начать в любое время.</p>\n"
+"\n"
+"<p>Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href=\"https://compscicenter.ru/\">Computer Science центре</a>.</p>"
 
-#: cscsite/csclub/templates/index.html:16
+#: cscsite/csclub/templates/index.html:17
+#| msgid ""
+#| "\n"
+#| "  The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
+msgid ""
+"\n"
+"      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
+"      "
+msgstr ""
+"\n"
+"<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, регистрация не требуется, посещать курсы можно начать в любое время.</p>\n"
+"\n"
+"<p>Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href=\"https://yandexdataschool.ru/\">ШАД</a>.</p>"
+
+#: cscsite/csclub/templates/index.html:22
 msgid "Courses"
 msgstr "Курсы"
 
-#: cscsite/csclub/templates/index.html:21
+#: cscsite/csclub/templates/index.html:27
 msgid "Course name"
 msgstr "Название курса"
 
-#: cscsite/csclub/templates/index.html:22
+#: cscsite/csclub/templates/index.html:28
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: cscsite/csclub/templates/index.html:23
+#: cscsite/csclub/templates/index.html:29
 msgid "Next lecture"
 msgstr "Следующая лекция"
 
-#: cscsite/csclub/templates/index.html:39
+#: cscsite/csclub/templates/index.html:45
 msgid "The course is completed"
 msgstr "Курс завершён"
 
-#: cscsite/csclub/templates/index.html:41
+#: cscsite/csclub/templates/index.html:47
 msgid "To be announced"
 msgstr "Дата будет объявлена позже"
 
-#: cscsite/csclub/templates/index.html:45
+#: cscsite/csclub/templates/index.html:51
 msgid "Russian"
 msgstr ""
 
-#: cscsite/csclub/templates/index.html:45
+#: cscsite/csclub/templates/index.html:51
 msgid "English"
 msgstr ""
 
-#: cscsite/csclub/templates/index.html:51
+#: cscsite/csclub/templates/index.html:57
 msgid "No active courses"
 msgstr "На ближайшее время нет курсов"
 
@@ -149,8 +158,7 @@ msgstr "регистрация"
 #, python-format
 msgid ""
 "\n"
-"    You (or someone pretending to be you) have asked to register an account "
-"at\n"
+"    You (or someone pretending to be you) have asked to register an account at\n"
 "    %(site_name)s.  If this wasn't you, please ignore this email\n"
 "    and your address will be removed from our records.\n"
 "    "
@@ -163,14 +171,12 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"    To activate this account, please click the following link within the "
-"next\n"
+"    To activate this account, please click the following link within the next\n"
 "    %(expiration_days)s days:\n"
 "    "
 msgstr ""
 "\n"
-"Чтобы активировать аккаунт, пожалуйста, нажмите на ссылку ниже. Будьте "
-"внимательны, через %(expiration_days)s дня ключ активации будет просрочен:"
+"Чтобы активировать аккаунт, пожалуйста, нажмите на ссылку ниже. Будьте внимательны, через %(expiration_days)s дня ключ активации будет просрочен:"
 
 #: cscsite/csclub/templates/registration/activation_email.html:31
 #, python-format
@@ -236,6 +242,12 @@ msgstr "Регистрация аккаунта на"
 msgid "Submit"
 msgstr "Отправить"
 
+#: cscsite/csclub/templates/users/teacher_list.html:29
+#, fuzzy
+#| msgid "No news yet"
+msgid "No professors yet"
+msgstr "Новостей пока нет"
+
 #~ msgid ""
 #~ "\n"
 #~ "Основная <strong>цель клуба</strong> — познакомить студентов с\n"
@@ -246,11 +258,7 @@ msgstr "Отправить"
 #~ "требуются. Приглашаются все желающие.\n"
 #~ msgstr ""
 #~ "\n"
-#~ "The main goal of the Club is to provide undergraduate and graduate "
-#~ "students, as well as professionals, access to high quality education in "
-#~ "the area of Computer Science. Lectures by local and foreign instructors "
-#~ "and researchers are usually held on Saturdays and Sundays at Steklov "
-#~ "Institute of Mathematics at St.\n"
+#~ "The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Lectures by local and foreign instructors and researchers are usually held on Saturdays and Sundays at Steklov Institute of Mathematics at St.\n"
 #~ "Petersburg. Attendance is open to everyone and is free of charge.\n"
 
 #~ msgid "Name"
@@ -270,9 +278,6 @@ msgstr "Отправить"
 
 #~ msgid "All news"
 #~ msgstr "Все новости"
-
-#~ msgid "No news yet"
-#~ msgstr "Новостей пока нет"
 
 #~ msgid "Supervision"
 #~ msgstr "Курирование"
