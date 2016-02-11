@@ -87,7 +87,7 @@ class AssignmentCommentAdmin(RelatedSpecMixin,
 
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ['student', 'course_offering', 'grade', 'grade_changed']
-    list_filter = ['course_offering__course']
+    list_filter = ['course_offering__semester', 'course_offering__course']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
