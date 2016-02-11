@@ -1694,7 +1694,7 @@ class OnlineCoursesListView(generic.ListView):
     model = OnlineCourse
 
     def get_queryset(self):
-        return OnlineCourse.objects.order_by("is_self_paced", "start", "name")
+        return OnlineCourse.objects.order_by("is_self_paced", "-start", "name")
 
 
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
