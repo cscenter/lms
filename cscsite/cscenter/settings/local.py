@@ -92,3 +92,8 @@ WEBPACK_LOADER = {
         'IGNORE': ['.+\.hot-update.js', '.+\.map']
     }
 }
+
+SLIDESHARE_API_KEY = "OX5YoPYg"
+SLIDESHARE_SECRET = "R3lITlTK"
+SLIDESHARE_USERNAME = "pacahon"
+SLIDESHARE_PASSWORD = "q3wcp001"

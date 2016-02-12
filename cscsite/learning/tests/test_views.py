@@ -1478,7 +1478,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
-        self.assertEquals(resp.context['structured'].items()[0][1]["total"], expected_total_score)
+        self.assertEquals(resp.context['students'].items()[0][1]["total"], expected_total_score)
 
     def test_save_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])

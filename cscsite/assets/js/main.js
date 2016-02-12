@@ -1,7 +1,6 @@
 "use strict";
 
 var ends_at_touched = false;
-var marks_sheet_unsaved = 0;
 
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
@@ -293,91 +292,6 @@ $(document).ready(function () {
             });
     })();
 
-
-    //
-    // Marks sheet (for teacher's one and staff's)
-    //
-
-    if (marks_sheet_unsaved == 0) {
-        $("#marks-sheet-save").attr("disabled", "disabled");
-    }
-
-    $(".marks-table.teacher").on("change", "input,select", function (e) {
-        var $this = $(this);
-        var $target = $(e.target);
-        var $csv_link = $(".marks-sheet-csv-link");
-        var current_value = $target.val();
-        var saved_value = $target.next("input[type=hidden]").val();
-        if (current_value != saved_value) {
-            $target.parent().addClass("marks-sheet-unsaved-cell");
-            marks_sheet_unsaved++;
-            if (marks_sheet_unsaved > 0) {
-                $("#marks-sheet-save").removeAttr("disabled");
-                $csv_link.addClass("disabled");
-            }
-        } else {
-            $target.parent().removeClass("marks-sheet-unsaved-cell");
-            marks_sheet_unsaved--;
-            if (marks_sheet_unsaved == 0) {
-                $("#marks-sheet-save").attr("disabled", "disabled");
-                $csv_link.removeClass("disabled");
-            }
-        }
-    });
-
-    // see this http://stackoverflow.com/a/8641208 for discussion
-    // about the following hack
-    $('.marks-table').each(function (i) {
-        $(this).find('tr').each(function() {
-            $(this).find('td').each(function(j) {
-                // order marks sheets for different course offerings properly
-                var idx = j + 1000 * (i + 1);
-                $(this).find('input,select').prop('tabindex', idx);
-            });
-        });
-    });
-
-    $('.marks-table')
-    // NOTE(Dmitry): this is needed to prevent default change-on-scroll
-    //               behavior on HTML5 number input fields
-        .on('mousewheel', 'input[type=number]', function (e) {
-            this.blur();
-        })
-        .on('keypress', 'input', function(e) {
-            var code = e.keyCode || e.which;
-            if (code == 13 || code == 10) {
-                if (e.metaKey || e.ctrlKey) {
-                    this.form.submit();
-                } else {
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
-
-
-    $('.marks-table.teacher').on('focus', 'input,select', function (e) {
-        $(this).closest("tr").addClass("active");
-        var tdIdx = $(this).closest("td").index();
-        ($(this).closest(".marks-table")
-         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
-         .addClass("active"));
-    });
-
-    $('.marks-table.teacher').on('blur', 'input,select', function (e) {
-        $(this).closest(".marks-table").find("td,tr").removeClass("active");
-    });
-
-    $('.marks-table.staff').on('click', 'td.content', function (e) {
-        $(this).closest(".marks-table").addClass("focused");
-        $(this).closest(".marks-table").find("td,tr").removeClass("active");
-        $(this).closest("tr").addClass("active");
-        var tdIdx = $(this).closest("td").index();
-        ($(this).closest(".marks-table")
-         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
-         .addClass("active"));
-    });
-
     if ($('.user-search').length > 0) {
         var enrollmentYears = {};
         var groups = {};
@@ -469,7 +383,5 @@ $(document).ready(function () {
                 cnt_enrollments[$(this).val()] = this.checked;
                 query();
             });
-
     }
-
 });
