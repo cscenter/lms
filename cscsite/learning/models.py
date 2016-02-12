@@ -436,6 +436,7 @@ class CourseClass(TimeStampedModel, object):
         # TODO: Delegate upload slides logic to task manager
         if self.slides != self.get_track_field("slides"):
             # TODO: Maybe we should try to delete old slides from slideshare
+            # TODO: Add tags to uploaded slides and we can do it
             self.slides_url = ""
         super(CourseClass, self).save()
         self.update_track_fields()

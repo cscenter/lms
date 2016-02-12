@@ -1390,7 +1390,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                             generic.FormView):
     is_for_staff = False
     user_type = 'teacher'
-    template_name = "learning/markssheet_teacher.html"
+    template_name = "learning/gradebook.html"
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
@@ -1422,25 +1422,26 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         self.course_offering = course_offering
 
         # Sacrifice attributes access for better performance
-        student_assignments = (StudentAssignment.objects
-                               .filter(assignment__course_offering=course_offering)
-                               .values("pk",
-                            "grade",
-                            "is_passed",
-                            "assignment__pk",
-                            "assignment__title",
-                            "assignment__is_online",
-                            "assignment__grade_max",
-                            "assignment__grade_min",
-                            "student__pk")
-                               .order_by("assignment__pk",
-                              "student__last_name",
-                              "student__first_name")
-                               )
+        student_assignments = (
+            StudentAssignment.objects
+                .filter(assignment__course_offering=course_offering)
+                .values("pk",
+                        "grade",
+                        "is_passed",
+                        "assignment__pk",
+                        "assignment__title",
+                        "assignment__is_online",
+                        "assignment__grade_max",
+                        "assignment__grade_min",
+                        "student__pk")
+                .order_by("assignment__pk",
+                          "student__pk")
+        )
         self.student_assignments = student_assignments
 
-        enrollment_list = Enrollment.objects.filter(
-            course_offering=course_offering).select_related("student")
+        enrollment_list = (Enrollment.objects
+                           .filter(course_offering=course_offering)
+                           .select_related("student"))
         self.enrollment_list = enrollment_list
 
         course_offering_list = (co_queryset
@@ -1485,52 +1486,25 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
         return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
+        context = (super(MarksSheetTeacherView, self)
+                   .get_context_data(*args, **kwargs))
+        context['course_offering'] = self.course_offering
+        context['course_offering_list'] = self.course_offering_list
+        context['user_type'] = self.user_type
 
-        # TODO: 1. Move to get_form_class method http://concentricsky.com/blog/2014/feb/custom-django-widget
-        def get_grade_widget(a_s):
-            # Note: Django's widgets soooo sloooooow
-            cell = a_s
-            if not a_s["assignment__is_online"]:
-                cell["form_field"] = \
-                    '<input type="number" name="a_s_{}" max="{}" min="0" value={}>'.format(
-                    a_s["pk"], a_s["assignment__grade_max"],
-                    a_s["grade"] if a_s["grade"] is not None else "")
-            else:
-                state = StudentAssignment.calculate_state(
-                    a_s["grade"],
-                    a_s["assignment__is_online"],
-                    a_s["is_passed"],
-                    a_s["assignment__grade_min"],
-                    a_s["assignment__grade_max"]
-                )
-                if a_s["grade"] is not None:
-                    cell["form_field"] = "{0}/{1}".format(
-                        a_s["grade"], a_s["assignment__grade_max"])
-                else:
-                    cell["form_field"] = StudentAssignment.SHORT_STATES[state]
-
-            return cell
+        students = OrderedDict()
+        assignments = OrderedDict()
 
         def get_final_grade_widget(enrollment_pk):
             key = GradeBookFormFactory.FINAL_GRADE_PREFIX.format(enrollment_pk)
             return kwargs['form'][key]
 
-        context = (super(MarksSheetTeacherView, self)
-                   .get_context_data(*args, **kwargs))
-
-        context['course_offering'] = self.course_offering
-        context['course_offering_list'] = self.course_offering_list
-        context['user_type'] = self.user_type
-
-        structured = OrderedDict()
-        assignment_headers = OrderedDict()
         for enrollment in self.enrollment_list:
             student_id = enrollment.student_id
-            if student_id not in structured:
-                structured[student_id] = OrderedDict({
+            if student_id not in students:
+                students[student_id] = OrderedDict({
                     "student": enrollment.student,
                     "grade": get_final_grade_widget(enrollment.pk),
-                    "assignments": OrderedDict(),
                     "total": 0
                 })
 
@@ -1538,29 +1512,55 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
             student_id = a_s["student__pk"]
             assignment_id = a_s["assignment__pk"]
             # The student unsubscribed from the course
-            if student_id not in structured:
+            if student_id not in students:
                 continue
 
-            structured[student_id]["assignments"][assignment_id] = get_grade_widget(a_s)
-            if a_s["grade"] is not None:
-                structured[student_id]["total"] += int(a_s["grade"])
-            if assignment_id not in assignment_headers:
-                assignment_headers[assignment_id] = {
-                    "pk": a_s["assignment__pk"],
-                    "title": a_s["assignment__title"],
-                    "is_online" : a_s["assignment__is_online"],
-                    "grade_min": a_s["assignment__grade_min"],
-                    "grade_max": a_s["assignment__grade_min"],
+            if assignment_id not in assignments:
+                assignments[assignment_id] = {
+                    "header": {
+                        "pk": a_s["assignment__pk"],
+                        "title": a_s["assignment__title"],
+                        "is_online": a_s["assignment__is_online"],
+                        "grade_min": a_s["assignment__grade_min"],
+                        "grade_max": a_s["assignment__grade_max"],
+                    },
+                    "students": OrderedDict(((sid, None) for sid in students))
                 }
-        for student in structured.values():
+            assignment = assignments[assignment_id]
+
+            state = None
+            if assignment["header"]["is_online"]:
+                state_value = StudentAssignment.calculate_state(
+                    a_s["grade"],
+                    assignment["header"]["is_online"],
+                    a_s["is_passed"],
+                    assignment["header"]["grade_min"],
+                    assignment["header"]["grade_max"],
+                )
+                if a_s["grade"] is not None:
+                    state = "{0}/{1}".format(a_s["grade"],
+                                             assignment["header"]["grade_max"])
+                else:
+                    state = StudentAssignment.SHORT_STATES[state_value]
+            assignment["students"][student_id] = {
+                "pk": a_s["pk"],
+                "grade": a_s["grade"],
+                "is_passed": a_s["is_passed"],
+                "state": state
+            }
+
+            if a_s["grade"] is not None:
+                students[student_id]["total"] += int(a_s["grade"])
+
+        for assignment in assignments.values():
             # we should check for "assignment consistency": that all
-            # assignments are similar for all students in particular
-            # course offering
-            assert student["assignments"].keys() == assignment_headers.keys()
+            # student assignments are presented
+            assert any(s is not None for s in assignment["students"])
 
-        context['assignment_headers'] = assignment_headers
-        context['structured'] = structured
-
+        context['students'] = students
+        context['assignments'] = assignments
+        # Magic "100" constant - width of .assignment column
+        context['assignments_width'] = len(assignments) * 100
 
         return context
 
