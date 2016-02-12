@@ -3,6 +3,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import io
+from abc import ABCMeta, abstractmethod
 
 import six
 import unicodecsv
@@ -11,9 +13,12 @@ from collections import OrderedDict, defaultdict
 from django.core.urlresolvers import reverse
 from django.db.models import F, Count, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
+from django.utils.encoding import smart_str, smart_unicode, smart_text, \
+    force_unicode
 from django.views import generic
 from django.http import HttpResponse, JsonResponse, Http404
 from braces.views import LoginRequiredMixin, JSONResponseMixin
+from xlsxwriter import Workbook
 
 from core.views import SuperUserOnlyMixin
 from learning.viewmixins import CuratorOnlyMixin
@@ -288,9 +293,7 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
         return response
 
 
-class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-
+class StudentSummaryBySemesterMixin(object):
     def get(self, request, *args, **kwargs):
         try:
             semester_year = int(self.kwargs['semester_year'])
@@ -331,12 +334,6 @@ class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
                 )
             s.courses = student_courses
 
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        filename = "sheet_{}_{}.csv".format(semester.year, semester.type)
-        response['Content-Disposition'] \
-            = 'attachment; filename="{}"'.format(filename)
-        w = unicodecsv.writer(response, encoding='utf-8')
-
         headers = [
             'Фамилия',
             'Имя',
@@ -361,8 +358,12 @@ class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
         for course_id, course_name in six.iteritems(courses_headers):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
-        w.writerow(headers)
 
+        return self.get_response(headers,
+                                 self.students_iter(students, courses_headers),
+                                 semester)
+
+    def students_iter(self, students, courses_headers):
         for s in students:
             row = [
                 s.last_name,
@@ -383,16 +384,71 @@ class StudentsSheetFilterBySemesterCSVView(CuratorOnlyMixin, generic.base.View):
                 s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
                 s.workplace,
                 len(s.courses) + len(s.shads),
-                request.build_absolute_uri(s.get_absolute_url())
+                self.request.build_absolute_uri(s.get_absolute_url())
             ]
-
             for course_id in courses_headers:
                 sc = s.courses[course_id]
                 row.extend([sc['grade'], sc['teachers']])
 
+            yield row
+
+    def get_response(self, headers, data, semester):
+        raise NotImplemented("StudentSummaryBySemesterMixin: not implemented")
+
+
+
+class StudentSummaryBySemesterCSVView(CuratorOnlyMixin,
+                                      StudentSummaryBySemesterMixin,
+                                      generic.base.View):
+    http_method_names = ['get']
+
+    def get_response(self, headers, data_iter, semester):
+        output = io.BytesIO()
+        w = unicodecsv.writer(output, encoding='utf-8')
+
+        w.writerow(headers)
+        for row in data_iter:
             w.writerow(row)
 
+        output.seek(0)
+        response = HttpResponse(output.read(),
+                                content_type='text/csv; charset=utf-8')
+        filename = "sheet_{}_{}.csv".format(semester.year, semester.type)
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         return response
+
+
+class StudentSummaryBySemesterExcel2010View(CuratorOnlyMixin,
+                                            StudentSummaryBySemesterMixin,
+                                            generic.base.View):
+    http_method_names = ['get']
+
+    def get_response(self, headers, data_iter, semester):
+        output = io.BytesIO()
+        workbook = Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet()
+
+        bold = workbook.add_format({'bold': True})
+        for index, header in enumerate(headers):
+            worksheet.write(0, index, header, bold)
+
+        for row_index, row in enumerate(data_iter, start=1):
+            for col_index, value in enumerate(row):
+                value = "" if value is None else force_unicode(value)
+                worksheet.write(row_index, col_index, force_unicode(value))
+
+        workbook.close()
+        output.seek(0)
+        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        filename = "sheet_{}_{}.xlsx".format(semester.year, semester.type)
+        response = HttpResponse(output.read(), content_type=content_type)
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        return response
+
+
+
+
+
 
 
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):

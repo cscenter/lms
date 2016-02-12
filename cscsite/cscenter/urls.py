@@ -12,7 +12,8 @@ from learning.views import \
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView, \
-    StudentsSheetFilterBySemesterCSVView, TotalStatisticsView
+    StudentSummaryBySemesterCSVView, TotalStatisticsView, \
+    StudentSummaryBySemesterExcel2010View
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -76,11 +77,14 @@ urlpatterns = [
         StudentsAllSheetCSVView.as_view(),
         name='staff_exports_sheet_all_students_csv'),
     url(r'^staff/exports/sheet/current_semester/csv/$',
-        StudentsSheetFilterBySemesterCSVView.as_view(),
+        StudentSummaryBySemesterCSVView.as_view(),
         name='staff_exports_students_sheet_current_semester_csv'),
     url(r'^staff/exports/sheet/(?P<semester_year>\d+)/(?P<semester_type>\w+)/csv/$',
-        StudentsSheetFilterBySemesterCSVView.as_view(),
+        StudentSummaryBySemesterCSVView.as_view(),
         name='staff_exports_students_sheet_filter_by_semester_csv'),
+    url(r'^staff/exports/sheet/(?P<semester_year>\d+)/(?P<semester_type>\w+)/xlsx/$',
+        StudentSummaryBySemesterExcel2010View.as_view(),
+        name='staff_exports_students_sheet_filter_by_semester_xlsx'),
     url(r'^staff/statistics/csv/$',
         TotalStatisticsView.as_view(),
         name='staff_total_statistics_csv'),
