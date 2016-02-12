@@ -21,13 +21,14 @@
         Launch: function () {
             fn.initFormSaveButton();
             fn.initFinalGradeSelect();
-            fn.initAssignmentGradeInput();
             fn.initFinalGradeSelectBehavior();
+            fn.initAssignmentGradeInput();
+            fn.assignmentGradeInputIncrementByArrows();
             fn.scrollButtons();
             //fn.restrictGradeInputChars();
             //fn.gradeInputFocus();
+            // TODO: Maby should replace with 1 .on delegate event
             // TODO: Sticky headers
-            // TODO: arrow up and down inc/dec - keypress event for better performance. Inspire by jquery-arrow
             // TODO: quick select for
 
         },
@@ -44,7 +45,7 @@
         },
 
         initAssignmentGradeInput: function() {
-            assignmentsWrapper.on("blur", "input", function (e) {
+            assignmentsWrapper.on("change", "input", function (e) {
                 var $this = $(this),
                     $target = $(e.target);
                 // Validate min-max
@@ -137,6 +138,45 @@
             });
         },
 
+        assignmentGradeInputIncrementByArrows: function() {
+            assignmentsWrapper.on("keydown", ".assignment input", function(e) {
+                if (e.keyCode === 38 || e.keyCode == 40) {
+                    var that = this; // input object
+                    // Mb it's incredibly stupid practice, who cares?
+                    if (that.increment === undefined || that.decrement === undefined) {
+                        that.increment = $.arrowIncrement.prototype.increment;
+                        that.decrement = $.arrowIncrement.prototype.decrement;
+                    }
+                    // TODO: get min/max
+
+                    that.opts = {
+                        // Slightly modified version of original $.arrowIncrement method
+                        parseFn: function (value) {
+                            var parsed = value.match(/^(\D*?)(\d*(,\d{3})*(\.\d+)?)\D*$/);
+                            if (parsed && parsed[2]) {
+                                if (parsed[1] && parsed[1].indexOf('-') >= 0) {
+                                    return -parsed[2].replace(',', '');
+                                } else {
+                                    return +parsed[2].replace(',', '');
+                                }
+                            }
+                            // Empty string as 0
+                            if (value.length == 0) {
+                                return 0;
+                            }
+                            return NaN;
+                        }
+                    };
+                    that.$element = $(this);
+                    if (e.keyCode === 38) { // up
+                        that.increment();
+                    } else if (e.keyCode === 40) { // down
+                        that.decrement();
+                    }
+                }
+            });
+        },
+
         restrictGradeInputChars: function() {
         }
     };
@@ -146,28 +186,3 @@
     });
 
 })(jQuery);
-
-
-
-
-    $('.marks-table.teacher').on('focus', 'input,select', function (e) {
-        $(this).closest("tr").addClass("active");
-        var tdIdx = $(this).closest("td").index();
-        ($(this).closest(".marks-table")
-         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
-         .addClass("active"));
-    });
-
-    $('.marks-table.teacher').on('blur', 'input,select', function (e) {
-        $(this).closest(".marks-table").find("td,tr").removeClass("active");
-    });
-
-    $('.marks-table.staff').on('click', 'td.content', function (e) {
-        $(this).closest(".marks-table").addClass("focused");
-        $(this).closest(".marks-table").find("td,tr").removeClass("active");
-        $(this).closest("tr").addClass("active");
-        var tdIdx = $(this).closest("td").index();
-        ($(this).closest(".marks-table")
-         .find("tr > td.content:nth-child(" + (tdIdx + 1) +")")
-         .addClass("active"));
-    });
