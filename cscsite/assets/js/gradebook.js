@@ -27,6 +27,8 @@
             //fn.restrictGradeInputChars();
             //fn.gradeInputFocus();
             // TODO: Sticky headers
+            // TODO: arrow up and down inc/dec - keypress event for better performance. Inspire by jquery-arrow
+            // TODO: quick select for
 
         },
 
