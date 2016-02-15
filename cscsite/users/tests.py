@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from bs4 import BeautifulSoup
 import factory
 from icalendar import Calendar, Event
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory
@@ -157,12 +157,6 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
-
-    @unittest.skip('not implemented')
-    def test_expelled(self):
-        """Center students and volunteers can't access student section
-        if there status equal expelled"""
-        pass
 
     def test_login_page(self):
         response = self.client.get(reverse('login'))
@@ -400,6 +394,27 @@ def test_club_students_profiles_on_cscenter_site(client,
     teacher_center = teacher_factory.create()
     client.login(teacher_center)
     url = reverse('user_detail', args=[student_club.pk])
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_expelled(client,
+                  student_center_factory,
+                  student_club_factory,
+                  student_factory,
+                  teacher_factory):
+    """Center students and volunteers can't access student section
+    if there status equal expelled"""
+    student = student_center_factory(status=STUDENT_STATUS.expelled)
+    client.login(student)
+    url = reverse('course_list_student')
+    response = client.get(url)
+    assert response.status_code == 302
+    assert "login" in response["Location"]
+    # active student
+    active_student = student_center_factory()
+    client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
 
