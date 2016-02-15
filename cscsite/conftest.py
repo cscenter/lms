@@ -9,7 +9,7 @@ from pytest_django.lazy_django import skip_if_no_django
 from core.models import City
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory, StudentFactory, StudentClubFactory, \
-    TeacherFactory
+    TeacherFactory, StudentCenterFactory
 
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
@@ -41,7 +41,12 @@ def user_factory():
 
 @pytest.fixture(scope="session")
 def student_factory():
+    """Both club and center groups"""
     return StudentFactory
+
+@pytest.fixture(scope="session")
+def student_center_factory():
+    return StudentCenterFactory
 
 @pytest.fixture(scope="session")
 def student_club_factory():
