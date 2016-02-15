@@ -107,7 +107,7 @@ class StudyProgramFactory(factory.DjangoModelFactory):
         model = StudyProgram
 
     name = factory.Sequence(lambda n: "Study program %03d" % n)
-    code = factory.Sequence(lambda n: "program_%03d" % n)
+    code = factory.Sequence(lambda n: "p%01d" % n)
 
 
 class CourseClassFactory(factory.DjangoModelFactory):
