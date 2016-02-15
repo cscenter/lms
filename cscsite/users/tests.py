@@ -377,19 +377,31 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, student_mail)
 
 @pytest.mark.django_db
-def test_prevent_show_club_students_profiles_on_cscenter_site(client,
-                                                              user_factory,
-                                                              student_club_factory,
-                                                              student_factory):
+def test_club_students_profiles_on_cscenter_site(client,
+                                                 user_factory,
+                                                 student_club_factory,
+                                                 student_factory,
+                                                 teacher_factory):
+    """Only teachers and curators can see club students profiles on cscenter site"""
     student_club = student_club_factory.create()
     url = reverse('user_detail', args=[student_club.pk])
     response = client.get(url)
     assert response.status_code == 404
+
     student = student_factory()
     url = reverse('user_detail', args=[student.pk])
     response = client.get(url)
     assert response.status_code == 200
+    client.login(student)
+    url = reverse('user_detail', args=[student_club.pk])
+    response = client.get(url)
+    assert response.status_code == 404
 
+    teacher_center = teacher_factory.create()
+    client.login(teacher_center)
+    url = reverse('user_detail', args=[student_club.pk])
+    response = client.get(url)
+    assert response.status_code == 200
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):

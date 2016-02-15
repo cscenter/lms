@@ -398,9 +398,17 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups = self.groups.values_list("pk", flat=True).all()
         # Restrict access for expelled students
         if self.status == self.STATUS.expelled:
+            center_student = (self.group_pks.STUDENT_CENTER in user_groups or
+                              self.group_pks.VOLUNTEER in user_groups)
             user_groups = [pk for pk in user_groups
                            if pk != self.group_pks.STUDENT_CENTER and
                               pk != self.group_pks.VOLUNTEER]
+            # Add club group on csclub site to expelled students
+            if (center_student
+                    and self.group_pks.STUDENT_CLUB not in user_groups
+                    and settings.SITE_ID == settings.CLUB_SITE_ID):
+                user_groups.append(self.group_pks.STUDENT_CLUB)
+
         return user_groups
 
     @property
@@ -419,9 +427,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @property
     def is_student(self):
-        return self.is_student_center or \
-               self.is_student_club or \
-               self.is_volunteer
+        return (self.is_student_center or
+                self.is_student_club or
+                self.is_volunteer)
 
     @cached_property
     def is_student_center(self):
