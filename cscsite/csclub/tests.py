@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import unittest
 
+import pytest
 from bs4 import BeautifulSoup
 
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from learning.factories import *
+from users.factories import UserFactory
 from learning.tests.mixins import *
 
 
@@ -31,7 +33,7 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
         self.assertNotContains(resp, co_kzn.course.name)
 
     def test_student_list_center_site(self):
-        s = UserFactory.create(groups=['Student [CENTER]'])
+        s = UserFactory.create(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
         self.doLogin(s)
         current_semester = SemesterFactory.create_current()
         co_center = CourseOfferingFactory(semester=current_semester,
@@ -49,3 +51,4 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
     def test_show_news_to_all(self):
         """ On csclub site all users can see news """
         pass
+
