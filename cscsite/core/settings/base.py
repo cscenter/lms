@@ -234,6 +234,6 @@ MICAWBER_DEFAULT_SETTINGS = {
 
 # SORL settings
 THUMBNAIL_DUMMY = True
-THUMBNAIL_DUMMY_SOURCE = "http://dummyimage.com/220x40/000000/ffffff&text=404+(Not+Found)"
+THUMBNAIL_DUMMY_SOURCE = "http://dummyimage.com/166x166/000000/ffffff&text=404+(Not+Found)"
 
 WEBPACK_LOADER = {}

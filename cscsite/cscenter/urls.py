@@ -6,7 +6,8 @@ from django.contrib import admin
 from core.views import MarkdownRenderView
 from htmlpages import views
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
-    UnsubscribeYaProxyView, EnrollmentApplicationCallback
+    UnsubscribeYaProxyView, EnrollmentApplicationCallback, \
+    AlumniViewByStudyProgram
 from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherDispatchView
 from staff.views import ExportsView, StudentsDiplomasView, \
@@ -50,6 +51,9 @@ urlpatterns = [
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
+    url(r'^alumni/(?P<study_program_code>[-\w]+)/$',
+        AlumniViewByStudyProgram.as_view(),
+        name='alumni_by_study_program'),
 
     # TODO: refactor
     url(r'^staff/course-marks/$',

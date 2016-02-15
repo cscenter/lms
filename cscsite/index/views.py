@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db import transaction
 from django.db.models import Q, Count, Prefetch
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.utils.timezone import now
 from django.utils.translation import get_language, ugettext_lazy as _
 from django.views import generic
@@ -20,7 +20,7 @@ from django.views import generic
 import requests
 from braces import views
 
-from learning.models import OnlineCourse, CourseOffering, Semester
+from learning.models import OnlineCourse, CourseOffering, Semester, StudyProgram
 from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
@@ -65,16 +65,40 @@ class IndexView(generic.TemplateView):
         return context
 
 
-# TODO: test it
-class AlumniView(generic.ListView):
-    template_name = "users/alumni_list.html"
-
+class AlumniViewMixin(object):
     def get_queryset(self):
         user_model = get_user_model()
         graduate_pk = user_model.group_pks.GRADUATE_CENTER
         return (user_model.objects
                 .filter(groups__pk=graduate_pk)
                 .order_by("-graduation_year", "last_name", "first_name"))
+
+    def get_context_data(self, **kwargs):
+        context = super(AlumniViewMixin, self).get_context_data(**kwargs)
+        context["study_programs"] = StudyProgram.objects.all()
+        return context
+
+class AlumniView(AlumniViewMixin, generic.ListView):
+    template_name = "users/alumni_list.html"
+
+
+class AlumniViewByStudyProgram(AlumniViewMixin, generic.ListView):
+    template_name = "users/alumni_list.html"
+
+    def get_queryset(self):
+        code = self.kwargs.get("study_program_code")
+        queryset = super(AlumniViewByStudyProgram, self).get_queryset().filter(
+            study_programs=code)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        code = self.kwargs.get("study_program_code")
+        context = super(AlumniViewByStudyProgram, self).get_context_data(**kwargs)
+        if code not in (s.code for s in context["study_programs"]):
+            raise Http404
+        context["selected_study_program"] = code
+        return context
+
 
 
 class TeachersView(generic.ListView):

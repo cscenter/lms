@@ -1,0 +1,38 @@
+#graduates {
+  @extend .container;
+  padding: 80px 0;
+
+  .graduates-list-filter {
+    width: 86%;
+  }
+
+  .graduates-list {
+    @extend .row;
+
+    h3 {
+      @extend .col-xs-12;
+    }
+
+    .graduates-list__item {
+      width: 170px;
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: top;
+      margin: 0 15px 32px;
+
+      img {
+        max-width: 170px;
+        max-height: 170px;
+      }
+
+      a {
+        font-weight: 300;
+        margin-top: 16px;
+        font-size: 16px;
+        display: inline-block;
+        line-height: 22px;
+        max-width: 170px;
+      }
+    }
+  }
+}
