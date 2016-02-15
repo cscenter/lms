@@ -395,7 +395,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups = self._prefetched_objects_cache['groups']
             user_groups = [group.pk for group in user_groups]
         except (AttributeError, KeyError):
-            user_groups = self.groups.values_list("pk", flat=True).all()
+            user_groups = list(self.groups.values_list("pk", flat=True))
 
         center_student = (self.group_pks.STUDENT_CENTER in user_groups or
                           self.group_pks.VOLUNTEER in user_groups or
