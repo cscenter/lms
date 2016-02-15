@@ -3,39 +3,43 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-  {% regroup object_list by graduation_year as alumni_list %}
-  {% for alumni_by_year in alumni_list %}
-    <div class="col-xs-12">
-    <h3>{{ alumni_by_year.grouper }}</h3>
-    {% for alumni in alumni_by_year.list %}
-      {% if forloop.counter0|divisibleby:2 %}
-      <div class="row">
-      {% endif %}
-        <div class="col-xs-6 user-tile">
-          <div class="col-xs-3">
-          {% if alumni.photo %}
-          {% thumbnail alumni.photo "100x100" crop="center" as im %}
-            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-          {% endthumbnail %}
-          {% endif %}
-          </div>
-          <div class="col-xs-9">
-            <h4><a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a></h4>
-            <div class="ubertext">{% markdown 3600 "alumni_short_note" alumni.pk alumni.get_short_note %}
-                {{ alumni.get_short_note }}
-              {% endmarkdown %}</div>
-          </div>
+    {% regroup object_list by graduation_year as alumni_list %}
+    <div id="graduates">
+        <div class="graduates-list-filter">
+            <ul class="nav nav-tabs material" role="tablist">
+                <li {% if not selected_study_program %}class="active"{% endif %}>
+                    <a href="{% url "alumni" %}">{% trans "All areas" %}</a>
+                    {% for study_program in study_programs %}
+                        <li{% if study_program.code == selected_study_program %}
+                            class="active"{% endif %}>
+                        <a href="{% url "alumni_by_study_program" study_program.code %}">{{ study_program }}</a>
+                    {% endfor %}
+            </ul>
         </div>
-      {% if not forloop.counter0|divisibleby:2 or forloop.last %}
-      </div>
-      {% endif %}
-    {% endfor %}
+
+        <div class="graduates-list">
+            {% for alumni_by_year in alumni_list %}
+                <h3>{{ alumni_by_year.grouper }}</h3>
+                {% for alumni in alumni_by_year.list %}
+                    <div class="graduates-list__item">
+                        {% if alumni.photo %}
+                            {% thumbnail alumni.photo "170x170" crop="center" as im %}
+                                <img src="{{ im.url }}" width="{{ im.width }}"
+                                     height="{{ im.height }}">
+                            {% endthumbnail %}
+                        {% else %}
+                            <img src="{% static "img/center/brain.jpg" %}"/>
+                        {% endif %}
+                        <a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a>
+                    </div>
+                {% endfor %}
+                <div class="clearfix"></div>
+                {% empty %}
+                {% trans "No alumni yet" %}
+            {% endfor %}
+        </div>
     </div>
-  {% empty %}
-    {% trans "No alumni yet" %}
-  {% endfor %}
-</div>
 {% endblock content %}

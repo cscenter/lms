@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-12 16:31+0300\n"
-"PO-Revision-Date: 2016-02-12 16:32+0230\n"
+"POT-Creation-Date: 2016-02-15 17:33+0300\n"
+"PO-Revision-Date: 2016-02-15 17:34+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -106,19 +106,19 @@ msgstr "email заявки на поступление"
 msgid "Enrollment application emails"
 msgstr "email'ы заявок на поступление"
 
-#: cscsite/index/views.py:116
+#: cscsite/index/views.py:140
 msgid "Subscription wasn't found"
 msgstr "Подписка не найдена"
 
-#: cscsite/index/views.py:117
+#: cscsite/index/views.py:141
 msgid "There was en error, please try again later"
 msgstr "Произошла ошибка, пожалуйста, попробуйте ещё раз позже"
 
-#: cscsite/index/views.py:118
+#: cscsite/index/views.py:142
 msgid "There was an error, but your subscription will be removed"
 msgstr "Произошла ошибка, но подписка будет удалена позже"
 
-#: cscsite/index/views.py:120
+#: cscsite/index/views.py:144
 msgid "Subscription removed!"
 msgstr "Подписка удалена!"
 
@@ -151,8 +151,8 @@ msgid "Text"
 msgstr "Текст"
 
 #: cscsite/learning/forms.py:89 cscsite/learning/models.py:47
-#: cscsite/learning/models.py:989 cscsite/users/models.py:458
-#: cscsite/users/models.py:476
+#: cscsite/learning/models.py:989 cscsite/users/models.py:467
+#: cscsite/users/models.py:485
 msgid "Course|name"
 msgstr "Название"
 
@@ -369,7 +369,7 @@ msgstr ""
 #: cscsite/learning/models.py:941
 #: cscsite/templates/learning/courses/list_student.html:85
 #: cscsite/templates/learning/courses/list_teacher.html:58
-#: cscsite/users/models.py:149 cscsite/users/models.py:480
+#: cscsite/users/models.py:149 cscsite/users/models.py:489
 msgid "Semester"
 msgstr "Семестр"
 
@@ -690,12 +690,12 @@ msgstr "Комментарии к заданиям"
 #: cscsite/templates/learning/assignment_detail_teacher.html:64
 #: cscsite/templates/learning/assignment_list_teacher.html:66
 #: cscsite/templates/learning/student_assignment_detail.html:140
-#: cscsite/users/models.py:156 cscsite/users/models.py:456
-#: cscsite/users/models.py:474 cscsite/users/models.py:508
+#: cscsite/users/models.py:156 cscsite/users/models.py:465
+#: cscsite/users/models.py:483 cscsite/users/models.py:517
 msgid "Student"
 msgstr "Студент"
 
-#: cscsite/learning/models.py:775 cscsite/users/models.py:484
+#: cscsite/learning/models.py:775 cscsite/users/models.py:493
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1589,7 +1589,6 @@ msgid "From Yandex"
 msgstr "По Yandex-логину"
 
 #: cscsite/templates/learning/gradebook.html:82
-#| msgid "Students"
 msgid "Students total"
 msgstr "Всего студентов"
 
@@ -1791,7 +1790,11 @@ msgstr "Отмена подписки"
 msgid "Do you want to unsubscribe from"
 msgstr "Вы действительно хотите отменить подписку "
 
-#: cscsite/templates/users/alumni_list.html:38
+#: cscsite/templates/users/alumni_list.html:14
+msgid "All areas"
+msgstr "Все направления"
+
+#: cscsite/templates/users/alumni_list.html:41
 msgid "No alumni yet"
 msgstr "Список выпускников пуст"
 
@@ -1920,8 +1923,8 @@ msgstr "Учебная программа"
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/templates/users/user_detail.html:329 cscsite/users/tests.py:504
-#: cscsite/users/tests.py:509
+#: cscsite/templates/users/user_detail.html:329 cscsite/users/tests.py:564
+#: cscsite/users/tests.py:569
 msgid "Student references"
 msgstr "Справки студента"
 
@@ -1929,8 +1932,8 @@ msgstr "Справки студента"
 msgid "Edit in admin"
 msgstr "Редактировать в админ-панели"
 
-#: cscsite/templates/users/user_detail.html:366 cscsite/users/tests.py:481
-#: cscsite/users/tests.py:489
+#: cscsite/templates/users/user_detail.html:366 cscsite/users/tests.py:541
+#: cscsite/users/tests.py:549
 msgid "Create reference"
 msgstr "Выдать справку"
 
@@ -2127,39 +2130,39 @@ msgstr "Пользователь"
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: cscsite/users/models.py:462
+#: cscsite/users/models.py:471
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: cscsite/users/models.py:463
+#: cscsite/users/models.py:472
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: cscsite/users/models.py:477
+#: cscsite/users/models.py:486
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: cscsite/users/models.py:490
+#: cscsite/users/models.py:499
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: cscsite/users/models.py:491
+#: cscsite/users/models.py:500
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: cscsite/users/models.py:503
+#: cscsite/users/models.py:512
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: cscsite/users/models.py:504
+#: cscsite/users/models.py:513
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: cscsite/users/models.py:513
+#: cscsite/users/models.py:522
 msgid "User reference record"
 msgstr "Справка пользователя"
 
-#: cscsite/users/models.py:514
+#: cscsite/users/models.py:523
 msgid "User reference records"
 msgstr "Справки пользователей"
 

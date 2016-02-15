@@ -16,7 +16,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text, force_unicode
 from django.utils import translation
 from django.utils.translation import ugettext as _
 
@@ -26,7 +26,7 @@ from icalendar import Calendar, Event
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import StudentProjectFactory, SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
-    AssignmentFactory, NonCourseEventFactory, CourseFactory
+    AssignmentFactory, NonCourseEventFactory, CourseFactory, StudyProgramFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
 from .admin import CSCUserCreationForm, CSCUserChangeForm
@@ -417,6 +417,39 @@ def test_expelled(client,
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
+
+@pytest.mark.django_db
+def test_alumni(client,
+                student_center_factory,
+                student_club_factory,
+                student_factory,
+                user_factory,
+                teacher_factory):
+    graduated = user_factory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    student_center = student_center_factory()
+    client.login(graduated)
+    url_list_all = reverse('alumni')
+    response = client.get(url_list_all)
+    assert student_center.last_name not in force_unicode(response.content)
+    assert graduated.last_name in force_unicode(response.content)
+    url = reverse('alumni_by_study_program', args=["-"])
+    response = client.get(url)
+    assert response.status_code == 404
+    st1 = StudyProgramFactory.create()
+    st2 = StudyProgramFactory.create()
+    url = reverse('alumni_by_study_program', args=[st1.code])
+    response = client.get(url)
+    assert "study_programs" in response.context
+    assert len(response.context["study_programs"]) == 2
+    graduated.study_programs.add(st1.code)
+    url = reverse('alumni_by_study_program', args=[st1.code])
+    response = client.get(url)
+    assert graduated.last_name in force_unicode(response.content)
+    response = client.get(url_list_all)
+    assert graduated.last_name in force_unicode(response.content)
+    url = reverse('alumni_by_study_program', args=[st2.code])
+    response = client.get(url)
+    assert graduated.last_name not in force_unicode(response.content)
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):
