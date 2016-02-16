@@ -82,6 +82,7 @@ class AlumniView(AlumniViewMixin, generic.ListView):
     template_name = "users/alumni_list.html"
 
 
+# TODO: rewrite with js filter?
 class AlumniViewByStudyProgram(AlumniViewMixin, generic.ListView):
     template_name = "users/alumni_list.html"
 

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-15 17:33+0300\n"
-"PO-Revision-Date: 2016-02-15 17:34+0230\n"
+"POT-Creation-Date: 2016-02-16 13:58+0300\n"
+"PO-Revision-Date: 2016-02-16 13:59+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -106,19 +106,19 @@ msgstr "email заявки на поступление"
 msgid "Enrollment application emails"
 msgstr "email'ы заявок на поступление"
 
-#: cscsite/index/views.py:140
+#: cscsite/index/views.py:141
 msgid "Subscription wasn't found"
 msgstr "Подписка не найдена"
 
-#: cscsite/index/views.py:141
+#: cscsite/index/views.py:142
 msgid "There was en error, please try again later"
 msgstr "Произошла ошибка, пожалуйста, попробуйте ещё раз позже"
 
-#: cscsite/index/views.py:142
+#: cscsite/index/views.py:143
 msgid "There was an error, but your subscription will be removed"
 msgstr "Произошла ошибка, но подписка будет удалена позже"
 
-#: cscsite/index/views.py:144
+#: cscsite/index/views.py:145
 msgid "Subscription removed!"
 msgstr "Подписка удалена!"
 
@@ -137,7 +137,7 @@ msgid "Cancel"
 msgstr "Отмена"
 
 #: cscsite/learning/forms.py:26 cscsite/learning/forms.py:251
-#: cscsite/templates/learning/gradebook.html:27 cscsite/users/forms.py:116
+#: cscsite/templates/learning/gradebook.html:27 cscsite/users/forms.py:117
 msgid "Save"
 msgstr "Сохранить"
 
@@ -356,10 +356,9 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: cscsite/learning/models.py:82
-#, fuzzy
 #| msgid "Semester"
 msgid "Semester index"
-msgstr "Семестр"
+msgstr "Порядковый номер семестра (служебное поле)"
 
 #: cscsite/learning/models.py:83
 msgid "System field. Do not manually edit"
@@ -894,47 +893,47 @@ msgstr "Студент клуба"
 msgid "Teacher [CLUB]"
 msgstr "Преподаватель клуба"
 
-#: cscsite/learning/settings.py:28
+#: cscsite/learning/settings.py:35
 msgid "StudentInfo|Expelled"
 msgstr "Отчислен"
 
-#: cscsite/learning/settings.py:29
+#: cscsite/learning/settings.py:36
 msgid "StudentInfo|Reinstalled"
 msgstr "Восстановлен"
 
-#: cscsite/learning/settings.py:30
+#: cscsite/learning/settings.py:37
 msgid "StudentInfo|Will graduate"
 msgstr "Будет выпускаться"
 
-#: cscsite/learning/settings.py:33
+#: cscsite/learning/settings.py:40
 msgid "Not graded"
 msgstr "Без оценки"
 
-#: cscsite/learning/settings.py:34
+#: cscsite/learning/settings.py:41
 msgid "Enrollment|Unsatisfactory"
 msgstr "Незачёт"
 
-#: cscsite/learning/settings.py:35
+#: cscsite/learning/settings.py:42
 msgid "Enrollment|Pass"
 msgstr "Зачёт"
 
-#: cscsite/learning/settings.py:36
+#: cscsite/learning/settings.py:43
 msgid "Good"
 msgstr "Хорошо"
 
-#: cscsite/learning/settings.py:37
+#: cscsite/learning/settings.py:44
 msgid "Excellent"
 msgstr "Отлично"
 
-#: cscsite/learning/settings.py:47
+#: cscsite/learning/settings.py:54
 msgid "spring"
 msgstr "весна"
 
-#: cscsite/learning/settings.py:48
+#: cscsite/learning/settings.py:55
 msgid "summer"
 msgstr "лето"
 
-#: cscsite/learning/settings.py:49
+#: cscsite/learning/settings.py:56
 msgid "autumn"
 msgstr "осень"
 
@@ -1977,36 +1976,37 @@ msgstr "Внешние сервисы"
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: cscsite/users/forms.py:22
+#: cscsite/users/forms.py:23
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: cscsite/users/forms.py:26
+#: cscsite/users/forms.py:27
 msgid "Password"
 msgstr "Пароль"
 
-#: cscsite/users/forms.py:33
+#: cscsite/users/forms.py:34
 #, python-brace-format
 msgid "You can also <a href=\"{0}\">restore your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">восстановить ваш пароль</a>"
 
-#: cscsite/users/forms.py:42
+#: cscsite/users/forms.py:43
 msgid "Login"
 msgstr "Войти"
 
-#: cscsite/users/forms.py:55
-msgid "Students of CS-club can't login on CS-center site"
-msgstr "Студенты клуба не могут пользоваться сайтом CS Центра"
+#: cscsite/users/forms.py:56
+#| msgid "Students of CS-club can't login on CS-center site"
+msgid "Users of CS-club can't login on CS-center site"
+msgstr "Пользователи клуба не могут пользоваться сайтом CS Центра"
 
-#: cscsite/users/forms.py:104 cscsite/users/models.py:265
+#: cscsite/users/forms.py:105 cscsite/users/models.py:265
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
-#: cscsite/users/forms.py:105
+#: cscsite/users/forms.py:106
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: cscsite/users/forms.py:107
+#: cscsite/users/forms.py:108
 msgid "stepic.org/users/<b>STEPIC-ID</b>"
 msgstr "stepic.org/users/<b>STEPIC-ID</b>"
 

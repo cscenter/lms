@@ -169,16 +169,18 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(len(form.select('input[type="submit"]')), 1)
 
     def test_login_works(self):
-        good_user = UserFactory.attributes()
-        CSCUser.objects.create_user(**good_user)
+        good_user_attrs = UserFactory.attributes()
+        good_user = CSCUser.objects.create_user(**good_user_attrs)
+        # graduated students redirected to LOGIN_REDIRECT_URL
+        good_user.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
         self.assertNotIn('_auth_user_id', self.client.session)
-        bad_user = copy.copy(good_user)
+        bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
         resp = self.client.post(reverse('login'), bad_user)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
         assert len(resp.context['form'].errors) > 0
-        resp = self.client.post(reverse('login'), good_user)
+        resp = self.client.post(reverse('login'), good_user_attrs)
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
 
@@ -190,10 +192,13 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser.objects.create_user(**user_data)
         url = reverse('assignment_list_teacher')
         assertLoginRedirect(url)
-        self.client.post(reverse('login'), user_data)
+        response = self.client.post(reverse('login'), user_data)
+        assert response.status_code == 200
         assertLoginRedirect(url)
         user.groups = [user.group_pks.STUDENT_CENTER]
         user.save()
+        response = self.client.post(reverse('login'), user_data)
+        assert response.status_code == 302
         resp = self.client.get(reverse('assignment_list_teacher'))
         assertLoginRedirect(url)
         user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
@@ -450,6 +455,67 @@ def test_alumni(client,
     url = reverse('alumni_by_study_program', args=[st2.code])
     response = client.get(url)
     assert graduated.last_name not in force_unicode(response.content)
+
+
+@pytest.mark.django_db
+def test_login_restrictions(client, settings):
+    """Again. Club students and teachers have no access to center site"""
+    assert settings.SITE_ID == settings.CENTER_SITE_ID
+
+    user_data = UserFactory.attributes()
+    student = CSCUser.objects.create_user(**user_data)
+    # Try to login without groups at all
+    response = client.post(reverse('login'), user_data)
+    assert response.status_code == 200
+    assert len(response.context["form"].errors) > 0
+    # Login as center student
+    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # Login as center and club student simultaneously
+    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # Login as volunteer
+    student.groups = [PARTICIPANT_GROUPS.VOLUNTEER]
+    student.save()
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # Login as volunteer and club students simultaneously
+    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # Login as graduate only
+    student.groups = [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+    student.save()
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # graduate and club
+    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    client.logout()
+    # Only club gtfo
+    student.groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
+    student.save()
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert not response.context["request"].user.is_authenticated()
+    # Club teacher
+    student.groups.add(PARTICIPANT_GROUPS.TEACHER_CLUB)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert not response.context["request"].user.is_authenticated()
+    # Center teacher
+    student.groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
+    response = client.post(reverse('login'), user_data, follow=True)
+    assert response.context["request"].user.is_authenticated()
+    # Just to make sure we have no super user permissions
+    assert not response.context["request"].user.is_curator
+
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):

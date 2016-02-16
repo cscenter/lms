@@ -24,6 +24,13 @@ PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
     (6, 'TEACHER_CLUB', _('Teacher [CLUB]')),
 ))
 
+GROUPS_HAS_ACCESS_TO_CENTER = (
+    PARTICIPANT_GROUPS.STUDENT_CENTER,
+    PARTICIPANT_GROUPS.VOLUNTEER,
+    PARTICIPANT_GROUPS.TEACHER_CENTER,
+    PARTICIPANT_GROUPS.GRADUATE_CENTER,
+)
+
 STUDENT_STATUS = getattr(settings, 'STUDENT_STATUS',
                          Choices(('expelled', _("StudentInfo|Expelled")),
                                  ('reinstated', _("StudentInfo|Reinstalled")),

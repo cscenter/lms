@@ -13,6 +13,7 @@ import floppyforms.__future__ as forms
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
+from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
 from .models import CSCUser, CSCUserReference
 
 
@@ -45,14 +46,14 @@ class LoginForm(AuthenticationForm):
     def is_valid(self):
         is_valid = super(LoginForm, self).is_valid()
         # Prevent login for club students on cscenter site
-        if is_valid and settings.SITE_ID == 1:
+        if is_valid and settings.SITE_ID == settings.CENTER_SITE_ID:
             user = self.get_user()
             if user.is_curator:
                 return is_valid
-            user_groups = [g.pk for g in user.groups.all()]
-            if CSCUser.group_pks.STUDENT_CLUB in user_groups:
+            user_groups = set(g.pk for g in user.groups.all())
+            if not user_groups.intersection(GROUPS_HAS_ACCESS_TO_CENTER):
                 is_valid = False
-                self.add_error(None, ValidationError(_("Students of CS-club can't login on CS-center site")))
+                self.add_error(None, ValidationError(_("Users of CS-club can't login on CS-center site")))
         return is_valid
 
 
