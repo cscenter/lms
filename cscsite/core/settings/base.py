@@ -15,6 +15,9 @@ PROJECT_DIR = Path(__file__).ancestor(3)
 MEDIA_ROOT = PROJECT_DIR.child("media")
 MEDIA_URL = "/media/"
 
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
+FILE_UPLOAD_PERMISSIONS = 0o664
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = MODELTRANSLATION_DEBUG = True
 THUMBNAIL_DEBUG = False
@@ -84,6 +87,7 @@ INSTALLED_APPS = (
     'news',
     'index',
     'learning',
+    # 'learning.admission',
     'staff',
     'library',
     'loginas',
