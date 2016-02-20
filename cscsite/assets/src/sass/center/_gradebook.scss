@@ -164,7 +164,7 @@ $unsaved-state-color: #dcf0ff;
         input {
           cursor: pointer;
           width: 100%;
-          border: 0;
+          border: 1px solid transparent;
           padding: 2px;
           height: $cell-height + 8px;
           text-align: right;
@@ -175,6 +175,10 @@ $unsaved-state-color: #dcf0ff;
 
           &.__unsaved {
             background: $unsaved-state-color;
+          }
+
+          &:hover {
+            border-color: $unsaved-state-color;
           }
         }
 
