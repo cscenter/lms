@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-16 13:58+0300\n"
-"PO-Revision-Date: 2016-02-16 13:59+0230\n"
-"Last-Translator:   <>\n"
+"POT-Creation-Date: 2016-02-25 14:23+0300\n"
+"PO-Revision-Date: 2016-02-25 14:24+0230\n"
+"Last-Translator:   <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -356,7 +356,6 @@ msgid "Semester|type"
 msgstr "Тип"
 
 #: cscsite/learning/models.py:82
-#| msgid "Semester"
 msgid "Semester index"
 msgstr "Порядковый номер семестра (служебное поле)"
 
@@ -866,6 +865,44 @@ msgstr "Онлайн-курс"
 #: cscsite/learning/models.py:1013 cscsite/templates/users/user_detail.html:91
 msgid "Online courses"
 msgstr "Онлайн-курсы"
+
+#: cscsite/learning/models.py:1024
+msgid "InternationalSchool|name"
+msgstr "Название международной школы"
+
+#: cscsite/learning/models.py:1026
+msgid "InternationalSchool|Link"
+msgstr "Ссылка на подробную информацию"
+
+#: cscsite/learning/models.py:1027
+msgid "InternationalSchool|place"
+msgstr "Место проведения"
+
+#: cscsite/learning/models.py:1028
+msgid "InternationalSchool|Deadline"
+msgstr "Крайний срок подачи заявок"
+
+#: cscsite/learning/models.py:1029
+#| msgid "InternationalSchool|Grants"
+msgid "InternationalSchool|Start"
+msgstr "Начало обучения"
+
+#: cscsite/learning/models.py:1030
+#| msgid "InternationalSchool|name"
+msgid "InternationalSchool|End"
+msgstr "Окончание обучения"
+
+#: cscsite/learning/models.py:1032
+msgid "InternationalSchool|Grants"
+msgstr "Гранты"
+
+#: cscsite/learning/models.py:1038
+msgid "International school"
+msgstr "Международная школа"
+
+#: cscsite/learning/models.py:1039
+msgid "International schools"
+msgstr "Международные школы"
 
 #: cscsite/learning/settings.py:19
 msgid "Student [CENTER]"
@@ -1922,8 +1959,8 @@ msgstr "Учебная программа"
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/templates/users/user_detail.html:329 cscsite/users/tests.py:564
-#: cscsite/users/tests.py:569
+#: cscsite/templates/users/user_detail.html:329 cscsite/users/tests.py:630
+#: cscsite/users/tests.py:635
 msgid "Student references"
 msgstr "Справки студента"
 
@@ -1931,8 +1968,8 @@ msgstr "Справки студента"
 msgid "Edit in admin"
 msgstr "Редактировать в админ-панели"
 
-#: cscsite/templates/users/user_detail.html:366 cscsite/users/tests.py:541
-#: cscsite/users/tests.py:549
+#: cscsite/templates/users/user_detail.html:366 cscsite/users/tests.py:607
+#: cscsite/users/tests.py:615
 msgid "Create reference"
 msgstr "Выдать справку"
 
@@ -1994,7 +2031,6 @@ msgid "Login"
 msgstr "Войти"
 
 #: cscsite/users/forms.py:56
-#| msgid "Students of CS-club can't login on CS-center site"
 msgid "Users of CS-club can't login on CS-center site"
 msgstr "Пользователи клуба не могут пользоваться сайтом CS Центра"
 

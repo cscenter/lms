@@ -5,7 +5,7 @@ $min-width: 940px;
 $color-blue: #337ab7;
 $color-grey: #9B9B9B;
 $color-orange: #f2a654;
-$color-green: #8CE087;
+$color-green: #5cb85c;
 $color-red: #f96868;
 $color-yellow: #f9cd48;
 $color-purple: #6a679e;
@@ -14,7 +14,7 @@ $btn-primary-bg:  $color-blue;
 $btn-primary-border:  $btn-primary-bg;
 
 $brand-success: $color-green;
-$brand-danger: #ef4036;
+$brand-danger: #d9534f;
 
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";
@@ -32,7 +32,12 @@ $brand-danger: #ef4036;
 //@import "pages/student_assignment";
 @import "pages/graduates";
 
-// TODO: Rewrite it all with less
+// Boostrap overrides for cscenter site
+.btn-danger, .btn-success {
+  padding: 10px 12px;
+}
+
+
 blockquote {
   font-size: 14px;
 }

@@ -41,7 +41,8 @@ from learning.views import \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherImportCSVFromYandexView, \
     MarksSheetTeacherDispatchView, \
-    NonCourseEventDetailView, AssignmentAttachmentDownloadView
+    NonCourseEventDetailView, AssignmentAttachmentDownloadView, \
+    InternationalSchoolsListView
 
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
@@ -240,6 +241,8 @@ urlpatterns += patterns('',
     url(r"^venues/(?P<pk>\d+)/$", VenueDetailView.as_view(),
         name="venue_detail"),
 
+    url(r"^schools/$", InternationalSchoolsListView.as_view(),
+        name="international_schools_list"),
     url(r"^events/(?P<pk>\d+)/$", NonCourseEventDetailView.as_view(),
         name="non_course_event_detail"),
 

@@ -11,6 +11,9 @@ DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 run:
 	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
 
+club:
+	python manage.py runserver_plus --settings=csclub.settings.local 8002
+
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 
