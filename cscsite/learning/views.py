@@ -43,7 +43,7 @@ from .models import Course, CourseClass, CourseOffering, Venue, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    OnlineCourse
+    OnlineCourse, InternationalSchool
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -1695,6 +1695,15 @@ class OnlineCoursesListView(generic.ListView):
 
     def get_queryset(self):
         return OnlineCourse.objects.order_by("is_self_paced", "-start", "name")
+
+
+class InternationalSchoolsListView(generic.ListView):
+    model = InternationalSchool
+    context_object_name = 'schools'
+    template_name = "learning/international_schools.html"
+
+    def get_queryset(self):
+        return InternationalSchool.objects.order_by("-deadline")
 
 
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):

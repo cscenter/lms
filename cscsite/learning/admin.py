@@ -10,7 +10,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
-    CourseOfferingTeacher
+    CourseOfferingTeacher, InternationalSchool
 from learning.settings import PARTICIPANT_GROUPS
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
@@ -134,8 +134,13 @@ class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
     pass
 
 
+class InternationalSchoolAdmin(UbereditorMixin, admin.ModelAdmin):
+    list_display = ['name', 'deadline', 'has_grants']
+
+
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
+admin.site.register(InternationalSchool, InternationalSchoolAdmin)
 admin.site.register(Semester)
 admin.site.register(CourseOffering, CourseOfferingAdmin)
 admin.site.register(Venue, VenueAdmin)

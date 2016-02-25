@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="international-schools">
+    Список школ также поддерживается в <a href="https://vk.com/compscischools">группе Вконтакте</a>
+    и в группе <a href="https://www.facebook.com/compscischools">в Фейсбуке</a>.<br>
+    Для добавления анонса школы свяжитесь с координатором клуба: Александр Куликов, alexander.s.kulikov@gmail.com.
+
+    {% if schools %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Крайний срок подачи заявок</th>
+                <th></th>
+                <th>Даты</th>
+                <th>Место проведения</th>
+                <th>Гранты</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for school in schools %}
+                <tr>
+                    <td>{{ school.deadline|date:"d.m.Y" }}</td>
+                    <td><a href="{{ school.link }}"></a>{{ school.name }}</td>
+                    <td>{{ school.starts_at|date:"d.m.Y" }} - {{ school.ends_at|date:"d.m.Y" }}</td>
+                    <td>{{ school.place }}</td>
+                    <td>{% if school.has_grants %}да{% else %}нет{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="row">
+            <div class="col-xs-12">
+              Сейчас нет международных школ, которые мы могли бы вам рекомендовать.
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
