@@ -474,6 +474,7 @@ class CourseOfferingDetailViewContext(GetCourseOfferingObjectMixin,
                         .filter(pk=self.object.pk)
                         .exists()))
         context['is_enrolled'] = is_enrolled
+        context['enrollment_opened'] = context[self.context_object_name].enrollment_opened()
         is_actual_teacher = (self.request.user.is_authenticated() and
                              self.request.user in self.object.teachers.all())
         context['is_actual_teacher'] = is_actual_teacher
@@ -644,9 +645,8 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         course_offering = get_object_or_404(
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
-        # CourseOffering should be active
-        current_semester = Semester.get_current()
-        if course_offering.semester != current_semester:
+        # CourseOffering enrollment should be active
+        if course_offering.enrollment_opened():
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
         if self.request.site.domain == settings.CLUB_DOMAIN and \
@@ -680,6 +680,8 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
         enrollment = get_object_or_404(
             Enrollment.objects.filter(student=self.request.user,
                                       course_offering=course_offering))
+        if not enrollment.course_offering.enrollment_opened():
+            raise PermissionDenied
         return enrollment
 
     def get_context_data(self, *args, **kwargs):

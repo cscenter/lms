@@ -2,6 +2,8 @@
 from __future__ import unicode_literals, absolute_import
 
 import os
+import datetime
+
 import unittest
 
 import pytest
@@ -10,8 +12,17 @@ from mock import patch
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
+
+from learning.factories import CourseFactory, CourseOfferingFactory, \
+    CourseOfferingNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
+    AssignmentFactory, StudentAssignmentFactory, AssignmentCommentFactory, \
+    EnrollmentFactory, AssignmentNotificationFactory, \
+    CourseOfferingNewsNotificationFactory, AssignmentAttachmentFactory, \
+    SemesterFactory
+from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
+    StudentAssignment
 from learning.settings import SEMESTER_TYPES
-from ..factories import *
+from users.factories import UserFactory
 
 
 class CommonTests(TestCase):
@@ -58,6 +69,8 @@ class CommonTests(TestCase):
 
 class SemesterTests(TestCase):
     def test_starts_ends(self):
+        import datetime
+        from django.utils import timezone
         spring_date = (datetime.datetime(2015, 4, 8, 0, 0, 0)
                        .replace(tzinfo=timezone.utc))
         autumn_date = (datetime.datetime(2015, 11, 8, 0, 0, 0)
@@ -113,6 +126,8 @@ class CourseOfferingTests(TestCase):
         """
         In near future only one course should be "ongoing".
         """
+        import datetime
+        from django.utils import timezone
         future_year = datetime.datetime.now().year + 20
         some_year = future_year - 5
         semesters = [Semester(year=year,
@@ -204,6 +219,8 @@ class AssignmentTest(TestCase):
         self.assertRaises(ValidationError, a_copy.clean)
 
     def test_is_open(self):
+        import datetime
+        from django.utils import timezone
         a = AssignmentFactory.create()
         self.assertTrue(a.is_open)
         a.deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
@@ -271,6 +288,8 @@ class StudentAssignmentTests(TestCase):
         self.assertFalse(as_.is_passed)
 
     def test_student_assignment_state(self):
+        import datetime
+        from django.utils import timezone
         student = UserFactory.create(groups=['Student [CENTER]'])
         a_online = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=True,
@@ -425,3 +444,35 @@ def test_latest_academic_year_spring(mocker):
 
     queryset = Semester.latest_academic_years(year_count=3)
     assert queryset.count() == 8
+
+
+@pytest.mark.django_db
+def test_course_offering_enrollment_expired(mocker):
+    current_year = 2015
+    current_term_type = SEMESTER_TYPES.spring
+    semester = SemesterFactory(year=current_year, type=current_term_type)
+    co = CourseOfferingFactory.create(semester=semester)
+    # XXX: Mock is HARD
+    # Fixate spring semester term start
+    from learning import utils
+    utils.SPRING_TERM_START = "10 jan"
+    # Patch CourseOffering.enrollment_expired.ENROLLMENT_DURATION
+    from learning import models
+    models.ENROLLMENT_DURATION = 8
+    mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
+    mocked_model_util.return_value = utils.CurrentSemester(current_year, current_term_type)
+    # Mock today time
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    from django.utils.timezone import utc
+    start_datetime = datetime.datetime(current_year, month=1, day=10, tzinfo=utc)  # should be equal to term start
+    mocked_timezone.return_value = start_datetime
+    assert co.enrollment_opened()
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION - 1)
+    assert co.enrollment_opened()
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION)
+    assert co.enrollment_opened()
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION + 1)
+    assert not co.enrollment_opened()
+    # Back to the future
+    mocked_timezone.return_value = start_datetime - datetime.timedelta(days=models.ENROLLMENT_DURATION + 1)
+    assert co.enrollment_opened()
