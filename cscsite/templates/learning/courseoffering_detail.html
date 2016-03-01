@@ -62,12 +62,12 @@
     <div class="col-xs-4">
         {% if request.user.is_student and course_offering.is_ongoing %}
             <div class="enroll-block">
-                {% if is_enrolled %}
+                {% if is_enrolled and enrollment_opened %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
                        class="btn btn-danger btn-block">
                         {% trans "Unenroll from the course" %}
                     </a>
-                {% else %}
+                {% elif enrollment_opened %}
                     <form method="post"
                           action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
                         {% csrf_token %}

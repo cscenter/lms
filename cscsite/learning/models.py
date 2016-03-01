@@ -20,6 +20,7 @@ from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
+from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from micawber.contrib.mcdjango import extract_oembed
@@ -31,13 +32,14 @@ from sorl.thumbnail import ImageField
 
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES, FOUNDATION_YEAR
+    SEMESTER_TYPES, FOUNDATION_YEAR, ENROLLMENT_DURATION, AUTUMN_TERM_START, \
+    SPRING_TERM_START
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from .utils import get_current_semester_pair, SortBySemesterMethodMixin, \
-    get_semester_index
+    get_semester_index, convert_term_start_to_datetime, get_term_start_by_type
 
 logger = logging.getLogger(__name__)
 
@@ -117,9 +119,9 @@ class Semester(models.Model):
     @cached_property
     def starts_at(self):
         if self.type == 'spring':
-            start_str = settings.SPRING_TERM_START
+            start_str = SPRING_TERM_START
         else:
-            start_str = settings.AUTUMN_TERM_START
+            start_str = AUTUMN_TERM_START
         return (dparser
                 .parse(start_str)
                 .replace(tzinfo=timezone.utc,
@@ -128,10 +130,10 @@ class Semester(models.Model):
     @cached_property
     def ends_at(self):
         if self.type == 'spring':
-            next_start_str = settings.AUTUMN_TERM_START
+            next_start_str = AUTUMN_TERM_START
             next_year = self.year
         else:
-            next_start_str = settings.SPRING_TERM_START
+            next_start_str = SPRING_TERM_START
             next_year = self.year + 1
         return (dparser
                 .parse(next_start_str)
@@ -229,6 +231,11 @@ class CourseOffering(TimeStampedModel):
     is_completed = models.BooleanField(
         _("Course already completed"),
         default=False)
+    enroll_before = models.DateField(
+        _("Enroll before"),
+        blank=True,
+        null=True,
+        help_text=_("Students can enroll on or leave the course before this date (inclusive)"))
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Enrolled students"),
@@ -270,6 +277,31 @@ class CourseOffering(TimeStampedModel):
         current_semester = get_current_semester_pair()
         return (current_semester.year == self.semester.year
                 and current_semester.type == self.semester.type)
+
+
+    def enrollment_opened(self):
+        if not self.is_ongoing:
+            return False
+        today = timezone.now()
+        if self.enroll_before:
+            enroll_before_date = self.enroll_before
+            enroll_before = datetime.datetime(
+                year=enroll_before_date.year,
+                month=enroll_before_date.month,
+                day=enroll_before_date.day,
+                tzinfo=utc
+            )
+            enroll_before += datetime.timedelta(days=1)
+        else:
+            year, term_type = get_current_semester_pair()
+            term_start = get_term_start_by_type(term_type)
+            current_term_start = convert_term_start_to_datetime(year, term_start)
+            enroll_before = current_term_start + datetime.timedelta(
+                days=ENROLLMENT_DURATION)
+        if today > enroll_before:
+            return False
+        return True
+
 
 
 from bitfield import BitField

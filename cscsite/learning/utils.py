@@ -3,44 +3,53 @@ import itertools
 from collections import namedtuple
 
 import dateutil.parser as dparser
-from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
-    SEMESTER_INDEX_START
+    SEMESTER_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
+    SPRING_TERM_START
 
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
 
 def get_current_semester_pair():
     date = timezone.now()
-    return date_to_semester_pair(date)
+    return date_to_term_pair(date)
 
-def date_to_semester_pair(date):
+def convert_term_start_to_datetime(year, term_start):
+    return (dparser
+            .parse(term_start)
+            .replace(tzinfo=timezone.utc,
+                     year=year))
+
+def get_term_start_by_type(term_type):
+    # TODO: Replace with something more generic, if you really need to edit this code
+    if term_type == SEMESTER_TYPES.spring:
+        return SPRING_TERM_START
+    elif term_type == SEMESTER_TYPES.summer:
+        return SUMMER_TERM_START
+    elif term_type == SEMESTER_TYPES.autumn:
+        return AUTUMN_TERM_START
+    raise ValueError("get_term_start_by_type: unknown term type")
+
+def date_to_term_pair(date):
     assert timezone.is_aware(date)
-    spring_term_start = (dparser
-                         .parse(settings.SPRING_TERM_START)
-                         .replace(tzinfo=timezone.utc,
-                                  year=date.year))
-    autumn_term_start = (dparser
-                         .parse(settings.AUTUMN_TERM_START)
-                         .replace(tzinfo=timezone.utc,
-                                  year=date.year))
-    summer_term_start = (dparser
-                         .parse(settings.SUMMER_TERM_START)
-                         .replace(tzinfo=timezone.utc,
-                                  year=date.year))
+
     year = date.year
+    spring_term_start = convert_term_start_to_datetime(year, SPRING_TERM_START)
+    autumn_term_start = convert_term_start_to_datetime(year, AUTUMN_TERM_START)
+    summer_term_start = convert_term_start_to_datetime(year, SUMMER_TERM_START)
+
     if spring_term_start <= date < summer_term_start:
-        current_season = SEMESTER_TYPES.spring
+        current_term = SEMESTER_TYPES.spring
     elif summer_term_start <= date < autumn_term_start:
-        current_season = SEMESTER_TYPES.summer
+        current_term = SEMESTER_TYPES.summer
     else:
-        current_season = SEMESTER_TYPES.autumn
+        current_term = SEMESTER_TYPES.autumn
         # Fix year inaccuracy, when spring semester starts later than 1 jan
         if date.month <= spring_term_start.month:
             year -= 1
-    return CurrentSemester(year, current_season)
+    return CurrentSemester(year, current_term)
 
 def get_semester_index(target_year, semester_type):
     assert target_year >= FOUNDATION_YEAR
