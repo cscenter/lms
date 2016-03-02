@@ -4,6 +4,7 @@ from __future__ import unicode_literals, absolute_import
 import csv
 import logging
 import os
+import pytest
 import unittest
 
 import pytest
@@ -552,83 +553,6 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
         co_url = self.co.get_absolute_url()
         self.assertRedirects(self.client.post(self.url), co_url)
         self.assertNotContains(self.client.get(co_url), self.con.text)
-
-
-class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
-    def test_enrollment(self):
-        student = UserFactory.create(groups=['Student [CENTER]'])
-        self.doLogin(student)
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester)
-        url = reverse('course_offering_enroll',
-                      args=[co.course.slug, co.semester.slug])
-        form = {'course_offering_pk': co.pk}
-        self.assertRedirects(self.client.post(url, form),
-                             co.get_absolute_url())
-        self.assertEquals(1, Enrollment.objects
-                          .filter(student=student, course_offering=co)
-                          .count())
-        as_ = AssignmentFactory.create_batch(3, course_offering=co)
-        self.assertEquals(set((student.pk, a.pk) for a in as_),
-                          set(StudentAssignment.objects
-                              .filter(student=student)
-                              .values_list('student', 'assignment')))
-        co_other = CourseOfferingFactory.create(semester=current_semester)
-        form.update({'back': 'course_list_student'})
-        url = reverse('course_offering_enroll',
-                      args=[co_other.course.slug, co_other.semester.slug])
-        self.assertRedirects(self.client.post(url, form),
-                             reverse('course_list_student'))
-        # Try to enroll to old CO
-        old_semester = SemesterFactory.create(year=2010)
-        old_co = CourseOfferingFactory.create(semester=old_semester)
-        form = {'course_offering_pk': old_co.pk}
-        url = reverse('course_offering_enroll',
-                      args=[old_co.course.slug, old_co.semester.slug])
-        self.assertEqual(403, self.client.post(url, form).status_code)
-
-    @unittest.skip('not implemented')
-    def test_security(self):
-        """ Student can enroll only on active course offering """
-        pass
-
-    @unittest.skip('not implemented')
-    def test_enrollment_for_club_students(self):
-        """ Club Student can enroll only on open courses """
-        pass
-
-    def test_unenrollment(self):
-        s = UserFactory.create(groups=['Student [CENTER]'])
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester)
-        as_ = AssignmentFactory.create_batch(3, course_offering=co)
-        form = {'course_offering_pk': co.pk}
-        url = reverse('course_offering_unenroll',
-                      args=[co.course.slug, co.semester.slug])
-        self.doLogin(s)
-        self.client.post(reverse('course_offering_enroll',
-                                 args=[co.course.slug, co.semester.slug]),
-                         form)
-        resp = self.client.get(url)
-        self.assertContains(resp, "Unenroll")
-        self.assertContains(resp, smart_text(co))
-        self.client.post(url, form)
-        self.assertEquals(0, Enrollment.objects
-                          .filter(student=s, course_offering=co)
-                          .count())
-        a_ss = (StudentAssignment.objects
-                .filter(student=s,
-                        assignment__course_offering=co))
-        self.assertEquals(3, len(a_ss))
-        self.client.post(reverse('course_offering_enroll',
-                                 args=[co.course.slug, co.semester.slug]),
-                         form)
-        url += "?back=course_list_student"
-        self.assertRedirects(self.client.post(url, form),
-                             reverse('course_list_student'))
-        self.assertSameObjects(a_ss, (StudentAssignment.objects
-                                      .filter(student=s,
-                                              assignment__course_offering=co)))
 
 
 class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
@@ -1681,3 +1605,96 @@ class TestCompletedCourseOfferingBehaviour(object):
         co.save()
         response = client.get(url)
         assert not response.context["is_failed_completed_course"]
+
+
+
+
+class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
+
+    @unittest.skip('not implemented')
+    def test_enrollment_for_club_students(self):
+        """ Club Student can enroll only on open courses """
+        pass
+
+    def test_unenrollment(self):
+        s = UserFactory.create(groups=['Student [CENTER]'])
+        today = timezone.now()
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester)
+        as_ = AssignmentFactory.create_batch(3, course_offering=co)
+        form = {'course_offering_pk': co.pk}
+        url = reverse('course_offering_unenroll',
+                      args=[co.course.slug, co.semester.slug])
+        self.doLogin(s)
+        # Enrollment already closed
+        current_semester.enroll_before = (today - datetime.timedelta(days=1)).date()
+        current_semester.save()
+        response = self.client.post(reverse('course_offering_enroll',
+                                 args=[co.course.slug, co.semester.slug]),
+                         form)
+        assert response.status_code == 403
+        current_semester.enroll_before = today.date()
+        current_semester.save()
+        self.client.post(reverse('course_offering_enroll',
+                                 args=[co.course.slug, co.semester.slug]),
+                         form)
+        resp = self.client.get(url)
+        self.assertContains(resp, "Unenroll")
+        self.assertContains(resp, smart_text(co))
+        self.client.post(url, form)
+        self.assertEquals(0, Enrollment.objects
+                          .filter(student=s, course_offering=co)
+                          .count())
+        a_ss = (StudentAssignment.objects
+                .filter(student=s,
+                        assignment__course_offering=co))
+        self.assertEquals(3, len(a_ss))
+        self.client.post(reverse('course_offering_enroll',
+                                 args=[co.course.slug, co.semester.slug]),
+                         form)
+        url += "?back=course_list_student"
+        self.assertRedirects(self.client.post(url, form),
+                             reverse('course_list_student'))
+        self.assertSameObjects(a_ss, (StudentAssignment.objects
+                                      .filter(student=s,
+                                              assignment__course_offering=co)))
+
+
+@pytest.mark.django_db
+def test_enrollment(client):
+    from django.utils import dateformat
+    student = UserFactory.create(groups=['Student [CENTER]'])
+    client.login(student)
+    today = timezone.now()
+    current_semester = SemesterFactory.create_current()
+    current_semester.enroll_before = today.date()
+    current_semester.save()
+    co = CourseOfferingFactory.create(semester=current_semester)
+    url = reverse('course_offering_enroll',
+                  args=[co.course.slug, co.semester.slug])
+    form = {'course_offering_pk': co.pk}
+    response = client.post(url, form)
+    assert response.status_code == 302
+    # FIXME: Find how to assert redirects with pytest and Django
+    # assert response.url == client.request.get_absolute_uri(co.get_absolute_url())
+    assert 1 == (Enrollment.objects
+                      .filter(student=student, course_offering=co)
+                      .count())
+    as_ = AssignmentFactory.create_batch(3, course_offering=co)
+    assert set((student.pk, a.pk) for a in as_) == set(StudentAssignment.objects
+                          .filter(student=student)
+                          .values_list('student', 'assignment'))
+    co_other = CourseOfferingFactory.create(semester=current_semester)
+    form.update({'back': 'course_list_student'})
+    url = reverse('course_offering_enroll',
+                  args=[co_other.course.slug, co_other.semester.slug])
+    response = client.post(url, form)
+    assert response.status_code == 302
+    # assert response.url == reverse('course_list_student')
+    # Try to enroll to old CO
+    old_semester = SemesterFactory.create(year=2010)
+    old_co = CourseOfferingFactory.create(semester=old_semester)
+    form = {'course_offering_pk': old_co.pk}
+    url = reverse('course_offering_enroll',
+                  args=[old_co.course.slug, old_co.semester.slug])
+    assert client.post(url, form).status_code == 403

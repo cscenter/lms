@@ -646,7 +646,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
             CourseOffering.objects.filter(
                 pk=form.cleaned_data['course_offering_pk']))
         # CourseOffering enrollment should be active
-        if course_offering.enrollment_opened():
+        if not course_offering.enrollment_opened():
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
         if self.request.site.domain == settings.CLUB_DOMAIN and \

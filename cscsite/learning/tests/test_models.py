@@ -447,32 +447,31 @@ def test_latest_academic_year_spring(mocker):
 
 
 @pytest.mark.django_db
-def test_course_offering_enrollment_expired(mocker):
+def test_course_offering_enrollment_expired(mocker, monkeypatch):
     current_year = 2015
     current_term_type = SEMESTER_TYPES.spring
     semester = SemesterFactory(year=current_year, type=current_term_type)
     co = CourseOfferingFactory.create(semester=semester)
     # XXX: Mock is HARD
     # Fixate spring semester term start
-    from learning import utils
-    utils.SPRING_TERM_START = "10 jan"
-    # Patch CourseOffering.enrollment_expired.ENROLLMENT_DURATION
-    from learning import models
-    models.ENROLLMENT_DURATION = 8
+    from learning.utils import CurrentSemester
+    enrollment_duration = 8
+    monkeypatch.setattr("learning.settings.ENROLLMENT_DURATION", enrollment_duration)
+    monkeypatch.setattr("learning.settings.SPRING_TERM_START", "10 jan")
     mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
-    mocked_model_util.return_value = utils.CurrentSemester(current_year, current_term_type)
+    mocked_model_util.return_value = CurrentSemester(current_year, current_term_type)
     # Mock today time
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     from django.utils.timezone import utc
     start_datetime = datetime.datetime(current_year, month=1, day=10, tzinfo=utc)  # should be equal to term start
     mocked_timezone.return_value = start_datetime
     assert co.enrollment_opened()
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION - 1)
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration - 1)
     assert co.enrollment_opened()
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION)
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration)
     assert co.enrollment_opened()
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=models.ENROLLMENT_DURATION + 1)
+    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration + 1)
     assert not co.enrollment_opened()
     # Back to the future
-    mocked_timezone.return_value = start_datetime - datetime.timedelta(days=models.ENROLLMENT_DURATION + 1)
+    mocked_timezone.return_value = start_datetime - datetime.timedelta(days=enrollment_duration + 1)
     assert co.enrollment_opened()

@@ -29,11 +29,10 @@ from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
-
-from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES, FOUNDATION_YEAR, ENROLLMENT_DURATION, AUTUMN_TERM_START, \
-    SPRING_TERM_START
+# Note: For test purposes import some settings in this way
+from learning import settings as learn_conf
+from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
+    SEMESTER_TYPES
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
@@ -79,6 +78,13 @@ class Semester(models.Model):
         validators=[MinValueValidator(1990)])
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
+    enroll_before = models.DateField(
+        _("Enroll before"),
+        blank=True,
+        null=True,
+        help_text=_("Students can enroll on or leave the course "
+                    "before this date (inclusive)"))
+
     # Note: used for sort order and filter
     index = models.PositiveSmallIntegerField(
         verbose_name=_("Semester index"),
@@ -119,26 +125,23 @@ class Semester(models.Model):
     @cached_property
     def starts_at(self):
         if self.type == 'spring':
-            start_str = SPRING_TERM_START
+            start_str = learn_conf.SPRING_TERM_START
         else:
-            start_str = AUTUMN_TERM_START
-        return (dparser
-                .parse(start_str)
-                .replace(tzinfo=timezone.utc,
-                         year=self.year))
+            start_str = learn_conf.AUTUMN_TERM_START
+        return convert_term_start_to_datetime(self.year, start_str)
+
 
     @cached_property
     def ends_at(self):
         if self.type == 'spring':
-            next_start_str = AUTUMN_TERM_START
+            next_start_str = learn_conf.AUTUMN_TERM_START
             next_year = self.year
         else:
-            next_start_str = SPRING_TERM_START
+            next_start_str = learn_conf.SPRING_TERM_START
             next_year = self.year + 1
-        return (dparser
-                .parse(next_start_str)
-                .replace(tzinfo=timezone.utc,
-                         year=next_year)) - datetime.timedelta(days=1)
+        return convert_term_start_to_datetime(next_year, next_start_str) \
+                    - datetime.timedelta(days=1)
+
 
     @classmethod
     def get_current(cls):
@@ -231,11 +234,6 @@ class CourseOffering(TimeStampedModel):
     is_completed = models.BooleanField(
         _("Course already completed"),
         default=False)
-    enroll_before = models.DateField(
-        _("Enroll before"),
-        blank=True,
-        null=True,
-        help_text=_("Students can enroll on or leave the course before this date (inclusive)"))
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Enrolled students"),
@@ -280,11 +278,11 @@ class CourseOffering(TimeStampedModel):
 
 
     def enrollment_opened(self):
-        if not self.is_ongoing:
+        if self.is_completed or not self.is_ongoing:
             return False
         today = timezone.now()
-        if self.enroll_before:
-            enroll_before_date = self.enroll_before
+        if self.semester.enroll_before:
+            enroll_before_date = self.semester.enroll_before
             enroll_before = datetime.datetime(
                 year=enroll_before_date.year,
                 month=enroll_before_date.month,
@@ -297,7 +295,7 @@ class CourseOffering(TimeStampedModel):
             term_start = get_term_start_by_type(term_type)
             current_term_start = convert_term_start_to_datetime(year, term_start)
             enroll_before = current_term_start + datetime.timedelta(
-                days=ENROLLMENT_DURATION)
+                days=learn_conf.ENROLLMENT_DURATION)
         if today > enroll_before:
             return False
         return True
@@ -626,7 +624,7 @@ class AssignmentAttachment(TimeStampedModel, object):
     def file_url(self):
         return reverse(
             "assignment_attachments_download",
-            args=[hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
+            args=[hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
         )
 
 
@@ -786,7 +784,7 @@ class AssignmentComment(TimeStampedModel):
         return reverse(
             "assignment_attachments_download",
             args=[hashids.encode(
-                ASSIGNMENT_COMMENT_ATTACHMENT,
+                learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
                 self.pk)]
         )
 
