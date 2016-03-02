@@ -60,14 +60,14 @@
       </div>
     </div>
     <div class="col-xs-4">
-        {% if request.user.is_student and course_offering.is_ongoing %}
+        {% if request.user.is_student and course_offering.enrollment_opened %}
             <div class="enroll-block">
-                {% if is_enrolled and enrollment_opened %}
+                {% if is_enrolled %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
                        class="btn btn-danger btn-block">
                         {% trans "Unenroll from the course" %}
                     </a>
-                {% elif enrollment_opened %}
+                {% else %}
                     <form method="post"
                           action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
                         {% csrf_token %}
