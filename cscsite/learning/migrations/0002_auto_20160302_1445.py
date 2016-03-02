@@ -21,6 +21,20 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name='Students'),
         ),
         migrations.AddField(
+            model_name='studentassignment',
+            name='assignment',
+            field=models.ForeignKey(verbose_name='StudentAssignment|assignment', to='learning.Assignment'),
+        ),
+        migrations.AddField(
+            model_name='studentassignment',
+            name='student',
+            field=models.ForeignKey(verbose_name='StudentAssignment|student', to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AlterUniqueTogether(
+            name='semester',
+            unique_together=set([('year', 'type')]),
+        ),
+        migrations.AddField(
             model_name='noncourseevent',
             name='venue',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, verbose_name='CourseClass|Venue', to='learning.Venue'),
@@ -106,16 +120,6 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, verbose_name='CourseClass|Venue', to='learning.Venue'),
         ),
         migrations.AddField(
-            model_name='StudentAssignment',
-            name='assignment',
-            field=models.ForeignKey(verbose_name='StudentAssignment|assignment', to='learning.Assignment'),
-        ),
-        migrations.AddField(
-            model_name='StudentAssignment',
-            name='student',
-            field=models.ForeignKey(verbose_name='StudentAssignment|student', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
             model_name='assignmentnotification',
             name='student_assignment',
             field=models.ForeignKey(verbose_name='student_assignment', to='learning.StudentAssignment'),
@@ -127,13 +131,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='assignmentcomment',
-            name='student_assignment',
-            field=models.ForeignKey(verbose_name='AssignmentComment|student_assignment', to='learning.StudentAssignment'),
+            name='author',
+            field=models.ForeignKey(verbose_name='Author', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='assignmentcomment',
-            name='author',
-            field=models.ForeignKey(verbose_name='Author', to=settings.AUTH_USER_MODEL),
+            name='student_assignment',
+            field=models.ForeignKey(verbose_name='AssignmentComment|student_assignment', to='learning.StudentAssignment'),
         ),
         migrations.AddField(
             model_name='assignmentattachment',
@@ -151,11 +155,11 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, verbose_name='Course offering', to='learning.CourseOffering'),
         ),
         migrations.AlterUniqueTogether(
-            name='enrollment',
-            unique_together=set([('student', 'course_offering')]),
+            name='studentassignment',
+            unique_together=set([('assignment', 'student')]),
         ),
         migrations.AlterUniqueTogether(
-            name='StudentAssignment',
-            unique_together=set([('assignment', 'student')]),
+            name='enrollment',
+            unique_together=set([('student', 'course_offering')]),
         ),
     ]
