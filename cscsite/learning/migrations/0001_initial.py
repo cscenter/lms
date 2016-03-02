@@ -88,23 +88,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='StudentAssignment',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('grade', models.PositiveSmallIntegerField(null=True, verbose_name='Grade', blank=True)),
-                ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, verbose_name='Assignment|grade changed', monitor='grade')),
-                ('is_passed', models.BooleanField(default=False, help_text="It's online and has comments", verbose_name='Is passed')),
-                ('last_commented', models.DateTimeField(null=True, verbose_name='Last comment date', blank=True)),
-            ],
-            options={
-                'ordering': ['assignment', 'student'],
-                'verbose_name': 'Assignment-student',
-                'verbose_name_plural': 'Assignment-students',
-            },
-        ),
-        migrations.CreateModel(
             name='Course',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -241,6 +224,27 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='InternationalSchool',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('name', models.CharField(max_length=255, verbose_name='InternationalSchool|name')),
+                ('link', models.URLField(verbose_name='InternationalSchool|Link')),
+                ('place', models.CharField(max_length=255, verbose_name='InternationalSchool|place')),
+                ('deadline', models.DateField(verbose_name='InternationalSchool|Deadline')),
+                ('starts_at', models.DateField(verbose_name='InternationalSchool|Start')),
+                ('ends_at', models.DateField(verbose_name='InternationalSchool|End')),
+                ('has_grants', models.BooleanField(default=False, verbose_name='InternationalSchool|Grants')),
+            ],
+            options={
+                'ordering': ['name'],
+                'db_table': 'international_schools',
+                'verbose_name': 'International school',
+                'verbose_name_plural': 'International schools',
+            },
+        ),
+        migrations.CreateModel(
             name='NonCourseEvent',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -272,6 +276,7 @@ class Migration(migrations.Migration):
                 ('link', models.URLField(verbose_name='Online Course|Link')),
                 ('photo', sorl.thumbnail.fields.ImageField(upload_to='online_courses/', verbose_name='Online Course|photo', blank=True)),
                 ('is_au_collaboration', models.BooleanField(default=False, verbose_name='Collaboration with AY')),
+                ('is_self_paced', models.BooleanField(default=False, verbose_name='Without deadlines')),
             ],
             options={
                 'ordering': ['name'],
@@ -286,11 +291,30 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('year', models.PositiveSmallIntegerField(verbose_name='Year', validators=[django.core.validators.MinValueValidator(1990)])),
                 ('type', model_utils.fields.StatusField(default='spring', max_length=100, verbose_name='Semester|type', no_check_for_status=True, choices=[('spring', 'spring'), ('summer', 'summer'), ('autumn', 'autumn')])),
+                ('enroll_before', models.DateField(help_text='Students can enroll on or leave the course before this date (inclusive)', null=True, verbose_name='Enroll before', blank=True)),
+                ('index', models.PositiveSmallIntegerField(help_text='System field. Do not manually edit', verbose_name='Semester index', editable=False)),
             ],
             options={
                 'ordering': ['-year', 'type'],
                 'verbose_name': 'Semester',
                 'verbose_name_plural': 'Semesters',
+            },
+        ),
+        migrations.CreateModel(
+            name='StudentAssignment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('grade', models.PositiveSmallIntegerField(null=True, verbose_name='Grade', blank=True)),
+                ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, verbose_name='Assignment|grade changed', monitor='grade')),
+                ('is_passed', models.BooleanField(default=False, help_text="It's online and has comments", verbose_name='Is passed')),
+                ('last_commented', models.DateTimeField(null=True, verbose_name='Last comment date', blank=True)),
+            ],
+            options={
+                'ordering': ['assignment', 'student'],
+                'verbose_name': 'Assignment-student',
+                'verbose_name_plural': 'Assignment-students',
             },
         ),
         migrations.CreateModel(
