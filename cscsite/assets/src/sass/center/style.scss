@@ -33,8 +33,10 @@ $brand-danger: #d9534f;
 @import "pages/graduates";
 
 // Boostrap overrides for cscenter site
-.btn-danger, .btn-success {
-  padding: 10px 12px;
+.btn-danger, .btn-success, .btn-primary {
+  &.btn-block {
+    padding: 10px 12px;
+  }
 }
 
 
