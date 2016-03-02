@@ -36,9 +36,11 @@
               <br><a class=" btn btn-default btn-sm btn-success" href="{{ e.course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
           </td>
             <td>
-            <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
-               class=" btn btn-sm btn-warning pull-right">{% trans "Unenrolled" %}
-            </a>
+                {% if e.course_offering.enrollment_opened %}
+                <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
+                   class=" btn btn-sm btn-warning pull-right">{% trans "Unenrolled" %}
+                </a>
+                {% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -54,6 +56,8 @@
             {% endfor %}
           </td>
           <td>
+              {% if course_offering.enrollment_opened %}
+
             <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
             {% csrf_token %}
             <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
@@ -62,6 +66,7 @@
               {% trans "Enroll" %}
             </button>
           </form>
+              {% endif %}
           </td>
         </tr>
         {% endfor %}
