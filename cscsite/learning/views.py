@@ -643,8 +643,9 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
 
     def form_valid(self, form):
         course_offering = get_object_or_404(
-            CourseOffering.objects.filter(
-                pk=form.cleaned_data['course_offering_pk']))
+            CourseOffering.objects
+                .filter(pk=form.cleaned_data['course_offering_pk'])
+                .select_related("semester"))
         # CourseOffering enrollment should be active
         if not course_offering.enrollment_opened():
             return HttpResponseForbidden()
@@ -673,9 +674,10 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         course_offering = get_object_or_404(
             CourseOffering.objects
-            .filter(semester__type=semester_type,
+                .filter(semester__type=semester_type,
                     semester__year=year,
-                    course__slug=self.kwargs['course_slug']))
+                    course__slug=self.kwargs['course_slug'])
+                .select_related("semester"))
         self._course_offering = course_offering
         enrollment = get_object_or_404(
             Enrollment.objects.filter(student=self.request.user,
