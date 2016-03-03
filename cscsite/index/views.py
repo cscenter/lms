@@ -20,7 +20,8 @@ from django.views import generic
 import requests
 from braces import views
 
-from learning.models import OnlineCourse, CourseOffering, Semester, StudyProgram
+from learning.models import OnlineCourse, CourseOffering, Semester, StudyProgram, \
+    CourseOfferingTeacher
 from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
@@ -101,7 +102,7 @@ class AlumniViewByStudyProgram(AlumniViewMixin, generic.ListView):
         return context
 
 
-
+# TODO: add tests
 class TeachersView(generic.ListView):
     template_name = "users/teacher_list.html"
 
@@ -109,17 +110,19 @@ class TeachersView(generic.ListView):
         user_model = get_user_model()
         semesters = list(Semester.latest_academic_years(year_count=2).values_list(
             "id", flat=True))
-        active_teachers_pks = Counter(CourseOffering.objects.filter(
+        active_lecturers = Counter(CourseOffering.objects.filter(
             semester__in=semesters).values_list("teachers__pk", flat=True))
 
         teacher_groups = user_model.group_pks.TEACHER_CENTER
         if self.request.site.domain == settings.CLUB_DOMAIN:
             teacher_groups = user_model.group_pks.TEACHER_CLUB
-        queryset = user_model.objects.filter(groups=teacher_groups).distinct()
-        print(queryset.count())
+        qs = (user_model.objects
+              .filter(groups=teacher_groups,
+                      courseofferingteacher__roles=CourseOfferingTeacher.roles.lecturer)
+              .distinct())
         teachers = {}
-        teachers["active"] = filter(lambda t: t.pk in active_teachers_pks, queryset)
-        teachers["other"] = filter(lambda t: t.pk not in active_teachers_pks, queryset)
+        teachers["active"] = filter(lambda t: t.pk in active_lecturers, qs)
+        teachers["other"] = filter(lambda t: t.pk not in active_lecturers, qs)
         return teachers
 
 
