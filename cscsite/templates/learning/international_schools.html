@@ -22,8 +22,8 @@
             {% for school in schools %}
                 <tr>
                     <td>{{ school.deadline|date:"d.m.Y" }}</td>
-                    <td><a href="{{ school.link }}"></a>{{ school.name }}</td>
-                    <td>{{ school.starts_at|date:"d.m.Y" }} - {{ school.ends_at|date:"d.m.Y" }}</td>
+                    <td><a href="{{ school.link }}">{{ school.name }}</a></td>
+                    <td>{{ school.starts_at|date:"d.m.Y" }}{% if school.ends_at %} - {{ school.ends_at|date:"d.m.Y" }}{% endif %}</td>
                     <td>{{ school.place }}</td>
                     <td>{% if school.has_grants %}да{% else %}нет{% endif %}</td>
                 </tr>
