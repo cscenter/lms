@@ -16,6 +16,17 @@
         {% trans "student"|title %}{% if user_object.enrollment_year %}, {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% endif %}
     {% endif %}
 
+    {% if has_curator_permissions %}
+        <br><br>
+        <div class="panel panel-default">
+            <div class="panel-heading">Информация для куратора</div>
+            <ul class="list-group">
+                <li class="list-group-item"><b>Статус</b>: {{ user_object.get_status_display|default:"—" }}</li>
+                <li class="list-group-item"><b>Группы</b>: {% for group in user_object.groups.all %}{% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп{% endfor %}</li>
+            </ul>
+        </div>
+    {% endif %}
+
     {% if user_object.note %}
         <div class="about-me">
             <h4>{% trans "About me" %}</h4>
@@ -294,10 +305,7 @@
         <tr>
           <td>{% trans "Status" %}:</td>
           <td>
-            {{ user_object.get_status_display|default:"—" }}
-            {% if user_object.is_volunteer %}
-            ({% trans "Non-degree student"|lower %})
-            {% endif %}
+            {{ user_object.get_status_display|default:"—" }} {% if user_object.is_volunteer %}({% trans "Non-degree student"|lower %}){% endif %}
           </td>
         </tr>
         <tr>
