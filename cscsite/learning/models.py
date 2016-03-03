@@ -1059,7 +1059,7 @@ class InternationalSchool(TimeStampedModel):
     place = models.CharField(_("InternationalSchool|place"), max_length=255)
     deadline = models.DateField(_("InternationalSchool|Deadline"))
     starts_at = models.DateField(_("InternationalSchool|Start"))
-    ends_at = models.DateField(_("InternationalSchool|End"))
+    ends_at = models.DateField(_("InternationalSchool|End"), blank=True, null=True)
     has_grants = models.BooleanField(
         _("InternationalSchool|Grants"),
         default=False)
