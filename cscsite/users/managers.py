@@ -75,10 +75,13 @@ class CSCUserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'enrollments__course_offering__teachers',
-                    # Note (Zh): Can't solve it with standard ORM instruments
-                    queryset=CSCUser.objects.extra(select={
-                        'is_lector': '1 & %s.roles' % CourseOfferingTeacher._meta.db_table}).order_by(
-                        "-is_lector", "last_name"),
+                    # Note (Zh): Can't solve it with standard ORM instruments.
+                    # Sorting: roles field contains bit mask,
+                    # show pure lecturers first (=1), then teachers with lecturer role (values >1)
+                    queryset=CSCUser.objects.extra(
+                        where=['%s.roles & 1=%s' % (CourseOfferingTeacher._meta.db_table, int(CourseOfferingTeacher.roles.lecturer)) ],
+                        order_by=["%s.roles" % CourseOfferingTeacher._meta.db_table]
+                    )
                 ),
                 Prefetch(
                     'studentproject_set',
