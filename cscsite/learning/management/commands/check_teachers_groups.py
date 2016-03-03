@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     teachers[teacher.pk]["state"] = self.BOTH
                 elif teachers[teacher.pk]["state"] == self.CLUB_ONLY and not co.is_open:
                     teachers[teacher.pk]["state"] = self.BOTH
-        # Ok, try to update teacher groups
+        # Ok, try to update teacher groups, looks as hell, but it works
         for teacher in teachers:
             if teachers[teacher]["state"] == self.BOTH:
                 teachers[teacher]["obj"].groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
