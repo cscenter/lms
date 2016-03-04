@@ -9,6 +9,7 @@ import time
 
 import dateutil.parser as dparser
 # TODO: investigate `from annoying.fields import AutoOneToOneField`
+from bitfield import BitField
 from django.db import models
 from django.conf import settings
 from django.core.cache import cache
@@ -303,13 +304,10 @@ class CourseOffering(TimeStampedModel):
         return True
 
 
-
-from bitfield import BitField
 @python_2_unicode_compatible
 class CourseOfferingTeacher(models.Model):
-    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, limit_choices_to={
-        'groups__in': [PARTICIPANT_GROUPS.TEACHER_CENTER,
-                       PARTICIPANT_GROUPS.TEACHER_CLUB]})
+    # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL)
     course_offering = models.ForeignKey(CourseOffering)
     roles = BitField(flags=(
         ('lecturer', _('Lecturer')),
@@ -961,6 +959,8 @@ class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
+        # XXX: Can generate duplicates here if related user has both groups
+        # Unlikely due to admin form validation, but possible in theory
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
                                          PARTICIPANT_GROUPS.GRADUATE_CENTER]})
     supervisor = models.CharField(
