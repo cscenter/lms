@@ -384,4 +384,16 @@ $(document).ready(function () {
                 query();
             });
     }
+
+    // Admission
+    if ($(".forms-iframe").length > 0) {
+        $(window).on("message", function(a){
+            var e=a.originalEvent,i=e.data,n=e.source;
+            try{i=JSON.parse(i)}catch(a){}("ping"===i||"ping"===i.message)&&n.postMessage("pong","*")
+        });
+        $(window).on("message",function(a){
+            var e=a.originalEvent,i=e.data;
+            try{i=JSON.parse(i)}catch(a){}i&&i["iframe-height"]&&$(".forms-iframe").css("height",i["iframe-height"])
+        });
+    }
 });
