@@ -21,7 +21,7 @@ from learning.views import \
     CourseTeacherListView, \
     CourseStudentListView, \
     CoursesListView, CourseDetailView, CourseUpdateView, \
-    CourseOfferingDetailViewContext, \
+    CourseOfferingDetailView, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
@@ -65,7 +65,7 @@ urlpatterns = solid_i18n_patterns(
         name="course_edit"),
     # Course Readings
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/$",
-        CourseOfferingDetailViewContext.as_view(),
+        CourseOfferingDetailView.as_view(),
         name="course_offering_detail"),
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/edit-descr$",
         CourseOfferingEditDescrView.as_view(),
