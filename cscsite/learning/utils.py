@@ -134,6 +134,10 @@ class LearningPermissionsMixin(object):
         return False
 
     @property
+    def is_student(self):
+        return False
+
+    @property
     def is_graduate(self):
         return False
 

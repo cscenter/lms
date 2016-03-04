@@ -499,6 +499,10 @@ class CourseOfferingDetailViewContext(GetCourseOfferingObjectMixin,
                                  "student ID {0}, assignment ID {1}"
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
+        context['can_view_assignments'] = (
+            self.request.user.is_student
+            or context['is_actual_teacher']
+            or self.request.user.is_curator)
         context['can_view_news'] = not context['is_failed_completed_course'] and (
                                    self.request.user.is_authenticated() or
                                    self.request.site.domain == settings.CLUB_DOMAIN)
