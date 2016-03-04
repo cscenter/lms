@@ -40,10 +40,10 @@ class CSCUserChangeForm(UserChangeForm):
         model = CSCUser
 
     def clean(self):
+        """XXX: we can't validate m2m like `groups` in Model.clean() method"""
         cleaned_data = super(CSCUserChangeForm, self).clean()
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = [x.pk for x in cleaned_data.get('groups', [])]
-        # TODO: Should I move this logic to model?
         if self.instance.group_pks.STUDENT_CENTER in groups \
            and enrollment_year is None:
             self.add_error('enrollment_year', ValidationError(
@@ -64,6 +64,11 @@ class CSCUserChangeForm(UserChangeForm):
                 and self.instance.group_pks.STUDENT_CENTER in groups:
             self.add_error('groups', ValidationError(
                 _("User can't be simultaneously in volunteer and student group")))
+
+        if self.instance.group_pks.GRADUATE_CENTER in groups \
+                and self.instance.group_pks.STUDENT_CENTER in groups:
+            self.add_error('groups', ValidationError(
+                _("User can't be simultaneously in graduate and student group")))
 
 class CSCUserStatusLogAdmin(admin.StackedInline):
     model = CSCUserStatusLog

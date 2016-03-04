@@ -6,6 +6,7 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
 from core.models import apply_related_spec
+from users.models import CSCUser
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
@@ -32,6 +33,13 @@ class CourseOfferingTeacherInline(admin.TabularInline):
     formfield_overrides = {
             BitField: {'widget': BitFieldCheckboxSelectMultiple},
     }
+
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        if db_field.name == "teacher":
+            kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
+                PARTICIPANT_GROUPS.TEACHER_CENTER,
+                PARTICIPANT_GROUPS.TEACHER_CLUB]).distinct()
+        return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 class CourseOfferingAdmin(UbereditorMixin, WiderLabelsMixin, TranslationAdmin,
                           admin.ModelAdmin):

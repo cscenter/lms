@@ -16,6 +16,8 @@ class Borrow(models.Model):
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        # XXX: Can generate duplicates here if related user has both groups
+        # It's unlikely due to admin form validation, but possible in theory
         limit_choices_to={'groups__in': [
             CSCUser.group_pks.STUDENT_CENTER, CSCUser.group_pks.VOLUNTEER]},
         related_name="borrows", verbose_name=_("Borrow|student"))
