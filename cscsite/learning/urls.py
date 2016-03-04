@@ -10,7 +10,7 @@ from .views import \
     CourseTeacherListView, \
     CourseStudentListView, \
     CoursesListView, CourseDetailView, CourseUpdateView, \
-    CourseOfferingDetailViewContext, \
+    CourseOfferingDetailView, \
     CourseOfferingEditDescrView, \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
@@ -54,7 +54,7 @@ urlpatterns = [
     url(r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)", include([
         # Common pages
         url(r"^/$",
-            CourseOfferingDetailViewContext.as_view(),
+            CourseOfferingDetailView.as_view(),
             name="course_offering_detail"),
         url(r"^/edit-descr$",
             CourseOfferingEditDescrView.as_view(),

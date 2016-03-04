@@ -32,7 +32,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF
+    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF, \
+    CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
@@ -51,7 +52,7 @@ from .forms import CourseOfferingPKForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, GradeBookFormFactory
 from core.notifications import get_unread_notifications_cache
-from core.utils import hashids
+from core.utils import hashids, get_club_domain
 from . import utils
 from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
 
@@ -452,20 +453,29 @@ class GetCourseOfferingObjectMixin(object):
                               'assignment_set'))
 
 
-class CourseOfferingDetailViewContext(GetCourseOfferingObjectMixin,
-                                      FailedCourseContextMixin,
-                                      generic.DetailView):
+class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
+                               FailedCourseContextMixin,
+                               generic.DetailView):
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        co = context[self.context_object_name]
+        if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
+            index = get_semester_index(CENTER_FOUNDATION_YEAR,
+                                       SEMESTER_TYPES.autumn)
+            if co.semester.index < index:
+                return HttpResponseRedirect(
+                    get_club_domain(co.city.code) + co.get_absolute_url())
+        return self.render_to_response(context)
+
     def get_queryset(self):
-        q = self.model.custom.site_related(self.request)
-        if self.request.site.domain != settings.CLUB_DOMAIN:
-            q = q.filter(semester__year__gte=2011)
-        return q
+        return self.model.custom.site_related(self.request)
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseOfferingDetailViewContext, self)
+        context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
         is_enrolled = (self.request.user.is_authenticated() and
                        self.request.user.is_student and
