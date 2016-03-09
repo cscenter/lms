@@ -759,11 +759,10 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         # Prefetch Course Offering model
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_curator:
-            base_qs = CourseOffering.objects
-        else:
-            base_qs = (CourseOffering.objects
-                       .filter(teachers=self.request.user))
+        base_qs = CourseOffering.custom.site_related(self.request)
+        if not self.request.user.is_curator:
+            base_qs = base_qs.filter(teachers=self.request.user)
+
         self._course_offering = get_object_or_404(
             base_qs.filter(course__slug=course_slug,
                            semester__year=semester_year,
