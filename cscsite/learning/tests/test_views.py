@@ -1698,3 +1698,5 @@ def test_enrollment(client):
     url = reverse('course_offering_enroll',
                   args=[old_co.course.slug, old_co.semester.slug])
     assert client.post(url, form).status_code == 403
+
+# TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
