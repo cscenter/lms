@@ -591,6 +591,9 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
     def is_form_allowed(self, user, obj):
         return (user.is_authenticated() and user.is_curator) or (user in obj.teachers.all())
 
+    def get_queryset(self):
+        return self.model.custom.site_related(self.request)
+
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin,
                                    ProtectedFormMixin,
