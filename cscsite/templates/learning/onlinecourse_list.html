@@ -3,15 +3,21 @@
 
 {% block content %}
 <div class="container" id="onlinecourses-list">
-    {% for online_course in active_courses %}
-        {% include "learning/_onlinecourse_list__row.html" %}
-    {% empty %}
-    <div class="row">
-        <div class="col-xs-12">
-          {% trans "No online courses for now" %}
+    {% if recent_courses or self_paced_courses %}
+        {% for online_course in recent_courses %}
+            {% include "learning/_onlinecourse_list__row.html" %}
+        {% endfor %}
+        {% for online_course in self_paced_courses %}
+            {% include "learning/_onlinecourse_list__row.html" %}
+        {% endfor %}
+    {% else %}
+        <div class="row">
+            <div class="col-xs-12">
+              {% trans "No online courses for now" %}
+            </div>
         </div>
-    </div>
-    {% endfor %}
+    {% endif %}
+
 
     {% if archive_courses %}
         <br>

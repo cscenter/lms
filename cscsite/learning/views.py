@@ -1716,8 +1716,12 @@ class OnlineCoursesListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
-        context["active_courses"] = filter(lambda c: not c.end or c.end > now(),
-                                   context[self.context_object_name])
+        context["recent_courses"] = filter(
+            lambda c: not c.is_self_paced and (not c.end or c.end > now()),
+            context[self.context_object_name])
+        context["self_paced_courses"] = sorted(filter(
+            lambda c: c.is_self_paced,
+            context[self.context_object_name]), key=lambda c: c.name)
         context["archive_courses"] = filter(lambda c: c.end and c.end <= now(),
                                    context[self.context_object_name])
         return context
