@@ -1711,7 +1711,16 @@ class NonCourseEventDetailView(generic.DetailView):
 
 
 class OnlineCoursesListView(generic.ListView):
+    context_object_name = 'courses'
     model = OnlineCourse
+
+    def get_context_data(self, **kwargs):
+        context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
+        context["active_courses"] = filter(lambda c: not c.end or c.end > now(),
+                                   context[self.context_object_name])
+        context["archive_courses"] = filter(lambda c: c.end and c.end <= now(),
+                                   context[self.context_object_name])
+        return context
 
     def get_queryset(self):
         return OnlineCourse.objects.order_by("is_self_paced", "-start", "name")

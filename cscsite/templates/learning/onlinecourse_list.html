@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container" id="onlinecourses-list">
-    {% for online_course in object_list %}
+    {% for online_course in active_courses %}
         {% include "learning/_onlinecourse_list__row.html" %}
     {% empty %}
     <div class="row">
@@ -12,6 +12,18 @@
         </div>
     </div>
     {% endfor %}
+
+    {% if archive_courses %}
+        <br>
+        <a href="#onlinecourses-earlier" data-toggle="collapse" aria-expanded="false" class="collapse-link">Прошедшие курсы</a><br>
+        <div class="panel-collapse ">
+            <div class="collapse" id="onlinecourses-earlier">
+            {% for online_course in archive_courses %}
+                {% include "learning/_onlinecourse_list__row.html" %}
+            {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock content %}
 
