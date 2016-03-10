@@ -9,7 +9,7 @@
         <div class="onlinecourses-list__item-right">
             {% if online_course.is_self_paced %}
                 <h2><small>
-                    <span class="label label-primary">{% trans "Without deadlines" %}{{ now.date }}</span>
+                    <span class="label label-primary label-outline">{% trans "Without deadlines" %}{{ now.date }}</span>
                     {% if online_course.start and not online_course.is_ongoing %}{% trans "The course starts on " %}{{ online_course.start|date:"j E Y" }}{% endif %}
                 </small></h2>
             {% elif online_course.start and online_course.end %}
