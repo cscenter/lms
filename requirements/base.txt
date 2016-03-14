@@ -1,4 +1,4 @@
-Django==1.8.8
+Django==1.8.11
 
 Unipath==1.1
 requests==2.9.1
@@ -12,6 +12,8 @@ pytz==2015.7
 
 # Db support
 psycopg2==2.6.1
+# JsonField support for Django <= 1.8
+jsonfield==1.0.3
 
 # Images
 Pillow==3.1.0
