@@ -60,7 +60,7 @@ class IndexView(generic.TemplateView):
         context['testimonials'] = testimonials
         # Don't care about performance for online courses
         today = now().date()
-        pool = list(OnlineCourse.objects.filter(end__gt=today).order_by("start", "name").all())
+        pool = list(OnlineCourse.objects.filter(Q(end__gt=today) | Q(is_self_paced=True)).order_by("start", "name").all())
         random.shuffle(pool)
         context['online_courses'] = pool[:1]
         return context
