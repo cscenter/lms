@@ -20,7 +20,7 @@
                 {% for menu_item in menu %}
                     {% if not menu_item.hidden %}
                     <li {% if menu_item.extension.classes %}class="{{menu_item.extension.classes}}"{% endif %}>
-                        <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+                        <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
@@ -56,7 +56,7 @@
               <ul>
                 {% for second_level in menu_item.children %}
                     <li {% if second_level.extension.classes %}class="{{second_level.extension.classes}}"{% endif %}>
-                        <a href="{{ second_level.url }}">
+                        <a {% if second_level.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ second_level.url }}">
                             {% trans second_level.caption context 'menu' %}
 
                             {% if second_level.extension.budge and request.unread_notifications_cache|getattribute:second_level.extension.budge %}
