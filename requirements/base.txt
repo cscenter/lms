@@ -20,7 +20,7 @@ Pillow==3.1.0
 sorl-thumbnail==12.3
 
 # Forms
-django-floppyforms==1.6.0
+django-floppyforms==1.6.1
 django-crispy-forms==1.5.2
 
 # Models
