@@ -936,7 +936,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         context = (super(StudentAssignmentListView, self)
                    .get_context_data(*args, **kwargs))
-        # Get active student enrollments and then related co's
+        # Get student enrollments from current term and then related co's
         actual_co = (Enrollment.objects.filter(
             course_offering__semester=self.current_semester,
             student=self.request.user).values_list("course_offering", flat=True))
