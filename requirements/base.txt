@@ -8,7 +8,7 @@ unicodecsv==0.14.1
 six==1.10.0
 
 # Time zones support
-pytz==2015.7
+pytz==2016.1
 
 # Db support
 psycopg2==2.6.1
@@ -30,7 +30,7 @@ django-model-utils==2.4
 beautifulsoup4==4.4.1
 
 # Translation utils
-django-rosetta==0.7.6
+django-rosetta==0.7.10
 django-modeltranslation==0.10.2
 
 # Amazon services
@@ -42,7 +42,7 @@ xlsxwriter==0.8.4
 # External services
 yandexwebdav==0.2.11
 slideshare==0.1dev
-raven==5.9.2
+raven==5.11.1
 
 # Localization
 solid_i18n==1.1.0
@@ -77,8 +77,8 @@ django-annoying==0.8.4
 django-bootstrap3==6.2.2
 # Generic, reusable mixins
 django-braces==1.8.1
-django-sitemetrics==0.5.1
-django-taggit==0.17.3
+django-sitemetrics==0.5.2
+django-taggit==0.18.0
 icalendar==3.9.1
 python-dateutil==2.4.2
 sqlparse==0.1.18
