@@ -917,6 +917,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         current_semester = Semester.get_current()
+        self.current_semester = current_semester
         return (self.model.objects
                 .filter(
                     student=self.request.user,
@@ -935,8 +936,13 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         context = (super(StudentAssignmentListView, self)
                    .get_context_data(*args, **kwargs))
-        open_, archive = utils.split_list(context['assignment_list'],
-                                          lambda a_s: a_s.assignment.is_open)
+        # Get active student enrollments and then related co's
+        actual_co = (Enrollment.objects.filter(
+            course_offering__semester=self.current_semester,
+            student=self.request.user).values_list("course_offering", flat=True))
+        open_, archive = utils.split_list(
+            context['assignment_list'],
+            lambda a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive

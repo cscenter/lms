@@ -893,6 +893,30 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         resp = self.client.get(reverse(self.url_name))
         self.assertNotIn(as_past, resp.context['assignment_list_archive'])
 
+    def test_assignments_from_unenrolled_course_offering(self):
+        """Move to archive active assignments from course offerings
+        which student already leave
+        """
+        u = UserFactory.create(groups=['Student [CENTER]'])
+        now_year, now_season = get_current_semester_pair()
+        s = SemesterFactory.create(year=now_year, type=now_season)
+        # Create open co to pass enrollment limit
+        co = CourseOfferingFactory.create(semester=s, is_open=True)
+        as1 = AssignmentFactory.create_batch(2, course_offering=co)
+        self.doLogin(u)
+        # enroll at course offering, assignments are shown
+        EnrollmentFactory.create(student=u, course_offering=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(2, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['assignment_list_archive']))
+        # Now unenroll from the course
+        form = {'course_offering_pk': co.pk}
+        url = reverse('course_offering_unenroll',
+                      args=[co.course.slug, co.semester.slug])
+        response = self.client.post(url, form)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(2, len(resp.context['assignment_list_archive']))
 
 class AssignmentTeacherListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
