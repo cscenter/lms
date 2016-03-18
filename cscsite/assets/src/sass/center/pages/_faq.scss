@@ -1,12 +1,6 @@
-#contacts-wrapper {
+#questions-wrapper {
   // hack for top menu problem
   margin-top: -50px;
-  font-size: 16px;
-  @extend .container;
-
-}
-
-#questions-wrapper {
   @extend .container;
 
   .panel-title {
