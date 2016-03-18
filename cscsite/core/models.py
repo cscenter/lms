@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
@@ -65,7 +66,7 @@ class Faq(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    sites = models.ManyToManyField(Site, verbose_name=_("Sites"))
+    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
 
     class Meta:
         db_table = 'faq'

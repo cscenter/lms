@@ -102,7 +102,7 @@ class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
 class FaqAdmin(admin.ModelAdmin):
-    list_filter = ['sites']
+    list_filter = ['site']
 
 admin.site.register(City, CityAdmin)
 
