@@ -30,12 +30,88 @@ $brand-danger: #d9534f;
 @import "_gradebook.scss";
 @import "_learning.scss";
 //@import "pages/student_assignment";
+@import "pages/faq";
 @import "pages/graduates";
 
 // Boostrap overrides for cscenter site
 .btn-danger, .btn-success, .btn-primary {
   &.btn-block {
     padding: 10px 12px;
+  }
+}
+
+.center-header {
+    @extend .page-header;
+    text-align: center;
+
+    h1 {
+        text-align: center;
+
+    }
+
+    &._supported {
+        margin-bottom: 40px;
+    }
+
+    a {
+        text-transform: uppercase;
+    }
+
+}
+
+// Panel group
+.panel-group {
+  .panel-heading {
+    position: relative;
+    padding: 0;
+    border-bottom: 0;
+
+    + .panel-collapse .panel-body {
+      border-top-color: rgba(0, 0, 0, 0);
+    }
+  }
+
+
+  .panel-title {
+    position: relative;
+    padding: 15px 30px;
+
+    &:after, &:before {
+      position: absolute;
+      top: 18px;
+      right: 30px;
+      font: normal normal normal 14px/1 FontAwesome;
+      @include transition(none);
+    }
+
+    &:focus, &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .panel-body {
+    padding: 15px 30px;
+  }
+
+
+}
+
+.panel-group-continuous {
+  .panel {
+    border-radius: 0;
+
+    + .panel {
+      margin-top: 0;
+      border-top: 1px solid #e4eaec;
+    }
+
+    &:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 4px 4px;
+    }
   }
 }
 

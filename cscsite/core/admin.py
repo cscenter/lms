@@ -103,6 +103,7 @@ class CityAdmin(TranslationAdmin, admin.ModelAdmin):
 
 class FaqAdmin(admin.ModelAdmin):
     list_filter = ['site']
+    list_display = ['question', 'sort']
 
 admin.site.register(City, CityAdmin)
 
