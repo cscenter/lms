@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-18 16:47+0300\n"
-"PO-Revision-Date: 2016-03-18 16:58+0230\n"
+"POT-Creation-Date: 2016-03-18 19:21+0300\n"
+"PO-Revision-Date: 2016-03-18 19:30+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Language: \n"
 "X-Translated-Using: django-rosetta 0.7.10\n"
 
-#: cscsite/core/models.py:12
+#: cscsite/core/models.py:14
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
 " enabled"
@@ -26,7 +26,7 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
 
-#: cscsite/core/models.py:16
+#: cscsite/core/models.py:18
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
@@ -34,11 +34,11 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
-#: cscsite/core/models.py:48
+#: cscsite/core/models.py:50
 msgid "Code"
 msgstr "Код"
 
-#: cscsite/core/models.py:50
+#: cscsite/core/models.py:52
 msgid ""
 "UN/LOCODE notification preferable <a "
 "href='http://www.unece.org/cefact/locode/service/location' "
@@ -48,38 +48,58 @@ msgstr ""
 "href='http://www.unece.org/cefact/locode/service/location' "
 "target='_blank'>Описание</a>"
 
-#: cscsite/core/models.py:52
+#: cscsite/core/models.py:54
 msgid "City name"
 msgstr "Название города"
 
-#: cscsite/core/models.py:57
+#: cscsite/core/models.py:59
 msgid "City"
 msgstr "Город"
 
-#: cscsite/core/models.py:58
+#: cscsite/core/models.py:60
 msgid "Cities"
 msgstr "Города"
 
-#: cscsite/core/models.py:65
-#| msgid "Description"
-msgid "Question"
-msgstr "Вопрос"
-
-#: cscsite/core/models.py:66
-msgid "Answer"
-msgstr "Ответ"
-
 #: cscsite/core/models.py:67
+#| msgid "City name"
+msgid "Category name"
+msgstr "Название категории"
+
+#: cscsite/core/models.py:68 cscsite/core/models.py:81
 msgid "Sort order"
 msgstr "Сортировка"
 
+#: cscsite/core/models.py:69 cscsite/core/models.py:82
+msgid "Site"
+msgstr ""
+
 #: cscsite/core/models.py:73
+msgid "FAQ category"
+msgstr "Раздел для FAQ"
+
+#: cscsite/core/models.py:74
+msgid "FAQ categories"
+msgstr "Разделы для FAQ"
+
+#: cscsite/core/models.py:79
+msgid "Question"
+msgstr "Вопрос"
+
+#: cscsite/core/models.py:80
+msgid "Answer"
+msgstr "Ответ"
+
+#: cscsite/core/models.py:85
+msgid "Categories"
+msgstr "Категории"
+
+#: cscsite/core/models.py:91
 msgid "FAQ"
 msgstr ""
 
-#: cscsite/core/models.py:74
+#: cscsite/core/models.py:92
 msgid "Questions&Answers"
-msgstr "Вопросы-Ответы"
+msgstr "FAQ"
 
 #: cscsite/core/validators.py:35
 #, python-format

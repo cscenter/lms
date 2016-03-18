@@ -13,7 +13,7 @@ from sitemetrics.models import Keycode
 from modeltranslation.admin import TranslationAdmin
 
 from .forms import Ubereditor
-from .models import City, Faq
+from .models import City, Faq, FaqCategory
 
 # Remove groups app from django admin
 admin.site.unregister(Group)
@@ -101,6 +101,10 @@ class WiderLabelsMixin(object):
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
+class FaqCategoryAdmin(admin.ModelAdmin):
+    list_filter = ['site']
+    list_display = ['name', 'sort']
+
 class FaqAdmin(admin.ModelAdmin):
     list_filter = ['site']
     list_display = ['question', 'sort']
@@ -108,3 +112,4 @@ class FaqAdmin(admin.ModelAdmin):
 admin.site.register(City, CityAdmin)
 
 admin.site.register(Faq, FaqAdmin)
+admin.site.register(FaqCategory, FaqCategoryAdmin)

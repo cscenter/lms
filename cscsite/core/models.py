@@ -8,7 +8,6 @@ from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-
 LATEX_MARKDOWN_HTML_ENABLED = _(
     "LaTeX+"
     "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+"
@@ -61,12 +60,32 @@ class City(models.Model):
     def __str__(self):
         return smart_text(self.name)
 
+
+@python_2_unicode_compatible
+class FaqCategory(models.Model):
+    name = models.CharField(_("Category name"), max_length=255)
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
+    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
+
+    class Meta:
+        ordering = ["sort"]
+        verbose_name = _("FAQ category")
+        verbose_name_plural = _("FAQ categories")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
 @python_2_unicode_compatible
 class Faq(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
+    categories = models.ManyToManyField(
+        FaqCategory,
+        verbose_name=_("Categories"),
+        related_name='categories',)
 
     class Meta:
         db_table = 'faq'
