@@ -8,21 +8,12 @@
         <div class="panel-group panel-group-continuous" id="questions">
             {% for qa in faq %}
                 <div class="panel">
-                    <div class="panel-heading" id="question-{{ qa.pk }}" role="tab">
-                        <a class="panel-title" aria-controls="answer-{{ qa.pk }}" data-toggle="collapse"
-                           aria-expanded="false"
-{#                               data-parent="#questions"#}
-                           href="#answer-{{ qa.pk }}">
-                            {{ qa.question }}
-                        </a>
+                    <div class="panel-heading" id="question-{{ qa.pk }}">
+                        <a class="panel-title" aria-controls="answer-{{ qa.pk }}" data-toggle="collapse" aria-expanded="false"
+                           href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
                     </div>
-                    <div class="panel-collapse collapse"
-                         id="answer-{{ qa.pk }}"
-                         aria-labelledby="question-{{ qa.pk }}"  role="tabpanel"
-                         aria-expanded="false">
-                        <div class="panel-body">
-                            {{ qa.answer|safe }}
-                        </div>
+                    <div class="panel-collapse collapse" id="answer-{{ qa.pk }}" aria-labelledby="question-{{ qa.pk }}"  role="tabpanel" aria-expanded="false">
+                        <div class="panel-body">{{ qa.answer|safe }}</div>
                     </div>
                 </div>
             {% endfor %}
