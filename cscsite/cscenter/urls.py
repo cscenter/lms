@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from core.views import MarkdownRenderView
+from cscenter.views import QAListView
 from htmlpages import views
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback, \
@@ -94,6 +95,7 @@ urlpatterns = [
         name='staff_total_statistics_csv'),
 
     url(r'^library/', include("library.urls")),
+    url(r'^faq/$', QAListView.as_view(), name='faq'),
 
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),

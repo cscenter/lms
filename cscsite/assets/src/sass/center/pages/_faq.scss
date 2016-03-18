@@ -1,0 +1,24 @@
+#contacts-wrapper {
+  // hack for top menu problem
+  margin-top: -50px;
+  font-size: 16px;
+  @extend .container;
+
+}
+
+#questions-wrapper {
+  @extend .container;
+
+  .panel-title {
+    font-size: 18px;
+    line-height: 1.2;
+
+    &:before, &:after {
+      top: 20px;
+    }
+  }
+
+  .panel-body {
+    font-size: 16px;
+  }
+}

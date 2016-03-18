@@ -32,7 +32,7 @@ h2.right-line:after {
   line-height: 1.55;
   padding-bottom: 30px;
 
-  .index-header {
+  .center-header {
     a {
       @extend .links-sep-by-vertical-lines;
       font-size: 14px;
@@ -72,24 +72,7 @@ h2.right-line:after {
     padding-top: 20%;
 }
 
-.index-header {
-    @extend .page-header;
-    text-align: center;
 
-    h1 {
-        text-align: center;
-
-    }
-
-    &._supported {
-        margin-bottom: 40px;
-    }
-
-    a {
-        text-transform: uppercase;
-    }
-
-}
 
 #index-online-courses {
   min-width: $min-width;
@@ -99,7 +82,7 @@ h2.right-line:after {
     @extend .container;
     padding-bottom: 30px;
 
-    .index-header {
+    .center-header {
       border-color: #ddd;
     }
 
@@ -118,7 +101,7 @@ h2.right-line:after {
     div {
         text-align: center;
         padding-bottom: 20px;
-        
+
         img {
           max-width: 200px;
         }
@@ -151,7 +134,7 @@ h2.right-line:after {
 
   #courses {
 
-    .index-header {
+    .center-header {
       a {
         @extend .links-sep-by-vertical-lines;
       }

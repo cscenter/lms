@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block body_class %} gray{% endblock body_class %}
+{% block title %}FAQ{% endblock title %}
+{% block content %}
+    <div id="contacts-wrapper">
+        <h2 class="center-header">Контакты</h2>
+        <p>По вопросам, касающимся обучения в CS центре, можно обращаться по адресу <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a></p>
+        <p>Прежде чем задавать вопрос, убедитесь, что его нет среди часто задаваемых вопросов ниже.</p>
+    </div>
+    {% if faq %}
+        <div id="questions-wrapper">
+            <h2 class="center-header">Вопросы и Ответы</h2>
+            <div class="panel-group panel-group-continuous" id="questions">
+                {% for qa in faq %}
+                    <div class="panel">
+                        <div class="panel-heading" id="question-{{ qa.pk }}" role="tab">
+                            <a class="panel-title" aria-controls="answer-{{ qa.pk }}" data-toggle="collapse"
+                               aria-expanded="false"
+{#                               data-parent="#questions"#}
+                               href="#answer-{{ qa.pk }}">
+                                {{ qa.question }}
+                            </a>
+                        </div>
+                        <div class="panel-collapse collapse"
+                             id="answer-{{ qa.pk }}"
+                             aria-labelledby="question-{{ qa.pk }}"  role="tabpanel"
+                             aria-expanded="false">
+                            <div class="panel-body">
+                                {{ qa.answer|safe }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}

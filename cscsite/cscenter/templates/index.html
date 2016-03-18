@@ -10,7 +10,7 @@
 <div class="index-image-container"></div>
 
 <div id="admission">
-    <div class="index-header">
+    <div class="center-header">
         <h1>Набор в CS центр 2016</h1>
         <a href="/enrollment/">Подробнее</a><a href="/application/">Подать заявку</a>
     </div>
@@ -32,7 +32,7 @@
 {% if online_courses %}
     <div id="index-online-courses">
         <div id="onlinecourses-list">
-            <div class="index-header">
+            <div class="center-header">
                 <h1>{% trans "Online courses" %}</h1>
                 <a href="{% url 'onlinecourses_list' %}">{% trans "All online courses" %}</a>
             </div>
@@ -46,7 +46,7 @@
 {% if testimonials %}
     <div class="testimonials-wrapper">
         <div class="testimonials">
-            <div class="index-header">
+            <div class="center-header">
                 <h1>{% trans "Graduates about CS Center" %}</h1>
                 <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
             </div>
@@ -78,7 +78,7 @@
 {% if courses %}
     <div id="courses-wrapper">
     <div id="courses">
-        <div class="index-header">
+        <div class="center-header">
             <h1>{% trans "Full-time courses on video" %}</h1>
             <a href="{% url 'course_list' %}">{% trans "All courses" %}</a><a href="{% url 'course_video_list' %}">{% trans "All video courses" %}</a>
         </div>
@@ -118,7 +118,7 @@
 {% endif %}
 
 <div class="container">
-    <div class="index-header _supported">
+    <div class="center-header _supported">
         <h1>{% trans "Supported by" %}</h1>
     </div>
     <div class="row supported-by">
