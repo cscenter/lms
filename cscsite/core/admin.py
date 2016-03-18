@@ -13,8 +13,7 @@ from sitemetrics.models import Keycode
 from modeltranslation.admin import TranslationAdmin
 
 from .forms import Ubereditor
-from .models import City
-
+from .models import City, Faq
 
 # Remove groups app from django admin
 admin.site.unregister(Group)
@@ -103,3 +102,5 @@ class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
 admin.site.register(City, CityAdmin)
+
+admin.site.register(Faq)
