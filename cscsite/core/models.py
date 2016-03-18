@@ -85,7 +85,8 @@ class Faq(models.Model):
     categories = models.ManyToManyField(
         FaqCategory,
         verbose_name=_("Categories"),
-        related_name='categories',)
+        related_name='categories',
+        blank=True)
 
     class Meta:
         db_table = 'faq'
