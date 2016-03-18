@@ -64,8 +64,8 @@ class City(models.Model):
 class Faq(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
-    sort = models.SmallIntegerField(_("Sort order"))
-    sites = models.ManyToManyField(Site)
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
+    sites = models.ManyToManyField(Site, verbose_name=_("Sites"))
 
     class Meta:
         db_table = 'faq'

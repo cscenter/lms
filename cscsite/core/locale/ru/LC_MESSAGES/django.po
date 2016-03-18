@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-18 16:47+0300\n"
-"PO-Revision-Date: 2016-03-18 16:49+0230\n"
+"PO-Revision-Date: 2016-03-18 16:58+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -44,6 +44,9 @@ msgid ""
 "href='http://www.unece.org/cefact/locode/service/location' "
 "target='_blank'>Hint</a>"
 msgstr ""
+"Нужно указать UN/LOCODE <a "
+"href='http://www.unece.org/cefact/locode/service/location' "
+"target='_blank'>Описание</a>"
 
 #: cscsite/core/models.py:52
 msgid "City name"
@@ -68,7 +71,7 @@ msgstr "Ответ"
 
 #: cscsite/core/models.py:67
 msgid "Sort order"
-msgstr ""
+msgstr "Сортировка"
 
 #: cscsite/core/models.py:73
 msgid "FAQ"

@@ -101,6 +101,9 @@ class WiderLabelsMixin(object):
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
+class FaqAdmin(admin.ModelAdmin):
+    list_filter = ['sites']
+
 admin.site.register(City, CityAdmin)
 
-admin.site.register(Faq)
+admin.site.register(Faq, FaqAdmin)
