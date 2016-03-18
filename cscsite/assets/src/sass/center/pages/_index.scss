@@ -1,3 +1,19 @@
+.background-grey {
+  background: #f8f8f8;
+}
+
+a.links-sep-by-vertical-lines {
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid $color-grey;
+
+  &:last-child {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
 // test css
 h2.right-line:after {
     position: absolute;
@@ -10,6 +26,23 @@ h2.right-line:after {
     border-left: solid 20px #fff;
 }
 
+#admission {
+  @extend .container;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-bottom: 30px;
+
+  .index-header {
+    a {
+      @extend .links-sep-by-vertical-lines;
+      font-size: 14px;
+    }
+  }
+
+  ul {
+    @extend .list-unstyled;
+  }
+}
 
 #intro {
     overflow: hidden;
@@ -60,6 +93,7 @@ h2.right-line:after {
 
 #index-online-courses {
   min-width: $min-width;
+  @extend .background-grey;
 
   #onlinecourses-list {
     @extend .container;
@@ -112,20 +146,14 @@ h2.right-line:after {
   color: #B5B5B5;
 }
 
+#courses-wrapper {
+  //@extend .background-grey;
 
-#courses {
+  #courses {
 
     .index-header {
       a {
-        padding-right: 10px;
-        margin-right: 10px;
-        border-right: 1px solid $color-grey;
-
-        &:last-child {
-          border: 0;
-          padding: 0;
-          margin: 0;
-        }
+        @extend .links-sep-by-vertical-lines;
       }
     }
 
@@ -139,39 +167,39 @@ h2.right-line:after {
 
     .table {
 
-        th {
-            &._semester {
-                width: 100px;
-            }
-            &._lec_cnt {
-                width: 54px;
-                text-align: center;
-            }
-
-            &._video {
-                text-align: center;
-                width: 50px;
-            }
+      th {
+        &._semester {
+          width: 100px;
+        }
+        &._lec_cnt {
+          width: 54px;
+          text-align: center;
         }
 
-        tr {
-            td:last-child {
-                text-align: center;
-            }
+        &._video {
+          text-align: center;
+          width: 50px;
         }
+      }
 
-         > thead > tr > th {
-            background: #f8f8f8;
-            border-bottom: 0;
+      tr {
+        td:last-child {
+          text-align: center;
         }
+      }
+
+      > thead > tr > th {
+        @extend .background-grey;
+        border-bottom: 0;
+      }
     }
+  }
 }
 
 
 
 /* Testimonials */
 .testimonials-wrapper {
-  background: #f8f8f8;
 
   .testimonials {
     @extend .container;
@@ -180,7 +208,7 @@ h2.right-line:after {
     .testimonial {
       margin-bottom: 20px;
       blockquote {
-        background: #fff none repeat scroll 0 0;
+        background: #f8f8f8 none repeat scroll 0 0;
         border: medium none;
         color: #666;
         display: block;
@@ -206,7 +234,7 @@ h2.right-line:after {
           position: absolute;
           border-style: solid;
           border-width: 30px 30px 0 0;
-          border-color: #fff transparent transparent transparent;
+          border-color: #f8f8f8 transparent transparent transparent;
         }
       }
 
