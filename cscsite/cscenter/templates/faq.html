@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load staticfiles %}
 {% block body_class %} gray{% endblock body_class %}
 {% block title %}Вопросы и ответы{% endblock title %}
 {% block content %}
@@ -9,10 +10,10 @@
             {% for qa in faq %}
                 <div class="panel">
                     <div class="panel-heading" id="question-{{ qa.pk }}">
-                        <a class="panel-title" aria-controls="answer-{{ qa.pk }}" data-toggle="collapse" aria-expanded="false"
+                        <a class="panel-title" aria-expanded="true"
                            href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
                     </div>
-                    <div class="panel-collapse collapse" id="answer-{{ qa.pk }}" aria-labelledby="question-{{ qa.pk }}"  role="tabpanel" aria-expanded="false">
+                    <div class="panel-collapse" id="answer-{{ qa.pk }}"  aria-expanded="true">
                         <div class="panel-body">{{ qa.answer|safe }}</div>
                     </div>
                 </div>
@@ -20,3 +21,8 @@
         </div>
     </div>
 {% endblock content %}
+
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/faq.js" %}"></script>
+{% endblock javascripts %}
