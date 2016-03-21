@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-18 19:21+0300\n"
-"PO-Revision-Date: 2016-03-21 15:06+0230\n"
+"POT-Creation-Date: 2016-03-21 18:20+0300\n"
+"PO-Revision-Date: 2016-03-21 18:21+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Language: \n"
 "X-Translated-Using: django-rosetta 0.7.10\n"
 
-#: cscsite/core/models.py:14
+#: cscsite/core/models.py:12
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML is"
 " enabled"
@@ -26,7 +26,7 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>+HTML"
 
-#: cscsite/core/models.py:18
+#: cscsite/core/models.py:16
 msgid ""
 "LaTeX+<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a> is "
 "enabled"
@@ -34,11 +34,11 @@ msgstr ""
 "Доступны LaTeX+<a "
 "href=\"http://ru.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
-#: cscsite/core/models.py:50
+#: cscsite/core/models.py:48
 msgid "Code"
 msgstr "Код"
 
-#: cscsite/core/models.py:52
+#: cscsite/core/models.py:50
 msgid ""
 "UN/LOCODE notification preferable <a "
 "href='http://www.unece.org/cefact/locode/service/location' "
@@ -48,56 +48,57 @@ msgstr ""
 "href='http://www.unece.org/cefact/locode/service/location' "
 "target='_blank'>Описание</a>"
 
-#: cscsite/core/models.py:54
+#: cscsite/core/models.py:52
 msgid "City name"
 msgstr "Название города"
 
-#: cscsite/core/models.py:59
+#: cscsite/core/models.py:57
 msgid "City"
 msgstr "Город"
 
-#: cscsite/core/models.py:60
+#: cscsite/core/models.py:58
 msgid "Cities"
 msgstr "Города"
 
-#: cscsite/core/models.py:67
-#| msgid "City name"
+#: cscsite/core/models.py:66
 msgid "Category name"
 msgstr "Название категории"
 
-#: cscsite/core/models.py:68 cscsite/core/models.py:81
+#: cscsite/core/models.py:67 cscsite/core/models.py:83
+#: cscsite/learning/models.py:1081
 msgid "Sort order"
 msgstr "Сортировка"
 
-#: cscsite/core/models.py:69 cscsite/core/models.py:82
+#: cscsite/core/models.py:68 cscsite/core/models.py:84
+#: cscsite/learning/models.py:1082
 msgid "Site"
 msgstr ""
 
-#: cscsite/core/models.py:73
+#: cscsite/core/models.py:72
 msgid "FAQ category"
 msgstr "Раздел для FAQ"
 
-#: cscsite/core/models.py:74
+#: cscsite/core/models.py:73
 msgid "FAQ categories"
 msgstr "Разделы для FAQ"
 
-#: cscsite/core/models.py:79
+#: cscsite/core/models.py:81 cscsite/learning/models.py:1079
 msgid "Question"
 msgstr "Вопрос"
 
-#: cscsite/core/models.py:80
+#: cscsite/core/models.py:82 cscsite/learning/models.py:1080
 msgid "Answer"
 msgstr "Ответ"
 
-#: cscsite/core/models.py:85
+#: cscsite/core/models.py:87
 msgid "Categories"
 msgstr "Категории"
 
-#: cscsite/core/models.py:91
+#: cscsite/core/models.py:94
 msgid "FAQ"
 msgstr ""
 
-#: cscsite/core/models.py:92
+#: cscsite/core/models.py:95
 msgid "Questions&Answers"
 msgstr "FAQ"
 
@@ -958,6 +959,10 @@ msgstr "Международная школа"
 #: cscsite/learning/models.py:1071
 msgid "International schools"
 msgstr "Международные школы"
+
+#: cscsite/learning/models.py:1086 cscsite/learning/models.py:1087
+msgid "Usefull"
+msgstr "Полезное"
 
 #: cscsite/learning/settings.py:19
 msgid "Student [CENTER]"

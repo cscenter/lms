@@ -11,7 +11,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
-    CourseOfferingTeacher, InternationalSchool
+    CourseOfferingTeacher, InternationalSchool, Usefull
 from learning.settings import PARTICIPANT_GROUPS
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
@@ -145,6 +145,10 @@ class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
 class InternationalSchoolAdmin(UbereditorMixin, admin.ModelAdmin):
     list_display = ['name', 'deadline', 'has_grants']
 
+class UsefullAdmin(admin.ModelAdmin):
+    list_filter = ['site']
+    list_display = ['question', 'sort']
+
 
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
@@ -162,3 +166,4 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
 admin.site.register(StudentProject, StudentProjectAdmin)
+admin.site.register(Usefull, UsefullAdmin)
