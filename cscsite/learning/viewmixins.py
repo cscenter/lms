@@ -27,6 +27,13 @@ class StudentOnlyMixin(UserPassesTestMixin):
                (user.is_student or user.is_curator))
 
 
+class StudentCenterOnlyMixin(UserPassesTestMixin):
+    raise_exception = False
+
+    def test_func(self, user):
+        return (user.is_student_center or user.is_curator)
+
+
 class CuratorOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 

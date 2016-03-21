@@ -9,10 +9,10 @@
         },
 
         toggleBehaviour: function() {
-            faq.find('.panel').each(function() {
-                $(this).find('.panel-title').attr("aria-expanded", false);
-                $(this).find('.panel-collapse').attr("aria-expanded", false).addClass('collapse');
-            });
+            //faq.find('.panel').each(function() {
+            //    $(this).find('.panel-title').attr("aria-expanded", false);
+            //    $(this).find('.panel-collapse').attr("aria-expanded", false).addClass('collapse');
+            //});
             faq.on('click', '.panel-title', function(e) {
                 e.preventDefault();
                 var open = $(this).attr("aria-expanded") == "true";

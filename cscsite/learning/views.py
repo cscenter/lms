@@ -37,14 +37,15 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin
+    CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin, \
+    StudentCenterOnlyMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool
+    OnlineCourse, InternationalSchool, Useful
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
@@ -1771,3 +1772,11 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             "attachment; filename={}".format(file_name)
         response['X-Accel-Redirect'] = file_url
         return response
+
+
+class UsefulListView(StudentCenterOnlyMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "useful.html"
+
+    def get_queryset(self):
+        return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
