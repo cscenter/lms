@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-18 19:21+0300\n"
-"PO-Revision-Date: 2016-03-18 19:30+0230\n"
+"PO-Revision-Date: 2016-03-21 15:06+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1174,7 +1174,7 @@ msgstr "Дополнительные поля для меню"
 #: cscsite/menu_extension/translation.py:13
 msgctxt "menu"
 msgid "About CSC"
-msgstr "О Центре"
+msgstr "О центре"
 
 #: cscsite/menu_extension/translation.py:14
 msgctxt "menu"
