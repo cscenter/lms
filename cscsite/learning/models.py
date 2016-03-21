@@ -1075,7 +1075,7 @@ class InternationalSchool(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class Usefull(models.Model):
+class Useful(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
@@ -1083,8 +1083,8 @@ class Usefull(models.Model):
 
     class Meta:
         ordering = ["sort"]
-        verbose_name = _("Usefull")
-        verbose_name_plural = _("Usefull")
+        verbose_name = _("Useful")
+        verbose_name_plural = _("Useful")
 
     def __str__(self):
         return smart_text(self.question)
