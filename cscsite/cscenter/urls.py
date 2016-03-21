@@ -10,7 +10,7 @@ from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback, \
     AlumniViewByStudyProgram
 from learning.views import \
-    MarksSheetTeacherView, MarksSheetTeacherDispatchView
+    MarksSheetTeacherView, MarksSheetTeacherDispatchView, UsefulListView
 from staff.views import ExportsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
     StudentSearchJSONView, StudentSearchView, \
@@ -30,6 +30,8 @@ urlpatterns = [
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
     url(r'^private/enrollment_gform_callback/',
         EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
+
+    url(r'^learning/useful/$', UsefulListView.as_view(), name='learning_useful'),
 
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
