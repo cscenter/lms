@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Usefull',
+            name='Useful',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('question', models.CharField(max_length=255, verbose_name='Question')),
@@ -23,8 +23,8 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['sort'],
-                'verbose_name': 'FAQ',
-                'verbose_name_plural': 'Questions&Answers',
+                'verbose_name': 'Useful',
+                'verbose_name_plural': 'Useful',
             },
         ),
     ]
