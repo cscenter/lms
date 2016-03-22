@@ -17,5 +17,15 @@
   .panel-body {
     font-size: 14px;
   }
+
+  .panel-collapse {
+    max-height: 2000px;
+    overflow: hidden;
+    @include transition(max-height 0.45s ease-in);
+    &.expanded {
+      max-height: 0;
+      @include transition(max-height 0.4s ease);
+    }
+  }
 }
 
