@@ -16,7 +16,7 @@
             faq.on('click', '.panel-title', function(e) {
                 e.preventDefault();
                 var open = $(this).attr("aria-expanded") == "true";
-                $(this).parent().next().slideToggle('collapse').attr("aria-expanded", !open);
+                $(this).parent().next().toggleClass('collapse').attr("aria-expanded", !open);
                 $(this).attr("aria-expanded", !open);
             });
         },
