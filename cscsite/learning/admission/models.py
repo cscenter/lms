@@ -1,0 +1,284 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, unicode_literals
+
+from collections import OrderedDict
+
+from django.conf import settings
+from django.core.validators import RegexValidator
+from django.db import models
+from django.utils.encoding import python_2_unicode_compatible, smart_text
+from jsonfield import JSONField
+from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
+from model_utils.models import TimeStampedModel
+
+
+@python_2_unicode_compatible
+class Campaign(models.Model):
+    name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
+
+    class Meta:
+        verbose_name = _("Campaign")
+        verbose_name_plural = _("Campaigns")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
+@python_2_unicode_compatible
+class Applicant(TimeStampedModel):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Applicant|Campaign"),
+        on_delete=models.PROTECT,
+        related_name="applicants")
+    first_name = models.CharField(_("First name"), max_length=255)
+    second_name = models.CharField(_("Second name"), max_length=255)
+    last_name = models.CharField(_("Last name"), max_length=255)
+    email = models.EmailField(
+        _("Email"),
+        help_text=_("Applicant|email"))
+    phone = models.CharField(
+        _("Contact phone"),
+        max_length=42,
+        help_text=_("Applicant|phone"))
+    stepic_id = models.PositiveIntegerField(
+        _("Stepic ID"),
+        help_text=_("Applicant|stepic_id"),
+        blank=True,
+        null=True)
+    yandex_id = models.CharField(
+        _("Yandex ID"),
+        max_length=80,
+        validators=[RegexValidator(regex="^[^@]*$",
+                                   message=_("Only the part before "
+                                             "\"@yandex.ru\" is expected"))],
+        help_text=_("Applicant|yandex_id"))
+    github_id = models.CharField(
+        _("Github ID"),
+        max_length=255,
+        help_text=_("Applicant|github_id"),
+        null=True,
+        blank=True)
+
+    university = models.CharField(
+        _("University"),
+        help_text=_("Applicant|university"),
+        max_length=255)
+    faculty = models.TextField(
+        _("Faculty"),
+        help_text=_("Applicant|faculty"))
+    course = models.CharField(
+        _("Course"),
+        help_text=_("Applicant|course"),
+        max_length=355)
+    graduate_work = models.TextField(
+        _("Graduate work"),
+        help_text=_("Applicant|graduate_work_or_dissertation"),
+        null=True,
+        blank=True)
+    experience = models.TextField(
+        _("Experience"),
+        help_text=_("Applicant|work_or_study_experience"))
+    has_job = models.CharField(
+        _("Do you work?"),
+        help_text=_("Applicant|has_job"),
+        max_length=10,
+        null=True,
+        blank=True)
+    workplace = models.CharField(
+        _("Workplace"),
+        help_text=_("Applicant|workplace"),
+        max_length=255,
+        null=True,
+        blank=True)
+    position = models.CharField(
+        _("Position"),
+        help_text=_("Applicant|position"),
+        max_length=255,
+        null=True,
+        blank=True)
+
+    motivation = models.TextField(
+        _("Your motivation"),
+        help_text=_("Applicant|motivation_why"),
+        blank=True,
+        null=True)
+    additional_info = models.TextField(
+        _("Additional info from applicant about himself"),
+        help_text=_("Applicant|additional_info"),
+        blank=True,
+        null=True)
+    preferred_study_programs = models.CharField(
+        _("Study program"),
+        help_text=_("Applicant|study_program"),
+        max_length=255)
+    where_did_you_learn = models.TextField(
+        _("Where did you learn?"),
+        help_text=_("Applicant|where_did_you_learn"))
+    your_future_plans = models.TextField(
+        _("Future plans"),
+        help_text=_("Applicant|future_plans"),
+        blank=True,
+        null=True)
+    admin_note = models.TextField(
+        _("Admin note"),
+        help_text=_("Applicant|admin_note"),
+        blank=True,
+        null=True)
+
+    uuid = models.UUIDField(editable=False, null=True, blank=True)
+
+    # TODO: добавить статус? Отказ по экзамену и т.д.? Как обновлять при собеседовании?
+
+    class Meta:
+        verbose_name = _("Applicant")
+        verbose_name_plural = _("Applicants")
+
+
+    def __str__(self):
+        return smart_text("{} {} {}".format(self.second_name, self.first_name, self.last_name))
+
+
+class Test(TimeStampedModel):
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="online_tests")
+    details = JSONField(
+        load_kwargs={'object_pairs_hook': OrderedDict},
+        blank=True,
+        null=True
+    )
+    yandex_contest_id = models.CharField(
+        _("Contest #ID"),
+        help_text=_("Applicant|yandex_contest_id"),
+        max_length=42,
+        blank=True,
+        null=True)
+    score = models.DecimalField(
+        verbose_name=_("Score"),
+        max_digits=3,
+        decimal_places=1)
+
+    uuid = models.UUIDField(editable=False, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Testing")
+        verbose_name_plural = _("Testings")
+
+
+class Exam(TimeStampedModel):
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="exams")
+    details = JSONField(
+        load_kwargs={'object_pairs_hook': OrderedDict},
+        blank=True,
+        null=True
+    )
+    yandex_contest_id = models.CharField(
+        _("Contest #ID"),
+        help_text=_("Applicant|yandex_contest_id"),
+        max_length=42,
+        blank=True,
+        null=True)
+    score = models.DecimalField(
+        verbose_name=_("Score"),
+        max_digits=3,
+        decimal_places=1)
+
+    uuid = models.UUIDField(editable=False, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Exam")
+        verbose_name_plural = _("Exams")
+
+
+@python_2_unicode_compatible
+class Interviewer(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Interviewer|user"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Interviewer")
+        verbose_name_plural = _("Interviewers")
+
+    def __str__(self):
+        return smart_text(self.user.get_full_name(True))
+
+
+# TODO: кто принимает решение о результатах интервью?
+class Interview(TimeStampedModel):
+    WAITING = 'waiting'
+    CANCELED = 'canceled'
+    ACCEPT = 'accept'
+    DECLINE = 'decline'
+    VOLUNTEER = 'volunteer'
+    DECISIONS = (
+        (WAITING, _('Waiting for interview')),
+        (CANCELED, _('Canceled')),
+        (ACCEPT, _('Accept')),
+        (DECLINE, _('Decline')),
+        (VOLUNTEER, _("Volunteer")),
+    )
+
+    date = models.DateTimeField(_("When"))
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="interviews")
+    # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
+    decision = models.CharField(
+        choices=DECISIONS,
+        default=WAITING,
+        verbose_name=_("Interview|Decision"),
+        max_length=10)
+    decision_comment = models.TextField(
+        _("Decision summary"),
+        blank=True,
+        null=True)
+
+    class Meta:
+        verbose_name = _("Interview")
+        verbose_name_plural = _("Interviews")
+
+    def average_score(self):
+        scores = [comment.score for comment in self.comments]
+        if scores:
+            return float(sum(scores)) / len(scores)
+        return "-"
+
+
+# TODO: Можно оставить только 1 комментарий 1му интервьюверу?
+class Comment(TimeStampedModel):
+    interview = models.ForeignKey(
+        Interview,
+        verbose_name=_("Interview"),
+        on_delete=models.PROTECT,
+        related_name="comments")
+    interviewer = models.ForeignKey(
+        Interviewer,
+        on_delete=models.PROTECT,
+        related_name="comments")
+    text = models.TextField(
+        _("Text"),
+        blank=True,
+        null=True)
+    # TODO: какая шкала?
+    score = models.DecimalField(
+        verbose_name=_("Score"),
+        max_digits=2,
+        decimal_places=1)
+
+    class Meta:
+        verbose_name = _("Comment")
+        verbose_name_plural = _("Comments")
+
