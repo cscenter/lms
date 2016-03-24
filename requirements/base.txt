@@ -41,7 +41,8 @@ xlsxwriter==0.8.4
 
 # External services
 yandexwebdav==0.2.11
-slideshare==0.1dev
+# remove slideshare==0.1dev
+git+https://github.com/pacahon/slideshare.git
 raven==5.11.1
 
 # Localization
