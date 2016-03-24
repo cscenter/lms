@@ -2,7 +2,12 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from StringIO import StringIO
+import six
+if six.PY3:
+    from io import StringIO as OutputIO
+else:
+    from io import BytesIO as OutputIO
+
 
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -35,13 +40,13 @@ class FakeObj(object):
 
 class NotifyCommandTest(TestCase):
     def test_notifications(self):
-        out = StringIO()
+        out = OutputIO()
         mail.outbox = []
         Command().execute(stdout=out)
         self.assertEqual(0, len(mail.outbox))
         self.assertEqual(0, len(out.getvalue()))
 
-        out = StringIO()
+        out = OutputIO()
         mail.outbox = []
         an = AssignmentNotificationFactory.create(is_about_passed=True)
         Command().execute(stdout=out)
@@ -54,13 +59,13 @@ class NotifyCommandTest(TestCase):
                       mail.outbox[0].body)
         self.assertIn("sending notification for", out.getvalue())
 
-        out = StringIO()
+        out = OutputIO()
         mail.outbox = []
         Command().execute(stdout=out)
         self.assertEqual(0, len(mail.outbox))
         self.assertEqual(0, len(out.getvalue()))
 
-        out = StringIO()
+        out = OutputIO()
         mail.outbox = []
         conn = CourseOfferingNewsNotificationFactory.create()
         course_offering = conn.course_offering_news.course_offering

@@ -1,6 +1,6 @@
 import datetime
-import itertools
 from collections import namedtuple
+from six.moves import zip_longest
 
 import dateutil.parser as dparser
 from django.http import Http404
@@ -106,7 +106,7 @@ def grouper(iterable, n, fillvalue=None):
     """Collect data into fixed-length chunks or blocks"""
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
-    return itertools.izip_longest(fillvalue=fillvalue, *args)
+    return zip_longest(fillvalue=fillvalue, *args)
 
 
 def co_from_kwargs(kwargs):

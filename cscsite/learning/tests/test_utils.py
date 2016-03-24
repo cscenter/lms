@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-import cStringIO
+from io import StringIO, BytesIO
 import datetime
 
+from django.utils.encoding import force_bytes
 from mock import patch, MagicMock
 import pytz
 
@@ -46,11 +47,11 @@ class UtilTests(TestCase):
         assignments = AssignmentFactory.create_batch(3, course_offering=co)
         assignment = assignments[0]
         expected_grade = 13
-        csv_input = ('user_id,total\n' +
-                     "{},{}\n".format(student.stepic_id,
-                                      expected_grade)).encode('utf-8')
+        csv_input = force_bytes("user_id,total\n"
+                                "{},{}\n".format(student.stepic_id,
+                                                 expected_grade))
         request = MagicMock()
-        request.FILES = {'csvfile': cStringIO.StringIO(csv_input)}
+        request.FILES = {'csvfile': BytesIO(csv_input)}
         ImportGradesByStepicID(request, assignment).process()
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)

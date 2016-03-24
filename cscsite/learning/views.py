@@ -2,11 +2,12 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import csv
 import datetime
 import logging
 import os
-import unicodecsv
+
+import itertools
+import unicodecsv as csv
 
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
@@ -1654,19 +1655,17 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             = 'attachment; filename="{}"'.format(filename)
 
         writer = csv.writer(response)
-        writer.writerow(['Фамилия'.encode('utf8'),
-                         'Имя'.encode('utf8'),
-                         'Яндекс ID'.encode('utf8')]
-                        + [smart_text(a.title).encode('utf8')
-                           for a in header]
-                        + ['Итоговая оценка'.encode('utf8')])
+        writer.writerow(['Фамилия',
+                         'Имя',
+                         'Яндекс ID']
+                        + [a.title for a in header]
+                        + ['Итоговая оценка'])
         for student, by_assignment in structured.items():
-            writer.writerow([(smart_text(x if x is not None else '')
-                              .encode('utf8'))
-                             for x in
-                             ([student.last_name, student.first_name, student.yandex_id]
-                              + by_assignment.values()
-                              + [enrollment_grades[student]])])
+            writer.writerow(
+                [(x if x is not None else '') for x in
+                    itertools.chain([student.last_name, student.first_name, student.yandex_id],
+                    by_assignment.values(),
+                    [enrollment_grades[student]])])
         return response
 
 
