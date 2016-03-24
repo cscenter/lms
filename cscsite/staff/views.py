@@ -13,8 +13,8 @@ from collections import OrderedDict, defaultdict
 from django.core.urlresolvers import reverse
 from django.db.models import F, Count, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import smart_str, smart_unicode, smart_text, \
-    force_unicode
+from django.utils.encoding import smart_str, smart_text, \
+    force_text
 from django.views import generic
 from django.http import HttpResponse, JsonResponse, Http404
 from braces.views import LoginRequiredMixin, JSONResponseMixin
