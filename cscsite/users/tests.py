@@ -16,7 +16,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_text, force_unicode
+from django.utils.encoding import smart_text, force_text
 from django.utils import translation
 from django.utils.translation import ugettext as _
 
@@ -435,8 +435,8 @@ def test_alumni(client,
     client.login(graduated)
     url_list_all = reverse('alumni')
     response = client.get(url_list_all)
-    assert student_center.last_name not in force_unicode(response.content)
-    assert graduated.last_name in force_unicode(response.content)
+    assert student_center.last_name not in force_text(response.content)
+    assert graduated.last_name in force_text(response.content)
     url = reverse('alumni_by_study_program', args=["-"])
     response = client.get(url)
     assert response.status_code == 404
@@ -449,12 +449,12 @@ def test_alumni(client,
     graduated.study_programs.add(st1.code)
     url = reverse('alumni_by_study_program', args=[st1.code])
     response = client.get(url)
-    assert graduated.last_name in force_unicode(response.content)
+    assert graduated.last_name in force_text(response.content)
     response = client.get(url_list_all)
-    assert graduated.last_name in force_unicode(response.content)
+    assert graduated.last_name in force_text(response.content)
     url = reverse('alumni_by_study_program', args=[st2.code])
     response = client.get(url)
-    assert graduated.last_name not in force_unicode(response.content)
+    assert graduated.last_name not in force_text(response.content)
 
 
 @pytest.mark.django_db

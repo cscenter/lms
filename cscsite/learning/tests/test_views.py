@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-import csv
+import unicodecsv
 import logging
 import os
 import pytest
@@ -19,7 +19,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.test.utils import override_settings
 from django.test import TestCase
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text, force_text, force_str
 from django.utils.translation import ugettext as _
 from learning.settings import GRADES
 from ..utils import get_current_semester_pair
@@ -1426,7 +1426,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                   co.semester.type])
         self.doLogin(teacher)
         resp = self.client.get(url)
-        self.assertEquals(resp.context['students'].items()[0][1]["total"], expected_total_score)
+        head_student = next(iter(resp.context['students'].items()))
+        self.assertEquals(head_student[1]["total"], expected_total_score)
 
     def test_save_markssheet(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -1535,7 +1536,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         [EnrollmentFactory.create(student=s, course_offering=co)
-         for s in [student1, student2]]
+            for s in [student1, student2]]
         url = reverse('markssheet_teacher_csv',
                       args=[co.course.slug, co.semester.slug])
         combos = [(a, s, grade+1)
@@ -1549,9 +1550,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
             a_s.grade = grade
             a_s.save()
         self.doLogin(teacher)
-        data = [[x.decode('utf8') if isinstance(x, basestring) else x
-                 for x in row]
-                for row in csv.reader(self.client.get(url)) if row]
+        data = [row for row in unicodecsv.reader(self.client.get(url)) if row]
         self.assertEquals(3, len(data))
         self.assertIn(a1.title, data[0])
         row_last_names = [row[0] for row in data]
