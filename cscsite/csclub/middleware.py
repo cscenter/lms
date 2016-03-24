@@ -1,5 +1,3 @@
-from urlparse import urlparse
-
 from django.conf import settings
 
 from core.models import City

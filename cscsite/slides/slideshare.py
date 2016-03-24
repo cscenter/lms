@@ -14,8 +14,8 @@ except ImportError:
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.encoding import force_bytes
-from slideshare import SlideshareAPI, SlideShareServiceError
+from slideshare import client
+from slideshare.client import SlideShareError
 
 
 logger = logging.getLogger(__name__)
@@ -35,32 +35,24 @@ for attr in REQUIRED_SETTINGS:
 
 
 def get_api():
-    return SlideshareAPI(settings.SLIDESHARE_API_KEY,
-                         settings.SLIDESHARE_SECRET)
+    return client(api_key=settings.SLIDESHARE_API_KEY,
+                  shared_secret=settings.SLIDESHARE_SECRET,
+                  username=settings.SLIDESHARE_USERNAME,
+                  password=settings.SLIDESHARE_PASSWORD)
 
 
 def upload_slides(handle, title, description, tags):
     api = get_api()
-
-    # Note(lebedev): unfortunately 'slideshare' has no idea about
-    # unicode strings, so we have to force everything to be bytes.
-    mimetype, _ = mimetypes.guess_type(handle.name)
-    srcfile = {
-        "filename": force_bytes(os.path.basename(handle.name)),
-        "mimetype": mimetype,
-        "filehandle": handle
-    }
-
+    path_to_file = handle.name
     try:
         sls = api.upload_slideshow(
-            settings.SLIDESHARE_USERNAME, settings.SLIDESHARE_PASSWORD,
-            slideshow_title=force_bytes(title),
-            slideshow_srcfile=srcfile,
-            slideshow_description=force_bytes(description),
-            slideshow_tags=[force_bytes(tag) for tag in tags])
+            slideshow_title=title,
+            slideshow_srcfile=path_to_file,
+            slideshow_description=description,
+            slideshow_tags=[tag for tag in tags])
         sl_id = sls["SlideShowUploaded"]["SlideShowID"]
         sl_meta = api.get_slideshow(sl_id)
         return sl_meta["Slideshow"]["URL"]
-    except (SlideShareServiceError, URLError) as e:
+    except (SlideShareError, URLError) as e:
         logger.error(e)
         return ""
