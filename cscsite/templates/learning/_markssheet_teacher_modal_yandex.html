@@ -13,9 +13,9 @@
                     <div class="form-group">
                         <label for="csv-assignment-selected">1. {% trans "Select assignment" %}</label>
                         <select name="assignment" class="form-control" id="csv-assignment-selected">
-                        {% for assignment_id, assignment in assignment_headers.iteritems %}
-                            {% if not assignment.is_online %}
-                                <option value="{{ assignment.pk }}">{{ assignment.title}}</option>
+                        {% for assignment_id, assignment in assignments.items %}
+                            {% if not assignment.header.is_online %}
+                                <option value="{{ assignment.header.pk }}">{{ assignment.header.title}}</option>
                             {% endif %}
                         {% endfor %}
                         </select>
