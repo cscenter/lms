@@ -23,6 +23,10 @@ MIDDLEWARE_CLASSES = (
     'core.notifications.UnreadNotificationsCacheMiddleware',
 )
 
+INSTALLED_APPS += (
+    'learning.admission',
+)
+
 # Add site specific templates
 TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 
@@ -30,6 +34,7 @@ TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 # https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS += (
     Path(BASE_DIR, "locale"),
+    Path(PROJECT_DIR, "learning", "admission", "locale"),
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!

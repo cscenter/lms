@@ -87,12 +87,12 @@ INSTALLED_APPS = (
     'news',
     'index',
     'learning',
-    # 'learning.admission',
     'staff',
     'library',
     'loginas',
     'import_export',
     'pipeline',
+
     # 'webpack_loader',
 )
 

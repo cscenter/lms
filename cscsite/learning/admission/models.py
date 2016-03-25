@@ -28,6 +28,18 @@ class Campaign(models.Model):
 
 @python_2_unicode_compatible
 class Applicant(TimeStampedModel):
+    REJECTED_BY_TEST = 'rejected_test'
+    REJECTED_BY_EXAM = 'rejected_exam'
+    REJECTED_BY_INTERVIEW = 'rejected_interview'
+    ACCEPT = 'accept'
+    VOLUNTEER = 'volunteer'
+    STATUS = (
+        (REJECTED_BY_TEST, _('Rejected by test')),
+        (REJECTED_BY_EXAM, _('Rejected by exam')),
+        (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
+        (ACCEPT, _('Accept')),
+        (VOLUNTEER, _("Applicant|Volunteer")),
+    )
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Applicant|Campaign"),
@@ -127,7 +139,12 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|admin_note"),
         blank=True,
         null=True)
-
+    status = models.CharField(
+        choices=STATUS,
+        verbose_name=_("Applicant|Status"),
+        blank=True,
+        null=True,
+        max_length=20)
     uuid = models.UUIDField(editable=False, null=True, blank=True)
 
     # TODO: добавить статус? Отказ по экзамену и т.д.? Как обновлять при собеседовании?
@@ -141,8 +158,9 @@ class Applicant(TimeStampedModel):
         return smart_text("{} {} {}".format(self.second_name, self.first_name, self.last_name))
 
 
+@python_2_unicode_compatible
 class Test(TimeStampedModel):
-    applicant = models.ForeignKey(
+    applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
@@ -163,11 +181,16 @@ class Test(TimeStampedModel):
         max_digits=3,
         decimal_places=1)
 
-    uuid = models.UUIDField(editable=False, null=True, blank=True)
-
     class Meta:
         verbose_name = _("Testing")
         verbose_name_plural = _("Testings")
+
+    def __str__(self):
+        return smart_text("{} {} {}".format(
+            self.applicant.second_name,
+            self.applicant.first_name,
+            self.applicant.last_name)
+        )
 
 
 class Exam(TimeStampedModel):
@@ -192,11 +215,16 @@ class Exam(TimeStampedModel):
         max_digits=3,
         decimal_places=1)
 
-    uuid = models.UUIDField(editable=False, null=True, blank=True)
-
     class Meta:
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
+
+    def __str__(self):
+        return smart_text("{} {} {}".format(
+            self.applicant.second_name,
+            self.applicant.first_name,
+            self.applicant.last_name)
+        )
 
 
 @python_2_unicode_compatible
@@ -240,7 +268,7 @@ class Interview(TimeStampedModel):
         choices=DECISIONS,
         default=WAITING,
         verbose_name=_("Interview|Decision"),
-        max_length=10)
+        max_length=15)
     decision_comment = models.TextField(
         _("Decision summary"),
         blank=True,
