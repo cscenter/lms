@@ -2,9 +2,21 @@
 
 from __future__ import unicode_literals, absolute_import
 
-from import_export import resources
+from import_export import resources, fields, widgets
 
 from learning.admission.models import Applicant, Test
+
+
+class JsonFieldWidget(widgets.Widget):
+    # TODO: Maybe should check str type here and parse it to dict
+    def clean(self, value):
+        return super(JsonFieldWidget, self).clean(value)
+
+    def render(self, value):
+        repr = ""
+        for k, v in value.items():
+            repr += "{}: {}\n".format(k, v)
+        return repr
 
 
 class ApplicantRecordResource(resources.ModelResource):
@@ -21,32 +33,21 @@ class ApplicantRecordResource(resources.ModelResource):
             field.save(obj, data)
 
 
-class OnlineTestRecordResource(resources.ModelResource):
-
-    def __init__(self, lookup_field, allowed_fields, campaign_id, passing_score, contest_id):
-        self.lookup_field = lookup_field
-        self.allowed_fields = allowed_fields
-        self.campaign_id = campaign_id
-        self.passing_score = passing_score
-        self.contest_id = contest_id
-
-    class Meta:
-        model = Test
-        import_id_fields = ['applicant']
-        skip_unchanged = True
-
+class DetailsApplicantImportMixin(object):
     def before_import(self, data, dry_run, **kwargs):
         if "details" in data.headers:
             print("Column `details` will be ignored")
             del data["details"]
-        data.append_col(self.row_collect_details(data.headers), header="details")
+        data.append_col(self.row_collect_details(data.headers),
+                        header="details")
 
         if "applicant" not in data.headers:
             data.append_col(self.row_attach_applicant(data.headers),
                             header="applicant")
         # Optionally save contest id for debug purpose
         if self.contest_id:
-            data.append_col(lambda r: self.contest_id, header="yandex_contest_id")
+            data.append_col(lambda r: self.contest_id,
+                            header="yandex_contest_id")
 
     def import_field(self, field, obj, data):
         if field.attribute and field.column_name in data:
@@ -56,6 +57,7 @@ class OnlineTestRecordResource(resources.ModelResource):
             if field.column_name == "applicant" and not data[field.column_name]:
                 return
             field.save(obj, data)
+
 
     def skip_row(self, instance, original):
         # We can't find applicant by lookup field, so skip record
@@ -68,22 +70,27 @@ class OnlineTestRecordResource(resources.ModelResource):
         # Otherwise, save lowest score
         if original.pk and original.score < instance.score:
             return True
-        return super(OnlineTestRecordResource, self).skip_row(instance, original)
+        return super(DetailsApplicantImportMixin, self).skip_row(instance, original)
+
 
     def row_collect_details(self, headers):
         """Collect data for `details` column"""
+
         def wrapper(row):
             details = {}
             for i, h in enumerate(headers):
                 if h not in self.allowed_fields:
                     details[h] = row[i]
             return details
+
         return wrapper
+
 
     def row_attach_applicant(self, headers):
         """Get applicant id by `lookup` field and campaign id"""
         lookup_field = self.lookup_field
         campaign_id = self.campaign_id
+
         def wrapper(row):
             qs = Applicant.objects.filter(campaign_id=campaign_id)
             index = headers.index(lookup_field)
@@ -104,15 +111,68 @@ class OnlineTestRecordResource(resources.ModelResource):
                     lookup_field, row[index]))
                 return ""
             return qs.get().pk
+
         return wrapper
+
 
     def before_save_instance(self, instance, dry_run):
         # Set default values if not specified
         if not instance.score:
             instance.score = 0
 
+
+
+class OnlineTestRecordResource(DetailsApplicantImportMixin, resources.ModelResource):
+    details = fields.Field(column_name='details',
+                           attribute='details',
+                           widget=JsonFieldWidget())
+    # Note: Should return __str__ representation of applicant attribute
+    fio = fields.Field(column_name='fio',
+                       attribute='applicant')
+
+    def __init__(self, **kwargs):
+        self.lookup_field = kwargs.get("lookup_field", "")
+        self.allowed_fields = kwargs.get("allowed_fields", False)
+        self.campaign_id = kwargs.get("campaign_id", False)
+        self.passing_score = kwargs.get("passing_score", False)
+        self.contest_id = kwargs.get("contest_id", False)
+
+    class Meta:
+        model = Test
+        import_id_fields = ['applicant']
+        skip_unchanged = True
+
+
     def after_save_instance(self, instance, dry_run):
         """Update applicant status if score lower than passing_score"""
         if instance.score < self.passing_score:
             instance.applicant.status = Applicant.REJECTED_BY_TEST
+            instance.applicant.save()
+
+
+class ExamRecordResource(DetailsApplicantImportMixin,
+                         resources.ModelResource):
+    details = fields.Field(column_name='details',
+                           attribute='details',
+                           widget=JsonFieldWidget())
+    # Note: Should return __str__ representation of applicant attribute
+    fio = fields.Field(column_name='fio',
+                       attribute='applicant')
+
+    def __init__(self, **kwargs):
+        self.lookup_field = kwargs.get("lookup_field", "")
+        self.allowed_fields = kwargs.get("allowed_fields", False)
+        self.campaign_id = kwargs.get("campaign_id", False)
+        self.passing_score = kwargs.get("passing_score", False)
+        self.contest_id = kwargs.get("contest_id", False)
+
+    class Meta:
+        model = Test
+        import_id_fields = ['applicant']
+        skip_unchanged = True
+
+    def after_save_instance(self, instance, dry_run):
+        """Update applicant status if score lower than passing_score"""
+        if instance.score < self.passing_score:
+            instance.applicant.status = Applicant.REJECTED_BY_EXAM
             instance.applicant.save()

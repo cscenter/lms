@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-25 17:28+0300\n"
-"PO-Revision-Date: 2016-03-25 17:28+0230\n"
+"PO-Revision-Date: 2016-03-28 16:06+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -268,7 +268,7 @@ msgstr "Онлайн-тестирование"
 
 #: cscsite/learning/admission/models.py:186
 msgid "Testings"
-msgstr "Тестирования"
+msgstr "Результаты тестирования"
 
 #: cscsite/learning/admission/models.py:219
 msgid "Exam"
@@ -276,7 +276,7 @@ msgstr "Экзамен"
 
 #: cscsite/learning/admission/models.py:220
 msgid "Exams"
-msgstr "Экзамены"
+msgstr "Результаты экзамена"
 
 #: cscsite/learning/admission/models.py:234
 msgid "Interviewer|user"
@@ -337,4 +337,4 @@ msgstr "Комментарий"
 
 #: cscsite/learning/admission/models.py:311
 msgid "Comments"
-msgstr "Комментарии"
+msgstr "Комментарии к собеседованию"
