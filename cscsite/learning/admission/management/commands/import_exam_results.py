@@ -2,27 +2,20 @@
 
 from __future__ import unicode_literals
 
-from itertools import chain
-
 import tablib
 
 from django.core.management import BaseCommand, CommandError
-
-from learning.admission.import_export import OnlineTestRecordResource
-from learning.admission.models import Applicant
+from learning.admission.import_export import ExamRecordResource
 
 
 class Command(BaseCommand):
     help = (
-        "Import results for online test. Run in dry mode by default."
+        "Import results for online exam. Run in dry mode by default."
 
-        "Try to find already existed online test by `lookup` field "
+        "Try to find already existed exam result by `lookup` field "
         "and campaign_id and update record if score is less than previous."
         "Note: Don't forget manually remove applicant duplicates first "
         "to avoid errors on `attach_applicant` action."
-
-        "Example:"
-        "./manage.py import_online_test_results ~/online-test-results.csv --passing_score=8 --campaign_id=1 --lookup=stepic_id"
     )
     # Other fields go to dynamically created `details` field
     allowed_fields = ['created', 'yandex_id', 'stepic_id', 'score', 'yandex_contest_id']
@@ -47,7 +40,7 @@ class Command(BaseCommand):
             help='Skip dry mode and import data to DB')
 
         parser.add_argument('--passing_score', type=int,
-            help='Set `rejected by online test` status for applicants below passing score')
+            help='Set `rejected by exam` status for applicants below passing score')
 
         parser.add_argument('--contest_id', type=int,
             help='Save contest_id for easier debug')
@@ -68,17 +61,20 @@ class Command(BaseCommand):
             data = tablib.Dataset().load(f.read())
             if not lookup_field in data.headers:
                 raise CommandError("lookup field not specified in source csv")
-            online_test_resource = OnlineTestRecordResource(
+            exam_resource = ExamRecordResource(
                 lookup_field = lookup_field,
                 allowed_fields = self.allowed_fields,
                 campaign_id = campaign_id,
                 passing_score = passing_score,
                 contest_id = contest_id)
-            result = online_test_resource.import_data(data, dry_run=dry_run)
-            if result.has_errors():
-                for error in result.base_errors:
-                    print(error)
-                for _, row_errors in result.row_errors():
-                    for row_error in row_errors:
-                        print(row_error)
+            result = exam_resource.import_data(data, dry_run=dry_run)
+            self.print_errors(result)
             print("Done")
+
+    def print_errors(self, result):
+        if result.has_errors():
+            for error in result.base_errors:
+                print(error)
+            for _, row_errors in result.row_errors():
+                for row_error in row_errors:
+                    print(row_error)

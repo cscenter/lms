@@ -43,3 +43,4 @@ class Command(BaseCommand):
                 print(error)
             for _, error in result.row_errors():
                 print(error)
+        print("Done")

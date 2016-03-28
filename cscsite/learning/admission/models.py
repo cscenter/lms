@@ -147,8 +147,6 @@ class Applicant(TimeStampedModel):
         max_length=20)
     uuid = models.UUIDField(editable=False, null=True, blank=True)
 
-    # TODO: добавить статус? Отказ по экзамену и т.д.? Как обновлять при собеседовании?
-
     class Meta:
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
