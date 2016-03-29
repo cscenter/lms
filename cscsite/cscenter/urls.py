@@ -127,6 +127,7 @@ urlpatterns = [
     url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(), name='render_markdown'),
 
     url(r'^', include('learning.urls')),
+    url(r'^', include('learning.admission.urls')),
     url(r'^narnia/', include(admin.site.urls)),
     url(r'^narnia/', include('loginas.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
