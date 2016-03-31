@@ -1123,19 +1123,6 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                 self.assertPOSTLoginRedirect(url, grade_dict)
             self.doLogout()
 
-    def test_assignment_contents(self):
-        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        student = UserFactory.create(groups=['Student [CENTER]'])
-        co = CourseOfferingFactory.create(teachers=[teacher])
-        EnrollmentFactory.create(student=student, course_offering=co)
-        a = AssignmentFactory.create(course_offering=co)
-        a_s = (StudentAssignment.objects
-               .filter(assignment=a, student=student)
-               .get())
-        url = reverse('a_s_detail_teacher', args=[a_s.pk])
-        self.doLogin(teacher)
-        self.assertContains(self.client.get(url), a.text)
-
     def test_comment(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         student = UserFactory.create(groups=['Student [CENTER]'])
@@ -1574,10 +1561,10 @@ class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
 @pytest.mark.django_db
 class TestCompletedCourseOfferingBehaviour(object):
     def test_security_assignmentstudent_detail(self, client,
-                                               teacher_factory,
+                                               teacher_center_factory,
                                                student_factory):
         """Students can't see assignments from completed course, which they failed"""
-        teacher = teacher_factory()
+        teacher = teacher_center_factory()
         student = student_factory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
@@ -1598,10 +1585,10 @@ class TestCompletedCourseOfferingBehaviour(object):
         assert response.status_code == 200
 
     def test_security_courseoffering_detail(self, client,
-                                            teacher_factory,
+                                            teacher_center_factory,
                                             student_factory):
         """Students can't see news from completed course, which they failed"""
-        teacher = teacher_factory()
+        teacher = teacher_center_factory()
         student = student_factory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
@@ -1723,3 +1710,23 @@ def test_enrollment(client):
     assert client.post(url, form).status_code == 403
 
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
+
+
+@pytest.mark.django_db
+def test_assignment_contents(client):
+    teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+    student = UserFactory.create(groups=['Student [CENTER]'])
+    # XXX: Unexpected Segfault when running pytest.
+    # Move this test from ASTeacherDetailTests cls.
+    # No idea why it's happening on login action
+    # if assignment `notify_teachers` field not specified.
+    # Problem can be related to pytest, django tests or factory-boy
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    EnrollmentFactory.create(student=student, course_offering=co)
+    a = AssignmentFactory.create(course_offering=co)
+    a_s = (StudentAssignment.objects
+           .filter(assignment=a, student=student)
+           .get())
+    url = reverse('a_s_detail_teacher', args=[a_s.pk])
+    client.login(teacher)
+    assert bytes(a.text) in client.get(url).content
