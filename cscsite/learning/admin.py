@@ -85,7 +85,9 @@ class AssignmentAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(AssignmentAdminForm, self).clean()
         # We can select teachers only from related course offering
-        if 'course_offering' in cleaned_data and cleaned_data['notify_teachers']:
+        if ('course_offering' in cleaned_data
+                and 'notify_teachers' in cleaned_data
+                and cleaned_data['notify_teachers']):
             co = cleaned_data['course_offering']
             co_teachers = [t.pk for t in co.courseofferingteacher_set.all()]
             if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
