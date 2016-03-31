@@ -72,7 +72,8 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
         if extracted:
             for teacher in extracted:
                 CourseOfferingTeacher(course_offering=self,
-                                      teacher=teacher).save()
+                                      teacher=teacher,
+                                      notify_by_default=True).save()
 
 class CourseOfferingTeacherFactory(factory.DjangoModelFactory):
     class Meta:
@@ -161,6 +162,14 @@ class AssignmentFactory(factory.DjangoModelFactory):
     text = "This is a text for a test assignment"
     grade_min = 10
     grade_max = 80
+
+    @factory.post_generation
+    def notify_teachers(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for co_teacher in extracted:
+                self.notify_teachers.add(co_teacher)
 
 
 class AssignmentAttachmentFactory(factory.DjangoModelFactory):

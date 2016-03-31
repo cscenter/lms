@@ -380,7 +380,7 @@ def test_club_students_profiles_on_cscenter_site(client,
                                                  user_factory,
                                                  student_club_factory,
                                                  student_factory,
-                                                 teacher_factory):
+                                                 teacher_center_factory):
     """Only teachers and curators can see club students profiles on cscenter site"""
     student_club = student_club_factory.create()
     url = reverse('user_detail', args=[student_club.pk])
@@ -396,7 +396,7 @@ def test_club_students_profiles_on_cscenter_site(client,
     response = client.get(url)
     assert response.status_code == 404
 
-    teacher_center = teacher_factory.create()
+    teacher_center = teacher_center_factory.create()
     client.login(teacher_center)
     url = reverse('user_detail', args=[student_club.pk])
     response = client.get(url)
@@ -407,8 +407,7 @@ def test_club_students_profiles_on_cscenter_site(client,
 def test_expelled(client,
                   student_center_factory,
                   student_club_factory,
-                  student_factory,
-                  teacher_factory):
+                  student_factory):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
     student = student_center_factory(status=STUDENT_STATUS.expelled)
@@ -429,7 +428,7 @@ def test_alumni(client,
                 student_club_factory,
                 student_factory,
                 user_factory,
-                teacher_factory):
+                teacher_center_factory):
     graduated = user_factory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
     student_center = student_center_factory()
     client.login(graduated)

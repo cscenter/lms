@@ -1,7 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
@@ -74,12 +77,61 @@ class VenueAdmin(UbereditorMixin, admin.ModelAdmin):
     pass
 
 
+class AssignmentAdminForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super(AssignmentAdminForm, self).clean()
+        # We can select teachers only from related course offering
+        if 'course_offering' in cleaned_data and cleaned_data['notify_teachers']:
+            co = cleaned_data['course_offering']
+            co_teachers = [t.pk for t in co.courseofferingteacher_set.all()]
+            if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
+                self.add_error('notify_teachers', ValidationError(
+                        _("Assignment|Please, double check teachers list. Some "
+                          "of them not related to selected course offering")))
+
+
 class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
     list_display = ['title', 'course_offering', 'created', 'deadline_at']
     list_filter = ['course_offering']
+    form = AssignmentAdminForm
 
     def get_readonly_fields(self, request, obj=None):
         return ['course_offering'] if obj else []
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'course_offering':
+            kwargs['queryset'] = (CourseOffering.objects
+                .select_related("course", "semester"))
+        return (super(AssignmentAdmin, self)
+                .formfield_for_foreignkey(db_field, request, **kwargs))
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == "notify_teachers":
+            qs = (CourseOfferingTeacher.objects.select_related(
+                "teacher",
+                "course_offering"))
+            try:
+                assignment_pk = request.resolver_match.args[0]
+                a = (Assignment.objects
+                        .prefetch_related("course_offering__courseofferingteacher_set")
+                        .get(pk=assignment_pk))
+                teachers = [t.pk for t in a.course_offering.teachers.all()]
+                qs = qs.filter(teacher__in=teachers, course_offering=a.course_offering)
+            except IndexError:
+                pass
+            kwargs["queryset"] = qs.order_by("course_offering_id").distinct()
+        return super(AssignmentAdmin, self).formfield_for_manytomany(
+            db_field, request, **kwargs)
+
+    def save_related(self, request, form, formsets, change):
+        if not change and not form.cleaned_data['notify_teachers']:
+            co_teachers = form.cleaned_data['course_offering'].courseofferingteacher_set.all()
+            form.cleaned_data['notify_teachers'] = [t.pk for t in co_teachers if t.notify_by_default]
+        return super(AssignmentAdmin, self).save_related(request, form, formsets, change)
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin,

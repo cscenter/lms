@@ -313,15 +313,18 @@ class CourseOfferingTeacher(models.Model):
         ('lecturer', _('Lecturer')),
         ('reviewer', _('Reviewer')),
     ), default=('lecturer',))
+    notify_by_default = models.BooleanField(
+        _("Notify by default"),
+        help_text=(_("Add teacher to assignment notify settings by default")),
+        default=False)
 
     class Meta:
         verbose_name = _("Course Offering teacher")
         verbose_name_plural = _("Course Offering teachers")
+        unique_together = [['teacher', 'course_offering']]
 
     def __str__(self):
-        return "{0}-{1}-{2}".format(smart_text(self.course_offering),
-                                    smart_text(self.teacher),
-                                    smart_text(self.roles))
+        return "{0} [{1}]".format(smart_text(self.teacher), smart_text(self.course_offering_id))
 
 
 @python_2_unicode_compatible
@@ -557,6 +560,13 @@ class Assignment(TimeStampedModel, object):
         _("Assignment|grade_max"),
         default=5,
         validators=[MaxValueValidator(1000)])
+    # XXX: No ability to add default values with `post_save` signal in one place
+    # We do it separately in admin form and AssignmentCreateView
+    notify_teachers = models.ManyToManyField(
+        CourseOfferingTeacher,
+        verbose_name=_("Assignment|notify_settings"),
+        help_text=_("Leave blank if you want populate teachers from course offering settings"),
+        blank=True)
 
     tracker = FieldTracker(fields=['deadline_at'])
 

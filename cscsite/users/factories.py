@@ -56,7 +56,7 @@ class StudentClubFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
 
 
-class TeacherFactory(UserFactory):
+class TeacherCenterFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.TEACHER_CENTER]
 
 

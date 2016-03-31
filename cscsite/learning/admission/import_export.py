@@ -13,10 +13,7 @@ class JsonFieldWidget(widgets.Widget):
         return super(JsonFieldWidget, self).clean(value)
 
     def render(self, value):
-        repr = ""
-        for k, v in value.items():
-            repr += "{}: {}\n".format(k, v)
-        return repr
+        return "\n".join("{}: {}".format(k, v) for k, v in value.items())
 
 
 class ApplicantRecordResource(resources.ModelResource):
