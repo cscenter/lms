@@ -191,9 +191,10 @@ def test_notify_teachers_assignment_admin_form(client, curator,
     assert (Assignment.objects.count() == 1)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     # Manually select teachers from list
-    post_data['notify_teachers'] = [t1.pk, t2.pk]
+    co_t1, co_t2, co_t3, co_t4 = CourseOfferingTeacher.objects.filter(course_offering=co).all()
+    post_data['notify_teachers'] = [co_t1.pk, co_t2.pk]
     response = client.post(reverse('admin:learning_assignment_add'), post_data)
     assert (Assignment.objects.count() == 2)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 2
-    assert t3.pk not in Assignment.objects.order_by('id').all()[1].notify_teachers.all()
+    assert co_t3.pk not in Assignment.objects.order_by('id').all()[1].notify_teachers.all()
