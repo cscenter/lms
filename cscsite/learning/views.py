@@ -1229,7 +1229,7 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         initial = super(AssignmentCreateUpdateMixin, self).get_initial()
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_authenticated() and self.request.user.is_curator:
+        if self.request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = (CourseOffering.objects
@@ -1263,8 +1263,7 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                         in self.object.assignmentattachment_set.all()))
         else:
             remove_links = ""
-        return form_class(remove_links=remove_links,
-                          **self.get_form_kwargs())
+        return form_class(remove_links=remove_links, **self.get_form_kwargs())
 
 
     def get_success_url(self):
@@ -1272,11 +1271,14 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                        args=[self._course_offering.course.slug,
                              self._course_offering.semester.slug])
 
-    def form_valid(self, form):
+    def save_instance(self, form):
         self.object = form.save(commit=False)
         assert self._course_offering is not None
         self.object.course_offering = self._course_offering
         self.object.save()
+
+    def form_valid(self, form):
+        self.save_instance(form)
         attachments = self.request.FILES.getlist('attachments')
         if attachments:
             for attachment in attachments:
@@ -1288,7 +1290,15 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin,
                            generic.CreateView):
-    pass
+
+    def save_instance(self, form):
+        super(AssignmentCreateView, self).save_instance(form)
+        # Populate notification receivers
+        co_teachers = self._course_offering.courseofferingteacher_set.all()
+        notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
+        self.object.notify_teachers.add(*notify_teachers)
+
+
 
 
 # Same here

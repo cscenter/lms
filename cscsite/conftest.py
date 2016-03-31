@@ -9,7 +9,7 @@ from pytest_django.lazy_django import skip_if_no_django
 from core.models import City
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory, StudentFactory, StudentClubFactory, \
-    TeacherFactory, StudentCenterFactory
+    TeacherCenterFactory, StudentCenterFactory
 
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
@@ -53,8 +53,8 @@ def student_club_factory():
     return StudentClubFactory
 
 @pytest.fixture(scope="session")
-def teacher_factory():
-    return TeacherFactory
+def teacher_center_factory():
+    return TeacherCenterFactory
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -104,7 +104,7 @@ def replace_django_data_migrations_with_pytest_fixture(_django_db_setup,
 
 
 @pytest.fixture(scope="function")
-def curator(user_factory_cls):
-    return user_factory_cls.create(is_superuser=True, is_staff=True)
+def curator(user_factory):
+    return user_factory.create(is_superuser=True, is_staff=True)
 
 
