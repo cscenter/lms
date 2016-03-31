@@ -29,7 +29,6 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
                                 is_about_creation=True)
          .save())
 
-
 def create_deadline_change_notification(sender, instance, created,
                                         *args, **kwargs):
     if created:
@@ -49,34 +48,29 @@ def create_deadline_change_notification(sender, instance, created,
 
 def create_assignment_comment_notification(sender, instance, created,
                                            *args, **kwargs):
+    """Send notification to teachers if student leave a comment, otherwise to student"""
     if not created:
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
-    a_s = instance.student_assignment
-    if instance.author.pk == a_s.student.pk:
-        teachers = (instance
-                    .student_assignment
-                    .assignment
-                    .course_offering
-                    .teachers
-                    .all())
-        is_about_passed = not ((a_s.assignmentcomment_set
+    s_a = instance.student_assignment
+    if instance.author.pk == s_a.student.pk:
+        is_about_passed = not ((s_a.assignmentcomment_set
                                 .exclude(pk=instance.pk)
                                 .filter(author__groups__name='Student [CENTER]')
                                 .exists()) and
-                               a_s.assignment.is_online)
+                               s_a.assignment.is_online)
+
+        teachers = instance.student_assignment.assignment.notify_teachers.all()
         # this loop can be optimized using bulk_create at the expence of
         # pre/post_save signals on AssigmentNotification
         for teacher in teachers:
-            (AssignmentNotification(user=teacher,
-                                    student_assignment=a_s,
+            (AssignmentNotification(user=teacher.teacher,
+                                    student_assignment=s_a,
                                     is_about_passed=is_about_passed)
              .save())
     else:
         student = instance.student_assignment.student
-        (AssignmentNotification(user=student,
-                                student_assignment=a_s)
-         .save())
+        AssignmentNotification(user=student, student_assignment=s_a).save()
 
 def update_last_commented_date_on_student_assignment(sender, instance, created,
                                                      *args, **kwargs):
@@ -126,14 +120,9 @@ def create_course_offering_news_notification(sender, instance, created,
     if not created:
         return
 
-    students = (instance
-                .course_offering
-                .enrolled_students
-                .all())
-    teachers = (instance
-                .course_offering
-                .teachers
-                .all())
+    students = (instance.course_offering.enrolled_students.all())
+    teachers = (instance.course_offering.teachers.all())
+
     CourseOfferingNewsNotification = apps.get_model('learning',
                                                     'CourseOfferingNewsNotification')
     # this loop can be optimized using bulk_create at the expence of
@@ -152,6 +141,5 @@ def populate_assignments_for_new_enrolled_student(sender, instance, created,
     StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     assignments = instance.course_offering.assignment_set.all()
     for a in assignments:
-        (StudentAssignment.objects
-         .get_or_create(assignment=a,
-                        student=instance.student))
+        (StudentAssignment.objects.get_or_create(assignment=a,
+                                                 student=instance.student))
