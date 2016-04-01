@@ -1,0 +1,16 @@
+.assignment-date {
+  &.tomorrow {
+    color: $color-red;
+  }
+
+  &.today {
+    color: $color-red;
+  }
+
+  &.day-after-tomorrow {
+    color: $color-orange;
+  }
+}
+
+
+

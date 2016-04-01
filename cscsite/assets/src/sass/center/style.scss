@@ -10,6 +10,9 @@ $color-red: #f96868;
 $color-yellow: #f9cd48;
 $color-purple: #6a679e;
 
+$background-white: #fff;
+$background-grey: #f8f8f8;
+
 $btn-primary-bg:  $color-blue;
 $btn-primary-border:  $btn-primary-bg;
 
@@ -25,13 +28,15 @@ $brand-danger: #d9534f;
 @import "top_menu.scss";
 @import "_material_design.scss";
 
-@import "_online_page.scss";
+@import "pages/online_page.scss";
 @import "pages/index";
-@import "_gradebook.scss";
-@import "_learning.scss";
+@import "pages/gradebook.scss";
+@import "pages/courses_list_student.scss";
 //@import "pages/student_assignment";
 @import "pages/faq";
 @import "pages/graduates";
+@import "pages/_assignments";
+@import "pages/_calendar";
 
 // Boostrap overrides for cscenter site
 .btn-danger, .btn-success, .btn-primary {
@@ -425,209 +430,6 @@ h5.assignment {
   transition: opacity .15s ease-in-out;
 }
 
-.marks-table-container-outer {
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-  position: relative;
-
-  .marks-table-container-inner {
-    margin-left: 135px;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    -ms-overflow-style: -ms-autohiding-scrollbar;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-// MARKS TABLE
-.marks-table {
-  table-layout: fixed;
-
-  &.teacher {
-    tr.active {
-      background-color: #E2F9FF;
-    }
-    td.active {
-      background-color: #E2F9FF;
-    }
-  }
-
-  &.staff {
-
-    td.active {
-      /* border-left: solid 1px #BBB; */
-      /* border-right: solid 1px #BBB; */
-      color: black !important;
-      text-shadow: none !important;
-      box-shadow: none !important;
-      opacity: 1 !important;
-    }
-
-    tr.active td.content {
-      /* border-bottom: solid 1px #BBB; */
-      /* border-top: solid 1px #BBB; */
-      color: black !important;
-      text-shadow: none !important;
-      box-shadow: none !important;
-      opacity: 1 !important;
-    }
-
-    &.focused {
-      td.content {
-        color: transparent;
-        text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-        opacity: 0.7;
-        z-index: -5;
-
-        &.enrolled {
-          color: transparent;
-          text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-          box-shadow: 0px 0px 10px 0px rgba(226, 249, 255, 1);
-          opacity: 0.7;
-          z-index: -5;
-        }
-      }
-    }
-  }
-
-  td {
-    vertical-align: middle;
-    text-align: center;
-    margin: 10px;
-    box-sizing: border-box;
-
-    input[type=number] {
-      width: 48px;
-    }
-
-    &.marks-header-horiz {
-      text-align: left;
-      white-space: nowrap;
-      width: 135px;
-      padding-right: 10px;
-      position: absolute;
-      left: 0px;
-      margin-top: 0px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    &.content {
-      padding: 0px 10px;
-      width: 40px;
-    }
-  }
-
-  th {
-    &.rotate {
-      height: 18em;
-      white-space: nowrap;
-      vertical-align: bottom;
-
-      > div {
-        width: 40px;
-        /* CSS3 specific totation code */
-        /* translate should have the same negative dimension as head height */
-        transform: rotate(315deg) translate(25px, 0px);
-        //-moz-transform: rotate(315deg) translate(-25px, 50px);
-        //-webkit-transform: rotate(315deg) translate(-25px, 50px);
-
-        span {
-          //line-height: 1.5em;
-          width: 18em;
-          display: block;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          ///* setting background may yield better results in IE text clear type rendering */
-          background: #fff;
-          ///* IE specific rotation code */
-          filter: flipv fliph;
-        }
-      }
-    }
-  }
-
-}
-
-
-
-#calendar-container {
-  min-width: 940px;
-  width: 70% !important;
-}
-
-.calendar {
-  th {
-    width: 130px;
-  }
-
-  td {
-    padding: 4px !important;
-    width: 130px;
-
-    &.today {
-      background-color: #FAFFEC;
-    }
-
-    .cell {
-      min-height: 100px;
-      min-width: 122px;
-    }
-
-    .day {
-      color: #9E9E9E;
-      font-size: 1.3em;
-      text-align: right;
-    }
-
-    .event {
-      margin-bottom: 3px;
-      border: 1px solid #D3D3D3;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 3px 4px;
-      line-height: 1.3;
-
-      &.lecture {
-        background-color: #F9F9F9;
-      }
-
-      &.seminar {
-        background-color: #E9E9E9;
-      }
-
-      &.noncourse {
-        background-color: #ECF9FF;
-      }
-
-      &.times {
-        white-space: nowrap;
-      }
-    }
-
-    &.not-in-semester {
-      //background-color: #EEE;
-
-      .day {
-        color: #ccc;
-      }
-    }
-  }
-
-}
-
-div.week-num-container {
-  position: relative;
-}
-
-div.week-num {
-  margin-left: -25px;
-  position: absolute;
-  font-weight: bold;
-  color: #666;
-}
-
 .assignment-status {
   color: #fff;
   font-weight: normal;
@@ -661,43 +463,18 @@ div.week-num {
   }
 }
 
-.assignment-date.tomorrow {
-  color: $color-red;
-}
 
-.assignment-date.today {
-  color: $color-red;
-}
-
-.assignment-date.day-after-tomorrow {
-  color: $color-orange;
-}
 
 tr.unread {
   background-color: #E2F9FF;
 }
 
-.marks-table .enrolled {
-  background-color: #E2F9FF;
-}
 
 .list-unstyled.no-margin {
   margin-bottom: 0px !important;
 }
 
-.marks-sheet-form-cell > input[type="number"] {
-  width: 43px;
-}
 
-.marks-sheet-unsaved-cell {
-  border-left: 2px solid #428bca;
-  padding-left: 3px;
-  margin-left: -3px;
-}
-
-.final-grade-cell {
-  margin-left: 3px;
-}
 
 #course-list > li:first-child {
   padding-left: 5px !important;
