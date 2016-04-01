@@ -1,5 +1,5 @@
 // Material design elements based on bootstrap
-
+@import "components/labels";
   // material design tabs
 .nav-tabs {
   &.material {
@@ -306,32 +306,10 @@
   }
 }
 
+
+
 .label {
   font-weight: normal;
-}
-
-// LABEL OUTLINE
-.label.label-outline {
-  color: $color-grey;
-  background-color: transparent;
-  border-color: $color-grey;
-}
-.label-outline {
-  border: 1px solid transparent;
-  font-weight: normal;
-}
-
-.label-primary {
-  background-color: $color-blue;
-}
-.label-primary[href]:hover,
-.label-primary[href]:focus {
-  background-color: #77d6e1;
-}
-.label-primary.label-outline {
-  color: $color-blue;
-  background-color: transparent;
-  border-color: $color-blue;
 }
 
 .label-lg {
@@ -342,3 +320,4 @@
   padding: .2em .3em .2em;
   font-size: 10px
 }
+

@@ -1123,6 +1123,19 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                 self.assertPOSTLoginRedirect(url, grade_dict)
             self.doLogout()
 
+    # def test_assignment_contents(self):
+    #     teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+    #     student = UserFactory.create(groups=['Student [CENTER]'])
+    #     co = CourseOfferingFactory.create(teachers=[teacher])
+    #     EnrollmentFactory.create(student=student, course_offering=co)
+    #     a = AssignmentFactory.create(course_offering=co)
+    #     a_s = (StudentAssignment.objects
+    #            .filter(assignment=a, student=student)
+    #            .get())
+    #     url = reverse('a_s_detail_teacher', args=[a_s.pk])
+    #     self.doLogin(teacher)
+    #     self.assertContains(self.client.get(url), a.text)
+
     def test_comment(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         student = UserFactory.create(groups=['Student [CENTER]'])
