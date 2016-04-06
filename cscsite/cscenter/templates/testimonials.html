@@ -30,6 +30,7 @@
                             {% endthumbnail %}
                             {% endif %}
                             <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}
+                            <br>Направлени{{ student.study_programs.all|pluralize:"е,я" }}: {{  student.study_programs.all|join:", " }}
                         </div>
                     </div>
                 </div>
