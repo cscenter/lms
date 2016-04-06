@@ -90,10 +90,8 @@
                 {{ day|date:"j" }}
               </div>
               {% for event in events %}
-              <div class="event {{ event.type }}"
-                   title="{{ event.name }}">
-                <span class="times">{{ event.starts_at|time:"H:i" }}–{{ event.ends_at|time:"H:i" }}</span>
-                <a href="{{ event.get_absolute_url }}">
+              <div class="event {{ event.type }}" title="{{ event.name }}">
+                <a href="{{ event.get_absolute_url }}">{{ event.starts_at|time:"H:i" }}–{{ event.ends_at|time:"H:i" }}
                   {% if event.type == "noncourse" %}
                   {{ event.name }}
                   {% else %}
