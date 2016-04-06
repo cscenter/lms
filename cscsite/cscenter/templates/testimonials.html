@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load htmlpage_url %}
+{% load thumbnail %}
+{% load markdown from core_tags %}
+
+{% block content %}
+
+{% if testimonials %}
+    <div class="testimonials-wrapper">
+        <div class="testimonials">
+            <div class="center-header">
+                <h1>{% trans "Graduates about CS Center" %}</h1>
+                <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
+            </div>
+            <div class="row">
+                {% for student in testimonials %}
+                <div class="col-md-12">
+                    <div class="testimonial">
+                        <blockquote>
+                            {% markdown 3600 "csc_review" student.pk student.modified %}
+                                {{ student.csc_review }}
+                            {% endmarkdown %}
+                        </blockquote>
+                        <div>
+                            {% if student.photo %}
+                            {% thumbnail student.photo "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            {% endthumbnail %}
+                            {% endif %}
+                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock content %}

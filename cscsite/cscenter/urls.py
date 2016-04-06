@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from core.views import MarkdownRenderView
-from cscenter.views import QAListView
+from cscenter.views import QAListView, TestimonialsListView
 from htmlpages import views
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback, \
@@ -98,6 +98,7 @@ urlpatterns = [
 
     url(r'^library/', include("library.urls")),
     url(r'^faq/$', QAListView.as_view(), name='faq'),
+    url(r'^testimonials/$', TestimonialsListView.as_view(), name='testimonials'),
 
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),

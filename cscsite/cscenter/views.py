@@ -2,6 +2,7 @@ from django.conf import settings
 from django.views import generic
 
 from core.models import Faq
+from users.models import CSCUser
 
 
 class QAListView(generic.ListView):
@@ -10,3 +11,14 @@ class QAListView(generic.ListView):
 
     def get_queryset(self):
         return Faq.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
+
+
+class TestimonialsListView(generic.ListView):
+    context_object_name = "testimonials"
+    template_name = "testimonials.html"
+
+    def get_queryset(self):
+        return (CSCUser.objects
+                .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+                .exclude(csc_review='').exclude(photo='')
+                .order_by("-graduation_year"))
