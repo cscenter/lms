@@ -1,6 +1,12 @@
 // Used on testimonials/ and index pages
 .testimonials-wrapper {
 
+    .center-header {
+      a {
+        @extend .links-sep-by-vertical-lines;
+      }
+    }
+
   .testimonials {
     @extend .container;
     margin: 0px auto;
