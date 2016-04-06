@@ -21,4 +21,5 @@ class TestimonialsListView(generic.ListView):
         return (CSCUser.objects
                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
+                .prefetch_related("study_programs")
                 .order_by("-graduation_year"))
