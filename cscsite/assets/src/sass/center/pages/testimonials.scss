@@ -94,7 +94,7 @@
         }
 
         blockquote {
-          overflow: hidden;
+          clear: both;
           padding: 30px;
           &:before {
             display: none;
