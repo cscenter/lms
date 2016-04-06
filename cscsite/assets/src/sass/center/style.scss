@@ -30,6 +30,7 @@ $brand-danger: #d9534f;
 
 @import "pages/online_page.scss";
 @import "pages/index";
+@import "pages/testimonials";
 @import "pages/gradebook.scss";
 @import "pages/courses_list_student.scss";
 //@import "pages/student_assignment";
@@ -377,7 +378,7 @@ h5.assignment {
 }
 
 #div_id_deadline_at {
-  width: 400px;
+  width: 408px;
 }
 
 #div_id_deadline_at input#id_deadline_at_0 {
@@ -389,7 +390,6 @@ h5.assignment {
 #div_id_deadline_at input#id_deadline_at_1 {
   width: 49%;
   float: left;
-  margin-right: 1%;
 }
 
 .marks-sheet-csv-link .reason {
