@@ -56,7 +56,7 @@
           color: #e6400c;
           font-size: 16px;
           font-weight: 300;
-          margin: 16px 0 0px;
+          margin: 18px 0 6px;
         }
 
         a {
@@ -79,6 +79,24 @@
             @extend .pull-right;
             margin-left: 15px;
             margin-right: 0;
+          }
+        }
+      }
+    }
+
+    &.__list {
+      .testimonial {
+        width: 840px;
+        margin-bottom: 40px;
+        
+        &.right {
+          float: right;
+        }
+
+        blockquote {
+          padding: 30px;
+          &:before {
+            display: none;
           }
         }
       }

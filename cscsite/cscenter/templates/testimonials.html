@@ -7,37 +7,34 @@
 
 {% block content %}
 
-{% if testimonials %}
-    <div class="testimonials-wrapper">
-        <div class="testimonials">
-            <div class="center-header">
-                <h1>{% trans "Graduates about CS Center" %}</h1>
-                <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
-            </div>
-            <div class="row">
-                {% for student in testimonials %}
-                <div class="col-md-12">
-                    <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
-                        <blockquote>
-                            {% markdown 3600 "csc_review" student.pk student.modified %}
-                                {{ student.csc_review }}
-                            {% endmarkdown %}
-                        </blockquote>
-                        <div>
-                            {% if student.photo %}
-                            {% thumbnail student.photo "200x200" crop="center" as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% endthumbnail %}
-                            {% endif %}
-                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}
-                            <br>Направлени{{ student.study_programs.all|pluralize:"е,я" }}: {{  student.study_programs.all|join:", " }}
-                        </div>
+<div class="testimonials-wrapper">
+    <div class="testimonials __list">
+        <div class="center-header">
+            <h1>{% trans "Graduates about CS Center" %}</h1>
+            <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
+        </div>
+        <div class="row">
+            {% for student in testimonials %}
+            <div class="col-md-12">
+                <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
+                    <blockquote>
+                        {% markdown 3600 "csc_review" student.pk student.modified %}
+                            {{ student.csc_review }}
+                        {% endmarkdown %}
+                    </blockquote>
+                    <div>
+                        {% if student.photo %}
+                        {% thumbnail student.photo "200x200" crop="center" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                        {% endif %}
+                        <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
                     </div>
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
     </div>
-{% endif %}
+</div>
 
 {% endblock content %}
