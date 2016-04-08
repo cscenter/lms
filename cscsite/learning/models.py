@@ -958,6 +958,7 @@ def studentproject_slides_file_name(self, filename):
 
 @python_2_unicode_compatible
 class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
+    GRADES = GRADES
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))
 
@@ -973,6 +974,12 @@ class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
         # Unlikely due to admin form validation, but possible in theory
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
                                          PARTICIPANT_GROUPS.GRADUATE_CENTER]})
+
+
+    grade = StatusField(
+        verbose_name=_("Grade"),
+        choices_name='GRADES',
+        default='not_graded')
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,
