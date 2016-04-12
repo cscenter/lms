@@ -25,6 +25,8 @@ MIDDLEWARE_CLASSES = (
 
 INSTALLED_APPS += (
     'learning.admission',
+    # 'django_ses'
+    'post_office'
 )
 
 # Add site specific templates
@@ -48,3 +50,16 @@ GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
 NEWRELIC_CONF = Path(BASE_DIR, "newrelic.ini")
 NEWRELIC_ENV = 'development'
+
+
+AWS_SES_ACCESS_KEY_ID = ''
+AWS_SES_SECRET_ACCESS_KEY = ''
+AWS_SES_REGION_NAME = 'eu-west-1'
+AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'
+POST_OFFICE = {
+    'BACKENDS': {
+        'ses': 'django_ses.SESBackend',
+        'BATCH_SIZE': 10,
+        'LOG_LEVEL': 1
+    }
+}
