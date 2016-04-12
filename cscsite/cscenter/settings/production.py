@@ -116,3 +116,6 @@ WEBPACK_LOADER = {
         'IGNORE': ['.+\.hot-update.js', '.+\.map']
     }
 }
+
+AWS_SES_ACCESS_KEY_ID = '***REMOVED***'
+AWS_SES_SECRET_ACCESS_KEY = '***REMOVED***'

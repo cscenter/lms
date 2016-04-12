@@ -33,8 +33,12 @@ beautifulsoup4==4.4.1
 django-rosetta==0.7.10
 django-modeltranslation==0.10.2
 
+# Mailing support
+django-post-office==2.0.7
+django-ses==0.7.0
+
 # Amazon services
-boto==2.38.0
+boto==2.39.0
 
 # Excel 2010 support
 xlsxwriter==0.8.4
