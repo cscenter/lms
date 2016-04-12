@@ -59,6 +59,9 @@ $link-hover-color: darken($link-color, 5%);
 @import "bootstrap/responsive-utilities.scss";
 
 
+@import "center/components/multiselect";
+
+
 // Custom styles. Here for now.
 .news {
     @include make-xs-column(10);

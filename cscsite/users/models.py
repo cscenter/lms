@@ -326,6 +326,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     def __init__(self, *args, **kwargs):
         super(CSCUser, self).__init__(*args, **kwargs)
+        # TODO: No need to prefetch this field if it's marked as deffered
+        # TODO: Django 1.9 migration: check get_deferred_fields() method
         self._original_comment = self.comment
 
     def save(self, **kwargs):

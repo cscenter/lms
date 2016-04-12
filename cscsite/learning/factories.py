@@ -170,6 +170,10 @@ class AssignmentFactory(factory.DjangoModelFactory):
         if extracted:
             for co_teacher in extracted:
                 self.notify_teachers.add(co_teacher)
+        else:
+            ts = self.course_offering.courseofferingteacher_set.all()
+            for t in ts:
+                self.notify_teachers.add(t)
 
 
 class AssignmentAttachmentFactory(factory.DjangoModelFactory):
