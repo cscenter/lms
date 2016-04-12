@@ -34,7 +34,7 @@ from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF, \
-    CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
+    CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
@@ -955,52 +955,170 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
 class AssignmentTeacherListView(TeacherOnlyMixin,
                                 generic.ListView):
     model = StudentAssignment
-    context_object_name = 'assignment_list'
+    context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
+    filter_grades_empty = "no"
+    filter_grades = (
+        (filter_grades_empty, _("Without grades")),
+        ("yes", _("With grades")),
+        ("all", _("All"))
+    )
+    filter_statuses = (
+        ("comments", _("Has comments")),
+        ("no_comments", _("Without comments")),
+        ("all", _("All")),
+    )
+
+    def get_term_data(self):
+        """Returns data for selected (or current otherwise) term"""
+        current_year, term_type = get_current_semester_pair()
+        term = self.request.GET.get("term", term_type)
+        if term not in SEMESTER_TYPES:
+            term = term_type
+        try:
+            year = int(self.request.GET.get("year", current_year))
+            if year < FOUNDATION_YEAR:
+                year = current_year
+        except ValueError:
+            year = current_year
+        return year, term, get_semester_index(year, term)
+
+    def filter_courses(self, term_index, course_offerings):
+        """Returns courses for selected or latest actual term"""
+        term_cos = [c for c in course_offerings if c.semester.index == term_index]
+        term_set_by_teacher = "term" in self.request.GET
+        # If no courses for default term, get for latest where teacher has activity.
+        if not term_cos and not term_set_by_teacher:
+            term_index = self.terms[0].index
+            term_cos = [c for c in course_offerings if c.semester.index == term_index]
+        elif not term_cos:
+            raise Http404
+        term_cos = sorted(term_cos, key=lambda c: -c.pk)
+        return term_cos
+
+    def get_filter_assignments(self, assignments):
+        try:
+            assignments_str = self.request.GET.get("assignments", "")
+            query_assignments = map(int,
+                                    filter(None,
+                                           assignments_str.split(",")))
+        except ValueError:
+            query_assignments = False
+        if not query_assignments:
+            # Default value
+            filter_assignments = [a for a in assignments[:3]]
+        else:
+            filter_assignments = [a for a in assignments
+                                  if a.pk in query_assignments]
+        return filter_assignments
+
+    def get_filter_params(self):
+        filters = {}
+        year, term, term_index = self.get_term_data()
+        query = {}
+        teacher_course_offerings = (CourseOffering.objects
+                            .filter(teachers=self.request.user)
+                            .select_related("course", "semester")
+                            .order_by("semester__index"))
+        if not teacher_course_offerings:
+            raise Http404
+        # Collect terms for filter view
+        terms = set(c.semester for c in teacher_course_offerings)
+        self.terms = sorted(terms, key=lambda t: -t.index)
+        # Collect course offerings for filter view
+        self.course_offerings = self.filter_courses(term_index,
+                                                    teacher_course_offerings)
+        # Collect assignments for filter view
+        course_slug = self.request.GET.get("course", False)
+        cos = self.course_offerings
+        if course_slug:
+            cos = [c for c in self.course_offerings if c.course.slug == course_slug]
+        if not cos:
+            raise Http404
+        co = cos[0]
+        assignments = list(Assignment.objects
+                           .filter(notify_teachers__teacher=self.request.user,
+                                   course_offering=co)
+                           .only("pk", "deadline_at", "title", "course_offering_id")
+                           .order_by("-deadline_at"))
+        self.assignments = assignments
+        query["course_slug"] = co.course.slug
+        query["year"] = co.semester.year
+        query["term"] = co.semester.type
+        query["term_index"] = co.semester.index
+        query["assignments"] = self.get_filter_assignments(assignments)
+        query["assignments_qs"] = ",".join((str(a.pk) for a in query["assignments"]))
+        filters["assignment__in"] = [a for a in query["assignments"]]
+        # Set grade filter
+        filter_grade = self.request.GET.get("grades", self.filter_grades_empty)
+        if filter_grade not in (k for k,v in self.filter_grades):
+            filter_grade = self.filter_grades_empty
+        if filter_grade == self.filter_grades_empty:
+            filters["grade__isnull"] = True
+        elif filter_grade == "yes":
+            filters["grade__isnull"] = False
+        query["grades"] = filter_grade
+        # Set status filter
+        filter_status = self.request.GET.get("status", "comments")
+        if filter_status not in (k for k, v in self.filter_statuses):
+            filter_status = "comments"
+        if filter_status == "comments":
+            filters["last_commented__isnull"] = False
+        elif filter_status == "no_comments":
+            filters["last_commented__isnull"] = True
+        query["status"] = filter_status
+        self.query = query
+        return filters
 
     def get_queryset(self):
-        base_qs = \
-            (self.model.objects
-             .filter(assignment__course_offering__teachers=self.request.user,
-                     grade__isnull=True)
-             .order_by('assignment__course_offering__course__name',
-                       'assignment__deadline_at',
-                       'assignment__pk',
-                       'last_commented')
-             .select_related('assignment',
-                             'assignment__course_offering',
-                             'assignment__course_offering__course',
-                             'assignment__course_offering__semester',
-                             'student'))
-        if self.request.GET.get('show_all') == 'true':
-            return base_qs
-        else:
-            return base_qs.filter(assignment__is_online=True,
-                                  grade__isnull=True)
+        filters = self.get_filter_params()
+        base_qs = (
+            self.model.objects
+                .filter(**filters)
+                .order_by('assignment__deadline_at',
+                          'assignment__pk',
+                          'last_commented')
+                .select_related('assignment',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester',
+                                'student')
+                # Hide fat fields
+                .defer("assignment__text",
+                       "student__university",
+                       # Note: Can't hide `student_comment`. See details in CSCUser.__init__() method
+                       "assignment__course_offering__description",
+                       "assignment__course_offering__description_ru",
+                       "assignment__course_offering__description_en",
+                       "assignment__course_offering__course__description",
+                       "assignment__course_offering__course__description_ru",
+                       "assignment__course_offering__course__description_en",))
+        return base_qs
 
-    def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentTeacherListView, self)
-                   .get_context_data(*args, **kwargs))
-        if self.request.GET.get('show_all') == 'true':
-            open_ = context['assignment_list']
-        else:
-            open_ = [a_s
-                     for a_s in context['assignment_list']
-                     if a_s.last_commented]
-        archive = (Assignment.objects
-                   .filter(course_offering__teachers=self.request.user)
-                   .order_by('-deadline_at',
-                             'course_offering__course__name',
-                             'pk')
-                   .select_related('course_offering',
-                                   'course_offering__course',
-                                   'course_offering__semester'))
-        context['assignment_list_open'] = open_
-        context['assignment_list_archive'] = archive
-        context['user_type'] = self.user_type
-        context['show_all'] = \
-            (self.request.GET.get('show_all') == 'true')
+    def get_context_data(self, **kwargs):
+        # TODO: НАписать тестик на обновление last_comment_from
+        # TODO: После этого переделать фильтр статус на:
+        # TODO: Последний комментарий от: - студента - преподавателя - Неважно - все комментарии
+        # TODO: Добавить линк на страницу курса для доступа к списку домашек
+        # TODO: Показывать текущую оценку, если выбрано "с оценкой". Показывать дату последнего комментария, если выбрано "с комментарием"...
+        # TODO: написать в github - нужно ли показывать дедлайны к заданиям?
+        context = (super(AssignmentTeacherListView, self).get_context_data(**kwargs))
+        context["course_offerings"] = self.course_offerings
+        context["terms"] = self.terms
+        context["assignments"] = self.assignments
+        context["filter_grades"] = self.filter_grades
+        context["filter_statuses"] = self.filter_statuses
+        # Url for assignment filter
+        self.query["form_url"] = "{}?year={}&term={}&course={}&grades={}&status={}&assignments=".format(
+            reverse("assignment_list_teacher"),
+            self.query["year"],
+            self.query["term"],
+            self.query["course_slug"],
+            self.query["grades"],
+            self.query["status"],
+        )
+        context["query"] = self.query
         return context
 
 

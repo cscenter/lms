@@ -918,12 +918,30 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertEquals(2, len(resp.context['assignment_list_archive']))
 
-class AssignmentTeacherListTests(GroupSecurityCheckMixin,
-                                 MyUtilitiesMixin, TestCase):
+class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_teacher'
     groups_allowed = ['Teacher [CENTER]']
 
+    def test_group_security(self):
+        """Custom logic instead of GroupSecurityCheckMixin.
+        Teacher can get 404 if no CO yet"""
+        self.assertLoginRedirect(reverse(self.url_name))
+        for groups in [[], ['Teacher [CENTER]'], ['Student [CENTER]'],
+                       ['Graduate']]:
+            user = UserFactory.create(groups=groups)
+            self.doLogin(user)
+            if any(group in self.groups_allowed for group in groups):
+                co = CourseOfferingFactory.create(teachers=[user])
+                # Create co for teacher to prevent 404 error
+                self.assertStatusCode(200, self.url_name)
+            else:
+                self.assertLoginRedirect(reverse(self.url_name))
+            self.client.logout()
+        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
+        self.assertStatusCode(404, self.url_name)
+
     def test_list(self):
+        """Leave this test for group security checks. Don't want rewrite it in pytest style"""
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
@@ -932,52 +950,44 @@ class AssignmentTeacherListTests(GroupSecurityCheckMixin,
         co_other = CourseOfferingFactory.create(semester=s)
         AssignmentFactory.create_batch(2, course_offering=co_other)
         self.doLogin(teacher)
-        # no assignments yet
+        # no course offerings and assignments yet, return 404
         resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
-        self.assertEquals(0, len(resp.context['assignment_list_archive']))
-        # assignments should show up in archive
+        self.assertEquals(404, resp.status_code)
+        # Create co, assignments and enroll students
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
-        as1 = AssignmentFactory.create_batch(2, course_offering=co)
-        resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
-        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        resp = self.client.get(reverse(self.url_name) + "?show_all=true")
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
-        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        # enroll students, their assignments should show up only in
-        # "show all" mode
         for student in students:
             EnrollmentFactory.create(student=student, course_offering=co)
+        as1 = AssignmentFactory.create_batch(2, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
-        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        resp = self.client.get(reverse(self.url_name) + "?show_all=true")
+        # By default we show last 3 assignments without grades and with comments
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
+        # Let's check assignments without comments too
+        resp = self.client.get(reverse(self.url_name) + "?status=all")
+        self.assertEquals(6, len(resp.context['student_assignment_list']))
         self.assertSameObjects([(StudentAssignment.objects
                                  .get(student=student,
                                       assignment=assignment))
                                 for student in students
                                 for assignment in as1],
-                               resp.context['assignment_list_open'])
-        self.assertSameObjects(as1, resp.context['assignment_list_archive'])
-        # teacher commented on an assingnment, now it should show up
+                               resp.context['student_assignment_list'])
+        # teacher commented on an assignment, now it should show up
         a = as1[0]
         student = students[0]
         a_s = StudentAssignment.objects.get(student=student, assignment=a)
         AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=teacher)
         resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(1, len(resp.context['assignment_list_open']))
-        # but if student have commented, it should show up
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        # If student have commented, it should show up
         AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=student)
         resp = self.client.get(reverse(self.url_name))
-        self.assertSameObjects([a_s], resp.context['assignment_list_open'])
+        self.assertSameObjects([a_s], resp.context['student_assignment_list'])
         # if teacher has set a grade, assignment shouldn't show up
         a_s.grade = 3
         a_s.save()
         resp = self.client.get(reverse(self.url_name))
-        self.assertEquals(0, len(resp.context['assignment_list_open']))
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
 
 
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
@@ -1269,6 +1279,10 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_update(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
+        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
+        for student in students:
+            EnrollmentFactory.create(student=student,
+                                     course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         form = model_to_dict(a)
         deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
@@ -1285,7 +1299,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertNotContains(self.client.get(list_url), form['title'])
         self.assertRedirects(self.client.post(url, form),
                              co.get_absolute_url())
-        self.assertContains(self.client.get(list_url), form['title'])
+        # Show student assignments without comments
+        self.assertContains(self.client.get( list_url + "?status=all"), form['title'])
 
     def test_delete(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])

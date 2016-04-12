@@ -204,6 +204,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
+        # Teacher has no course offering and gets 404
+        self.assertEqual(resp.status_code, 404)
+        # Now he has one
+        CourseOfferingFactory.create(teachers=[user])
+        resp = self.client.get(reverse('assignment_list_teacher'))
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):

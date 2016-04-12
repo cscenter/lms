@@ -7,7 +7,7 @@ from .signals import (maybe_upload_slides,
                       create_deadline_change_notification,
                       populate_assignments_for_new_enrolled_student,
                       create_assignment_comment_notification,
-                      update_last_commented_date_on_student_assignment,
+                      update_last_comment_info_on_student_assignment,
                       create_course_offering_news_notification,
                       mark_assignment_passed, track_fields_post_init)
 
@@ -23,7 +23,7 @@ class LearningConfig(AppConfig):
                           sender=self.get_model('Assignment'))
         post_save.connect(create_assignment_comment_notification,
                           sender=self.get_model('AssignmentComment'))
-        post_save.connect(update_last_commented_date_on_student_assignment,
+        post_save.connect(update_last_comment_info_on_student_assignment,
                           sender=self.get_model('AssignmentComment'))
         post_save.connect(mark_assignment_passed,
                           sender=self.get_model('AssignmentComment'))

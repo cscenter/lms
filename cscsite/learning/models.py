@@ -677,6 +677,11 @@ class StudentAssignment(TimeStampedModel):
         verbose_name=_("Last comment date"),
         null=True,
         blank=True)
+    last_comment_from = models.PositiveSmallIntegerField(
+        verbose_name=_("Last comment from"),
+        help_text=_("System field. 0 - no comments yet. 1 - from student. 2 - from teacher"),
+        editable=False,
+        default=0)
 
     class Meta:
         ordering = ["assignment", "student"]

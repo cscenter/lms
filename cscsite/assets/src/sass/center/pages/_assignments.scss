@@ -14,3 +14,70 @@
 
 
 
+// teacher assignment submissions page
+#assignments-page {
+  @extend .container;
+  position: relative;
+  min-height:500px;
+
+  .page-aside {
+    top: -10px;
+    bottom: -30px;
+    position: relative;
+    float: left;
+  }
+  .page-main {
+    padding: 30px 20px;
+    h3 {
+      display: inline-block;
+      margin: 0;
+    }
+
+    .filters-wrapper {
+      height: 40px;
+      margin: 0 0 40px 0;
+    }
+
+    .filters {
+      @extend .pull-right;
+      @extend .btn-group;
+      margin: 0;
+
+      select {
+        width: 100px;
+      }
+      .multiselect-container>li>a>label.radio, .multiselect-container>li>a>label.checkbox {
+        width:276px;
+        white-space: normal;
+      }
+
+      #assignments-select-button {
+        @extend .btn;
+        @extend .btn-primary;
+        @extend .btn-outline;
+        padding: 6px 12px!important;
+      }
+    }
+
+    .loading {
+      cursor: wait;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      background: #fff;
+      top: 0;
+      left: 0;
+
+      i {
+        position: absolute;
+        top: 50%;
+        margin-top: -13px;
+        left: 50%;
+        margin-left: -13px;
+        font-size: 26px;
+      }
+    }
+  }
+
+
+}

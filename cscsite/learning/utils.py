@@ -51,16 +51,16 @@ def date_to_term_pair(date):
             year -= 1
     return CurrentSemester(year, current_term)
 
-def get_semester_index(target_year, semester_type):
+def get_semester_index(target_year, term_type):
     assert target_year >= FOUNDATION_YEAR
-    assert semester_type in SEMESTER_TYPES
+    assert term_type in SEMESTER_TYPES
     index = SEMESTER_INDEX_START
     year = FOUNDATION_YEAR
     # TODO: Optimize by skipping (target_year-FOUNDATION_YEAR) % len(TYPES) and remove infinity loop
     # TODO: add tests
     while True:
         for season, _ in SEMESTER_TYPES:
-            if year == target_year and semester_type == season:
+            if year == target_year and term_type == season:
                 return index
             index += 1
         year += 1
