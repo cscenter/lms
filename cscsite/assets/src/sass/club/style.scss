@@ -4,6 +4,7 @@ $min-width: 940px;
 $color-blue: #337ab7;
 $color-green: #5cb85c;
 $color-red: #FF6B78;
+$color-orange: #F39700;
 $color-grey: #9B9B9B;
 $btn-primary-bg: #7a9cc6;
 
@@ -17,7 +18,9 @@ $background-grey: #f8f8f8;
 @import "../_login_page.scss";
 @import "../center/pages/courses_list_student.scss";
 @import "../center/pages/_calendar";
+@import "../center/pages/_assignments";
 @import "../center/components/labels";
+@import "../center/components/page_aside";
 @import "top_menu.scss";
 
 
