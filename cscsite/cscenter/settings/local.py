@@ -24,6 +24,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+    # 'djdt_flamegraph.FlamegraphPanel',
 ]
 
 FLAMES_DIR = PROJECT_DIR.parent.child("flame_graph")

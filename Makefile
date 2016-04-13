@@ -6,13 +6,16 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run dumpdemo loaddemo test_travis lcaomail clean cmd check_defined sass sass_club webpack run_club
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run run_flame dumpdemo loaddemo test_travis lcaomail clean cmd check_defined sass sass_club webpack run_club
 
 run:
 	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
 
 club:
 	python manage.py runserver_plus --settings=csclub.settings.local 8002
+
+run_flame:
+	python manage.py runserver_plus --nothreading --noreload --settings=$(PROJECT).settings.local $(PORT)
 
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
