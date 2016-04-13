@@ -38,3 +38,5 @@ pytest-django==2.9.1
 pytest-cov==2.2.1
 pytest-xdist==1.14
 pytest-mock==0.11.0
+
+djdt-flamegraph==0.2.12
