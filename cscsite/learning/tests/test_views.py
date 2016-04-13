@@ -1758,3 +1758,26 @@ def test_assignment_contents(client):
     url = reverse('a_s_detail_teacher', args=[a_s.pk])
     client.login(teacher)
     assert bytes(a.text) in client.get(url).content
+
+
+@pytest.mark.django_db
+def test_studentassignment_last_commented_from(client,
+                                               student_center_factory,
+                                               teacher_center_factory):
+    LAST_COMMENT_FROM_NOBODY = 0
+    LAST_COMMENT_FROM_TEACHER = 1
+    LAST_COMMENT_FROM_STUDENT = 2
+    teacher = teacher_center_factory.create()
+    student = student_center_factory.create()
+    now_year, now_season = get_current_semester_pair()
+    s = SemesterFactory.create(year=now_year, type=now_season)
+    co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+    EnrollmentFactory.create(student=student, course_offering=co)
+    assignment = AssignmentFactory.create(course_offering=co)
+    sa = StudentAssignment.objects.get(assignment=assignment)
+    # Nobody comments yet
+    assert sa.last_comment_from == LAST_COMMENT_FROM_NOBODY
+    AssignmentCommentFactory.create(student_assignment=sa, author=student)
+    assert sa.last_comment_from == LAST_COMMENT_FROM_STUDENT
+    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
+    assert sa.last_comment_from == LAST_COMMENT_FROM_TEACHER
