@@ -23,7 +23,8 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     MultipleObjectsReturned
 
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, F, Prefetch, Count, When, Value, Case
+from django.db.models import Q, F, Prefetch, Count, When, Value, Case, \
+    IntegerField
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -1077,10 +1078,19 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
 
     def get_queryset(self):
         filters = self.get_filter_params()
+        today = now()
         base_qs = (
             self.model.objects
                 .filter(**filters)
-                .order_by('assignment__deadline_at',
+                .annotate(
+                    deadline_passed=Case(
+                        When(assignment__deadline_at__gte=today, then=Value(0)),
+                        default=Value('1'),
+                        output_field=IntegerField(),
+                    )
+                )
+                .order_by('deadline_passed',
+                          'assignment__deadline_at',
                           'assignment__pk',
                           'last_commented')
                 .select_related('assignment',
@@ -1101,12 +1111,6 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         return base_qs
 
     def get_context_data(self, **kwargs):
-        # TODO: НАписать тестик на обновление last_comment_from
-        # TODO: После этого переделать фильтр статус на:
-        # TODO: Последний комментарий от: - студента - преподавателя - Неважно - все комментарии
-        # TODO: Добавить линк на страницу курса для доступа к списку домашек
-        # TODO: Показывать текущую оценку, если выбрано "с оценкой". Показывать дату последнего комментария, если выбрано "с комментарием"...
-        # TODO: написать в github - нужно ли показывать дедлайны к заданиям?
         context = (super(AssignmentTeacherListView, self).get_context_data(**kwargs))
         context["course_offerings"] = self.course_offerings
         context["terms"] = self.terms
