@@ -962,7 +962,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         # By default we show last 3 assignments without grades and with comments
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         # Let's check assignments without comments too
-        resp = self.client.get(reverse(self.url_name) + "?status=all")
+        resp = self.client.get(reverse(self.url_name) + "?comment=nomatter")
         self.assertEquals(6, len(resp.context['student_assignment_list']))
         self.assertSameObjects([(StudentAssignment.objects
                                  .get(student=student,
@@ -970,15 +970,15 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
                                 for student in students
                                 for assignment in as1],
                                resp.context['student_assignment_list'])
-        # teacher commented on an assignment, now it should show up
+        # Teacher commented on an assignment, now it should show up with appropriate filter
         a = as1[0]
         student = students[0]
         a_s = StudentAssignment.objects.get(student=student, assignment=a)
         AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=teacher)
-        resp = self.client.get(reverse(self.url_name))
+        resp = self.client.get(reverse(self.url_name) + "?comment=teacher")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
-        # If student have commented, it should show up
+        # If student have commented, it should show up due to default filter
         AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=student)
         resp = self.client.get(reverse(self.url_name))
@@ -1764,9 +1764,6 @@ def test_assignment_contents(client):
 def test_studentassignment_last_commented_from(client,
                                                student_center_factory,
                                                teacher_center_factory):
-    LAST_COMMENT_FROM_NOBODY = 0
-    LAST_COMMENT_FROM_TEACHER = 1
-    LAST_COMMENT_FROM_STUDENT = 2
     teacher = teacher_center_factory.create()
     student = student_center_factory.create()
     now_year, now_season = get_current_semester_pair()
@@ -1776,8 +1773,8 @@ def test_studentassignment_last_commented_from(client,
     assignment = AssignmentFactory.create(course_offering=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     # Nobody comments yet
-    assert sa.last_comment_from == LAST_COMMENT_FROM_NOBODY
+    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_NOBODY
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
-    assert sa.last_comment_from == LAST_COMMENT_FROM_STUDENT
+    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_STUDENT
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
-    assert sa.last_comment_from == LAST_COMMENT_FROM_TEACHER
+    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_TEACHER

@@ -652,6 +652,9 @@ class StudentAssignment(TimeStampedModel):
                            ('pass', "3"),
                            ('good', "4"),
                            ('excellent', "5"))
+    LAST_COMMENT_NOBODY = 0
+    LAST_COMMENT_STUDENT = 1
+    LAST_COMMENT_TEACHER = 2
 
     assignment = models.ForeignKey(
         Assignment,
@@ -681,7 +684,7 @@ class StudentAssignment(TimeStampedModel):
         verbose_name=_("Last comment from"),
         help_text=_("System field. 0 - no comments yet. 1 - from student. 2 - from teacher"),
         editable=False,
-        default=0)
+        default=LAST_COMMENT_NOBODY)
 
     class Meta:
         ordering = ["assignment", "student"]
