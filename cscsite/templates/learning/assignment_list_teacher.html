@@ -11,8 +11,8 @@
     <section class="page-aside-section">
       <h5 class="page-aside-title">СТАТУС</h5>
       <div class="list-group has-actions">
-          {% for code, name in filter_grades %}
-              <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&status={{ query.status }}&assignments={{ query.assignments_qs }}"
+          {% for code, name in filter_by_grades %}
+              <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignments={{ query.assignments_qs }}"
                  class="list-group-item{% if code == query.grades %} active{% endif %}">
                   {{ name }}</a>
           {% endfor %}
@@ -20,12 +20,13 @@
     </section>
 
     <section class="page-aside-section">
-      <div class="list-group has-actions">
-          {% for code, status in filter_statuses %}
-              <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&status={{ code }}&assignments={{ query.assignments_qs }}"
-                 class="list-group-item{% if code == query.status %} active{% endif %}">{{ status }}</a>
+        <h5 class="page-aside-title">ПОСЛЕДНИЙ<br>КОММЕНТАРИЙ</h5>
+        <div class="list-group has-actions">
+          {% for code, comment in filter_by_comments %}
+              <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
+                 class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment }}</a>
           {% endfor %}
-      </div>
+        </div>
     </section>
 
   {% if course_offerings %}
@@ -33,7 +34,7 @@
       <h5 class="page-aside-title">КУРС</h5>
       <div class="list-group has-actions">
           {% for co in course_offerings %}
-            <a href="{% url "assignment_list_teacher" %}?year={{ co.semester.year }}&term={{ co.semester.type }}&course={{ co.course.slug }}&grades={{ query.grades }}&status={{ query.status }}"
+            <a href="{% url "assignment_list_teacher" %}?year={{ co.semester.year }}&term={{ co.semester.type }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
                data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}">{{ co.course.name }}</a>
           {% endfor %}
       </div>
@@ -45,7 +46,7 @@
           <h5 class="page-aside-title">СЕМЕСТР</h5>
           <div class="list-group has-actions">
               {% for term in terms %}
-                <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&status={{ query.status }}"
+                <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&comment={{ query.comment }}"
                    class="list-group-item{% if term.index == query.term_index %} active{% endif %}">{{ term }}</a>
               {% endfor %}
           </div>
@@ -74,7 +75,6 @@
                 </form>
             </div>
             <div>
-{#            <b>Показаны результаты для следующих заданий</b>:<br>{% for a in query.assignments %}{{ a.title }}{% if not forloop.last %}, {% endif %}{% endfor %}#}
             </div>
             <div class="clearfix"></div>
         {% endif %}

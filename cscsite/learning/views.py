@@ -959,15 +959,16 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
     filter_grades_empty = "no"
-    filter_grades = (
+    filter_by_grades = (
         (filter_grades_empty, _("Without grades")),
         ("yes", _("With grades")),
         ("all", _("All"))
     )
-    filter_statuses = (
-        ("comments", _("Has comments")),
-        ("no_comments", _("Without comments")),
-        ("all", _("All")),
+    filter_by_comments = (
+        ("student", _("From student")),
+        ("teacher", _("From teacher")),
+        ("empty", _("Without comments")),
+        ("nomatter", _("No matter")),
     )
 
     def get_term_data(self):
@@ -1052,7 +1053,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         filters["assignment__in"] = [a for a in query["assignments"]]
         # Set grade filter
         filter_grade = self.request.GET.get("grades", self.filter_grades_empty)
-        if filter_grade not in (k for k,v in self.filter_grades):
+        if filter_grade not in (k for k,v in self.filter_by_grades):
             filter_grade = self.filter_grades_empty
         if filter_grade == self.filter_grades_empty:
             filters["grade__isnull"] = True
@@ -1060,14 +1061,17 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             filters["grade__isnull"] = False
         query["grades"] = filter_grade
         # Set status filter
-        filter_status = self.request.GET.get("status", "comments")
-        if filter_status not in (k for k, v in self.filter_statuses):
-            filter_status = "comments"
-        if filter_status == "comments":
-            filters["last_commented__isnull"] = False
-        elif filter_status == "no_comments":
+        filter_by_comments = self.request.GET.get("comment", "student")
+        if filter_by_comments not in (k for k, v in self.filter_by_comments):
+            filter_by_comments = "student"
+        if filter_by_comments == "student":
+            filters["last_comment_from"] = StudentAssignment.LAST_COMMENT_STUDENT
+        elif filter_by_comments == "teacher":
+            filters["last_comment_from"] = StudentAssignment.LAST_COMMENT_TEACHER
+        elif filter_by_comments == "empty":
             filters["last_commented__isnull"] = True
-        query["status"] = filter_status
+
+        query["comment"] = filter_by_comments
         self.query = query
         return filters
 
@@ -1107,16 +1111,16 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         context["course_offerings"] = self.course_offerings
         context["terms"] = self.terms
         context["assignments"] = self.assignments
-        context["filter_grades"] = self.filter_grades
-        context["filter_statuses"] = self.filter_statuses
+        context["filter_by_grades"] = self.filter_by_grades
+        context["filter_by_comments"] = self.filter_by_comments
         # Url for assignment filter
-        self.query["form_url"] = "{}?year={}&term={}&course={}&grades={}&status={}&assignments=".format(
+        self.query["form_url"] = "{}?year={}&term={}&course={}&grades={}&comment={}&assignments=".format(
             reverse("assignment_list_teacher"),
             self.query["year"],
             self.query["term"],
             self.query["course_slug"],
             self.query["grades"],
-            self.query["status"],
+            self.query["comment"],
         )
         context["query"] = self.query
         return context

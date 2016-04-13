@@ -79,18 +79,15 @@ def update_last_comment_info_on_student_assignment(sender, instance,
     if not created:
         return
 
-    LAST_COMMENT_FROM_TEACHER = 1
-    LAST_COMMENT_FROM_STUDENT = 2
+    sa = instance.student_assignment
+    sa.last_commented = timezone.now()
 
-    a_s = instance.student_assignment
-    a_s.last_commented = timezone.now()
-
-    teachers = [t.teacher_id for t in a_s.assignment.notify_teachers.all()]
+    teachers = [t.teacher_id for t in sa.assignment.notify_teachers.all()]
     if instance.author_id in teachers:
-        a_s.last_comment_from = LAST_COMMENT_FROM_TEACHER
+        sa.last_comment_from = sa.LAST_COMMENT_TEACHER
     else:
-        a_s.last_comment_from = LAST_COMMENT_FROM_STUDENT
-    a_s.save()
+        sa.last_comment_from = sa.LAST_COMMENT_STUDENT
+    sa.save()
 
 def mark_assignment_passed(sender, instance, created,
                            *args, **kwargs):
