@@ -157,9 +157,11 @@ class Applicant(TimeStampedModel):
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.get_full_name(),
-                                                 self.campaign.name))
-
+        if self.campaign:
+            return smart_text("{} [{}]".format(self.get_full_name(),
+                                               self.campaign.name))
+        else:
+            return smart_text("{} [{}]".format(self.get_full_name()))
 
 @python_2_unicode_compatible
 class Test(TimeStampedModel):
