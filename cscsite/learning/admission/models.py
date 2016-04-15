@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from collections import OrderedDict
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -128,7 +129,7 @@ class Applicant(TimeStampedModel):
         max_length=255)
     where_did_you_learn = models.TextField(
         _("Where did you learn?"),
-        help_text=_("Applicant|where_did_you_learn"))
+        help_text=_("Applicant|where_did_you_learn_about_cs_center"))
     your_future_plans = models.TextField(
         _("Future plans"),
         help_text=_("Applicant|future_plans"),
@@ -151,9 +152,13 @@ class Applicant(TimeStampedModel):
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
 
+    def get_full_name(self):
+        parts = [self.second_name, self.first_name, self.last_name]
+        return smart_text(" ".join(part for part in parts if part).strip())
 
     def __str__(self):
-        return smart_text("{} {} {}".format(self.second_name, self.first_name, self.last_name))
+        return smart_text("{} [{}]".format(self.get_full_name(),
+                                                 self.campaign.name))
 
 
 @python_2_unicode_compatible
@@ -231,16 +236,23 @@ class Interviewer(models.Model):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interviewer|user"),
         on_delete=models.CASCADE)
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Interviewer|Campaign"),
+        on_delete=models.PROTECT,
+        related_name="interviewers")
 
     class Meta:
         verbose_name = _("Interviewer")
         verbose_name_plural = _("Interviewers")
 
     def __str__(self):
-        return smart_text(self.user.get_full_name(True))
+        return smart_text("{} [{}]".format(self.user.get_full_name(True),
+                                           self.campaign.name))
 
 
 # TODO: кто принимает решение о результатах интервью?
+@python_2_unicode_compatible
 class Interview(TimeStampedModel):
     WAITING = 'waiting'
     CANCELED = 'canceled'
@@ -261,6 +273,9 @@ class Interview(TimeStampedModel):
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interviews")
+    interviewers = models.ManyToManyField(
+        'Interviewer',
+        verbose_name=_("Interview|Interviewers"))
     # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
     decision = models.CharField(
         choices=DECISIONS,
@@ -276,14 +291,19 @@ class Interview(TimeStampedModel):
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
 
+    def get_absolute_url(self):
+        return reverse('admission_interview_detail', args=[self.pk])
+
     def average_score(self):
         scores = [comment.score for comment in self.comments]
         if scores:
             return float(sum(scores)) / len(scores)
         return "-"
 
+    def __str__(self):
+        return smart_text("{} [{}]".format(self.applicant, self.date))
 
-# TODO: Можно оставить только 1 комментарий 1му интервьюверу?
+
 class Comment(TimeStampedModel):
     interview = models.ForeignKey(
         Interview,

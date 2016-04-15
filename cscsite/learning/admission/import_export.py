@@ -17,7 +17,6 @@ class JsonFieldWidget(widgets.Widget):
 
 
 class ApplicantRecordResource(resources.ModelResource):
-
     class Meta:
         model = Applicant
         import_id_fields = ['uuid']
@@ -25,6 +24,10 @@ class ApplicantRecordResource(resources.ModelResource):
 
     def import_field(self, field, obj, data):
         if field.attribute and field.column_name in data:
+            if field.column_name == "where_did_you_learn":
+                data[field.column_name] = data[field.column_name].strip()
+                if not data[field.column_name]:
+                    data[field.column_name] = "<не указано>"
             if data[field.column_name] == "None":
                 data[field.column_name] = ""
             field.save(obj, data)
