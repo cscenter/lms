@@ -93,7 +93,9 @@ class Applicant(TimeStampedModel):
         blank=True)
     experience = models.TextField(
         _("Experience"),
-        help_text=_("Applicant|work_or_study_experience"))
+        help_text=_("Applicant|work_or_study_experience"),
+        null=True,
+        blank=True)
     has_job = models.CharField(
         _("Do you work?"),
         help_text=_("Applicant|has_job"),
@@ -157,7 +159,7 @@ class Applicant(TimeStampedModel):
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def __str__(self):
-        return smart_text("{}".format(self.get_full_name()))
+        return smart_text("{} [{}]".format(self.get_full_name(), self.campaign_id))
 
 @python_2_unicode_compatible
 class Test(TimeStampedModel):
