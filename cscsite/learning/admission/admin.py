@@ -31,7 +31,7 @@ class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     resource_class = ApplicantRecordResource
     list_display = ['id', 'yandex_id', 'second_name', 'first_name', 'last_name', 'campaign']
     list_filter = ['campaign',]
-    search_fields = ['yandex_id', 'stepic_id']
+    search_fields = ['yandex_id', 'stepic_id', 'first_name', 'second_name']
 
 class InterviewerAdmin(admin.ModelAdmin):
     list_display = ['user', 'campaign']
