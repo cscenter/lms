@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load thumbnail %}
+{% load crispy_forms_tags %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+<div class="admission-interview-page">
+    <h3>Собеседование</h3>кнопка назад и иконка редактирования для админа
+    <h4>{{ interview.applicant.get_full_name }}</h4>
+<div class="nav-tabs-horizontal nav-tabs-inverse">
+              <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+                <li class="active" role="presentation">
+                  <a data-toggle="tab" href="#comment" aria-controls="comment" role="tab" aria-expanded="true">Комментарий</a>
+                </li>
+                <li role="presentation" class="">
+                  <a data-toggle="tab" href="#applicant" aria-controls="applicant" role="tab" aria-expanded="false">Анкета поступающего</a>
+                </li>
+                  <li role="presentation" class="">
+                  <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Результаты теста</a>
+                </li>
+                  <li role="presentation" class="">
+                  <a data-toggle="tab" href="#exam-results" aria-controls="exam-results" role="tab" aria-expanded="false">Результаты экзамена</a>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane active" id="comment" role="tabpanel">
+                  {% crispy form form.helper %}
+                    <div class="clearfix"></div>
+                </div>
+                <div class="tab-pane" id="applicant" role="tabpanel">
+                  Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
+                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
+                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
+                  pararetur. Et, horreat optimum.
+                </div>
+                <div class="tab-pane" id="test-results" role="tabpanel">
+                  3Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
+                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
+                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
+                  pararetur. Et, horreat optimum.
+                </div>
+                <div class="tab-pane" id="exam-results" role="tabpanel">
+                  4Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
+                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
+                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
+                  pararetur. Et, horreat optimum.
+                </div>
+              </div>
+            </div>
+
+
+
+</div>
+{% endblock content %}
