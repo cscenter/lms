@@ -201,6 +201,7 @@ class Test(TimeStampedModel):
             return smart_text(self.score)
 
 
+@python_2_unicode_compatible
 class Exam(TimeStampedModel):
     applicant = models.ForeignKey(
         Applicant,
