@@ -158,6 +158,10 @@ class Applicant(TimeStampedModel):
         parts = [self.second_name, self.first_name, self.last_name]
         return smart_text(" ".join(part for part in parts if part).strip())
 
+    def clean(self):
+        if self.yandex_id:
+            self.yandex_id = self.yandex_id.lower().replace("-", ".")
+
     def __str__(self):
         return smart_text("{} [{}]".format(self.get_full_name(), self.campaign_id))
 
@@ -167,11 +171,11 @@ class Test(TimeStampedModel):
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="online_tests")
+        related_name="online_test")
     details = JSONField(
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
-        null=True
+        null=True,
     )
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
@@ -189,11 +193,11 @@ class Test(TimeStampedModel):
         verbose_name_plural = _("Testings")
 
     def __str__(self):
-        return smart_text("{} {} {}".format(
-            self.applicant.second_name,
-            self.applicant.first_name,
-            self.applicant.last_name)
-        )
+        """ Import/export get repr before instance created in db."""
+        if self.applicant_id:
+            return self.applicant.get_full_name()
+        else:
+            return smart_text(self.score)
 
 
 class Exam(TimeStampedModel):
