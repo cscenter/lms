@@ -37,8 +37,6 @@ class Command(BaseCommand):
                               .select_related("online_test", "exam"))
 
         for a in failed_applicants:
-            if not a.exam:
-                print("what are you doing here, man?")
             score = int(a.online_test.score)
             score_str = str(score) + " балл" + self.pluralize(score)
             mail.send(
