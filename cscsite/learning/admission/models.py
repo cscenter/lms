@@ -61,6 +61,7 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|stepic_id"),
         blank=True,
         null=True)
+    # FIXME: не допускать всякие eni@binom.in, удалять @yandex.ru и т.д.
     yandex_id = models.CharField(
         _("Yandex ID"),
         max_length=80,
