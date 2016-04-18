@@ -200,14 +200,14 @@ class Test(TimeStampedModel):
         else:
             return smart_text(self.score)
 
-
+# TODO: Добавить флаг "не сдавал"
 @python_2_unicode_compatible
 class Exam(TimeStampedModel):
-    applicant = models.ForeignKey(
+    applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="exams")
+        related_name="exam")
     details = JSONField(
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
