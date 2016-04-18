@@ -1,7 +1,11 @@
 from __future__ import unicode_literals, absolute_import
 
+import simplejson
 from django.contrib import admin
+from django.forms import TextInput
+from django.utils.encoding import smart_text
 from import_export.admin import ExportActionModelAdmin, ExportMixin
+from jsonfield.fields import JSONField
 
 from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
@@ -12,6 +16,8 @@ from learning.admission.models import Campaign, Interview, Applicant, Test, Exam
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
+    list_filter = ['applicant__campaign']
+    search_fields = ['applicant__yandex_id',]
 
     def get_queryset(self, request):
         qs = super(OnlineTestAdmin, self).get_queryset(request)

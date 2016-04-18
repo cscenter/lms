@@ -14,15 +14,20 @@ from learning.admission.models import Applicant
 
 class Command(BaseCommand):
     help = (
-        "Import results for online test. Run in dry mode by default."
+        """Import results for online test. Run in dry mode by default.
 
-        "Try to find already existed online test by `lookup` field "
-        "and campaign_id and update record if score is less than previous."
-        "Note: Don't forget manually remove applicant duplicates first "
-        "to avoid errors on `attach_applicant` action."
+        Try to find already existed online test by `lookup` field
+        and campaign_id and update record if score is less than previous.
+        Note: This command creates online test result record only for
+            yandex login registered in our database.
+            Run `online_test_init` first to create empty records for
+            all applicants, even with buggy yandex login.
+        Note: Don't forget manually remove applicant duplicates first
+            to avoid errors on `attach_applicant` action.
 
-        "Example:"
-        "./manage.py import_online_test_results ~/online-test-results.csv --passing_score=8 --campaign_id=1 --lookup=stepic_id"
+        Example:
+        ./manage.py online_test_import_results ~/online-test-results.csv --campaign_id=1 --lookup=stepic_id
+        """
     )
     # Other fields go to dynamically created `details` field
     allowed_fields = ['created', 'yandex_id', 'stepic_id', 'score', 'yandex_contest_id']
@@ -47,10 +52,12 @@ class Command(BaseCommand):
             help='Skip dry mode and import data to DB')
 
         parser.add_argument('--passing_score', type=int,
-            help='Set `rejected by online test` status for applicants below passing score')
+            help='You can pass value to set `rejected by online test` '
+                 'status for applicants below passing score')
 
         parser.add_argument('--contest_id', type=int,
-            help='Save contest_id for easier debug')
+            help='Save contest_id for easier debug. '
+                 'Overrides `yandex_contest_id` field from source csv file')
 
     def handle(self, *args, **options):
         csv_path = options["csv"]
@@ -59,8 +66,6 @@ class Command(BaseCommand):
         if not campaign_id:
             raise CommandError("Campaign ID not specified")
         passing_score = options["passing_score"]
-        if not passing_score:
-            raise CommandError("Passing score not specified")
         dry_run = not options["skip"]
         contest_id = options["contest_id"]
 
@@ -69,16 +74,20 @@ class Command(BaseCommand):
             if not lookup_field in data.headers:
                 raise CommandError("lookup field not specified in source csv")
             online_test_resource = OnlineTestRecordResource(
-                lookup_field = lookup_field,
-                allowed_fields = self.allowed_fields,
-                campaign_id = campaign_id,
-                passing_score = passing_score,
-                contest_id = contest_id)
+                lookup_field=lookup_field,
+                allowed_fields=self.allowed_fields,
+                campaign_id=campaign_id,
+                passing_score=passing_score,
+                contest_id=contest_id)
             result = online_test_resource.import_data(data, dry_run=dry_run)
-            if result.has_errors():
-                for error in result.base_errors:
-                    print(error)
-                for _, row_errors in result.row_errors():
-                    for row_error in row_errors:
-                        print(row_error)
+            self.handle_errors(result)
             print("Done")
+
+    @staticmethod
+    def handle_errors(result):
+        if result.has_errors():
+            for error in result.base_errors:
+                print(error)
+            for line, errors in result.row_errors():
+                for error in errors:
+                    print("line {} - {}".format(line + 1, error.error))
