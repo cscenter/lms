@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
         "Note: add `uuid` field to avoid duplicates"
     )
-
+    # TODO: Autocorrect yandex id (remove @ya.ru @yandex.ru and so on.)
     def add_arguments(self, parser):
         # Named (optional) arguments
         parser.add_argument('csv', metavar='CSV',
@@ -48,7 +48,8 @@ class Command(BaseCommand):
         self.handle_errors(result)
         print("Done")
 
-    def handle_errors(self, result):
+    @staticmethod
+    def handle_errors(result):
         if result.has_errors():
             for error in result.base_errors:
                 print(error)

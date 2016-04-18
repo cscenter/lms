@@ -2,7 +2,9 @@
 
 from __future__ import unicode_literals, absolute_import
 
+from django.utils.encoding import smart_text, force_text
 from import_export import resources, fields, widgets
+from import_export.instance_loaders import ModelInstanceLoader
 
 from learning.admission.models import Applicant, Test
 
@@ -45,6 +47,7 @@ class DetailsApplicantImportMixin(object):
             data.append_col(self.row_attach_applicant(data.headers),
                             header="applicant")
         # Optionally save contest id for debug purpose
+        # Note: Should implicitly override `yandex_contest_id` field
         if self.contest_id:
             data.append_col(lambda r: self.contest_id,
                             header="yandex_contest_id")
@@ -57,7 +60,6 @@ class DetailsApplicantImportMixin(object):
             if field.column_name == "applicant" and not data[field.column_name]:
                 return
             field.save(obj, data)
-
 
     def skip_row(self, instance, original):
         # We can't find applicant by lookup field, so skip record
@@ -72,7 +74,6 @@ class DetailsApplicantImportMixin(object):
             return True
         return super(DetailsApplicantImportMixin, self).skip_row(instance, original)
 
-
     def row_collect_details(self, headers):
         """Collect data for `details` column"""
 
@@ -85,7 +86,6 @@ class DetailsApplicantImportMixin(object):
 
         return wrapper
 
-
     def row_attach_applicant(self, headers):
         """Get applicant id by `lookup` field and campaign id"""
         lookup_field = self.lookup_field
@@ -97,6 +97,8 @@ class DetailsApplicantImportMixin(object):
             if not row[index]:
                 print("Empty {}. Skip".format(lookup_field))
                 return ""
+            else:
+                row[index] = row[index].lower().replace("-", ".")
             if lookup_field == "yandex_id":
                 qs = qs.filter(yandex_id=row[index])
             else:
@@ -114,15 +116,14 @@ class DetailsApplicantImportMixin(object):
 
         return wrapper
 
-
     def before_save_instance(self, instance, dry_run):
         # Set default values if not specified
         if not instance.score:
             instance.score = 0
 
 
-
-class OnlineTestRecordResource(DetailsApplicantImportMixin, resources.ModelResource):
+class OnlineTestRecordResource(DetailsApplicantImportMixin,
+                               resources.ModelResource):
     details = fields.Field(column_name='details',
                            attribute='details',
                            widget=JsonFieldWidget())
@@ -144,10 +145,9 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin, resources.ModelResou
         import_id_fields = ['applicant']
         skip_unchanged = True
 
-
     def after_save_instance(self, instance, dry_run):
         """Update applicant status if score lower than passing_score"""
-        if instance.score < self.passing_score:
+        if self.passing_score and instance.score < self.passing_score:
             instance.applicant.status = Applicant.REJECTED_BY_TEST
             instance.applicant.save()
 
@@ -175,6 +175,6 @@ class ExamRecordResource(DetailsApplicantImportMixin,
 
     def after_save_instance(self, instance, dry_run):
         """Update applicant status if score lower than passing_score"""
-        if instance.score < self.passing_score:
+        if self.passing_score and instance.score < self.passing_score:
             instance.applicant.status = Applicant.REJECTED_BY_EXAM
             instance.applicant.save()
