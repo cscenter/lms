@@ -39,7 +39,7 @@ class Command(BaseCommand):
                                                        online_test__score__gte=passing_score)
                               .select_related("online_test", "exam"))
 
-        for a in success_applicants[:3]:
+        for a in success_applicants:
             if not a.exam:
                 print("what are you doing here, man?")
             score = int(a.online_test.score)
