@@ -67,7 +67,7 @@ class DetailsApplicantImportMixin(object):
             return True
         # Skip results with zero score and empty `details`.
         # It means applicant don't even try to pass this contest
-        if not instance.score and not all(instance.details.values()):
+        if not instance.score and not any(instance.details.values()):
             return True
         # Otherwise, save lowest score
         if original.pk and original.score < instance.score:
@@ -109,8 +109,9 @@ class DetailsApplicantImportMixin(object):
                     lookup_field, row[index]))
                 return ""
             elif cnt == 0:
-                print("No matching applicant for {}={}. Skip".format(
-                    lookup_field, row[index]))
+                score_index = headers.index("score")
+                print("No applicant for {} = {}; score = {}; contest = {}. Skip".format(
+                    lookup_field, row[index], row[score_index], self.contest_id))
                 return ""
             return qs.get().pk
 
