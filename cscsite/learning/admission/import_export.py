@@ -161,6 +161,8 @@ class ExamRecordResource(DetailsApplicantImportMixin,
     # Note: Should return __str__ representation of applicant attribute
     fio = fields.Field(column_name='fio',
                        attribute='applicant')
+    yandex_login = fields.Field(column_name='yandex_login',
+                                attribute='applicant__yandex_id')
 
     def __init__(self, **kwargs):
         self.lookup_field = kwargs.get("lookup_field", "")
