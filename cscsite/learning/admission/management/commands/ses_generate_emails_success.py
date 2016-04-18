@@ -11,8 +11,9 @@ from post_office import mail
 from learning.admission.models import Test, Applicant
 
 # ./manage.py ses_generate_emails --passing_score=7 --template=admission-2016-online-test-success --campaign_id=2
+# TODO: refactor description
 class Command(BaseCommand):
-    help = 'Generate mailing list for choosing template and action'
+    help = 'Generate mailing list for choosing template and action. ONLY SUCCESS EMAILS HERE'
 
     def add_arguments(self, parser):
         parser.add_argument('--template', type=str,
@@ -58,7 +59,7 @@ class Command(BaseCommand):
 
     # shitty code
     def pluralize(self, value):
-        endings = ["a", "", "ов"]
+        endings = ["", "a", "ов"]
         if value % 100 in (11, 12, 13, 14):
             return endings[2]
         if value % 10 == 1:
