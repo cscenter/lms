@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals, absolute_import
 
+from collections import OrderedDict
+
 from django.utils.encoding import smart_text, force_text
 from import_export import resources, fields, widgets
 from import_export.instance_loaders import ModelInstanceLoader
@@ -82,7 +84,7 @@ class DetailsApplicantImportMixin(object):
         """Collect data for `details` column"""
 
         def wrapper(row):
-            details = {}
+            details = OrderedDict()
             for i, h in enumerate(headers):
                 if h not in self.allowed_fields:
                     details[h] = row[i]
