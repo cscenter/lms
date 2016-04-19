@@ -61,7 +61,6 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|stepic_id"),
         blank=True,
         null=True)
-    # FIXME: не допускать всякие eni@binom.in, удалять @yandex.ru и т.д.
     yandex_id = models.CharField(
         _("Yandex ID"),
         max_length=80,
@@ -69,6 +68,10 @@ class Applicant(TimeStampedModel):
                                    message=_("Only the part before "
                                              "\"@yandex.ru\" is expected"))],
         help_text=_("Applicant|yandex_id"))
+    yandex_id_normalize = models.CharField(
+        _("Yandex ID normalisation"),
+        max_length=80,
+        help_text=_("Applicant|yandex_id_normalization"))
     github_id = models.CharField(
         _("Github ID"),
         max_length=255,
@@ -160,8 +163,7 @@ class Applicant(TimeStampedModel):
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def clean(self):
-        if self.yandex_id:
-            self.yandex_id = self.yandex_id.lower().replace("-", ".")
+        self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
     def __str__(self):
         return smart_text("{} [{}]".format(self.get_full_name(), self.campaign_id))

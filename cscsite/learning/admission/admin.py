@@ -2,7 +2,7 @@ from __future__ import unicode_literals, absolute_import
 
 import simplejson
 from django.contrib import admin
-from django.forms import TextInput
+from django.forms import TextInput, forms
 from django.utils.encoding import smart_text
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 from jsonfield.fields import JSONField
@@ -13,7 +13,16 @@ from learning.admission.models import Campaign, Interview, Applicant, Test, Exam
     Interviewer, Comment
 
 
+# class OnlineTestAdminForm(forms.ModelForm):
+#     class Meta:
+#         model = Test
+#         widgets = {
+#           'approve_ts': TestApplicantWidget,
+#         }
+
+
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
+    # form = OnlineTestAdminForm
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
     list_filter = ['applicant__campaign']
@@ -32,7 +41,9 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
 
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
-    list_display = ['__str__', 'score']
+    list_display = ['__str__', 'score', 'yandex_contest_id']
+    search_fields = ['applicant__yandex_id', 'applicant__second_name',
+                     'applicant__first_name']
 
     def get_queryset(self, request):
         qs = super(ExamAdmin, self).get_queryset(request)
@@ -43,7 +54,8 @@ class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     resource_class = ApplicantRecordResource
     list_display = ['id', 'yandex_id', 'second_name', 'first_name', 'last_name', 'campaign']
     list_filter = ['campaign',]
-    search_fields = ['yandex_id', 'stepic_id', 'first_name', 'second_name', 'email']
+    search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id', 'first_name', 'second_name', 'email']
+    readonly_fields = ['yandex_id_normalize']
 
 class InterviewerAdmin(admin.ModelAdmin):
     list_display = ['user', 'campaign']

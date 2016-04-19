@@ -18,7 +18,6 @@ class Command(BaseCommand):
     )
     # TODO: Autocorrect yandex id (remove @ya.ru @yandex.ru and so on.)
     def add_arguments(self, parser):
-        # Named (optional) arguments
         parser.add_argument('csv', metavar='CSV',
                    help='path to csv with data')
         parser.add_argument('--campaign_id', type=int,
