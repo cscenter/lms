@@ -53,6 +53,13 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
         qs = super(ExamAdmin, self).get_queryset(request)
         return qs.select_related('applicant')
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'applicant':
+            kwargs['queryset'] = (
+            Applicant.objects.select_related("campaign", ).order_by("second_name"))
+        return (super(ExamAdmin, self)
+                .formfield_for_foreignkey(db_field, request, **kwargs))
+
 
 class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     resource_class = ApplicantRecordResource
