@@ -30,7 +30,7 @@ class Command(BaseCommand):
         """
     )
     # Other fields go to dynamically created `details` field
-    allowed_fields = ['created', 'yandex_id', 'stepic_id', 'score', 'yandex_contest_id']
+    allowed_fields = ['created', 'yandex_id', 'stepic_id', 'score', 'yandex_contest_id', 'user_name']
     lookup_fields = ["yandex_id", "stepic_id"]
 
     def add_arguments(self, parser):

@@ -34,6 +34,10 @@ class ApplicantRecordResource(resources.ModelResource):
                 data[field.column_name] = ""
             field.save(obj, data)
 
+    def before_save_instance(self, instance, dry_run):
+        """Invoke clean method to normalize yandex_id"""
+        instance.clean()
+
 
 class DetailsApplicantImportMixin(object):
     def before_import(self, data, dry_run, **kwargs):
@@ -109,9 +113,16 @@ class DetailsApplicantImportMixin(object):
                     lookup_field, row[index]))
                 return ""
             elif cnt == 0:
+                try:
+                    user_name_index = headers.index("user_name")
+                    user_name = row[user_name_index]
+                except ValueError:
+                    user_name = "-"
                 score_index = headers.index("score")
-                print("No applicant for {} = {}; score = {}; contest = {}. Skip".format(
-                    lookup_field, row[index], row[score_index], self.contest_id))
+                print("No applicant for {} = {}; user_name = {}; "
+                      "score = {}; contest = {}".format(
+                    lookup_field, row[index], user_name, row[score_index],
+                    self.contest_id))
                 return ""
             return qs.get().pk
 
@@ -147,7 +158,9 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
         skip_unchanged = True
 
     def after_save_instance(self, instance, dry_run):
-        """Update applicant status if score lower than passing_score"""
+        """Update applicant status if passing_score provided and instance score
+        lower than passing_score
+        """
         if self.passing_score and instance.score < self.passing_score:
             instance.applicant.status = Applicant.REJECTED_BY_TEST
             instance.applicant.save()
