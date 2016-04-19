@@ -1,11 +1,14 @@
 from __future__ import unicode_literals, absolute_import
 
-import simplejson
+from learning.admission.widgets import SimpleJSONWidget
+
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 from django.contrib import admin
-from django.forms import TextInput, forms
-from django.utils.encoding import smart_text
+import floppyforms.__future__ as forms
 from import_export.admin import ExportActionModelAdmin, ExportMixin
-from jsonfield.fields import JSONField
 
 from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
@@ -13,16 +16,17 @@ from learning.admission.models import Campaign, Interview, Applicant, Test, Exam
     Interviewer, Comment
 
 
-# class OnlineTestAdminForm(forms.ModelForm):
-#     class Meta:
-#         model = Test
-#         widgets = {
-#           'approve_ts': TestApplicantWidget,
-#         }
+class OnlineTestAdminForm(forms.ModelForm):
+    class Meta:
+        model = Test
+        fields = "__all__"
+        widgets = {
+          'details': SimpleJSONWidget,
+        }
 
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
-    # form = OnlineTestAdminForm
+    form = OnlineTestAdminForm
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
     list_filter = ['applicant__campaign']
