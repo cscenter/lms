@@ -103,10 +103,9 @@ class DetailsApplicantImportMixin(object):
             if not row[index]:
                 print("Empty {}. Skip".format(lookup_field))
                 return ""
-            else:
-                row[index] = row[index].lower().replace("-", ".")
             if lookup_field == "yandex_id":
-                qs = qs.filter(yandex_id=row[index])
+                row[index] = row[index].lower().replace("-", ".")
+                qs = qs.filter(yandex_id_normalize=row[index])
             else:
                 qs = qs.filter(stepic_id=row[index])
             cnt = qs.count()
