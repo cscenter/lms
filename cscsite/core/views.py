@@ -13,6 +13,28 @@ from django.views import generic
 from .utils import render_markdown
 
 
+class ReadOnlyFieldsMixin(object):
+    readonly_fields = ()
+
+    def __init__(self, *args, **kwargs):
+        super(ReadOnlyFieldsMixin, self).__init__(*args, **kwargs)
+        for field in (field for name, field in self.fields.iteritems()
+                      if self._pred(name)):
+            field.widget.attrs['disabled'] = 'true'
+            field.required = False
+
+    def _pred(self, field_name):
+        if self.readonly_fields == "__all__":
+            return True
+        return field_name in self.readonly_fields
+
+    def clean(self):
+        cleaned_data = super(ReadOnlyFieldsMixin,self).clean()
+        for field in self.readonly_fields:
+            cleaned_data[field] = getattr(self.instance, field)
+        return cleaned_data
+
+
 class LoginRequiredMixin(LoginRequiredMixin):
     raise_exception = False
 

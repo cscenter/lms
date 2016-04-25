@@ -19,6 +19,9 @@ $btn-primary-border:  $btn-primary-bg;
 $brand-success: $color-green;
 $brand-danger: #d9534f;
 
+$state-info-text: $color-blue;
+$state-success-text: $color-green;
+
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
@@ -27,7 +30,7 @@ $brand-danger: #d9534f;
 @import "../_login_page.scss";
 @import "top_menu.scss";
 @import "_material_design.scss";
-
+// TODO: separate pages from common bundle (teacher bundle, student bundle?)
 @import "pages/online_page.scss";
 @import "pages/index";
 @import "pages/testimonials";
@@ -36,6 +39,7 @@ $brand-danger: #d9534f;
 //@import "pages/student_assignment";
 @import "pages/faq";
 @import "pages/graduates";
+@import "pages/admission";
 @import "pages/_assignments";
 @import "pages/_calendar";
 

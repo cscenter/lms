@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-from django.forms import Textarea
+
+from __future__ import unicode_literals
+
+from itertools import chain
+
+from django.core.urlresolvers import reverse
+from django.forms import Textarea, Select
 from django.forms.utils import flatatt
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
