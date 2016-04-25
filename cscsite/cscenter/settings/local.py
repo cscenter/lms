@@ -28,7 +28,6 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 FLAMES_DIR = PROJECT_DIR.parent.child("flame_graph")
-MIDDLEWARE_CLASSES += ('core.middleware.FlamesMiddleware',)
 
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'

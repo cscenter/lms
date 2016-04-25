@@ -8,7 +8,7 @@ from django.utils.encoding import smart_text, force_text
 from import_export import resources, fields, widgets
 from import_export.instance_loaders import ModelInstanceLoader
 
-from learning.admission.models import Applicant, Test
+from learning.admission.models import Applicant, Test, Exam
 
 
 class JsonFieldWidget(widgets.Widget):
@@ -25,6 +25,12 @@ class ApplicantRecordResource(resources.ModelResource):
         model = Applicant
         import_id_fields = ['uuid']
         skip_unchanged = True
+        # FIXME: Too slow, looking for another solution
+        online_test_fields = ["online_test__" + f.name for f in
+                              Test._meta.fields if f.name != 'id']
+        exam_fields = ["exam__" + f.name for f in
+                       Exam._meta.fields if f.name != 'id']
+        fields = [f.name for f in Applicant._meta.fields] + online_test_fields + exam_fields
 
     def import_field(self, field, obj, data):
         if field.attribute and field.column_name in data:

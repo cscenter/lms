@@ -22,6 +22,7 @@ PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
     (4, 'VOLUNTEER', _('Volunteer')),
     (5, 'STUDENT_CLUB', _('Student [CLUB]')),
     (6, 'TEACHER_CLUB', _('Teacher [CLUB]')),
+    (7, 'INTERVIEWER', _('Interviewer [Admission]')),
 ))
 
 GROUPS_HAS_ACCESS_TO_CENTER = (

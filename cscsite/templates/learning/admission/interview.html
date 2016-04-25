@@ -2,55 +2,82 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load crispy_forms_tags %}
+ {% load static %}
 
 {% block body_class %} gray{% endblock body_class %}
 
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/vendor/jquery.barrating.min.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('select#id_score').barrating({
+                theme: 'bars-movie',
+            });
+        });
+    </script>
+{% endblock javascripts %}
+
 {% block content %}
 <div class="admission-interview-page">
-    <h3>Собеседование</h3>кнопка назад и иконка редактирования для админа
-    <h4>{{ interview.applicant.get_full_name }}</h4>
-<div class="nav-tabs-horizontal nav-tabs-inverse">
-              <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
-                <li class="active" role="presentation">
-                  <a data-toggle="tab" href="#comment" aria-controls="comment" role="tab" aria-expanded="true">Комментарий</a>
-                </li>
-                <li role="presentation" class="">
-                  <a data-toggle="tab" href="#applicant" aria-controls="applicant" role="tab" aria-expanded="false">Анкета поступающего</a>
-                </li>
-                  <li role="presentation" class="">
-                  <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Результаты теста</a>
-                </li>
-                  <li role="presentation" class="">
-                  <a data-toggle="tab" href="#exam-results" aria-controls="exam-results" role="tab" aria-expanded="false">Результаты экзамена</a>
-                </li>
-              </ul>
-              <div class="tab-content">
-                <div class="tab-pane active" id="comment" role="tabpanel">
-                  {% crispy form form.helper %}
-                    <div class="clearfix"></div>
-                </div>
-                <div class="tab-pane" id="applicant" role="tabpanel">
-                  Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
-                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
-                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
-                  pararetur. Et, horreat optimum.
-                </div>
-                <div class="tab-pane" id="test-results" role="tabpanel">
-                  3Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
-                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
-                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
-                  pararetur. Et, horreat optimum.
-                </div>
-                <div class="tab-pane" id="exam-results" role="tabpanel">
-                  4Arbitror nulli fugiat liberos mi aequum epularum praetulerit. Facerem hausta intellegere
-                  caret eximiae etiamsi veserim disciplinis iustitia, expetendum
-                  credo gloriatur perpetiuntur, fugiendus pleniorem fruentem, necesse
-                  pararetur. Et, horreat optimum.
-                </div>
-              </div>
+    <div class="page-header">
+        <h3 class="page-title">{{ interview.applicant.get_full_name }}</h3>
+        <ol class="breadcrumb">
+            <li><a href="{% url "admission_dashboard" %}">Список собеседований</a></li>
+            <li class="active">{{ interview.applicant.get_full_name }}</li>
+        </ol>
+        {% if request.user.is_curator %}
+            <div class="page-header-actions">
+                <a class="edit-interview-btn"
+                   href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-cog"></i></a>
             </div>
-
-
-
+        {% endif %}
+    </div>
+    <div class="date">Дата собеседования: {{ interview.date }}</div>
+    <div class="nav-tabs-horizontal nav-tabs-inverse">
+      <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+        <li class="active" role="presentation">
+          <a data-toggle="tab" href="#comment" aria-controls="comment" role="tab" aria-expanded="true">Комментарий</a>
+        </li>
+        <li role="presentation" class="">
+          <a data-toggle="tab" href="#applicant" aria-controls="applicant" role="tab" aria-expanded="false">Анкета поступающего</a>
+        </li>
+          <li role="presentation" class="">
+          <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Тест и экзамен</a>
+        </li>
+          <li role="presentation" class="">
+          <a data-toggle="tab" href="#comments" aria-controls="test-results" role="tab" aria-expanded="false">Все комментарии</a>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="comment" role="tabpanel">
+            {{ form.errors }}
+          {% crispy form form.helper %}
+            <div class="clearfix"></div>
+        </div>
+        <div class="tab-pane" id="applicant" role="tabpanel">
+            <dl>
+            {% for field in applicant %}
+                <dt>{{ field.label_tag }}</dt>
+                <dd>{% if field.value %}{{ field.value }}{% else %}<не указано>{% endif %}</dd>
+            {% endfor %}
+            </dl>
+        </div>
+        <div class="tab-pane" id="test-results" role="tabpanel">
+            <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span></h4>
+            <ul class="list-unstyled">
+            {% for k,v in online_test.details.items %}
+                <li>{{ k }}: {{ v }}</li>
+            {% endfor %}
+            </ul>
+            <hr>
+            <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span></h4>
+            <ul class="list-unstyled">
+            {% for k,v in exam.details.items %}
+                <li>{{ k }}: {{ v }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+      </div>
+    </div>
 </div>
 {% endblock content %}

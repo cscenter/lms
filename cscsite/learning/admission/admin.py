@@ -1,19 +1,19 @@
 from __future__ import unicode_literals, absolute_import
 
-from learning.admission.widgets import SimpleJSONWidget
-
 try:
     import json
 except ImportError:
     from django.utils import simplejson as json
+
+from django import forms
 from django.contrib import admin
-import floppyforms.__future__ as forms
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
 from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, Exam, \
-    Interviewer, Comment
+    Interviewer, Comment, InterviewAssignments, Contest
+from learning.admission.widgets import SimpleJSONWidget
 
 
 class OnlineTestAdminForm(forms.ModelForm):
@@ -21,7 +21,7 @@ class OnlineTestAdminForm(forms.ModelForm):
         model = Test
         fields = "__all__"
         widgets = {
-          'details': SimpleJSONWidget,
+            'details': SimpleJSONWidget,
         }
 
 
@@ -68,6 +68,7 @@ class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id', 'first_name', 'second_name', 'email']
     readonly_fields = ['yandex_id_normalize']
 
+
 class InterviewerAdmin(admin.ModelAdmin):
     list_display = ['user', 'campaign']
     list_filter = ['campaign']
@@ -90,4 +91,6 @@ admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interviewer, InterviewerAdmin)
 admin.site.register(Interview, InterviewAdmin)
+admin.site.register(InterviewAssignments)
+admin.site.register(Contest)
 admin.site.register(Comment)

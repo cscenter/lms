@@ -6,7 +6,8 @@ from collections import OrderedDict
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, \
+    MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from jsonfield import JSONField
@@ -17,6 +18,14 @@ from model_utils.models import TimeStampedModel
 @python_2_unicode_compatible
 class Campaign(models.Model):
     name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
+    online_test_max_score = models.SmallIntegerField(
+        _("Campaign|Test_max_score"))
+    online_test_passing_score = models.SmallIntegerField(
+        _("Campaign|Test_passing_score"))
+    exam_max_score = models.SmallIntegerField(
+        _("Campaign|Exam_max_score"))
+    exam_passing_score = models.SmallIntegerField(
+        _("Campaign|Exam_passing_score"))
 
     class Meta:
         verbose_name = _("Campaign")
@@ -29,11 +38,13 @@ class Campaign(models.Model):
 @python_2_unicode_compatible
 class Applicant(TimeStampedModel):
     REJECTED_BY_TEST = 'rejected_test'
+    REJECTED_BY_CHEATING = 'rejected_cheating'
     REJECTED_BY_EXAM = 'rejected_exam'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
     ACCEPT = 'accept'
     VOLUNTEER = 'volunteer'
     STATUS = (
+        (REJECTED_BY_CHEATING, _('Cheating')),
         (REJECTED_BY_TEST, _('Rejected by test')),
         (REJECTED_BY_EXAM, _('Rejected by exam')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
@@ -167,6 +178,36 @@ class Applicant(TimeStampedModel):
     def __str__(self):
         return smart_text("{} [{}]".format(self.get_full_name(), self.campaign_id))
 
+
+def contest_assignments_upload_to(instance, filename):
+    # TODO: Can be visible for unauthenticated. Is it ok?
+    return ("contest/{0}/assignments/{1}".format(
+        instance.contest_id, filename))
+
+
+class Contest(models.Model):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Contest|Campaign"),
+        on_delete=models.PROTECT,
+        related_name="contests")
+    contest_id = models.CharField(
+        _("Contest #ID"),
+        help_text=_("Applicant|yandex_contest_id"),
+        max_length=42,
+        blank=True,
+        null=True)
+
+    file = models.FileField(
+        _("Assignments in pdf format"),
+        blank=True,
+        upload_to=contest_assignments_upload_to)
+
+    class Meta:
+        verbose_name = _("Contest")
+        verbose_name_plural = _("Contests")
+
+
 @python_2_unicode_compatible
 class Test(TimeStampedModel):
     applicant = models.OneToOneField(
@@ -179,6 +220,7 @@ class Test(TimeStampedModel):
         blank=True,
         null=True,
     )
+    # TODO: replace with FK to Contest model?
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
@@ -201,7 +243,7 @@ class Test(TimeStampedModel):
         else:
             return smart_text(self.score)
 
-# TODO: Добавить флаг "не сдавал"
+
 @python_2_unicode_compatible
 class Exam(TimeStampedModel):
     applicant = models.OneToOneField(
@@ -214,6 +256,7 @@ class Exam(TimeStampedModel):
         blank=True,
         null=True
     )
+    # TODO: replace with FK to Contest model?
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
@@ -258,7 +301,22 @@ class Interviewer(models.Model):
                                            self.campaign.name))
 
 
-# TODO: кто принимает решение о результатах интервью?
+class InterviewAssignments(models.Model):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("InterviewAssignments|Campaign"),
+        on_delete=models.PROTECT,
+        related_name="interview_assignments")
+    name = models.CharField(_("InterviewAssignments|name"), max_length=255)
+    description = models.TextField(
+        _("Assignment description"),
+        help_text=_("TeX support"))
+
+    class Meta:
+        verbose_name = _("Interview assignment")
+        verbose_name_plural = _("Interview assignments")
+
+
 @python_2_unicode_compatible
 class Interview(TimeStampedModel):
     WAITING = 'waiting'
@@ -325,13 +383,12 @@ class Comment(TimeStampedModel):
         _("Text"),
         blank=True,
         null=True)
-    # TODO: какая шкала?
-    score = models.DecimalField(
+    score = models.SmallIntegerField(
         verbose_name=_("Score"),
-        max_digits=2,
-        decimal_places=1)
+        validators=[MinValueValidator(-2), MaxValueValidator(2)])
 
     class Meta:
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
+        unique_together = ("interview", "interviewer")
 
