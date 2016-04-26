@@ -181,11 +181,15 @@ class Applicant(TimeStampedModel):
 
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?
-    return ("contest/{0}/assignments/{1}".format(
-        instance.contest_id, filename))
+    return instance.FILE_PATH_TEMPLATE.format(
+        contest_id=instance.contest_id,
+        filename=filename)
 
 
+@python_2_unicode_compatible
 class Contest(models.Model):
+    FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
+
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Contest|Campaign"),
@@ -207,6 +211,12 @@ class Contest(models.Model):
         verbose_name = _("Contest")
         verbose_name_plural = _("Contests")
 
+    def file_url(self):
+        return self.file.url
+
+    def __str__(self):
+        return self.contest_id
+
 
 @python_2_unicode_compatible
 class Test(TimeStampedModel):
@@ -227,6 +237,7 @@ class Test(TimeStampedModel):
         max_length=42,
         blank=True,
         null=True)
+    # TODO: replace with integer
     score = models.DecimalField(
         verbose_name=_("Score"),
         max_digits=3,
@@ -256,28 +267,26 @@ class Exam(TimeStampedModel):
         blank=True,
         null=True
     )
-    # TODO: replace with FK to Contest model?
+    # TODO: replace with FK to Contest model! Migrate all data
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
         max_length=42,
         blank=True,
         null=True)
-    score = models.DecimalField(
-        verbose_name=_("Score"),
-        max_digits=3,
-        decimal_places=1)
+    score = models.PositiveSmallIntegerField(
+        verbose_name=_("Score"))
 
     class Meta:
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
 
     def __str__(self):
-        return smart_text("{} {} {}".format(
-            self.applicant.second_name,
-            self.applicant.first_name,
-            self.applicant.last_name)
-        )
+        """ Import/export get repr before instance created in db."""
+        if self.applicant_id:
+            return self.applicant.get_full_name()
+        else:
+            return smart_text(self.score)
 
 
 @python_2_unicode_compatible

@@ -184,6 +184,11 @@ class ExamRecordResource(DetailsApplicantImportMixin,
     yandex_login = fields.Field(column_name='yandex_login',
                                 attribute='applicant__yandex_id')
 
+    class Meta:
+        model = Exam
+        import_id_fields = ['applicant']
+        # skip_unchanged = True
+
     def __init__(self, **kwargs):
         self.lookup_field = kwargs.get("lookup_field", "")
         self.allowed_fields = kwargs.get("allowed_fields", False)
@@ -191,10 +196,21 @@ class ExamRecordResource(DetailsApplicantImportMixin,
         self.passing_score = kwargs.get("passing_score", False)
         self.contest_id = kwargs.get("contest_id", False)
 
-    class Meta:
-        model = Test
-        import_id_fields = ['applicant']
-        skip_unchanged = True
+    def skip_row(self, instance, original):
+        # Skip new instances. Before import we create empty records
+        # and then import only existed.
+        if not instance.pk:
+            return True
+        if original.yandex_contest_id != str(instance.yandex_contest_id):
+            # TODO: replace all prints with logger
+            print("Contest id from DB != contest_id from csv for record: "
+                  "{}".format(instance.applicant.yandex_id))
+            return True
+        # We can't find applicant by lookup field, so skip record
+        if not hasattr(instance, "applicant"):
+            return True
+        return super(DetailsApplicantImportMixin, self).skip_row(instance,
+                                                                 original)
 
     def after_save_instance(self, instance, dry_run):
         """Update applicant status if score lower than passing_score"""
