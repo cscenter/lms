@@ -361,6 +361,34 @@
     dd {
       margin-bottom: 15px;
     }
+
+    .comment {
+      img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 6px;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+
+      div.square {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        line-height: 50px;
+        text-align: center;
+        @extend .bg-info;
+        color: #333;
+      }
+      .comment-body {
+        span {
+          color: $color-blue;
+        }
+      }
+    }
+
   }
 }
 

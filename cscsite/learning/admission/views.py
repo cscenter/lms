@@ -17,7 +17,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView
 
 from learning.admission.forms import InterviewCommentForm, ApplicantForm
-from learning.admission.models import Interview, Interviewer, Comment
+from learning.admission.models import Interview, Interviewer, Comment, Contest
 
 
 class InterviewListView(generic.ListView):
@@ -63,7 +63,7 @@ class InterviewerAccessMixin(AccessMixin):
                 .prefetch_related(
                     Prefetch(
                         'interviewers',
-                        queryset=Interviewer.objects.select_related("user"))
+                        queryset=Interviewer.objects.select_related("user")),
                 )
                 .select_related("applicant", "applicant__online_test",
                                 "applicant__exam", "applicant__campaign"))
@@ -101,7 +101,16 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
         context["interview"] = self.interview
         context["applicant"] = ApplicantForm(instance=self.interview.applicant)
         context["online_test"] = self.interview.applicant.online_test
+        if context["online_test"].yandex_contest_id:
+            context["contests"] = Contest.objects.filter(
+                contest_id=context["online_test"].yandex_contest_id).all()
         context["exam"] = self.interview.applicant.exam
+        comment = self.get_object()
+        if comment:
+            context["comments"] = Comment.objects.filter(
+                interview=self.interview.pk).select_related("interviewer__user")
+        else:
+            context["comments"] = False
         return context
 
     def _get_interviewer(self):

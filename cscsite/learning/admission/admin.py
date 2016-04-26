@@ -36,14 +36,24 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         qs = super(OnlineTestAdmin, self).get_queryset(request)
         return qs.select_related('applicant')
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (Applicant.objects.select_related("campaign", ).order_by("second_name"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
+class ExamResultAdminForm(forms.ModelForm):
+    class Meta:
+        model = Exam
+        fields = "__all__"
+        widgets = {
+            'details': SimpleJSONWidget,
+        }
+
+
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
+    # FIXME: SimpleJSONWidget work's bad on exam model :<
     resource_class = ExamRecordResource
     list_display = ['__str__', 'score', 'yandex_contest_id']
     search_fields = ['applicant__yandex_id', 'applicant__second_name',
@@ -53,7 +63,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
         qs = super(ExamAdmin, self).get_queryset(request)
         return qs.select_related('applicant')
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
             Applicant.objects.select_related("campaign", ).order_by("second_name"))
@@ -74,15 +84,21 @@ class InterviewerAdmin(admin.ModelAdmin):
     list_filter = ['campaign']
 
 
+class ContestAdmin(admin.ModelAdmin):
+    list_display = ['contest_id', 'campaign']
+    list_filter = ['campaign']
+
+
 class InterviewAdmin(admin.ModelAdmin):
     list_display = ['date', 'applicant']
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
-            kwargs['queryset'] = (Applicant.objects.select_related("campaign",))
+            kwargs['queryset'] = (
+            Applicant.objects.select_related("campaign", ).order_by(
+                "second_name"))
         return (super(InterviewAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
-
 
 
 admin.site.register(Campaign)
@@ -92,5 +108,5 @@ admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interviewer, InterviewerAdmin)
 admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignments)
-admin.site.register(Contest)
+admin.site.register(Contest, ContestAdmin)
 admin.site.register(Comment)

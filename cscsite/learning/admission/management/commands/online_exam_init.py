@@ -25,6 +25,7 @@ class Command(BaseCommand):
         parser.add_argument('--contests', type=str,
                             help='Round robin to set one of contest_id')
 
+    # TODO: Get contest_id from DB by yandex contest id value after replacing yandex_contest_id with FK
     def handle(self, *args, **options):
         campaign_id = options["campaign_id"]
         passing_score = options["passing_score"]

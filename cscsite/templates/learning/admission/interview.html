@@ -13,6 +13,16 @@
             $('select#id_score').barrating({
                 theme: 'bars-movie',
             });
+
+            var hash = window.location.hash;
+            hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+            $('.nav-tabs a').click(function (e) {
+                $(this).tab('show');
+                var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+                window.location.hash = this.hash;
+                $('html,body').scrollTop(scrollmem);
+            });
         });
     </script>
 {% endblock javascripts %}
@@ -45,7 +55,13 @@
           <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Тест и экзамен</a>
         </li>
           <li role="presentation" class="">
-          <a data-toggle="tab" href="#comments" aria-controls="test-results" role="tab" aria-expanded="false">Все комментарии</a>
+          <a data-toggle="tab" href="#assignments" aria-controls="assignments" role="tab" aria-expanded="false">Задачи</a>
+        </li>
+          <li role="presentation" class="">
+          <a data-toggle="tab" href="#comments" aria-controls="comments" role="tab" aria-expanded="false">Все комментарии</a>
+        </li>
+          <li role="presentation" class="">
+          <a data-toggle="tab" href="#similar-applications" aria-controls="similar-applications" role="tab" aria-expanded="false">Похожие анкеты</a>
         </li>
       </ul>
       <div class="tab-content">
@@ -63,7 +79,8 @@
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
-            <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span></h4>
+            <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests %}{% for contest in contests %}<a
+                    href="{{ contest.file_url }}" target="_blank">Описание задач</a>{% endfor %}{% endif %}</h4>
             <ul class="list-unstyled">
             {% for k,v in online_test.details.items %}
                 <li>{{ k }}: {{ v }}</li>
@@ -76,6 +93,36 @@
                 <li>{{ k }}: {{ v }}</li>
             {% endfor %}
             </ul>
+        </div>
+        <div class="tab-pane" id="assignments" role="tabpanel">
+            Здесь будет список задач, предложенных перед прохождением собеседования.
+        </div>
+        <div class="tab-pane" id="comments" role="tabpanel">
+            {% if comments %}
+                {% for comment in comments %}
+                    <div class="comment media">
+                        <div class="media-left">
+                            {% with user=comment.interviewer.user %}
+                            {% if user.photo %}
+                                {% thumbnail user.photo "100x100" crop="center" as im %}
+                                    <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                {% endthumbnail %}
+                            {% else %}
+                                <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.last_name|slice:":1" }}{{ user.first_name|slice:":1" }}</div>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    <div class="comment-body media-body">
+                      <span>{{ comment.interviewer.user.get_full_name }}</span> / <b>{{ comment.score }}</b>
+                      <div class="comment-content">
+                        <p>{{ comment.text }}</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+            {% else %}
+                Нужна предворительная оценка, чтобы посмотреть мнение остальных участников.
+            {% endif %}
         </div>
       </div>
     </div>
