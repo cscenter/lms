@@ -5,7 +5,6 @@ try:
 except ImportError:
     from django.utils import simplejson as json
 
-from django import forms
 from django.contrib import admin
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
@@ -13,20 +12,9 @@ from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, Exam, \
     Interviewer, Comment, InterviewAssignments, Contest
-from learning.admission.widgets import SimpleJSONWidget
-
-
-class OnlineTestAdminForm(forms.ModelForm):
-    class Meta:
-        model = Test
-        fields = "__all__"
-        widgets = {
-            'details': SimpleJSONWidget,
-        }
 
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
-    form = OnlineTestAdminForm
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
     list_filter = ['applicant__campaign']
@@ -41,15 +29,6 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
             kwargs['queryset'] = (Applicant.objects.select_related("campaign", ).order_by("second_name"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
-
-
-class ExamResultAdminForm(forms.ModelForm):
-    class Meta:
-        model = Exam
-        fields = "__all__"
-        widgets = {
-            'details': SimpleJSONWidget,
-        }
 
 
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
