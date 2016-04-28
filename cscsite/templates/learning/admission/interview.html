@@ -74,20 +74,21 @@
             <dl>
             {% for field in applicant %}
                 <dt>{{ field.label_tag }}</dt>
-                <dd>{% if field.value %}{{ field.value }}{% else %}<не указано>{% endif %}</dd>
+                <dd>{% if field.value %}{{ field.value|linebreaks }}{% else %}<не указано>{% endif %}</dd>
             {% endfor %}
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
-            <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests %}{% for contest in contests %}<a
-                    href="{{ contest.file_url }}" target="_blank">Описание задач</a>{% endfor %}{% endif %}</h4>
+            <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test %}<a
+                    href="{{ contests.test.file_url }}" target="_blank">Описание задач</a>{% endif %}</h4>
             <ul class="list-unstyled">
             {% for k,v in online_test.details.items %}
                 <li>{{ k }}: {{ v }}</li>
             {% endfor %}
             </ul>
             <hr>
-            <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span></h4>
+            <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam %}<a
+                    href="{{ contests.exam.file_url }}" target="_blank">Описание задач</a>{% endif %}</h4>
             <ul class="list-unstyled">
             {% for k,v in exam.details.items %}
                 <li>{{ k }}: {{ v }}</li>
@@ -95,7 +96,17 @@
             </ul>
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            Здесь будет список задач, предложенных перед прохождением собеседования.
+            {% if interview.assignments %}
+                {% for assignment in interview.assignments.all %}
+                    <h3>{{ assignment.name }}</h3>
+                    <div class="ubertext">
+                        {{ assignment.description|safe }}
+                    </div>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                Список задач, предложенных перед прохождением собеседования, пуст.
+            {% endif %}
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
             {% if comments %}
@@ -121,8 +132,19 @@
                   </div>
                 {% endfor %}
             {% else %}
-                Нужна предворительная оценка, чтобы посмотреть мнение остальных участников.
+                {% if request.user.is_curator %}
+                    Комментариев пока нет.
+                {% else %}
+                    Нужна предворительная оценка, чтобы посмотреть мнение остальных участников.
+                {% endif %}
             {% endif %}
+        </div>
+        <div class="tab-pane" id="similar-applications" role="tabpanel">
+            Поиск похожих анкет осуществляется по следующим критериям:
+            <ul>
+                <li>email</li>
+                <li>ФИО</li>
+            </ul>
         </div>
       </div>
     </div>

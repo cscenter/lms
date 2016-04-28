@@ -11,7 +11,7 @@ from import_export.admin import ExportActionModelAdmin, ExportMixin
 from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, Exam, \
-    Interviewer, Comment, InterviewAssignments, Contest
+    Interviewer, Comment, InterviewAssignment, Contest
 
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
@@ -86,6 +86,6 @@ admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interviewer, InterviewerAdmin)
 admin.site.register(Interview, InterviewAdmin)
-admin.site.register(InterviewAssignments)
+admin.site.register(InterviewAssignment)
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Comment)

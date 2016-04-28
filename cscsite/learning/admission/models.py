@@ -310,7 +310,8 @@ class Interviewer(models.Model):
                                            self.campaign.name))
 
 
-class InterviewAssignments(models.Model):
+@python_2_unicode_compatible
+class InterviewAssignment(models.Model):
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("InterviewAssignments|Campaign"),
@@ -324,6 +325,9 @@ class InterviewAssignments(models.Model):
     class Meta:
         verbose_name = _("Interview assignment")
         verbose_name_plural = _("Interview assignments")
+
+    def __str__(self):
+        return smart_text(self.name)
 
 
 @python_2_unicode_compatible
@@ -350,6 +354,12 @@ class Interview(TimeStampedModel):
     interviewers = models.ManyToManyField(
         'Interviewer',
         verbose_name=_("Interview|Interviewers"))
+
+    assignments = models.ManyToManyField(
+        'InterviewAssignment',
+        verbose_name=_("Interview|Assignments"))
+
+
     # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
     decision = models.CharField(
         choices=DECISIONS,
