@@ -70,6 +70,10 @@
                             </div>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                    <td colspan="4">Нет назначенных интервью.</td>
+                    </tr>
                 {% endfor %}
 
             </tbody>

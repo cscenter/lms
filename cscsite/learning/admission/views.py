@@ -64,6 +64,7 @@ class InterviewerAccessMixin(AccessMixin):
                     Prefetch(
                         'interviewers',
                         queryset=Interviewer.objects.select_related("user")),
+                    'assignments'
                 )
                 .select_related("applicant", "applicant__online_test",
                                 "applicant__exam", "applicant__campaign"))
@@ -101,12 +102,22 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
         context["interview"] = self.interview
         context["applicant"] = ApplicantForm(instance=self.interview.applicant)
         context["online_test"] = self.interview.applicant.online_test
-        if context["online_test"].yandex_contest_id:
-            context["contests"] = Contest.objects.filter(
-                contest_id=context["online_test"].yandex_contest_id).all()
         context["exam"] = self.interview.applicant.exam
+        # get contests description
+        contests = {}
+        contest_ids = [context["online_test"].yandex_contest_id,
+                       context["exam"].yandex_contest_id]
+        contest_ids = filter(None, contest_ids)
+        if contest_ids:
+            contests_query = Contest.objects.filter(contest_id__in=contest_ids)
+            for c in contests_query:
+                if c.contest_id == context["online_test"].yandex_contest_id:
+                    contests["test"] = c
+                elif c.contest_id == context["exam"].yandex_contest_id:
+                    contests["exam"] = c
+        context["contests"] = contests
         comment = self.get_object()
-        if comment:
+        if comment or self.request.user.is_curator:
             context["comments"] = Comment.objects.filter(
                 interview=self.interview.pk).select_related("interviewer__user")
         else:
@@ -124,7 +135,10 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
         interviewer = self._get_interviewer()
         kwargs = super(InterviewDetailView, self).get_form_kwargs()
         kwargs['initial']['interview'] = interview_id
-        kwargs['initial']['interviewer'] = interviewer.pk
+        if hasattr(interviewer, 'pk'):
+            kwargs['initial']['interviewer'] = interviewer.pk
+        else:
+            kwargs['initial']['interviewer'] = self.request.user.pk
         # Store values to validate submitted interviewer/interview on form level
         kwargs.update({"interviewer": interviewer})
         kwargs.update({"interview_id": interview_id})

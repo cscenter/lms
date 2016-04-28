@@ -42,7 +42,9 @@ class InterviewCommentForm(forms.ModelForm):
         interviewer = self.cleaned_data['interviewer']
         if interviewer != self.interviewer:
             raise ValidationError(
-                "You have permissions to create/update only own comments")
+                _("Sorry, but you should be in interviewers list to "
+                  "create or update comment.")
+            )
         return interviewer
 
     def clean_interview(self):
