@@ -15,7 +15,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView
 
 from learning.admission.forms import InterviewCommentForm, ApplicantForm
-from learning.admission.models import Interview, Comment, Contest
+from learning.admission.models import Interview, Comment, Contest, Test, Exam
 from learning.viewmixins import InterviewerOnlyMixin
 
 
@@ -91,12 +91,19 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
         context["campaign"] = self.interview.applicant.campaign
         context["interview"] = self.interview
         context["applicant"] = ApplicantForm(instance=self.interview.applicant)
-        context["online_test"] = self.interview.applicant.online_test
-        context["exam"] = self.interview.applicant.exam
+        contest_ids = []
+        try:
+            context["online_test"] = self.interview.applicant.online_test
+            contest_ids.append(context["online_test"].yandex_contest_id)
+        except Test.DoesNotExist:
+            pass
+        try:
+            context["exam"] = self.interview.applicant.exam
+            contest_ids.append(context["exam"].yandex_contest_id)
+        except Exam.DoesNotExist:
+            pass
         # get contests description
         contests = {}
-        contest_ids = [context["online_test"].yandex_contest_id,
-                       context["exam"].yandex_contest_id]
         contest_ids = filter(None, contest_ids)
         if contest_ids:
             contests_query = Contest.objects.filter(contest_id__in=contest_ids)
