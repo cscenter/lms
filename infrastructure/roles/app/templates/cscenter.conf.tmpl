@@ -43,9 +43,10 @@ server {
         alias /home/{{ cscenter_user }}/site/repo/cscsite/static;
         access_log off;
         tcp_nodelay off;
-        # FIXME(Dmitry): do this statically
-        # gzip_static on;
+        gzip_static on;
         gzip on;
+        gzip_min_length  1100;
+        gzip_types text/css text/javascript application/javascript;
         expires 6h;
         add_header Cache-Control public,max-age=21600;
     }

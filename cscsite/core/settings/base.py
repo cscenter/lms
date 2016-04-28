@@ -181,7 +181,7 @@ STATICFILES_DIRS = (
 )
 
 # See django-pipeline for details
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
