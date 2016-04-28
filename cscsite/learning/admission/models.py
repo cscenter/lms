@@ -20,6 +20,7 @@ from learning.settings import PARTICIPANT_GROUPS
 @python_2_unicode_compatible
 class Campaign(models.Model):
     name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
+    code = models.CharField(_("Campaign|Code"), max_length=140, help_text=_("Will be displayed in admin select"))
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
@@ -178,7 +179,11 @@ class Applicant(TimeStampedModel):
         self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.get_full_name(), self.campaign_id))
+        if self.campaign_id:
+            return smart_text(
+                "{} [{}]".format(self.get_full_name(), self.campaign.code))
+        else:
+            return smart_text(self.get_full_name())
 
 
 def contest_assignments_upload_to(instance, filename):
@@ -292,28 +297,6 @@ class Exam(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class Interviewer(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Interviewer|user"),
-        on_delete=models.CASCADE,
-        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
-    campaign = models.ForeignKey(
-        Campaign,
-        verbose_name=_("Interviewer|Campaign"),
-        on_delete=models.PROTECT,
-        related_name="interviewers")
-
-    class Meta:
-        verbose_name = _("Interviewer")
-        verbose_name_plural = _("Interviewers")
-
-    def __str__(self):
-        return smart_text("{} [{}]".format(self.user.get_full_name(True),
-                                           self.campaign.name))
-
-
-@python_2_unicode_compatible
 class InterviewAssignment(models.Model):
     campaign = models.ForeignKey(
         Campaign,
@@ -355,12 +338,14 @@ class Interview(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="interviews")
     interviewers = models.ManyToManyField(
-        'Interviewer',
-        verbose_name=_("Interview|Interviewers"))
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Interview|Interviewers"),
+        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
 
     assignments = models.ManyToManyField(
         'InterviewAssignment',
-        verbose_name=_("Interview|Assignments"))
+        verbose_name=_("Interview|Assignments"),
+        blank=True)
 
 
     # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
@@ -398,9 +383,9 @@ class Comment(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="comments")
     interviewer = models.ForeignKey(
-        Interviewer,
+        settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
-        related_name="comments")
+        related_name="interview_comments")
     text = models.TextField(
         _("Text"),
         blank=True,

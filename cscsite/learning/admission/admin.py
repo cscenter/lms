@@ -11,7 +11,7 @@ from import_export.admin import ExportActionModelAdmin, ExportMixin
 from learning.admission.import_export import ApplicantRecordResource, \
     OnlineTestRecordResource, ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, Exam, \
-    Interviewer, Comment, InterviewAssignment, Contest
+    Comment, InterviewAssignment, Contest
 
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
@@ -58,11 +58,6 @@ class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     readonly_fields = ['yandex_id_normalize']
 
 
-class InterviewerAdmin(admin.ModelAdmin):
-    list_display = ['user', 'campaign']
-    list_filter = ['campaign']
-
-
 class ContestAdmin(admin.ModelAdmin):
     list_display = ['contest_id', 'campaign']
     list_filter = ['campaign']
@@ -84,7 +79,6 @@ admin.site.register(Campaign)
 admin.site.register(Applicant, ApplicantRecordResourceAdmin)
 admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
-admin.site.register(Interviewer, InterviewerAdmin)
 admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment)
 admin.site.register(Contest, ContestAdmin)

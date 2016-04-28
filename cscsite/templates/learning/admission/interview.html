@@ -96,17 +96,15 @@
             </ul>
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            {% if interview.assignments %}
                 {% for assignment in interview.assignments.all %}
                     <h3>{{ assignment.name }}</h3>
                     <div class="ubertext">
                         {{ assignment.description|safe }}
                     </div>
                     <hr>
+                    {% empty %}
+                    Список задач, предложенных перед прохождением собеседования, пуст.
                 {% endfor %}
-            {% else %}
-                Список задач, предложенных перед прохождением собеседования, пуст.
-            {% endif %}
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
             {% if comments %}
@@ -140,7 +138,7 @@
             {% endif %}
         </div>
         <div class="tab-pane" id="similar-applications" role="tabpanel">
-            Поиск похожих анкет осуществляется по следующим критериям:
+            Поиск похожих анкет будет осуществляться по следующим критериям:
             <ul>
                 <li>email</li>
                 <li>ФИО</li>
