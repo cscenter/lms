@@ -18,9 +18,10 @@ from django.views.generic.edit import BaseUpdateView
 
 from learning.admission.forms import InterviewCommentForm, ApplicantForm
 from learning.admission.models import Interview, Interviewer, Comment, Contest
+from learning.viewmixins import TeacherOnlyMixin
 
 
-class InterviewListView(generic.ListView):
+class InterviewListView(TeacherOnlyMixin, generic.ListView):
     context_object_name = 'interviews'
     model = Interview
     template_name = "learning/admission/dashboard.html"
