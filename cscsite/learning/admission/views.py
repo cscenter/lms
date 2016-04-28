@@ -6,9 +6,7 @@ import datetime
 
 from braces.views._access import AccessMixin
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -17,7 +15,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView
 
 from learning.admission.forms import InterviewCommentForm, ApplicantForm
-from learning.admission.models import Interview, Interviewer, Comment, Contest
+from learning.admission.models import Interview, Comment, Contest
 from learning.viewmixins import InterviewerOnlyMixin
 
 
@@ -41,11 +39,7 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
                          .filter(date__gte=today,
                                  decision=Interview.WAITING)
                          .select_related("applicant")
-                         .prefetch_related(
-                            Prefetch(
-                                'interviewers',
-                                queryset=Interviewer.objects.select_related("user"))
-                         )
+                         .prefetch_related("interviewers")
                          .order_by("date"))
 
 
@@ -61,16 +55,11 @@ class InterviewerAccessMixin(AccessMixin):
         self.interview = get_object_or_404(
             Interview.objects
                 .filter(pk=interview_id)
-                .prefetch_related(
-                    Prefetch(
-                        'interviewers',
-                        queryset=Interviewer.objects.select_related("user")),
-                    'assignments'
-                )
+                .prefetch_related("interviewers", "assignments")
                 .select_related("applicant", "applicant__online_test",
                                 "applicant__exam", "applicant__campaign"))
         interviewers_uids = [u.pk for u in self.interview.interviewers.all()]
-        if request.user.pk not in interviewers_uids:
+        if not request.user.is_curator and request.user.pk not in interviewers_uids:
             return self.handle_no_permission(request)
 
         return super(InterviewerAccessMixin, self).dispatch(
@@ -95,7 +84,7 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
     def get_queryset(self):
         interview_id = self.kwargs.get("pk", None)
         return Comment.objects.filter(interview=interview_id,
-                                      interviewer__user=self.request.user)
+                                      interviewer=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(InterviewDetailView, self).get_context_data(**kwargs)
@@ -120,14 +109,14 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
         comment = self.get_object()
         if comment or self.request.user.is_curator:
             context["comments"] = Comment.objects.filter(
-                interview=self.interview.pk).select_related("interviewer__user")
+                interview=self.interview.pk).select_related("interviewer")
         else:
             context["comments"] = False
         return context
 
     def _get_interviewer(self):
         for i in self.interview.interviewers.all():
-            if i.user.pk == self.request.user.pk:
+            if i.pk == self.request.user.pk:
                 return i
         return False
 
