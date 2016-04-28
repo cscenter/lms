@@ -14,6 +14,8 @@ from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 
+from learning.settings import PARTICIPANT_GROUPS
+
 
 @python_2_unicode_compatible
 class Campaign(models.Model):
@@ -294,7 +296,8 @@ class Interviewer(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interviewer|user"),
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Interviewer|Campaign"),
