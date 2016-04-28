@@ -22,11 +22,11 @@ class InterviewCommentForm(forms.ModelForm):
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
             'score': forms.Select(choices=(
-                (-2, "Очень плохо"),
-                (-1, "Плохо"),
-                (0, "Середина"),
-                (1, "Хорош"),
-                (2, "Отлично")))
+                (-2, "не брать ни сейчас, ни потом"),
+                (-1, "не брать сейчас"),
+                (0, "нейтрально"),
+                (1, "можно взять"),
+                (2, "точно нужно взять")))
         }
 
     def __init__(self, *args, **kwargs):
