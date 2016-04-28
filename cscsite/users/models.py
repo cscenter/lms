@@ -459,6 +459,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     def is_curator(self):
         return self.is_superuser and self.is_staff
 
+    @cached_property
+    def is_interviewer(self):
+        return self.group_pks.INTERVIEWER in self._cs_group_pks
+
 
 @python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):

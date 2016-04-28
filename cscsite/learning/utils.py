@@ -149,6 +149,10 @@ class LearningPermissionsMixin(object):
     def is_curator(self):
         return False
 
+    @property
+    def is_interviewer(self):
+        return False
+
 # TODO: Add sort order to Semester object and forget about this method!
 class SortBySemesterMethodMixin(object):
     @staticmethod
