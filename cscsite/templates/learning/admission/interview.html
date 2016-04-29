@@ -119,6 +119,12 @@
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
             {% if comments %}
+                <ul class="panel-info">
+                    <li>
+                      <div class="num text-info">{{ interview.average_score|floatformat }}</div>
+                      <p>Средний балл</p>
+                    </li>
+                  </ul>
                 {% for comment in comments %}
                     <div class="comment media">
                         <div class="media-left">

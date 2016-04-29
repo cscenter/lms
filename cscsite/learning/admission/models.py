@@ -369,7 +369,7 @@ class Interview(TimeStampedModel):
         return reverse('admission_interview_detail', args=[self.pk])
 
     def average_score(self):
-        scores = [comment.score for comment in self.comments]
+        scores = [comment.score for comment in self.comments.all()]
         if scores:
             return float(sum(scores)) / len(scores)
         return "-"
