@@ -34,7 +34,7 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        today = now()
+        today = now() - datetime.timedelta(hours=2)
         q = (Interview.objects
                          .filter(decision=Interview.WAITING)
                          .select_related("applicant")
