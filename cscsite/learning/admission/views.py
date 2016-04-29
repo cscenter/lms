@@ -35,12 +35,15 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         today = now()
-        return (Interview.objects
-                         .filter(date__gte=today,
-                                 decision=Interview.WAITING)
+        q = (Interview.objects
+                         .filter(decision=Interview.WAITING)
                          .select_related("applicant")
                          .prefetch_related("interviewers")
                          .order_by("date"))
+        if not self.request.user.is_curator:
+            q = q.filter(date__gte=today,
+                         interviewers=self.request.user)
+        return q
 
 
 class InterviewerAccessMixin(AccessMixin):

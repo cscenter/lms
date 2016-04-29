@@ -365,6 +365,13 @@
     .controls {
       margin-right: 0;
     }
+
+    .asteriskField {
+      color: $color-red;
+    }
+    #error_1_id_score {
+      margin-top: 24px;
+    }
   }
 
   .page-header {
