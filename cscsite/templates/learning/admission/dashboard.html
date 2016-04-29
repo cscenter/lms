@@ -38,7 +38,6 @@
                 <th>Время</th>
                 <th>Поступающий</th>
                 <th>Собеседующие</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -61,21 +60,11 @@
                                             <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}" alt="{{ interviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                                         {% endthumbnail %}
                                     {% else %}
-                                        <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">{{ interviewer.last_name|slice:":1" }}{{ interviewer.first_name|slice:":1" }}</div>
+                                        <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">{{ interviewer.first_name|slice:":1" }}{{ interviewer.last_name|slice:":1" }}</div>
                                     {% endif %}
                                 </li>
                                 {% endfor %}
                             </ul>
-                        </td>
-                        <td class="actions">
-                            <button data-url="panel.tpl" data-toggle="slidePanel"
-                                    type="button" class="btn btn-outline btn-success ">
-                                Achievements
-                            </button>
-                            <div class="table-content">
-                                <i class="icon wb-menu" data-url="panel.tpl"
-                                   data-toggle="slidePanel"></i>
-                            </div>
                         </td>
                     </tr>
                     {% empty %}
