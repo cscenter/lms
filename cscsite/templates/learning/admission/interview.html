@@ -128,7 +128,7 @@
                                     <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                                 {% endthumbnail %}
                             {% else %}
-                                <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.last_name|slice:":1" }}{{ user.first_name|slice:":1" }}</div>
+                                <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</div>
                             {% endif %}
                             {% endwith %}
                         </div>
