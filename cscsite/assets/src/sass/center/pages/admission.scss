@@ -50,6 +50,30 @@
   }
 }
 
+.admission-list-page, .admission-interview-page {
+  .panel-info {
+    float: right;
+    margin: 0 10px 0 0;
+    li {
+      list-style: none;
+      display: inline-block;
+      margin-right: 30px;
+      text-align: center;
+      &:last-child {
+        margin: 0;
+      }
+      .num {
+        font-size: 24px;
+        line-height: 1.2em;
+      }
+      p {
+        margin: 0;
+      }
+    }
+  }
+}
+
+
 
 .admission-list-page {
   @extend .container;
@@ -73,27 +97,7 @@
     float: left;
     padding: 29px 10px;
   }
-  .panel-info {
-    float: right;
-    padding: 11px 0;
-    margin: 0 10px 0 0;
-    li {
-      list-style: none;
-      display: inline-block;
-      margin-right: 30px;
-      text-align: center;
-      &:last-child {
-        margin: 0;
-      }
-      .num {
-        font-size: 24px;
-        line-height: 1.2em;
-      }
-      p {
-        margin: 0;
-      }
-    }
-  }
+
   .panel-body {
     clear: both;
     .table {
@@ -423,6 +427,8 @@
     }
 
     .comment {
+      margin-right: 130px;
+
       img {
         width: 50px;
         height: 50px;
