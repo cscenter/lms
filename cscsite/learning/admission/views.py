@@ -58,8 +58,8 @@ class InterviewerAccessMixin(AccessMixin):
                 .prefetch_related("interviewers", "assignments")
                 .select_related("applicant", "applicant__online_test",
                                 "applicant__exam", "applicant__campaign"))
-        interviewers_uids = [u.pk for u in self.interview.interviewers.all()]
-        if not request.user.is_curator and request.user.pk not in interviewers_uids:
+        interviewers = [u.pk for u in self.interview.interviewers.all()]
+        if not request.user.is_curator and request.user.pk not in interviewers:
             return self.handle_no_permission(request)
 
         return super(InterviewerAccessMixin, self).dispatch(

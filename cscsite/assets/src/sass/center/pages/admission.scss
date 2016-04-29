@@ -1,3 +1,56 @@
+// jquery barrating styles
+.br-theme-bars-movie .br-widget {
+  height: 10px;
+  white-space: nowrap;
+}
+.br-theme-bars-movie .br-widget a {
+  display: block;
+  width: 60px;
+  height: 8px;
+  float: left;
+  background-color: lighten($color-blue, 40%);
+  margin: 1px;
+}
+.br-theme-bars-movie .br-widget a.br-active,
+.br-theme-bars-movie .br-widget a.br-selected {
+  background-color: $color-blue;
+}
+.br-theme-bars-movie .br-widget .br-current-rating {
+  clear: both;
+  width: 300px;
+  text-align: center;
+  font-weight: 600;
+  display: block;
+  padding: .5em 0;
+  color: $color-blue;
+  font-weight: 400;
+}
+.br-theme-bars-movie .br-readonly a.br-active,
+.br-theme-bars-movie .br-readonly a.br-selected {
+  background-color: $color-blue;
+}
+.br-theme-bars-movie .br-readonly .br-current-rating {
+  color: #729bf8;
+}
+@media print {
+  .br-theme-bars-movie .br-widget a {
+    border: 1px solid #b3b3b3;
+    background: white;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  .br-theme-bars-movie .br-widget a.br-active,
+  .br-theme-bars-movie .br-widget a.br-selected {
+    border: 1px solid black;
+    background: white;
+  }
+  .br-theme-bars-movie .br-widget .br-current-rating {
+    color: black;
+  }
+}
+
+
 .admission-list-page {
   @extend .container;
 
@@ -82,6 +135,7 @@
       padding: 0;
       li {
         display: inline-block;
+        float: left;
 
         img {
           width: 40px;
@@ -94,6 +148,7 @@
         }
 
         div.square {
+          margin-right: 4px;
           width: 40px;
           height: 40px;
           border-radius: 50%;
@@ -392,56 +447,23 @@
 
   }
 }
-
-.br-theme-bars-movie .br-widget {
-  height: 10px;
-  white-space: nowrap;
-}
-.br-theme-bars-movie .br-widget a {
-  display: block;
-  width: 60px;
-  height: 8px;
-  float: left;
-  background-color: lighten($color-blue, 40%);
-  margin: 1px;
-}
-.br-theme-bars-movie .br-widget a.br-active,
-.br-theme-bars-movie .br-widget a.br-selected {
-  background-color: $color-blue;
-}
-.br-theme-bars-movie .br-widget .br-current-rating {
-  clear: both;
-  width: 300px;
-  text-align: center;
-  font-weight: 600;
-  display: block;
-  padding: .5em 0;
-  color: $color-blue;
-  font-weight: 400;
-}
-.br-theme-bars-movie .br-readonly a.br-active,
-.br-theme-bars-movie .br-readonly a.br-selected {
-  background-color: $color-blue;
-}
-.br-theme-bars-movie .br-readonly .br-current-rating {
-  color: #729bf8;
-}
+// print mode for interview detail page
 @media print {
-  .br-theme-bars-movie .br-widget a {
-    border: 1px solid #b3b3b3;
-    background: white;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+  div.header, div.footer {
+    display: none;
   }
-  .br-theme-bars-movie .br-widget a.br-active,
-  .br-theme-bars-movie .br-widget a.br-selected {
-    border: 1px solid black;
-    background: white;
+  .admission-interview-page {
+    .page-header {
+      display: none;
+    }
+    .date {
+      display: none;
+    }
+    .nav {
+      display: none;
+    }
   }
-  .br-theme-bars-movie .br-widget .br-current-rating {
-    color: black;
-  }
+
 }
 
 

@@ -20,7 +20,8 @@ from learning.settings import PARTICIPANT_GROUPS
 @python_2_unicode_compatible
 class Campaign(models.Model):
     name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
-    code = models.CharField(_("Campaign|Code"), max_length=140, help_text=_("Will be displayed in admin select"))
+    code = models.CharField(_("Campaign|Code"), max_length=140,
+                            help_text=_("Will be displayed in admin select"))
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
@@ -318,12 +319,14 @@ class InterviewAssignment(models.Model):
 
 @python_2_unicode_compatible
 class Interview(TimeStampedModel):
+    APPROVAL = 'approval'
     WAITING = 'waiting'
     CANCELED = 'canceled'
     ACCEPT = 'accept'
     DECLINE = 'decline'
     VOLUNTEER = 'volunteer'
     DECISIONS = (
+        (APPROVAL, _('Approval')),
         (WAITING, _('Waiting for interview')),
         (CANCELED, _('Canceled')),
         (ACCEPT, _('Accept')),
@@ -347,11 +350,10 @@ class Interview(TimeStampedModel):
         verbose_name=_("Interview|Assignments"),
         blank=True)
 
-
     # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
     decision = models.CharField(
         choices=DECISIONS,
-        default=WAITING,
+        default=APPROVAL,
         verbose_name=_("Interview|Decision"),
         max_length=15)
     decision_comment = models.TextField(
@@ -376,6 +378,7 @@ class Interview(TimeStampedModel):
         return smart_text("{} [{}]".format(self.applicant, self.date))
 
 
+@python_2_unicode_compatible
 class Comment(TimeStampedModel):
     interview = models.ForeignKey(
         Interview,
@@ -384,6 +387,7 @@ class Comment(TimeStampedModel):
         related_name="comments")
     interviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        verbose_name=_("Interviewer"),
         on_delete=models.PROTECT,
         related_name="interview_comments")
     text = models.TextField(
@@ -398,4 +402,8 @@ class Comment(TimeStampedModel):
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
         unique_together = ("interview", "interviewer")
+
+    def __str__(self):
+        return smart_text("{} [{}]".format(self.interviewer.get_full_name(),
+                                           self.interview.applicant.get_full_name()))
 
