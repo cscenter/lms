@@ -2,7 +2,8 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load crispy_forms_tags %}
- {% load static %}
+{% load static %}
+{% load markdown from core_tags %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -12,6 +13,7 @@
         $(function () {
             $('select#id_score').barrating({
                 theme: 'bars-movie',
+                hoverState: false
             });
 
             var hash = window.location.hash;
@@ -108,7 +110,7 @@
                 {% for assignment in interview.assignments.all %}
                     <h3>{{ assignment.name }}</h3>
                     <div class="ubertext">
-                        {{ assignment.description|safe }}
+                        {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
                     </div>
                     <hr>
                     {% empty %}
@@ -120,7 +122,7 @@
                 {% for comment in comments %}
                     <div class="comment media">
                         <div class="media-left">
-                            {% with user=comment.interviewer.user %}
+                            {% with user=comment.interviewer %}
                             {% if user.photo %}
                                 {% thumbnail user.photo "100x100" crop="center" as im %}
                                     <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
@@ -131,7 +133,7 @@
                             {% endwith %}
                         </div>
                     <div class="comment-body media-body">
-                      <span>{{ comment.interviewer.user.get_full_name }}</span> / <b>{{ comment.score }}</b>
+                      <span>{{ comment.interviewer.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
                       <div class="comment-content">
                         <p>{{ comment.text }}</p>
                       </div>
