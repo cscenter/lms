@@ -22,6 +22,7 @@ class InterviewCommentForm(forms.ModelForm):
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
             'score': forms.Select(choices=(
+                ("", ""),
                 (-2, "не брать ни сейчас, ни потом"),
                 (-1, "не брать сейчас"),
                 (0, "нейтрально"),
@@ -37,6 +38,7 @@ class InterviewCommentForm(forms.ModelForm):
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
+        self.fields['score'].label = "Выберите оценку"
 
     def clean_interviewer(self):
         interviewer = self.cleaned_data['interviewer']
