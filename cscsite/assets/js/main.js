@@ -41,6 +41,12 @@ $(document).ready(function () {
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function() {
             var $target = $(target);
             $target.find("pre").addClass("hljs").find('code').each(function(i, block) {
+                // Some teachers uses escape entities inside code block
+                // To prevent &amp;lt; instead of "&lt;", lets double
+                // unescape (&amp; first, then &lt;) and escape again
+                // Note: It can be unpredictable if you want show "&amp;lt;"
+                var t = block.innerHTML;
+                block.innerHTML = _.escape(_.unescape(_.unescape(t)));
                 hljs.highlightBlock(block);
             });
         }]);
