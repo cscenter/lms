@@ -245,11 +245,8 @@ class Test(TimeStampedModel):
         max_length=42,
         blank=True,
         null=True)
-    # TODO: replace with integer
-    score = models.DecimalField(
-        verbose_name=_("Score"),
-        max_digits=3,
-        decimal_places=1)
+    score = models.PositiveSmallIntegerField(
+        verbose_name=_("Score"))
 
     class Meta:
         verbose_name = _("Testing")

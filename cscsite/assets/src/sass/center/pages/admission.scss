@@ -103,7 +103,12 @@
     .table {
       td {
         vertical-align: middle;
-        padding: 20px 8px;
+        padding: 16px 6px;
+
+        &:first-child {
+          padding-left: 0;
+        }
+
       }
       tr {
         th:first-child {

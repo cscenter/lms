@@ -7,6 +7,8 @@ import datetime
 from braces.views._access import AccessMixin
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db.models import Value
+from django.db.models.functions import Coalesce
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -15,8 +17,35 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView
 
 from learning.admission.forms import InterviewCommentForm, ApplicantForm
-from learning.admission.models import Interview, Comment, Contest, Test, Exam
-from learning.viewmixins import InterviewerOnlyMixin
+from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
+    Applicant
+from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
+
+import django_filters
+
+
+class ApplicantFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Applicant
+        fields = ['campaign', 'status']
+
+
+class ApplicantResultsListView(CuratorOnlyMixin, generic.ListView):
+    context_object_name = 'applicants'
+    model = Applicant
+    template_name = "learning/admission/applicant_results.html"
+    paginate_by = 100
+
+    def get_context_data(self, **kwargs):
+        context = super(ApplicantResultsListView, self).get_context_data(**kwargs)
+        context["filter"] = ApplicantFilter(self.request.GET,
+                                     queryset=self.get_queryset())
+        return context
+
+    def get_queryset(self):
+        return Applicant.objects.select_related("exam", "online_test", "campaign").prefetch_related("interviews").annotate(
+            exam_result_null=Coalesce('exam__score', Value(-1))).order_by("-exam_result_null", "-online_test__score")
 
 
 class InterviewListView(InterviewerOnlyMixin, generic.ListView):
