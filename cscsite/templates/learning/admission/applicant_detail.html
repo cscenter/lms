@@ -7,13 +7,39 @@
 
 {% block body_class %} gray{% endblock body_class %}
 
+{% block stylesheets %}
+    <link href="{% static "css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+{% endblock stylesheets %}
+
 {% block javascripts %}
-    <script type="text/javascript" src="{% static "js/vendor/jquery.barrating.min.js" %}"></script>
+    {# TODO: Add as Meta class options??    #}
+    <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $('select#id_score').barrating({
-                theme: 'bars-movie',
-                hoverState: false
+            $('.datetimeinput').datetimepicker({
+                locale: 'ru',
+                stepping: 5,
+                collapse: false,
+                sideBySide: true,
+                toolbarPlacement: "bottom",
+                debug: true,
+                keyBinds: {
+                    left: false,
+                    right: false,
+                },
+                showClose: true,
+                icons: {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
             });
 
             var hash = window.location.hash;
@@ -34,45 +60,33 @@
     <div class="page-header">
         <h3 class="page-title">{{ applicant.get_full_name }}</h3>
         <ol class="breadcrumb">
-            <li><a href="{% url "admission_dashboard" %}">Список собеседований</a></li>
+            <li><a href="{% url "admission_applicants" %}">Список поступающих</a></li>
             <li class="active">{{ applicant.get_full_name }}</li>
         </ol>
         {% if request.user.is_curator %}
             <div class="page-header-actions">
                 <a class="edit-interview-btn"
-                   href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-cog"></i></a>
+                   href="{% url "admin:admission_applicant_change" applicant.pk %}" target="_blank"><i class="icon fa fa-cog"></i></a>
             </div>
         {% endif %}
     </div>
-    <div class="date">Дата собеседования: {{ interview.date }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
-        <li class="active" role="presentation">
-          <a data-toggle="tab" href="#comment" aria-controls="comment" role="tab" aria-expanded="true">Комментарий</a>
-        </li>
-        <li role="presentation" class="">
+        <li role="presentation" class="active">
           <a data-toggle="tab" href="#applicant" aria-controls="applicant" role="tab" aria-expanded="false">Анкета поступающего</a>
         </li>
           <li role="presentation" class="">
           <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Тест и экзамен</a>
         </li>
           <li role="presentation" class="">
-          <a data-toggle="tab" href="#assignments" aria-controls="assignments" role="tab" aria-expanded="false">Задачи</a>
-        </li>
-          <li role="presentation" class="">
-          <a data-toggle="tab" href="#comments" aria-controls="comments" role="tab" aria-expanded="false">Все комментарии</a>
+          <a data-toggle="tab" href="#create" aria-controls="create" role="tab" aria-expanded="false">Назначить собеседование</a>
         </li>
 {#          <li role="presentation" class="">#}
 {#          <a data-toggle="tab" href="#similar-applications" aria-controls="similar-applications" role="tab" aria-expanded="false">Похожие анкеты</a>#}
 {#        </li>#}
       </ul>
       <div class="tab-content">
-        <div class="tab-pane active" id="comment" role="tabpanel">
-            {{ form.errors }}
-          {% crispy form form.helper %}
-            <div class="clearfix"></div>
-        </div>
-        <div class="tab-pane" id="applicant" role="tabpanel">
+        <div class="tab-pane active" id="applicant" role="tabpanel">
             <dl>
             {% for field in applicant_form %}
                 <dt>{{ field.label_tag }}</dt>
@@ -106,54 +120,6 @@
                 Результаты экзамена не найдены.
             {% endif %}
         </div>
-        <div class="tab-pane" id="assignments" role="tabpanel">
-                {% for assignment in interview.assignments.all %}
-                    <h3>{{ assignment.name }}</h3>
-                    <div class="ubertext">
-                        {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
-                    </div>
-                    <hr>
-                    {% empty %}
-                    Список задач, предложенных перед прохождением собеседования, пуст.
-                {% endfor %}
-        </div>
-        <div class="tab-pane" id="comments" role="tabpanel">
-            {% if comments %}
-                <ul class="panel-info">
-                    <li>
-                      <div class="num text-info">{{ interview.average_score|floatformat }}</div>
-                      <p>Средний балл</p>
-                    </li>
-                  </ul>
-                {% for comment in comments %}
-                    <div class="comment media">
-                        <div class="media-left">
-                            {% with user=comment.interviewer %}
-                            {% if user.photo %}
-                                {% thumbnail user.photo "100x100" crop="center" as im %}
-                                    <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                                {% endthumbnail %}
-                            {% else %}
-                                <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</div>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                    <div class="comment-body media-body">
-                      <span>{{ comment.interviewer.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
-                      <div class="comment-content">
-                        <p>{{ comment.text }}</p>
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-            {% else %}
-                {% if request.user.is_curator %}
-                    Комментариев пока нет.
-                {% else %}
-                    Нужна предворительная оценка, чтобы посмотреть мнение остальных участников.
-                {% endif %}
-            {% endif %}
-        </div>
         <div class="tab-pane" id="similar-applications" role="tabpanel">
             Поиск похожих анкет будет осуществляться по следующим критериям:
             <ul>
@@ -161,7 +127,11 @@
                 <li>ФИО</li>
             </ul>
         </div>
+      <div class="tab-pane" id="create" role="tabpanel">
+          {% crispy form %}
+            <div class="clearfix"></div>
       </div>
+    </div>
     </div>
 </div>
 {% endblock content %}

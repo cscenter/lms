@@ -5,47 +5,145 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 
 from braces.views._access import AccessMixin
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Value
 from django.db.models.functions import Coalesce
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin
-from django.views.generic.edit import BaseUpdateView
+from django.views.generic.edit import BaseUpdateView, BaseCreateView
+from django_filters.views import BaseFilterView
 
-from learning.admission.forms import InterviewCommentForm, ApplicantForm
+from learning.admission.filters import ApplicantFilter
+from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
+    InterviewForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 
-import django_filters
+
+class InterviewerAccessMixin(AccessMixin):
+    def __init__(self):
+        self.interview = None
+        super(InterviewerAccessMixin, self).__init__()
+
+    def dispatch(self, request, *args, **kwargs):
+        interview_id = self.kwargs.get("pk", None)
+        if not interview_id:
+            raise Http404
+        self.interview = get_object_or_404(
+            Interview.objects
+                .filter(pk=interview_id)
+                .prefetch_related("interviewers", "assignments"))
+        interviewers = [u.pk for u in self.interview.interviewers.all()]
+        if not request.user.is_curator and request.user.pk not in interviewers:
+            return self.handle_no_permission(request)
+
+        return super(InterviewerAccessMixin, self).dispatch(
+            request, *args, **kwargs)
 
 
-class ApplicantFilter(django_filters.FilterSet):
+class ApplicantContextMixin(object):
+    @staticmethod
+    def get_applicant_context(applicant_id):
+        context = {}
+        applicant = get_object_or_404(Applicant.objects
+                     .select_related("exam", "campaign", "online_test")
+                     .filter(pk=applicant_id))
+        context["applicant"] = applicant
+        context["applicant_form"] = ApplicantForm(instance=applicant)
+        context["campaign"] = applicant.campaign
+        contest_ids = []
+        try:
+            context["online_test"] = applicant.online_test
+            contest_ids.append(context["online_test"].yandex_contest_id)
+        except Test.DoesNotExist:
+            pass
+        try:
+            context["exam"] = applicant.exam
+            contest_ids.append(context["exam"].yandex_contest_id)
+        except Exam.DoesNotExist:
+            pass
+        # get contests description
+        contests = {}
+        contest_ids = filter(None, contest_ids)
+        if contest_ids:
+            contests_query = Contest.objects.filter(contest_id__in=contest_ids)
+            for c in contests_query:
+                if c.contest_id == context["online_test"].yandex_contest_id:
+                    contests["test"] = c
+                elif c.contest_id == context["exam"].yandex_contest_id:
+                    contests["exam"] = c
+        context["contests"] = contests
+        return context
 
-    class Meta:
-        model = Applicant
-        fields = ['campaign', 'status']
 
-
-class ApplicantResultsListView(CuratorOnlyMixin, generic.ListView):
+class ApplicantResultsListView(CuratorOnlyMixin, BaseFilterView,
+                               generic.ListView):
     context_object_name = 'applicants'
     model = Applicant
-    template_name = "learning/admission/applicant_results.html"
-    paginate_by = 100
+    template_name = "learning/admission/applicant_list.html"
+    filterset_class = ApplicantFilter
+    paginate_by = 50
 
     def get_context_data(self, **kwargs):
-        context = super(ApplicantResultsListView, self).get_context_data(**kwargs)
-        context["filter"] = ApplicantFilter(self.request.GET,
-                                     queryset=self.get_queryset())
+        context = super(ApplicantResultsListView, self).get_context_data(
+            **kwargs)
+        context["filter"] = self.filterset
         return context
 
     def get_queryset(self):
-        return Applicant.objects.select_related("exam", "online_test", "campaign").prefetch_related("interviews").annotate(
-            exam_result_null=Coalesce('exam__score', Value(-1))).order_by("-exam_result_null", "-online_test__score")
+        return (Applicant.objects
+                .select_related("exam", "online_test", "campaign")
+                .prefetch_related("interviews")
+                .annotate(exam_result_null=Coalesce('exam__score', Value(-1)))
+                .order_by("-exam_result_null", "-exam__score",
+                          "-online_test__score"))
+
+
+class ApplicantResultsDetailView(CuratorOnlyMixin, ApplicantContextMixin,
+                                 TemplateResponseMixin, BaseCreateView):
+
+    form_class = InterviewForm
+    template_name = "learning/admission/applicant_detail.html"
+
+    def get_queryset(self):
+        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        return (Applicant.objects
+                .select_related("exam", "online_test", "campaign")
+                .get(pk=applicant_id))
+
+    def get_context_data(self, **kwargs):
+        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        context = super(ApplicantResultsDetailView, self).get_context_data(
+            **kwargs)
+        context.update(self.get_applicant_context(applicant_id))
+        return context
+
+    def get(self, request, *args, **kwargs):
+        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        try:
+            interview = Interview.objects.get(applicant_id=applicant_id)
+            return HttpResponseRedirect(reverse("admission_interview_detail",
+                                                args=[interview.pk]))
+        except Interview.DoesNotExist:
+            return super(ApplicantResultsDetailView, self).get(request, *args,
+                                                               **kwargs)
+
+    def get_form_kwargs(self):
+        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        kwargs = super(ApplicantResultsDetailView, self).get_form_kwargs()
+        kwargs['initial']['applicant'] = applicant_id
+        return kwargs
+
+    def get_success_url(self):
+        messages.success(self.request, "Собеседование успешно добавлено",
+                         extra_tags='timeout')
+        return reverse("admission_interview_detail", args=[self.object.pk])
 
 
 class InterviewListView(InterviewerOnlyMixin, generic.ListView):
@@ -75,31 +173,8 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
         return q
 
 
-class InterviewerAccessMixin(AccessMixin):
-    def __init__(self):
-        self.interview = None
-        super(InterviewerAccessMixin, self).__init__()
-
-    def dispatch(self, request, *args, **kwargs):
-        interview_id = self.kwargs.get("pk", None)
-        if not interview_id:
-            raise Http404
-        self.interview = get_object_or_404(
-            Interview.objects
-                .filter(pk=interview_id)
-                .prefetch_related("interviewers", "assignments")
-                .select_related("applicant", "applicant__online_test",
-                                "applicant__exam", "applicant__campaign"))
-        interviewers = [u.pk for u in self.interview.interviewers.all()]
-        if not request.user.is_curator and request.user.pk not in interviewers:
-            return self.handle_no_permission(request)
-
-        return super(InterviewerAccessMixin, self).dispatch(
-            request, *args, **kwargs)
-
-
-class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
-                          BaseUpdateView):
+class InterviewDetailView(InterviewerAccessMixin, ApplicantContextMixin,
+                          TemplateResponseMixin, BaseUpdateView):
     form_class = InterviewCommentForm
     template_name = "learning/admission/interview.html"
 
@@ -120,32 +195,12 @@ class InterviewDetailView(InterviewerAccessMixin, TemplateResponseMixin,
 
     def get_context_data(self, **kwargs):
         context = super(InterviewDetailView, self).get_context_data(**kwargs)
-        context["campaign"] = self.interview.applicant.campaign
         context["interview"] = self.interview
-        context["applicant"] = ApplicantForm(instance=self.interview.applicant)
-        contest_ids = []
-        try:
-            context["online_test"] = self.interview.applicant.online_test
-            contest_ids.append(context["online_test"].yandex_contest_id)
-        except Test.DoesNotExist:
-            pass
-        try:
-            context["exam"] = self.interview.applicant.exam
-            contest_ids.append(context["exam"].yandex_contest_id)
-        except Exam.DoesNotExist:
-            pass
-        # get contests description
-        contests = {}
-        contest_ids = filter(None, contest_ids)
-        if contest_ids:
-            contests_query = Contest.objects.filter(contest_id__in=contest_ids)
-            for c in contests_query:
-                if c.contest_id == context["online_test"].yandex_contest_id:
-                    contests["test"] = c
-                elif c.contest_id == context["exam"].yandex_contest_id:
-                    contests["exam"] = c
-        context["contests"] = contests
-        comment = self.get_object()
+        context.update(self.get_applicant_context(self.interview.applicant_id))
+        if hasattr(self, "object"):
+            comment = self.object
+        else:
+            comment = self.get_object()
         if comment or self.request.user.is_curator:
             context["comments"] = Comment.objects.filter(
                 interview=self.interview.pk).select_related("interviewer")
