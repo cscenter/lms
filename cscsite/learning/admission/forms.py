@@ -2,15 +2,33 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit
 from decimal import Decimal
 from django import forms
+from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant
+
+
+class InterviewForm(forms.ModelForm):
+    class Meta:
+        model = Interview
+        fields = "__all__"
+        widgets = {
+            'applicant': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(InterviewForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(
+            FormActions(Submit('create', _('Create admission')),
+                        css_class="pull-right"))
 
 
 class InterviewCommentForm(forms.ModelForm):
@@ -34,7 +52,7 @@ class InterviewCommentForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div('text', 'score'),
-            Div(Submit('save', _('Save')), css_class="pull-right"))
+            FormActions(Submit('save', _('Save')), css_class="pull-right"))
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
         super(InterviewCommentForm, self).__init__(*args, **kwargs)

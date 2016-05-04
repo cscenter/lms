@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'loginas',
     'import_export',
     'pipeline',
+    'bootstrap_pagination',
 
     # 'webpack_loader',
 )

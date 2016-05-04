@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+<div class="admission-list-page">
+    {% crispy filter.form %}
+
+    <div class="page-content">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Результаты тестирования и экзамена</h3>
+        </div>
+
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Поступающий</th>
+                <th>Набор</th>
+                <th>Тест</th>
+                <th>Экзамен</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for applicant in applicants %}
+                    <tr>
+                        <td class="applicant"><a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a></td>
+                        <td>{{ applicant.campaign.code }}</td>
+                        <td>{% if applicant.online_test %}{{ applicant.online_test.score }}{% else %}-{% endif %}</td>
+                        <td>{% if applicant.exam %}{{ applicant.exam.score }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+
+        {% if is_paginated %}
+            {% bootstrap_paginate page_obj range=10 show_first_last="true" previous_label="<i class='fa fa-angle-left'></i>" next_label="<i class='fa fa-angle-right'></i>" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>"%}
+        {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
