@@ -76,6 +76,10 @@ class InterviewAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
+class InterviewCommentAdmin(admin.ModelAdmin):
+    search_fields = ['interview__applicant__second_name']
+
+
 admin.site.register(Campaign)
 admin.site.register(Applicant, ApplicantRecordResourceAdmin)
 admin.site.register(Test, OnlineTestAdmin)
@@ -83,4 +87,4 @@ admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment)
 admin.site.register(Contest, ContestAdmin)
-admin.site.register(Comment)
+admin.site.register(Comment, InterviewCommentAdmin)
