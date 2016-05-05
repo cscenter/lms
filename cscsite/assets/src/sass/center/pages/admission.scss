@@ -390,6 +390,12 @@
       }
     }
 
+    #assignments {
+      h3.print-version {
+        display: none;
+      }
+    }
+
   }
 }
 
@@ -418,8 +424,16 @@
     .nav {
       display: none;
     }
-  }
 
+    #assignments {
+      h3 {
+        display: none;
+        &.print-version {
+          display: block!important;
+        }
+      }
+    }
+  }
 }
 
 
