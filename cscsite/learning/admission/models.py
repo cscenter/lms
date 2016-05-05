@@ -318,6 +318,7 @@ class InterviewAssignment(models.Model):
 class Interview(TimeStampedModel):
     APPROVAL = 'approval'
     WAITING = 'waiting'
+    DEFERRED = 'deferred'
     CANCELED = 'canceled'
     ACCEPT = 'accept'
     DECLINE = 'decline'
@@ -325,6 +326,7 @@ class Interview(TimeStampedModel):
     DECISIONS = (
         (APPROVAL, _('Approval')),
         (WAITING, _('Waiting for interview')),
+        (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
         (ACCEPT, _('Accept')),
         (DECLINE, _('Decline')),
