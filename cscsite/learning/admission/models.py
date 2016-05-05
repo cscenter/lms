@@ -47,12 +47,14 @@ class Applicant(TimeStampedModel):
     INTERVIEW_PHASE = 'interview_phase'
     INTERVIEW_ASSIGNED = 'interview_assigned'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
+    PENDING = 'pending'
     ACCEPT = 'accept'
     VOLUNTEER = 'volunteer'
     STATUS = (
         (REJECTED_BY_TEST, _('Rejected by test')),
         (REJECTED_BY_EXAM, _('Rejected by exam')),
         (REJECTED_BY_CHEATING, _('Cheating')),
+        (PENDING, _('Pending')),
         (INTERVIEW_PHASE, _('Can be interviewed')),
         (INTERVIEW_ASSIGNED, _('Interview assigned')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
