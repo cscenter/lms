@@ -325,9 +325,9 @@ class Interview(TimeStampedModel):
     VOLUNTEER = 'volunteer'
     DECISIONS = (
         (APPROVAL, _('Approval')),
-        (WAITING, _('Waiting for interview')),
         (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
+        (WAITING, _('Waiting for interview')),
         (ACCEPT, _('Accept')),
         (DECLINE, _('Decline')),
         (VOLUNTEER, _("Volunteer")),
