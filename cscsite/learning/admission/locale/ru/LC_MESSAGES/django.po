@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-05 15:02+0300\n"
-"PO-Revision-Date: 2016-05-05 15:04+0230\n"
+"POT-Creation-Date: 2016-05-05 16:22+0300\n"
+"PO-Revision-Date: 2016-05-05 16:22+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -88,12 +88,10 @@ msgid "Cheating"
 msgstr "Читер (списывание и т.д.)"
 
 #: cscsite/learning/admission/models.py:56
-#| msgid "Create interview"
 msgid "Can be interviewed"
 msgstr "Прошёл на собеседование (ещё не назначено)"
 
 #: cscsite/learning/admission/models.py:57
-#| msgid "Interview assignment"
 msgid "Interview assigned"
 msgstr "Назначено собеседование"
 
@@ -102,7 +100,7 @@ msgid "Rejected by interview"
 msgstr "Отказ по результатам интервью"
 
 #: cscsite/learning/admission/models.py:59
-#: cscsite/learning/admission/models.py:335
+#: cscsite/learning/admission/models.py:340
 msgid "Accept"
 msgstr "Принимаем"
 
@@ -303,7 +301,7 @@ msgstr "Статус"
 #: cscsite/learning/admission/models.py:176
 #: cscsite/learning/admission/models.py:237
 #: cscsite/learning/admission/models.py:271
-#: cscsite/learning/admission/models.py:343
+#: cscsite/learning/admission/models.py:348
 msgid "Applicant"
 msgstr "Поступающий"
 
@@ -341,7 +339,7 @@ msgstr "Контесты"
 
 #: cscsite/learning/admission/models.py:253
 #: cscsite/learning/admission/models.py:287
-#: cscsite/learning/admission/models.py:401
+#: cscsite/learning/admission/models.py:406
 msgid "Score"
 msgstr "Оценка"
 
@@ -374,83 +372,89 @@ msgid "Assignment description"
 msgstr "Описание"
 
 #: cscsite/learning/admission/models.py:311
+#: cscsite/learning/admission/models.py:314
 msgid "TeX support"
 msgstr "Поддерживается TeX"
 
-#: cscsite/learning/admission/models.py:314
+#: cscsite/learning/admission/models.py:313
+#| msgid "Assignment description"
+msgid "Assignment solution"
+msgstr "Решение"
+
+#: cscsite/learning/admission/models.py:319
 msgid "Interview assignment"
 msgstr "Задание для интервью"
 
-#: cscsite/learning/admission/models.py:315
+#: cscsite/learning/admission/models.py:320
 msgid "Interview assignments"
 msgstr "Задания для интервью"
 
-#: cscsite/learning/admission/models.py:331
+#: cscsite/learning/admission/models.py:336
 msgid "Approval"
 msgstr "Согласование"
 
-#: cscsite/learning/admission/models.py:332
+#: cscsite/learning/admission/models.py:337
 msgid "Deferred"
 msgstr "Отложено"
 
-#: cscsite/learning/admission/models.py:333
+#: cscsite/learning/admission/models.py:338
 msgid "Canceled"
 msgstr "Отменено"
 
-#: cscsite/learning/admission/models.py:334
+#: cscsite/learning/admission/models.py:339
 msgid "Waiting for interview"
 msgstr "На очереди"
 
-#: cscsite/learning/admission/models.py:336
+#: cscsite/learning/admission/models.py:341
 msgid "Decline"
 msgstr "Не принимаем"
 
-#: cscsite/learning/admission/models.py:337
+#: cscsite/learning/admission/models.py:342
 msgid "Volunteer"
 msgstr "Берём в вольнослушатели"
 
-#: cscsite/learning/admission/models.py:340
+#: cscsite/learning/admission/models.py:345
 msgid "When"
 msgstr "Дата интервью"
 
-#: cscsite/learning/admission/models.py:348
+#: cscsite/learning/admission/models.py:353
 msgid "Interview|Interviewers"
 msgstr "Собеседующие"
 
-#: cscsite/learning/admission/models.py:353
+#: cscsite/learning/admission/models.py:358
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: cscsite/learning/admission/models.py:360
+#: cscsite/learning/admission/models.py:365
 msgid "Interview|Decision"
 msgstr "Статус собеседования"
 
-#: cscsite/learning/admission/models.py:363
+#: cscsite/learning/admission/models.py:368
 msgid "Decision summary"
 msgstr "Дополнительные заметки об интервью"
 
-#: cscsite/learning/admission/models.py:368
-#: cscsite/learning/admission/models.py:388
+#: cscsite/learning/admission/models.py:373
+#: cscsite/learning/admission/models.py:393
 msgid "Interview"
 msgstr "Интервью"
 
-#: cscsite/learning/admission/models.py:369
+#: cscsite/learning/admission/models.py:374
 msgid "Interviews"
 msgstr "Собеседования"
 
-#: cscsite/learning/admission/models.py:393
+#: cscsite/learning/admission/models.py:398
 msgid "Interviewer"
 msgstr "Собеседующий"
 
-#: cscsite/learning/admission/models.py:397
+#: cscsite/learning/admission/models.py:402
 msgid "Text"
 msgstr "Комментарий"
 
-#: cscsite/learning/admission/models.py:405
+#: cscsite/learning/admission/models.py:410
 msgid "Comment"
 msgstr "Комментарий"
 
-#: cscsite/learning/admission/models.py:406
+#: cscsite/learning/admission/models.py:411
 msgid "Comments"
 msgstr "Комментарии к собеседованию"
 
