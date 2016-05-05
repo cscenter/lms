@@ -12,10 +12,16 @@ from learning.admission.import_export import ApplicantRecordResource
 
 class Command(BaseCommand):
     help = (
-        "Import applicants from csv"
+        """Import applicants from csv
 
-        "Note: add `uuid` field to avoid duplicates"
+        Note: add `uuid` field to avoid duplicates
+        Note: Don't forget merge columns for `university` if set
+        `other (blablabla)`
+        Note: Duplicate info for `course` column from `additional_info`
+        if set `other`"""
+
     )
+
     # TODO: Autocorrect yandex id (remove @ya.ru @yandex.ru and so on.)
     def add_arguments(self, parser):
         parser.add_argument('csv', metavar='CSV',
