@@ -27,7 +27,7 @@ class InterviewForm(forms.ModelForm):
         super(InterviewForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(
-            FormActions(Submit('create', _('Create admission')),
+            FormActions(Submit('create', _('Create interview')),
                         css_class="pull-right"))
 
 

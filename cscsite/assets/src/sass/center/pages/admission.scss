@@ -360,7 +360,7 @@
 
 
 
-.admission-interview-page {
+.admission-interview-page, .admission-applicant-page {
   @extend .container;
 
   h4 {
@@ -462,6 +462,17 @@
 
   }
 }
+
+.admission-applicant-page {
+  select[name=interviewers] {
+    min-height: 300px;
+  }
+
+  select[name=assignments] {
+    min-height: 300px;
+  }
+}
+
 // print mode for interview detail page
 @media print {
   div.header, div.footer {
