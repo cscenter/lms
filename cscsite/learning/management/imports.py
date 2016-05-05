@@ -15,7 +15,7 @@ from learning.models import StudentAssignment
 logger = logging.getLogger(__name__)
 user_model = get_user_model()
 
-# TODO: Create management command. mock request? Mb replace messages with logger?
+# TODO: Create management command. mock request?
 
 
 class ImportGrades(object):
@@ -106,7 +106,10 @@ class ImportGradesByStepicID(ImportGrades):
 
     def _get_user(self, stepic_id):
         try:
-            user = user_model.objects.get(stepic_id=stepic_id)
+            user = user_model.objects.get(
+                stepic_id=stepic_id,
+                groups__in=[user_model.group_pks.STUDENT_CENTER,
+                            user_model.group_pks.VOLUNTEER])
             return user
         except ObjectDoesNotExist:
             msg = _("No user with stepic ID {}").format(stepic_id)
@@ -159,7 +162,11 @@ class ImportGradesByYandexLogin(ImportGrades):
 
     def _get_user(self, yandex_id):
         try:
-            user = user_model.objects.get(yandex_id__iexact=yandex_id)
+            user = user_model.objects.get(
+                yandex_id__iexact=yandex_id,
+                groups__in=[
+                    user_model.group_pks.STUDENT_CENTER,
+                    user_model.group_pks.VOLUNTEER])
             return user
         except ObjectDoesNotExist:
             msg = _("No user with Yandex ID {}").format(yandex_id)
