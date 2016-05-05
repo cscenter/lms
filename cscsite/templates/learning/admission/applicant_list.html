@@ -21,6 +21,7 @@
               <tr>
                 <th>Поступающий</th>
                 <th>Набор</th>
+                <th>Направление</th>
                 <th>Тест</th>
                 <th>Экзамен</th>
               </tr>
@@ -28,8 +29,13 @@
             <tbody>
                 {% for applicant in applicants %}
                     <tr>
-                        <td class="applicant"><a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a></td>
+                        <td class="applicant">
+                            <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
+                            {{ applicant.university }}
+                            {% if applicant.course %}<br><b>Курс</b>: {{ applicant.course }}{% endif %}
+                        </td>
                         <td>{{ applicant.campaign.code }}</td>
+                        <td>{{ applicant.preferred_study_programs }}</td>
                         <td>{% if applicant.online_test %}{{ applicant.online_test.score }}{% else %}-{% endif %}</td>
                         <td>{% if applicant.exam %}{{ applicant.exam.score }}{% else %}-{% endif %}</td>
                     </tr>
