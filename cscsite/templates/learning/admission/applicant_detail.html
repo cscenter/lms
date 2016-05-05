@@ -80,6 +80,9 @@
           <li role="presentation" class="">
           <a data-toggle="tab" href="#create" aria-controls="create" role="tab" aria-expanded="false">Назначить собеседование</a>
         </li>
+          <li role="presentation" class="">
+          <a data-toggle="tab" href="#update-status-form" aria-controls="update-status-form" role="tab" aria-expanded="false">Статус</a>
+        </li>
 {#          <li role="presentation" class="">#}
 {#          <a data-toggle="tab" href="#similar-applications" aria-controls="similar-applications" role="tab" aria-expanded="false">Похожие анкеты</a>#}
 {#        </li>#}
@@ -133,6 +136,10 @@
       <div class="tab-pane" id="create" role="tabpanel">
           {% crispy form %}
             <div class="clearfix"></div>
+      </div>
+      <div class="tab-pane" id="update-status-form" role="tabpanel">
+          {% crispy status_form %}
+          <div class="clearfix"></div>
       </div>
     </div>
     </div>
