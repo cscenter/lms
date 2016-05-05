@@ -9,6 +9,7 @@ from decimal import Decimal
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from core.views import ReadOnlyFieldsMixin
@@ -82,3 +83,17 @@ class ApplicantForm(ReadOnlyFieldsMixin, forms.ModelForm):
         model = Applicant
         exclude = ("campaign", "first_name", "last_name", "second_name",
                    "status", "admin_note", "yandex_id_normalize")
+
+
+class ApplicantStatusForm(forms.ModelForm):
+    class Meta:
+        model = Applicant
+        fields = ("admin_note", "status")
+
+    def __init__(self, *args, **kwargs):
+        super(ApplicantStatusForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(
+            FormActions(Submit('update', _('Update')), css_class="pull-right"))
+        self.helper.form_action = reverse("admission_applicant_status_update",
+                                          args=[self.instance.pk]) + "#update-status-form"

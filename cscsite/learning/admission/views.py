@@ -20,7 +20,7 @@ from django_filters.views import BaseFilterView
 
 from learning.admission.filters import ApplicantFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
-    InterviewForm
+    InterviewForm, ApplicantStatusForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
@@ -122,6 +122,7 @@ class ApplicantResultsDetailView(CuratorOnlyMixin, ApplicantContextMixin,
         context = super(ApplicantResultsDetailView, self).get_context_data(
             **kwargs)
         context.update(self.get_applicant_context(applicant_id))
+        context["status_form"] = ApplicantStatusForm(instance=context["applicant"])
         return context
 
     def get(self, request, *args, **kwargs):
@@ -145,6 +146,15 @@ class ApplicantResultsDetailView(CuratorOnlyMixin, ApplicantContextMixin,
                          extra_tags='timeout')
         return reverse("admission_interview_detail", args=[self.object.pk])
 
+
+class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
+    form_class = ApplicantStatusForm
+    model = Applicant
+
+    def get_success_url(self):
+        messages.success(self.request, "Статус успешно обновлён",
+                         extra_tags='timeout')
+        return reverse("admission_applicant_detail", args=[self.object.pk])
 
 class InterviewListView(InterviewerOnlyMixin, generic.ListView):
     context_object_name = 'interviews'
