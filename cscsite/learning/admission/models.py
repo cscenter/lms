@@ -309,6 +309,11 @@ class InterviewAssignment(models.Model):
     description = models.TextField(
         _("Assignment description"),
         help_text=_("TeX support"))
+    solution = models.TextField(
+        _("Assignment solution"),
+        help_text=_("TeX support"),
+        null=True,
+        blank=True)
 
     class Meta:
         verbose_name = _("Interview assignment")

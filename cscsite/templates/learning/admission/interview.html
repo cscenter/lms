@@ -113,6 +113,9 @@
                     <div class="ubertext">
                         {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
                     </div>
+                    {% if assignment.solution %}
+                        <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}{{ assignment.solution|safe }}{% endmarkdown %}</div>
+                    {% endif %}
                     <hr>
                     {% empty %}
                     Список задач, предложенных перед прохождением собеседования, пуст.
