@@ -42,15 +42,19 @@ class Campaign(models.Model):
 @python_2_unicode_compatible
 class Applicant(TimeStampedModel):
     REJECTED_BY_TEST = 'rejected_test'
-    REJECTED_BY_CHEATING = 'rejected_cheating'
     REJECTED_BY_EXAM = 'rejected_exam'
+    REJECTED_BY_CHEATING = 'rejected_cheating'
+    INTERVIEW_PHASE = 'interview_phase'
+    INTERVIEW_ASSIGNED = 'interview_assigned'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
     ACCEPT = 'accept'
     VOLUNTEER = 'volunteer'
     STATUS = (
-        (REJECTED_BY_CHEATING, _('Cheating')),
         (REJECTED_BY_TEST, _('Rejected by test')),
         (REJECTED_BY_EXAM, _('Rejected by exam')),
+        (REJECTED_BY_CHEATING, _('Cheating')),
+        (INTERVIEW_PHASE, _('Can be interviewed')),
+        (INTERVIEW_ASSIGNED, _('Interview assigned')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
         (ACCEPT, _('Accept')),
         (VOLUNTEER, _("Applicant|Volunteer")),

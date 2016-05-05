@@ -109,6 +109,7 @@
         <div class="tab-pane" id="assignments" role="tabpanel">
                 {% for assignment in interview.assignments.all %}
                     <h3>{{ assignment.name }}</h3>
+                    <h3 class="print-version">Задание {{ forloop.counter }}</h3>
                     <div class="ubertext">
                         {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
                     </div>
