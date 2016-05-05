@@ -1524,6 +1524,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertRedirects(resp, redirect_url)
         self.assertIn('messages', resp.cookies)
         # TODO: provide testing with request.FILES. Move it to test_utils...
+    # TODO: write test for user search by stepic id
 
 
 class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
