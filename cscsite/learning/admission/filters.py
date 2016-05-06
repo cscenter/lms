@@ -14,9 +14,12 @@ EMPTY_CHOICE = ('', '---------')
 
 
 class ApplicantFilter(django_filters.FilterSet):
+    second_name = django_filters.CharFilter(lookup_type='icontains',
+                                            label=_("Second name"))
+
     class Meta:
         model = Applicant
-        fields = ['campaign', 'status', 'second_name']
+        fields = ['campaign', 'status']
 
     def __init__(self, *args, **kwargs):
         super(ApplicantFilter, self).__init__(*args, **kwargs)
