@@ -24,7 +24,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS += (
-    'learning.admission',
+    'learning.admission.apps.AdmissionConfig',
     # 'django_ses'
     'post_office'
 )
