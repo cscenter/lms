@@ -53,7 +53,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
 class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
     resource_class = ApplicantRecordResource
     list_display = ['id', 'yandex_id', 'second_name', 'first_name', 'last_name', 'campaign']
-    list_filter = ['campaign',]
+    list_filter = ['campaign', 'status']
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id', 'first_name', 'second_name', 'email']
     readonly_fields = ['yandex_id_normalize']
 
