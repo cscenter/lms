@@ -76,7 +76,6 @@ h2.right-line:after {
 
 #index-online-courses {
   min-width: $min-width;
-  @extend .background-grey;
 
   #onlinecourses-list {
     @extend .container;
@@ -129,8 +128,25 @@ h2.right-line:after {
   color: #B5B5B5;
 }
 
+.testimonials-wrapper {
+  &.__index {
+    @extend .background-grey;
+    .testimonials {
+      .testimonial {
+        blockquote {
+          padding-left: 3px;
+          margin-bottom: 0;
+          &:before {
+            display: none;
+          }
+        }
+      }
+    }
+
+  }
+}
+
 #courses-wrapper {
-  //@extend .background-grey;
 
   #courses {
 
