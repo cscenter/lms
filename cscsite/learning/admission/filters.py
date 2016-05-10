@@ -2,10 +2,12 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import django_filters
-from crispy_forms.bootstrap import FormActions
+from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import DateTimeRangeWidget
@@ -50,13 +52,22 @@ class ApplicantFilter(django_filters.FilterSet):
 
 
 class InterviewsFilter(django_filters.FilterSet):
-    date = django_filters.DateTimeFromToRangeFilter(name='date',
-                                                    label=_("Date"),
-                                                    widget=DateTimeRangeWidget)
+    date = django_filters.MethodFilter(action='filter_by_date', label=_("Date"),
+                                       help_text="", name="date")
 
     class Meta:
         model = Interview
-        fields = ['decision']
+        fields = ['decision', 'date']
+
+    def filter_by_date(self, queryset, value):
+        try:
+            day_start = datetime.datetime.strptime(value, '%d.%m.%Y')
+        except ValueError:
+            return queryset
+        day_end = day_start + datetime.timedelta(days=1)
+        return queryset.filter(
+            date__range=(day_start, day_end)
+        )
 
     @property
     def form(self):
@@ -64,10 +75,12 @@ class InterviewsFilter(django_filters.FilterSet):
             self._form = super(InterviewsFilter, self).form
             self._form.fields["decision"].initial = Interview.WAITING
             self._form.fields["decision"].help_text = ""
-            self._form.fields["date"].help_text = ""
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
-            self._form.helper.layout.append(
-                FormActions(Submit('', _('Filter'))))
+            self._form.helper.layout = Div(
+                'decision',
+                PrependedText('date', '<i class="fa fa-calendar"></i>'),
+                FormActions(Submit('', _('Filter')))
+            )
         return self._form
