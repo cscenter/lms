@@ -18,7 +18,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
 
-from learning.admission.filters import ApplicantFilter
+from learning.admission.filters import ApplicantFilter, InterviewsFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
     InterviewForm, ApplicantStatusForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
@@ -156,9 +156,12 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
                          extra_tags='timeout')
         return reverse("admission_applicant_detail", args=[self.object.pk])
 
-class InterviewListView(InterviewerOnlyMixin, generic.ListView):
+
+class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'interviews'
     model = Interview
+    filterset_class = InterviewsFilter
+    paginate_by = 50
     template_name = "learning/admission/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -167,7 +170,9 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
         today_max = datetime.datetime.combine(now(), datetime.time.max)
         context = super(InterviewListView, self).get_context_data(**kwargs)
         context["total"] = self.get_queryset().count()
+        # TODO: collect stats for curators here
         context["today"] = self.get_queryset().filter(date__range=(today_min, today_max)).count()
+        context["filter"] = self.filterset
         return context
 
     def get_queryset(self):
@@ -178,8 +183,7 @@ class InterviewListView(InterviewerOnlyMixin, generic.ListView):
                          .prefetch_related("interviewers")
                          .order_by("date"))
         if not self.request.user.is_curator:
-            q = q.filter(date__gte=today,
-                         interviewers=self.request.user)
+            q = q.filter(interviewers=self.request.user)
         return q
 
 

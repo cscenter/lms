@@ -1,8 +1,15 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 {% load i18n %}
 {% load thumbnail %}
+{% load bootstrap_pagination %}
+{% load static %}
 
 {% block body_class %} gray{% endblock body_class %}
+
+{% block stylesheets %}
+    <link href="{% static "css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+{% endblock stylesheets %}
 
 {% block javascripts %}
     <script type="text/javascript">
@@ -10,10 +17,44 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
+    {# TODO: Can't add js without pain in Meta class of django form. Rewrite with django-sekizai after investigation    #}
+    <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.input-daterange .textinput').datetimepicker({
+                locale: 'ru',
+                stepping: 5,
+                collapse: false,
+                sideBySide: true,
+                toolbarPlacement: "bottom",
+                keyBinds: {
+                    left: false,
+                    right: false,
+                },
+                showClose: true,
+                icons: {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-chevron-up',
+                    down: 'fa fa-chevron-down',
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+            });
+            $(".input-daterange .textinput:eq(1)").on("dp.change", function (e) {
+                $('.input-daterange .textinput:eq(0)').data("DateTimePicker").maxDate(e.date);
+            });
+        });
+    </script>
 {% endblock javascripts %}
 
 {% block content %}
 <div class="admission-list-page">
+    {% crispy filter.form %}
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
@@ -69,12 +110,16 @@
                     </tr>
                     {% empty %}
                     <tr>
-                    <td colspan="4">Нет назначенных интервью.</td>
+                    <td colspan="4">Измените параметры поиска.</td>
                     </tr>
                 {% endfor %}
 
             </tbody>
           </table>
+
+            {% if is_paginated %}
+                {% bootstrap_paginate page_obj range=10 show_first_last="true" previous_label="<i class='fa fa-angle-left'></i>" next_label="<i class='fa fa-angle-right'></i>" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>"%}
+            {% endif %}
         </div>
       </div>
     </div>
