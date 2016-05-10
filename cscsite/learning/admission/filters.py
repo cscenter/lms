@@ -8,7 +8,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit
 from django.utils.translation import ugettext_lazy as _
 
-from learning.admission.models import Applicant
+from core.widgets import DateTimeRangeWidget
+from learning.admission.models import Applicant, Interview
 
 EMPTY_CHOICE = ('', '---------')
 
@@ -44,5 +45,29 @@ class ApplicantFilter(django_filters.FilterSet):
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
                 Div('campaign', 'status', 'second_name'),
+                FormActions(Submit('', _('Filter'))))
+        return self._form
+
+
+class InterviewsFilter(django_filters.FilterSet):
+    date = django_filters.DateTimeFromToRangeFilter(name='date',
+                                                    label=_("Date"),
+                                                    widget=DateTimeRangeWidget)
+
+    class Meta:
+        model = Interview
+        fields = ['decision']
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super(InterviewsFilter, self).form
+            self._form.fields["decision"].initial = Interview.WAITING
+            self._form.fields["decision"].help_text = ""
+            self._form.fields["date"].help_text = ""
+            self._form.helper = FormHelper(self._form)
+            self._form.helper.disable_csrf = True
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout.append(
                 FormActions(Submit('', _('Filter'))))
         return self._form
