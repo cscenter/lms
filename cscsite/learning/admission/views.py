@@ -162,7 +162,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     model = Interview
     filterset_class = InterviewsFilter
     paginate_by = 50
-    template_name = "learning/admission/dashboard.html"
+    template_name = "learning/admission/interviews.html"
 
     def get_context_data(self, **kwargs):
         # TODO: In Django 1.9 implemented __date lookup field. Replace after migration
@@ -171,17 +171,17 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         context = super(InterviewListView, self).get_context_data(**kwargs)
         context["total"] = self.get_queryset().count()
         # TODO: collect stats for curators here
-        context["today"] = self.get_queryset().filter(date__range=(today_min, today_max)).count()
+        context["today"] = self.get_queryset().filter(
+            date__range=(today_min, today_max)).count()
         context["filter"] = self.filterset
         return context
 
     def get_queryset(self):
-        today = now() - datetime.timedelta(hours=2)
         q = (Interview.objects
-                         .filter(decision=Interview.WAITING)
-                         .select_related("applicant")
-                         .prefetch_related("interviewers")
-                         .order_by("date"))
+             .filter(decision=Interview.WAITING)
+             .select_related("applicant")
+             .prefetch_related("interviewers")
+             .order_by("date"))
         if not self.request.user.is_curator:
             q = q.filter(interviewers=self.request.user)
         return q

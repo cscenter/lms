@@ -22,17 +22,15 @@
     <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $('.input-daterange .textinput').datetimepicker({
+            $('#id_date').datetimepicker({
                 locale: 'ru',
+                format: 'DD.MM.YYYY',
                 stepping: 5,
-                collapse: false,
-                sideBySide: true,
                 toolbarPlacement: "bottom",
                 keyBinds: {
                     left: false,
                     right: false,
                 },
-                showClose: true,
                 icons: {
                     time: 'fa fa-clock-o',
                     date: 'fa fa-calendar',
@@ -44,9 +42,6 @@
                     clear: 'fa fa-trash',
                     close: 'fa fa-remove'
                 }
-            });
-            $(".input-daterange .textinput:eq(1)").on("dp.change", function (e) {
-                $('.input-daterange .textinput:eq(0)').data("DateTimePicker").maxDate(e.date);
             });
         });
     </script>
