@@ -196,6 +196,12 @@ class ExamRecordResource(DetailsApplicantImportMixin,
         self.passing_score = kwargs.get("passing_score", False)
         self.contest_id = kwargs.get("contest_id", False)
 
+    def get_or_init_instance(self, instance_loader, row):
+        if "applicant" not in row:
+            return (self.init_instance(row), True)
+        return super(ExamRecordResource, self).get_or_init_instance(
+            instance_loader, row)
+
     def skip_row(self, instance, original):
         # Skip new instances. Before import we create empty records
         # and then import only existed.

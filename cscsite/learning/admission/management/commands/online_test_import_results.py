@@ -71,8 +71,6 @@ class Command(BaseCommand):
 
         with open(csv_path, "rb") as f:
             data = tablib.Dataset().load(f.read())
-            if lookup_field not in data.headers:
-                raise CommandError("lookup field not specified in source csv")
             online_test_resource = OnlineTestRecordResource(
                 lookup_field=lookup_field,
                 allowed_fields=self.allowed_fields,

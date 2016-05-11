@@ -37,6 +37,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ['__str__', 'score', 'yandex_contest_id']
     search_fields = ['applicant__yandex_id', 'applicant__second_name',
                      'applicant__first_name']
+    list_filter = ['applicant__campaign']
 
     def get_queryset(self, request):
         qs = super(ExamAdmin, self).get_queryset(request)

@@ -13,17 +13,21 @@ class Command(BaseCommand):
         "Create empty online exam results for all applicants with "
         "predefined contest_id"
 
-        "Later we only update existed records"
+        "Later we update existing records only."
     )
 
     def add_arguments(self, parser):
-        parser.add_argument('--campaign_id', type=int,
+        parser.add_argument(
+            '--campaign_id', type=int,
             dest='campaign_id',
             help='Search applicants by specified campaign id')
-        parser.add_argument('--passing_score', type=int,
-                            help='Create records for applicants with online_test results above this value')
-        parser.add_argument('--contests', type=str,
-                            help='Round robin to set one of contest_id')
+        parser.add_argument(
+            '--passing_score', type=int,
+            help='Create records for applicants with online_test results '
+                 'above this value')
+        parser.add_argument(
+            '--contests', type=str,
+            help='Round robin to set one of contest_id')
 
     # TODO: Get contest_id from DB by yandex contest id value after replacing yandex_contest_id with FK
     def handle(self, *args, **options):
