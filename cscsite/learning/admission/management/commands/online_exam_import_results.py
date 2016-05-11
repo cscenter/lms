@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         Try to find already existed exam record by `lookup` field
         and campaign_id and update record. Otherwise fail.
-        Note: This command doesn't creates records.
+        Note: This command doesn't create records.
             Run `online_exam_init` first to create empty records.
 
         Example:
@@ -71,8 +71,6 @@ class Command(BaseCommand):
 
         with open(csv_path, "rb") as f:
             data = tablib.Dataset().load(f.read())
-            if lookup_field not in data.headers:
-                raise CommandError("lookup field not specified in source csv")
             if not contest_id and "contest_id" not in data.headers:
                 raise CommandError("Contest id must be provided in csv "
                                    "file or pass with --contest_id arg")
