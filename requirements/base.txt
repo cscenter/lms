@@ -24,7 +24,7 @@ django-floppyforms==1.6.1
 django-crispy-forms==1.5.2
 
 # Models
-django-model-utils==2.4
+django-model-utils==2.5
 
 # Html parsing
 beautifulsoup4==4.4.1
@@ -45,7 +45,6 @@ xlsxwriter==0.8.4
 
 # External services
 yandexwebdav==0.2.11
-# remove slideshare==0.1dev
 git+https://github.com/pacahon/slideshare.git
 raven==5.11.1
 
