@@ -14,8 +14,7 @@ except ImportError:
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from slideshare import client
-from slideshare.client import SlideShareError
+from slideshare.client import SlideShareAPI, SlideShareError
 
 
 logger = logging.getLogger(__name__)
@@ -35,10 +34,10 @@ for attr in REQUIRED_SETTINGS:
 
 
 def get_api():
-    return client(api_key=settings.SLIDESHARE_API_KEY,
-                  shared_secret=settings.SLIDESHARE_SECRET,
-                  username=settings.SLIDESHARE_USERNAME,
-                  password=settings.SLIDESHARE_PASSWORD)
+    return SlideShareAPI(api_key=settings.SLIDESHARE_API_KEY,
+                         shared_secret=settings.SLIDESHARE_SECRET,
+                         username=settings.SLIDESHARE_USERNAME,
+                         password=settings.SLIDESHARE_PASSWORD)
 
 
 def upload_slides(handle, title, description, tags):
