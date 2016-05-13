@@ -380,7 +380,7 @@ class Interview(TimeStampedModel):
         return "-"
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.applicant, self.date))
+        return smart_text(self.applicant)
 
 
 @python_2_unicode_compatible
