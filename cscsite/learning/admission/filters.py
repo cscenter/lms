@@ -73,7 +73,7 @@ class InterviewsFilter(django_filters.FilterSet):
     def form(self):
         if not hasattr(self, '_form'):
             self._form = super(InterviewsFilter, self).form
-            # self._form.fields["status"].initial = Interview.WAITING
+            self._form.fields["status"].initial = Interview.WAITING
             self._form.fields["status"].help_text = ""
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
