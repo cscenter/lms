@@ -331,17 +331,13 @@ class Interview(TimeStampedModel):
     WAITING = 'waiting'
     DEFERRED = 'deferred'
     CANCELED = 'canceled'
-    ACCEPT = 'accept'
-    DECLINE = 'decline'
-    VOLUNTEER = 'volunteer'
+    COMPLETED = 'completed'
     DECISIONS = (
         (APPROVAL, _('Approval')),
         (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
         (WAITING, _('Waiting for interview')),
-        (ACCEPT, _('Accept')),
-        (DECLINE, _('Decline')),
-        (VOLUNTEER, _("Volunteer")),
+        (COMPLETED, _('Completed')),
     )
 
     date = models.DateTimeField(_("When"))
