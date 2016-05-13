@@ -65,8 +65,8 @@ class ContestAdmin(admin.ModelAdmin):
 
 
 class InterviewAdmin(admin.ModelAdmin):
-    list_display = ['date', 'applicant', 'decision']
-    list_filter = ['decision']
+    list_display = ['date', 'applicant', 'status']
+    list_filter = ['status']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
