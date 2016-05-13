@@ -4,8 +4,8 @@ try:
     import json
 except ImportError:
     from django.utils import simplejson as json
-
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
 from learning.admission.import_export import ApplicantRecordResource, \
@@ -66,7 +66,7 @@ class ContestAdmin(admin.ModelAdmin):
 
 class InterviewAdmin(admin.ModelAdmin):
     list_display = ['date', 'applicant', 'status']
-    list_filter = ['status']
+    list_filter = ['status', 'applicant__campaign']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
@@ -78,7 +78,34 @@ class InterviewAdmin(admin.ModelAdmin):
 
 
 class InterviewCommentAdmin(admin.ModelAdmin):
+    list_display = ['get_interview', 'get_interviewer', 'score']
     search_fields = ['interview__applicant__second_name']
+    list_filter = ['interview__applicant__campaign']
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == 'interview':
+            kwargs['queryset'] = (
+                Interview.objects.select_related("applicant",
+                                                 "applicant__campaign", ))
+        if db_field.name == 'get_interview':
+            print("test")
+        return (super(InterviewCommentAdmin, self)
+                .formfield_for_foreignkey(db_field, request, **kwargs))
+
+    def get_queryset(self, request):
+        q = super(InterviewCommentAdmin, self).get_queryset(request)
+        q = q.select_related("interview__applicant",
+                             "interviewer")
+        return q
+
+    def get_interview(self, obj):
+        return obj.interview.applicant.get_full_name()
+    get_interview.short_description = _("Interview")
+    get_interview.admin_order_field = "interview__applicant__second_name"
+
+    def get_interviewer(self, obj):
+        return obj.interviewer.get_full_name()
+    get_interviewer.short_description = _("Interviewer")
 
 
 admin.site.register(Campaign)

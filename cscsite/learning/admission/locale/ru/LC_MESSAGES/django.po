@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-05-13 15:33+0300\n"
-"PO-Revision-Date: 2016-05-13 15:34+0230\n"
+"PO-Revision-Date: 2016-05-13 18:20+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: cscsite/learning/admission/apps.py:10
 msgid "Admission"
-msgstr "Собеседование"
+msgstr "Поступление"
 
 #: cscsite/learning/admission/filters.py:21
 #: cscsite/learning/admission/models.py:70
