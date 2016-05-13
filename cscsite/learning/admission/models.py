@@ -332,7 +332,7 @@ class Interview(TimeStampedModel):
     DEFERRED = 'deferred'
     CANCELED = 'canceled'
     COMPLETED = 'completed'
-    DECISIONS = (
+    STATUSES = (
         (APPROVAL, _('Approval')),
         (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
@@ -356,14 +356,13 @@ class Interview(TimeStampedModel):
         verbose_name=_("Interview|Assignments"),
         blank=True)
 
-    # TODO: дублировать в Applicant, если in [accept, decline, volunteer] ?
-    decision = models.CharField(
-        choices=DECISIONS,
+    status = models.CharField(
+        choices=STATUSES,
         default=APPROVAL,
-        verbose_name=_("Interview|Decision"),
+        verbose_name=_("Interview|Status"),
         max_length=15)
-    decision_comment = models.TextField(
-        _("Decision summary"),
+    note = models.TextField(
+        _("Note"),
         blank=True,
         null=True)
 

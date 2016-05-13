@@ -57,7 +57,7 @@ class InterviewsFilter(django_filters.FilterSet):
 
     class Meta:
         model = Interview
-        fields = ['decision', 'date']
+        fields = ['status', 'date']
 
     def filter_by_date(self, queryset, value):
         try:
@@ -73,13 +73,13 @@ class InterviewsFilter(django_filters.FilterSet):
     def form(self):
         if not hasattr(self, '_form'):
             self._form = super(InterviewsFilter, self).form
-            self._form.fields["decision"].initial = Interview.WAITING
-            self._form.fields["decision"].help_text = ""
+            # self._form.fields["status"].initial = Interview.WAITING
+            self._form.fields["status"].help_text = ""
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Div(
-                'decision',
+                'status',
                 PrependedText('date', '<i class="fa fa-calendar"></i>'),
                 FormActions(Submit('', _('Filter')))
             )
