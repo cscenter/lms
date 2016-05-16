@@ -47,7 +47,6 @@
             $('.nav-tabs a').click(function (e) {
                 $(this).tab('show');
                 var scrollmem = $('body').scrollTop() || $('html').scrollTop();
-                window.location.hash = this.hash;
                 $('html,body').scrollTop(scrollmem);
             });
         });
@@ -78,14 +77,16 @@
           <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Тест и экзамен</a>
         </li>
           <li role="presentation" class="">
+          <a data-toggle="tab" href="#similar-applicants" aria-controls="similar-applicants" role="tab" aria-expanded="false">Похожие анкеты</a>
+        </li>
+          {% if request.user.is_curator %}
+          <li role="presentation" class="">
           <a data-toggle="tab" href="#create" aria-controls="create" role="tab" aria-expanded="false">Назначить собеседование</a>
         </li>
           <li role="presentation" class="">
           <a data-toggle="tab" href="#update-status-form" aria-controls="update-status-form" role="tab" aria-expanded="false">Статус</a>
         </li>
-{#          <li role="presentation" class="">#}
-{#          <a data-toggle="tab" href="#similar-applications" aria-controls="similar-applications" role="tab" aria-expanded="false">Похожие анкеты</a>#}
-{#        </li>#}
+          {% endif %}
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="applicant" role="tabpanel">
@@ -126,21 +127,23 @@
                 Результаты экзамена не найдены.
             {% endif %}
         </div>
-        <div class="tab-pane" id="similar-applications" role="tabpanel">
-            Поиск похожих анкет будет осуществляться по следующим критериям:
-            <ul>
-                <li>email</li>
-                <li>ФИО</li>
-            </ul>
+        <div class="tab-pane" id="similar-applicants" role="tabpanel">
+            {% for applicant in similar_applicants %}
+                <a target="_blank" href="{% url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign.name }})</a><br>
+            {% empty %}
+                Похожие анкеты не найдены.
+            {% endfor %}
         </div>
-      <div class="tab-pane" id="create" role="tabpanel">
-          {% crispy form %}
-            <div class="clearfix"></div>
-      </div>
-      <div class="tab-pane" id="update-status-form" role="tabpanel">
-          {% crispy status_form %}
-          <div class="clearfix"></div>
-      </div>
+      {% if request.user.is_curator %}
+          <div class="tab-pane" id="create" role="tabpanel">
+              {% crispy form %}
+                <div class="clearfix"></div>
+          </div>
+          <div class="tab-pane" id="update-status-form" role="tabpanel">
+              {% crispy status_form %}
+              <div class="clearfix"></div>
+          </div>
+      {% endif %}
     </div>
     </div>
 </div>
