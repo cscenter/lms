@@ -6,27 +6,21 @@ import datetime
 import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit
+from crispy_forms.layout import Layout, Div, Submit, Row
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import DateTimeRangeWidget
 from learning.admission.models import Applicant, Interview
 
-EMPTY_CHOICE = ('', '---------')
+EMPTY_CHOICE = ('', _('Any'))
 
 
-class ApplicantFilter(django_filters.FilterSet):
-    second_name = django_filters.CharFilter(lookup_type='icontains',
-                                            label=_("Second name"))
-
-    class Meta:
-        model = Applicant
-        fields = ['campaign', 'status']
-
+class FilterEmptyChoiceMixin(object):
+    """add empty choice to all choice fields"""
     def __init__(self, *args, **kwargs):
-        super(ApplicantFilter, self).__init__(*args, **kwargs)
-        # add empty choice to all choice fields:
+        super(FilterEmptyChoiceMixin, self).__init__(*args, **kwargs)
+
         choices = filter(
             lambda f: isinstance(self.filters[f], django_filters.ChoiceFilter),
             self.filters)
@@ -34,6 +28,15 @@ class ApplicantFilter(django_filters.FilterSet):
             extended_choices = ((EMPTY_CHOICE,) +
                                 self.filters[field_name].extra['choices'])
             self.filters[field_name].extra['choices'] = extended_choices
+
+
+class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+    second_name = django_filters.CharFilter(lookup_type='icontains',
+                                            label=_("Second name"))
+
+    class Meta:
+        model = Applicant
+        fields = ['campaign', 'status']
 
     @property
     def form(self):
@@ -46,12 +49,16 @@ class ApplicantFilter(django_filters.FilterSet):
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
-                Div('campaign', 'status', 'second_name'),
+                Row(
+                    Div("campaign", css_class="col-xs-4"),
+                    Div("status", css_class="col-xs-4"),
+                    Div("second_name", css_class="col-xs-4"),
+                ),
                 FormActions(Submit('', _('Filter'))))
         return self._form
 
 
-class InterviewsFilter(django_filters.FilterSet):
+class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     date = django_filters.MethodFilter(action='filter_by_date', label=_("Date"),
                                        help_text="", name="date")
 
@@ -78,9 +85,15 @@ class InterviewsFilter(django_filters.FilterSet):
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
-            self._form.helper.layout = Div(
-                'status',
-                PrependedText('date', '<i class="fa fa-calendar"></i>'),
-                FormActions(Submit('', _('Filter')))
+            self._form.helper.layout = Layout(
+                Row(
+                    Div('status', css_class="col-xs-6"),
+                    Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
+                        css_class="col-xs-6"),
+                ),
+                Row(
+                    FormActions(Div(Submit('', _('Filter')),
+                                    css_class="col-xs-4"))
+                )
             )
         return self._form
