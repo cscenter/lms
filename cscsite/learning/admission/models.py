@@ -30,6 +30,7 @@ class Campaign(models.Model):
         _("Campaign|Exam_max_score"))
     exam_passing_score = models.SmallIntegerField(
         _("Campaign|Exam_passing_score"))
+    current = models.BooleanField(_("Current campaign"), default=False)
 
     class Meta:
         verbose_name = _("Campaign")

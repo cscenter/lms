@@ -5,7 +5,10 @@
 {% load static %}
 {% load markdown from core_tags %}
 
+{% block title %} Анкета {{ applicant.campaign.code }} - {{ applicant.get_full_name }}{% endblock title %}
+
 {% block body_class %} gray{% endblock body_class %}
+
 
 {% block stylesheets %}
     <link href="{% static "css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
@@ -68,6 +71,7 @@
             </div>
         {% endif %}
     </div>
+    <div class="date">{{ applicant.campaign }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li role="presentation" class="active">
