@@ -113,7 +113,7 @@
           </table>
 
             {% if is_paginated %}
-                {% bootstrap_paginate page_obj range=10 show_first_last="true" previous_label="<i class='fa fa-angle-left'></i>" next_label="<i class='fa fa-angle-right'></i>" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>"%}
+                {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
             {% endif %}
         </div>
       </div>
