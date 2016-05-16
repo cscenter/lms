@@ -83,7 +83,7 @@
           <li role="presentation" class="">
           <a data-toggle="tab" href="#similar-applicants" aria-controls="similar-applicants" role="tab" aria-expanded="false">Похожие анкеты</a>
         </li>
-          {% if request.user.is_curator %}
+          {% if request.user.is_curator and applicant.campaign.current %}
           <li role="presentation" class="">
           <a data-toggle="tab" href="#create" aria-controls="create" role="tab" aria-expanded="false">Назначить собеседование</a>
         </li>
@@ -138,7 +138,7 @@
                 Похожие анкеты не найдены.
             {% endfor %}
         </div>
-      {% if request.user.is_curator %}
+      {% if request.user.is_curator and applicant.campaign.current %}
           <div class="tab-pane" id="create" role="tabpanel">
               {% crispy form %}
                 <div class="clearfix"></div>
