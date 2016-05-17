@@ -1,9 +1,9 @@
 (function ($) {
     "use strict";
 
-    var gradebook_unsaved = 0;
-
     var gradebook = $("#gradebook");
+
+    var buttonDownloadCSV = $(".marks-sheet-csv-link");
 
     var scrollButtonsWrapper = $(".header", gradebook);
 
@@ -13,38 +13,46 @@
 
     var assignmentsWrapper = $("#assignments");
 
-    var buttonSaveForm = $("button#marks-sheet-save");
-
-    var buttonDownloadCSV = $(".marks-sheet-csv-link");
-
     var fn = {
         Launch: function () {
-            fn.initFormSaveButton();
-            fn.initFinalGradeSelect();
-            fn.initFinalGradeSelectBehavior();
-            fn.initAssignmentGradeInput();
+            fn.downloadCSVButton();
+            fn.finalGradeSelect();
+            fn.assignmentGradeInputValidator();
             fn.assignmentGradeInputIncrementByArrows();
             fn.scrollButtons();
-            //fn.restrictGradeInputChars();
-            //fn.gradeInputFocus();
-            // TODO: Maby should replace with 1 .on delegate event
-            // TODO: Sticky headers
-            // TODO: quick select for
-
+            fn.fileInput();
         },
 
-        initFormSaveButton: function() {
-            // Lock save button until nothing changed.
-            buttonSaveForm.attr("disabled", "disabled");
-        },
-
-        initFinalGradeSelect: function() {
-            finalGradesWrapper.find("select").each(function() {
-                $(this).data("value", $(this).val());
+        downloadCSVButton: function() {
+            buttonDownloadCSV.click(function() {
+                if (gradebook.find(".__unsaved").length > 0) {
+                    swal({
+                        title: "",
+                        text: "Сперва сохраните форму,\n" +
+                              "чтобы скачать актуальные данные.",
+                        type: "warning",
+                        confirmButtonText: "Хорошо"
+                    });
+                    return false;
+                }
             });
         },
 
-        initAssignmentGradeInput: function() {
+        finalGradeSelect: function() {
+            // Store initial value
+            finalGradesWrapper.find("select").each(function() {
+                $(this).data("value",
+                             $(this).find('option').filter(function () {
+                                return $(this).prop('defaultSelected');
+                             }).val());
+            });
+            gradebook.on("change", "select", function (e) {
+                var $target = $(e.target);
+                fn.toggleState($target);
+            });
+        },
+
+        assignmentGradeInputValidator: function() {
             assignmentsWrapper.on("change", "input", function (e) {
                 var $this = $(this),
                     $target = $(e.target);
@@ -61,81 +69,24 @@
                     $this.val("");
                 }
 
-                fn.toggleSaveButton($target);
+                fn.toggleState($target);
             });
         },
 
-        initFinalGradeSelectBehavior: function() {
-            gradebook.on("change", "select", function (e) {
-                var $target = $(e.target);
-                fn.toggleSaveButton($target);
-            });
-        },
-
-        toggleSaveButton: function(element) {
+        toggleState: function(element) {
             var current_value = element.val();
             var saved_value = element.data("value");
             var gradeWrapper;
+            if ( element[0].nodeName.toLowerCase() === 'input' ) {
+                gradeWrapper = element;
+            } else if (element[0].nodeName.toLowerCase() === 'select') {
+                gradeWrapper = element.parent();
+            }
             if (current_value != saved_value) {
-                if ( element[0].nodeName.toLowerCase() === 'input' ) {
-                    gradeWrapper = element;
-                } else if (element[0].nodeName.toLowerCase() === 'select') {
-                    gradeWrapper = element.parent();
-                }
                 gradeWrapper.addClass("__unsaved");
-                gradebook_unsaved++;
-                if (gradebook_unsaved > 0) {
-                    buttonSaveForm.removeAttr("disabled");
-                    buttonDownloadCSV.addClass("disabled");
-                }
             } else {
-                if ( element[0].nodeName.toLowerCase() === 'input' ) {
-                    gradeWrapper = element;
-                } else if (element[0].nodeName.toLowerCase() === 'select') {
-                    gradeWrapper = element.parent();
-                }
                 gradeWrapper.removeClass("__unsaved");
-                gradebook_unsaved--;
-                if (gradebook_unsaved == 0) {
-                    buttonSaveForm.attr("disabled", "disabled");
-                    buttonDownloadCSV.removeClass("disabled");
-                }
             }
-        },
-
-        // TODO: Refactor
-        scrollButtons: function() {
-            scrollButtonsWrapper.on("click", ".scroll.left", function() {
-                fn.scroll(-1, 0);
-            });
-            scrollButtonsWrapper.on("click", ".scroll.right", function() {
-                fn.scroll(1, 0);
-            });
-            if (assignmentsWrapper.find('.assignment').length > 6) {
-                scrollButtonsWrapper.css("visibility", "visible");
-                totalWrapper.css("box-shadow", "5px 0 5px -5px rgba(0, 0, 0, 0.4)");
-            }
-        },
-
-        scroll: function (xdir, ydir) {
-            var assignmentColumnWidth = 100,
-                rowHeight = 20,
-                xinc = assignmentColumnWidth * parseInt(xdir),
-                yinc = rowHeight * 5 * parseInt(ydir);
-            if (xinc != 0) {
-                var scrollXOffset = assignmentsWrapper.scrollLeft();
-                assignmentsWrapper.scrollLeft(scrollXOffset + xinc);
-            }
-            if (yinc != 0) {
-                var scrollYOffset = assignmentsWrapper.scrollTop();
-                assignmentsWrapper.scrollTop(scrollYOffset + yinc);
-            }
-        },
-        // Disabled
-        gradeInputFocus: function() {
-            assignmentsWrapper.on("click", ".assignment input", function() {
-                $(this).select();
-            });
         },
 
         assignmentGradeInputIncrementByArrows: function() {
@@ -147,8 +98,6 @@
                         that.increment = $.arrowIncrement.prototype.increment;
                         that.decrement = $.arrowIncrement.prototype.decrement;
                     }
-                    // TODO: get min/max
-
                     that.opts = {
                         // Slightly modified version of original $.arrowIncrement method
                         parseFn: function (value) {
@@ -174,6 +123,55 @@
                         that.decrement();
                     }
                 }
+            });
+        },
+
+        // TODO: Refactor
+        scrollButtons: function() {
+            scrollButtonsWrapper.on("click", ".scroll.left", function() {
+                fn.scroll(-1, 0);
+            });
+            scrollButtonsWrapper.on("click", ".scroll.right", function() {
+                fn.scroll(1, 0);
+            });
+
+            totalWrapper.css("box-shadow", "5px 0 5px -5px rgba(0, 0, 0, 0.4)");
+
+            if (assignmentsWrapper.width() <= assignmentsWrapper.find('.scrollable').width()) {
+                scrollButtonsWrapper.css("visibility", "visible");
+            }
+        },
+
+        scroll: function (xdir, ydir) {
+            var assignmentColumnWidth = 100,
+                rowHeight = 20,
+                xinc = assignmentColumnWidth * parseInt(xdir),
+                yinc = rowHeight * 5 * parseInt(ydir);
+            if (xinc != 0) {
+                var scrollXOffset = assignmentsWrapper.scrollLeft();
+                assignmentsWrapper.scrollLeft(scrollXOffset + xinc);
+            }
+            if (yinc != 0) {
+                var scrollYOffset = assignmentsWrapper.scrollTop();
+                assignmentsWrapper.scrollTop(scrollYOffset + yinc);
+            }
+        },
+
+        fileInput: function () {
+            $("#input-id").fileinput({
+                'showUpload': false,
+                'language': 'ru',
+                'previewFileType': 'text',
+                'allowedFileTypes': ['text'],
+                'allowedFileExtensions': ['txt', 'csv'],
+                'showPreview': false,
+                'showRemove': false,
+                'maxFileCount': 1,
+                browseIcon: '<i class="fa fa-folder-open"></i> &nbsp;',
+                removeIcon: '<i class="fa fa-trash"></i> ',
+                uploadIcon: '<i class="fa fa-upload"></i> ',
+                cancelIcon: '<i class="fa fa-times-circle-o"></i> ',
+                msgValidationErrorIcon: '<i class="fa fa-exclamation-circle"></i> '
             });
         },
 

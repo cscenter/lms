@@ -10,7 +10,7 @@
 
 {% block content %}
 <div class="container container-responsive">
-  <form method="post">{% csrf_token %}
+  <form method="post" id="gradebook-form">{% csrf_token %}
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
@@ -19,8 +19,7 @@
         {% else %}
         <a href="{% url 'course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
         {% endif %}
-        {% trans "Marks sheet" %}
-        <small>{{ course_offering }}</small>
+        {% trans "Marks sheet" %}<small>{{ course_offering }}</small>
       </h2>
       <div class="btn-toolbar">
         <div class="btn-group">
@@ -119,7 +118,7 @@
                                             <a href="{% url 'a_s_detail_teacher' student_assignment.pk %}">{{ student_assignment.state }}</a>
                                         </div>
                                     {% else %}
-                                        <input type="text" name="a_s_{{ student_assignment.pk }}" max="{{ assignment.header.grade_max }}" min="0" value="{% if student_assignment.grade %}{{ student_assignment.grade }}{% endif %}" data-value="{% if student_assignment.grade %}{{ student_assignment.grade }}{% endif %}" class="{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                        <input type="text" name="a_s_{{ student_assignment.pk }}" max="{{ assignment.header.grade_max }}" min="0" value="{{ student_assignment.grade }}" data-value="{{ student_assignment.grade }}" class="{% if forloop.counter|divisibleby:2 %} even{% endif %}">
                                     {% endif %}
                                 {% endfor %}
                             {% endspaceless %}
@@ -132,15 +131,11 @@
   </form>
 </div>
 
-{% include "learning/_markssheet_teacher_modal_stepic.html" %}
-{% include "learning/_markssheet_teacher_modal_yandex.html" %}
+{% include "learning/gradebook/_modal_stepic.html" %}
+{% include "learning/gradebook/_modal_yandex.html" %}
 
 {% endblock content %}
 
 {% block javascripts %}
-    {% javascript 'fileinput' %}
-    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendor/jquery.arrow-increment.min.js" %}"></script>
+    {% javascript 'gradebook' %}
 {% endblock javascripts %}
-
-

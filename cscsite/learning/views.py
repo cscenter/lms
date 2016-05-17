@@ -1550,11 +1550,10 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
         return context
 
 
-class MarksSheetTeacherView(TeacherOnlyMixin,
-                            generic.FormView):
+class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
     is_for_staff = False
     user_type = 'teacher'
-    template_name = "learning/gradebook.html"
+    template_name = "learning/gradebook/form.html"
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
@@ -1577,10 +1576,10 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
 
         try:
             course_offering = (co_queryset
-                  .select_related('semester', 'course')
-                  .get(course__slug=self.kwargs['course_slug'],
-                       semester__type=self.kwargs['semester_type'],
-                       semester__year=semester_year))
+                               .select_related('semester', 'course')
+                               .get(course__slug=self.kwargs['course_slug'],
+                                    semester__type=self.kwargs['semester_type'],
+                                    semester__year=semester_year))
         except ObjectDoesNotExist:
             raise Http404('Course offering not found')
         self.course_offering = course_offering
@@ -1708,7 +1707,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin,
                     state = StudentAssignment.SHORT_STATES[state_value]
             assignment["students"][student_id] = {
                 "pk": a_s["pk"],
-                "grade": a_s["grade"],
+                "grade": a_s["grade"] if a_s["grade"] is not None else "",
                 "is_passed": a_s["is_passed"],
                 "state": state
             }
