@@ -57,7 +57,8 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
         context = super(StudentSearchView, self).get_context_data(**kwargs)
         context['json_api_uri'] = reverse('student_search_json')
         context['enrollment_years'] = (CSCUser.objects
-                                       .values_list('enrollment_year', flat=True)
+                                       .values_list('enrollment_year',
+                                                    flat=True)
                                        .filter(enrollment_year__isnull=False)
                                        .order_by('enrollment_year')
                                        .distinct())
@@ -69,17 +70,15 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
         context["cnt_enrollments"] = range(CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
         return context
 
+
 class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = CSCUser.objects.students_info(filter={
+        context['students'] = CSCUser.objects.students_info(filters={
             "status": CSCUser.STATUS.will_graduate
         })
-        for student in context['students']:
-            student.projects = StudentProject.sorted(student.projects)
-
         return context
 
 
@@ -87,7 +86,7 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(filter={
+        students = CSCUser.objects.students_info(filters={
             "status": CSCUser.STATUS.will_graduate
         })
 
@@ -113,7 +112,6 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
 
             if len(s.projects) > projects_max:
                 projects_max = len(s.projects)
-            s.projects = StudentProject.sorted(s.projects)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "diplomas_{}.csv".format(datetime.datetime.now().year)
@@ -125,10 +123,10 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         for course_id, course_name in six.iteritems(courses_headers):
             headers.append(course_name + ', оценка')
             headers.append(course_name + ', преподаватели')
-        for i in xrange(1, shads_max + 1):
+        for i in range(1, shads_max + 1):
             headers.append('ШАД, курс {}, название'.format(i))
             headers.append('ШАД, курс {}, оценка'.format(i))
-        for i in xrange(1, projects_max + 1):
+        for i in range(1, projects_max + 1):
             headers.append('Проект {}, оценка'.format(i))
             headers.append('Проект {}, руководитель(и)'.format(i))
             headers.append('Проект {}, семестр'.format(i))
@@ -195,7 +193,6 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
 
             if len(s.projects) > projects_max:
                 projects_max = len(s.projects)
-            s.projects = StudentProject.sorted(s.projects)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         now = datetime.datetime.now()
@@ -307,7 +304,7 @@ class StudentSummaryBySemesterMixin(object):
             semester = Semester.get_current()
 
         students = CSCUser.objects.students_info(
-            filter={
+            filters={
                 "groups__in": [
                     CSCUser.group_pks.STUDENT_CENTER,
                     CSCUser.group_pks.VOLUNTEER

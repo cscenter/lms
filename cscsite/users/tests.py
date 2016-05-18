@@ -269,7 +269,6 @@ class UserTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['user_object'], user)
-        self.assertFalse(resp.context['is_extended_profile_available'])
         self.assertFalse(resp.context['is_editing_allowed'])
 
     def test_user_can_update_profile(self):
@@ -277,11 +276,9 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user_data = UserFactory.attributes()
         user = CSCUser.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertFalse(resp.context['is_extended_profile_available'])
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.context['user_object'], user)
-        self.assertTrue(resp.context['is_extended_profile_available'])
         self.assertTrue(resp.context['is_editing_allowed'])
         self.assertContains(resp, reverse('user_update', args=[user.pk]))
         resp = self.client.get(reverse('user_update', args=[user.pk]))

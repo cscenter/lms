@@ -596,9 +596,9 @@ class CSCUserFilter(django_filters.FilterSet):
                     enrollment__grade=Enrollment.GRADES.unsatisfactory),
                      then=Value(None)),
                 default=F("enrollment")
-            ), distinct=True)
-            + Count("shadcourserecord", distinct=True)
-            + Count("onlinecourserecord", distinct=True)
+            ), distinct=True) +
+            Count("shadcourserecord", distinct=True) +
+            Count("onlinecourserecord", distinct=True)
         )
 
         condition = Q(courses_cnt__in=value_list)
