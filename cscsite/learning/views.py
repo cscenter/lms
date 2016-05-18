@@ -35,7 +35,8 @@ from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF, \
-    CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES
+    CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
+    GRADING_TYPES
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_semester_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
@@ -1635,18 +1636,35 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
         a_s_index, enrollment_index = \
             GradeBookFormFactory.build_indexes(self.student_assignments,
                                                self.enrollment_list)
+        final_grade_updated = False
         for field in form.changed_data:
             if field in a_s_index:
                 a_s = a_s_index[field]
-                StudentAssignment.objects.filter(pk=a_s["pk"]).update(grade=form.cleaned_data[field])
+                StudentAssignment.objects.filter(pk=a_s["pk"]).update(
+                    grade=form.cleaned_data[field])
                 continue
             # Looking for final_grade_*
             elif field in enrollment_index:
+                final_grade_updated = True
                 enrollment = enrollment_index[field]
                 enrollment.grade = form.cleaned_data[field]
                 enrollment.save()
                 continue
+        if final_grade_updated:
+            self.recalculate_grading_type()
         return redirect(self.get_success_url())
+
+    def recalculate_grading_type(self):
+        """Update grading type for binded course offering if needed"""
+        es = (Enrollment.objects
+                        .filter(course_offering=self.course_offering)
+                        .values_list("grade", flat=True))
+        grading_type = GRADING_TYPES.default
+        if not any(filter(lambda g: g in [GRADES.good, GRADES.excellent], es)):
+            grading_type = GRADING_TYPES.binary
+        if self.course_offering.grading_type != grading_type:
+            self.course_offering.grading_type = grading_type
+            self.course_offering.save()
 
     def get_context_data(self, *args, **kwargs):
         context = (super(MarksSheetTeacherView, self)

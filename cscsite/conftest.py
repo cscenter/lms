@@ -35,22 +35,27 @@ def client():
 
     return CustomDjangoTestClient()
 
+
 @pytest.fixture(scope="session")
 def user_factory():
     return UserFactory
+
 
 @pytest.fixture(scope="session")
 def student_factory():
     """Both club and center groups"""
     return StudentFactory
 
+
 @pytest.fixture(scope="session")
 def student_center_factory():
     return StudentCenterFactory
 
+
 @pytest.fixture(scope="session")
 def student_club_factory():
     return StudentClubFactory
+
 
 @pytest.fixture(scope="session")
 def teacher_center_factory():
@@ -60,7 +65,8 @@ def teacher_center_factory():
 @pytest.fixture(scope="session", autouse=True)
 def replace_django_data_migrations_with_pytest_fixture(_django_db_setup,
                                                        _django_cursor_wrapper):
-    """Django data migrations with py.test due to tests runs with --nomigrations"""
+    """Django data migrations with py.test due to tests runs with --nomigrations
+    """
     with _django_cursor_wrapper:
         # Create user groups
         for group_id, group_name in PARTICIPANT_GROUPS:
