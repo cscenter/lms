@@ -33,7 +33,7 @@ from sorl.thumbnail import ImageField
 # Note: For test purposes import some settings in this way
 from learning import settings as learn_conf
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES
+    SEMESTER_TYPES, GRADING_TYPES
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
@@ -208,6 +208,10 @@ class CourseOffering(TimeStampedModel):
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
+    grading_type = models.SmallIntegerField(
+        verbose_name=_("CourseOffering|grading_type"),
+        choices=GRADING_TYPES,
+        default=GRADING_TYPES.default)
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
@@ -843,6 +847,10 @@ class Enrollment(TimeStampedModel):
 
     @property
     def grade_display(self):
+        return GRADES[self.grade]
+
+    @property
+    def grade_honest(self):
         return GRADES[self.grade]
 
     @property

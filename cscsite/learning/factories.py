@@ -36,7 +36,7 @@ class SemesterFactory(factory.DjangoModelFactory):
 
     @classmethod
     def create_current(cls, **kwargs):
-        """Get or create semester for current season"""
+        """Get or create semester for current term"""
         year, type = get_current_semester_pair()
         kwargs.pop('year', None)
         kwargs.pop('type', None)
@@ -74,6 +74,7 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
                 CourseOfferingTeacher(course_offering=self,
                                       teacher=teacher,
                                       notify_by_default=True).save()
+
 
 class CourseOfferingTeacherFactory(factory.DjangoModelFactory):
     class Meta:

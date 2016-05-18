@@ -21,7 +21,7 @@ from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text, force_text, force_str
 from django.utils.translation import ugettext as _
-from learning.settings import GRADES
+from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES
 from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
@@ -1779,3 +1779,56 @@ def test_studentassignment_last_commented_from(client,
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_STUDENT
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_TEACHER
+
+
+@pytest.mark.django_db
+def test_gradebook_recalculate_grading_type(client,
+                                            student_center_factory,
+                                            teacher_center_factory):
+    teacher = teacher_center_factory.create()
+    students = student_center_factory.create_batch(2)
+    s = SemesterFactory.create_current()
+    co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+    assert co.grading_type == GRADING_TYPES.default
+    assignments = AssignmentFactory.create_batch(2,
+                                                 course_offering=co,
+                                                 is_online=True)
+    client.login(teacher)
+    url = reverse('markssheet_teacher', args=[co.course.slug,
+                                              co.semester.year,
+                                              co.semester.type])
+    form = {}
+    for s in students:
+        enrollment = EnrollmentFactory.create(student=s, course_offering=co)
+        field = 'final_grade_{}'.format(enrollment.pk)
+        form[field] = GRADES.good
+    # Save empty form first
+    response = client.post(url, {}, follow=True)
+    assert response.status_code == 200
+    co.refresh_from_db()
+    assert co.grading_type == GRADING_TYPES.default
+    # Update final grades, still should be `default`
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    co.refresh_from_db()
+    assert co.grading_type == GRADING_TYPES.default
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GRADES.good
+    # Now we should get `binary` type after all final grades
+    # will be equal `unsatisfactory`
+    for key in form:
+        form[key] = GRADES.unsatisfactory
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    co.refresh_from_db()
+    assert co.grading_type == GRADING_TYPES.binary
+    # Update random submission grade, grading_type shouldn't change
+    submission = StudentAssignment.objects.get(student=students[0],
+                                               assignment=assignments[0])
+    form = {
+        'a_s_{}'.format(submission.pk): 2  # random valid grade
+    }
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    co.refresh_from_db()
+    assert co.grading_type == GRADING_TYPES.binary
