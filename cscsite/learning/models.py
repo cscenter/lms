@@ -207,6 +207,7 @@ class CourseOffering(TimeStampedModel):
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
+    # TODO: hide in admin?
     grading_type = models.SmallIntegerField(
         verbose_name=_("CourseOffering|grading_type"),
         choices=GRADING_TYPES,
@@ -855,10 +856,10 @@ class Enrollment(TimeStampedModel):
 
     @property
     def grade_honest(self):
-        """Change honest repr for `unsatisfactory` grade"""
+        """Show `satisfactory` instead of `pass` for default grading type"""
         if (self.course_offering.grading_type == GRADING_TYPES.default and
-                self.grade == GRADES.unsatisfactory):
-            return _("Unsatisfactory")
+                self.grade == getattr(GRADES, 'pass')):
+            return _("Satisfactory")
         return GRADES[self.grade]
 
     @property
