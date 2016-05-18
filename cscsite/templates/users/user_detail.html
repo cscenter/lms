@@ -49,7 +49,7 @@
               <a href="{% url 'course_offering_detail' enrollment.course_offering.course.slug enrollment.course_offering.semester.slug %}">
                 {{ enrollment.course_offering }}
               </a>
-              ({{ enrollment.grade_display|lower }})
+              ({{ enrollment.grade_honest|lower }})
             </li>
             {% endfor %}
             </ul>

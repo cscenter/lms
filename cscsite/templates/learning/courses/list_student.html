@@ -27,7 +27,7 @@
         <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
             <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}" class="title">
-{{ e.course_offering.course.name }}</a> &nbsp;<span class="badge assignment-status {{ e.grade }}">{{ e.grade_display }}</span><br>
+{{ e.course_offering.course.name }}</a> &nbsp;<span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span><br>
 
           {% trans "Professors" %}:
             {% for teacher in e.course_offering.teachers.all %}
@@ -99,7 +99,7 @@
           </td>
           <td>
             <span class="badge assignment-status {{ e.grade }}">
-              {{ e.grade_display }}
+              {{ e.grade_honest }}
             </span>
           </td>
           <td>

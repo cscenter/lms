@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-import unicodecsv
 import logging
 import os
 import pytest
+import re
+import unicodecsv
 import unittest
 
 import pytest
@@ -19,7 +20,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.test.utils import override_settings
 from django.test import TestCase
-from django.utils.encoding import smart_text, force_text, force_str
+from django.utils.encoding import smart_text, force_text, force_str, smart_bytes
 from django.utils.translation import ugettext as _
 from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES
 from ..utils import get_current_semester_pair
@@ -918,6 +919,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertEquals(2, len(resp.context['assignment_list_archive']))
 
+
 class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_teacher'
     groups_allowed = ['Teacher [CENTER]']
@@ -941,7 +943,9 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         self.assertStatusCode(404, self.url_name)
 
     def test_list(self):
-        """Leave this test for group security checks. Don't want rewrite it in pytest style"""
+        """Leave this test for group security checks.
+        Don't want rewrite it in pytest style
+        """
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
@@ -959,7 +963,8 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
             EnrollmentFactory.create(student=student, course_offering=co)
         as1 = AssignmentFactory.create_batch(2, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
-        # By default we show last 3 assignments without grades and with comments
+        # By default we show submissions from last 3 assignments,
+        # without grades and with comments
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         # Let's check assignments without comments too
         resp = self.client.get(reverse(self.url_name) + "?comment=nomatter")
@@ -1758,7 +1763,7 @@ def test_assignment_contents(client):
            .get())
     url = reverse('a_s_detail_teacher', args=[a_s.pk])
     client.login(teacher)
-    assert bytes(a.text) in client.get(url).content
+    assert smart_bytes(a.text) in client.get(url).content
 
 
 @pytest.mark.django_db
@@ -1814,6 +1819,8 @@ def test_gradebook_recalculate_grading_type(client,
     assert co.grading_type == GRADING_TYPES.default
     enrollment.refresh_from_db()
     assert enrollment.grade == GRADES.good
+    student = students[0]
+    user_detail_url = reverse('user_detail', args=[student.pk])
     # Now we should get `binary` type after all final grades
     # will be equal `unsatisfactory`
     for key in form:
@@ -1822,8 +1829,10 @@ def test_gradebook_recalculate_grading_type(client,
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
+    response = client.get(user_detail_url)
+    assert smart_bytes("(enrollment|unsatisfactory)") in response.content
     # Update random submission grade, grading_type shouldn't change
-    submission = StudentAssignment.objects.get(student=students[0],
+    submission = StudentAssignment.objects.get(student=student,
                                                assignment=assignments[0])
     form = {
         'a_s_{}'.format(submission.pk): 2  # random valid grade
@@ -1832,3 +1841,9 @@ def test_gradebook_recalculate_grading_type(client,
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
+    # Manually set default grading type and check that grade repr changed
+    co.grading_type = GRADING_TYPES.default
+    co.save()
+    response = client.get(user_detail_url)
+    assert smart_bytes("(enrollment|unsatisfactory)") not in response.content
+    assert smart_bytes("(unsatisfactory)") in response.content

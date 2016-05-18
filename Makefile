@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run run_flame dumpdemo loaddemo test_travis lcaomail clean cmd check_defined sass sass_club webpack run_club
+.PHONY: clean coverage test pip static freeze msg msgcompile migrate run run_flame dumpdata loaddata test_travis clean cmd check_defined sass sass_club webpack run_club
 
 run:
 	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
@@ -22,6 +22,7 @@ migrate:
 
 msg:
 	python manage.py makemessages -l ru
+
 # https://code.djangoproject.com/ticket/24159
 # Should set apps in LOCALE_PATHS explicitly until patch been released
 msgcompile:
@@ -37,11 +38,11 @@ freeze:
 pip:
 	pip install -r requirements.txt
 
-dumpdemo:
+dumpdata:
 	$(call check_defined, app)
 	python manage.py dumpdata $(DJANGO_POSTFIX) --indent=2 $(app) --output=./fixture_$(app).json
 
-loaddemo:
+loaddata:
 	$(call check_defined, src)
 	python manage.py loaddata $(DJANGO_POSTFIX) $(src)
 
@@ -53,9 +54,6 @@ test_travis: clean
 
 test: clean
 	python manage.py test core index news users learning --settings=$(PROJECT).settings.test
-
-localmail:
-	python -m smtpd -n -c DebuggingServer localhost:1025
 
 clean:
 	find . -name "*.pyc" -print0 -delete

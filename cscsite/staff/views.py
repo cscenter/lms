@@ -103,7 +103,7 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
                 teachers = [t.get_full_name() for t
                             in e.course_offering.teachers.all()]
                 student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_display.lower(),
+                    grade=e.grade_honest.lower(),
                     teachers=", ".join(teachers)
                 )
             s.courses = student_courses
@@ -182,7 +182,7 @@ class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
                 teachers = [t.get_full_name() for t
                             in e.course_offering.teachers.all()]
                 student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_display.lower(),
+                    grade=e.grade_honest.lower(),
                     teachers=", ".join(teachers)
                 )
             s.courses = student_courses
@@ -329,7 +329,7 @@ class StudentSummaryBySemesterMixin(object):
                 teachers = [t.get_full_name() for t
                             in e.course_offering.teachers.all()]
                 student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_display.lower(),
+                    grade=e.grade_honest.lower(),
                     teachers=", ".join(teachers)
                 )
             s.courses = student_courses
@@ -396,7 +396,6 @@ class StudentSummaryBySemesterMixin(object):
         raise NotImplemented("StudentSummaryBySemesterMixin: not implemented")
 
 
-
 class StudentSummaryBySemesterCSVView(CuratorOnlyMixin,
                                       StudentSummaryBySemesterMixin,
                                       generic.base.View):
@@ -434,8 +433,8 @@ class StudentSummaryBySemesterExcel2010View(CuratorOnlyMixin,
 
         for row_index, row in enumerate(data_iter, start=1):
             for col_index, value in enumerate(row):
-                value = "" if value is None else force_unicode(value)
-                worksheet.write(row_index, col_index, force_unicode(value))
+                value = "" if value is None else force_text(value)
+                worksheet.write(row_index, col_index, force_text(value))
 
         workbook.close()
         output.seek(0)
@@ -444,11 +443,6 @@ class StudentSummaryBySemesterExcel2010View(CuratorOnlyMixin,
         response = HttpResponse(output.read(), content_type=content_type)
         response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         return response
-
-
-
-
-
 
 
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):

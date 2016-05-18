@@ -21,7 +21,7 @@
                 {% for course_id, enrollment in user_enrollments.items %}
                     <li>
                         {{ enrollment.course_offering }}
-                      ({{ enrollment.grade_display|lower }})
+                      ({{ enrollment.grade_honest|lower }})
                     </li>
                 {% endfor %}
                 {% for shad in shads %}

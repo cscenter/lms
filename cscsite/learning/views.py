@@ -1003,9 +1003,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     def get_filter_assignments(self, assignments):
         try:
             assignments_str = self.request.GET.get("assignments", "")
-            query_assignments = map(int,
-                                    filter(None,
-                                           assignments_str.split(",")))
+            query_assignments = list(map(int,
+                                         filter(None,
+                                                assignments_str.split(","))))
         except ValueError:
             query_assignments = False
         if not query_assignments:
@@ -1021,9 +1021,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         year, term, term_index = self.get_term_data()
         query = {}
         teacher_course_offerings = (CourseOffering.objects
-                            .filter(teachers=self.request.user)
-                            .select_related("course", "semester")
-                            .order_by("semester__index"))
+                                    .filter(teachers=self.request.user)
+                                    .select_related("course", "semester")
+                                    .order_by("semester__index"))
         if not teacher_course_offerings:
             raise Http404
         # Collect terms for filter view
@@ -1083,13 +1083,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         base_qs = (
             self.model.objects
                 .filter(**filters)
-                .annotate(
-                    deadline_passed=Case(
-                        When(assignment__deadline_at__gte=today, then=Value(0)),
-                        default=Value('1'),
-                        output_field=IntegerField(),
-                    )
-                )
+                .annotate(deadline_passed=Case(
+                    When(assignment__deadline_at__gte=today, then=Value(0)),
+                    default=Value('1'),
+                    output_field=IntegerField(),
+                ))
                 .order_by('deadline_passed',
                           'assignment__deadline_at',
                           'assignment__pk',
@@ -1108,7 +1106,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                        "assignment__course_offering__description_en",
                        "assignment__course_offering__course__description",
                        "assignment__course_offering__course__description_ru",
-                       "assignment__course_offering__course__description_en",))
+                       "assignment__course_offering__course__description_en", ))
         return base_qs
 
     def get_context_data(self, **kwargs):
