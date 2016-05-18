@@ -152,11 +152,3 @@ class LearningPermissionsMixin(object):
     @property
     def is_interviewer(self):
         return False
-
-# TODO: Add sort order to Semester object and forget about this method!
-class SortBySemesterMethodMixin(object):
-    @staticmethod
-    def sorted(student_projects, reverse=False):
-        """Return projects in chronological order"""
-        return sorted(student_projects, key=lambda p: p.semester,
-                      reverse=reverse)

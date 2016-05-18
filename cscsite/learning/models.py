@@ -38,7 +38,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
     City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
-from .utils import get_current_semester_pair, SortBySemesterMethodMixin, \
+from .utils import get_current_semester_pair, \
     get_semester_index, convert_term_start_to_datetime, get_term_start_by_type
 
 logger = logging.getLogger(__name__)
@@ -857,6 +857,7 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
+        print(getattr(GRADES, 'pass'))
         if (self.course_offering.grading_type == GRADING_TYPES.default and
                 self.grade == getattr(GRADES, 'pass')):
             return _("Satisfactory")
@@ -982,7 +983,7 @@ def studentproject_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
-class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
+class StudentProject(TimeStampedModel):
     GRADES = GRADES
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))

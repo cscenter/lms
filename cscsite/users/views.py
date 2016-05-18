@@ -121,8 +121,7 @@ class TeacherDetailView(generic.DetailView):
     def get_queryset(self, *args, **kwargs):
         co_queryset = (CourseOffering.custom.site_related(self.request)
             .select_related('semester', 'course'))
-        return (auth.get_user_model()
-                ._default_manager
+        return (auth.get_user_model()._default_manager
                 .all()
                 .prefetch_related(
                     Prefetch('teaching_set',
@@ -165,8 +164,7 @@ class UserDetailView(generic.DetailView):
                               'study_programs',
                               'cscuserreference_set']
             select_list += ['comment_last_author']
-        return (auth.get_user_model()
-                ._default_manager
+        return (auth.get_user_model()._default_manager
                 .all()
                 .select_related(*select_list)
                 .prefetch_related(*prefetch_list))
@@ -177,25 +175,18 @@ class UserDetailView(generic.DetailView):
         u = self.request.user
         # On center site show club students only to teachers and curators
         if self.request.site.domain != settings.CLUB_DOMAIN:
-            if (list(context["user_object"]._cs_group_pks) == [CSCUser.group_pks.STUDENT_CLUB]
+            if (list(context["user_object"]._cs_group_pks) == [
+                CSCUser.group_pks.STUDENT_CLUB]
                     and not(u.is_teacher or u.is_curator)):
                 raise Http404
 
-        # FIXME: use it or remove
-        context['is_extended_profile_available'] = \
-            (u.is_authenticated() and
-            (u == self.object or u.is_teacher or u.is_curator))
-        context['is_editing_allowed'] = \
-            (u.is_authenticated() and
-            (u == self.object or u.is_curator))
-        context['has_curator_permissions'] = \
-            u.is_authenticated() and u.is_curator
-        student_projects = list(self.object.studentproject_set
-                                .select_related('semester')
-                                .order_by('pk'))
-        context['student_projects'] = StudentProject.sorted(student_projects)
+        context['is_editing_allowed'] = (u == self.object or u.is_curator)
+        context['has_curator_permissions'] = u.is_curator
+        context['student_projects'] = (self.object.studentproject_set
+                                       .select_related('semester')
+                                       .order_by('semester__index'))
         context['current_semester'] = Semester.get_current()
-        if self.request.user.is_authenticated() and self.request.user.is_curator:
+        if u.is_curator:
             related = ['assignment',
                        'assignment__course_offering',
                        'assignment__course_offering__course',
@@ -276,20 +267,6 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
                                   student_info.shads)
 
         return context
-
-
-# class StudentInfoUpdateView(StaffOnlyMixin, generic.UpdateView):
-#     model = StudentInfo
-#     template_name = "learning/simple_crispy_form.html"
-#     form_class = StudentInfoForm
-
-#     def get_success_url(self):
-#         return reverse('user_detail', args=[self.object.student_id])
-
-#     def form_valid(self, form):
-#         self.object = form.save(commit=False)
-#         self.object.save(edit_author=self.request.user)
-#         return HttpResponseRedirect(self.get_success_url())
 
 
 # The following code has been taken from

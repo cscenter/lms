@@ -9,7 +9,7 @@ from learning.models import CourseOfferingTeacher
 class CSCUserQuerySet(query.QuerySet):
 
     def students_info(self,
-                      filter=None,
+                      filters=None,
                       exclude=None,
                       semester=False):
         """Returns list of students with all related courses, shad-courses
@@ -19,16 +19,16 @@ class CSCUserQuerySet(query.QuerySet):
         from learning.models import Enrollment, CourseClass, StudentProject, \
             Semester, CourseOffering
 
-        # Note: At the same time student must be in one of these groups
-        # So, group_by not neccessary for this m2m relationship (in theory)
-        filter = filter or {}
-        if not "groups__in" in filter:
-            filter["groups__in"] = [
+        # Note: At the same time student must be only in one of these groups
+        # So, group_by not necessary for this m2m relationship (in theory)
+        filters = filters or {}
+        if "groups__in" not in filters:
+            filters["groups__in"] = [
                 CSCUser.group_pks.STUDENT_CENTER,
                 CSCUser.group_pks.GRADUATE_CENTER,
                 CSCUser.group_pks.VOLUNTEER
             ]
-        q = self.filter(**filter)
+        q = self.filter(**filters)
 
         if exclude:
             q = q.exclude(**exclude)
@@ -52,8 +52,8 @@ class CSCUserQuerySet(query.QuerySet):
                 semester=semester
             )
 
-        # Note: No ides how it works with thousands students
-        # due to user_id IN(blabla thousands ids), but it's fine for now.
+        # Note: No idea how it works with thousands students
+        # due to user_id IN(blabla thousands ids), but it's ok now.
         return (
             q
             .order_by('last_name', 'first_name')
@@ -77,16 +77,22 @@ class CSCUserQuerySet(query.QuerySet):
                     'enrollments__course_offering__teachers',
                     # Note (Zh): Can't solve it with standard ORM instruments.
                     # Sorting: roles field contains bit mask,
-                    # show pure lecturers first (=1), then teachers with lecturer role (values >1)
+                    # show pure lecturers first (=1), then teachers with
+                    # lecturer role (values >1)
                     queryset=CSCUser.objects.extra(
-                        where=['%s.roles & 1=%s' % (CourseOfferingTeacher._meta.db_table, int(CourseOfferingTeacher.roles.lecturer)) ],
-                        order_by=["%s.roles" % CourseOfferingTeacher._meta.db_table]
+                        where=['%s.roles & 1=%s' %
+                               (CourseOfferingTeacher._meta.db_table,
+                                int(CourseOfferingTeacher.roles.lecturer))],
+                        order_by=["%s.roles" %
+                                  CourseOfferingTeacher._meta.db_table]
                     )
                 ),
                 Prefetch(
                     'studentproject_set',
-                    queryset=StudentProject.objects.order_by('project_type')
-                                           .select_related('semester'),
+                    queryset=(StudentProject.objects
+                              .order_by('project_type')
+                              .select_related('semester')
+                              .order_by('semester__index')),
                     to_attr='projects'
                 ),
                 Prefetch(
