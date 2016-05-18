@@ -336,7 +336,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Student project',
                 'verbose_name_plural': 'Student projects',
             },
-            bases=(learning.utils.SortBySemesterMethodMixin, models.Model),
+            bases=(models.Model),
         ),
         migrations.CreateModel(
             name='StudyProgram',
