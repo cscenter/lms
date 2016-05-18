@@ -1817,20 +1817,19 @@ def test_gradebook_recalculate_grading_type(client,
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.default
-    enrollment.refresh_from_db()
-    assert enrollment.grade == GRADES.good
     student = students[0]
     user_detail_url = reverse('user_detail', args=[student.pk])
     # Now we should get `binary` type after all final grades
-    # will be equal `unsatisfactory`
+    # will be equal `pass`
     for key in form:
-        form[key] = GRADES.unsatisfactory
+        form[key] = getattr(GRADES, 'pass')
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
     response = client.get(user_detail_url)
-    assert smart_bytes("(enrollment|unsatisfactory)") in response.content
+    assert smart_bytes("(enrollment|pass)") in response.content
+    assert smart_bytes("(satisfactory)") not in response.content
     # Update random submission grade, grading_type shouldn't change
     submission = StudentAssignment.objects.get(student=student,
                                                assignment=assignments[0])
@@ -1845,5 +1844,5 @@ def test_gradebook_recalculate_grading_type(client,
     co.grading_type = GRADING_TYPES.default
     co.save()
     response = client.get(user_detail_url)
-    assert smart_bytes("(enrollment|unsatisfactory)") not in response.content
-    assert smart_bytes("(unsatisfactory)") in response.content
+    assert smart_bytes("(enrollment|pass)") not in response.content
+    assert smart_bytes("(satisfactory)") in response.content
