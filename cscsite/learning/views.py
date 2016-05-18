@@ -38,7 +38,7 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
     GRADING_TYPES
 from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
-from learning.utils import get_current_semester_pair, get_semester_index
+from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin, \
     StudentCenterOnlyMixin
@@ -468,8 +468,8 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         context = self.get_context_data(object=self.object)
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
-            index = get_semester_index(CENTER_FOUNDATION_YEAR,
-                                       SEMESTER_TYPES.autumn)
+            index = get_term_index(CENTER_FOUNDATION_YEAR,
+                                   SEMESTER_TYPES.autumn)
             if co.semester.index < index:
                 return HttpResponseRedirect(
                     get_club_domain(co.city.code) + co.get_absolute_url())
@@ -985,7 +985,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                 year = current_year
         except ValueError:
             year = current_year
-        return year, term, get_semester_index(year, term)
+        return year, term, get_term_index(year, term)
 
     def filter_courses(self, term_index, course_offerings):
         """Returns courses for selected or latest actual term"""
@@ -1499,7 +1499,7 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
 
     def get_queryset(self):
         current_year, semester_type = get_current_semester_pair()
-        semester_index = get_semester_index(current_year, semester_type)
+        semester_index = get_term_index(current_year, semester_type)
         if semester_type == Semester.TYPES.autumn:
             semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF  # skip to spring semester
         return (self.model.objects

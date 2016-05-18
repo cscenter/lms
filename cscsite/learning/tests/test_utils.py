@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from io import StringIO, BytesIO
-import datetime
+from io import BytesIO
 
-from django.utils.encoding import force_bytes
-from mock import patch, MagicMock
+import pytest
 import pytz
-
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils.encoding import force_bytes
+from mock import patch, MagicMock
 
-from learning.utils import get_current_semester_pair, split_list
 from learning.management.imports import ImportGradesByStepicID
+from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
+                               SEMESTER_TYPES)
+from learning.utils import split_list, get_term_index
 from ..factories import *
 
 
@@ -35,7 +36,6 @@ class UtilTests(TestCase):
         self.assertEquals((xs, []), split_list(xs, lambda x: True))
         self.assertEquals(([], xs), split_list(xs, lambda x: False))
 
-
     @patch('django.contrib.messages.api.add_message')
     def test_import_stepic(self, mock_messages):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -56,3 +56,23 @@ class UtilTests(TestCase):
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
         self.assertEquals(a_s.grade, expected_grade)
+
+
+def test_get_term_index():
+    cnt = len(SEMESTER_TYPES)
+    with pytest.raises(ValueError) as e:
+        get_term_index(FOUNDATION_YEAR - 1, SEMESTER_TYPES.spring)
+    assert "target year < FOUNDATION_YEAR" in str(e.value)
+    with pytest.raises(ValueError) as e:
+        get_term_index(FOUNDATION_YEAR, "sprEng")
+    assert "unknown term type" in str(e.value)
+    assert get_term_index(FOUNDATION_YEAR,
+                          SEMESTER_TYPES.spring) == TERMS_INDEX_START
+    assert get_term_index(FOUNDATION_YEAR,
+                          SEMESTER_TYPES.autumn) == TERMS_INDEX_START + 2
+    assert get_term_index(FOUNDATION_YEAR + 1,
+                          SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt
+    assert get_term_index(FOUNDATION_YEAR + 1,
+                          SEMESTER_TYPES.summer) == TERMS_INDEX_START + cnt + 1
+    assert get_term_index(FOUNDATION_YEAR + 7,
+                          SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt * 7
