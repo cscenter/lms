@@ -6,7 +6,7 @@ import dateutil.parser as dparser
 from django.http import Http404
 from django.utils import timezone
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
-    SEMESTER_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
+    TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
     SPRING_TERM_START
 
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
@@ -16,11 +16,13 @@ def get_current_semester_pair():
     date = timezone.now()
     return date_to_term_pair(date)
 
+
 def convert_term_start_to_datetime(year, term_start):
     return (dparser
             .parse(term_start)
             .replace(tzinfo=timezone.utc,
                      year=year))
+
 
 def get_term_start_by_type(term_type):
     # TODO: Replace with something more generic, if you really need to edit this code
@@ -31,6 +33,7 @@ def get_term_start_by_type(term_type):
     elif term_type == SEMESTER_TYPES.autumn:
         return AUTUMN_TERM_START
     raise ValueError("get_term_start_by_type: unknown term type")
+
 
 def date_to_term_pair(date):
     assert timezone.is_aware(date)
@@ -51,25 +54,20 @@ def date_to_term_pair(date):
             year -= 1
     return CurrentSemester(year, current_term)
 
-def get_semester_index(target_year, term_type):
-    assert target_year >= FOUNDATION_YEAR
-    assert term_type in SEMESTER_TYPES
-    index = SEMESTER_INDEX_START
-    year = FOUNDATION_YEAR
-    # TODO: Optimize by skipping (target_year-FOUNDATION_YEAR) % len(TYPES) and remove infinity loop
-    # TODO: add tests
-    while True:
-        for season, _ in SEMESTER_TYPES:
-            if year == target_year and term_type == season:
-                return index
-            index += 1
-        year += 1
-        if year > target_year:
-            raise ValueError("get_semester_index: Unreachable target year")
 
-# TODO: get semester pair by index util function
-
-
+def get_term_index(target_year, target_term_type):
+    """Calculate term order index starting from FOUNDATION_YEAR spring term"""
+    if target_year < FOUNDATION_YEAR:
+        raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
+    if target_term_type not in SEMESTER_TYPES:
+        raise ValueError("get_term_index: unknown term type %s" % target_term_type)
+    terms_in_year = len(SEMESTER_TYPES)
+    year_portion = (target_year - FOUNDATION_YEAR) * terms_in_year
+    term_portion = TERMS_INDEX_START
+    for index, (t, _) in enumerate(SEMESTER_TYPES):
+        if t == target_term_type:
+            term_portion += index
+    return year_portion + term_portion
 
 
 def split_list(iterable, predicate):

@@ -6,7 +6,7 @@ from django.core.management import BaseCommand
 
 from learning.models import Semester, CourseOffering
 from learning.settings import FOUNDATION_YEAR, SEMESTER_TYPES, \
-    SEMESTER_INDEX_START
+    TERMS_INDEX_START
 
 
 class Command(BaseCommand):
@@ -18,7 +18,7 @@ class Command(BaseCommand):
         if max_year is None:
             return
         max_year = max_year.year
-        index = SEMESTER_INDEX_START
+        index = TERMS_INDEX_START
         for year in range(FOUNDATION_YEAR, max_year + 1):
             for semester_type, _ in SEMESTER_TYPES:
                 Semester.objects.filter(year=year, type=semester_type).update(index=index)

@@ -39,7 +39,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, LATEX_MARKDOWN_ENABLED, \
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from .utils import get_current_semester_pair, \
-    get_semester_index, convert_term_start_to_datetime, get_term_start_by_type
+    get_term_index, convert_term_start_to_datetime, get_term_start_by_type
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +153,7 @@ class Semester(models.Model):
         return obj
 
     def save(self, *args, **kwargs):
-        self.index = get_semester_index(self.year, self.type)
+        self.index = get_term_index(self.year, self.type)
         super(Semester, self).save(*args, **kwargs)
 
     # TODO: move to custom manager? Should I return queryset or id values? WIP

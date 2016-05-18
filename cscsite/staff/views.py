@@ -23,7 +23,7 @@ from xlsxwriter import Workbook
 from core.views import SuperUserOnlyMixin
 from learning.viewmixins import CuratorOnlyMixin
 from learning.models import StudentProject, Semester
-from learning.utils import get_current_semester_pair, get_semester_index
+from learning.utils import get_current_semester_pair, get_term_index
 from learning.settings import STUDENT_STATUS
 from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
 
@@ -447,8 +447,8 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
 
     def get(self, request, *args, **kwargs):
         current_year, season = get_current_semester_pair()
-        start_semester_index = get_semester_index(2011, Semester.TYPES.autumn)
-        end_semester_index = get_semester_index(current_year, season)
+        start_semester_index = get_term_index(2011, Semester.TYPES.autumn)
+        end_semester_index = get_term_index(current_year, season)
         semesters = Semester.objects.filter(index__gte=start_semester_index, index__lte=end_semester_index)
         # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
         query = (CSCUser.objects.exclude(enrollment_year__isnull=True)

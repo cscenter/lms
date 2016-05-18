@@ -73,6 +73,6 @@ ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after seme
 FOUNDATION_YEAR = getattr(settings, 'FOUNDATION_YEAR', 2007)
 CENTER_FOUNDATION_YEAR = getattr(settings, 'CENTER_FOUNDATION_YEAR', 2011)
 # Used for semester index calculation
-SEMESTER_INDEX_START = getattr(settings, 'SEMESTER_INDEX_START', 1)
+TERMS_INDEX_START = getattr(settings, 'TERMS_INDEX_START', 1)
 
 SEMESTER_AUTUMN_SPRING_INDEX_DIFF = getattr(settings, 'SEMESTER_AUTUMN_SPRING_INDEX_DIFF', 1)
