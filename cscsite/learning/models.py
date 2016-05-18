@@ -115,6 +115,7 @@ class Semester(models.Model):
             return self.year - other.year
         else:
             return self.type_index - other.type_index
+
     # TODO: add fucking tests or refactor with `sort` column
     def __lt__(self, other):
         return self.__cmp__(other) < 0
@@ -131,7 +132,6 @@ class Semester(models.Model):
             start_str = learn_conf.AUTUMN_TERM_START
         return convert_term_start_to_datetime(self.year, start_str)
 
-
     @cached_property
     def ends_at(self):
         if self.type == 'spring':
@@ -141,8 +141,7 @@ class Semester(models.Model):
             next_start_str = learn_conf.SPRING_TERM_START
             next_year = self.year + 1
         return convert_term_start_to_datetime(next_year, next_start_str) \
-                    - datetime.timedelta(days=1)
-
+               - datetime.timedelta(days=1)
 
     @classmethod
     def get_current(cls):
@@ -227,7 +226,7 @@ class CourseOffering(TimeStampedModel):
                     "will be replaced by course description"),
         blank=True)
     survey_url = models.URLField(_("Survey URL"), blank=True,
-        help_text=_("Link to Survey"))
+                                 help_text=_("Link to Survey"))
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
@@ -258,7 +257,7 @@ class CourseOffering(TimeStampedModel):
 
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.course),
-                              smart_text(self.semester))
+                                 smart_text(self.semester))
 
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,
@@ -281,7 +280,6 @@ class CourseOffering(TimeStampedModel):
         return (current_semester.year == self.semester.year
                 and current_semester.type == self.semester.type)
 
-
     def enrollment_opened(self):
         if self.is_open:
             return True
@@ -300,7 +298,8 @@ class CourseOffering(TimeStampedModel):
         else:
             year, term_type = get_current_semester_pair()
             term_start = get_term_start_by_type(term_type)
-            current_term_start = convert_term_start_to_datetime(year, term_start)
+            current_term_start = convert_term_start_to_datetime(year,
+                                                                term_start)
             enroll_before = current_term_start + datetime.timedelta(
                 days=learn_conf.ENROLLMENT_DURATION)
         if today > enroll_before:
@@ -328,7 +327,8 @@ class CourseOfferingTeacher(models.Model):
         unique_together = [['teacher', 'course_offering']]
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.teacher), smart_text(self.course_offering_id))
+        return "{0} [{1}]".format(smart_text(self.teacher),
+                                  smart_text(self.course_offering_id))
 
 
 @python_2_unicode_compatible
@@ -359,7 +359,7 @@ class CourseOfferingNews(TimeStampedModel):
 @python_2_unicode_compatible
 class Venue(models.Model):
     city = models.ForeignKey(City, null=True, blank=True, \
-                                   default=settings.DEFAULT_CITY_CODE)
+                             default=settings.DEFAULT_CITY_CODE)
     sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(
@@ -428,7 +428,8 @@ class CourseClass(TimeStampedModel, object):
         upload_to=courseclass_slides_file_name)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video_url = models.URLField(_("Video URL"), blank=True,
-        help_text=_("Both YouTube and Yandex Video are supported"))
+                                help_text=_(
+                                    "Both YouTube and Yandex Video are supported"))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
@@ -481,6 +482,7 @@ class CourseClass(TimeStampedModel, object):
     # this is needed to properly set up fields for admin page
     def type_display_prop(self):
         return self.TYPES[self.type]
+
     type_display_prop.short_description = _("Type")
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
@@ -569,7 +571,8 @@ class Assignment(TimeStampedModel, object):
     notify_teachers = models.ManyToManyField(
         CourseOfferingTeacher,
         verbose_name=_("Assignment|notify_settings"),
-        help_text=_("Leave blank if you want populate teachers from course offering settings"),
+        help_text=_(
+            "Leave blank if you want populate teachers from course offering settings"),
         blank=True)
 
     tracker = FieldTracker(fields=['deadline_at'])
@@ -586,7 +589,7 @@ class Assignment(TimeStampedModel, object):
 
     def clean(self):
         if (self.pk and
-                self._original_course_offering_id != self.course_offering_id):
+                    self._original_course_offering_id != self.course_offering_id):
             raise ValidationError(_("Course offering modification "
                                     "is not allowed"))
         if self.grade_min > self.grade_max:
@@ -638,7 +641,8 @@ class AssignmentAttachment(TimeStampedModel, object):
     def file_url(self):
         return reverse(
             "assignment_attachments_download",
-            args=[hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
+            args=[
+                hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
         )
 
 
@@ -686,7 +690,8 @@ class StudentAssignment(TimeStampedModel):
         blank=True)
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("Last comment from"),
-        help_text=_("System field. 0 - no comments yet. 1 - from student. 2 - from teacher"),
+        help_text=_(
+            "System field. 0 - no comments yet. 1 - from student. 2 - from teacher"),
         editable=False,
         default=LAST_COMMENT_NOBODY)
 
@@ -737,7 +742,6 @@ class StudentAssignment(TimeStampedModel):
                 return 'good'
             else:
                 return 'excellent'
-
 
     @property
     def state_display(self):
@@ -851,6 +855,10 @@ class Enrollment(TimeStampedModel):
 
     @property
     def grade_honest(self):
+        """Change honest repr for `unsatisfactory` grade"""
+        if (self.course_offering.grading_type == GRADING_TYPES.default and
+                self.grade == GRADES.unsatisfactory):
+            return _("Unsatisfactory")
         return GRADES[self.grade]
 
     @property
@@ -991,7 +999,6 @@ class StudentProject(SortBySemesterMethodMixin, TimeStampedModel):
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
                                          PARTICIPANT_GROUPS.GRADUATE_CENTER]})
 
-
     grade = StatusField(
         verbose_name=_("Grade"),
         choices_name='GRADES',
@@ -1092,7 +1099,8 @@ class InternationalSchool(TimeStampedModel):
     place = models.CharField(_("InternationalSchool|place"), max_length=255)
     deadline = models.DateField(_("InternationalSchool|Deadline"))
     starts_at = models.DateField(_("InternationalSchool|Start"))
-    ends_at = models.DateField(_("InternationalSchool|End"), blank=True, null=True)
+    ends_at = models.DateField(_("InternationalSchool|End"), blank=True,
+                               null=True)
     has_grants = models.BooleanField(
         _("InternationalSchool|Grants"),
         default=False)
@@ -1112,7 +1120,8 @@ class Useful(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
+    site = models.ForeignKey(Site, verbose_name=_("Site"),
+                             default=settings.CENTER_SITE_ID)
 
     class Meta:
         ordering = ["sort"]

@@ -50,6 +50,7 @@ class StudentFactory(UserFactory):
 
 class StudentCenterFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.STUDENT_CENTER]
+    enrollment_year = 2015
 
 
 class StudentClubFactory(UserFactory):
