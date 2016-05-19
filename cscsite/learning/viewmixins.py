@@ -1,7 +1,6 @@
 from braces.views import UserPassesTestMixin
-from django.conf import settings
 
-from learning.models import StudentAssignment, CourseOffering, Enrollment
+from learning.models import Enrollment
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):
@@ -33,14 +32,14 @@ class StudentOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         return (user.is_authenticated() and
-               (user.is_student or user.is_curator))
+                (user.is_student or user.is_curator))
 
 
-class StudentCenterOnlyMixin(UserPassesTestMixin):
+class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):
-        return (user.is_student_center or user.is_curator)
+        return user.is_student_center or user.is_volunteer or user.is_curator
 
 
 class CuratorOnlyMixin(UserPassesTestMixin):
@@ -60,8 +59,8 @@ class FailedCourseContextMixin(object):
 
         if "course_offering" not in context:
             raise NotImplementedError(
-            '{0} is missing `course_offering` attribute '.format(
-                self.__class__.__name__))
+                '{0} is missing `course_offering` attribute '.format(
+                    self.__class__.__name__))
 
         co = context["course_offering"]
         context["is_failed_completed_course"] = False

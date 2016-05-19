@@ -41,7 +41,7 @@ from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixi
 from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin, \
-    StudentCenterOnlyMixin
+    StudentCenterAndVolunteerOnlyMixin
 from core import comment_persistence
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -1924,7 +1924,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         return response
 
 
-class UsefulListView(StudentCenterOnlyMixin, generic.ListView):
+class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "useful.html"
 
