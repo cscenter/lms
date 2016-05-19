@@ -17,6 +17,5 @@ install:
   #  Speed up lxml installation
   - CFLAGS="-O0"  pip install lxml
   - pip install -r requirements/test.txt
-  - pip install -e cscsite
 script:
   - py.test --ds=cscenter.settings.test_travis
