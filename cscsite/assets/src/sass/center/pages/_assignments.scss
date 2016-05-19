@@ -11,7 +11,8 @@
     color: $color-orange;
   }
 }
-
+// quick fix, material design partial not included in club styles
+.btn-outline { background: none;}
 
 
 // teacher assignment submissions page

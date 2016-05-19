@@ -14,3 +14,4 @@ cscsite/static/
 local/
 .cache/
 .coverage
+node_modules/

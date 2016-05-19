@@ -30,7 +30,7 @@ msgcompile:
 	python manage.py compilemessages --settings=csclub.settings.local
 
 static:
-	python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
+	python manage.py collectstatic --noinput $(DJANGO_POSTFIX) --ignore src --ignore *.map
 
 freeze:
 	pip freeze --local > requirements.txt
@@ -75,18 +75,13 @@ deploy:
 	git pull
 	pip install -r requirements.txt
 	python manage.py migrate --settings=$(app).settings.$(conf)
-	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf)
+	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore src --ignore *.map
 
 deploy_remote:
+    grunt build
 	$(call check_defined, app_user)
 	git push
 	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
-
-sass:
-	cd cscsite/assets/; node-sass -w src/sass/center/style.scss css/center/style.css --output-style=compressed --source-map=true
-
-sass_club:
-	cd cscsite/assets/; node-sass -w src/sass/club/style.scss css/club/style.css --output-style=compressed --source-map=true
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
