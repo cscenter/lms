@@ -38,6 +38,15 @@ $ python cscsite/manage.py syncdb --settings=cscenter.settings.local
 
 * run with `python manage.py runserver --settings=cscenter.settings.local`
 
+* To serving static, install grunt with npm locally
+
+```bash
+# put grunt cmd in system path
+npm install -g grunt-cli
+# go to project root dir and install grunt locally
+npm install --save-dev grunt load-grunt-tasks grunt-contrib-concat grunt-contrib-uglify grunt-sass grunt-contrib-watch
+```
+
 ## Recreate DB snippet
 
     psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"

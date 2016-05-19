@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 from unipath import Path
 
 PROJECT_DIR = Path(__file__).ancestor(3)
+ROOT_DIR = PROJECT_DIR.ancestor(1)
 
 MEDIA_ROOT = PROJECT_DIR.child("media")
 MEDIA_URL = "/media/"

@@ -1,0 +1,29 @@
+{
+  "name": "csc",
+  "version": "1.0.0",
+  "description": "CSC websites",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt": "^1.0.1",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-sass": "^1.2.0"
+  },
+  "devDependencies": {
+    "load-grunt-tasks": "^3.5.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cscenter/site.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cscenter/site/issues"
+  },
+  "homepage": "https://github.com/cscenter/site#readme"
+}
