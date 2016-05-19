@@ -8,6 +8,7 @@ from django.contrib.staticfiles.management.commands.runserver import Command \
     as RunserverCommand
 
 
+# TODO: investigate django-grunt
 class Command(RunserverCommand):
 
     def inner_run(self, *args, **options):
