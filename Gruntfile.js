@@ -22,6 +22,17 @@ module.exports = function (grunt) {
                 files: '<%= sass_files %>'
             }
         },
+        concat: {
+            main: {
+                src: ['cscsite/assets/src/js/main.js'],
+                dest: 'cscsite/assets/js/main.js'
+            }
+        },
+        uglify: {
+            main: {
+                files: {'cscsite/assets/js/main.js': ['cscsite/assets/src/js/main.js']}
+            }
+        },
         watch: {
             options: {
                 // livereload: true,
@@ -45,6 +56,6 @@ module.exports = function (grunt) {
 
     // Register tasks here.
     grunt.registerTask('default', ['watch']);
-    grunt.registerTask('build', ['sass:deploy']);
+    grunt.registerTask('build', ['sass:deploy', 'concat', 'uglify']);
     // TODO: investigate grunt-concurrent
 };
