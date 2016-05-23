@@ -8,7 +8,7 @@ from braces.views._access import AccessMixin
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import Value, Q
+from django.db.models import Value, Q, Avg
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -189,6 +189,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .filter(applicant__campaign__current=True)
              .select_related("applicant")
              .prefetch_related("interviewers")
+             .annotate(average=Avg('comments__score'))
              .order_by("date"))
         if not self.request.user.is_curator:
             q = q.filter(interviewers=self.request.user)

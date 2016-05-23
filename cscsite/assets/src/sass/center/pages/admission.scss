@@ -106,6 +106,9 @@
   .panel-body {
     clear: both;
     .table {
+      th:last-child {
+        text-align: right;
+      }
       td {
         vertical-align: middle;
         padding: 16px 6px;
@@ -114,6 +117,16 @@
           padding-left: 0;
         }
 
+        &:last-child {
+          text-align: right;
+          font-size: 16px;
+          span {
+            color: $color-grey;
+          }
+        }
+        &.empty-results {
+          text-align: left;
+        }
       }
       tr {
         th:first-child {
@@ -355,7 +368,7 @@
     }
   }
 
-  .date {
+  .date, .additional-info {
     font-size: 18px;
     color: $color-grey;
   }

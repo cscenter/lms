@@ -71,9 +71,10 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Время</th>
-                <th>Поступающий</th>
-                <th>Собеседующие</th>
+                  <th>Время</th>
+                  <th>Поступающий</th>
+                  <th>Собеседующие</th>
+                  <th>{% if not filter.form.status.value or filter.form.status.value == "completed" %}Средний&nbsp;балл{% endif %}</th>
               </tr>
             </thead>
             <tbody>
@@ -102,10 +103,17 @@
                                 {% endfor %}
                             </ul>
                         </td>
+                        <td>
+                            {% if interview.status == "completed" %}
+                                {{ interview.average|floatformat }}
+                            {% elif not filter.form.status.value %}
+                                <span>{{ interview.get_status_display }}</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                    <td colspan="4">Измените параметры поиска.</td>
+                    <td colspan="4" class="empty-results">Измените параметры поиска.</td>
                     </tr>
                 {% endfor %}
 
