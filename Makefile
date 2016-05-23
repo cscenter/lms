@@ -77,11 +77,14 @@ deploy:
 	python manage.py migrate --settings=$(app).settings.$(conf)
 	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore src --ignore *.map
 
+# Note: contains Mac specific commands
 deploy_remote:
 # it's not in git, sorry --> grunt build
+	pyenv deactivate
 	$(call check_defined, app_user)
 	git push
 	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
+	pyenv activate
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
