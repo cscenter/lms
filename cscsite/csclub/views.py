@@ -1,17 +1,17 @@
-from collections import Counter
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Prefetch, Count
+from django.db.models import Prefetch
 from django.http import JsonResponse
-from django.views import generic
 from django.utils.timezone import now
+from django.views import generic
+# TODO: (XXX) Dont' forget to remove it after old.* termination.
+from django.views.decorators.csrf import requires_csrf_token
+from django.shortcuts import redirect
 
-from .utils import check_for_city
-from learning.views import CalendarMixin
-from learning.models import NonCourseEvent, CourseOffering, Semester, \
+from learning.models import CourseOffering, Semester, \
     CourseClass
-from learning.utils import grouper
+from learning.views import CalendarMixin
+from .utils import check_for_city
 
 
 def set_city(request, city_code):
@@ -49,7 +49,10 @@ class IndexView(generic.TemplateView):
         courseclass_queryset = (CourseClass.objects
                                            .filter(date__gte=today)
                                            .order_by('date', 'starts_at'))
-        context['courses'] = (CourseOffering.custom.site_related(self.request)
+        context['courses'] = (
+            CourseOffering
+            .custom
+            .site_related(self.request)
             .filter(semester=current_semester.pk)
             .select_related('course', 'semester')
             .prefetch_related(
@@ -58,8 +61,7 @@ class IndexView(generic.TemplateView):
                     'courseclass_set',
                     queryset=courseclass_queryset,
                     to_attr='classes'
-                ),
-            )
+                ))
             .order_by('is_completed', 'course__name'))
 
         return context
@@ -74,10 +76,6 @@ class TeachersView(generic.ListView):
         return user_model.objects.filter(groups__in=teacher_groups).distinct()
 
 
-# TODO: (XXX) Dont' forget to remove it after old.* termination.
-from django.views.defaults import page_not_found
-from django.views.decorators.csrf import requires_csrf_token
-from django.shortcuts import get_object_or_404, redirect
 @requires_csrf_token
 def custom_page_not_found(request, template_name='404.html'):
     return redirect('http://old.compsciclub.ru' + request.path)
