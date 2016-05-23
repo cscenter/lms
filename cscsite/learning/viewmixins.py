@@ -1,6 +1,8 @@
 from braces.views import UserPassesTestMixin
+from django.utils.timezone import now
 
 from learning.models import Enrollment
+from learning.settings import FOUNDATION_YEAR
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):
@@ -79,3 +81,53 @@ class FailedCourseContextMixin(object):
             Enrollment.GRADES.unsatisfactory, Enrollment.GRADES.not_graded):
                 context["is_failed_completed_course"] = True
         return context
+
+
+class ValidateYearMixin(object):
+    """Validate query year GET-param"""
+    @staticmethod
+    def year_is_valid(request):
+        today = now().date()
+        year = request.GET.get('year', today.year)
+        try:
+            year = int(year)
+        except ValueError:
+            return False
+        # Note: we can have events in next year
+        if not (FOUNDATION_YEAR <= year <= today.year + 1):
+            return False
+        return True
+
+
+class ValidateMonthMixin(object):
+    """Validate query month GET-param"""
+    @staticmethod
+    def month_is_valid(request):
+        today = now().date()
+        month = request.GET.get('month', today.month)
+        try:
+            month = int(month)
+        except ValueError:
+            return False
+        if not (1 <= month <= 12):
+            return False
+        return True
+
+
+class ValidateWeekMixin(object):
+    """Validate query week GET-param"""
+    @staticmethod
+    def week_is_valid(request):
+        today = now().date()
+        # This returns current week number. Beware: the week's number
+        # is as of ISO8601, so 29th of December can be reported as
+        # 1st week of the next year.
+        today_year, today_week, _ = today.isocalendar()
+        week = request.GET.get('week', today_week)
+        try:
+            week = int(week)
+        except ValueError:
+            return False
+        if week <= 0:
+            return False
+        return True

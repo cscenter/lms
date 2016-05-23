@@ -3,68 +3,64 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import itertools
 import logging
 import os
-
-import itertools
-import unicodecsv as csv
-
 from calendar import Calendar
 from collections import OrderedDict, defaultdict
-
-from annoying.exceptions import Redirect
-from six import viewvalues
 from itertools import chain
 
+import unicodecsv as csv
+from annoying.exceptions import Redirect
+from core import comment_persistence
+from core.notifications import get_unread_notifications_cache
+from core.utils import hashids, get_club_domain
+from core.views import ProtectedFormMixin, LoginRequiredMixin
+from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, ValidateWeekMixin
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
-    MultipleObjectsReturned
-
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import Q, F, Prefetch, Count, When, Value, Case, \
+from django.db.models import Q, Prefetch, When, Value, Case, \
     IntegerField
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
-from django.views import generic
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
-from dateutil.relativedelta import relativedelta
+from django.utils.translation import ugettext_lazy as _
+from django.views import generic
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF, \
     CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
     GRADING_TYPES
-from core.views import ProtectedFormMixin, LoginRequiredMixin, SuperUserOnlyMixin
 from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin, \
     StudentCenterAndVolunteerOnlyMixin
-from core import comment_persistence
-from .models import Course, CourseClass, CourseOffering, Venue, \
-    CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
-    StudentAssignment, AssignmentComment, \
-    CourseClassAttachment, AssignmentNotification, \
-    CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool, Useful
+from six import viewvalues
+
+from . import utils
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, GradeBookFormFactory
-from core.notifications import get_unread_notifications_cache
-from core.utils import hashids, get_club_domain
-from . import utils
 from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
-
+from .models import Course, CourseClass, CourseOffering, Venue, \
+    CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
+    StudentAssignment, AssignmentComment, \
+    CourseClassAttachment, AssignmentNotification, \
+    CourseOfferingNewsNotification, Semester, NonCourseEvent, \
+    OnlineCourse, InternationalSchool, Useful
 
 logger = logging.getLogger(__name__)
 
 
 class TimetableTeacherView(TeacherOnlyMixin,
+                           ValidateYearMixin,
+                           ValidateMonthMixin,
                            generic.ListView):
     model = CourseClass
     user_type = 'teacher'
@@ -74,15 +70,17 @@ class TimetableTeacherView(TeacherOnlyMixin,
         self._context_weeks = None
         super(TimetableTeacherView, self).__init__(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        if not self.year_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        if not self.month_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        return super(TimetableTeacherView, self).get(request, args, kwargs)
+
     def get_queryset(self):
-        month_qstr = self.request.GET.get('month')
-        year_qstr = self.request.GET.get('year')
-        try:
-            year = int(year_qstr)
-            month = int(month_qstr)
-        except TypeError:
-            today = now().date()
-            year, month = today.year, today.month
+        today = now().date()
+        year = int(self.request.GET.get('year', today.year))
+        month = int(self.request.GET.get('month', today.month))
         chosen_month_date = datetime.date(year=year, month=month, day=1)
         prev_month_date = chosen_month_date + relativedelta(months=-1)
         next_month_date = chosen_month_date + relativedelta(months=+1)
@@ -110,6 +108,8 @@ class TimetableTeacherView(TeacherOnlyMixin,
 
 
 class TimetableStudentView(StudentOnlyMixin,
+                           ValidateYearMixin,
+                           ValidateWeekMixin,
                            generic.ListView):
     model = CourseClass
     user_type = 'student'
@@ -119,17 +119,18 @@ class TimetableStudentView(StudentOnlyMixin,
         self._context_weeks = None
         super(TimetableStudentView, self).__init__(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        if not self.year_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        if not self.week_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        return super(TimetableStudentView, self).get(request, args, kwargs)
+
     def get_queryset(self):
-        week_qstr = self.request.GET.get('week')
-        year_qstr = self.request.GET.get('year')
-        try:
-            week = int(week_qstr)
-            year = int(year_qstr)
-        except TypeError:
-            # This returns current week number. Beware: the week's number
-            # is as of ISO8601, so 29th of December can be reported as
-            # 1st week of the next year.
-            year, week, _ = now().date().isocalendar()
+        today = now().date()
+        today_year, today_week, _ = today.isocalendar()
+        week = int(self.request.GET.get('week', today_week))
+        year = int(self.request.GET.get('year', today_year))
         start = utils.iso_to_gregorian(year, week, 1)
         end = utils.iso_to_gregorian(year, week, 7)
         next_w_cal = (start + datetime.timedelta(weeks=1)).isocalendar()
@@ -160,7 +161,7 @@ class TimetableStudentView(StudentOnlyMixin,
         return context
 
 
-class CalendarMixin(object):
+class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
     model = CourseClass
     template_name = "learning/calendar.html"
 
@@ -169,28 +170,30 @@ class CalendarMixin(object):
         self._non_course_events = None
         super(CalendarMixin, self).__init__(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        if not self.year_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        if not self.month_is_valid(request):
+            return HttpResponseRedirect(request.path)
+        return super(CalendarMixin, self).get(request, args, kwargs)
+
     def noncourse_events(self, request, month, year, prev_month_date,
                          next_month_date):
         if request.site.domain == settings.CLUB_DOMAIN:
             return NonCourseEvent.objects.none()
         return (NonCourseEvent.objects
-               .filter(Q(date__month=month, date__year=year)
-                       | Q(date__month=prev_month_date.month,
-                           date__year=prev_month_date.year)
-                       | Q(date__month=next_month_date.month,
-                           date__year=next_month_date.year))
-               .order_by('date', 'starts_at')
-               .select_related('venue'))
+                .filter(Q(date__month=month, date__year=year) |
+                        Q(date__month=prev_month_date.month,
+                          date__year=prev_month_date.year) |
+                        Q(date__month=next_month_date.month,
+                          date__year=next_month_date.year))
+                .order_by('date', 'starts_at')
+                .select_related('venue'))
 
     def get_queryset(self):
-        year_qstr = self.request.GET.get('year')
-        month_qstr = self.request.GET.get('month')
-        try:
-            year = int(year_qstr)
-            month = int(month_qstr)
-        except TypeError:
-            today = now().date()
-            year, month = today.year, today.month
+        today = now().date()
+        year = int(self.request.GET.get('year', today.year))
+        month = int(self.request.GET.get('month', today.month))
         self._month_date = datetime.date(year=year, month=month, day=1)
         prev_month_date = self._month_date + relativedelta(months=-1)
         next_month_date = self._month_date + relativedelta(months=+1)
