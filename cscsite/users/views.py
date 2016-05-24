@@ -213,7 +213,7 @@ class UserDetailView(generic.DetailView):
 
 class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     model = CSCUser
-    template_name = "learning/simple_crispy_form.html"
+    template_name = "users/user_edit.html"
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
