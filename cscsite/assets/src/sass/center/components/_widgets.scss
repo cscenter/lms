@@ -1,0 +1,21 @@
+.widget-shadow {
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.widget-title {
+  color: #37474f;
+}
+
+.overlay-panel .widget-title {
+  color: #ffffff;
+}
+
+.widget-watermark {
+  &.darker {
+    color: black;
+  }
+  &.lighter {
+    color: white;
+  }
+}
