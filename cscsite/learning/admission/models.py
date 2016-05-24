@@ -88,7 +88,9 @@ class Applicant(TimeStampedModel):
         validators=[RegexValidator(regex="^[^@]*$",
                                    message=_("Only the part before "
                                              "\"@yandex.ru\" is expected"))],
-        help_text=_("Applicant|yandex_id"))
+        help_text=_("Applicant|yandex_id"),
+        null=True,
+        blank=True)
     yandex_id_normalize = models.CharField(
         _("Yandex ID normalisation"),
         max_length=80,
