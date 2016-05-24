@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/profile.min.js" %}"></script>
+{% endblock javascripts %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      {% crispy form form.helper %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
