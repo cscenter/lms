@@ -79,8 +79,9 @@ class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     @property
     def form(self):
         if not hasattr(self, '_form'):
+            today = now().date()
             self._form = super(InterviewsFilter, self).form
-            self._form.fields["status"].initial = Interview.WAITING
+            self._form.fields["date"].initial = today.strftime("%d.%m.%Y")
             self._form.fields["status"].help_text = ""
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
