@@ -191,8 +191,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .annotate(average=Avg('comments__score'))
              .order_by("date"))
         if not self.request.user.is_curator:
-            q = (q.filter(interviewers=self.request.user)
-                  .exclude(status=Interview.CANCELED))
+            q = q.filter(interviewers=self.request.user)
         return q
 
 
