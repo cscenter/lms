@@ -16,14 +16,18 @@ def post_save_interview_update_applicant_status(sender, instance, created,
 
 def post_save_interview_comment(sender, instance, created,
                                 *args, **kwargs):
-    """Set interview status to `completed` if all interviewers leave a comment
+    """
+    Set interview status to `completed` if all interviewers leave a comment
+    Add curator to interviewers if he leave a comment and not in a list yet.
     """
     if not created:
         return
     Interview = apps.get_model('admission', 'Interview')
     Comment = apps.get_model('admission', 'Comment')
-    interviewers_cnt = len(instance.interview.interviewers.all())
+    interviewers = instance.interview.interviewers.all()
     comments_cnt = Comment.objects.filter(interview=instance.interview).count()
-    if interviewers_cnt == comments_cnt:
+    if len(interviewers) == comments_cnt:
         instance.interview.status = Interview.COMPLETED
         instance.interview.save()
+    if instance.interviewer not in interviewers and instance.interviewer.is_curator:
+        instance.interview.interviewers.add(instance.interviewer)

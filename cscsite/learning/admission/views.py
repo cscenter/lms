@@ -242,6 +242,8 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         return context
 
     def _get_interviewer(self):
+        if self.request.user.is_curator:
+            return self.request.user
         for i in self.interview.interviewers.all():
             if i.pk == self.request.user.pk:
                 return i
@@ -252,10 +254,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         interviewer = self._get_interviewer()
         kwargs = super(InterviewDetailView, self).get_form_kwargs()
         kwargs['initial']['interview'] = interview_id
-        if hasattr(interviewer, 'pk'):
-            kwargs['initial']['interviewer'] = interviewer.pk
-        else:
-            kwargs['initial']['interviewer'] = self.request.user.pk
+        kwargs['initial']['interviewer'] = self.request.user.pk
         # Store values to validate submitted interviewer/interview on form level
         kwargs.update({"interviewer": interviewer})
         kwargs.update({"interview_id": interview_id})

@@ -61,7 +61,7 @@ class InterviewCommentForm(forms.ModelForm):
 
     def clean_interviewer(self):
         interviewer = self.cleaned_data['interviewer']
-        if interviewer != self.interviewer:
+        if not self.interviewer or (interviewer != self.interviewer and not self.interviewer.is_curator):
             raise ValidationError(
                 _("Sorry, but you should be in interviewers list to "
                   "create or update comment.")
