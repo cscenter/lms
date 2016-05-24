@@ -26,11 +26,21 @@ module.exports = function (grunt) {
             main: {
                 src: ['cscsite/assets/src/js/main.js'],
                 dest: 'cscsite/assets/js/main.js'
+            },
+            profile: {
+                src: ['cscsite/assets/js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
+                      'cscsite/assets/src/js/profile.js'],
+                dest: 'cscsite/assets/js/profile.min.js'
             }
         },
         uglify: {
             main: {
                 files: {'cscsite/assets/js/main.js': ['cscsite/assets/src/js/main.js']}
+            },
+            profile: {
+                files: {
+                    'cscsite/assets/js/profile.min.js': ['cscsite/assets/js/profile.min.js']
+                }
             }
         },
         watch: {

@@ -1,4 +1,4 @@
-{% extends "base_offcanvas_menu.html" %}
+{% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
 
@@ -29,6 +29,19 @@
                 </a>
             </div>
         </div>
+
+<div class="widget">
+            <div class="widget-content padding-30 bg-blue-600">
+              <div class="widget-watermark darker font-size-60 margin-15"><i class="icon wb-clipboard" aria-hidden="true"></i></div>
+              <div class="counter counter-md counter-inverse text-left">
+                <div class="counter-number-group">
+                  <span class="counter-number">25</span>
+                  <span class="counter-number-related text-capitalize">projects</span>
+                </div>
+                <div class="counter-label text-capitalize">in design</div>
+              </div>
+            </div>
+          </div>
     </div>
 </div>
 {% endblock content %}
