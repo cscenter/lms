@@ -84,7 +84,8 @@ deploy_remote:
 # it's not in git, sorry --> grunt build
 	$(call check_defined, app_user)
 	git push
-	cd infrastructure && PYENV_VERSION="system" ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
+	# Looks like empty PYENV_VERSION force to use system python
+	cd infrastructure && PYENV_VERSION="" ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.

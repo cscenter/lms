@@ -177,10 +177,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         today_min = datetime.datetime.combine(now(), datetime.time.min)
         today_max = datetime.datetime.combine(now(), datetime.time.max)
         context = super(InterviewListView, self).get_context_data(**kwargs)
-        # context["total"] = self.get_queryset().count()
         # TODO: collect stats for curators here?
         context["today"] = self.get_queryset().filter(
-            date__range=(today_min, today_max)).count()
+            date__range=(today_min, today_max), status=Interview.WAITING).count()
         context["filter"] = self.filterset
         return context
 
