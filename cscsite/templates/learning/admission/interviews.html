@@ -70,7 +70,7 @@
                   <th>Время</th>
                   <th>Поступающий</th>
                   <th>Собеседующие</th>
-                  <th>{% if not filter.form.status.value or filter.form.status.value == "completed" %}Средний&nbsp;балл{% endif %}</th>
+                  <th>{% if not filter.form.status.value or filter.form.status.value == "completed" or filter.form.status.value == "agreed" %}Средний&nbsp;балл{% endif %}</th>
               </tr>
             </thead>
             <tbody>
@@ -102,7 +102,7 @@
                         <td>
                             {% if interview.status == "completed" %}
                                 {{ interview.average|floatformat }}
-                            {% elif not filter.form.status.value %}
+                            {% elif not filter.form.status.value or filter.form.status.value == "agreed" %}
                                 <span>{{ interview.get_status_display }}</span>
                             {% endif %}
                         </td>

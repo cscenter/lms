@@ -58,7 +58,25 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         return self._form
 
 
+class InterviewStatusFilter(django_filters.ChoiceFilter):
+    AGREED = "agreed"
+    AGREED_CHOICE = (AGREED, _('Agreed'))
+
+    def __init__(self, *args, **kwargs):
+        super(InterviewStatusFilter, self).__init__(*args, **kwargs)
+        self.extra['choices'] = (self.AGREED_CHOICE,) + self.extra['choices']
+
+    def filter(self, qs, value):
+        if value == self.AGREED:
+            qs = self.get_method(qs)(**{
+                '%s__%s' % (self.name, "in"): [Interview.COMPLETED, Interview.WAITING]})
+            return qs
+        return super(InterviewStatusFilter, self).filter(qs, value)
+
+
 class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+    status = InterviewStatusFilter(choices=Interview.STATUSES, label=_("Status"),
+                                   help_text="")
     date = django_filters.MethodFilter(action='filter_by_date', label=_("Date"),
                                        help_text="", name="date")
 
@@ -81,8 +99,8 @@ class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         if not hasattr(self, '_form'):
             today = now().date()
             self._form = super(InterviewsFilter, self).form
+            self._form.fields["status"].initial = InterviewStatusFilter.AGREED
             self._form.fields["date"].initial = today.strftime("%d.%m.%Y")
-            self._form.fields["status"].help_text = ""
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
