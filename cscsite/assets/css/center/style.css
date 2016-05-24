@@ -6313,46 +6313,6 @@ body.sign-in, body.reset-password, body.gray {
   padding-right: 0;
   padding-left: 0; }
 
-.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button {
-  color: #9B9B9B;
-  background-color: transparent; }
-  .btn-outline.btn-default:hover, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover, .btn-outline.btn-default:focus, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus, .btn-outline.btn-default:active, #assignments-page .page-main .filters .btn-default#assignments-select-button:active, .btn-outline.btn-default.active, #assignments-page .page-main .filters .btn-default.active#assignments-select-button,
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default,
-  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button {
-    border-color: #e4eaec;
-    background-color: rgba(118, 131, 143, 0.1);
-    color: #76838f; }
-  .btn-outline.btn-default:hover .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover .badge,
-  .btn-outline.btn-default:focus .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus .badge,
-  .btn-outline.btn-default:active .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:active .badge,
-  .btn-outline.btn-default.active .badge, #assignments-page .page-main .filters .btn-default.active#assignments-select-button .badge,
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default .badge,
-  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button .badge {
-    color: #76838f;
-    background-color: #76838f; }
-
-.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button {
-  color: #337ab7;
-  background-color: transparent; }
-  .btn-outline.btn-primary:hover, #assignments-page .page-main .filters #assignments-select-button:hover, .btn-outline.btn-primary:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn-outline.btn-primary:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn-outline.btn-primary.active, #assignments-page .page-main .filters .active#assignments-select-button,
-  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary,
-  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters
-  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button {
-    border-color: #2b679b;
-    background-color: #2d6da3;
-    color: #ffffff; }
-  .btn-outline.btn-primary:hover .badge, #assignments-page .page-main .filters #assignments-select-button:hover .badge,
-  .btn-outline.btn-primary:focus .badge, #assignments-page .page-main .filters #assignments-select-button:focus .badge,
-  .btn-outline.btn-primary:active .badge, #assignments-page .page-main .filters #assignments-select-button:active .badge,
-  .btn-outline.btn-primary.active .badge, #assignments-page .page-main .filters .active#assignments-select-button .badge,
-  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary .badge,
-  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters
-  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button .badge {
-    color: #57c7d4;
-    background-color: #ffffff; }
-
 .label, .event-types span {
   font-weight: normal; }
 
@@ -7151,9 +7111,6 @@ h2.right-line:after {
 .assignment-date.day-after-tomorrow {
   color: #f2a654; }
 
-.btn-outline, #assignments-page .page-main .filters #assignments-select-button {
-  background: none; }
-
 #assignments-page {
   position: relative;
   min-height: 500px; }
@@ -7283,6 +7240,46 @@ h2.right-line:after {
       border-left-width: 1px; }
     .input-daterange .input-group-addon:last-child {
       border-right-width: 1px; }
+
+.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button {
+  color: #9B9B9B;
+  background-color: transparent; }
+  .btn-outline.btn-default:hover, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover, .btn-outline.btn-default:focus, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus, .btn-outline.btn-default:active, #assignments-page .page-main .filters .btn-default#assignments-select-button:active, .btn-outline.btn-default.active, #assignments-page .page-main .filters .btn-default.active#assignments-select-button,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default,
+  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button {
+    border-color: #e4eaec;
+    background-color: rgba(118, 131, 143, 0.1);
+    color: #76838f; }
+  .btn-outline.btn-default:hover .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover .badge,
+  .btn-outline.btn-default:focus .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus .badge,
+  .btn-outline.btn-default:active .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:active .badge,
+  .btn-outline.btn-default.active .badge, #assignments-page .page-main .filters .btn-default.active#assignments-select-button .badge,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default .badge,
+  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button .badge {
+    color: #76838f;
+    background-color: #76838f; }
+
+.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button {
+  color: #337ab7;
+  background-color: transparent; }
+  .btn-outline.btn-primary:hover, #assignments-page .page-main .filters #assignments-select-button:hover, .btn-outline.btn-primary:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn-outline.btn-primary:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn-outline.btn-primary.active, #assignments-page .page-main .filters .active#assignments-select-button,
+  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary,
+  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters
+  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button {
+    border-color: #2b679b;
+    background-color: #2d6da3;
+    color: #ffffff; }
+  .btn-outline.btn-primary:hover .badge, #assignments-page .page-main .filters #assignments-select-button:hover .badge,
+  .btn-outline.btn-primary:focus .badge, #assignments-page .page-main .filters #assignments-select-button:focus .badge,
+  .btn-outline.btn-primary:active .badge, #assignments-page .page-main .filters #assignments-select-button:active .badge,
+  .btn-outline.btn-primary.active .badge, #assignments-page .page-main .filters .active#assignments-select-button .badge,
+  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary .badge,
+  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters
+  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button .badge {
+    color: #57c7d4;
+    background-color: #ffffff; }
 
 .btn-danger.btn-block, .btn-success.btn-block, .btn-primary.btn-block, #assignments-page .page-main .filters .btn-block#assignments-select-button {
   padding: 10px 12px; }
