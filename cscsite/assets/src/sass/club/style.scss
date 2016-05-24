@@ -19,9 +19,11 @@ $background-grey: #f8f8f8;
 @import "../center/pages/courses_list_student.scss";
 @import "../center/pages/_calendar";
 @import "../center/pages/_assignments";
+@import "../center/components/buttons";
 @import "../center/components/labels";
 @import "../center/components/page_aside";
 @import "top_menu.scss";
+
 
 // index page
 .font-bigger {

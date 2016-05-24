@@ -44,6 +44,7 @@ $state-success-text: $color-green;
 @import "pages/_calendar";
 
 @import "components/input-daterange";
+@import "components/buttons";
 
 // Boostrap overrides for cscenter site
 .btn-danger, .btn-success, .btn-primary {
