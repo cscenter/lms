@@ -35,6 +35,7 @@ YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
 
 logger = logging.getLogger(__name__)
 
+
 # TODO: Add tests
 class MonitorFieldMixin(object):
     def __init__(self, *args, **kwargs):

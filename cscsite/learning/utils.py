@@ -70,6 +70,21 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
+def get_term_by_index(term_index):
+    """Inverse func for `get_term_index`"""
+    # TODO: add tests!
+    assert term_index >= TERMS_INDEX_START
+    terms_in_year = len(SEMESTER_TYPES)
+    term_index -= TERMS_INDEX_START
+    year = FOUNDATION_YEAR + term_index / terms_in_year
+    term = term_index % terms_in_year
+    for index, (t, _) in enumerate(SEMESTER_TYPES):
+        if index == term:
+            term = t
+    assert not isinstance(term, int)
+    return year, term
+
+
 def split_list(iterable, predicate):
     true_lst, false_lst = [], []
     for x in iterable:

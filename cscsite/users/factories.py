@@ -7,7 +7,8 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ImproperlyConfigured
 
 from learning.settings import PARTICIPANT_GROUPS, GRADES
-from users.models import CSCUser, SHADCourseRecord, CSCUserReference
+from users.models import CSCUser, SHADCourseRecord, CSCUserReference, \
+    OnlineCourseRecord
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -59,6 +60,15 @@ class StudentClubFactory(UserFactory):
 
 class TeacherCenterFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+
+
+class OnlineCourseRecordFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = OnlineCourseRecord
+
+    name = factory.Sequence(lambda n: "Online course %03d" % n)
+    student = factory.SubFactory(UserFactory,
+                                 groups=[CSCUser.group_pks.STUDENT_CENTER])
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):

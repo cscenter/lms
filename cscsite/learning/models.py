@@ -92,6 +92,7 @@ class Semester(models.Model):
         help_text=_("System field. Do not manually edit"),
         editable=False)
 
+    # FIXME: legacy??? check it
     @property
     def type_index(self):
         """ Return int representation of semester type """
@@ -109,6 +110,7 @@ class Semester(models.Model):
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
 
+    # FIXME: legacy??? check it. Maybe should replace with `index` attr
     def __cmp__(self, other):
         """ Compare by year and semester type """
         if self.year != other.year:
@@ -151,6 +153,10 @@ class Semester(models.Model):
         if created:
             obj.save()
         return obj
+
+    def is_current(self):
+        year, term = get_current_semester_pair()
+        return year == self.year and term == self.type
 
     def save(self, *args, **kwargs):
         self.index = get_term_index(self.year, self.type)
@@ -857,7 +863,6 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
-        print(getattr(GRADES, 'pass'))
         if (self.course_offering.grading_type == GRADING_TYPES.default and
                 self.grade == getattr(GRADES, 'pass')):
             return _("Satisfactory")
