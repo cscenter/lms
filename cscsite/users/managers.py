@@ -11,7 +11,8 @@ class CSCUserQuerySet(query.QuerySet):
     def students_info(self,
                       filters=None,
                       exclude=None,
-                      semester=False):
+                      semester=False,
+                      include_not_graded=False):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
@@ -34,22 +35,19 @@ class CSCUserQuerySet(query.QuerySet):
             q = q.exclude(**exclude)
 
         exclude_enrollment_grades = ['unsatisfactory']
-
-        current_semester = Semester.get_current()
-        if semester != current_semester:
+        if not include_not_graded:
             exclude_enrollment_grades.append('not_graded')
 
         enrollment_queryset = (Enrollment.objects
-            .exclude(grade__in=exclude_enrollment_grades)
-            .order_by('course_offering__course__name'))
-
+                               .exclude(grade__in=exclude_enrollment_grades)
+                               .order_by('course_offering__course__name'))
         shad_queryset = SHADCourseRecord.objects.get_queryset()
-
-        if semester:
+        if isinstance(semester, Semester):
+            semester_upper_bound = semester.index
             enrollment_queryset = enrollment_queryset.filter(
-                course_offering__semester=semester)
+                course_offering__semester__index__lte=semester_upper_bound)
             shad_queryset = shad_queryset.filter(
-                semester=semester
+                semester__index__lte=semester_upper_bound
             )
 
         # Note: No idea how it works with thousands students
@@ -83,8 +81,9 @@ class CSCUserQuerySet(query.QuerySet):
                         where=['%s.roles & 1=%s' %
                                (CourseOfferingTeacher._meta.db_table,
                                 int(CourseOfferingTeacher.roles.lecturer))],
-                        order_by=["%s.roles" %
-                                  CourseOfferingTeacher._meta.db_table]
+                        order_by=["%s.roles" % CourseOfferingTeacher._meta.db_table,
+                                  "last_name",
+                                  "first_name"]
                     )
                 ),
                 Prefetch(

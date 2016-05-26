@@ -42,7 +42,6 @@ class SemesterWidget(widgets.Widget):
             type = self.MAPPING[type]
         return Semester.objects.get(type=type, year=year).pk
 
-
     def render(self, value):
         # TODO: not implemented for export
         return value
@@ -59,11 +58,11 @@ class ImportWithEmptyIdMixin(object):
 
 class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
     student_id = fields.Field(column_name='student_id', attribute='student',
-                           widget=widgets.ForeignKeyWidget(CSCUser))
+                              widget=widgets.ForeignKeyWidget(CSCUser))
     grade = fields.Field(column_name='grade', attribute='grade',
-                           widget=GradeWidget())
+                         widget=GradeWidget())
     semester = fields.Field(column_name='semester', attribute='semester_id',
-                           widget=SemesterWidget())
+                            widget=SemesterWidget())
 
     class Meta:
         model = SHADCourseRecord

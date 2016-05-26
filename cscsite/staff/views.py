@@ -2,35 +2,31 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import io
-from abc import ABCMeta, abstractmethod
-
-import six
-import unicodecsv
 from collections import OrderedDict, defaultdict
 
+import unicodecsv
+from braces.views import JSONResponseMixin
 from django.core.urlresolvers import reverse
-from django.db.models import F, Count, Case, When, Value, IntegerField
+from django.db.models import Count
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import smart_str, smart_text, \
-    force_text
+from django.utils.encoding import force_text
 from django.views import generic
-from django.http import HttpResponse, JsonResponse, Http404
-from braces.views import LoginRequiredMixin, JSONResponseMixin
 from xlsxwriter import Workbook
 
-from core.views import SuperUserOnlyMixin
+from learning.models import Semester
+from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
+    ProgressReportForSemester
+from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES
+from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
-from learning.models import StudentProject, Semester
-from learning.utils import get_current_semester_pair, get_term_index
-from learning.settings import STUDENT_STATUS
 from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
 
 
 class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
     content_type = u"application/javascript; charset=utf-8"
-    limit = 1000
+    limit = 500
 
     def get(self, request, *args, **kwargs):
         qs = CSCUser.objects.values('first_name', 'last_name', 'pk')
@@ -41,7 +37,6 @@ class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
         filtered_users = filter.qs[:self.limit + 1]
         for u in filtered_users:
             u['url'] = reverse('user_detail', args=[u['pk']])
-        # return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
         # TODO: JsonResponse returns unicode. Hard to debug.
         return self.render_json_response({
             "total": len(filtered_users[:self.limit]),
@@ -67,243 +62,98 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
                              context["groups"]}
         context['status'] = CSCUser.STATUS
         context["status"] = {sid: name for sid, name in context["status"]}
-        context["cnt_enrollments"] = range(CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
+        context["cnt_enrollments"] = range(
+            CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
         return context
 
 
-class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
+class ExportsView(CuratorOnlyMixin, generic.TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super(ExportsView, self).get_context_data(**kwargs)
+        year, term = get_current_semester_pair()
+        current_term_index = get_term_index(year, term)
+        context["current_term"] = {"year": year, "type": term}
+        prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
+        context["prev_term"] = {"year": prev_term_year, "type": prev_term}
+        return context
+    template_name = "staff/exports.html"
+
+
+class StudentsInfoForDiplomasMixin(object):
+    @staticmethod
+    def get_students_info():
+        return CSCUser.objects.students_info(filters={
+            "status": CSCUser.STATUS.will_graduate
+        })
+
+
+class StudentsDiplomasView(CuratorOnlyMixin, StudentsInfoForDiplomasMixin,
+                           generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = CSCUser.objects.students_info(filters={
-            "status": CSCUser.STATUS.will_graduate
-        })
+        context['students'] = self.get_students_info()
         return context
 
 
-class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
+class StudentsDiplomasCSVView(CuratorOnlyMixin, StudentsInfoForDiplomasMixin,
+                              generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info(filters={
-            "status": CSCUser.STATUS.will_graduate
-        })
-
-        # Prepare courses and student projects data
-        courses_headers = OrderedDict()
-        shads_max = 0
-        projects_max = 0
-        for s in students:
-            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
-            for e in s.enrollments:
-                courses_headers[e.course_offering.course.id] = \
-                    e.course_offering.course.name
-                teachers = [t.get_full_name() for t
-                            in e.course_offering.teachers.all()]
-                student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_honest.lower(),
-                    teachers=", ".join(teachers)
-                )
-            s.courses = student_courses
-
-            if len(s.shads) > shads_max:
-                shads_max = len(s.shads)
-
-            if len(s.projects) > projects_max:
-                projects_max = len(s.projects)
+        students_data = self.get_students_info()
+        progress_report = ProgressReportForDiplomas(students_data)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        filename = "diplomas_{}.csv".format(datetime.datetime.now().year)
-        response['Content-Disposition'] \
-            = 'attachment; filename="{}"'.format(filename)
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
+            progress_report.get_filename())
+
         w = unicodecsv.writer(response, encoding='utf-8')
-
-        headers = ['Фамилия', 'Имя', 'Отчество', 'Университет', 'Направления']
-        for course_id, course_name in six.iteritems(courses_headers):
-            headers.append(course_name + ', оценка')
-            headers.append(course_name + ', преподаватели')
-        for i in range(1, shads_max + 1):
-            headers.append('ШАД, курс {}, название'.format(i))
-            headers.append('ШАД, курс {}, оценка'.format(i))
-        for i in range(1, projects_max + 1):
-            headers.append('Проект {}, оценка'.format(i))
-            headers.append('Проект {}, руководитель(и)'.format(i))
-            headers.append('Проект {}, семестр'.format(i))
-        w.writerow(headers)
-
-        for s in students:
-            row = [s.last_name, s.first_name, s.patronymic, s.university,
-                   " и ".join((s.name for s in s.study_programs.all()))]
-            for course_id in courses_headers:
-                sc = s.courses[course_id]
-                row.extend([sc['grade'], sc['teachers']])
-
-            s.shads.extend([None] * (shads_max - len(s.shads)))
-            for shad in s.shads:
-                if shad is not None:
-                    row.extend([shad.name, shad.grade])
-                else:
-                    row.extend(['', ''])
-
-            s.projects.extend([None] * (projects_max - len(s.projects)))
-            for p in s.projects:
-                if p is not None:
-                    row.extend([p.name, p.supervisor, p.semester])
-                else:
-                    row.extend(['', '', ''])
+        w.writerow(progress_report.headers)
+        for student in progress_report.data:
+            row = progress_report.export_row(student)
             w.writerow(row)
 
         return response
 
 
-class ExportsView(CuratorOnlyMixin, generic.TemplateView):
-    template_name = "staff/exports.html"
-
-
-class StudentsAllSheetCSVView(CuratorOnlyMixin, generic.base.View):
+class ProgressReportFullCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students = CSCUser.objects.students_info()
-
-        # Prepare courses and student projects data
-        courses_headers = OrderedDict()
-        shads_max = 0
-        online_courses_max = 0
-        projects_max = 0
-        for s in students:
-            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
-            for e in s.enrollments:
-                courses_headers[e.course_offering.course.id] = \
-                    e.course_offering.course.name
-                teachers = [t.get_full_name() for t
-                            in e.course_offering.teachers.all()]
-                student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_honest.lower(),
-                    teachers=", ".join(teachers)
-                )
-            s.courses = student_courses
-
-            if len(s.shads) > shads_max:
-                shads_max = len(s.shads)
-
-            if len(s.online_courses) > online_courses_max:
-                online_courses_max = len(s.online_courses)
-
-            if len(s.projects) > projects_max:
-                projects_max = len(s.projects)
+        students_data = CSCUser.objects.students_info()
+        progress_report = ProgressReportFull(students_data,
+                                             honest_grade_system=True,
+                                             request=request)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
-        now = datetime.datetime.now()
-        filename = "sheet_{}.csv".format(now.strftime("%d.%m.%Y"))
-        response['Content-Disposition'] \
-            = 'attachment; filename="{}"'.format(filename)
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
+            progress_report.get_filename())
         w = unicodecsv.writer(response, encoding='utf-8')
-
-        headers = [
-            'Фамилия',
-            'Имя',
-            'Отчество',
-            'Вольнослушатель',
-            'ВУЗ',
-            'Курс (на момент поступления)',
-            'Год поступления',
-            'Год выпуска',
-            'Почта',
-            'Яндекс ID',
-            'Телефон',
-            'Направления обучения',
-            'Статус',
-            'Дата статуса или итога (изменения)',
-            'Комментарий',
-            'Дата последнего изменения комментария',
-            'Работа',
-            'Сдано курсов',
-            'Ссылка на профиль',
-        ]
-        for course_id, course_name in six.iteritems(courses_headers):
-            headers.append(course_name + ', оценка')
-            headers.append(course_name + ', преподаватели')
-        for i in xrange(1, projects_max + 1):
-            headers.append('Проект {}, оценка'.format(i))
-            headers.append('Проект {}, руководитель(и)'.format(i))
-            headers.append('Проект {}, семестр(ы)'.format(i))
-        for i in xrange(1, shads_max + 1):
-            headers.append('ШАД, курс {}, название'.format(i))
-            headers.append('ШАД, курс {}, преподаватели'.format(i))
-            headers.append('ШАД, курс {}, оценка'.format(i))
-        for i in xrange(1, online_courses_max + 1):
-            headers.append('Онлайн-курс {}, название'.format(i))
-        w.writerow(headers)
-
-        for s in students:
-            row = [
-                s.last_name,
-                s.first_name,
-                s.patronymic,
-                "+" if s.is_volunteer else "",
-                s.university,
-                s.uni_year_at_enrollment,
-                s.enrollment_year,
-                s.graduation_year,
-                s.email,
-                s.yandex_id,
-                s.phone,
-                " и ".join((s.name for s in s.study_programs.all())),
-                s.status_display,
-                '',
-                s.comment,
-                s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
-                s.workplace,
-                len(s.courses) + len(s.shads) + len(s.online_courses),
-                request.build_absolute_uri(s.get_absolute_url())
-            ]
-
-            for course_id in courses_headers:
-                sc = s.courses[course_id]
-                row.extend([sc['grade'], sc['teachers']])
-
-            s.projects.extend([None] * (projects_max - len(s.projects)))
-            for p in s.projects:
-                if p is not None:
-                    row.extend([p.name, p.supervisor, p.semester])
-                else:
-                    row.extend(['', '', ''])
-
-            s.shads.extend([None] * (shads_max - len(s.shads)))
-            for shad in s.shads:
-                if shad is not None:
-                    row.extend([shad.name, shad.teachers, shad.grade_display])
-                else:
-                    row.extend(['', '', ''])
-
-            s.online_courses.extend([None] * (online_courses_max -
-                                              len(s.online_courses)))
-            for online_course in s.online_courses:
-                if online_course is not None:
-                    row.extend([online_course.name])
-                else:
-                    row.extend([''])
-
+        w.writerow(progress_report.headers)
+        for student in progress_report.data:
+            row = progress_report.export_row(student)
             w.writerow(row)
         return response
 
 
-class StudentSummaryBySemesterMixin(object):
+class ProgressReportForSemesterMixin(object):
     def get(self, request, *args, **kwargs):
+        # Validate GET params
         try:
-            semester_year = int(self.kwargs['semester_year'])
-            semester_type = self.kwargs['semester_type']
-            filter = {
-                "year": semester_year,
-                "type": semester_type
-            }
-            semester = get_object_or_404(Semester, **filter)
-        except KeyError:
-            semester = Semester.get_current()
+            term_year = int(self.kwargs['term_year'])
+            if term_year < FOUNDATION_YEAR:
+                raise ValueError("ProgressReportBySemester: Wrong year format")
+            term_type = self.kwargs['term_type']
+            if term_type not in SEMESTER_TYPES:
+                raise ValueError("ProgressReportBySemester: Wrong term format")
+            filters = {"year": term_year, "type": term_type}
+            semester = get_object_or_404(Semester, **filters)
+        except (KeyError, ValueError):
+            return HttpResponseBadRequest()
 
-        students = CSCUser.objects.students_info(
+        students_data = CSCUser.objects.students_info(
             filters={
                 "groups__in": [
                     CSCUser.group_pks.STUDENT_CENTER,
@@ -313,122 +163,58 @@ class StudentSummaryBySemesterMixin(object):
             exclude={
                 "status": STUDENT_STATUS.expelled
             },
-            semester=semester
+            semester=semester,
+            include_not_graded=True
         )
 
-        # Prepare courses and student projects data
-        courses_headers = OrderedDict()
-        for s in students:
-            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
-            for e in s.enrollments:
-                courses_headers[e.course_offering.course.id] = \
-                    e.course_offering.course.name
-                teachers = [t.get_full_name() for t
-                            in e.course_offering.teachers.all()]
-                student_courses[e.course_offering.course.id] = dict(
-                    grade=e.grade_honest.lower(),
-                    teachers=", ".join(teachers)
-                )
-            s.courses = student_courses
+        progress_report = ProgressReportForSemester(students_data,
+                                                    honest_grade_system=True,
+                                                    target_semester=semester,
+                                                    request=request)
+        return self.generate_response(progress_report)
 
-        headers = [
-            'Фамилия',
-            'Имя',
-            'Отчество',
-            'Вольнослушатель',
-            'ВУЗ',
-            'Курс (на момент поступления)',
-            'Год поступления',
-            'Год выпуска',
-            'Почта',
-            'Яндекс ID',
-            'Телефон',
-            'Направления обучения',
-            'Статус',
-            'Дата статуса или итога (изменения)',
-            'Комментарий',
-            'Дата последнего изменения комментария',
-            'Работа',
-            'Сдано курсов (Центр/Клуб/ШАД)',
-            'Ссылка на профиль',
-        ]
-        for course_id, course_name in six.iteritems(courses_headers):
-            headers.append(course_name + ', оценка')
-            headers.append(course_name + ', преподаватели')
-
-        return self.get_response(headers,
-                                 self.students_iter(students, courses_headers),
-                                 semester)
-
-    def students_iter(self, students, courses_headers):
-        for s in students:
-            row = [
-                s.last_name,
-                s.first_name,
-                s.patronymic,
-                "+" if s.is_volunteer else "",
-                s.university,
-                s.uni_year_at_enrollment,
-                s.enrollment_year,
-                s.graduation_year,
-                s.email,
-                s.yandex_id,
-                s.phone,
-                " и ".join((s.name for s in s.study_programs.all())),
-                s.status_display,
-                '',
-                s.comment,
-                s.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
-                s.workplace,
-                len(s.courses) + len(s.shads),
-                self.request.build_absolute_uri(s.get_absolute_url())
-            ]
-            for course_id in courses_headers:
-                sc = s.courses[course_id]
-                row.extend([sc['grade'], sc['teachers']])
-
-            yield row
-
-    def get_response(self, headers, data, semester):
-        raise NotImplemented("StudentSummaryBySemesterMixin: not implemented")
+    def generate_response(self, progress_report):
+        raise NotImplemented("ProgressReportBySemesterMixin: not implemented")
 
 
-class StudentSummaryBySemesterCSVView(CuratorOnlyMixin,
-                                      StudentSummaryBySemesterMixin,
-                                      generic.base.View):
+class ProgressReportForSemesterCSVView(CuratorOnlyMixin,
+                                       ProgressReportForSemesterMixin,
+                                       generic.base.View):
     http_method_names = ['get']
 
-    def get_response(self, headers, data_iter, semester):
+    def generate_response(self, progress_report):
         output = io.BytesIO()
         w = unicodecsv.writer(output, encoding='utf-8')
 
-        w.writerow(headers)
-        for row in data_iter:
+        w.writerow(progress_report.headers)
+        for student in progress_report.data:
+            row = progress_report.export_row(student)
             w.writerow(row)
 
         output.seek(0)
         response = HttpResponse(output.read(),
                                 content_type='text/csv; charset=utf-8')
-        filename = "sheet_{}_{}.csv".format(semester.year, semester.type)
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
+            progress_report.get_filename())
         return response
 
 
-class StudentSummaryBySemesterExcel2010View(CuratorOnlyMixin,
-                                            StudentSummaryBySemesterMixin,
-                                            generic.base.View):
+class ProgressReportForSemesterExcel2010View(CuratorOnlyMixin,
+                                             ProgressReportForSemesterMixin,
+                                             generic.base.View):
     http_method_names = ['get']
 
-    def get_response(self, headers, data_iter, semester):
+    def generate_response(self, progress_report):
         output = io.BytesIO()
         workbook = Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet()
 
-        bold = workbook.add_format({'bold': True})
-        for index, header in enumerate(headers):
-            worksheet.write(0, index, header, bold)
+        format_bold = workbook.add_format({'bold': True})
+        for index, header in enumerate(progress_report.headers):
+            worksheet.write(0, index, header, format_bold)
 
-        for row_index, row in enumerate(data_iter, start=1):
+        for row_index, raw_row in enumerate(progress_report.data, start=1):
+            row = progress_report.export_row(raw_row)
             for col_index, value in enumerate(row):
                 value = "" if value is None else force_text(value)
                 worksheet.write(row_index, col_index, force_text(value))
@@ -436,9 +222,9 @@ class StudentSummaryBySemesterExcel2010View(CuratorOnlyMixin,
         workbook.close()
         output.seek(0)
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        filename = "sheet_{}_{}.xlsx".format(semester.year, semester.type)
         response = HttpResponse(output.read(), content_type=content_type)
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        response['Content-Disposition'] = 'attachment; filename="{}.xlsx"'.format(
+            progress_report.get_filename())
         return response
 
 

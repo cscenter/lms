@@ -45,7 +45,7 @@ from learning.views import \
     InternationalSchoolsListView
 
 from staff.views import ExportsView, StudentsDiplomasView, \
-    StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
+    StudentsDiplomasCSVView, ProgressReportFullCSVView, \
     StudentSearchJSONView, StudentSearchView
 
 from core.views import MarkdownRenderView

@@ -12,10 +12,10 @@ from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
 from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherDispatchView, UsefulListView
 from staff.views import ExportsView, StudentsDiplomasView, \
-    StudentsDiplomasCSVView, StudentsAllSheetCSVView, \
+    StudentsDiplomasCSVView, ProgressReportFullCSVView, \
     StudentSearchJSONView, StudentSearchView, \
-    StudentSummaryBySemesterCSVView, TotalStatisticsView, \
-    StudentSummaryBySemesterExcel2010View
+    ProgressReportForSemesterCSVView, TotalStatisticsView, \
+    ProgressReportForSemesterExcel2010View
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -81,16 +81,13 @@ urlpatterns = [
         StudentsDiplomasCSVView.as_view(),
         name='staff_exports_students_diplomas_csv'),
     url(r'^staff/exports/sheet/csv/$',
-        StudentsAllSheetCSVView.as_view(),
+        ProgressReportFullCSVView.as_view(),
         name='staff_exports_sheet_all_students_csv'),
-    url(r'^staff/exports/sheet/current_semester/csv/$',
-        StudentSummaryBySemesterCSVView.as_view(),
-        name='staff_exports_students_sheet_current_semester_csv'),
-    url(r'^staff/exports/sheet/(?P<semester_year>\d+)/(?P<semester_type>\w+)/csv/$',
-        StudentSummaryBySemesterCSVView.as_view(),
+    url(r'^staff/exports/sheet/(?P<term_year>\d+)/(?P<term_type>\w+)/csv/$',
+        ProgressReportForSemesterCSVView.as_view(),
         name='staff_exports_students_sheet_filter_by_semester_csv'),
-    url(r'^staff/exports/sheet/(?P<semester_year>\d+)/(?P<semester_type>\w+)/xlsx/$',
-        StudentSummaryBySemesterExcel2010View.as_view(),
+    url(r'^staff/exports/sheet/(?P<term_year>\d+)/(?P<term_type>\w+)/xlsx/$',
+        ProgressReportForSemesterExcel2010View.as_view(),
         name='staff_exports_students_sheet_filter_by_semester_xlsx'),
     url(r'^staff/statistics/csv/$',
         TotalStatisticsView.as_view(),
