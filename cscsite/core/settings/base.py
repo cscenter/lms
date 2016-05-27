@@ -85,7 +85,6 @@ INSTALLED_APPS = (
     'users',
     'core',
     'htmlpages',
-    'news',
     'index',
     'learning',
     'staff',
@@ -94,8 +93,6 @@ INSTALLED_APPS = (
     'import_export',
     'pipeline',
     'bootstrap_pagination',
-
-    # 'webpack_loader',
 )
 
 # oEmbed
