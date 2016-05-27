@@ -33,6 +33,7 @@ class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
 class CourseOfferingTeacherInline(admin.TabularInline):
     model = CourseOfferingTeacher
     extra = 0
+    min_num = 1
     formfield_overrides = {
             BitField: {'widget': BitFieldCheckboxSelectMultiple},
     }
@@ -43,6 +44,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
                 PARTICIPANT_GROUPS.TEACHER_CENTER,
                 PARTICIPANT_GROUPS.TEACHER_CLUB]).distinct()
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
+
 
 class CourseOfferingAdmin(UbereditorMixin, WiderLabelsMixin, TranslationAdmin,
                           admin.ModelAdmin):
