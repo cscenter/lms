@@ -7,9 +7,11 @@ import six
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, defaultdict
-from learning.settings import GRADES
+from learning.settings import GRADES, STUDENT_STATUS
+from users.models import CSCUser
 
 
+# TODO: Exclude some headers for target semester
 class ProgressReport(object):
     # TODO: Maybe can use report.data even in diplomas view to simplify it
     """
@@ -26,10 +28,8 @@ class ProgressReport(object):
 
     __metaclass__ = ABCMeta
 
-    static_headers = None
-
-    def __init__(self, students_data, honest_grade_system=False,
-                 target_semester=None, request=None):
+    def __init__(self, honest_grade_system=False, target_semester=None,
+                 request=None):
         courses_headers = OrderedDict()
         # Max count values among all students
         self.shads_max = 0
@@ -37,6 +37,7 @@ class ProgressReport(object):
         self.projects_max = 0
         self.target_semester = target_semester
         self.request = request
+        students_data = self.get_queryset(term=self.target_semester)
         for s in students_data:
             self.before_process_row(s)
 
@@ -81,8 +82,14 @@ class ProgressReport(object):
         """
         return False
 
+    @staticmethod
+    @abstractmethod
+    def get_queryset(**kwargs):
+        raise NotImplementedError("ProgressReport: undefined queryset")
+
     @abstractproperty
     def static_headers(self):
+        """Returns array of headers, that always included in report"""
         pass
 
     @abstractmethod
@@ -91,21 +98,27 @@ class ProgressReport(object):
 
     def _append_courses_headers(self, headers):
         for course_id, course_name in six.iteritems(self.courses_headers):
-            headers.append(course_name + ', оценка')
-            headers.append(course_name + ', преподаватели')
+            headers.extend([
+                "{}, оценка".format(course_name),
+                "{}, преподаватели".format(course_name)
+            ])
 
     def _append_projects_headers(self, headers):
         for i in range(1, self.projects_max + 1):
-            headers.append('Проект {}, название'.format(i))
-            headers.append('Проект {}, оценка'.format(i))
-            headers.append('Проект {}, руководитель(и)'.format(i))
-            headers.append('Проект {}, семестр'.format(i))
+            headers.extend([
+                'Проект {}, название'.format(i),
+                'Проект {}, оценка'.format(i),
+                'Проект {}, руководитель(и)'.format(i),
+                'Проект {}, семестр'.format(i)
+            ])
 
     def _append_shad_courses_headers(self, headers):
         for i in range(1, self.shads_max + 1):
-            headers.append('ШАД, курс {}, название'.format(i))
-            headers.append('ШАД, курс {}, преподаватели'.format(i))
-            headers.append('ШАД, курс {}, оценка'.format(i))
+            headers.extend([
+                'ШАД, курс {}, название'.format(i),
+                'ШАД, курс {}, преподаватели'.format(i),
+                'ШАД, курс {}, оценка'.format(i)
+            ])
 
     def _append_online_courses_headers(self, headers):
         for i in range(1, self.online_courses_max + 1):
@@ -135,7 +148,9 @@ class ProgressReport(object):
             [None] * (self.shads_max - len(student.shads)))
         for shad in student.shads:
             if shad is not None:
-                row.extend([shad.name, shad.teachers, shad.grade_display])
+                row.extend([shad.name,
+                            shad.teachers,
+                            shad.grade_display.lower()])
             else:
                 row.extend(['', '', ''])
 
@@ -154,6 +169,12 @@ class ProgressReport(object):
 
 
 class ProgressReportForDiplomas(ProgressReport):
+    @staticmethod
+    def get_queryset(**kwargs):
+        return CSCUser.objects.students_info(filters={
+            "status": CSCUser.STATUS.will_graduate
+        })
+
     @property
     def static_headers(self):
         return [
@@ -179,7 +200,6 @@ class ProgressReportForDiplomas(ProgressReport):
             student.university,
             " и ".join(s.name for s in student.study_programs.all())
         ]
-        # FIXME: Include lecturers only?
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
         self._export_row_append_projects(row, student)
@@ -187,10 +207,14 @@ class ProgressReportForDiplomas(ProgressReport):
 
     def get_filename(self):
         today = datetime.datetime.now()
-        return "diplomas_{}.csv".format(today.year)
+        return "diplomas_{}".format(today.year)
 
 
 class ProgressReportFull(ProgressReport):
+    @staticmethod
+    def get_queryset(**kwargs):
+        return CSCUser.objects.students_info()
+
     @property
     def static_headers(self):
         return [
@@ -238,7 +262,7 @@ class ProgressReportFull(ProgressReport):
             student.yandex_id,
             " и ".join(s.name for s in student.study_programs.all()),
             student.status_display,
-            '',
+            '',  # FIXME: missed value??
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
@@ -264,13 +288,31 @@ class ProgressReportForSemester(ProgressReport):
     Exported data contains club and center courses if target term already
     passed and additionally shad- and online-courses if target term is current.
     """
+    @staticmethod
+    def get_queryset(**kwargs):
+        assert "term" in kwargs
+        return CSCUser.objects.students_info(
+            filters={
+                "groups__in": [
+                    CSCUser.group_pks.STUDENT_CENTER,
+                    CSCUser.group_pks.VOLUNTEER
+                ],
+            },
+            exclude={
+                "status": STUDENT_STATUS.expelled
+            },
+            semester=kwargs["term"],
+            include_not_graded=True
+        )
+
     def before_process_row(self, student):
         student.enrollments_in_target_semester = 0
-        student.passed_success_in_target_semester = 0
-        student.passed_success_total = 0
+        student.success_eq_target_semester = 0
+        student.success_lt_target_semester = 0
+        # Note: Include shad courses even ungraded or `unsatisfactory`
         student.shads = [c for c in student.shads if
                          c.semester_id == self.target_semester.pk]
-        # FIXME: skip online courses from untargeted term
+        # FIXME: include online and shads in stats for success_lt_target_semester!!!
 
     def skip_enrollment(self, enrollment, student):
         """
@@ -278,17 +320,16 @@ class ProgressReportForSemester(ProgressReport):
         For target term skip `not graded` enrollments if target semester
         already passed.
         """
+        # Note: Failed courses rejected on query level.
+        assert enrollment.grade != GRADES.unsatisfactory
         if enrollment.course_offering.semester == self.target_semester:
             student.enrollments_in_target_semester += 1
             if enrollment.grade != GRADES.not_graded:
-                student.passed_success_in_target_semester += 1
-                student.passed_success_total += 1
-            elif not self.target_semester.is_current():
-                # Skip not graded enrollments in view for past terms
-                return True
-        elif enrollment.grade != GRADES.not_graded:
-            # Collect stats for passed enrollments and skip them in public view
-            student.passed_success_total += 1
+                student.success_eq_target_semester += 1
+        else:
+            if enrollment.grade != GRADES.not_graded:
+                student.success_lt_target_semester += 1
+            # Hide all passed enrollments in report
             return True
         return False
 
@@ -313,19 +354,28 @@ class ProgressReportForSemester(ProgressReport):
             'Дата последнего изменения комментария',
             'Работа',
             'Ссылка на профиль',
-            'Сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
+            'Сдано курсов (Центр/Клуб/ШАД/Онлайн) всего до семестра "%s"' %
+            self.target_semester,
             'Сдано курсов (Центр/Клуб/ШАД/Онлайн) за семестр "%s"' %
             self.target_semester,
             'Записей на курсы за семестр "%s"' % self.target_semester
         ]
 
+    def _append_courses_headers(self, headers):
+        for course_id, course_name in six.iteritems(self.courses_headers):
+            headers.append("{}, оценка".format(course_name))
+
     def generate_headers(self):
         headers = self.static_headers
         self._append_courses_headers(headers)
-        if not self.target_semester.is_current():
-            self._append_shad_courses_headers(headers)
-            self._append_online_courses_headers(headers)
+        self._append_shad_courses_headers(headers)
+        self._append_online_courses_headers(headers)
         return headers
+
+    def _export_row_append_courses(self, row, student):
+        for course_id in self.courses_headers:
+            sc = student.courses[course_id]
+            row.append(sc['grade'])
 
     def export_row(self, student):
         row = [
@@ -342,20 +392,19 @@ class ProgressReportForSemester(ProgressReport):
             student.yandex_id,
             " и ".join(s.name for s in student.study_programs.all()),
             student.status_display,
-            '',
+            '', # FIXME: missed value?
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
-            student.passed_success_total,
-            student.passed_success_in_target_semester,
-            # FIXME: included all online courses until target semester!
+            student.success_lt_target_semester,
+            student.success_eq_target_semester,
+            # Note: included all online courses until target semester
             student.enrollments_in_target_semester
         ]
         self._export_row_append_courses(row, student)
-        if not self.target_semester.is_current():
-            self._export_row_append_shad_courses(row, student)
-            self._export_row_append_online_courses(row, student)
+        self._export_row_append_shad_courses(row, student)
+        self._export_row_append_online_courses(row, student)
         return row
 
     def get_filename(self):

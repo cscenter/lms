@@ -79,31 +79,20 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/exports.html"
 
 
-class StudentsInfoForDiplomasMixin(object):
-    @staticmethod
-    def get_students_info():
-        return CSCUser.objects.students_info(filters={
-            "status": CSCUser.STATUS.will_graduate
-        })
-
-
-class StudentsDiplomasView(CuratorOnlyMixin, StudentsInfoForDiplomasMixin,
-                           generic.TemplateView):
+class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = self.get_students_info()
+        context['students'] = ProgressReportForDiplomas.get_queryset()
         return context
 
 
-class StudentsDiplomasCSVView(CuratorOnlyMixin, StudentsInfoForDiplomasMixin,
-                              generic.base.View):
+class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students_data = self.get_students_info()
-        progress_report = ProgressReportForDiplomas(students_data)
+        progress_report = ProgressReportForDiplomas()
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
@@ -122,9 +111,7 @@ class ProgressReportFullCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        students_data = CSCUser.objects.students_info()
-        progress_report = ProgressReportFull(students_data,
-                                             honest_grade_system=True,
+        progress_report = ProgressReportFull(honest_grade_system=True,
                                              request=request)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
@@ -152,23 +139,7 @@ class ProgressReportForSemesterMixin(object):
             semester = get_object_or_404(Semester, **filters)
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
-
-        students_data = CSCUser.objects.students_info(
-            filters={
-                "groups__in": [
-                    CSCUser.group_pks.STUDENT_CENTER,
-                    CSCUser.group_pks.VOLUNTEER
-                ],
-            },
-            exclude={
-                "status": STUDENT_STATUS.expelled
-            },
-            semester=semester,
-            include_not_graded=True
-        )
-
-        progress_report = ProgressReportForSemester(students_data,
-                                                    honest_grade_system=True,
+        progress_report = ProgressReportForSemester(honest_grade_system=True,
                                                     target_semester=semester,
                                                     request=request)
         return self.generate_response(progress_report)

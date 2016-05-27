@@ -7,7 +7,9 @@ from learning.models import CourseOfferingTeacher
 
 
 class CSCUserQuerySet(query.QuerySet):
-
+    # TODO: Refactor later to remove WHERE IN(ids) due to performance reasons,
+    # rename ProgressReport.get_queryset after that. Add tests before
+    # Investigate how to use tmp table with JOIN in that case?
     def students_info(self,
                       filters=None,
                       exclude=None,
