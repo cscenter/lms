@@ -190,7 +190,7 @@ class NonCourseEventAdmin(admin.ModelAdmin):
 
 
 class StudentProjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'project_type', 'semester']
+    list_display = ['name', 'project_type', 'semester', 'grade']
     list_filter = ['semester']
 
 
@@ -200,6 +200,7 @@ class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
 
 class InternationalSchoolAdmin(UbereditorMixin, admin.ModelAdmin):
     list_display = ['name', 'deadline', 'has_grants']
+
 
 class UsefulAdmin(admin.ModelAdmin):
     list_filter = ['site']
