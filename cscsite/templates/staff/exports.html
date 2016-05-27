@@ -17,22 +17,20 @@
                 <a href="{% url 'staff_exports_sheet_all_students_csv' %}" class="list-group-item">
                     <h4 class="list-group-item-heading">Ведомость успеваемости. Полная</h4>
                     Группы: Студент центра, Вольнослушатель, Выпускник.<br>
-                    Не включены курсы с оценкой "незачёт" и "без оценки".<br>
+                    Не включены курсы с оценкой "незачёт" и "без оценки". TODO: показывать все вроде договорились, но тогда надо в статистику "Всего" не включать курсы без оценки и с "незачет"<br>
                     Курсы: центра, клуба, ШАД-, онлайн-, проекты.<br>
                 </a>
                 <div class="list-group-item">
                     <h4 class="list-group-item-heading">Ведомость успеваемости. Семестр</h4>
                     Группы: Студент центра, Вольнослушатель<br>
                     Не учитываются студенты со статусом "Отчислен".<br>
-                    Не включены курсы с оценкой "незачёт".<br>
+                    Включены курсы центра, клуба, ШАД, онлайн-курсы (для курсов клуба и центра данные о преподавателях не включены).<br>
+                    В статистику сданных курсов входят только <b>успешно</b> сданные курсы.<br>
+                    Замечание: в статистику входят все курсы ШАД, даже "без оценки" и "незачет".<br>
                     <b>{% trans current_term.type|title %} {{ current_term.year }}</b>: <a target="_blank" href="{% url 'staff_exports_students_sheet_filter_by_semester_csv' current_term.year current_term.type  %}">CSV</a> или
                     <a target="_blank" href="{% url 'staff_exports_students_sheet_filter_by_semester_xlsx' current_term.year current_term.type  %}">XLSX</a><br>
-                    Для текущего семестра:<br>
-                    * включены курсы без оценки.<br>
-                    * включены курсы центра и клуба<br>
                     <b>{% trans prev_term.type|title %} {{ prev_term.year }}</b>: <a target="_blank" href="{% url 'staff_exports_students_sheet_filter_by_semester_csv' prev_term.year prev_term.type  %}">CSV</a> или
                     <a target="_blank" href="{% url 'staff_exports_students_sheet_filter_by_semester_xlsx' prev_term.year prev_term.type  %}">XLSX</a><br>
-                    Включены курсы центра, клуба, ШАД, онлайн-курсы.<br>
                 </div>
             </div>
         </div>
