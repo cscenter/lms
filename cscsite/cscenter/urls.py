@@ -12,10 +12,11 @@ from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
 from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherDispatchView, UsefulListView
 from staff.views import ExportsView, StudentsDiplomasView, \
-    StudentsDiplomasCSVView, ProgressReportFullCSVView, \
+    StudentsDiplomasCSVView, \
     StudentSearchJSONView, StudentSearchView, \
-    ProgressReportForSemesterCSVView, TotalStatisticsView, \
-    ProgressReportForSemesterExcel2010View
+    TotalStatisticsView, \
+    ProgressReportForSemesterView, \
+    ProgressReportFullView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -81,14 +82,19 @@ urlpatterns = [
         StudentsDiplomasCSVView.as_view(),
         name='staff_exports_students_diplomas_csv'),
     url(r'^staff/exports/sheet/csv/$',
-        ProgressReportFullCSVView.as_view(),
+        ProgressReportFullView.as_view(output_format="csv"),
         name='staff_exports_sheet_all_students_csv'),
+    url(r'^staff/exports/sheet/xlsx/$',
+        ProgressReportFullView.as_view(output_format="xlsx"),
+        name='staff_exports_sheet_all_students_xlsx'),
+
     url(r'^staff/exports/sheet/(?P<term_year>\d+)/(?P<term_type>\w+)/csv/$',
-        ProgressReportForSemesterCSVView.as_view(),
+        ProgressReportForSemesterView.as_view(output_format="csv"),
         name='staff_exports_students_sheet_filter_by_semester_csv'),
     url(r'^staff/exports/sheet/(?P<term_year>\d+)/(?P<term_type>\w+)/xlsx/$',
-        ProgressReportForSemesterExcel2010View.as_view(),
+        ProgressReportForSemesterView.as_view(output_format="xlsx"),
         name='staff_exports_students_sheet_filter_by_semester_xlsx'),
+
     url(r'^staff/statistics/csv/$',
         TotalStatisticsView.as_view(),
         name='staff_total_statistics_csv'),

@@ -4,6 +4,7 @@ from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, Count, query
 
 from learning.models import CourseOfferingTeacher
+from learning.settings import GRADES
 
 
 class CSCUserQuerySet(query.QuerySet):
@@ -13,8 +14,8 @@ class CSCUserQuerySet(query.QuerySet):
     def students_info(self,
                       filters=None,
                       exclude=None,
-                      semester=False,
-                      include_not_graded=False):
+                      exclude_grades=None,
+                      semester=False):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
@@ -36,19 +37,20 @@ class CSCUserQuerySet(query.QuerySet):
         if exclude:
             q = q.exclude(**exclude)
 
-        exclude_enrollment_grades = ['unsatisfactory']
-        if not include_not_graded:
-            exclude_enrollment_grades.append('not_graded')
+        if exclude_grades is None:
+            exclude_grades = [GRADES.unsatisfactory, GRADES.not_graded]
+        enrollment_qs = (Enrollment.objects
+                         .order_by('course_offering__course__name'))
+        shad_qs = SHADCourseRecord.objects.get_queryset()
+        if exclude_grades:
+            enrollment_qs = enrollment_qs.exclude(grade__in=exclude_grades)
+            shad_qs = shad_qs.exclude(grade__in=exclude_grades)
 
-        enrollment_queryset = (Enrollment.objects
-                               .exclude(grade__in=exclude_enrollment_grades)
-                               .order_by('course_offering__course__name'))
-        shad_queryset = SHADCourseRecord.objects.get_queryset()
         if isinstance(semester, Semester):
             semester_upper_bound = semester.index
-            enrollment_queryset = enrollment_queryset.filter(
+            enrollment_qs = enrollment_qs.filter(
                 course_offering__semester__index__lte=semester_upper_bound)
-            shad_queryset = shad_queryset.filter(
+            shad_qs = shad_qs.filter(
                 semester__index__lte=semester_upper_bound
             )
 
@@ -61,7 +63,7 @@ class CSCUserQuerySet(query.QuerySet):
                 'groups',  # Mb we can do it without user_id IN(blabla million ids)
                 Prefetch(
                     'enrollment_set',
-                    queryset=enrollment_queryset,
+                    queryset=enrollment_qs,
                     to_attr='enrollments'
                 ),
                 Prefetch(
@@ -101,7 +103,7 @@ class CSCUserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'shadcourserecord_set',
-                    queryset=shad_queryset,
+                    queryset=shad_qs,
                     to_attr='shads'
                 ),
                 Prefetch(

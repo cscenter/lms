@@ -300,7 +300,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
-
+    # FIXME: Doesn't store current FK value now, replace with semester index value?
     status_changed_at = MonitorFKField(
         "learning.Semester",
         verbose_name=_("Status changed"),

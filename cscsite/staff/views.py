@@ -2,18 +2,14 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import io
 from collections import OrderedDict, defaultdict
 
-import unicodecsv
 from braces.views import JSONResponseMixin
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import force_text
 from django.views import generic
-from xlsxwriter import Workbook
 
 from learning.models import Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
@@ -93,41 +89,30 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
 
     def get(self, request, *args, **kwargs):
         progress_report = ProgressReportForDiplomas()
-
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
-            progress_report.get_filename())
-
-        w = unicodecsv.writer(response, encoding='utf-8')
-        w.writerow(progress_report.headers)
-        for student in progress_report.data:
-            row = progress_report.export_row(student)
-            w.writerow(row)
-
-        return response
+        return progress_report.output_csv()
 
 
-class ProgressReportFullCSVView(CuratorOnlyMixin, generic.base.View):
+class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
+    output_format = None
 
     def get(self, request, *args, **kwargs):
         progress_report = ProgressReportFull(honest_grade_system=True,
                                              request=request)
-
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
-            progress_report.get_filename())
-        w = unicodecsv.writer(response, encoding='utf-8')
-        w.writerow(progress_report.headers)
-        for student in progress_report.data:
-            row = progress_report.export_row(student)
-            w.writerow(row)
-        return response
+        if self.output_format == "csv":
+            return progress_report.output_csv()
+        elif self.output_format == "xlsx":
+            return progress_report.output_xlsx()
+        else:
+            raise ValueError("ProgressReportFullView: undefined output format")
 
 
-class ProgressReportForSemesterMixin(object):
+class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+    output_format = None
+
     def get(self, request, *args, **kwargs):
-        # Validate GET params
+        # Validate year and term GET params
         try:
             term_year = int(self.kwargs['term_year'])
             if term_year < FOUNDATION_YEAR:
@@ -142,61 +127,13 @@ class ProgressReportForSemesterMixin(object):
         progress_report = ProgressReportForSemester(honest_grade_system=True,
                                                     target_semester=semester,
                                                     request=request)
-        return self.generate_response(progress_report)
-
-    def generate_response(self, progress_report):
-        raise NotImplemented("ProgressReportBySemesterMixin: not implemented")
-
-
-class ProgressReportForSemesterCSVView(CuratorOnlyMixin,
-                                       ProgressReportForSemesterMixin,
-                                       generic.base.View):
-    http_method_names = ['get']
-
-    def generate_response(self, progress_report):
-        output = io.BytesIO()
-        w = unicodecsv.writer(output, encoding='utf-8')
-
-        w.writerow(progress_report.headers)
-        for student in progress_report.data:
-            row = progress_report.export_row(student)
-            w.writerow(row)
-
-        output.seek(0)
-        response = HttpResponse(output.read(),
-                                content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(
-            progress_report.get_filename())
-        return response
-
-
-class ProgressReportForSemesterExcel2010View(CuratorOnlyMixin,
-                                             ProgressReportForSemesterMixin,
-                                             generic.base.View):
-    http_method_names = ['get']
-
-    def generate_response(self, progress_report):
-        output = io.BytesIO()
-        workbook = Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet()
-
-        format_bold = workbook.add_format({'bold': True})
-        for index, header in enumerate(progress_report.headers):
-            worksheet.write(0, index, header, format_bold)
-
-        for row_index, raw_row in enumerate(progress_report.data, start=1):
-            row = progress_report.export_row(raw_row)
-            for col_index, value in enumerate(row):
-                value = "" if value is None else force_text(value)
-                worksheet.write(row_index, col_index, force_text(value))
-
-        workbook.close()
-        output.seek(0)
-        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        response = HttpResponse(output.read(), content_type=content_type)
-        response['Content-Disposition'] = 'attachment; filename="{}.xlsx"'.format(
-            progress_report.get_filename())
-        return response
+        if self.output_format == "csv":
+            return progress_report.output_csv()
+        elif self.output_format == "xlsx":
+            return progress_report.output_xlsx()
+        else:
+            raise ValueError("ProgressReportForSemesterView: output "
+                             "format not provided")
 
 
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):

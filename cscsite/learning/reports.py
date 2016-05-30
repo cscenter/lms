@@ -3,23 +3,30 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import io
+
 import six
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, defaultdict
+
+import unicodecsv
+from django.http import HttpResponse
+from django.utils.encoding import force_text
+from xlsxwriter import Workbook
+
 from learning.settings import GRADES, STUDENT_STATUS
 from users.models import CSCUser
 
 
-# TODO: Exclude some headers for target semester
+# TODO: filter projects by grade?
 class ProgressReport(object):
     # TODO: Maybe can use report.data even in diplomas view to simplify it
     """
     Process students info from CSCUser manager for future export in
     CSV of XLSX format.
     Example:
-        students_info = CSCUser.objects.students_info()
-        report = ProgressReportFull(students_info)
+        report = ProgressReportFull()
         print(report.headers)
         for raw_row in report.data:
             row = report.export_row(raw_row)
@@ -40,12 +47,11 @@ class ProgressReport(object):
         students_data = self.get_queryset(term=self.target_semester)
         for s in students_data:
             self.before_process_row(s)
-
+            # Process row
             student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
             for e in s.enrollments:
                 if self.skip_enrollment(e, s):
                     continue
-
                 courses_headers[
                     e.course_offering.course.id] = e.course_offering.course.name
                 teachers = [t.get_full_name() for t in
@@ -60,6 +66,8 @@ class ProgressReport(object):
                 }
             s.courses = student_courses
 
+            self.after_process_row(s)
+
             if len(s.shads) > self.shads_max:
                 self.shads_max = len(s.shads)
 
@@ -73,6 +81,10 @@ class ProgressReport(object):
         self.data = students_data
 
     def before_process_row(self, student):
+        pass
+
+    def after_process_row(self, student):
+        """Add additional logic here if necessary"""
         pass
 
     def skip_enrollment(self, enrollment, student):
@@ -124,6 +136,20 @@ class ProgressReport(object):
         for i in range(1, self.online_courses_max + 1):
             headers.append('Онлайн-курс {}, название'.format(i))
 
+    @staticmethod
+    def _is_success_grade(course):
+        # Skip dummy course
+        if course is None:
+            return False
+        if hasattr(course, "grade"):
+            grade = course.grade
+        else:
+            grade = course["grade"]
+        # Note: Not necessary check grading type here
+        return grade not in [GRADES["unsatisfactory"].lower(),
+                             GRADES["not_graded"].lower(),
+                             '']
+
     @abstractmethod
     def export_row(self, row):
         raise NotImplementedError()
@@ -162,6 +188,45 @@ class ProgressReport(object):
                 row.extend([online_course.name])
             else:
                 row.extend([''])
+
+    def output_csv(self):
+        output = io.BytesIO()
+        w = unicodecsv.writer(output, encoding='utf-8')
+
+        w.writerow(self.headers)
+        for student in self.data:
+            row = self.export_row(student)
+            w.writerow(row)
+
+        output.seek(0)
+        response = HttpResponse(output.read(),
+                                content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = \
+            'attachment; filename="{}.csv"'.format(self.get_filename())
+        return response
+
+    def output_xlsx(self):
+        output = io.BytesIO()
+        workbook = Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet()
+
+        format_bold = workbook.add_format({'bold': True})
+        for index, header in enumerate(self.headers):
+            worksheet.write(0, index, header, format_bold)
+
+        for row_index, raw_row in enumerate(self.data, start=1):
+            row = self.export_row(raw_row)
+            for col_index, value in enumerate(row):
+                value = "" if value is None else force_text(value)
+                worksheet.write(row_index, col_index, force_text(value))
+
+        workbook.close()
+        output.seek(0)
+        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response = HttpResponse(output.read(), content_type=content_type)
+        response['Content-Disposition'] = \
+            'attachment; filename="{}.xlsx"'.format(self.get_filename())
+        return response
 
     def get_filename(self):
         today = datetime.datetime.now()
@@ -213,7 +278,9 @@ class ProgressReportForDiplomas(ProgressReport):
 class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
-        return CSCUser.objects.students_info()
+        return CSCUser.objects.students_info(
+            exclude_grades=[]
+        )
 
     @property
     def static_headers(self):
@@ -236,7 +303,7 @@ class ProgressReportFull(ProgressReport):
             'Дата последнего изменения комментария',
             'Работа',
             'Ссылка на профиль',
-            'Сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
+            'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
         ]
 
     def generate_headers(self):
@@ -248,6 +315,10 @@ class ProgressReportFull(ProgressReport):
         return headers
 
     def export_row(self, student):
+        total_success_passed = (
+            len(filter(self._is_success_grade, student.courses.values())) +
+            len(filter(self._is_success_grade, student.shads)) +
+            len(student.online_courses))
         row = [
             student.last_name,
             student.first_name,
@@ -262,13 +333,12 @@ class ProgressReportFull(ProgressReport):
             student.yandex_id,
             " и ".join(s.name for s in student.study_programs.all()),
             student.status_display,
-            '',  # FIXME: missed value??
+            '',  # FIXME: error in student.status_changed_at field
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
-            len(student.courses) + len(student.shads) + len(
-                student.online_courses),
+            total_success_passed,
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_projects(row, student)
@@ -302,17 +372,30 @@ class ProgressReportForSemester(ProgressReport):
                 "status": STUDENT_STATUS.expelled
             },
             semester=kwargs["term"],
-            include_not_graded=True
+            exclude_grades=[GRADES.unsatisfactory]
         )
 
     def before_process_row(self, student):
         student.enrollments_in_target_semester = 0
         student.success_eq_target_semester = 0
         student.success_lt_target_semester = 0
-        # Note: Include shad courses even ungraded or `unsatisfactory`
-        student.shads = [c for c in student.shads if
-                         c.semester_id == self.target_semester.pk]
-        # FIXME: include online and shads in stats for success_lt_target_semester!!!
+        # Shad courses specific attributes
+        student.success_shad_eq_target_semester = 0
+        student.success_shad_lt_target_semester = 0
+
+    def after_process_row(self, student):
+        if not student.shads:
+            return
+        shads = []
+        # Note: failed shad courses rejected on query level
+        for shad in student.shads:
+            if shad.semester == self.target_semester:
+                if shad.grade != GRADES.not_graded:
+                    student.success_shad_eq_target_semester += 1
+                shads.append(shad)
+            elif shad.grade != GRADES.not_graded:
+                student.success_shad_lt_target_semester += 1
+        student.shads = shads
 
     def skip_enrollment(self, enrollment, student):
         """
@@ -329,7 +412,7 @@ class ProgressReportForSemester(ProgressReport):
         else:
             if enrollment.grade != GRADES.not_graded:
                 student.success_lt_target_semester += 1
-            # Hide all passed enrollments in report
+            # Hide enrollments from terms less than target semester
             return True
         return False
 
@@ -354,9 +437,9 @@ class ProgressReportForSemester(ProgressReport):
             'Дата последнего изменения комментария',
             'Работа',
             'Ссылка на профиль',
-            'Сдано курсов (Центр/Клуб/ШАД/Онлайн) всего до семестра "%s"' %
+            'Успешно сдано (Центр/Клуб/ШАД/Онлайн) всего до семестра "%s"' %
             self.target_semester,
-            'Сдано курсов (Центр/Клуб/ШАД/Онлайн) за семестр "%s"' %
+            'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' %
             self.target_semester,
             'Записей на курсы за семестр "%s"' % self.target_semester
         ]
@@ -378,6 +461,13 @@ class ProgressReportForSemester(ProgressReport):
             row.append(sc['grade'])
 
     def export_row(self, student):
+        success_total_lt_target_semester = (
+            student.success_lt_target_semester +
+            student.success_shad_lt_target_semester +
+            len(student.online_courses))
+        success_total_eq_target_semester = (
+            student.success_eq_target_semester +
+            student.success_shad_eq_target_semester)
         row = [
             student.last_name,
             student.first_name,
@@ -392,13 +482,13 @@ class ProgressReportForSemester(ProgressReport):
             student.yandex_id,
             " и ".join(s.name for s in student.study_programs.all()),
             student.status_display,
-            '', # FIXME: missed value?
+            '',  # FIXME: error with student.status_changed_at
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
-            student.success_lt_target_semester,
-            student.success_eq_target_semester,
+            success_total_lt_target_semester,
+            success_total_eq_target_semester,
             # Note: included all online courses until target semester
             student.enrollments_in_target_semester
         ]

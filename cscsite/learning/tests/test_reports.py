@@ -50,7 +50,7 @@ def test_report_common(rf,
     shad2 = SHADCourseRecordFactory.create(student=student2, grade=GRADES.good)
     p = StudentProjectFactory.create(students=[student1])
     progress_report = get_progress_report()
-    assert len(progress_report.courses_headers) == 1
+    assert len(progress_report.courses_headers) == 2
     assert progress_report.online_courses_max == 0
     assert progress_report.shads_max == 1
     assert progress_report.projects_max == 1
@@ -104,10 +104,6 @@ def test_report_full(rf,
         return ProgressReportFull(honest_grade_system=True,
                                   request=rf.request())
 
-    def get_exported_data(progress_report, index):
-        raw_data = progress_report.data[index]
-        return progress_report.export_row(raw_data)
-
     teacher = teacher_center_factory.create()
     students = student_center_factory.create_batch(3)
     s = SemesterFactory.create_current()
@@ -121,15 +117,16 @@ def test_report_full(rf,
     progress_report = get_progress_report()
     STATIC_HEADERS_CNT = len(progress_report.static_headers)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
-    # Without grade not included
+    # Without grade included too
     EnrollmentFactory.create(student=student2, course_offering=co2,
                              grade=GRADES.not_graded)
     progress_report = get_progress_report()
-    assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
+    assert len(progress_report.courses_headers) == 2
+    assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
     # Online course included. +1 header
     OnlineCourseRecordFactory.create(student=student1)
     progress_report = get_progress_report()
-    assert len(progress_report.headers) == STATIC_HEADERS_CNT + 3
+    assert len(progress_report.headers) == STATIC_HEADERS_CNT + 5
     EnrollmentFactory.create(student=student1, course_offering=co2,
                              grade=GRADES.good)
     EnrollmentFactory.create(student=student2, course_offering=co1,
@@ -137,30 +134,20 @@ def test_report_full(rf,
     EnrollmentFactory.create(student=student3, course_offering=co1,
                              grade=GRADES.unsatisfactory)
     progress_report = get_progress_report()
-    # Hardcode header. Test will be broken if it changed in reports module
-    total_passed_header = 'Сдано курсов (Центр/Клуб/ШАД/Онлайн) всего'
+    total_passed_header = 'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего'
     assert total_passed_header in progress_report.headers
-    total_passed_index = progress_report.headers.index(total_passed_header)
     # Check successfully passed courses value
     assert progress_report.data[0].pk == student1.pk
-    student1_data = get_exported_data(progress_report, 0)
-    assert student1_data[total_passed_index] == 3
+    # 2 co and 1 online course
+    check_value_for_header(progress_report, total_passed_header, 0, 2 + 1)
     assert progress_report.data[1].pk == student2.pk
-    student2_data = get_exported_data(progress_report, 1)
-    assert student2_data[total_passed_index] == 1
+    SHADCourseRecordFactory.create(student=student2, grade=GRADES.not_graded)
+    # skip `not_graded` course and shad course for student2 in stat column
+    check_value_for_header(progress_report, total_passed_header, 1, 1)
     assert progress_report.data[2].pk == student3.pk
-    student3_data = get_exported_data(progress_report, 2)
-    assert student3_data[total_passed_index] == 0
-
-
-@pytest.mark.django_db
-def test_report_for_term_common(client):
-    # TODO: ОБЯЗАТЕЛЬНО ТЕСТИРОВАТЬ TOTAL STATS, сейчас там не включены ШАД и Онлайн-курсы, 100% БАГ есть
-    # TODO: затестить passed_success_eq_target_semester, он одинаковый
-    # TODO: success_eq_target_semester тоже.
-    # TODO: не попадают выпускники
-    # TODO: честные оценки honest_grade_system
-    pass
+    check_value_for_header(progress_report, total_passed_header, 2, 0)
+    # TODO: check excluded in report
+    # TODO: check grading_type
 
 
 @pytest.mark.django_db
@@ -210,7 +197,7 @@ def test_report_for_target_term(rf,
     assert course_header_grade in progress_report.headers
     check_value_for_header(progress_report, course_header_grade,
                            student2_data_index, e_old2.grade_display.lower())
-    # But included for current target term. Compare expected value with actual
+    # And included for current target term. Compare expected value with actual
     progress_report = get_progress_report(s)
     assert len(progress_report.headers) == (STATIC_HEADERS_CNT +
                                             CENTER_CLUB_COURSES_HEADERS_CNT)
@@ -221,7 +208,7 @@ def test_report_for_target_term(rf,
     assert progress_report.data[student2_data_index].pk == student2.pk
     check_value_for_header(progress_report, course_header_grade,
                            student2_data_index, e_active2.grade_display.lower())
-    # For current term shad and online coursed not included in report
+    # Shad and online courses from prev semester not included in report
     shad = SHADCourseRecordFactory.create(student=student1, grade=GRADES.good,
                                           semester=prev_s)
     shad_header = 'ШАД, курс 1, название'
@@ -231,8 +218,48 @@ def test_report_for_target_term(rf,
     assert shad_header in progress_report.headers
     check_value_for_header(progress_report, shad_header,
                            student1_data_index, shad.name)
-    # TODO: check honest grade system
-    # TODO: check online excluded for current term too
+    # Check honest grade system
+    e = EnrollmentFactory.create(student=student1, course_offering=co2,
+                                 grade=getattr(GRADES, "pass"))
+    progress_report = get_progress_report(prev_s)
+    assert progress_report.data[student1_data_index].pk == student1.pk
+    course_header_grade = '{}, оценка'.format(co2.course.name)
+    check_value_for_header(progress_report, course_header_grade,
+                           student1_data_index, e.grade_honest.lower())
+    # Test `success_total_lt_target_semester` value
+    success_total_lt_ts_header = (
+        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) всего до семестра "%s"' % prev_s)
+    success_total_eq_ts_header = (
+        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % prev_s)
+    # +2 successful enrollments and +1 shad course for prev_s
+    check_value_for_header(progress_report, success_total_lt_ts_header,
+                           student1_data_index, 0)
+    check_value_for_header(progress_report, success_total_eq_ts_header,
+                           student1_data_index, 3)
+    # And 1 successful enrollment in current semester
+    progress_report = get_progress_report(s)
+    success_total_lt_ts_header = (
+        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) всего до семестра "%s"' % s)
+    success_total_eq_ts_header = (
+        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % s)
+    check_value_for_header(progress_report, success_total_lt_ts_header,
+                           student1_data_index, 3)
+    check_value_for_header(progress_report, success_total_eq_ts_header,
+                           student1_data_index, 1)
+    # Hide shad courses from semester less than target semester
+    assert progress_report.shads_max == 0
+    # Add not_graded shad course for current semester. We show it for
+    # target semester, but it's not counted in stats
+    SHADCourseRecordFactory.create(student=student1,
+                                   grade=GRADES.not_graded,
+                                   semester=s)
+    progress_report = get_progress_report(s)
+    assert progress_report.shads_max == 1
+    check_value_for_header(progress_report, success_total_lt_ts_header,
+                           student1_data_index, 3)
+    check_value_for_header(progress_report, success_total_eq_ts_header,
+                           student1_data_index, 1)
+    # TODO: Test enrollments_in_target_semester
 
 
 @pytest.mark.django_db
@@ -295,9 +322,8 @@ def test_report_diplomas(student_center_factory,
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 6
     # Add shad course
     SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
-    # this one shouldn't be in file due to grade value
-    # FIXME: shad course below included now. FIX or good behavior????
-    # SHADCourseRecordFactory.create(student=student1, grade=GRADES.not_graded)
+    # This one shouldn't be in report due to grade value
+    SHADCourseRecordFactory.create(student=student1, grade=GRADES.not_graded)
     progress_report = ProgressReportForDiplomas()
     # +3 headers for 1 shad course
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
