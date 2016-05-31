@@ -247,7 +247,8 @@ class ProgressReportForDiplomas(ProgressReport):
             'Имя',
             'Отчество',
             'Университет',
-            'Направления'
+            'Направления',
+            'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
         ]
 
     def generate_headers(self):
@@ -258,12 +259,16 @@ class ProgressReportForDiplomas(ProgressReport):
         return headers
 
     def export_row(self, student):
+        total_success_passed = (len(student.courses) +
+                                len(student.shads) +
+                                len(student.online_courses))
         row = [
             student.last_name,
             student.first_name,
             student.patronymic,
             student.university,
-            " и ".join(s.name for s in student.study_programs.all())
+            " и ".join(s.name for s in student.study_programs.all()),
+            total_success_passed
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
