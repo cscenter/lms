@@ -224,6 +224,7 @@ class UnsubscribeYaProxyView(generic.FormView):
         return context
 
 
+# FIXME: what is it?
 class EnrollmentApplicationCallback(views.CsrfExemptMixin,
                                     views.JsonRequestResponseMixin,
                                     generic.View):

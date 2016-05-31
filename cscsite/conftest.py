@@ -1,6 +1,5 @@
-from functools import partial
-
 import pytest
+
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from django.test.client import Client
@@ -32,7 +31,6 @@ class CustomDjangoTestClient(Client):
 def client():
     """Override Django test client instance."""
     skip_if_no_django()
-
     return CustomDjangoTestClient()
 
 
