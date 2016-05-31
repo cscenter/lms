@@ -16,7 +16,7 @@ MARKDOWN_RENDER_FLAGS = 0
 markdown = h.Hoep(MARKDOWN_EXTENSIONS, MARKDOWN_RENDER_FLAGS)
 
 MARKDOWN_ALLOWED_TAGS = [
-    'p', 'ul', 'ol', 'li', 'em', 'strong', 'pre', 'br', 'hr',
+    'p', 'ul', 'ol', 'li', 'em', 'strong', 'strike', 'pre', 'br', 'hr',
     'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
     'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img',
     'iframe', 'b', 'i', 'div']
