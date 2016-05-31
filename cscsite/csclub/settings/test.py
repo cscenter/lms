@@ -49,6 +49,7 @@ class DisableMigrations(object):
     def __getitem__(self, item):
         return "notmigrations"
 
+LANGUAGE_CODE = 'en'
 
 # disable migration in tests; it's a hack until Django 1.8 with --keepdb
 # MIGRATION_MODULES = DisableMigrations()
