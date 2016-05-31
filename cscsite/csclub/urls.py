@@ -44,10 +44,6 @@ from learning.views import \
     NonCourseEventDetailView, AssignmentAttachmentDownloadView, \
     InternationalSchoolsListView
 
-from staff.views import ExportsView, StudentsDiplomasView, \
-    StudentsDiplomasCSVView, ProgressReportFullCSVView, \
-    StudentSearchJSONView, StudentSearchView
-
 from core.views import MarkdownRenderView
 from csclub.views import set_city, CalendarClubScheduleView, IndexView, TeachersView
 

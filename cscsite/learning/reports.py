@@ -24,7 +24,7 @@ class ProgressReport(object):
     # TODO: Maybe can use report.data even in diplomas view to simplify it
     """
     Process students info from CSCUser manager for future export in
-    CSV of XLSX format.
+    CSV of XLSX format. Separately store headers and data.
     Example:
         report = ProgressReportFull()
         print(report.headers)
@@ -37,7 +37,6 @@ class ProgressReport(object):
 
     def __init__(self, honest_grade_system=False, target_semester=None,
                  request=None):
-        courses_headers = OrderedDict()
         # Max count values among all students
         self.shads_max = 0
         self.online_courses_max = 0
@@ -45,9 +44,10 @@ class ProgressReport(object):
         self.target_semester = target_semester
         self.request = request
         students_data = self.get_queryset(term=self.target_semester)
+        # Collect course headers and prepare enrollments info
+        courses_headers = OrderedDict()
         for s in students_data:
             self.before_process_row(s)
-            # Process row
             student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
             for e in s.enrollments:
                 if self.skip_enrollment(e, s):
@@ -376,7 +376,7 @@ class ProgressReportForSemester(ProgressReport):
         )
 
     def before_process_row(self, student):
-        student.enrollments_in_target_semester = 0
+        student.enrollments_eq_target_semester = 0
         student.success_eq_target_semester = 0
         student.success_lt_target_semester = 0
         # Shad courses specific attributes
@@ -406,7 +406,7 @@ class ProgressReportForSemester(ProgressReport):
         # Note: Failed courses rejected on query level.
         assert enrollment.grade != GRADES.unsatisfactory
         if enrollment.course_offering.semester == self.target_semester:
-            student.enrollments_in_target_semester += 1
+            student.enrollments_eq_target_semester += 1
             if enrollment.grade != GRADES.not_graded:
                 student.success_eq_target_semester += 1
         else:
@@ -489,8 +489,7 @@ class ProgressReportForSemester(ProgressReport):
             self.request.build_absolute_uri(student.get_absolute_url()),
             success_total_lt_target_semester,
             success_total_eq_target_semester,
-            # Note: included all online courses until target semester
-            student.enrollments_in_target_semester
+            student.enrollments_eq_target_semester
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
