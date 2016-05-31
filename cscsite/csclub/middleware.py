@@ -1,6 +1,5 @@
 from django.conf import settings
 
-from core.models import City
 from .context_processors import cities
 
 
