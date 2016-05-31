@@ -76,6 +76,18 @@ table {
 }
 // index page ends
 
+// international schools page
+#international-schools {
+  table {
+    margin-top: 25px;
+
+    th:first-child {
+      width: 130px;
+    }
+  }
+}
+
+
 // Course offering page
 #enroll-now {
   @extend .bg-info;

@@ -3,19 +3,20 @@
 
 {% block content %}
 <div class="container" id="international-schools">
-    Список школ также поддерживается в <a href="https://vk.com/compscischools">группе Вконтакте</a>
-    и в группе <a href="https://www.facebook.com/compscischools">в Фейсбуке</a>.<br>
-    Для добавления анонса школы свяжитесь с координатором клуба: Александр Куликов, alexander.s.kulikov@gmail.com.
-
+    <h2>{% trans "International Computer Science Student Schools" %}</h2>
+    {% blocktrans %}
+        If you would like a school to be added to this list email the club coordinator: Alexander Kulikov, kulikov()logic.pdmi.ras.ru<br>
+        Subscribe: <a href="https://www.facebook.com/compscischools">Facebook</a>
+    {% endblocktrans %}
     {% if schools %}
         <table class="table">
             <thead>
             <tr>
-                <th>Крайний срок подачи заявок</th>
+                <th>{% trans "Deadline" context "international schools" %}</th>
                 <th></th>
-                <th width="200">Даты</th>
-                <th>Место проведения</th>
-                <th>Гранты</th>
+                <th width="200">{% trans "Dates" %}</th>
+                <th>{% trans "Location" %}</th>
+                <th>{% trans "Grants" %}</th>
             </tr>
             </thead>
             <tbody>
@@ -25,7 +26,7 @@
                     <td><a href="{{ school.link }}">{{ school.name }}</a></td>
                     <td>{{ school.starts_at|date:"d.m.Y" }}{% if school.ends_at %} - {{ school.ends_at|date:"d.m.Y" }}{% endif %}</td>
                     <td>{{ school.place }}</td>
-                    <td>{% if school.has_grants %}да{% else %}нет{% endif %}</td>
+                    <td>{% if school.has_grants %}{% trans "yes" %}{% else %}{% trans "no" %}{% endif %}</td>
                 </tr>
             {% endfor %}
             </tbody>
