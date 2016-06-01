@@ -731,22 +731,22 @@ pre {
   .container-fluid:after {
     clear: both; }
 
-.row, #graduates .graduates-list {
+.row {
   margin-left: -15px;
   margin-right: -15px; }
-  .row:before, #graduates .graduates-list:before, .row:after, #graduates .graduates-list:after {
+  .row:before, .row:after {
     content: " ";
     display: table; }
-  .row:after, #graduates .graduates-list:after {
+  .row:after {
     clear: both; }
 
-.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, #graduates .graduates-list h3, .col-sm-12, .col-md-12, .col-lg-12 {
+.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
   position: relative;
   min-height: 1px;
   padding-left: 15px;
   padding-right: 15px; }
 
-.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12, #graduates .graduates-list h3 {
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
   float: left; }
 
 .col-xs-1 {
@@ -782,7 +782,7 @@ pre {
 .col-xs-11 {
   width: 91.6666666667%; }
 
-.col-xs-12, #graduates .graduates-list h3 {
+.col-xs-12 {
   width: 100%; }
 
 .col-xs-pull-0 {
@@ -6754,23 +6754,52 @@ h2.right-line:after {
 #graduates {
   padding: 80px 0; }
   #graduates .graduates-list-filter {
-    width: 86%; }
-  #graduates .graduates-list .graduates-list__item {
-    width: 170px;
-    display: inline-block;
-    overflow: hidden;
-    vertical-align: top;
-    margin: 0 25px 32px 15px; }
-    #graduates .graduates-list .graduates-list__item img {
-      max-width: 170px;
-      max-height: 170px; }
-    #graduates .graduates-list .graduates-list__item a {
-      font-weight: 300;
-      margin-top: 16px;
-      font-size: 16px;
-      display: inline-block;
-      line-height: 22px;
-      max-width: 170px; }
+    width: 100%; }
+  #graduates .graduates-list {
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-lines: multiple;
+    -moz-box-lines: multiple;
+    box-lines: multiple;
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -moz-box-pack: justify;
+    box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-justify-content: space-between;
+    -ms-justify-content: space-between;
+    -o-justify-content: space-between;
+    justify-content: space-between;
+    -ms-flex-pack: justify; }
+    #graduates .graduates-list h3 {
+      width: 100%; }
+    #graduates .graduates-list .alumni {
+      width: 170px;
+      overflow: hidden;
+      vertical-align: top;
+      margin: 0 0 32px 0; }
+      #graduates .graduates-list .alumni img {
+        max-width: 170px;
+        max-height: 170px; }
+      #graduates .graduates-list .alumni a {
+        font-weight: 300;
+        margin-top: 16px;
+        font-size: 16px;
+        display: inline-block;
+        line-height: 22px;
+        max-width: 170px; }
+    #graduates .graduates-list .fix-grid {
+      width: 170px;
+      height: 0;
+      margin: 0; }
 
 .br-theme-bars-movie .br-widget {
   height: 10px;
