@@ -63,7 +63,7 @@
             {% for project in student_projects %}
             <li>
               {{ project.semester }}:
-              «{{ project.name }}»{% if project.presentation %} (<a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>){% endif %},
+              «{{ project.name }}» {% if project.grade %}({{ project.get_grade_display|lower }}){% endif %} {% if project.presentation %} <a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>{% endif %},
               {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
               {% if project.description %}
               <div class="ubertext">
@@ -167,12 +167,12 @@
         <h4>{% trans "Social accounts" %}</h4>
         <table class="table table-condensed table-striped">
         <tr>
-            <td width="25%">{% trans "Yandex ID" %}</td>
+            <td>Yandex</td>
             <td>{{ user_object.yandex_id|default:"—" }}</td>
         </tr>
         <tr>
             
-            <td>{% trans "Github ID" %}</td>
+            <td>Github</td>
             <td>{% if user_object.github_id %}
                   <a href="https://github.com/{{ user_object.github_id }}" target="_blank">{{ user_object.github_id }}</a>
                 {% else %}
@@ -182,7 +182,7 @@
         </tr>
         <tr>
             
-            <td>{% trans "Stepic ID" %}</td>
+            <td>Stepic</td>
             <td>{% if user_object.stepic_id %}
                   <a href="https://stepic.org/users/{{ user_object.stepic_id }}" target="_blank">{{ user_object.stepic_id }}</a>
                 {% else %}
@@ -358,9 +358,10 @@
         <img src="{% static 'img/center/brain.jpg' %}">
     {% endif %}
     </div>
+
     {% if user.is_authenticated %}
         <div class="clearfix"></div>
-        <ul class="list-group">
+        <div class="list-group">
         {% if is_editing_allowed %}
             <a class="list-group-item" href="{% url 'user_update' user_object.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
         {% endif %}
@@ -380,8 +381,7 @@
                 <a href="{% url 'password_change' %}" class="list-group-item">{% trans "Change password" %}</a>
             {% endif %}
         {% endif %}
-        </ul>
-
+        </div>
     {% endif %}
 </div>
 </div>

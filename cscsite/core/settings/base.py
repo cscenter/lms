@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'import_export',
     'pipeline',
     'bootstrap_pagination',
+    # 'learning.gallery.apps.GalleryConfig'
 )
 
 # oEmbed
