@@ -842,7 +842,8 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if self.request.GET.get('back') == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
-            messages.success(self.request, self.MESSAGE_SUCCESS, extra_tags='timeout')
+            messages.success(self.request, self.MESSAGE_SUCCESS,
+                             extra_tags='timeout')
             return reverse('course_class_add',
                            args=[self._course_offering.course.slug,
                                  self._course_offering.semester.slug])
@@ -1629,6 +1630,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
             url_name = 'course_markssheet_staff'
         else:
             url_name = 'markssheet_teacher'
+        messages.info(self.request, _('Gradebook successfully saved.'),
+                      extra_tags='timeout')
         return reverse(url_name, args=[co.course.slug,
                                        co.semester.year,
                                        co.semester.type])
@@ -1811,15 +1814,16 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
         writer = csv.writer(response)
         writer.writerow(['Фамилия',
                          'Имя',
-                         'Яндекс ID']
-                        + [a.title for a in header]
-                        + ['Итоговая оценка'])
+                         'Яндекс ID'] +
+                        [a.title for a in header] +
+                        ['Итоговая оценка'])
         for student, by_assignment in structured.items():
             writer.writerow(
                 [(x if x is not None else '') for x in
-                    itertools.chain([student.last_name, student.first_name, student.yandex_id],
-                    by_assignment.values(),
-                    [enrollment_grades[student]])])
+                 itertools.chain([student.last_name, student.first_name,
+                                  student.yandex_id],
+                                 by_assignment.values(),
+                                 [enrollment_grades[student]])])
         return response
 
 
