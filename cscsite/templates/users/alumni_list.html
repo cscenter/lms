@@ -24,7 +24,7 @@
             {% for alumni_by_year in alumni_list %}
                 <h3>{{ alumni_by_year.grouper }}</h3>
                 {% for alumni in alumni_by_year.list %}
-                    <div class="graduates-list__item">
+                    <div class="alumni">
                         {% if alumni.photo %}
                             {% thumbnail alumni.photo "170x170" crop="center" as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}"
@@ -36,7 +36,14 @@
                         <a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a>
                     </div>
                 {% endfor %}
-                <div class="clearfix"></div>
+                {# Hack to fix flex grid #}
+                {% if not alumni_by_year.list|length|divisibleby:"5" %}
+                    <div class="fix-grid"></div>
+                    <div class="fix-grid"></div>
+                    <div class="fix-grid"></div>
+                    <div class="fix-grid"></div>
+                    <div class="clearfix"></div>
+                {% endif %}
                 {% empty %}
                 {% trans "No alumni yet" %}
             {% endfor %}
