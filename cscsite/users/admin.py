@@ -11,6 +11,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 from import_export.admin import ImportExportMixin, ImportMixin
 
 from core.admin import UbereditorMixin
+from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, CSCUserReference, \
     OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
 from .import_export import SHADCourseRecordResource, CSCUserRecordResource
@@ -85,7 +86,7 @@ class OnlineCourseRecordAdmin(admin.StackedInline):
     extra = 0
 
 
-class SHADCourseRecordAdmin(admin.StackedInline):
+class SHADCourseRecordInlineAdmin(admin.StackedInline):
     model = SHADCourseRecord
     extra = 0
 
@@ -95,7 +96,7 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
     add_form = CSCUserCreationForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
-    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordAdmin,
+    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                CSCUserStatusLogAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
                        'last_login', 'date_joined']
@@ -124,7 +125,14 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
 
 class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = SHADCourseRecordResource
-    pass
+
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        if db_field.name == "student":
+            kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
+                PARTICIPANT_GROUPS.STUDENT_CENTER,
+                PARTICIPANT_GROUPS.VOLUNTEER]).distinct()
+        return super(SHADCourseRecordResourceAdmin,
+                     self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
