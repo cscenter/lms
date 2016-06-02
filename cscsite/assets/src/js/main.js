@@ -139,10 +139,10 @@ function csrfSafeMethod(method) {
                 var mathjax = previewer.createElement('script');
                 mathjax.type = 'text/javascript';
                 mathjax.src = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-                previewer.body.appendChild(mathjax);
-                previewer.body.appendChild(
+                previewer.head.appendChild(
                     // re-use config from the top-level document
-                    $("[type^='text/x-mathjax-config']").clone().get(0));
+                    $("script[type^='text/x-mathjax-config']").clone().get(0));
+                previewer.body.appendChild(mathjax);
 
                 editor.on('preview', function () {
                     var contentDocument
@@ -160,18 +160,21 @@ function csrfSafeMethod(method) {
                         })
                             .done(function (data) {
                                 if (data.status == 'OK') {
-                                    $(target).html(data.text);
-                                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function () {
-                                        $(target).find("pre").addClass("hljs");
-                                        if (!editor.is('fullscreen')) {
-                                            var height = Math.max(
-                                                $(target).height() + 20,
-                                                editor.settings.autogrow.minHeight
-                                            );
-                                            $container.height(height);
-                                        }
-                                        editor.reflow();
-                                    }]);
+                                    target.innerHTML = data.text;
+                                    editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Queue(function () {
+                                        editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Typeset(target, function() {
+                                            $(target).find("pre").addClass("hljs");
+                                            if (!editor.is('fullscreen')) {
+                                                var height = Math.max(
+                                                    $(target).height() + 20,
+                                                    editor.settings.autogrow.minHeight
+                                                );
+                                                $container.height(height);
+                                            }
+                                            editor.reflow();
+
+                                            });
+                                    });
                                 }
                             }).error(function (data) {
                             var text;
