@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load core_tags %}
+{% load staticfiles %}
 
 {% block content %}
 <div class="container">
@@ -93,3 +94,7 @@
   </div>
 </div>
 {% endblock content %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/student_search.min.js" %}"></script>
+{% endblock javascripts %}

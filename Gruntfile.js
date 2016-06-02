@@ -27,19 +27,28 @@ module.exports = function (grunt) {
                 src: ['cscsite/assets/src/js/main.js'],
                 dest: 'cscsite/assets/js/main.js'
             },
-            profile: {
+            profile_edit: {
                 src: ['cscsite/assets/js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
-                      'cscsite/assets/src/js/profile.js'],
-                dest: 'cscsite/assets/js/profile.min.js'
+                      'cscsite/assets/src/js/profile_edit.js'],
+                dest: 'cscsite/assets/js/profile_edit.min.js'
+            },
+            staff_student_search: {
+                src: ['cscsite/assets/src/js/staff/student_search.js'],
+                dest: 'cscsite/assets/js/student_search.min.js'
             }
         },
         uglify: {
             main: {
                 files: {'cscsite/assets/js/main.js': ['cscsite/assets/src/js/main.js']}
             },
-            profile: {
+            profile_edit: {
                 files: {
-                    'cscsite/assets/js/profile.min.js': ['cscsite/assets/js/profile.min.js']
+                    'cscsite/assets/js/profile_edit.min.js': ['cscsite/assets/js/profile_edit.min.js']
+                }
+            },
+            staff_student_search: {
+                files: {
+                    'cscsite/assets/js/student_search.min.js': ['cscsite/assets/js/student_search.min.js']
                 }
             }
         },
@@ -48,10 +57,10 @@ module.exports = function (grunt) {
                 // livereload: true,
                 spawn: false
             },
-            // javascript: {
-            //     files: ['myproject/static/js/app/**/*.js'],
-            //     tasks: ['concat']
-            // },
+            javascript: {
+                files: ['cscsite/assets/src/js/**/*.js'],
+                tasks: ['concat']
+            },
             sass: {
                 files: ['cscsite/assets/src/sass/**/*.scss'],
                 tasks: ['sass:dev']
