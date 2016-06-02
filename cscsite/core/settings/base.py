@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'import_export',
     'pipeline',
     'bootstrap_pagination',
+    # 'mptt',
     # 'learning.gallery.apps.GalleryConfig'
 )
 
@@ -198,8 +199,6 @@ PIPELINE = {
     'JAVASCRIPT': {
         'base': {
             'source_filenames': (
-                'js/vendor/holder.js',
-                'js/vendor/readmore.min.js',
                 'js/vendor/md5.js',
                 'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
                 'js/vendor/bootstrap.min.js',
