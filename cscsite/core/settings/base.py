@@ -93,7 +93,8 @@ INSTALLED_APPS = (
     'import_export',
     'pipeline',
     'bootstrap_pagination',
-    # 'mptt',
+    'prettyjson',
+    'mptt',
     # 'learning.gallery.apps.GalleryConfig'
 )
 
