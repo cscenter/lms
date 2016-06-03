@@ -120,20 +120,20 @@ class TeacherDetailView(generic.DetailView):
 
     def get_queryset(self, *args, **kwargs):
         co_queryset = (CourseOffering.custom.site_related(self.request)
-            .select_related('semester', 'course'))
+                       .select_related('semester', 'course'))
         return (auth.get_user_model()._default_manager
                 .all()
                 .prefetch_related(
                     Prefetch('teaching_set',
                              queryset=co_queryset.all(),
-                             to_attr='course_offerings'))
-                )
+                             to_attr='course_offerings')))
 
-    def get_object(self, *args, **kwargs):
-        teacher = super(TeacherDetailView, self).get_object(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(TeacherDetailView, self).get_context_data(**kwargs)
+        teacher = context[self.context_object_name]
         if not teacher.is_teacher:
             raise Http404
-        return teacher
+        return context
 
 
 class UserDetailView(generic.DetailView):
