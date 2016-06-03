@@ -24,22 +24,29 @@ module.exports = function (grunt) {
         },
         concat: {
             main: {
-                src: ['cscsite/assets/src/js/main.js'],
+                src: ['<%= JS_SRC %>/main.js'],
                 dest: 'cscsite/assets/js/main.js'
             },
             profile_edit: {
                 src: ['cscsite/assets/js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
-                      'cscsite/assets/src/js/profile_edit.js'],
+                      '<%= JS_SRC %>/profile_edit.js'],
                 dest: 'cscsite/assets/js/profile_edit.min.js'
             },
             staff_student_search: {
-                src: ['cscsite/assets/src/js/staff/student_search.js'],
+                src: ['<%= JS_SRC %>/staff/student_search.js'],
                 dest: 'cscsite/assets/js/student_search.min.js'
+            },
+            club_teacher_gallery: {
+                src: [
+                    '<%= JS_SRC %>/vendor/jquery.magnific-popup/jquery.magnific-popup.min.js',
+                    '<%= JS_SRC %>/club/teacher_detail_gallery.js'
+                ],
+                dest: 'cscsite/assets/js/club/gallery.min.js'
             }
         },
         uglify: {
             main: {
-                files: {'cscsite/assets/js/main.js': ['cscsite/assets/src/js/main.js']}
+                files: {'cscsite/assets/js/main.js': ['<%= JS_SRC %>/main.js']}
             },
             profile_edit: {
                 files: {
@@ -50,7 +57,12 @@ module.exports = function (grunt) {
                 files: {
                     'cscsite/assets/js/student_search.min.js': ['cscsite/assets/js/student_search.min.js']
                 }
-            }
+            },
+            club_teacher_gallery: {
+                files: {
+                    'cscsite/assets/js/club/gallery.min.js': ['cscsite/assets/js/club/gallery.min.js']
+                }
+            },
         },
         watch: {
             options: {
@@ -58,7 +70,7 @@ module.exports = function (grunt) {
                 spawn: false
             },
             javascript: {
-                files: ['cscsite/assets/src/js/**/*.js'],
+                files: ['<%= JS_SRC %>/**/*.js'],
                 tasks: ['concat']
             },
             sass: {
@@ -68,9 +80,12 @@ module.exports = function (grunt) {
         },
         // Arbitrary properties used in task configuration templates.
         sass_files: {
-            'cscsite/assets/css/center/style.css': 'cscsite/assets/src/sass/center/style.scss',
-            'cscsite/assets/css/club/style.css': 'cscsite/assets/src/sass/club/style.scss'
-        }
+            'cscsite/assets/css/center/style.css': '<%= SASS_SRC %>/center/style.scss',
+            'cscsite/assets/css/club/style.css': '<%= SASS_SRC %>/club/style.scss',
+            'cscsite/assets/css/magnific-popup.css': '<%= SASS_SRC %>/jquery.magnific-popup/main.scss',
+        },
+        SASS_SRC: 'cscsite/assets/src/sass',
+        JS_SRC: 'cscsite/assets/src/js',
     });
 
     // Register tasks here.

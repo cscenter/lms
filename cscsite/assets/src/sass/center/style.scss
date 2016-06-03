@@ -70,7 +70,11 @@ $state-success-text: $color-green;
     a {
         text-transform: uppercase;
     }
+}
 
+input.form-control[type=file] {
+  line-height: 1;
+  height: auto;
 }
 
 // Panel group

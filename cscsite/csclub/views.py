@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.utils.timezone import now
 from django.views import generic
 # TODO: (XXX) Dont' forget to remove it after old.* termination.
@@ -74,6 +75,29 @@ class TeachersView(generic.ListView):
         user_model = get_user_model()
         teacher_groups = [user_model.group_pks.TEACHER_CLUB]
         return user_model.objects.filter(groups__in=teacher_groups).distinct()
+
+
+class TeacherDetailView(generic.DetailView):
+    template_name = "users/teacher_club_detail.html"
+    context_object_name = 'teacher'
+
+    def get_queryset(self, *args, **kwargs):
+        co_queryset = (CourseOffering.custom.site_related(self.request)
+                       .select_related('semester', 'course'))
+        return (auth.get_user_model()._default_manager
+                .all()
+                .prefetch_related(
+                    Prefetch('teaching_set',
+                             queryset=co_queryset.all(),
+                             to_attr='course_offerings'),
+                    "images"))
+
+    def get_context_data(self, **kwargs):
+        context = super(TeacherDetailView, self).get_context_data(**kwargs)
+        teacher = context[self.context_object_name]
+        if not teacher.is_teacher:
+            raise Http404
+        return context
 
 
 @requires_csrf_token

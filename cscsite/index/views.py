@@ -79,6 +79,7 @@ class AlumniViewMixin(object):
         context["study_programs"] = StudyProgram.objects.all()
         return context
 
+
 class AlumniView(AlumniViewMixin, generic.ListView):
     template_name = "users/alumni_list.html"
 

@@ -2,6 +2,23 @@
     margin-top: 40px;
 }
 
+.gallery {
+  @extend .row;
+  margin: 0;
+  padding: 20px 10px 0 10px;
+  background: #f8f8f8;
+
+  a {
+    @extend .col-xs-4;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+    img {
+      @extend .img-responsive;
+    }
+  }
+}
+
 .table {
     &.table-bordered {
         > thead > tr > th {

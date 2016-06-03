@@ -95,7 +95,7 @@ INSTALLED_APPS = (
     'bootstrap_pagination',
     'prettyjson',
     'mptt',
-    # 'learning.gallery.apps.GalleryConfig'
+    'learning.gallery.apps.GalleryConfig'
 )
 
 # oEmbed

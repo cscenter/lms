@@ -12,7 +12,6 @@
 
     {% if teacher.note %}
         <div class="about-me">
-            <h4>{% trans "About teacher" %}</h4>
             <div class="ubertext">
               {% markdown 3600 "user_note" teacher.pk teacher.modified %}
                 {{ teacher.note }}
@@ -33,23 +32,24 @@
     {% endif %}
 
     {% if teacher.course_offerings %}
-    <h3>{% trans "Course offerings" %}</h3>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Курс</th>
-          <th>Дата</th>
-        </tr>
-      </thead>
-        {% for course_offering in teacher.course_offerings %}
-          <tr>
-            <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
-            <td>{{ course_offering.semester }}</td>
+        <h4>{% trans "Course offerings" %}</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Курс</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+            {% for course_offering in teacher.course_offerings %}
+              <tr>
+                <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
+                <td>{{ course_offering.semester }}</td>
+              </tr>
+            {% endfor %}
           </tr>
-        {% endfor %}
-      </tr>
-    </table>
+        </table>
     {% endif %}
+    {% block gallery %}{% endblock gallery %}
 </div>
 <div class="col-xs-3 profile-sidebar">
     <div class="thumbnail text-center">

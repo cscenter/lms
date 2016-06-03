@@ -7,14 +7,15 @@ from htmlpages import views
 
 from index.views import RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
-from users.views import LoginView, LogoutView, TeacherDetailView, \
+from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
 from learning.views import InternationalSchoolsListView
 from learning.urls import course_patterns, course_offering_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView
-from csclub.views import CalendarClubScheduleView, IndexView, TeachersView
+from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
+    TeacherDetailView
 
 
 admin.autodiscover()
