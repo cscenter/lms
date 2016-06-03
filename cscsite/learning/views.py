@@ -842,8 +842,6 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if self.request.GET.get('back') == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
-            messages.success(self.request, self.MESSAGE_SUCCESS,
-                             extra_tags='timeout')
             return reverse('course_class_add',
                            args=[self._course_offering.course.slug,
                                  self._course_offering.semester.slug])
@@ -851,16 +849,22 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
-
-
 class CourseClassCreateView(CourseClassCreateUpdateMixin,
                             generic.CreateView):
-    MESSAGE_SUCCESS = _("The class was successfully created.")
+    def get_success_url(self):
+        msg = _("The class '%s' was successfully created.")
+        messages.success(self.request, msg % self.object.name,
+                         extra_tags='timeout')
+        return super(CourseClassCreateView, self).get_success_url()
 
 
 class CourseClassUpdateView(CourseClassCreateUpdateMixin,
                             generic.UpdateView):
-    MESSAGE_SUCCESS = _("The class was successfully updated.")
+    def get_success_url(self):
+        msg = _("The class '%s' was successfully updated.")
+        messages.success(self.request, msg % self.object.name,
+                         extra_tags='timeout')
+        return super(CourseClassUpdateView, self).get_success_url()
 
 
 class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
