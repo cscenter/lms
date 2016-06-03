@@ -561,6 +561,21 @@ tr.unread {
 }
 
 
+.ubertext {
+  overflow: hidden;
+
+  pre {
+    padding: 0.5em;
+  }
+  table {
+    @extend .table;
+    @extend .table-bordered;
+    @extend .table-condensed;
+    @extend .table-striped;
+  }
+}
+
+
 // Teachers list
 .teachers-list {
 
@@ -577,6 +592,7 @@ tr.unread {
     }
 
     .ubertext {
+      overflow: hidden;
 
       .h4 {
         color: $color-blue;
