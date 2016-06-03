@@ -74,6 +74,8 @@ django-import-export==0.4.5
 tablib==0.11.2
 
 # Misc utils
+django-prettyjson==0.2.0
+django-mptt==0.8.4
 django-bootstrap-pagination==1.6.1
 django-bitfield==1.8.0
 django-filter==0.13.0
