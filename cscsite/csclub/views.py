@@ -9,6 +9,7 @@ from django.views import generic
 from django.views.decorators.csrf import requires_csrf_token
 from django.shortcuts import redirect
 
+from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
 from learning.views import CalendarMixin
@@ -90,7 +91,11 @@ class TeacherDetailView(generic.DetailView):
                     Prefetch('teaching_set',
                              queryset=co_queryset.all(),
                              to_attr='course_offerings'),
-                    "images"))
+                    Prefetch('images',
+                             queryset=Image.objects.select_related(
+                                 "course_offering",
+                                 "course_offering__semester"))
+                    ))
 
     def get_context_data(self, **kwargs):
         context = super(TeacherDetailView, self).get_context_data(**kwargs)
