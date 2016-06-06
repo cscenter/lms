@@ -31,7 +31,7 @@ $state-success-text: $color-green;
 @import "top_menu.scss";
 @import "_material_design.scss";
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
-@import "pages/online_page.scss";
+@import "pages/online_courses_page.scss";
 @import "pages/index";
 @import "pages/testimonials";
 @import "pages/gradebook.scss";
