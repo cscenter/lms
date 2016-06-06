@@ -80,6 +80,7 @@ $unsaved-state-color: #dcf0ff;
     }
     .cell {
       border-right: 1px solid #fff;
+      text-overflow: ellipsis;
     }
 
   }

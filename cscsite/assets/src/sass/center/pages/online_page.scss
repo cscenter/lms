@@ -1,44 +1,60 @@
 // Online Courses list
 #onlinecourses-list {
+  padding-top: 40px;
 
-    h1 {
-        text-align: center;
-        margin-top: 30px;
+  h1 {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .onlinecourses-list__item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+    overflow: hidden;
+    font-size: 16px;
+    line-height: 1.5em;
+
+    &:last-child {
+      border-bottom: none;
     }
-    .onlinecourses-list__item {
-        margin-bottom: 20px;
 
-        h3 {
-            padding: 0 15px;
-        }
-
-        .onlinecourses-list__item-left {
-
-            position: relative;
-            min-height: 1px;
-            padding-left: 15px;
-            padding-right: 15px;
-            float: left;
-            width: 164px;
-
-            img {
-                @include img-responsive();
-                margin: 8px 0;
-            }
-        }
-
-        .onlinecourses-list__item-right {
-            position: relative;
-            min-height: 1px;
-            padding-left: 10px;
-            padding-right: 15px;
-            float: left;
-            width: 750px;
-
-            &._collaboration {
-                line-height: 34px;
-            }
-        }
+    h2 {
+      margin: 0 0 20px 0;
+      font-size: 24px;
     }
+
+    .onlinecourses-list__item-left {
+
+      position: relative;
+      min-height: 1px;
+      float: left;
+      width: 134px;
+
+      img {
+        @include img-responsive();
+        margin: 0 0 8px 0;
+      }
+    }
+
+    .onlinecourses-list__item-right {
+      position: relative;
+      min-height: 1px;
+      padding-left: 20px;
+      padding-right: 15px;
+      float: left;
+      width: 750px;
+
+      h3 {
+        margin: 0;
+        font-size: 20px;
+        color: $color-grey;
+        font-weight: normal;
+      }
+
+      &._collaboration {
+        line-height: 42px;
+      }
+    }
+  }
 
 }

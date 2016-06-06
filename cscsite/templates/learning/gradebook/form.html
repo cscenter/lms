@@ -69,7 +69,7 @@
                 <div>
                     {% for student_id, row in students.items %}
                         {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
-                          <a class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}">
+                          <a class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
                               {% if student.last_name %}
                                   {{ student.last_name }}&nbsp;{{ student.first_name|first }}.
                               {% else %}
