@@ -41,7 +41,8 @@ $state-success-text: $color-green;
 @import "pages/graduates";
 @import "pages/admission";
 @import "pages/_assignments";
-@import "pages/_calendar";
+@import "pages/calendar";
+@import "pages/teachers_list";
 
 @import "components/input-daterange";
 @import "components/buttons";
@@ -602,28 +603,4 @@ tr.unread {
   text-decoration: none!important;
   display: inline-block;
   margin-bottom: 20px;
-}
-.teachers-list {
-
-  margin-bottom: 20px;
-
-  h1 {
-    margin-bottom: 40px;
-  }
-
-  .col-xs-6 {
-    img {
-      float: left;
-      margin: 0 10px 20px 0;
-    }
-
-    .ubertext {
-
-      .h4 {
-        color: $color-blue;
-      }
-
-      margin-left: 110px;
-    }
-  }
 }
