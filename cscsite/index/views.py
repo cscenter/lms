@@ -67,11 +67,18 @@ class IndexView(generic.TemplateView):
 
 
 class AlumniViewMixin(object):
+    filter_by_year = None
+
     def get_queryset(self):
         user_model = get_user_model()
         graduate_pk = user_model.group_pks.GRADUATE_CENTER
+        params = {
+            "groups__pk": graduate_pk
+        }
+        if self.filter_by_year is not None:
+            params["graduation_year"] = self.filter_by_year
         return (user_model.objects
-                .filter(groups__pk=graduate_pk)
+                .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
