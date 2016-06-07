@@ -3,7 +3,7 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
-(function ($) {
+(function ($, HIGHLIGHTJS_SRC, _) {
     "use strict";
 
     var ends_at_touched = false;
@@ -11,12 +11,7 @@ function csrfSafeMethod(method) {
     // map from hash to dummy value (effectively a set)
     var persistedHashes = window.CSCCommentPersistenceHashes;
 
-    // Ubereditors
     var $ubereditors = $("textarea.ubereditor");
-    if ($ubereditors.length > 1) {
-        console.warn("more than one Ubereditor on page, " +
-                     "text restoration may be buggy");
-    }
 
     var $ubertexts = $("div.ubertext");
 
@@ -67,18 +62,16 @@ function csrfSafeMethod(method) {
                      });
                 });
                 chained.done(function() {
-                    fn.configureHighlightJS();
                     fn.initMathJaxAndHightlightJS();
                 });
                 deferred.resolve();
             }
         },
 
-        configureHighlightJS: function () {
-            hljs.configure({tabReplace: '    '});
-        },
-
         initMathJaxAndHightlightJS: function () {
+            // Configure hljs
+            hljs.configure({tabReplace: '    '});
+
             $ubertexts.each(function (i, target) {
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function () {
                     var $target = $(target);
@@ -97,14 +90,13 @@ function csrfSafeMethod(method) {
 
         initUberEditor: function () {
             $ubereditors.each(function (i, textarea) {
-                var $textarea = $(textarea);
-                var $container = $("<div/>").insertAfter($textarea);
-                var shouldFocus = false;
-                var ubereditorRestoration = $textarea.data('local-persist') == true;
+                var $textarea = $(textarea),
+                    $container = $("<div/>").insertAfter($textarea),
+                    autoSaveEnabled = $textarea.data('local-persist') == true;
 
                 $textarea.hide();
-                shouldFocus = $textarea.prop("autofocus");
                 $textarea.removeProp("required");
+                var shouldFocus = $textarea.prop("autofocus");
 
                 var opts = {
                     container: $container[0],
@@ -112,7 +104,7 @@ function csrfSafeMethod(method) {
                     parser: null,
                     focusOnLoad: shouldFocus,
                     basePath: "/static/js/vendor/EpicEditor-v0.2.2",
-                    clientSideStorage: ubereditorRestoration,
+                    clientSideStorage: autoSaveEnabled,
                     autogrow: {minHeight: 200},
                     button: {bar: "show"},
                     theme: {
@@ -122,12 +114,12 @@ function csrfSafeMethod(method) {
                 };
 
                 var filename = (window.location.pathname.replace(/\//g, "_")
-                + "_" + i.toString());
-                if (ubereditorRestoration) {
+                    + "_" + textarea.name);
+                if (autoSaveEnabled) {
                     opts['file'] = {
                         name: filename,
                         defaultContent: "",
-                        autoSave: 300
+                        autoSave: 200
                     };
                 }
 
@@ -348,4 +340,4 @@ function csrfSafeMethod(method) {
             });
         }
     };
-})(jQuery, HIGHLIGHTJS_SRC);
+})(jQuery, HIGHLIGHTJS_SRC, _);
