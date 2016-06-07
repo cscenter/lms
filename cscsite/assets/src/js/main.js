@@ -113,9 +113,14 @@ function csrfSafeMethod(method) {
                     }
                 };
 
-                var filename = (window.location.pathname.replace(/\//g, "_")
-                    + "_" + textarea.name);
                 if (autoSaveEnabled) {
+                    if (textarea.name === undefined) {
+                        console.error("Missing attr `name` for textarea. " +
+                            "Text restore will be buggy.")
+                    }
+                    // Presume textarea name is unique for page!
+                    var filename = (window.location.pathname.replace(/\//g, "_")
+                        + "_" + textarea.name);
                     opts['file'] = {
                         name: filename,
                         defaultContent: "",
