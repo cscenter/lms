@@ -95,6 +95,13 @@ server {
 
     resolver 8.8.8.8;
 
+    error_page 404 = /errors/404.html;
+
+    location = /errors/404.html {
+        root /home/{{ cscenter_user }}/site/repo/cscsite/templates/;
+        internal;
+    }
+
     location /media  {
         alias /shared/media;
         access_log off;
@@ -121,6 +128,8 @@ server {
     location / {
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;
+        # Serve 30x statuses with nginx
+        uwsgi_intercept_errors on;
         uwsgi_pass django_{{ cscenter_user }};
         include uwsgi_params;
     }
