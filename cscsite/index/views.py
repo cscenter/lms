@@ -66,8 +66,20 @@ class IndexView(generic.TemplateView):
         return context
 
 
-class AlumniViewMixin(object):
+# TODO: Rewrite filter by study programs with js and 1 additional db query?
+class AlumniView(generic.ListView):
     filter_by_year = None
+    study_programs = None
+    template_name = "users/alumni_list.html"
+
+    def get(self, request, *args, **kwargs):
+        # Validate query params
+        code = self.kwargs.get("study_program_code", False)
+        self.study_programs = StudyProgram.objects.all()
+        if code and code not in (s.code for s in self.study_programs):
+            # TODO: redirect to alumni/ page
+            raise Http404
+        return super(AlumniView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         user_model = get_user_model()
@@ -77,36 +89,23 @@ class AlumniViewMixin(object):
         }
         if self.filter_by_year is not None:
             params["graduation_year"] = self.filter_by_year
+        code = self.kwargs.get("study_program_code", False)
+        if code:
+            params["study_programs"] = code
         return (user_model.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
-        context = super(AlumniViewMixin, self).get_context_data(**kwargs)
-        context["study_programs"] = StudyProgram.objects.all()
-        return context
-
-
-class AlumniView(AlumniViewMixin, generic.ListView):
-    template_name = "users/alumni_list.html"
-
-
-# TODO: rewrite with js filter?
-class AlumniViewByStudyProgram(AlumniViewMixin, generic.ListView):
-    template_name = "users/alumni_list.html"
-
-    def get_queryset(self):
-        code = self.kwargs.get("study_program_code")
-        queryset = super(AlumniViewByStudyProgram, self).get_queryset().filter(
-            study_programs=code)
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        code = self.kwargs.get("study_program_code")
-        context = super(AlumniViewByStudyProgram, self).get_context_data(**kwargs)
-        if code not in (s.code for s in context["study_programs"]):
-            raise Http404
+        context = super(AlumniView, self).get_context_data(**kwargs)
+        code = self.kwargs.get("study_program_code", False)
         context["selected_study_program"] = code
+        context["study_programs"] = self.study_programs
+        if self.filter_by_year:
+            context["base_url"] = reverse(
+                "alumni_{}".format(self.filter_by_year))
+        else:
+            context["base_url"] = reverse("alumni")
         return context
 
 

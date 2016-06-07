@@ -7,8 +7,7 @@ from core.views import MarkdownRenderView
 from cscenter.views import QAListView, TestimonialsListView
 from htmlpages import views
 from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
-    UnsubscribeYaProxyView, EnrollmentApplicationCallback, \
-    AlumniViewByStudyProgram
+    UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherDispatchView, UsefulListView
 from staff.views import ExportsView, StudentsDiplomasView, \
@@ -54,10 +53,15 @@ urlpatterns = [
         name='ical_events'),
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
+    # Alumni
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
-    url(r'^alumni/(?P<study_program_code>[-\w]+)/$',
-        AlumniViewByStudyProgram.as_view(),
+    url(r'^2016/$', AlumniView.as_view(filter_by_year=2016),
+        name='alumni_2016'),
+    url(r'^alumni/(?P<study_program_code>[-\w]+)/$', AlumniView.as_view(),
         name='alumni_by_study_program'),
+    url(r'^2016/(?P<study_program_code>[-\w]+)/$',
+        AlumniView.as_view(filter_by_year=2016),
+        name='alumni_2016_by_study_program'),
 
     # TODO: refactor
     url(r'^staff/course-marks/$',
