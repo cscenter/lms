@@ -16,7 +16,6 @@ module.exports = function (grunt) {
             },
             deploy: {
                 options: {
-                    // includePaths: ['bower_components/foundation/scss'],
                     outputStyle: 'compressed'
                 },
                 files: '<%= sass_files %>'
@@ -25,42 +24,42 @@ module.exports = function (grunt) {
         concat: {
             main: {
                 src: ['<%= JS_SRC %>/main.js'],
-                dest: 'cscsite/assets/js/main.js'
+                dest: '<%= JS_RUNTIME %>/main.js'
             },
             profile_edit: {
-                src: ['cscsite/assets/js/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
+                src: ['<%= JS_SRC %>/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
                       '<%= JS_SRC %>/profile_edit.js'],
-                dest: 'cscsite/assets/js/profile_edit.min.js'
+                dest: '<%= JS_RUNTIME %>/profile_edit.js'
             },
             staff_student_search: {
                 src: ['<%= JS_SRC %>/staff/student_search.js'],
-                dest: 'cscsite/assets/js/student_search.min.js'
+                dest: '<%= JS_RUNTIME %>/student_search.js'
             },
             club_teacher_gallery: {
                 src: [
                     '<%= JS_SRC %>/vendor/jquery.magnific-popup/jquery.magnific-popup.min.js',
                     '<%= JS_SRC %>/club/teacher_detail_gallery.js'
                 ],
-                dest: 'cscsite/assets/js/club/gallery.min.js'
+                dest: '<%= JS_RUNTIME %>/club/gallery.js'
             }
         },
         uglify: {
             main: {
-                files: {'cscsite/assets/js/main.js': ['<%= JS_SRC %>/main.js']}
+                files: {'<%= JS_DEST %>/main.js': ['<%= JS_RUNTIME %>/main.js']}
             },
             profile_edit: {
                 files: {
-                    'cscsite/assets/js/profile_edit.min.js': ['cscsite/assets/js/profile_edit.min.js']
+                    '<%= JS_DEST %>/profile_edit.js': ['<%= JS_RUNTIME %>/profile_edit.js']
                 }
             },
             staff_student_search: {
                 files: {
-                    'cscsite/assets/js/student_search.min.js': ['cscsite/assets/js/student_search.min.js']
+                    '<%= JS_DEST %>/student_search.js': ['<%= JS_RUNTIME %>/student_search.js']
                 }
             },
             club_teacher_gallery: {
                 files: {
-                    'cscsite/assets/js/club/gallery.min.js': ['cscsite/assets/js/club/gallery.min.js']
+                    '<%= JS_DEST %>/club/gallery.js': ['<%= JS_RUNTIME %>/club/gallery.js']
                 }
             },
         },
@@ -71,7 +70,7 @@ module.exports = function (grunt) {
             },
             javascript: {
                 files: ['<%= JS_SRC %>/**/*.js'],
-                tasks: ['concat']
+                tasks: ['concat', 'uglify']
             },
             sass: {
                 files: ['cscsite/assets/src/sass/**/*.scss'],
@@ -86,6 +85,8 @@ module.exports = function (grunt) {
         },
         SASS_SRC: 'cscsite/assets/src/sass',
         JS_SRC: 'cscsite/assets/src/js',
+        JS_RUNTIME: 'cscsite/assets/_builds/js',
+        JS_DEST: 'cscsite/assets/js',
     });
 
     // Register tasks here.
