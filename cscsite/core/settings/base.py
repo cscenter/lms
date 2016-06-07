@@ -210,23 +210,6 @@ PIPELINE = {
             ),
             'output_filename': 'js/dist/base.js',
         },
-        'fileinput': {
-            'source_filenames': (
-                'js/vendor/bootstrap-fileinput/fileinput.min.js',
-                'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
-            ),
-            'output_filename': 'js/dist/fileinput.js',
-        },
-        # Note: Can't include fileinput package, so duplicate it
-        'gradebook': {
-            'source_filenames': (
-                'js/vendor/bootstrap-fileinput/fileinput.min.js',
-                'js/vendor/bootstrap-fileinput/fileinput_locale_ru.js',
-                'js/vendor/jquery.arrow-increment.min.js',
-                'js/gradebook.js',
-            ),
-            'output_filename': 'js/dist/gradebook.js',
-        }
     }
 }
 

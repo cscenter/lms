@@ -32,7 +32,7 @@ msgcompile:
 	python manage.py compilemessages --settings=csclub.settings.local
 
 static:
-	python manage.py collectstatic --noinput $(DJANGO_POSTFIX) --ignore src --ignore *.map
+	python manage.py collectstatic --noinput $(DJANGO_POSTFIX) --ignore src --ignore *.map --ignore _builds
 
 freeze:
 	pip freeze --local > requirements.txt

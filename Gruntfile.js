@@ -27,7 +27,7 @@ module.exports = function (grunt) {
                 dest: '<%= JS_RUNTIME %>/main.js'
             },
             profile_edit: {
-                src: ['<%= JS_SRC %>/vendor/jasny.bootstrap/jasny-bootstrap.min.js',
+                src: ['<%= JS_VENDOR %>/jasny.bootstrap/jasny-bootstrap.min.js',
                       '<%= JS_SRC %>/profile_edit.js'],
                 dest: '<%= JS_RUNTIME %>/profile_edit.js'
             },
@@ -37,12 +37,48 @@ module.exports = function (grunt) {
             },
             club_teacher_gallery: {
                 src: [
-                    '<%= JS_SRC %>/vendor/jquery.magnific-popup/jquery.magnific-popup.min.js',
+                    '<%= JS_VENDOR %>/jquery.magnific-popup/jquery.magnific-popup.min.js',
                     '<%= JS_SRC %>/club/teacher_detail_gallery.js'
                 ],
                 dest: '<%= JS_RUNTIME %>/club/gallery.js'
-            }
+            },
+            fileinput: {
+                src: [
+                    '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput.min.js',
+                    '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput_locale_ru.js'
+                ],
+                dest: '<%= JS_RUNTIME %>/fileinput.js'
+            },
+            gradebook: {
+                src: [
+                    // TODO: Investigate how to remove duplicates (see `fileinput` target)
+                    '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput.min.js',
+                    '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput_locale_ru.js',
+                    '<%= JS_VENDOR %>/jquery.arrow-increment.min.js',
+                    '<%= JS_SRC %>/gradebook.js'
+                ],
+                dest: '<%= JS_RUNTIME %>/gradebook.js'
+            },
+            faq: {
+                src: ['<%= JS_SRC %>/faq.js'],
+                dest: '<%= JS_DEST %>/faq.js'
+            },
+            assignment_submissions: {
+                src: ['<%= JS_SRC %>/assignment-submissions.js'],
+                dest: '<%= JS_DEST %>/assignment-submissions.js'
+            },
+            diplomas: {
+                src: [
+                    '<%= JS_SRC %>/diplomas.js',
+                ],
+                dest: '<%= JS_DEST %>/diplomas.js'
+            },
+            raven_conf: {
+                src: ['<%= JS_SRC %>/raven_conf.js'],
+                dest: '<%= JS_DEST %>/raven_conf.js'
+            },
         },
+        // TODO: Make this task more generic after all src js will be moved to src folder
         uglify: {
             main: {
                 files: {'<%= JS_DEST %>/main.js': ['<%= JS_RUNTIME %>/main.js']}
@@ -60,6 +96,11 @@ module.exports = function (grunt) {
             club_teacher_gallery: {
                 files: {
                     '<%= JS_DEST %>/club/gallery.js': ['<%= JS_RUNTIME %>/club/gallery.js']
+                }
+            },
+            gradebook: {
+                files: {
+                    '<%= JS_DEST %>/gradebook.js': ['<%= JS_RUNTIME %>/gradebook.js']
                 }
             },
         },
@@ -85,6 +126,7 @@ module.exports = function (grunt) {
         },
         SASS_SRC: 'cscsite/assets/src/sass',
         JS_SRC: 'cscsite/assets/src/js',
+        JS_VENDOR: 'cscsite/assets/src/js/vendor',
         JS_RUNTIME: 'cscsite/assets/_builds/js',
         JS_DEST: 'cscsite/assets/js',
     });
