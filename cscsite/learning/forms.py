@@ -21,11 +21,10 @@ from .models import Course, CourseOffering, CourseOfferingNews, \
     LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
-                              onclick='history.go(-1);',
-                              css_class="btn btn-default")
+                       onclick='history.go(-1);',
+                       css_class="btn btn-default")
 SUBMIT_BUTTON = Submit('save', _('Save'))
 CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
-
 
 
 class CourseOfferingPKForm(forms.Form):
@@ -314,7 +313,8 @@ class AssignmentForm(forms.ModelForm):
         label=_("Deadline"),
         input_date_formats=["%Y-%m-%d"],
         input_time_formats=["%H:%M"],
-        widget = forms.SplitDateTimeWidget(date_format="%Y-%m-%d", time_format="%H:%M")
+        widget = forms.SplitDateTimeWidget(date_format="%Y-%m-%d",
+                                           time_format="%H:%M")
         # help_text=_("Example: 1990-07-13 12:00"),
         )
     attachments = forms.FileField(
@@ -396,7 +396,6 @@ class MarksSheetTeacherImportGradesForm(forms.Form):
     )
 
 
-# Hipster factory class!
 class GradeBookFormFactory(object):
 
     GRADE_PREFIX = "a_s_{0}"
@@ -412,17 +411,18 @@ class GradeBookFormFactory(object):
             so it's unceccessary at all to use this feature.
         """
         fields = {cls.GRADE_PREFIX.format(a_s["pk"]):
-                      forms.IntegerField(min_value=0,
-                                         max_value=a_s["assignment__grade_max"],
-                                         required=False)
+                  forms.IntegerField(min_value=0,
+                                     max_value=a_s["assignment__grade_max"],
+                                     required=False)
                   for a_s in a_s_list if not a_s["assignment__is_online"]}
         fields.update({cls.FINAL_GRADE_PREFIX.format(e.pk):
-                           forms.ChoiceField(GRADES) for e in enrollment_list})
+                       forms.ChoiceField(GRADES) for e in enrollment_list})
         return type(str('MarksSheetTeacherForm'), (forms.Form,), fields)
 
     @classmethod
-    def build_indexes(cls, a_s_list, enrollment_list):
-        a_s_index = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s for a_s in a_s_list}
+    def build_indexes(cls, student_assignments_list, enrollment_list):
+        sas = student_assignments_list
+        a_s_index = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s for a_s in sas}
         enrollment_index = {cls.FINAL_GRADE_PREFIX.format(e.pk): e for e in
                             enrollment_list}
         return a_s_index, enrollment_index
