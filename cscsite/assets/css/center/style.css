@@ -7413,11 +7413,6 @@ h4.no-top-margin {
     width: 90% !important;
     min-width: 960px; }
 
-.container.inner, .inner#admission, #index-online-courses .inner#onlinecourses-list, #courses-wrapper .inner#courses, .testimonials-wrapper .inner.testimonials, .inner#questions-wrapper, .inner#graduates, .inner.admission-list-page, .inner.admission-interview-page, .inner.admission-applicant-page, .inner#assignments-page {
-  padding-left: 0px;
-  padding-right: 0px;
-  width: 940px !important; }
-
 .logo-cell {
   position: relative;
   margin-left: 15px;
@@ -7592,8 +7587,7 @@ h5.assignment {
 
 #div_id_deadline_at input#id_deadline_at_0 {
   width: 49%;
-  float: left;
-  margin-right: 1%; }
+  float: left; }
 
 #div_id_deadline_at input#id_deadline_at_1 {
   width: 49%;
@@ -7676,9 +7670,6 @@ tr.unread {
 
 .input-grade {
   width: 100px !important; }
-
-.form-group div.controls {
-  margin-right: 1%; }
 
 .nobreak {
   white-space: nowrap; }
