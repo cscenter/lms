@@ -3,6 +3,7 @@
 
   h3 {
     margin-top: 10px;
+    margin-left: 10px;
   }
 
   h4 {
@@ -72,16 +73,6 @@
 
       &.actions {
         width: 120px;
-      }
-    }
-
-    td {
-      &:first-child {
-        padding-left: 0;
-      }
-
-      &:last-child {
-        padding-right: 0;
       }
     }
   }
