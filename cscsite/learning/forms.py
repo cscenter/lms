@@ -120,9 +120,6 @@ class CourseForm(forms.ModelForm):
         fields = ['name_ru', 'name_en', 'description_ru', 'description_en']
 
 
-
-
-
 class CourseClassForm(forms.ModelForm):
     venue = forms.ModelChoiceField(
         Venue.objects.all(),
@@ -171,12 +168,11 @@ class CourseClassForm(forms.ModelForm):
         del kwargs['remove_links']
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div(Div(Div('type',
+            Div(Div('type',
                         css_class='col-xs-2'),
                     Div('venue',
                         css_class='col-xs-3'),
                     css_class='row'),
-                css_class='container inner'),
             Div('name',
                 'description',
                 css_class="form-group"),
@@ -188,13 +184,12 @@ class CourseClassForm(forms.ModelForm):
                     css_class="form-inline"),
                 css_class="form-group"),
             Fieldset(_("Materials"),
-                     Div(Div(Div('slides',
-                                 css_class='col-xs-6'),
-                             Div('attachments',
-                                 HTML(remove_links),
-                                 css_class='col-xs-6'),
-                             css_class='row'),
-                         css_class='container inner'),
+                     Div(
+                         Div('slides', css_class='col-xs-6'),
+                         Div('attachments', HTML(remove_links),
+                             css_class='col-xs-6'),
+                         css_class='row'
+                     ),
                      'video_url',
                      'other_materials'),
             FormActions(
@@ -337,21 +332,25 @@ class AssignmentForm(forms.ModelForm):
         del kwargs['remove_links']
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('title',
+            Div(
+                'title',
                 'text',
-                Div(Div(Div('deadline_at',
-                            css_class='col-xs-6'),
-                        Div('attachments',
-                            HTML(remove_links),
-                            css_class='col-xs-6'),
-                        css_class='row'),
-                    css_class='container inner'),
-                Div(Div('grade_min',
+                Div(
+                    Div('deadline_at', css_class='col-xs-6'),
+                    Div('attachments', HTML(remove_links),
+                        css_class='col-xs-6'),
+                    css_class='row'
+                ),
+                Div(
+                    Div('grade_min',
                         'grade_max',
-                        css_class="form-inline"),
-                    css_class="form-group"),
+                        css_class="form-inline"
+                    ),
+                    css_class="form-group"
+                ),
                 'is_online',
-                css_class="form-group"),
+                css_class="form-group"
+            ),
             CANCEL_SAVE_PAIR)
         super(AssignmentForm, self).__init__(*args, **kwargs)
         # No protection is needed if user is a superuser

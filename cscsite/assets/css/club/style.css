@@ -6629,10 +6629,6 @@ h4.no-top-margin {
 .container, #assignments-page {
   min-width: 940px !important; }
 
-.container.inner, .inner#assignments-page {
-  padding-left: 0px;
-  padding-right: 0px; }
-
 body {
   margin-bottom: 90px;
   /* min-height: 100%; */ }
@@ -6830,13 +6826,11 @@ h5.assignment {
 
 #div_id_deadline_at input#id_deadline_at_0 {
   width: 49%;
-  float: left;
-  margin-right: 1%; }
+  float: left; }
 
 #div_id_deadline_at input#id_deadline_at_1 {
   width: 49%;
-  float: left;
-  margin-right: 1%; }
+  float: left; }
 
 .marks-sheet-csv-link .reason {
   display: none; }
@@ -6922,9 +6916,6 @@ tr.unread {
 
 .input-grade {
   width: 100px !important; }
-
-.form-group div.controls {
-  margin-right: 1%; }
 
 .nobreak {
   white-space: nowrap; }
