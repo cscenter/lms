@@ -5870,6 +5870,8 @@ body.sign-in, body.reset-password, body.gray {
 
 ._students-courses-list {
   padding-top: 60px; }
+  ._students-courses-list h3 {
+    margin-top: 10px; }
   ._students-courses-list h4 {
     margin: 0 0 4px 0; }
   ._students-courses-list .table, ._students-courses-list .ubertext table, .ubertext ._students-courses-list table {
@@ -5896,6 +5898,9 @@ body.sign-in, body.reset-password, body.gray {
       font-size: 14px; }
       ._students-courses-list .table._archive td .badge, ._students-courses-list .ubertext table._archive td .badge, .ubertext ._students-courses-list table._archive td .badge {
         bottom: 0; }
+
+#current h3 {
+  margin-bottom: 4px; }
 
 #current .table th, #current .ubertext table th, .ubertext #current table th {
   border: none; }
