@@ -5871,7 +5871,8 @@ body.sign-in, body.reset-password, body.gray {
 ._students-courses-list {
   padding-top: 60px; }
   ._students-courses-list h3 {
-    margin-top: 10px; }
+    margin-top: 10px;
+    margin-left: 10px; }
   ._students-courses-list h4 {
     margin: 0 0 4px 0; }
   ._students-courses-list .table, ._students-courses-list .ubertext table, .ubertext ._students-courses-list table {
@@ -5906,12 +5907,6 @@ body.sign-in, body.reset-password, body.gray {
   border: none; }
   #current .table th.actions, #current .ubertext table th.actions, .ubertext #current table th.actions {
     width: 120px; }
-
-#current .table td:first-child, #current .ubertext table td:first-child, .ubertext #current table td:first-child {
-  padding-left: 0; }
-
-#current .table td:last-child, #current .ubertext table td:last-child, .ubertext #current table td:last-child {
-  padding-right: 0; }
 
 #calendar-container {
   min-width: 940px;
