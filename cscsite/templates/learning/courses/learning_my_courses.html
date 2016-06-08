@@ -10,9 +10,11 @@
             <li class="active" role="presentation">
                 <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{% trans "Current semester" %}</a>
             </li>
+            {% if enrollments_archive %}
             <li role="presentation">
                 <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">{% trans "Archive" %}</a>
             </li>
+            {% endif %}
         </ul>
         <div class="tab-content">
         {% if enrollments_ongoing or course_list_available %}

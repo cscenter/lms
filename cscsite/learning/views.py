@@ -356,7 +356,7 @@ class CourseStudentListView(StudentOnlyMixin,
                             generic.TemplateView):
     model = CourseOffering
     context_object_name = 'course_list'
-    template_name = "learning/courses/learning_list.html"
+    template_name = "learning/courses/learning_my_courses.html"
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()
@@ -369,7 +369,8 @@ class CourseStudentListView(StudentOnlyMixin,
                      .select_related('course', 'semester')
                      .prefetch_related('teachers'))
 
-        enrolled_on = (Enrollment.objects
+        enrolled_on = (Enrollment.custom
+                       .site_related(self.request)
                        .filter(student=self.request.user)
                        .order_by('course_offering__semester__year',
                                  '-course_offering__semester__type',
