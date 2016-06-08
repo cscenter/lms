@@ -26,12 +26,12 @@
                 {% for alumni in alumni_by_year.list %}
                     <div class="alumni">
                         {% if alumni.photo %}
-                            {% thumbnail alumni.photo "170x170" crop="center" as im %}
+                            {% thumbnail alumni.photo "170x238" crop="center" as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}"
                                      height="{{ im.height }}">
                             {% endthumbnail %}
                         {% else %}
-                            <img src="{% static "img/center/brain.jpg" %}"/>
+                            <img width="170" height="238" data-src="holder.js/170x238?text=Нет%20фото&fontweight=normal" />
                         {% endif %}
                         <a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a>
                     </div>
@@ -50,3 +50,7 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}
