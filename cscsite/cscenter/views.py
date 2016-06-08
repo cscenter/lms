@@ -44,7 +44,7 @@ class TeachersView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(TeachersView, self).get_context_data(**kwargs)
         semesters = list(Semester
-                         .latest_academic_years(year_count=2)
+                         .latest_academic_years(year_count=3)
                          .values_list("id", flat=True))
         active_lecturers = Counter(
             CourseOffering.objects.filter(semester__in=semesters)
