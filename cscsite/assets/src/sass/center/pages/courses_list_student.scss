@@ -1,27 +1,40 @@
 ._students-courses-list {
-  .table-hover>tbody>tr:hover {
-    background-color: #FCFDFD;
-  }
+  padding-top: 60px;
 
   h4 {
     margin: 0 0 4px 0;
   }
 
   .table {
+    margin: 0;
+
+    tr:first-child {
+      td {
+        border-top: none;
+      }
+    }
+
+    .btn-default, .btn-warning, .btn-success {
+      &.btn-block {
+        padding: 5px 10px;
+      }
+
+    }
+
     td {
       padding: 10px;
       font-size: 13px;
+      border-top-color: #e5e5e5;
 
       .badge {
         font-weight: normal;
         white-space: nowrap;
         position: relative;
-        bottom: 6px;
+        bottom: 2px;
 
       }
 
       a {
-
         &.title {
           font-size: 18px;
           font-weight: 500;
@@ -43,27 +56,25 @@
   }
 }
 
-.courses-list {
-  margin: 0;
-  padding: 0;
+#current {
 
-  li {
-    padding-right: 0;
-    padding-left: 0;
-    border: 1px solid transparent;
-    border-top-color: #e4eaec;
+  .table {
+    th {
+      border: none;
 
-    &:first-child {
-      border-top-color: transparent;
+      &.actions {
+        width: 120px;
+      }
     }
 
-    h4 {
-      margin: 0;
-    }
+    td {
+      &:first-child {
+        padding-left: 0;
+      }
 
-    .btn-success {
-      //background-color: #46be8a;
-      //border-color: #46be8a;
+      &:last-child {
+        padding-right: 0;
+      }
     }
   }
 }
