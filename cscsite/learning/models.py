@@ -822,9 +822,26 @@ class AssignmentComment(TimeStampedModel):
         )
 
 
+class SiteRelatedEnrollmentQuerySet(models.QuerySet):
+    def site_related(self, request):
+        qs = self.select_related("course_offering")
+        if request.site.domain == settings.CLUB_DOMAIN:
+            qs = qs.filter(course_offering__is_open=True)
+            if hasattr(request, 'city'):
+                qs = qs.filter(
+                    models.Q(course_offering__city__pk=request.city.code) |
+                    models.Q(course_offering__city__isnull=True))
+        else:
+            # Restrict by spb for center site
+            qs = qs.filter(course_offering__city__pk=settings.DEFAULT_CITY_CODE)
+        return qs
+
+
 @python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
     GRADES = GRADES
+    objects = models.Manager()
+    custom = SiteRelatedEnrollmentQuerySet.as_manager()
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
