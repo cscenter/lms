@@ -1,7 +1,8 @@
+from collections import Counter
+
 from django.conf import settings
-from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import JsonResponse, Http404
 from django.utils.timezone import now
 from django.views import generic
@@ -72,10 +73,21 @@ class IndexView(generic.TemplateView):
 class TeachersView(generic.ListView):
     template_name = "users/teacher_list.html"
 
+    @property
     def get_queryset(self):
         user_model = get_user_model()
-        teacher_groups = [user_model.group_pks.TEACHER_CLUB]
-        return user_model.objects.filter(groups__in=teacher_groups).distinct()
+        lecturers = list(CourseOffering
+            .objects
+            .filter(is_open=True)
+            .filter(Q(city__pk=self.request.city.code) |
+                    Q(city__isnull=True))
+            .distinct()
+            .values_list("teachers__pk", flat=True))
+        print(lecturers)
+        return (user_model.objects
+                .filter(groups=user_model.group_pks.TEACHER_CLUB,
+                        courseofferingteacher__teacher_id__in=lecturers)
+                .distinct)
 
 
 class TeacherDetailView(generic.DetailView):
@@ -85,7 +97,7 @@ class TeacherDetailView(generic.DetailView):
     def get_queryset(self, *args, **kwargs):
         co_queryset = (CourseOffering.custom.site_related(self.request)
                        .select_related('semester', 'course'))
-        return (auth.get_user_model()._default_manager
+        return (get_user_model()._default_manager
                 .all()
                 .prefetch_related(
                     Prefetch('teaching_set',
