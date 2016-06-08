@@ -47,9 +47,10 @@ $state-success-text: $color-green;
 @import "components/input-daterange";
 @import "components/buttons";
 @import "components/widgets";
+@import "components/tabs";
 
 // Boostrap overrides for cscenter site
-.btn-danger, .btn-success, .btn-primary {
+.btn-danger, .btn-success, .btn-primary, .btn-warning {
   &.btn-block {
     padding: 10px 12px;
   }

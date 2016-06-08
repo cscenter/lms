@@ -222,8 +222,8 @@ th {
     page-break-after: avoid; }
   .navbar {
     display: none; }
-  .btn > .caret, #assignments-page .page-main .filters #assignments-select-button > .caret,
-  .dropup > .btn > .caret, #assignments-page .page-main .filters
+  .btn > .caret, #assignments-select-button > .caret,
+  .dropup > .btn > .caret,
   .dropup > #assignments-select-button > .caret {
     border-top-color: #000 !important; }
   .label, .event-types span {
@@ -1580,14 +1580,13 @@ input[type="search"] {
     line-height: 34px; }
   input[type="date"].input-sm, .input-group-sm > input[type="date"].form-control,
   .input-group-sm > input[type="date"].input-group-addon,
-  .input-group-sm > .input-group-btn > input[type="date"].btn, #assignments-page .page-main .filters
+  .input-group-sm > .input-group-btn > input[type="date"].btn,
   .input-group-sm > .input-group-btn > input[type="date"]#assignments-select-button,
   .input-group-sm input[type="date"],
   input[type="time"].input-sm,
   .input-group-sm > input[type="time"].form-control,
   .input-group-sm > input[type="time"].input-group-addon,
   .input-group-sm > .input-group-btn > input[type="time"].btn,
-  #assignments-page .page-main .filters
   .input-group-sm > .input-group-btn > input[type="time"]#assignments-select-button,
   .input-group-sm
   input[type="time"],
@@ -1595,7 +1594,6 @@ input[type="search"] {
   .input-group-sm > input[type="datetime-local"].form-control,
   .input-group-sm > input[type="datetime-local"].input-group-addon,
   .input-group-sm > .input-group-btn > input[type="datetime-local"].btn,
-  #assignments-page .page-main .filters
   .input-group-sm > .input-group-btn > input[type="datetime-local"]#assignments-select-button,
   .input-group-sm
   input[type="datetime-local"],
@@ -1603,21 +1601,19 @@ input[type="search"] {
   .input-group-sm > input[type="month"].form-control,
   .input-group-sm > input[type="month"].input-group-addon,
   .input-group-sm > .input-group-btn > input[type="month"].btn,
-  #assignments-page .page-main .filters
   .input-group-sm > .input-group-btn > input[type="month"]#assignments-select-button,
   .input-group-sm
   input[type="month"] {
     line-height: 30px; }
   input[type="date"].input-lg, .input-group-lg > input[type="date"].form-control,
   .input-group-lg > input[type="date"].input-group-addon,
-  .input-group-lg > .input-group-btn > input[type="date"].btn, #assignments-page .page-main .filters
+  .input-group-lg > .input-group-btn > input[type="date"].btn,
   .input-group-lg > .input-group-btn > input[type="date"]#assignments-select-button,
   .input-group-lg input[type="date"],
   input[type="time"].input-lg,
   .input-group-lg > input[type="time"].form-control,
   .input-group-lg > input[type="time"].input-group-addon,
   .input-group-lg > .input-group-btn > input[type="time"].btn,
-  #assignments-page .page-main .filters
   .input-group-lg > .input-group-btn > input[type="time"]#assignments-select-button,
   .input-group-lg
   input[type="time"],
@@ -1625,7 +1621,6 @@ input[type="search"] {
   .input-group-lg > input[type="datetime-local"].form-control,
   .input-group-lg > input[type="datetime-local"].input-group-addon,
   .input-group-lg > .input-group-btn > input[type="datetime-local"].btn,
-  #assignments-page .page-main .filters
   .input-group-lg > .input-group-btn > input[type="datetime-local"]#assignments-select-button,
   .input-group-lg
   input[type="datetime-local"],
@@ -1633,7 +1628,6 @@ input[type="search"] {
   .input-group-lg > input[type="month"].form-control,
   .input-group-lg > input[type="month"].input-group-addon,
   .input-group-lg > .input-group-btn > input[type="month"].btn,
-  #assignments-page .page-main .filters
   .input-group-lg > .input-group-btn > input[type="month"]#assignments-select-button,
   .input-group-lg
   input[type="month"] {
@@ -1712,17 +1706,17 @@ fieldset[disabled]
   min-height: 34px; }
   .form-control-static.input-lg, .input-group-lg > .form-control-static.form-control, #gradebook #grades .input-group-lg > select.form-control-static,
   .input-group-lg > .form-control-static.input-group-addon,
-  .input-group-lg > .input-group-btn > .form-control-static.btn, #assignments-page .page-main .filters
+  .input-group-lg > .input-group-btn > .form-control-static.btn,
   .input-group-lg > .input-group-btn > .form-control-static#assignments-select-button, .form-control-static.input-sm, .input-group-sm > .form-control-static.form-control, #gradebook #grades .input-group-sm > select.form-control-static,
   .input-group-sm > .form-control-static.input-group-addon,
-  .input-group-sm > .input-group-btn > .form-control-static.btn, #assignments-page .page-main .filters
+  .input-group-sm > .input-group-btn > .form-control-static.btn,
   .input-group-sm > .input-group-btn > .form-control-static#assignments-select-button {
     padding-left: 0;
     padding-right: 0; }
 
 .input-sm, .input-group-sm > .form-control, #gradebook #grades .input-group-sm > select,
 .input-group-sm > .input-group-addon,
-.input-group-sm > .input-group-btn > .btn, #assignments-page .page-main .filters
+.input-group-sm > .input-group-btn > .btn,
 .input-group-sm > .input-group-btn > #assignments-select-button {
   height: 30px;
   padding: 5px 10px;
@@ -1732,21 +1726,20 @@ fieldset[disabled]
 
 select.input-sm, .input-group-sm > select.form-control, #gradebook #grades .input-group-sm > select,
 .input-group-sm > select.input-group-addon,
-.input-group-sm > .input-group-btn > select.btn, #assignments-page .page-main .filters
+.input-group-sm > .input-group-btn > select.btn,
 .input-group-sm > .input-group-btn > select#assignments-select-button {
   height: 30px;
   line-height: 30px; }
 
 textarea.input-sm, .input-group-sm > textarea.form-control,
 .input-group-sm > textarea.input-group-addon,
-.input-group-sm > .input-group-btn > textarea.btn, #assignments-page .page-main .filters
+.input-group-sm > .input-group-btn > textarea.btn,
 .input-group-sm > .input-group-btn > textarea#assignments-select-button,
 select[multiple].input-sm,
 .input-group-sm > select[multiple].form-control,
 #gradebook #grades .input-group-sm > select[multiple],
 .input-group-sm > select[multiple].input-group-addon,
 .input-group-sm > .input-group-btn > select[multiple].btn,
-#assignments-page .page-main .filters
 .input-group-sm > .input-group-btn > select[multiple]#assignments-select-button {
   height: auto; }
 
@@ -1776,7 +1769,7 @@ select[multiple].input-sm,
 
 .input-lg, .input-group-lg > .form-control, #gradebook #grades .input-group-lg > select,
 .input-group-lg > .input-group-addon,
-.input-group-lg > .input-group-btn > .btn, #assignments-page .page-main .filters
+.input-group-lg > .input-group-btn > .btn,
 .input-group-lg > .input-group-btn > #assignments-select-button {
   height: 46px;
   padding: 10px 16px;
@@ -1786,21 +1779,20 @@ select[multiple].input-sm,
 
 select.input-lg, .input-group-lg > select.form-control, #gradebook #grades .input-group-lg > select,
 .input-group-lg > select.input-group-addon,
-.input-group-lg > .input-group-btn > select.btn, #assignments-page .page-main .filters
+.input-group-lg > .input-group-btn > select.btn,
 .input-group-lg > .input-group-btn > select#assignments-select-button {
   height: 46px;
   line-height: 46px; }
 
 textarea.input-lg, .input-group-lg > textarea.form-control,
 .input-group-lg > textarea.input-group-addon,
-.input-group-lg > .input-group-btn > textarea.btn, #assignments-page .page-main .filters
+.input-group-lg > .input-group-btn > textarea.btn,
 .input-group-lg > .input-group-btn > textarea#assignments-select-button,
 select[multiple].input-lg,
 .input-group-lg > select[multiple].form-control,
 #gradebook #grades .input-group-lg > select[multiple],
 .input-group-lg > select[multiple].input-group-addon,
 .input-group-lg > .input-group-btn > select[multiple].btn,
-#assignments-page .page-main .filters
 .input-group-lg > .input-group-btn > select[multiple]#assignments-select-button {
   height: auto; }
 
@@ -1847,7 +1839,7 @@ select[multiple].input-lg,
 
 .input-lg + .form-control-feedback, .input-group-lg > .form-control + .form-control-feedback, #gradebook #grades .input-group-lg > select + .form-control-feedback,
 .input-group-lg > .input-group-addon + .form-control-feedback,
-.input-group-lg > .input-group-btn > .btn + .form-control-feedback, #assignments-page .page-main .filters
+.input-group-lg > .input-group-btn > .btn + .form-control-feedback,
 .input-group-lg > .input-group-btn > #assignments-select-button + .form-control-feedback,
 .input-group-lg + .form-control-feedback,
 .form-group-lg .form-control + .form-control-feedback,
@@ -1859,7 +1851,7 @@ select[multiple].input-lg,
 
 .input-sm + .form-control-feedback, .input-group-sm > .form-control + .form-control-feedback, #gradebook #grades .input-group-sm > select + .form-control-feedback,
 .input-group-sm > .input-group-addon + .form-control-feedback,
-.input-group-sm > .input-group-btn > .btn + .form-control-feedback, #assignments-page .page-main .filters
+.input-group-sm > .input-group-btn > .btn + .form-control-feedback,
 .input-group-sm > .input-group-btn > #assignments-select-button + .form-control-feedback,
 .input-group-sm + .form-control-feedback,
 .form-group-sm .form-control + .form-control-feedback,
@@ -2049,7 +2041,7 @@ select[multiple].input-lg,
     padding-top: 6px;
     font-size: 12px; } }
 
-.btn, #assignments-page .page-main .filters #assignments-select-button {
+.btn, #assignments-select-button {
   display: inline-block;
   margin-bottom: 0;
   font-weight: normal;
@@ -2068,21 +2060,20 @@ select[multiple].input-lg,
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none; }
-  .btn:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn.focus, #assignments-page .page-main .filters .focus#assignments-select-button, .btn:active:focus, #assignments-page .page-main .filters #assignments-select-button:active:focus, .btn:active.focus, #assignments-page .page-main .filters #assignments-select-button:active.focus, .btn.active:focus, #assignments-page .page-main .filters .active#assignments-select-button:focus, .btn.active.focus, #assignments-page .page-main .filters .active.focus#assignments-select-button {
+  .btn:focus, #assignments-select-button:focus, .btn.focus, .focus#assignments-select-button, .btn:active:focus, #assignments-select-button:active:focus, .btn:active.focus, #assignments-select-button:active.focus, .btn.active:focus, .active#assignments-select-button:focus, .btn.active.focus, .active.focus#assignments-select-button {
     outline: thin dotted;
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px; }
-  .btn:hover, #assignments-page .page-main .filters #assignments-select-button:hover, .btn:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn.focus, #assignments-page .page-main .filters .focus#assignments-select-button {
+  .btn:hover, #assignments-select-button:hover, .btn:focus, #assignments-select-button:focus, .btn.focus, .focus#assignments-select-button {
     color: #333;
     text-decoration: none; }
-  .btn:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn.active, #assignments-page .page-main .filters .active#assignments-select-button {
+  .btn:active, #assignments-select-button:active, .btn.active, .active#assignments-select-button {
     outline: 0;
     background-image: none;
     -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); }
-  .btn.disabled, #assignments-page .page-main .filters .disabled#assignments-select-button, .btn[disabled], #assignments-page .page-main .filters [disabled]#assignments-select-button,
+  .btn.disabled, .disabled#assignments-select-button, .btn[disabled], [disabled]#assignments-select-button,
   fieldset[disabled] .btn,
-  fieldset[disabled] #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters
   fieldset[disabled] #assignments-select-button {
     cursor: not-allowed;
     opacity: 0.65;
@@ -2090,9 +2081,8 @@ select[multiple].input-lg,
     -webkit-box-shadow: none;
     box-shadow: none; }
 
-a.btn.disabled, #assignments-page .page-main .filters a.disabled#assignments-select-button,
+a.btn.disabled, a.disabled#assignments-select-button,
 fieldset[disabled] a.btn,
-fieldset[disabled] #assignments-page .page-main .filters a#assignments-select-button, #assignments-page .page-main .filters
 fieldset[disabled] a#assignments-select-button {
   pointer-events: none; }
 
@@ -2133,51 +2123,48 @@ fieldset[disabled] a#assignments-select-button {
     color: #fff;
     background-color: #333; }
 
-.btn-primary, #assignments-page .page-main .filters #assignments-select-button {
+.btn-primary, #assignments-select-button {
   color: #fff;
   background-color: #337ab7;
   border-color: #337ab7; }
-  .btn-primary:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn-primary.focus, #assignments-page .page-main .filters .focus#assignments-select-button {
+  .btn-primary:focus, #assignments-select-button:focus, .btn-primary.focus, .focus#assignments-select-button {
     color: #fff;
     background-color: #285f8f;
     border-color: #173853; }
-  .btn-primary:hover, #assignments-page .page-main .filters #assignments-select-button:hover {
+  .btn-primary:hover, #assignments-select-button:hover {
     color: #fff;
     background-color: #285f8f;
     border-color: #265a87; }
-  .btn-primary:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn-primary.active, #assignments-page .page-main .filters .active#assignments-select-button,
-  .open > .btn-primary.dropdown-toggle, #assignments-page .page-main .filters
+  .btn-primary:active, #assignments-select-button:active, .btn-primary.active, .active#assignments-select-button,
+  .open > .btn-primary.dropdown-toggle,
   .open > .dropdown-toggle#assignments-select-button {
     color: #fff;
     background-color: #285f8f;
     border-color: #265a87; }
-    .btn-primary:active:hover, #assignments-page .page-main .filters #assignments-select-button:active:hover, .btn-primary:active:focus, #assignments-page .page-main .filters #assignments-select-button:active:focus, .btn-primary:active.focus, #assignments-page .page-main .filters #assignments-select-button:active.focus, .btn-primary.active:hover, #assignments-page .page-main .filters .active#assignments-select-button:hover, .btn-primary.active:focus, #assignments-page .page-main .filters .active#assignments-select-button:focus, .btn-primary.active.focus, #assignments-page .page-main .filters .active.focus#assignments-select-button,
-    .open > .btn-primary.dropdown-toggle:hover, #assignments-page .page-main .filters
+    .btn-primary:active:hover, #assignments-select-button:active:hover, .btn-primary:active:focus, #assignments-select-button:active:focus, .btn-primary:active.focus, #assignments-select-button:active.focus, .btn-primary.active:hover, .active#assignments-select-button:hover, .btn-primary.active:focus, .active#assignments-select-button:focus, .btn-primary.active.focus, .active.focus#assignments-select-button,
+    .open > .btn-primary.dropdown-toggle:hover,
     .open > .dropdown-toggle#assignments-select-button:hover,
-    .open > .btn-primary.dropdown-toggle:focus, #assignments-page .page-main .filters
+    .open > .btn-primary.dropdown-toggle:focus,
     .open > .dropdown-toggle#assignments-select-button:focus,
-    .open > .btn-primary.dropdown-toggle.focus, #assignments-page .page-main .filters
+    .open > .btn-primary.dropdown-toggle.focus,
     .open > .dropdown-toggle.focus#assignments-select-button {
       color: #fff;
       background-color: #204d73;
       border-color: #173853; }
-  .btn-primary:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn-primary.active, #assignments-page .page-main .filters .active#assignments-select-button,
-  .open > .btn-primary.dropdown-toggle, #assignments-page .page-main .filters
+  .btn-primary:active, #assignments-select-button:active, .btn-primary.active, .active#assignments-select-button,
+  .open > .btn-primary.dropdown-toggle,
   .open > .dropdown-toggle#assignments-select-button {
     background-image: none; }
-  .btn-primary.disabled:hover, #assignments-page .page-main .filters .disabled#assignments-select-button:hover, .btn-primary.disabled:focus, #assignments-page .page-main .filters .disabled#assignments-select-button:focus, .btn-primary.disabled.focus, #assignments-page .page-main .filters .disabled.focus#assignments-select-button, .btn-primary[disabled]:hover, #assignments-page .page-main .filters [disabled]#assignments-select-button:hover, .btn-primary[disabled]:focus, #assignments-page .page-main .filters [disabled]#assignments-select-button:focus, .btn-primary[disabled].focus, #assignments-page .page-main .filters [disabled].focus#assignments-select-button,
+  .btn-primary.disabled:hover, .disabled#assignments-select-button:hover, .btn-primary.disabled:focus, .disabled#assignments-select-button:focus, .btn-primary.disabled.focus, .disabled.focus#assignments-select-button, .btn-primary[disabled]:hover, [disabled]#assignments-select-button:hover, .btn-primary[disabled]:focus, [disabled]#assignments-select-button:focus, .btn-primary[disabled].focus, [disabled].focus#assignments-select-button,
   fieldset[disabled] .btn-primary:hover,
-  fieldset[disabled] #assignments-page .page-main .filters #assignments-select-button:hover, #assignments-page .page-main .filters
   fieldset[disabled] #assignments-select-button:hover,
   fieldset[disabled] .btn-primary:focus,
-  fieldset[disabled] #assignments-page .page-main .filters #assignments-select-button:focus, #assignments-page .page-main .filters
   fieldset[disabled] #assignments-select-button:focus,
   fieldset[disabled] .btn-primary.focus,
-  fieldset[disabled] #assignments-page .page-main .filters .focus#assignments-select-button, #assignments-page .page-main .filters
   fieldset[disabled] .focus#assignments-select-button {
     background-color: #337ab7;
     border-color: #337ab7; }
-  .btn-primary .badge, #assignments-page .page-main .filters #assignments-select-button .badge {
+  .btn-primary .badge, #assignments-select-button .badge {
     color: #337ab7;
     background-color: #fff; }
 
@@ -2350,19 +2337,19 @@ fieldset[disabled] a#assignments-select-button {
     color: #777777;
     text-decoration: none; }
 
-.btn-lg, .btn-group-lg > .btn, #assignments-page .page-main .filters .btn-group-lg > #assignments-select-button {
+.btn-lg, .btn-group-lg > .btn, .btn-group-lg > #assignments-select-button {
   padding: 10px 16px;
   font-size: 18px;
   line-height: 1.3333333;
   border-radius: 6px; }
 
-.btn-sm, .btn-group-sm > .btn, #assignments-page .page-main .filters .btn-group-sm > #assignments-select-button {
+.btn-sm, .btn-group-sm > .btn, .btn-group-sm > #assignments-select-button {
   padding: 5px 10px;
   font-size: 12px;
   line-height: 1.5;
   border-radius: 3px; }
 
-.btn-xs, .btn-group-xs > .btn, #assignments-page .page-main .filters .btn-group-xs > #assignments-select-button {
+.btn-xs, .btn-group-xs > .btn, .btn-group-xs > #assignments-select-button {
   padding: 1px 5px;
   font-size: 12px;
   line-height: 1.5;
@@ -2546,32 +2533,34 @@ tbody.collapse.in {
   position: relative;
   display: inline-block;
   vertical-align: middle; }
-  .btn-group > .btn, #assignments-page .page-main .filters > .btn, #assignments-page .page-main .filters .btn-group > #assignments-select-button, #assignments-page .page-main .filters > #assignments-select-button,
-  .btn-group-vertical > .btn, #assignments-page .page-main .filters
+  .btn-group > .btn, #assignments-page .page-main .filters > .btn, .btn-group > #assignments-select-button, #assignments-page .page-main .filters > #assignments-select-button,
+  .btn-group-vertical > .btn,
   .btn-group-vertical > #assignments-select-button {
     position: relative;
     float: left; }
-    .btn-group > .btn:hover, #assignments-page .page-main .filters > .btn:hover, #assignments-page .page-main .filters .btn-group > #assignments-select-button:hover, #assignments-page .page-main .filters > #assignments-select-button:hover, .btn-group > .btn:focus, #assignments-page .page-main .filters > .btn:focus, #assignments-page .page-main .filters .btn-group > #assignments-select-button:focus, #assignments-page .page-main .filters > #assignments-select-button:focus, .btn-group > .btn:active, #assignments-page .page-main .filters > .btn:active, #assignments-page .page-main .filters .btn-group > #assignments-select-button:active, #assignments-page .page-main .filters > #assignments-select-button:active, .btn-group > .btn.active, #assignments-page .page-main .filters > .btn.active, #assignments-page .page-main .filters .btn-group > .active#assignments-select-button, #assignments-page .page-main .filters > .active#assignments-select-button,
-    .btn-group-vertical > .btn:hover, #assignments-page .page-main .filters
+    .btn-group > .btn:hover, #assignments-page .page-main .filters > .btn:hover, .btn-group > #assignments-select-button:hover, #assignments-page .page-main .filters > #assignments-select-button:hover, .btn-group > .btn:focus, #assignments-page .page-main .filters > .btn:focus, .btn-group > #assignments-select-button:focus, #assignments-page .page-main .filters > #assignments-select-button:focus, .btn-group > .btn:active, #assignments-page .page-main .filters > .btn:active, .btn-group > #assignments-select-button:active, #assignments-page .page-main .filters > #assignments-select-button:active, .btn-group > .btn.active, #assignments-page .page-main .filters > .btn.active, .btn-group > .active#assignments-select-button, #assignments-page .page-main .filters > .active#assignments-select-button,
+    .btn-group-vertical > .btn:hover,
     .btn-group-vertical > #assignments-select-button:hover,
-    .btn-group-vertical > .btn:focus, #assignments-page .page-main .filters
+    .btn-group-vertical > .btn:focus,
     .btn-group-vertical > #assignments-select-button:focus,
-    .btn-group-vertical > .btn:active, #assignments-page .page-main .filters
+    .btn-group-vertical > .btn:active,
     .btn-group-vertical > #assignments-select-button:active,
-    .btn-group-vertical > .btn.active, #assignments-page .page-main .filters
+    .btn-group-vertical > .btn.active,
     .btn-group-vertical > .active#assignments-select-button {
       z-index: 2; }
 
-.btn-group .btn + .btn, #assignments-page .page-main .filters .btn + .btn, #assignments-page .page-main .filters .btn-group #assignments-select-button + .btn, #assignments-page .page-main .filters #assignments-select-button + .btn, #assignments-page .page-main .filters .btn-group .btn + #assignments-select-button, #assignments-page .page-main .filters .btn + #assignments-select-button, #assignments-page .page-main .filters .btn-group #assignments-select-button + #assignments-select-button, #assignments-page .page-main .filters #assignments-select-button + #assignments-select-button,
-.btn-group .btn + .btn-group, #assignments-page .page-main .filters .btn + .btn-group, #assignments-page .page-main .filters
+.btn-group .btn + .btn, #assignments-page .page-main .filters .btn + .btn, .btn-group #assignments-select-button + .btn, #assignments-page .page-main .filters #assignments-select-button + .btn, .btn-group .btn + #assignments-select-button, #assignments-page .page-main .filters .btn + #assignments-select-button, .btn-group #assignments-select-button + #assignments-select-button, #assignments-page .page-main .filters #assignments-select-button + #assignments-select-button,
+.btn-group .btn + .btn-group, #assignments-page .page-main .filters .btn + .btn-group,
 .btn-group #assignments-select-button + .btn-group, #assignments-page .page-main .filters #assignments-select-button + .btn-group,
 .btn-group #assignments-page .page-main .btn + .filters, #assignments-page .page-main
-.btn-group .btn + .filters, #assignments-page .page-main .filters .btn + .filters, #assignments-page .page-main .filters
+.btn-group .btn + .filters, #assignments-page .page-main .filters .btn + .filters,
+.btn-group #assignments-page .page-main #assignments-select-button + .filters, #assignments-page .page-main
 .btn-group #assignments-select-button + .filters, #assignments-page .page-main .filters #assignments-select-button + .filters,
 .btn-group .btn-group + .btn, #assignments-page .page-main .filters .btn-group + .btn,
 .btn-group #assignments-page .page-main .filters + .btn, #assignments-page .page-main
-.btn-group .filters + .btn, #assignments-page .page-main .filters .filters + .btn, #assignments-page .page-main .filters
-.btn-group .btn-group + #assignments-select-button, #assignments-page .page-main .filters .btn-group + #assignments-select-button, #assignments-page .page-main .filters
+.btn-group .filters + .btn, #assignments-page .page-main .filters .filters + .btn,
+.btn-group .btn-group + #assignments-select-button, #assignments-page .page-main .filters .btn-group + #assignments-select-button,
+.btn-group #assignments-page .page-main .filters + #assignments-select-button, #assignments-page .page-main
 .btn-group .filters + #assignments-select-button, #assignments-page .page-main .filters .filters + #assignments-select-button,
 .btn-group .btn-group + .btn-group, #assignments-page .page-main .filters .btn-group + .btn-group,
 .btn-group #assignments-page .page-main .filters + .btn-group, #assignments-page .page-main
@@ -2589,28 +2578,28 @@ tbody.collapse.in {
     display: table; }
   .btn-toolbar:after {
     clear: both; }
-  .btn-toolbar .btn, .btn-toolbar #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters .btn-toolbar #assignments-select-button,
+  .btn-toolbar .btn, .btn-toolbar #assignments-select-button,
   .btn-toolbar .btn-group,
   .btn-toolbar #assignments-page .page-main .filters, #assignments-page .page-main
   .btn-toolbar .filters,
   .btn-toolbar .input-group {
     float: left; }
-  .btn-toolbar > .btn, #assignments-page .page-main .filters .btn-toolbar > #assignments-select-button,
+  .btn-toolbar > .btn, .btn-toolbar > #assignments-select-button,
   .btn-toolbar > .btn-group, #assignments-page .page-main
   .btn-toolbar > .filters,
   .btn-toolbar > .input-group {
     margin-left: 5px; }
 
-.btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters .btn-group > #assignments-select-button:not(:first-child):not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > #assignments-select-button:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+.btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle), .btn-group > #assignments-select-button:not(:first-child):not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > #assignments-select-button:not(:first-child):not(:last-child):not(.dropdown-toggle) {
   border-radius: 0; }
 
-.btn-group > .btn:first-child, #assignments-page .page-main .filters > .btn:first-child, #assignments-page .page-main .filters .btn-group > #assignments-select-button:first-child, #assignments-page .page-main .filters > #assignments-select-button:first-child {
+.btn-group > .btn:first-child, #assignments-page .page-main .filters > .btn:first-child, .btn-group > #assignments-select-button:first-child, #assignments-page .page-main .filters > #assignments-select-button:first-child {
   margin-left: 0; }
-  .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > .btn:first-child:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters .btn-group > #assignments-select-button:first-child:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > #assignments-select-button:first-child:not(:last-child):not(.dropdown-toggle) {
+  .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > .btn:first-child:not(:last-child):not(.dropdown-toggle), .btn-group > #assignments-select-button:first-child:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters > #assignments-select-button:first-child:not(:last-child):not(.dropdown-toggle) {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0; }
 
-.btn-group > .btn:last-child:not(:first-child), #assignments-page .page-main .filters > .btn:last-child:not(:first-child), #assignments-page .page-main .filters .btn-group > #assignments-select-button:last-child:not(:first-child), #assignments-page .page-main .filters > #assignments-select-button:last-child:not(:first-child),
+.btn-group > .btn:last-child:not(:first-child), #assignments-page .page-main .filters > .btn:last-child:not(:first-child), .btn-group > #assignments-select-button:last-child:not(:first-child), #assignments-page .page-main .filters > #assignments-select-button:last-child:not(:first-child),
 .btn-group > .dropdown-toggle:not(:first-child), #assignments-page .page-main .filters > .dropdown-toggle:not(:first-child) {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0; }
@@ -2618,16 +2607,16 @@ tbody.collapse.in {
 .btn-group > .btn-group, #assignments-page .page-main .filters > .btn-group, #assignments-page .page-main .btn-group > .filters, #assignments-page .page-main .filters > .filters {
   float: left; }
 
-.btn-group > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .btn-group > .filters:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters > .filters:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters .btn-group > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .filters > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .btn-group > .filters:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .filters > .filters:not(:first-child):not(:last-child) > #assignments-select-button {
+.btn-group > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .btn-group > .filters:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters > .filters:not(:first-child):not(:last-child) > .btn, .btn-group > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .filters > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .btn-group > .filters:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .filters > .filters:not(:first-child):not(:last-child) > #assignments-select-button {
   border-radius: 0; }
 
-.btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .btn-group > .filters:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters > .filters:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters .btn-group > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .filters > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .btn-group > .filters:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .filters > .filters:first-child:not(:last-child) > #assignments-select-button:last-child,
+.btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .btn-group > .filters:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters > .filters:first-child:not(:last-child) > .btn:last-child, .btn-group > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .filters > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .btn-group > .filters:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .filters > .filters:first-child:not(:last-child) > #assignments-select-button:last-child,
 .btn-group > .btn-group:first-child:not(:last-child) > .dropdown-toggle, #assignments-page .page-main .filters > .btn-group:first-child:not(:last-child) > .dropdown-toggle, #assignments-page .page-main
 .btn-group > .filters:first-child:not(:last-child) > .dropdown-toggle, #assignments-page .page-main .filters > .filters:first-child:not(:last-child) > .dropdown-toggle {
   border-bottom-right-radius: 0;
   border-top-right-radius: 0; }
 
-.btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .btn-group > .filters:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters > .filters:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters .btn-group > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .filters > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .btn-group > .filters:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .filters > .filters:last-child:not(:first-child) > #assignments-select-button:first-child {
+.btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .btn-group > .filters:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters > .filters:last-child:not(:first-child) > .btn:first-child, .btn-group > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .filters > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .btn-group > .filters:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .filters > .filters:last-child:not(:first-child) > #assignments-select-button:first-child {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0; }
 
@@ -2635,11 +2624,11 @@ tbody.collapse.in {
 .btn-group.open .dropdown-toggle, #assignments-page .page-main .open.filters .dropdown-toggle {
   outline: 0; }
 
-.btn-group > .btn + .dropdown-toggle, #assignments-page .page-main .filters > .btn + .dropdown-toggle, #assignments-page .page-main .filters .btn-group > #assignments-select-button + .dropdown-toggle, #assignments-page .page-main .filters > #assignments-select-button + .dropdown-toggle {
+.btn-group > .btn + .dropdown-toggle, #assignments-page .page-main .filters > .btn + .dropdown-toggle, .btn-group > #assignments-select-button + .dropdown-toggle, #assignments-page .page-main .filters > #assignments-select-button + .dropdown-toggle {
   padding-left: 8px;
   padding-right: 8px; }
 
-.btn-group > .btn-lg + .dropdown-toggle, #assignments-page .page-main .filters > .btn-lg + .dropdown-toggle, .btn-group-lg.btn-group > .btn + .dropdown-toggle, #assignments-page .page-main .btn-group-lg.filters > .btn + .dropdown-toggle, #assignments-page .page-main .filters .btn-group-lg.btn-group > #assignments-select-button + .dropdown-toggle, #assignments-page .page-main .filters .btn-group-lg.filters > #assignments-select-button + .dropdown-toggle {
+.btn-group > .btn-lg + .dropdown-toggle, #assignments-page .page-main .filters > .btn-lg + .dropdown-toggle, .btn-group-lg.btn-group > .btn + .dropdown-toggle, #assignments-page .page-main .btn-group-lg.filters > .btn + .dropdown-toggle, .btn-group-lg.btn-group > #assignments-select-button + .dropdown-toggle, #assignments-page .page-main .btn-group-lg.filters > #assignments-select-button + .dropdown-toggle {
   padding-left: 12px;
   padding-right: 12px; }
 
@@ -2650,21 +2639,21 @@ tbody.collapse.in {
     -webkit-box-shadow: none;
     box-shadow: none; }
 
-.btn .caret, #assignments-page .page-main .filters #assignments-select-button .caret {
+.btn .caret, #assignments-select-button .caret {
   margin-left: 0; }
 
-.btn-lg .caret, .btn-group-lg > .btn .caret, #assignments-page .page-main .filters .btn-group-lg > #assignments-select-button .caret {
+.btn-lg .caret, .btn-group-lg > .btn .caret, .btn-group-lg > #assignments-select-button .caret {
   border-width: 5px 5px 0;
   border-bottom-width: 0; }
 
-.dropup .btn-lg .caret, .dropup .btn-group-lg > .btn .caret, .dropup #assignments-page .page-main .filters .btn-group-lg > #assignments-select-button .caret, #assignments-page .page-main .filters .dropup .btn-group-lg > #assignments-select-button .caret {
+.dropup .btn-lg .caret, .dropup .btn-group-lg > .btn .caret, .dropup .btn-group-lg > #assignments-select-button .caret {
   border-width: 0 5px 5px; }
 
-.btn-group-vertical > .btn, #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button,
+.btn-group-vertical > .btn, .btn-group-vertical > #assignments-select-button,
 .btn-group-vertical > .btn-group, #assignments-page .page-main
 .btn-group-vertical > .filters,
 .btn-group-vertical > .btn-group > .btn, #assignments-page .page-main
-.btn-group-vertical > .filters > .btn, #assignments-page .page-main .filters
+.btn-group-vertical > .filters > .btn,
 .btn-group-vertical > .btn-group > #assignments-select-button, #assignments-page .page-main
 .btn-group-vertical > .filters > #assignments-select-button {
   display: block;
@@ -2679,17 +2668,17 @@ tbody.collapse.in {
 .btn-group-vertical > .btn-group:after, #assignments-page .page-main .btn-group-vertical > .filters:after {
   clear: both; }
 
-.btn-group-vertical > .btn-group > .btn, #assignments-page .page-main .btn-group-vertical > .filters > .btn, #assignments-page .page-main .filters .btn-group-vertical > .btn-group > #assignments-select-button, #assignments-page .page-main .btn-group-vertical > .filters > #assignments-select-button {
+.btn-group-vertical > .btn-group > .btn, #assignments-page .page-main .btn-group-vertical > .filters > .btn, .btn-group-vertical > .btn-group > #assignments-select-button, #assignments-page .page-main .btn-group-vertical > .filters > #assignments-select-button {
   float: none; }
 
-.btn-group-vertical > .btn + .btn, #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button + .btn, #assignments-page .page-main .filters .btn-group-vertical > .btn + #assignments-select-button, #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button + #assignments-select-button,
-.btn-group-vertical > .btn + .btn-group, #assignments-page .page-main .filters
+.btn-group-vertical > .btn + .btn, .btn-group-vertical > #assignments-select-button + .btn, .btn-group-vertical > .btn + #assignments-select-button, .btn-group-vertical > #assignments-select-button + #assignments-select-button,
+.btn-group-vertical > .btn + .btn-group,
 .btn-group-vertical > #assignments-select-button + .btn-group, #assignments-page .page-main
-.btn-group-vertical > .btn + .filters, #assignments-page .page-main .filters
+.btn-group-vertical > .btn + .filters, #assignments-page .page-main
 .btn-group-vertical > #assignments-select-button + .filters,
 .btn-group-vertical > .btn-group + .btn, #assignments-page .page-main
-.btn-group-vertical > .filters + .btn, #assignments-page .page-main .filters
-.btn-group-vertical > .btn-group + #assignments-select-button, #assignments-page .page-main .filters
+.btn-group-vertical > .filters + .btn,
+.btn-group-vertical > .btn-group + #assignments-select-button, #assignments-page .page-main
 .btn-group-vertical > .filters + #assignments-select-button,
 .btn-group-vertical > .btn-group + .btn-group, #assignments-page .page-main
 .btn-group-vertical > .filters + .btn-group, #assignments-page .page-main
@@ -2698,31 +2687,31 @@ tbody.collapse.in {
   margin-top: -1px;
   margin-left: 0; }
 
-.btn-group-vertical > .btn:not(:first-child):not(:last-child), #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button:not(:first-child):not(:last-child) {
+.btn-group-vertical > .btn:not(:first-child):not(:last-child), .btn-group-vertical > #assignments-select-button:not(:first-child):not(:last-child) {
   border-radius: 0; }
 
-.btn-group-vertical > .btn:first-child:not(:last-child), #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button:first-child:not(:last-child) {
+.btn-group-vertical > .btn:first-child:not(:last-child), .btn-group-vertical > #assignments-select-button:first-child:not(:last-child) {
   border-top-right-radius: 4px;
   border-top-left-radius: 4px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0; }
 
-.btn-group-vertical > .btn:last-child:not(:first-child), #assignments-page .page-main .filters .btn-group-vertical > #assignments-select-button:last-child:not(:first-child) {
+.btn-group-vertical > .btn:last-child:not(:first-child), .btn-group-vertical > #assignments-select-button:last-child:not(:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 4px;
   border-bottom-left-radius: 4px; }
 
-.btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .btn-group-vertical > .filters:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .filters .btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .btn-group-vertical > .filters:not(:first-child):not(:last-child) > #assignments-select-button {
+.btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > .btn, #assignments-page .page-main .btn-group-vertical > .filters:not(:first-child):not(:last-child) > .btn, .btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > #assignments-select-button, #assignments-page .page-main .btn-group-vertical > .filters:not(:first-child):not(:last-child) > #assignments-select-button {
   border-radius: 0; }
 
-.btn-group-vertical > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .btn-group-vertical > .filters:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .filters .btn-group-vertical > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .btn-group-vertical > .filters:first-child:not(:last-child) > #assignments-select-button:last-child,
+.btn-group-vertical > .btn-group:first-child:not(:last-child) > .btn:last-child, #assignments-page .page-main .btn-group-vertical > .filters:first-child:not(:last-child) > .btn:last-child, .btn-group-vertical > .btn-group:first-child:not(:last-child) > #assignments-select-button:last-child, #assignments-page .page-main .btn-group-vertical > .filters:first-child:not(:last-child) > #assignments-select-button:last-child,
 .btn-group-vertical > .btn-group:first-child:not(:last-child) > .dropdown-toggle, #assignments-page .page-main
 .btn-group-vertical > .filters:first-child:not(:last-child) > .dropdown-toggle {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0; }
 
-.btn-group-vertical > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .btn-group-vertical > .filters:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .filters .btn-group-vertical > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .btn-group-vertical > .filters:last-child:not(:first-child) > #assignments-select-button:first-child {
+.btn-group-vertical > .btn-group:last-child:not(:first-child) > .btn:first-child, #assignments-page .page-main .btn-group-vertical > .filters:last-child:not(:first-child) > .btn:first-child, .btn-group-vertical > .btn-group:last-child:not(:first-child) > #assignments-select-button:first-child, #assignments-page .page-main .btn-group-vertical > .filters:last-child:not(:first-child) > #assignments-select-button:first-child {
   border-top-right-radius: 0;
   border-top-left-radius: 0; }
 
@@ -2731,26 +2720,26 @@ tbody.collapse.in {
   width: 100%;
   table-layout: fixed;
   border-collapse: separate; }
-  .btn-group-justified > .btn, #assignments-page .page-main .filters .btn-group-justified > #assignments-select-button,
+  .btn-group-justified > .btn, .btn-group-justified > #assignments-select-button,
   .btn-group-justified > .btn-group, #assignments-page .page-main
   .btn-group-justified > .filters {
     float: none;
     display: table-cell;
     width: 1%; }
-  .btn-group-justified > .btn-group .btn, #assignments-page .page-main .btn-group-justified > .filters .btn, .btn-group-justified > .btn-group #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters .btn-group-justified > .btn-group #assignments-select-button, #assignments-page .page-main .btn-group-justified > .filters #assignments-select-button {
+  .btn-group-justified > .btn-group .btn, #assignments-page .page-main .btn-group-justified > .filters .btn, .btn-group-justified > .btn-group #assignments-select-button, #assignments-page .page-main .btn-group-justified > .filters #assignments-select-button {
     width: 100%; }
   .btn-group-justified > .btn-group .dropdown-menu, #assignments-page .page-main .btn-group-justified > .filters .dropdown-menu {
     left: auto; }
 
-[data-toggle="buttons"] > .btn input[type="radio"], #assignments-page .page-main .filters [data-toggle="buttons"] > #assignments-select-button input[type="radio"],
-[data-toggle="buttons"] > .btn input[type="checkbox"], #assignments-page .page-main .filters
+[data-toggle="buttons"] > .btn input[type="radio"], [data-toggle="buttons"] > #assignments-select-button input[type="radio"],
+[data-toggle="buttons"] > .btn input[type="checkbox"],
 [data-toggle="buttons"] > #assignments-select-button input[type="checkbox"],
 [data-toggle="buttons"] > .btn-group > .btn input[type="radio"], #assignments-page .page-main
-[data-toggle="buttons"] > .filters > .btn input[type="radio"], #assignments-page .page-main .filters
+[data-toggle="buttons"] > .filters > .btn input[type="radio"],
 [data-toggle="buttons"] > .btn-group > #assignments-select-button input[type="radio"], #assignments-page .page-main
 [data-toggle="buttons"] > .filters > #assignments-select-button input[type="radio"],
 [data-toggle="buttons"] > .btn-group > .btn input[type="checkbox"], #assignments-page .page-main
-[data-toggle="buttons"] > .filters > .btn input[type="checkbox"], #assignments-page .page-main .filters
+[data-toggle="buttons"] > .filters > .btn input[type="checkbox"],
 [data-toggle="buttons"] > .btn-group > #assignments-select-button input[type="checkbox"], #assignments-page .page-main
 [data-toggle="buttons"] > .filters > #assignments-select-button input[type="checkbox"] {
   position: absolute;
@@ -2805,14 +2794,14 @@ tbody.collapse.in {
   border-radius: 4px; }
   .input-group-addon.input-sm, #gradebook #grades .input-group-sm > select.input-group-addon,
   .input-group-sm > .input-group-addon,
-  .input-group-sm > .input-group-btn > .input-group-addon.btn, #assignments-page .page-main .filters
+  .input-group-sm > .input-group-btn > .input-group-addon.btn,
   .input-group-sm > .input-group-btn > .input-group-addon#assignments-select-button {
     padding: 5px 10px;
     font-size: 12px;
     border-radius: 3px; }
   .input-group-addon.input-lg, #gradebook #grades .input-group-lg > select.input-group-addon,
   .input-group-lg > .input-group-addon,
-  .input-group-lg > .input-group-btn > .input-group-addon.btn, #assignments-page .page-main .filters
+  .input-group-lg > .input-group-btn > .input-group-addon.btn,
   .input-group-lg > .input-group-btn > .input-group-addon#assignments-select-button {
     padding: 10px 16px;
     font-size: 18px;
@@ -2823,17 +2812,17 @@ tbody.collapse.in {
 
 .input-group .form-control:first-child, .input-group #gradebook #grades select:first-child, #gradebook #grades .input-group select:first-child,
 .input-group-addon:first-child,
-.input-group-btn:first-child > .btn, #assignments-page .page-main .filters
+.input-group-btn:first-child > .btn,
 .input-group-btn:first-child > #assignments-select-button,
 .input-group-btn:first-child > .btn-group > .btn, #assignments-page .page-main
-.input-group-btn:first-child > .filters > .btn, #assignments-page .page-main .filters
+.input-group-btn:first-child > .filters > .btn,
 .input-group-btn:first-child > .btn-group > #assignments-select-button, #assignments-page .page-main
 .input-group-btn:first-child > .filters > #assignments-select-button,
 .input-group-btn:first-child > .dropdown-toggle,
-.input-group-btn:last-child > .btn:not(:last-child):not(.dropdown-toggle), #assignments-page .page-main .filters
+.input-group-btn:last-child > .btn:not(:last-child):not(.dropdown-toggle),
 .input-group-btn:last-child > #assignments-select-button:not(:last-child):not(.dropdown-toggle),
 .input-group-btn:last-child > .btn-group:not(:last-child) > .btn, #assignments-page .page-main
-.input-group-btn:last-child > .filters:not(:last-child) > .btn, #assignments-page .page-main .filters
+.input-group-btn:last-child > .filters:not(:last-child) > .btn,
 .input-group-btn:last-child > .btn-group:not(:last-child) > #assignments-select-button, #assignments-page .page-main
 .input-group-btn:last-child > .filters:not(:last-child) > #assignments-select-button {
   border-bottom-right-radius: 0;
@@ -2844,17 +2833,17 @@ tbody.collapse.in {
 
 .input-group .form-control:last-child, .input-group #gradebook #grades select:last-child, #gradebook #grades .input-group select:last-child,
 .input-group-addon:last-child,
-.input-group-btn:last-child > .btn, #assignments-page .page-main .filters
+.input-group-btn:last-child > .btn,
 .input-group-btn:last-child > #assignments-select-button,
 .input-group-btn:last-child > .btn-group > .btn, #assignments-page .page-main
-.input-group-btn:last-child > .filters > .btn, #assignments-page .page-main .filters
+.input-group-btn:last-child > .filters > .btn,
 .input-group-btn:last-child > .btn-group > #assignments-select-button, #assignments-page .page-main
 .input-group-btn:last-child > .filters > #assignments-select-button,
 .input-group-btn:last-child > .dropdown-toggle,
-.input-group-btn:first-child > .btn:not(:first-child), #assignments-page .page-main .filters
+.input-group-btn:first-child > .btn:not(:first-child),
 .input-group-btn:first-child > #assignments-select-button:not(:first-child),
 .input-group-btn:first-child > .btn-group:not(:first-child) > .btn, #assignments-page .page-main
-.input-group-btn:first-child > .filters:not(:first-child) > .btn, #assignments-page .page-main .filters
+.input-group-btn:first-child > .filters:not(:first-child) > .btn,
 .input-group-btn:first-child > .btn-group:not(:first-child) > #assignments-select-button, #assignments-page .page-main
 .input-group-btn:first-child > .filters:not(:first-child) > #assignments-select-button {
   border-bottom-left-radius: 0;
@@ -2867,17 +2856,17 @@ tbody.collapse.in {
   position: relative;
   font-size: 0;
   white-space: nowrap; }
-  .input-group-btn > .btn, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button {
+  .input-group-btn > .btn, .input-group-btn > #assignments-select-button {
     position: relative; }
-    .input-group-btn > .btn + .btn, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button + .btn, #assignments-page .page-main .filters .input-group-btn > .btn + #assignments-select-button, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button + #assignments-select-button {
+    .input-group-btn > .btn + .btn, .input-group-btn > #assignments-select-button + .btn, .input-group-btn > .btn + #assignments-select-button, .input-group-btn > #assignments-select-button + #assignments-select-button {
       margin-left: -1px; }
-    .input-group-btn > .btn:hover, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button:hover, .input-group-btn > .btn:focus, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button:focus, .input-group-btn > .btn:active, #assignments-page .page-main .filters .input-group-btn > #assignments-select-button:active {
+    .input-group-btn > .btn:hover, .input-group-btn > #assignments-select-button:hover, .input-group-btn > .btn:focus, .input-group-btn > #assignments-select-button:focus, .input-group-btn > .btn:active, .input-group-btn > #assignments-select-button:active {
       z-index: 2; }
-  .input-group-btn:first-child > .btn, #assignments-page .page-main .filters .input-group-btn:first-child > #assignments-select-button,
+  .input-group-btn:first-child > .btn, .input-group-btn:first-child > #assignments-select-button,
   .input-group-btn:first-child > .btn-group, #assignments-page .page-main
   .input-group-btn:first-child > .filters {
     margin-right: -1px; }
-  .input-group-btn:last-child > .btn, #assignments-page .page-main .filters .input-group-btn:last-child > #assignments-select-button,
+  .input-group-btn:last-child > .btn, .input-group-btn:last-child > #assignments-select-button,
   .input-group-btn:last-child > .btn-group, #assignments-page .page-main
   .input-group-btn:last-child > .filters {
     z-index: 2;
@@ -3259,10 +3248,10 @@ tbody.collapse.in {
 .navbar-btn {
   margin-top: 8px;
   margin-bottom: 8px; }
-  .navbar-btn.btn-sm, .btn-group-sm > .navbar-btn.btn, #assignments-page .page-main .filters .btn-group-sm > .navbar-btn#assignments-select-button {
+  .navbar-btn.btn-sm, .btn-group-sm > .navbar-btn.btn, .btn-group-sm > .navbar-btn#assignments-select-button {
     margin-top: 10px;
     margin-bottom: 10px; }
-  .navbar-btn.btn-xs, .btn-group-xs > .navbar-btn.btn, #assignments-page .page-main .filters .btn-group-xs > .navbar-btn#assignments-select-button {
+  .navbar-btn.btn-xs, .btn-group-xs > .navbar-btn.btn, .btn-group-xs > .navbar-btn#assignments-select-button {
     margin-top: 14px;
     margin-bottom: 14px; }
 
@@ -3555,7 +3544,7 @@ tbody.collapse.in {
   border-radius: .25em; }
   .label:empty, .event-types span:empty {
     display: none; }
-  .btn .label, #assignments-page .page-main .filters #assignments-select-button .label, .btn .event-types span, .event-types .btn span, #assignments-page .page-main .filters #assignments-select-button .event-types span, .event-types #assignments-page .page-main .filters #assignments-select-button span {
+  .btn .label, #assignments-select-button .label, .btn .event-types span, .event-types .btn span, #assignments-select-button .event-types span, .event-types #assignments-select-button span {
     position: relative;
     top: -1px; }
 
@@ -3609,11 +3598,11 @@ a.label:hover, a.label:focus {
   border-radius: 10px; }
   .badge:empty {
     display: none; }
-  .btn .badge, #assignments-page .page-main .filters #assignments-select-button .badge {
+  .btn .badge, #assignments-select-button .badge {
     position: relative;
     top: -1px; }
-  .btn-xs .badge, .btn-group-xs > .btn .badge, #assignments-page .page-main .filters .btn-group-xs > #assignments-select-button .badge,
-  .btn-group-xs > .btn .badge, #assignments-page .page-main .filters
+  .btn-xs .badge, .btn-group-xs > .btn .badge, .btn-group-xs > #assignments-select-button .badge,
+  .btn-group-xs > .btn .badge,
   .btn-group-xs > #assignments-select-button .badge {
     top: 0;
     padding: 1px 5px; }
@@ -4587,10 +4576,10 @@ button.close {
     display: table; }
   .modal-footer:after {
     clear: both; }
-  .modal-footer .btn + .btn, .modal-footer #assignments-page .page-main .filters #assignments-select-button + .btn, #assignments-page .page-main .filters .modal-footer #assignments-select-button + .btn, .modal-footer #assignments-page .page-main .filters .btn + #assignments-select-button, #assignments-page .page-main .filters .modal-footer .btn + #assignments-select-button, .modal-footer #assignments-page .page-main .filters #assignments-select-button + #assignments-select-button, #assignments-page .page-main .filters .modal-footer #assignments-select-button + #assignments-select-button {
+  .modal-footer .btn + .btn, .modal-footer #assignments-select-button + .btn, .modal-footer .btn + #assignments-select-button, .modal-footer #assignments-select-button + #assignments-select-button {
     margin-left: 5px;
     margin-bottom: 0; }
-  .modal-footer .btn-group .btn + .btn, .modal-footer #assignments-page .page-main .filters .btn + .btn, #assignments-page .page-main .modal-footer .filters .btn + .btn, #assignments-page .page-main .filters .modal-footer .btn-group #assignments-select-button + .btn, .modal-footer #assignments-page .page-main .filters #assignments-select-button + .btn, #assignments-page .page-main .modal-footer .filters #assignments-select-button + .btn, #assignments-page .page-main .filters .modal-footer .btn-group .btn + #assignments-select-button, .modal-footer #assignments-page .page-main .filters .btn + #assignments-select-button, #assignments-page .page-main .modal-footer .filters .btn + #assignments-select-button, #assignments-page .page-main .filters .modal-footer .btn-group #assignments-select-button + #assignments-select-button, .modal-footer #assignments-page .page-main .filters #assignments-select-button + #assignments-select-button, #assignments-page .page-main .modal-footer .filters #assignments-select-button + #assignments-select-button {
+  .modal-footer .btn-group .btn + .btn, .modal-footer #assignments-page .page-main .filters .btn + .btn, #assignments-page .page-main .modal-footer .filters .btn + .btn, .modal-footer .btn-group #assignments-select-button + .btn, .modal-footer #assignments-page .page-main .filters #assignments-select-button + .btn, #assignments-page .page-main .modal-footer .filters #assignments-select-button + .btn, .modal-footer .btn-group .btn + #assignments-select-button, .modal-footer #assignments-page .page-main .filters .btn + #assignments-select-button, #assignments-page .page-main .modal-footer .filters .btn + #assignments-select-button, .modal-footer .btn-group #assignments-select-button + #assignments-select-button, .modal-footer #assignments-page .page-main .filters #assignments-select-button + #assignments-select-button, #assignments-page .page-main .modal-footer .filters #assignments-select-button + #assignments-select-button {
     margin-left: -1px; }
   .modal-footer .btn-block + .btn-block {
     margin-left: 0; }
@@ -5134,7 +5123,7 @@ button.close {
         .multiselect-container > li > a > label > input[type="checkbox"] {
           margin-bottom: 5px; }
 
-.btn-group > .btn-group:nth-child(2) > .multiselect.btn, #assignments-page .page-main .filters > .btn-group:nth-child(2) > .multiselect.btn, #assignments-page .page-main .btn-group > .filters:nth-child(2) > .multiselect.btn, #assignments-page .page-main .filters > .filters:nth-child(2) > .multiselect.btn, #assignments-page .page-main .filters .btn-group > .btn-group:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .filters > .btn-group:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .btn-group > .filters:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .filters > .filters:nth-child(2) > .multiselect#assignments-select-button {
+.btn-group > .btn-group:nth-child(2) > .multiselect.btn, #assignments-page .page-main .filters > .btn-group:nth-child(2) > .multiselect.btn, #assignments-page .page-main .btn-group > .filters:nth-child(2) > .multiselect.btn, #assignments-page .page-main .filters > .filters:nth-child(2) > .multiselect.btn, .btn-group > .btn-group:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .filters > .btn-group:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .btn-group > .filters:nth-child(2) > .multiselect#assignments-select-button, #assignments-page .page-main .filters > .filters:nth-child(2) > .multiselect#assignments-select-button {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px; }
 
@@ -5869,7 +5858,7 @@ body.sign-in, body.reset-password, body.gray {
     right: 10px;
     font-size: 12px; }
 
-#sign-in .btn.sign-up-in, #sign-in #assignments-page .page-main .filters .sign-up-in#assignments-select-button, #assignments-page .page-main .filters #sign-in .sign-up-in#assignments-select-button, #sign-in .btn.btn-primary, #sign-in #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters #sign-in #assignments-select-button, #reset-password .btn.sign-up-in, #reset-password #assignments-page .page-main .filters .sign-up-in#assignments-select-button, #assignments-page .page-main .filters #reset-password .sign-up-in#assignments-select-button, #reset-password .btn.btn-primary, #reset-password #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters #reset-password #assignments-select-button {
+#sign-in .btn.sign-up-in, #sign-in .sign-up-in#assignments-select-button, #sign-in .btn.btn-primary, #sign-in #assignments-select-button, #reset-password .btn.sign-up-in, #reset-password .sign-up-in#assignments-select-button, #reset-password .btn.btn-primary, #reset-password #assignments-select-button {
   font-size: 13px;
   margin-top: 15px;
   border: 0 !important;
@@ -5877,7 +5866,7 @@ body.sign-in, body.reset-password, body.gray {
   text-transform: uppercase;
   border-radius: 4px !important; }
 
-#sign-in .btn.btn-primary, #sign-in #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters #sign-in #assignments-select-button, #reset-password .btn.btn-primary, #reset-password #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters #reset-password #assignments-select-button {
+#sign-in .btn.btn-primary, #sign-in #assignments-select-button, #reset-password .btn.btn-primary, #reset-password #assignments-select-button {
   margin-top: 0; }
 
 .header {
@@ -6426,7 +6415,7 @@ h2.right-line:after {
   #intro h1 {
     font-weight: normal;
     margin-top: 100px; }
-  #intro .btn-primary, #intro #assignments-page .page-main .filters #assignments-select-button, #assignments-page .page-main .filters #intro #assignments-select-button {
+  #intro .btn-primary, #intro #assignments-select-button {
     background: #f67280;
     border: #f34255; }
 
@@ -6709,43 +6698,45 @@ h2.right-line:after {
           text-align: right;
           color: #999; }
 
-._students-courses-list .table-hover > tbody > tr:hover {
-  background-color: #FCFDFD; }
-
-._students-courses-list h4 {
-  margin: 0 0 4px 0; }
-
-._students-courses-list .table td, ._students-courses-list .ubertext table td, .ubertext ._students-courses-list table td {
-  padding: 10px;
-  font-size: 13px; }
-  ._students-courses-list .table td .badge, ._students-courses-list .ubertext table td .badge, .ubertext ._students-courses-list table td .badge {
-    font-weight: normal;
-    white-space: nowrap;
-    position: relative;
-    bottom: 6px; }
-  ._students-courses-list .table td a.title, ._students-courses-list .ubertext table td a.title, .ubertext ._students-courses-list table td a.title {
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.1;
+._students-courses-list {
+  padding-top: 60px; }
+  ._students-courses-list h4 {
     margin: 0 0 4px 0; }
+  ._students-courses-list .table, ._students-courses-list .ubertext table, .ubertext ._students-courses-list table {
+    margin: 0; }
+    ._students-courses-list .table tr:first-child td, ._students-courses-list .ubertext table tr:first-child td, .ubertext ._students-courses-list table tr:first-child td {
+      border-top: none; }
+    ._students-courses-list .table .btn-default.btn-block, ._students-courses-list .ubertext table .btn-default.btn-block, .ubertext ._students-courses-list table .btn-default.btn-block, ._students-courses-list .table .btn-warning.btn-block, ._students-courses-list .ubertext table .btn-warning.btn-block, .ubertext ._students-courses-list table .btn-warning.btn-block, ._students-courses-list .table .btn-success.btn-block, ._students-courses-list .ubertext table .btn-success.btn-block, .ubertext ._students-courses-list table .btn-success.btn-block {
+      padding: 5px 10px; }
+    ._students-courses-list .table td, ._students-courses-list .ubertext table td, .ubertext ._students-courses-list table td {
+      padding: 10px;
+      font-size: 13px;
+      border-top-color: #e5e5e5; }
+      ._students-courses-list .table td .badge, ._students-courses-list .ubertext table td .badge, .ubertext ._students-courses-list table td .badge {
+        font-weight: normal;
+        white-space: nowrap;
+        position: relative;
+        bottom: 2px; }
+      ._students-courses-list .table td a.title, ._students-courses-list .ubertext table td a.title, .ubertext ._students-courses-list table td a.title {
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1.1;
+        margin: 0 0 4px 0; }
+    ._students-courses-list .table._archive td, ._students-courses-list .ubertext table._archive td, .ubertext ._students-courses-list table._archive td {
+      font-size: 14px; }
+      ._students-courses-list .table._archive td .badge, ._students-courses-list .ubertext table._archive td .badge, .ubertext ._students-courses-list table._archive td .badge {
+        bottom: 0; }
 
-._students-courses-list .table._archive td, ._students-courses-list .ubertext table._archive td, .ubertext ._students-courses-list table._archive td {
-  font-size: 14px; }
-  ._students-courses-list .table._archive td .badge, ._students-courses-list .ubertext table._archive td .badge, .ubertext ._students-courses-list table._archive td .badge {
-    bottom: 0; }
+#current .table th, #current .ubertext table th, .ubertext #current table th {
+  border: none; }
+  #current .table th.actions, #current .ubertext table th.actions, .ubertext #current table th.actions {
+    width: 120px; }
 
-.courses-list {
-  margin: 0;
-  padding: 0; }
-  .courses-list li {
-    padding-right: 0;
-    padding-left: 0;
-    border: 1px solid transparent;
-    border-top-color: #e4eaec; }
-    .courses-list li:first-child {
-      border-top-color: transparent; }
-    .courses-list li h4 {
-      margin: 0; }
+#current .table td:first-child, #current .ubertext table td:first-child, .ubertext #current table td:first-child {
+  padding-left: 0; }
+
+#current .table td:last-child, #current .ubertext table td:last-child, .ubertext #current table td:last-child {
+  padding-right: 0; }
 
 #questions-wrapper .panel-title {
   font-size: 18px;
@@ -7008,50 +6999,6 @@ h2.right-line:after {
     margin-right: 0;
     margin-left: 2px; }
 
-.nav-tabs-solid {
-  border-bottom-color: #f3f7f9; }
-  .nav-tabs-solid > li > a:hover {
-    border-color: transparent; }
-  .nav-tabs-solid > li.active > a {
-    color: #76838f;
-    background-color: #f3f7f9;
-    border-color: transparent; }
-    .nav-tabs-solid > li.active > a:focus, .nav-tabs-solid > li.active > a:hover {
-      color: #76838f;
-      background-color: #f3f7f9;
-      border-color: transparent; }
-  .nav-tabs-solid ~ .tab-content {
-    padding: 20px;
-    background-color: #f3f7f9; }
-  .nav-tabs-solid.nav-justified > li > a {
-    border: none; }
-  .nav-tabs-solid.nav-justified > li.active > a {
-    border: none; }
-    .nav-tabs-solid.nav-justified > li.active > a:focus, .nav-tabs-solid.nav-justified > li.active > a:hover {
-      border: none; }
-  .nav-tabs-solid.nav-tabs-bottom > li.active > a {
-    border: none; }
-    .nav-tabs-solid.nav-tabs-bottom > li.active > a:focus, .nav-tabs-solid.nav-tabs-bottom > li.active > a:hover {
-      border: none; }
-
-.nav-tabs-inverse .nav-tabs-solid {
-  border-bottom-color: #ffffff; }
-
-.nav-tabs-inverse .nav-tabs-solid > li.active > a,
-.nav-tabs-inverse .nav-tabs-solid > li.active > a:hover,
-.nav-tabs-inverse .nav-tabs-solid > li.active > a:focus {
-  color: #76838f;
-  background-color: #ffffff; }
-
-.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid {
-  border-right-color: #ffffff; }
-
-.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid.nav-tabs-reverse {
-  border-left-color: #ffffff; }
-
-.nav-tabs-inverse .tab-content {
-  background: #ffffff; }
-
 .admission-interview-page h4, .admission-applicant-page h4 {
   margin-bottom: 10px; }
   .admission-interview-page h4 span, .admission-applicant-page h4 span {
@@ -7154,6 +7101,9 @@ h2.right-line:after {
 .assignment-date.day-after-tomorrow {
   color: #f2a654; }
 
+#assignments-select-button {
+  padding: 6px 12px !important; }
+
 #assignments-page {
   position: relative;
   min-height: 500px; }
@@ -7177,8 +7127,6 @@ h2.right-line:after {
       #assignments-page .page-main .filters .multiselect-container > li > a > label.radio, #assignments-page .page-main .filters .multiselect-container > li > a > label.checkbox {
         width: 276px;
         white-space: normal; }
-      #assignments-page .page-main .filters #assignments-select-button {
-        padding: 6px 12px !important; }
     #assignments-page .page-main .loading {
       cursor: wait;
       position: absolute;
@@ -7299,43 +7247,39 @@ h2.right-line:after {
     .input-daterange .input-group-addon:last-child {
       border-right-width: 1px; }
 
-.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button {
+.btn-outline.btn-default, .btn-default#assignments-select-button {
   color: #9B9B9B;
   background-color: transparent; }
-  .btn-outline.btn-default:hover, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover, .btn-outline.btn-default:focus, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus, .btn-outline.btn-default:active, #assignments-page .page-main .filters .btn-default#assignments-select-button:active, .btn-outline.btn-default.active, #assignments-page .page-main .filters .btn-default.active#assignments-select-button,
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default,
-  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button {
+  .btn-outline.btn-default:hover, .btn-default#assignments-select-button:hover, .btn-outline.btn-default:focus, .btn-default#assignments-select-button:focus, .btn-outline.btn-default:active, .btn-default#assignments-select-button:active, .btn-outline.btn-default.active, .btn-default.active#assignments-select-button,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default, .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button, .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button {
     border-color: #e4eaec;
     background-color: rgba(118, 131, 143, 0.1);
     color: #76838f; }
-  .btn-outline.btn-default:hover .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:hover .badge,
-  .btn-outline.btn-default:focus .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:focus .badge,
-  .btn-outline.btn-default:active .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button:active .badge,
-  .btn-outline.btn-default.active .badge, #assignments-page .page-main .filters .btn-default.active#assignments-select-button .badge,
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default .badge,
-  .btn-outline.btn-default #assignments-page .page-main .filters .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters
-  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button .badge, #assignments-page .page-main .filters .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button .badge {
+  .btn-outline.btn-default:hover .badge, .btn-default#assignments-select-button:hover .badge,
+  .btn-outline.btn-default:focus .badge, .btn-default#assignments-select-button:focus .badge,
+  .btn-outline.btn-default:active .badge, .btn-default#assignments-select-button:active .badge,
+  .btn-outline.btn-default.active .badge, .btn-default.active#assignments-select-button .badge,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-outline.btn-default .badge, .btn-default#assignments-select-button .open > .dropdown-toggle.btn-outline.btn-default .badge,
+  .btn-outline.btn-default .open > .dropdown-toggle.btn-default#assignments-select-button .badge, .btn-default#assignments-select-button .open > .dropdown-toggle.btn-default#assignments-select-button .badge {
     color: #76838f;
     background-color: #76838f; }
 
-.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button {
+.btn-outline.btn-primary, #assignments-select-button {
   color: #337ab7;
   background-color: transparent; }
-  .btn-outline.btn-primary:hover, #assignments-page .page-main .filters #assignments-select-button:hover, .btn-outline.btn-primary:focus, #assignments-page .page-main .filters #assignments-select-button:focus, .btn-outline.btn-primary:active, #assignments-page .page-main .filters #assignments-select-button:active, .btn-outline.btn-primary.active, #assignments-page .page-main .filters .active#assignments-select-button,
-  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary,
-  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters
-  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button {
+  .btn-outline.btn-primary:hover, #assignments-select-button:hover, .btn-outline.btn-primary:focus, #assignments-select-button:focus, .btn-outline.btn-primary:active, #assignments-select-button:active, .btn-outline.btn-primary.active, .active#assignments-select-button,
+  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary, #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary,
+  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button, #assignments-select-button .open > .dropdown-toggle#assignments-select-button {
     border-color: #2b679b;
     background-color: #2d6da3;
     color: #ffffff; }
-  .btn-outline.btn-primary:hover .badge, #assignments-page .page-main .filters #assignments-select-button:hover .badge,
-  .btn-outline.btn-primary:focus .badge, #assignments-page .page-main .filters #assignments-select-button:focus .badge,
-  .btn-outline.btn-primary:active .badge, #assignments-page .page-main .filters #assignments-select-button:active .badge,
-  .btn-outline.btn-primary.active .badge, #assignments-page .page-main .filters .active#assignments-select-button .badge,
-  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary .badge,
-  .btn-outline.btn-primary #assignments-page .page-main .filters .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters
-  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button .badge, #assignments-page .page-main .filters #assignments-select-button .open > .dropdown-toggle#assignments-select-button .badge {
+  .btn-outline.btn-primary:hover .badge, #assignments-select-button:hover .badge,
+  .btn-outline.btn-primary:focus .badge, #assignments-select-button:focus .badge,
+  .btn-outline.btn-primary:active .badge, #assignments-select-button:active .badge,
+  .btn-outline.btn-primary.active .badge, .active#assignments-select-button .badge,
+  .btn-outline.btn-primary .open > .dropdown-toggle.btn-outline.btn-primary .badge, #assignments-select-button .open > .dropdown-toggle.btn-outline.btn-primary .badge,
+  .btn-outline.btn-primary .open > .dropdown-toggle#assignments-select-button .badge, #assignments-select-button .open > .dropdown-toggle#assignments-select-button .badge {
     color: #57c7d4;
     background-color: #ffffff; }
 
@@ -7355,7 +7299,51 @@ h2.right-line:after {
 .widget-watermark.lighter {
   color: white; }
 
-.btn-danger.btn-block, .btn-success.btn-block, .btn-primary.btn-block, #assignments-page .page-main .filters .btn-block#assignments-select-button {
+.nav-tabs-solid {
+  border-bottom-color: #f3f7f9; }
+  .nav-tabs-solid > li > a:hover {
+    border-color: transparent; }
+  .nav-tabs-solid > li.active > a {
+    color: #76838f;
+    background-color: #f3f7f9;
+    border-color: transparent; }
+    .nav-tabs-solid > li.active > a:focus, .nav-tabs-solid > li.active > a:hover {
+      color: #76838f;
+      background-color: #f3f7f9;
+      border-color: transparent; }
+  .nav-tabs-solid ~ .tab-content {
+    padding: 20px;
+    background-color: #f3f7f9; }
+  .nav-tabs-solid.nav-justified > li > a {
+    border: none; }
+  .nav-tabs-solid.nav-justified > li.active > a {
+    border: none; }
+    .nav-tabs-solid.nav-justified > li.active > a:focus, .nav-tabs-solid.nav-justified > li.active > a:hover {
+      border: none; }
+  .nav-tabs-solid.nav-tabs-bottom > li.active > a {
+    border: none; }
+    .nav-tabs-solid.nav-tabs-bottom > li.active > a:focus, .nav-tabs-solid.nav-tabs-bottom > li.active > a:hover {
+      border: none; }
+
+.nav-tabs-inverse .nav-tabs-solid {
+  border-bottom-color: #ffffff; }
+
+.nav-tabs-inverse .nav-tabs-solid > li.active > a,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:hover,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:focus {
+  color: #76838f;
+  background-color: #ffffff; }
+
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid {
+  border-right-color: #ffffff; }
+
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid.nav-tabs-reverse {
+  border-left-color: #ffffff; }
+
+.nav-tabs-inverse .tab-content {
+  background: #ffffff; }
+
+.btn-danger.btn-block, .btn-success.btn-block, .btn-primary.btn-block, .btn-block#assignments-select-button, .btn-warning.btn-block {
   padding: 10px 12px; }
 
 .center-header {
@@ -7554,7 +7542,7 @@ h2 small a {
 .h2-and-buttons hr {
   clear: both; }
 
-.btn, #assignments-page .page-main .filters #assignments-select-button {
+.btn, #assignments-select-button {
   border-radius: 0px !important; }
 
 .badge {

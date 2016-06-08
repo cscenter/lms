@@ -1,128 +1,120 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block body_class %} gray{% endblock body_class %}
+
 {% block content %}
 <div class="container _students-courses-list">
-  <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        {% trans "Courses" %}
-      </h2>
-      <hr>
-    </div>
-  </div>
+    <div class="nav-tabs-inverse">
+        <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+                <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{% trans "Current semester" %}</a>
+            </li>
+            <li role="presentation">
+                <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">{% trans "Archive" %}</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+        {% if enrollments_ongoing or course_list_available %}
+          <div class="tab-pane active" id="current" role="tabpanel">
+              <h3>{% trans "Courses" %}</h3>
 
-  {% if enrollments_ongoing or course_list_available %}
-  <div class="row ">
-    <div class="col-xs-12">
-      <h3>{% trans "Current semester" %}</h3>
-
-      <table class="table table-hover " width="100%">
-        <thead>
-          <th>{% trans "Course Offerings" %}</th>
-          <th width="20%"></th>
-        </thead>
-
-        {% for e in enrollments_ongoing %}
-        <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}" class="title">
-{{ e.course_offering.course.name }}</a> &nbsp;<span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span><br>
-
-          {% trans "Professors" %}:
-            {% for teacher in e.course_offering.teachers.all %}
-            <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
-            {% endfor %}{% if e.course_offering.survey_url %}
-              <br><a class=" btn btn-default btn-sm btn-success" href="{{ e.course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
-          </td>
-            <td>
-                {% if e.course_offering.enrollment_opened %}
-                <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
-                   class=" btn btn-sm btn-warning pull-right">{% trans "Unenrolled" %}
-                </a>
-                {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-
-        {% for course_offering in course_list_available %}
-        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <a class="title" href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-              {{ course_offering.course.name }}</a><br>
-          {% trans "Professors" %}:
-            {% for teacher in course_offering.teachers.all %}
-            <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+          <table class="table" width="100%">
+            <thead>
+                <th></th>
+                <th class="actions">&nbsp;</th>
+            </thead>
+            <tbody>
+            {% for e in enrollments_ongoing %}
+            <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
+                <td>
+                <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}" class="title">{{ e.course_offering.course.name }}</a> &nbsp;
+                  <span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span><br>
+              {% trans "Professors" %}:
+                {% for teacher in e.course_offering.teachers.all %}
+                <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </td>
+                <td>
+                    {% if e.course_offering.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ e.course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
+                    {% if e.course_offering.enrollment_opened %}
+                    <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
+                       class=" btn btn-sm btn-block btn-warning">{% trans "Leave course" %}
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
             {% endfor %}
-          </td>
-          <td>
-              {% if course_offering.enrollment_opened %}
 
-            <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
-            {% csrf_token %}
-            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-            <input type="hidden" name="back" value="course_list_student">
-            <button type="submit" class="btn btn-default btn-sm pull-right">
-              {% trans "Enroll" %}
-            </button>
-          </form>
-              {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
+            {% for course_offering in course_list_available %}
+            <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
+              <td>
+                <a class="title" href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+                  {{ course_offering.course.name }}</a><br>
+              {% trans "Professors" %}:
+                {% for teacher in course_offering.teachers.all %}
+                <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </td>
+              <td>
+                  {% if course_offering.enrollment_opened %}
 
-      </table>
+                <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
+                <input type="hidden" name="back" value="course_list_student">
+                <button type="submit" class="btn btn-default btn-sm btn-block">
+                  {% trans "Enroll" %}
+                </button>
+              </form>
+                  {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          </div>
+      {% endif %}
+
+      {% if enrollments_archive %}
+          <div class="tab-pane" id="archive" role="tabpanel">
+          <h3>{% trans "Archive" %}</h3>
+          <table class="table _archive" width="100%">
+            <thead>
+              <th></th>
+              <th width="10%">
+                {% trans "Grade" %}
+              </th>
+              <th width="15%">
+                {% trans "Semester" %}
+              </th>
+            </thead>
+            {% for e in enrollments_archive %}
+            <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
+              <td>
+                <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
+                  {{ e.course_offering.course.name }}
+                </a>
+              </td>
+              <td>
+                <span class="badge assignment-status {{ e.grade }}">
+                  {{ e.grade_honest }}
+                </span>
+              </td>
+              <td>
+                {{ e.course_offering.semester }}
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+          </div>
+      {% endif %}
+
     </div>
-  </div>
-  {% endif %}
-
-  {% if enrollments_archive %}
-  <div class="row">
-    <div class="col-xs-12">
-      <h3>{% trans "Archive" %}</h3>
-      <table class="table _archive" width="100%">
-        <thead>
-          <th></th>
-          <th width="10%">
-            {% trans "Grade" %}
-          </th>
-          <th width="15%">
-            {% trans "Semester" %}
-          </th>
-        </thead>
-        {% for e in enrollments_archive %}
-        <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
-              {{ e.course_offering.course.name }}
-            </a>
-          </td>
-          <td>
-            <span class="badge assignment-status {{ e.grade }}">
-              {{ e.grade_honest }}
-            </span>
-          </td>
-          <td>
-            {{ e.course_offering.semester }}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
+        {% if not enrollments_ongoing and not enrollments_archive and not course_list_available %}
+            <div class="container center-aligned"><h4>{% trans "No courses yet" %}</h4></div>
+        {% endif %}
     </div>
-  </div>
-  {% endif %}
-
 </div>
-{% if not enrollments_ongoing and not enrollments_archive and not course_list_available %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-3"></div>
-    <div class="col-xs-6 center-aligned">
-      <h4>{% trans "No courses yet" %}</h4>
-    </div>
-    <div class="col-xs-3">
-    </div>
-  </div>
-</div>
-{% endif %}
+
 {% endblock content %}

@@ -1,0 +1,58 @@
+.nav-tabs-solid {
+  border-bottom-color: #f3f7f9;
+  > li {
+    > a:hover {
+      border-color: transparent;
+    }
+    &.active > a {
+      color: #76838f;
+      background-color: #f3f7f9;
+      border-color: transparent;
+      &:focus, &:hover {
+        color: #76838f;
+        background-color: #f3f7f9;
+        border-color: transparent;
+      }
+    }
+  }
+  ~ .tab-content {
+    padding: 20px;
+    background-color: #f3f7f9;
+  }
+  &.nav-justified > li {
+    > a {
+      border: none;
+    }
+    &.active > a {
+      border: none;
+      &:focus, &:hover {
+        border: none;
+      }
+    }
+  }
+  &.nav-tabs-bottom > li.active > a {
+    border: none;
+    &:focus, &:hover {
+      border: none;
+    }
+  }
+}
+
+.nav-tabs-inverse .nav-tabs-solid {
+  border-bottom-color: #ffffff;
+}
+.nav-tabs-inverse .nav-tabs-solid > li.active > a,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:hover,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:focus {
+  color: #76838f;
+  background-color: #ffffff;
+}
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid {
+  border-right-color: #ffffff;
+}
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid.nav-tabs-reverse {
+  border-left-color: #ffffff;
+}
+.nav-tabs-inverse .tab-content {
+  background: #ffffff;
+}
