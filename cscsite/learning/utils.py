@@ -159,6 +159,10 @@ class LearningPermissionsMixin(object):
         return False
 
     @property
+    def is_master(self):
+        return False
+
+    @property
     def is_curator(self):
         return False
 

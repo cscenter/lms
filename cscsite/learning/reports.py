@@ -21,10 +21,9 @@ from users.models import CSCUser
 
 # TODO: filter projects by grade?
 class ProgressReport(object):
-    # TODO: Maybe can use report.data even in diplomas view to simplify it
     """
     Process students info from CSCUser manager for future export in
-    CSV of XLSX format. Separately store headers and data.
+    CSV of XLSX format. Stores separately headers and data.
     Example:
         report = ProgressReportFull()
         print(report.headers)
@@ -294,6 +293,7 @@ class ProgressReportFull(ProgressReport):
             'Имя',
             'Отчество',
             'Вольнослушатель',
+            'Магистратура',
             'Почта',
             'Телефон',
             'ВУЗ',
@@ -329,6 +329,7 @@ class ProgressReportFull(ProgressReport):
             student.first_name,
             student.patronymic,
             "+" if student.is_volunteer else "",
+            "+" if student.is_master else "",
             student.email,
             student.phone,
             student.university,
@@ -428,6 +429,7 @@ class ProgressReportForSemester(ProgressReport):
             'Имя',
             'Отчество',
             'Вольнослушатель',
+            'Магистратура',
             'Почта',
             'Телефон',
             'ВУЗ',
@@ -478,6 +480,7 @@ class ProgressReportForSemester(ProgressReport):
             student.first_name,
             student.patronymic,
             "+" if student.is_volunteer else "",
+            "+" if student.is_master else "",
             student.email,
             student.phone,
             student.university,

@@ -435,6 +435,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 self.is_student_club or
                 self.is_volunteer)
 
+    # Note: Don't forget about `LearningPermissionsMixin` used for unauth user
     @cached_property
     def is_student_center(self):
         return self.group_pks.STUDENT_CENTER in self._cs_group_pks
@@ -455,6 +456,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     @cached_property
     def is_volunteer(self):
         return self.group_pks.VOLUNTEER in self._cs_group_pks
+
+    @cached_property
+    def is_master(self):
+        """Studying for a masters degree"""
+        return self.group_pks.MASTERS_DEGREE in self._cs_group_pks
 
     @cached_property
     def is_curator(self):
