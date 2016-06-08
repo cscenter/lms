@@ -545,7 +545,8 @@ class ListFilter(django_filters.Filter):
 class CSCUserFilter(django_filters.FilterSet):
     FILTERING_GROUPS = [CSCUser.group_pks.VOLUNTEER,
                         CSCUser.group_pks.STUDENT_CENTER,
-                        CSCUser.group_pks.GRADUATE_CENTER]
+                        CSCUser.group_pks.GRADUATE_CENTER,
+                        CSCUser.group_pks.MASTERS_DEGREE]
 
     ENROLLMENTS_CNT_LIMIT = 12
 
