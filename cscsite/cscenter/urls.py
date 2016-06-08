@@ -4,9 +4,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from core.views import MarkdownRenderView
-from cscenter.views import QAListView, TestimonialsListView
+from cscenter.views import QAListView, TestimonialsListView, TeachersView
 from htmlpages import views
-from index.views import IndexView, AlumniView, TeachersView, RobotsView, \
+from index.views import IndexView, AlumniView, RobotsView, \
     UnsubscribeYaProxyView, EnrollmentApplicationCallback
 from learning.views import \
     MarksSheetTeacherView, MarksSheetTeacherDispatchView, UsefulListView

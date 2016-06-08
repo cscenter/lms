@@ -383,11 +383,11 @@ class CourseStudentListView(StudentOnlyMixin,
             enrolled_on,
             lambda e: (e.course_offering.semester.year == year
                        and e.course_offering.semester.type == semester_type))
-
-        context = {}
-        context['course_list_available'] = available
-        context['enrollments_ongoing'] = ongoing
-        context['enrollments_archive'] = archive
+        context = {
+            "course_list_available": available,
+            "enrollments_ongoing": ongoing,
+            "enrollments_archive": archive
+        }
         return context
 
 
