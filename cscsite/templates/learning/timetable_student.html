@@ -16,26 +16,6 @@
           <a href="?year={{ prev_year }}&week={{ prev_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
           <a href="?year={{ next_year }}&week={{ next_week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
-        {% if user.is_teacher and user.is_student %}
-        <div class="btn-group">
-          <a href="{% url 'timetable_student' %}"
-             role="button"
-             class="btn btn-default
-                    {% if user_type == 'student' %}
-                    active
-                    {% endif %}">
-            {% trans "Learning" %}
-          </a>
-          <a href="{% url 'timetable_teacher' %}"
-             role="button"
-             class="btn btn-default
-                    {% if user_type == 'teacher' %}
-                    active
-                    {% endif %}">
-            {% trans "Teaching" %}
-          </a>
-        </div>
-        {% endif %}
         <div class="btn-group">
           <a href="{% if user_type == 'teacher' %}
                    {% url 'timetable_teacher' %}

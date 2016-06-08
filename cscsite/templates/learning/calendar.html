@@ -13,26 +13,6 @@
           <a href="?year={{ next_date|date:"Y" }}&month={{ next_date|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         {% if user_type != 'full' and user_type != 'public_full' %}
-          {% if user.is_teacher and user.is_student %}
-          <div class="btn-group">
-            <a href="{% url 'calendar_student' %}"
-               role="button"
-               class="btn btn-default
-                      {% if user_type == 'student' %}
-                      active
-                      {% endif %}">
-              {% trans "Learning" %}
-            </a>
-            <a href="{% url 'calendar_teacher' %}"
-               role="button"
-               class="btn btn-default
-                      {% if user_type == 'teacher' %}
-                      active
-                      {% endif %}">
-              {% trans "Teaching" %}
-            </a>
-          </div>
-          {% endif %}
           <div class="btn-group">
             <a href="{% if user_type == 'teacher' %}
                      {% url 'timetable_teacher' %}
