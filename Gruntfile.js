@@ -64,7 +64,10 @@ module.exports = function (grunt) {
                 dest: '<%= JS_DEST %>/faq.js'
             },
             alumni: {
-                src: ['<%= JS_SRC %>/alumni.js'],
+                src: [
+                    '<%= JS_VENDOR %>/holder.min.js',
+                    '<%= JS_SRC %>/alumni.js'
+                ],
                 dest: '<%= JS_DEST %>/alumni.js'
             },
             assignment_submissions: {
