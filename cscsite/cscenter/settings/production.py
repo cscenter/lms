@@ -107,13 +107,5 @@ DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_typ
 
 NEWRELIC_ENV = 'production'
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/',
-        'STATS_FILE': PROJECT_DIR.child("webpack-stats-prod.json"),
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
-    }
-}
-
 AWS_SES_ACCESS_KEY_ID = 'AKIAJZ44WHPOEURR4TZA'
 AWS_SES_SECRET_ACCESS_KEY = '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'

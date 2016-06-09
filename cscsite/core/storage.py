@@ -1,8 +1,7 @@
 from django.contrib.staticfiles.storage import CachedStaticFilesStorage
 
-from pipeline.storage import GZIPMixin, PipelineMixin
+from pipeline.storage import GZIPMixin
 
 
-class PipelineCachedGZIPedStorage(PipelineMixin, GZIPMixin,
-                                  CachedStaticFilesStorage):
+class PipelineCachedGZIPedStorage(GZIPMixin, CachedStaticFilesStorage):
     pass
