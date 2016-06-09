@@ -1,0 +1,75 @@
+header {
+  @extend .container;
+
+  .thumbnail {
+    float: left;
+    margin: 0 20px 0 0;
+    z-index: 10000;
+    position: relative;
+
+    img {
+      height: 238px;
+      width: 175px;
+    }
+  }
+
+  h2 {
+    margin: 0 0 10px 0;
+  }
+
+  .progress-info {
+  }
+}
+
+.profile-additional-info {
+  background: #f8f8f8;
+  top: -120px;
+  position: relative;
+  padding: 30px 10px 0 0;
+  min-height: 72px;
+  overflow: hidden;
+
+  .about-me {
+    @extend .container;
+    min-height:60px;
+    margin-bottom: 10px;
+    padding: 0 0 0 220px;
+
+    h4 {
+      margin-top: 0;
+    }
+  }
+
+  .nav-tabs-inverse {
+    padding: 0 0 0 215px;
+    @extend .container;
+
+    .nav-tabs {
+      border: 0!important;
+      overflow: hidden;
+      height: 42px;
+
+      li {
+        @include border-top-radius(4px);
+        background: #eee;
+        margin: 0 8px 0 0;
+
+      }
+    }
+
+    a {
+      margin: 0;
+    }
+  }
+}
+
+.profile-content {
+  @extend .container;
+  margin-top: -70px;
+
+  table.calc {
+    input[type=text] {
+      width: 100%;
+    }
+  }
+}
