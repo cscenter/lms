@@ -193,6 +193,12 @@ function csrfSafeMethod(method) {
 
                 });
 
+                // Restore label behavior
+                $('label[for=id_' + textarea.name + ']').click(function() {
+                    console.log(textarea.name);
+                    editor.focus();
+                });
+
                 // How often people use this button?
                 editor.on('fullscreenenter', function () {
                     if (yaCounter25844420 !== undefined) {

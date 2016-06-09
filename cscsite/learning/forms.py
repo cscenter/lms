@@ -227,7 +227,7 @@ class CourseClassForm(forms.ModelForm):
 
 class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
-        label=_("Text"),
+        label=_("Add comment"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
         widget=Ubereditor(attrs={'data-quicksend': 'true',
@@ -239,7 +239,7 @@ class AssignmentCommentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.form_show_labels = False
+        # self.helper.form_show_labels = False
         self.helper.layout = Layout(
             Div('text'),
             Div(Div('attached_file',

@@ -9,7 +9,7 @@
 <script type="text/javascript">
   window.CSCCommentPersistenceHashes = {{ hashes_json|safe }};
 </script>
-<div class="container">
+<div class="container" id="student-submission-comments">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
@@ -100,10 +100,9 @@
         </li>
         {% endfor %}
         </ul>
-        <div class="csc-well">
-        <h4>{% trans "Add comment" %}</h4>
-        {% crispy form %}
-      </div>
+
+        <div class="csc-well">{% crispy form %}</div>
+
       {% endif %}
     </div>
     <div class="col-xs-3">

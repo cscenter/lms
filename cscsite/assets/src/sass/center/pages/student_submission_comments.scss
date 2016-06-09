@@ -1,0 +1,62 @@
+#student-submission-comments {
+  label[for=id_text] {
+    font-size: 18px;
+    margin: 10px 0;
+    font-weight: 500;
+  }
+}
+
+// Test page
+//#student-assignment {
+//  .comment-list {
+//    font-size: 16px;
+//    line-height: 1.55;
+//
+//    > li {
+//      border-top: 2px solid #ececec;
+//      margin: 0;
+//      padding: 1em;
+//
+//      &:nth-child(odd) {
+//        background: #fcfcfc;
+//      }
+//
+//      &.teacher {
+//        padding-left: 80px;
+//      }
+//      &.student {
+//        padding-right: 80px;
+//      }
+//
+//      .postmeta {
+//          font-size: 0.75em;
+//          line-height: 1.4;
+//          color: #909090;
+//          position: relative;
+//
+//        .postmeta-date {
+//          opacity: 0.4;
+//          padding-bottom: 0.5em;
+//
+//        }
+//
+//        .postmeta-user {
+//            vertical-align: top;
+//            height: 50px;
+//
+//            color: #337ab7;
+//            font-size: 1.2em;
+//            font-weight: normal;
+//            white-space: normal;
+//
+//            img {
+//                width: 40px;
+//                height: 40px;
+//                border: 2px solid #fff;
+//                border-radius: 40px;
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
