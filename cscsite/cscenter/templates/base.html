@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load pipeline %}
 {% load staticfiles %}
 
 {% load sitemetrics %}
@@ -31,7 +30,7 @@
       webshims.polyfill("forms forms-ext");
     </script>
 
-    {% include "mathjax.html" %}
+    {% include "mathjax_config.html" %}
   </head>
   <body class="tex2jax_ignore{% block body_class %}{% endblock body_class %}">
     {% include "base_menu.html" %}
@@ -71,7 +70,7 @@
     <script type="text/javascript" src="//cdn.ravenjs.com/3.0.4/raven.min.js"></script>
     <script type="text/javascript" src="{% static "js/raven_conf.js" %}"></script>
 
-    {% javascript 'base' %}
+    <script type="text/javascript" src="{% static "js/main.js" %}"></script>
 
     {% if messages %}
       <script type="text/javascript">

@@ -23,7 +23,15 @@ module.exports = function (grunt) {
         },
         concat: {
             main: {
-                src: ['<%= JS_SRC %>/main.js'],
+                src: [
+                    '<%= JS_VENDOR %>/md5.js',
+                    '<%= JS_DEST %>/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
+                    '<%= JS_VENDOR %>/bootstrap.min.js',
+                    '<%= JS_VENDOR %>/jquery.jgrowl.js',
+                    '<%= JS_VENDOR %>/jquery.cookie.js',
+                    '<%= JS_VENDOR %>/sweet-alerts/sweet-alert.min.js',
+                    '<%= JS_SRC %>/main.js'
+                ],
                 dest: '<%= JS_RUNTIME %>/main.js'
             },
             profile_edit: {

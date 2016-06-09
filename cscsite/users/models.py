@@ -2,7 +2,6 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
-import datetime
 import django_filters
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser

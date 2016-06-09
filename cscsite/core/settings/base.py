@@ -188,30 +188,7 @@ STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
 )
-
-PIPELINE = {
-    # Disable compression, enable only concatenation
-    'CSS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
-    'JS_COMPRESSOR': 'pipeline.compressors.NoopCompressor',
-    # Do not wrap js output with anonymous function
-    'DISABLE_WRAPPER': True,
-    'JAVASCRIPT': {
-        'base': {
-            'source_filenames': (
-                'js/vendor/md5.js',
-                'js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
-                'js/vendor/bootstrap.min.js',
-                'js/vendor/jquery.jgrowl.min.js',
-                'js/vendor/jquery.cookie.js',
-                'js/vendor/sweet-alerts/sweet-alert.min.js',
-                'js/main.js',
-            ),
-            'output_filename': 'js/dist/base.js',
-        },
-    }
-}
 
 
 HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
