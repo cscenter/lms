@@ -63,10 +63,5 @@ LOGGING = {
     },
 }
 
-# Looks for files in PIPELINE_CSS and PIPELINE_JS
-STATICFILES_FINDERS += (
-    'pipeline.finders.ManifestFinder',
-)
-
 
 FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)

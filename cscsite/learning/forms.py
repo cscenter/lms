@@ -239,6 +239,7 @@ class AssignmentCommentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
+        self.helper.form_show_labels = False
         self.helper.layout = Layout(
             Div('text'),
             Div(Div('attached_file',

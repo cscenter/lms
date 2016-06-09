@@ -23,6 +23,8 @@ function csrfSafeMethod(method) {
     $(document).ready(function () {
         fn.configureCSRFAjax();
         fn.loadMathJaxAndHightlightJS();
+        // Clear old cache befor init new editors
+        fn.clearEditorsFiles();
         fn.initUberEditor();
         fn.profileSpecificCode();
         fn.courseClassSpecificCode();
@@ -30,7 +32,6 @@ function csrfSafeMethod(method) {
         // Depends on `editors` var, which populated in initUberEditor method
         fn.reflowEditorOnTabToggle();
         // Note: Not sure, but call it after `initUberEditor` method
-        fn.clearEditorsFiles();
     });
 
     var fn = {

@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load pipeline %}
 {% load staticfiles %}
 {% load startswith from core_tags %}
 {% load sitemetrics %}
@@ -33,7 +32,7 @@
       webshims.polyfill("forms forms-ext");
     </script>
 
-    {% include "mathjax.html" %}
+    {% include "mathjax_config.html" %}
 </head>
 <body class="tex2jax_ignore">
     <div id="index-notice">
@@ -99,8 +98,7 @@
     <script type="text/javascript">
         var HIGHLIGHTJS_SRC = "{% static "js/vendor/highlight.pack.js" %}";
     </script>
-
-    {% javascript 'base' %}
+    <script type="text/javascript" src="{% static "js/main.js" %}"></script>
     {% if messages %}
       <script type="text/javascript">
         $(function() {
