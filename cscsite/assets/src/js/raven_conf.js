@@ -43,7 +43,7 @@ var ravenOptions = {
             /metrics\.itunes\.apple\.com\.edgesuite\.net\//i
     ]
 };
-Raven.config('https://3b2af1d12608406a8320124ea9d861e3@app.getsentry.com/13763', ravenOptions).install();
+Raven.config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763', ravenOptions).install();
 var $faUser = $(".login .fa-user")
 if ($faUser.length > 0) {
     Raven.setUserContext({
