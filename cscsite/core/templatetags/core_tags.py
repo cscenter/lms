@@ -28,7 +28,7 @@ def to_css(s):
 
 @register.filter
 def tex(s):
-    return s.replace("#", "\#").replace('&', '\&')
+    return s.replace("#", "\#").replace('&', '\&').replace('"', '``', 1).replace('"', "''", 1)
 
 
 @register.filter
@@ -46,6 +46,7 @@ def date_soon_css(d):
         return "in-future"
 
 # http://stackoverflow.com/a/1112236/1341309
+# FIXME: WTF???
 @register.filter
 def getattribute(value, arg):
     """Gets an attribute of an object dynamically from a string name"""
