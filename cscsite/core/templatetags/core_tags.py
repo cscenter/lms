@@ -27,6 +27,11 @@ def to_css(s):
 
 
 @register.filter
+def tex(s):
+    return s.replace("#", "\#").replace('&', '\&')
+
+
+@register.filter
 def date_soon_css(d):
     days_diff = (d.date() - now().date()).days
     if days_diff < 0:
