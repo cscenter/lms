@@ -77,15 +77,16 @@ class CSCUserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'enrollments__course_offering__teachers',
-                    # Note (Zh): Can't solve it with standard ORM instruments.
-                    # Sorting: roles field contains bit mask,
-                    # show pure lecturers first (=1), then teachers with
-                    # lecturer role (values >1)
+                    # Note (Zh): Show pure lecturers first (=1),
+                    # then teachers with lecturer role (values >1), then others
                     queryset=CSCUser.objects.extra(
-                        where=['%s.roles & 1=%s' %
-                               (CourseOfferingTeacher._meta.db_table,
-                                int(CourseOfferingTeacher.roles.lecturer))],
-                        order_by=["%s.roles" % CourseOfferingTeacher._meta.db_table,
+                        select={
+                            'is_lecturer': '"%s"."roles" & %s' %
+                            (CourseOfferingTeacher._meta.db_table,
+                             int(CourseOfferingTeacher.roles.lecturer))
+                        },
+                        order_by=["-is_lecturer",
+                                  "%s.roles" % CourseOfferingTeacher._meta.db_table,
                                   "last_name",
                                   "first_name"]
                     )
