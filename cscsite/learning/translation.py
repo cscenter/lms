@@ -1,4 +1,6 @@
 from modeltranslation.translator import register, TranslationOptions
+
+from learning.models import StudyProgram
 from .models import Course, CourseOffering
 
 
@@ -11,3 +13,8 @@ class CourseTranslationOptions(TranslationOptions):
 @register(CourseOffering)
 class CourseOfferingTranslationOptions(TranslationOptions):
     fields = ('description',)
+
+
+@register(StudyProgram)
+class StudyProgramTranslationOptions(TranslationOptions):
+    fields = ('name',)
