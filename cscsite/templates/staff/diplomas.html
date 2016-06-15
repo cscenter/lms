@@ -9,6 +9,7 @@
     <link href="{% static "css/diplomas.css" %}" rel="stylesheet">
 {% endblock stylesheets %}
 
+{# Note: Feel the fear below. #}
 {% block content %}
     <div class="container">
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">{% comment %} Pretty ugly due to brackets rendering in django template... {% endcomment %}
@@ -26,9 +27,9 @@
 {% endspaceless %}{% endfor %}
 {% endif %}{{ '}' }}
 {{ '{' }}{% if s.projects|length > 0 %}
-{% for project in s.projects %}{% spaceless %}
+{% for project in s.projects %}{% if not project.is_external %}{% spaceless %}
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
-         {{ '{' }}{{project.name}}{{ '}' }}{% endspaceless %}
+         {{ '{' }}{{project.name}}{{ '}' }}{{ '{' }}{{project.semester}}{{ '}' }}{% endspaceless %}{% endif %}
 {% endfor %}{% endif %}{{ '}' }}
 
 {% empty %}
