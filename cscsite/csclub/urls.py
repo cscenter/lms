@@ -3,6 +3,8 @@ from django.conf.urls import patterns, include, url
 from solid_i18n.urls import solid_i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
+
+from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
 
 from index.views import RobotsView, \
@@ -24,6 +26,9 @@ urlpatterns = solid_i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
     course_patterns,
     course_offering_patterns,
+
+    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
+        name="profile_update_image"),
     # Schedule
     url(r"^schedule/$", CalendarClubScheduleView.as_view(),
         name="public_schedule"),

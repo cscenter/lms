@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 
+from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import MarkdownRenderView
 from cscenter.views import QAListView, TestimonialsListView, TeachersView
 from htmlpages import views
@@ -30,6 +31,9 @@ urlpatterns = [
         UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
     url(r'^private/enrollment_gform_callback/',
         EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
+
+    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
+        name="profile_update_image"),
 
     url(r'^learning/useful/$', UsefulListView.as_view(), name='learning_useful'),
 

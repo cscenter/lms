@@ -23,6 +23,9 @@ $background-grey: #f8f8f8;
 @import "../center/components/buttons";
 @import "../center/components/labels";
 @import "../center/components/page_aside";
+@import "../center/components/loading";
+@import "../center/components/cropper";
+@import "../center/components/upload_photo";
 @import "top_menu.scss";
 
 
@@ -43,6 +46,40 @@ table {
    text-align: center; 
    font-size: 13px;
 }
+
+// profile overrides
+.profile-sidebar {
+  .thumbnail-inner {
+    position: relative;
+    height: 100%;
+    line-height: 1;
+
+    .photo-actions {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: #000;
+      background: rgba(29,32,34,.7);
+
+      a {
+        display: block;
+        color: #fff;
+        padding: 6px 15px;
+        line-height: 1.2;
+        @include transition(all 120ms ease-out);
+        opacity: 0.75;
+        font-size: 13px;
+        text-decoration: none;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+
 
 .banner {
 

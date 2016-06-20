@@ -23,14 +23,14 @@
 
 	&.bottom-right {
 		right: 				0px;
-		bottom: 			60px;
+		bottom: 			20px;
 	}
 
 	&.center {
 		top: 				0px;
 		width: 				50%;
 		left: 				25%;
-		
+
 		.jGrowl-notification,
 		.jGrowl-closer {
 			margin-left: 		auto;
@@ -81,6 +81,12 @@
 		font-weight: 			bold;
 		font-size: 				1em;
 		cursor:					pointer;
+	}
+
+	// Themes
+	&.error {
+		background: $color-red;
+		word-break: normal;
 	}
 }
 

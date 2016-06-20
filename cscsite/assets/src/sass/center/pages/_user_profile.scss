@@ -1,16 +1,53 @@
+@import "../components/cropper";
+@import "../components/upload_photo";
+
 header {
   @extend .container;
 
   .thumbnail {
     float: left;
     margin: 0 20px 0 0;
-    z-index: 10000;
+    z-index: 1;
     position: relative;
 
     img {
       height: 238px;
-      width: 175px;
+      width: 170px;
     }
+
+    .thumbnail-img {
+      overflow: hidden;
+    }
+
+    .thumbnail-inner {
+      position: relative;
+      height: 100%;
+      line-height: 1;
+
+      .photo-actions {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: #000;
+        background: rgba(29,32,34,.7);
+
+        a {
+          display: block;
+          color: #fff;
+          padding: 6px 15px;
+          line-height: 1.2;
+          @include transition(all 120ms ease-out);
+          opacity: 0.75;
+          font-size: 13px;
+          text-decoration: none;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+
   }
 
   h2 {
@@ -73,3 +110,6 @@ header {
     }
   }
 }
+
+
+

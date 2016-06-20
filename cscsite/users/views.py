@@ -2,6 +2,11 @@
 
 from __future__ import absolute_import, unicode_literals
 
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
+
 from datetime import datetime, time
 from itertools import chain, repeat
 
@@ -9,6 +14,7 @@ from braces.views import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import auth
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
@@ -164,8 +170,7 @@ class UserDetailView(generic.DetailView):
                 .prefetch_related(*prefetch_list))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(UserDetailView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super(UserDetailView, self).get_context_data(*args, **kwargs)
         u = self.request.user
         # On center site show club students only to teachers and curators
         if self.request.site.domain != settings.CLUB_DOMAIN:
@@ -202,6 +207,17 @@ class UserDetailView(generic.DetailView):
                     setattr(a_s, 'hacky_co_change', True)
                     current_co = a_s.assignment.course_offering
             context['a_ss'] = a_ss
+        context["initial"] = {}
+        if context['is_editing_allowed']:
+            context["initial"]["user_id"] = context[self.context_object_name].pk
+        if context[self.context_object_name].photo:
+            context["initial"]["photo"] = {
+                "url": context[self.context_object_name].photo.url,
+                "width": context[self.context_object_name].photo.width,
+                "height": context[self.context_object_name].photo.height,
+                "cropbox": context[self.context_object_name].photo_data
+            }
+        context["initial"] = json.dumps(context["initial"])
         return context
 
 
