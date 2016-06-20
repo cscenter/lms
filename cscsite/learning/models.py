@@ -1080,6 +1080,7 @@ class StudyProgram(models.Model):
         return smart_text(self.name)
 
 
+
 @python_2_unicode_compatible
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)

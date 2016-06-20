@@ -16,11 +16,13 @@ from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.timezone import now, make_aware
 from django.utils.translation import ugettext_lazy as _
+from jsonfield import JSONField
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
+from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.models import Enrollment
@@ -223,6 +225,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         _("CSCUser|photo"),
         upload_to="photos/",
         blank=True)
+    photo_data = JSONField(
+        blank=True,
+        null=True
+    )
     note = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
@@ -383,6 +389,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                                  .join(part for part in parts if part)
                                  .strip())
         return abbrev_name or self.username
+
+    def photo_thumbnail_cropbox(self):
+        """Used by `thumbnail` template tag. Format: x1,y1,x2,y2"""
+        if self.photo_data:
+            return photo_thumbnail_cropbox(self.photo_data)
+        return ""
+
 
     # FIXME(Dmitry): this should use model_utils.fields#SplitField
     def get_short_note(self):

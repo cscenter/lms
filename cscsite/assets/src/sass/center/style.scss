@@ -49,12 +49,17 @@ $state-success-text: $color-green;
 @import "components/buttons";
 @import "components/widgets";
 @import "components/tabs";
+@import "components/loading";
 
 // Boostrap overrides for cscenter site
 .btn-danger, .btn-success, .btn-primary, .btn-warning {
   &.btn-block {
     padding: 10px 12px;
   }
+}
+
+.modal-content {
+  border-radius: 3px;
 }
 
 .center-header {
@@ -322,7 +327,7 @@ h2 small a {
 }
 
 .btn {
-  border-radius: 0px !important;
+  border-radius: 0;
 }
 
 .badge {

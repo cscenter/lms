@@ -34,6 +34,10 @@ module.exports = function (grunt) {
                 ],
                 dest: '<%= JS_RUNTIME %>/main.js'
             },
+            profile: {
+                src: ['<%= JS_SRC %>/profile.js'],
+                dest: '<%= JS_RUNTIME %>/profile.js'
+            },
             profile_edit: {
                 src: ['<%= JS_VENDOR %>/jasny.bootstrap/jasny-bootstrap.min.js',
                       '<%= JS_SRC %>/profile_edit.js'],
@@ -97,6 +101,11 @@ module.exports = function (grunt) {
         uglify: {
             main: {
                 files: {'<%= JS_DEST %>/main.js': ['<%= JS_RUNTIME %>/main.js']}
+            },
+            profile: {
+                files: {
+                    '<%= JS_DEST %>/profile.js': ['<%= JS_RUNTIME %>/profile.js']
+                }
             },
             profile_edit: {
                 files: {

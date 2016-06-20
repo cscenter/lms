@@ -349,14 +349,25 @@
 
     </div>
 <div class="col-xs-3 profile-sidebar">
-    <div class="thumbnail text-center">
-    {% if user_object.photo %}
-        {% thumbnail user_object.photo "260x260" crop="center" as im %}
-        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-        {% endthumbnail %}
-    {% else %}
-        <img src="{% static 'img/center/brain.jpg' %}">
+    <div class="text-center">
+    <div class="thumbnail-inner">
+        <div class="thumbnail-img">
+            {% if user_object.photo %}
+                {% thumbnail user_object.photo "170x238" crop="center" cropbox=user_object.photo_thumbnail_cropbox as im %}
+                    <img src="{{ im.url }}" width="{{ im.width }}"
+                         height="{{ im.height }}">
+                {% endthumbnail %}
+            {% else %}
+                <img src="{% static 'img/center/profile_no_photo.png' %}">
+            {% endif %}
+        </div>
+
+    {% if user_object.pk == user.pk or user.is_curator %}
+        <div class="photo-actions">
+            <a href="#user-photo-upload">{% trans "Change photo" %}</a>
+        </div>
     {% endif %}
+    </div>
     </div>
 
     {% if user.is_authenticated %}
@@ -386,4 +397,17 @@
 </div>
 </div>
 </div>
+    {% include "users/_user_detail_upload_photo.html" %}
 {% endblock content %}
+
+{% block javascripts %}
+    {#  Initial data  #}
+    <script type="text/javascript">
+        var profileAppInit = {{ initial|safe }};
+        profileAppInit["preload"] = [
+            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
+            "{% static "js/vendor/cropper.js" %}"
+        ];
+    </script>
+    <script type="text/javascript" src="{% static "js/profile.js" %}"></script>
+{% endblock javascripts %}

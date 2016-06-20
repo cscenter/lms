@@ -57,6 +57,7 @@
     - build-essential
     - libjpeg-dev
     - libpng-dev
+    - libmagic-dev
     # utilities
     - zsh
     - tmux

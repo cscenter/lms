@@ -5,9 +5,9 @@ Computer Science Center/Club websites
 
 Dev setup
 ---------
-
+sudo apt-get install libmagic-dev
 * setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev`, `libxml2-dev`, `libxslt1-dev`
-    note for mac users: `brew intall libpng libjpeg libpqxx`
+    note for mac users: `brew install libpng libjpeg libpqxx libmagic`
 * create virtualenv for the project and open it;
 * setup PostgreSQL database:
 
