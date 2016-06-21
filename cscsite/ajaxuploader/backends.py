@@ -90,7 +90,6 @@ class DefaultStorageUploadBackend(AbstractUploadBackend):
 
 
 class ProfileImageUploadBackend(DefaultStorageUploadBackend):
-    # TODO: restrict big files? where?
     UPLOAD_DIR = getattr(settings, "UPLOAD_DIR", "profile")
 
     def update_filename(self, request, filename, *args, **kwargs):
@@ -99,11 +98,9 @@ class ProfileImageUploadBackend(DefaultStorageUploadBackend):
 
     def setup(self, filename, *args, **kwargs):
         # save empty file in default storage with path = new_path
-        # FIXME: Save old file?
         if default_storage.exists(filename):
-            # Clear sorl-thumbnail cache
-            delete(filename, delete_file=False)
-            default_storage.delete(filename)
+            # Clear sorl-thumbnail cache and delete file
+            delete(filename, delete_file=True)
         self.path = default_storage.save(filename, ContentFile(''))
 
         # create BufferedWriter for new file

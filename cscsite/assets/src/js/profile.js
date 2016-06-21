@@ -20,7 +20,7 @@
         preloadError: "Ошибка инициализации"
     };
 
-    var imageState = (profileAppInit.photo !== undefined) ? profileAppInit.photo : {};
+    var imageState = profileAppInit.photo;
 
     var photoValidation = {
         minWidth: 250,
@@ -44,7 +44,6 @@
     var modalHeader = $('.modal-header', uploadContainer);
     var modalBody = $('.modal-body', uploadContainer);
 
-    // TODO: prevent load if no userID
     var fn = {
         init: function() {
             if (profileAppInit.user_id === undefined) {
@@ -261,24 +260,6 @@
         // Calculate cropbox data relative to img
         getCropBox: function(cropper) {
             var cropBox = cropper.getData(true);
-// {#                    var canvasData = cropper.getCanvasData();#}
-// {#                    // Get scaled coords of cropbox#}
-// {#                    var cropBox = cropper.getCropBoxData();#}
-// {#                    console.log(cropBox);#}
-// {#                    // We want offset relative to image, not container#}
-// {#                    cropBox.left -= Math.abs(canvasData.left);#}
-// {#                    cropBox.top -= Math.abs(canvasData.top);#}
-// {#                    // Coords should depends on natural img dimensions#}
-// {#                    var imageData = cropper.getImageData();#}
-// {#                    var scaleX = imageData.naturalWidth / imageData.width;#}
-// {#                    var scaleY = imageData.naturalHeight / imageData.height;#}
-// {#                    cropBox.width *= scaleX;#}
-// {#                    cropBox.left *= scaleX;#}
-// {#                    cropBox.height *= scaleY;#}
-// {#                    cropBox.top *= scaleY;#}
-// {#                    cropBox = _.object(_.map(cropBox, function (value, key) {#}
-// {#                        return [key, Math.floor(value)];#}
-// {#                    }));#}
             return cropBox;
         },
 

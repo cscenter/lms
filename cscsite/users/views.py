@@ -211,12 +211,15 @@ class UserDetailView(generic.DetailView):
         if context['is_editing_allowed']:
             context["initial"]["user_id"] = context[self.context_object_name].pk
         if context[self.context_object_name].photo:
-            context["initial"]["photo"] = {
-                "url": context[self.context_object_name].photo.url,
-                "width": context[self.context_object_name].photo.width,
-                "height": context[self.context_object_name].photo.height,
-                "cropbox": context[self.context_object_name].photo_data
-            }
+            try:
+                context["initial"]["photo"] = {
+                    "url": context[self.context_object_name].photo.url,
+                    "width": context[self.context_object_name].photo.width,
+                    "height": context[self.context_object_name].photo.height,
+                    "cropbox": context[self.context_object_name].photo_data
+                }
+            except (IOError, OSError):
+                pass
         context["initial"] = json.dumps(context["initial"])
         return context
 
