@@ -225,33 +225,21 @@
                     <tr>
                         <td>{% trans "Classes" %}:</td>
                         <td>
-                            <input type="text" value="http://
-
-
-
-                                    {{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
+                            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
                                    disabled="disabled">
                         </td>
                     </tr>
                     <tr>
                         <td>{% trans "Assignments" %}:</td>
                         <td>
-                            <input type="text" value="http://
-
-
-
-                                    {{ request.get_host }}{% url 'user_ical_assignments' user.pk %}"
+                            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_assignments' user.pk %}"
                                    disabled="disabled">
                         </td>
                     </tr>
                     <tr>
                         <td>{% trans "Events" %}:</td>
                         <td>
-                            <input type="text" value="http://
-
-
-
-                                    {{ request.get_host }}{% url 'ical_events' %}"
+                            <input type="text" value="http://{{ request.get_host }}{% url 'ical_events' %}"
                                    disabled="disabled">
                         </td>
                     </tr>
