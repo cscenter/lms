@@ -21,6 +21,7 @@ from braces import views
 
 from learning.models import OnlineCourse, CourseOffering, Semester, \
     StudyProgram
+from learning.settings import STUDENT_STATUS
 from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
@@ -118,10 +119,11 @@ class AlumniByYearView(generic.ListView):
         user_model = get_user_model()
         graduate_pk = user_model.group_pks.GRADUATE_CENTER
         params = {
-            "groups__pk": graduate_pk
+            # "groups__pk": graduate_pk,
+            "status": STUDENT_STATUS.will_graduate
         }
         assert self.filter_by_year is not None
-        params["graduation_year"] = self.filter_by_year
+        # params["graduation_year"] = self.filter_by_year
         return (user_model.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
@@ -131,8 +133,11 @@ class AlumniByYearView(generic.ListView):
         testimonials = cache.get('alumni_2016_testimonials')
         if testimonials is None:
             s = (CSCUser.objects
-                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER,
-                         graduation_year=self.filter_by_year)
+                 .filter(
+                    # groups=CSCUser.group_pks.GRADUATE_CENTER,
+                    # graduation_year=self.filter_by_year,
+                    status=STUDENT_STATUS.will_graduate
+                 )
                  .exclude(csc_review='').exclude(photo='')
                  .order_by('?'))
             testimonials = s[:5]
