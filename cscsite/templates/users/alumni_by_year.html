@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load markdown from core_tags %}
+{% load static %}
+
+{% block content %}
+    {% regroup object_list by graduation_year as alumni_list %}
+    <div id="graduates-by-year">
+        <div class="graduates-list">
+            {% for alumni_by_year in alumni_list %}
+                <h3>Выпуск {{ alumni_by_year.grouper }} в лицах</h3>
+                <div class="clearfix"></div>
+                {% for alumni in alumni_by_year.list %}
+                    <div class="alumni">
+                        <a href="{{ alumni.get_absolute_url }}">
+                        {% if alumni.photo %}
+                            {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
+                                <img src="{{ im.url }}" width="{{ im.width }}"
+                                     height="{{ im.height }}">
+                            {% endthumbnail %}
+                        {% else %}
+                            <img width="150" height="150" data-src="holder.js/150x150?text=Нет%20фото&fontweight=normal" />
+                        {% endif %}
+                        </a>
+                    </div>
+                {% endfor %}
+                {% empty %}
+                <div class="empty">{% trans "No alumni yet" %}.</div>
+            {% endfor %}
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div class="testimonials-wrapper">
+            <h3>Отзывы о CS центре</h3>
+            <div class="testimonials __list">
+                {% for student in testimonials %}
+                <div class="col-xs-12">
+                    <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
+                        <blockquote>
+                            {% markdown 3600 "csc_review" student.pk student.modified %}
+                                {{ student.csc_review }}
+                            {% endmarkdown %}
+                        </blockquote>
+                        <div>
+                            {% if student.photo %}
+                            {% thumbnail student.photo "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            {% endthumbnail %}
+                            {% endif %}
+                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{%  url "testimonials" %}" class="dashed-link">Читать все отзывы</a>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}

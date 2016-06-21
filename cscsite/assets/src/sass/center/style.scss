@@ -38,7 +38,8 @@ $state-success-text: $color-green;
 @import "pages/courses_list_student.scss";
 @import "pages/student_submission_comments";
 @import "pages/faq";
-@import "pages/graduates";
+@import "pages/alumni";
+@import "pages/alumni_by_year";
 @import "pages/admission";
 @import "pages/_assignments";
 @import "pages/calendar";
@@ -49,6 +50,7 @@ $state-success-text: $color-green;
 @import "components/buttons";
 @import "components/widgets";
 @import "components/tabs";
+@import "components/pagination";
 @import "components/loading";
 
 // Boostrap overrides for cscenter site
@@ -603,4 +605,8 @@ tr.unread {
   text-decoration: none!important;
   display: inline-block;
   margin-bottom: 20px;
+}
+.dashed-link {
+  @extend .collapse-link;
+  border-bottom-style: solid;
 }

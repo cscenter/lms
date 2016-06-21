@@ -27,6 +27,8 @@ from .models import EnrollmentApplEmail
 
 logger = logging.getLogger(__name__)
 
+# TODO: move all view to core app
+
 
 class IndexView(generic.TemplateView):
     template_name = "index.html"
@@ -49,10 +51,10 @@ class IndexView(generic.TemplateView):
         testimonials = cache.get('index_page_testimonials')
         if testimonials is None:
             s = (CSCUser.objects
-                .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
-                .exclude(csc_review='').exclude(photo='')
-                .order_by('?')
-                .first())
+                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+                 .exclude(csc_review='').exclude(photo='')
+                 .order_by('?')
+                 .first())
             if s and s.csc_review.strip():
                 testimonials = [s]
             cache.set('index_page_testimonials', testimonials, 3600)
@@ -105,6 +107,37 @@ class AlumniView(generic.ListView):
                 "alumni_{}".format(self.filter_by_year))
         else:
             context["base_url"] = reverse("alumni")
+        return context
+
+
+class AlumniByYearView(generic.ListView):
+    filter_by_year = None
+    template_name = "users/alumni_by_year.html"
+
+    def get_queryset(self):
+        user_model = get_user_model()
+        graduate_pk = user_model.group_pks.GRADUATE_CENTER
+        params = {
+            "groups__pk": graduate_pk
+        }
+        assert self.filter_by_year is not None
+        params["graduation_year"] = self.filter_by_year
+        return (user_model.objects
+                .filter(**params)
+                .order_by("-graduation_year", "last_name", "first_name"))
+
+    def get_context_data(self, **kwargs):
+        context = super(AlumniByYearView, self).get_context_data(**kwargs)
+        testimonials = cache.get('alumni_2016_testimonials')
+        if testimonials is None:
+            s = (CSCUser.objects
+                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER,
+                         graduation_year=self.filter_by_year)
+                 .exclude(csc_review='').exclude(photo='')
+                 .order_by('?'))
+            testimonials = s[:5]
+            cache.set('alumni_2016_testimonials', testimonials, 3600)
+        context['testimonials'] = testimonials
         return context
 
 
