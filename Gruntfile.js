@@ -81,7 +81,7 @@ module.exports = function (grunt) {
                     '<%= JS_VENDOR %>/jquery.lazyload.min.js',
                     '<%= JS_SRC %>/alumni.js'
                 ],
-                dest: '<%= JS_DEST %>/alumni.js'
+                dest: '<%= JS_RUNTIME %>/alumni.js'
             },
             assignment_submissions: {
                 src: ['<%= JS_SRC %>/assignment-submissions.js'],
@@ -102,6 +102,11 @@ module.exports = function (grunt) {
         uglify: {
             main: {
                 files: {'<%= JS_DEST %>/main.js': ['<%= JS_RUNTIME %>/main.js']}
+            },
+            alumni: {
+                files: {
+                    '<%= JS_DEST %>/alumni.js': ['<%= JS_RUNTIME %>/alumni.js']
+                }
             },
             profile: {
                 files: {
