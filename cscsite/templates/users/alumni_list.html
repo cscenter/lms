@@ -27,7 +27,7 @@
                     <div class="alumni">
                         {% if alumni.photo %}
                             {% thumbnail alumni.photo "170x238" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
-                                <img src="{{ im.url }}" width="{{ im.width }}"
+                                <img class="lazy" data-original="{{ im.url }}" width="{{ im.width }}"
                                      height="{{ im.height }}">
                             {% endthumbnail %}
                         {% else %}

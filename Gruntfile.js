@@ -78,6 +78,7 @@ module.exports = function (grunt) {
             alumni: {
                 src: [
                     '<%= JS_VENDOR %>/holder.min.js',
+                    '<%= JS_VENDOR %>/jquery.lazyload.min.js',
                     '<%= JS_SRC %>/alumni.js'
                 ],
                 dest: '<%= JS_DEST %>/alumni.js'
