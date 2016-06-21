@@ -1,0 +1,43 @@
+{% load bootstrap_pagination %}
+{% load i18n %}
+<ul class="pagination{% if size == "small" %} pagination-sm{% endif %}{% if size == "large" %} pagination-lg{% endif %}{% block extra_classes %}{% endblock %}">
+{% if show_first_last %}
+    {% if page.has_previous %}
+      <li>
+        <a title="{% trans "First Page" %}" href="{{ first_page_url|default:"#"|escape }}">{{first_label}}</a>
+      </li>
+    {% endif %}
+{% endif %}
+{% if show_prev_next %}
+    {% if page.has_previous %}
+      <li>
+        <a title="{% trans "Previous Page" %}" href="{{ previous_page_url|default:"#"|escape }}">{{ previous_label }}</a>
+      </li>
+    {% endif %}
+{% endif %}
+{% for pagenum, index_range, url in page_urls %}
+    {% if page.number == pagenum %}
+        <li class="active">
+            <span title="{% trans "Current Page" %}">{% if show_index_range %} {{ index_range }} {% else %} {{ pagenum }} {%endif %}</span>
+        </li>
+    {% else %}
+        <li>
+            <a title="{% blocktrans with num_pages=page.paginator.num_pages %}Page {{ pagenum }} of {{ num_pages }}{% endblocktrans %}" href="{{ url|escape }}">{% if show_index_range %} {{ index_range }} {% else %} {{ pagenum }} {%endif %}</a>
+        </li>
+    {% endif %}
+{% endfor %}
+{% if show_prev_next %}
+    {% if page.has_next %}
+      <li>
+        <a title="{% trans "Next Page" %}" href="{{ next_page_url|default:"#"|escape }}">{{ next_label }}</a>
+      </li>
+    {% endif %}
+{% endif %}
+{% if show_first_last %}
+    {% if page.has_next %}
+      <li>
+        <a title="{% trans "Last Page" %}" href="{{ last_page_url|default:"#"|escape }}">{{last_label}}</a>
+      </li>
+    {% endif %}
+{% endif %}
+</ul>

@@ -108,6 +108,11 @@ class UserProfileForm(forms.ModelForm):
             'stepic_id': _("stepic.org/users/<b>STEPIC-ID</b>")
         }
 
+    def clean_csc_review(self):
+        csc_review = self.cleaned_data['csc_review']
+        return csc_review.strip()
+
+
 class CSCUserReferenceCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

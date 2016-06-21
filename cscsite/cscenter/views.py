@@ -20,6 +20,7 @@ class QAListView(generic.ListView):
 class TestimonialsListView(generic.ListView):
     context_object_name = "testimonials"
     template_name = "testimonials.html"
+    paginate_by = 10
 
     def get_queryset(self):
         return (CSCUser.objects

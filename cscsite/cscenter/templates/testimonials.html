@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% load i18n %}
+{% load bootstrap_pagination %}
 {% load htmlpage_url %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
@@ -13,27 +14,30 @@
             <h1>{% trans "Graduates about CS Center" %}</h1>
             <a href="{% url 'alumni' %}">{% trans "All graduates" %}</a>
         </div>
-        <div class="row">
-            {% for student in testimonials %}
-            <div class="col-md-12">
-                <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
-                    <blockquote>
-                        {% markdown 3600 "csc_review" student.pk student.modified %}
-                            {{ student.csc_review }}
-                        {% endmarkdown %}
-                    </blockquote>
-                    <div>
-                        {% if student.photo %}
-                        {% thumbnail student.photo "200x200" crop="center" as im %}
-                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
-                        {% endif %}
-                        <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
-                    </div>
+
+        <div>
+        {% for student in testimonials %}
+            <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
+                <blockquote>
+                    {% markdown 3600 "csc_review" student.pk student.modified %}
+                        {{ student.csc_review }}
+                    {% endmarkdown %}
+                </blockquote>
+                <div>
+                    {% if student.photo %}
+                    {% thumbnail student.photo "200x200" crop="center" as im %}
+                    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% endthumbnail %}
+                    {% endif %}
+                    <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
                 </div>
             </div>
-            {% endfor %}
+        {% endfor %}
         </div>
+
+        {% if is_paginated %}
+            {% bootstrap_paginate page_obj range=10 size="large" show_prev_next="true" show_first_last="false" previous_label="<i class='fa fa-chevron-left'></i>" next_label="<i class='fa fa-chevron-right'></i>" %}
+        {% endif %}
     </div>
 </div>
 

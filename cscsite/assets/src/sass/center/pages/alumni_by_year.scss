@@ -1,0 +1,47 @@
+#graduates-by-year {
+  @extend .container;
+  padding: 40px 15px 0 15px;
+
+  h3 {
+    display: inline-block;
+    padding: 0 15px 10px 0;
+    border-bottom: 2px solid $color-blue;
+    margin: 0 0 20px 0;
+    @include clearfix;
+  }
+
+  .graduates-list {
+    margin: 0 0 40px 0;
+    overflow: hidden;
+
+    .empty {
+      padding: 20px 0;
+    }
+
+
+    .alumni {
+      float: left; // for older browsers
+      overflow: hidden;
+      vertical-align: top;
+      margin: 0;
+
+      img {
+        max-width: 170px;
+      }
+
+      a {
+        font-weight: 300;
+        font-size: 16px;
+        display: inline-block;
+        line-height: 22px;
+        max-width: 170px;
+      }
+    }
+
+  }
+
+  .testimonials {
+    @extend .row;
+    padding: 0;
+  }
+}
