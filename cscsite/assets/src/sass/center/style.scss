@@ -608,5 +608,11 @@ tr.unread {
 }
 .dashed-link {
   @extend .collapse-link;
-  border-bottom-style: solid;
+  color: $color-blue;
+  border-bottom: 2px solid $color-blue;
+
+  &:hover {
+    color: darken($color-blue, 10%);
+    border-bottom-color: darken($color-blue, 10%);
+  }
 }
