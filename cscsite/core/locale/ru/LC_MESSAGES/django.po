@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-06-17 19:32+0300\n"
-"PO-Revision-Date: 2016-06-17 19:34+0230\n"
+"PO-Revision-Date: 2016-06-21 11:16+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2063,7 +2063,7 @@ msgstr "Выбрать изображение"
 
 #: cscsite/templates/users/_user_detail_upload_photo.html:39
 msgid "Back to upload"
-msgstr "Назад к загрузке"
+msgstr "Назад к загрузке фото"
 
 #: cscsite/templates/users/alumni_list.html:14
 msgid "All areas"

@@ -98,7 +98,7 @@ class AjaxProfileImageUploader(generic.base.View):
         if len(request.FILES) == 1:
             upload = request.FILES.values()[0]
         else:
-            return HttpResponseBadRequest("Unsupported file format")
+            return HttpResponseBadRequest("Check file format and size")
 
         try:
             _filename = request.POST['_photo']
@@ -118,6 +118,7 @@ class AjaxProfileImageUploader(generic.base.View):
 
         if success:
             user.photo.name = filename
+            user.photo_data = {}
             user.save()
             # send signals
             file_uploaded.send(sender=self.__class__, backend=backend,
