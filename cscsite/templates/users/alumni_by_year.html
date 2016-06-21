@@ -16,8 +16,7 @@
                         <a href="{{ alumni.get_absolute_url }}">
                         {% if alumni.photo %}
                             {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
-                                <img src="{{ im.url }}" width="{{ im.width }}"
-                                     height="{{ im.height }}">
+                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                             {% endthumbnail %}
                         {% else %}
                             <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />

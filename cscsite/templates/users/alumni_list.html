@@ -23,12 +23,12 @@
         <div class="graduates-list">
             {% for alumni_by_year in alumni_list %}
                 <h3>{{ alumni_by_year.grouper }}</h3>
+                {% with firstyear=forloop.first %}
                 {% for alumni in alumni_by_year.list %}
                     <div class="alumni">
                         {% if alumni.photo %}
                             {% thumbnail alumni.photo "170x238" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
-                                <img class="lazy" data-original="{{ im.url }}" width="{{ im.width }}"
-                                     height="{{ im.height }}">
+                                <img {% if firstyear %}src="{{ im.url }}"{% else %}class="lazy" data-original="{{ im.url }}"{% endif %} width="{{ im.width }}" height="{{ im.height }}">
                             {% endthumbnail %}
                         {% else %}
                             <img width="170" height="238" data-src="holder.js/170x238?text=%3F&fontweight=normal&size=50" />
@@ -36,6 +36,7 @@
                         <a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a>
                     </div>
                 {% endfor %}
+                {% endwith %}
                 {# Hack to fix flex grid #}
                 {% if not alumni_by_year.list|length|divisibleby:"5" %}
                     <div class="fix-grid"></div>
