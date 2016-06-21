@@ -104,7 +104,7 @@ class MarkdownNode(Node):
                 if isinstance(self.nodelist[0], TextNode) and \
                    not self.nodelist[0].s.strip():
                     self.nodelist[0].s = ''
-                if isinstance(self.nodelist[0], TextNode) and \
+                if isinstance(self.nodelist[-1], TextNode) and \
                    not self.nodelist[-1].s.strip():
                     self.nodelist[-1].s = ''
             value = self.nodelist.render(context)
