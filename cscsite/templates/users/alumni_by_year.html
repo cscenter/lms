@@ -27,12 +27,12 @@
                     </div>
                 {% endfor %}
                 {% empty %}
-                <div class="empty">{% trans "No alumni yet" %}.</div>
+                <div class="empty">Ждём выпуска!</div>
             {% endfor %}
         </div>
 
         <div class="clearfix"></div>
-
+        {% if testimonials %}
         <div class="testimonials-wrapper">
             <h3>Отзывы о CS центре</h3>
             <div class="testimonials __list">
@@ -58,6 +58,7 @@
             </div>
             <a href="{%  url "testimonials" %}" class="dashed-link">Читать все отзывы</a>
         </div>
+        {% endif %}
     </div>
 {% endblock content %}
 
