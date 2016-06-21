@@ -3,6 +3,8 @@
 
     var fn = {
         launch: function () {
+            $("img.lazy").lazyload({
+            });
         },
     };
 
