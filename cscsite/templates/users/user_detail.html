@@ -68,22 +68,16 @@
             {% endif %}</div>
             {% if user_object.pk == user.pk or user.is_curator %}
                 <div class="nav-tabs-inverse">
-                    <ul class="nav nav-tabs nav-tabs-solid"
-                        data-plugin="nav-tabs" role="tablist">
+                    <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
                         <li class="active" role="presentation">
                             <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
                         </li>
                         {% if is_editing_allowed %}
                             <li role="presentation"><a href="{% url 'user_update' user_object.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a></li>
                         {% endif %}
-                        {% if user.is_curator %}
-                            {% if user_object.is_student or user_object.is_graduate %}
-                                <li role="presentation"><a
-                                        href="{% url 'user_reference_add' user_object.pk %}"
-                                        role="tab"><i
-                                        class="fa fa-file-text-o"></i> {% trans "Create reference" %}
-                                </a></li>
-                            {% endif %}{% endif %}
+                        {% if user.is_curator %}{% if user_object.is_student or user_object.is_graduate %}
+                            <li role="presentation"><a href="{% url 'user_reference_add' user_object.pk %}" role="tab"><i class="fa fa-file-text-o"></i> {% trans "Create reference" %}</a></li>
+                        {% endif %}{% endif %}
                     </ul>
                 </div>
             {% endif %}
@@ -110,9 +104,11 @@
                         </li>
                         <li class="list-group-item"><b>Группы</b>:
                             {% for group in user_object.groups.all %}
-                                {% trans group.name %}{% if not forloop.last %}
-                                    , {% endif %}{% empty %}нет указанных
-                                групп{% endfor %}</li>
+                                {% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп
+                            {% endfor %}
+                        </li>
+                        <li class="list-group-item"><b>Успешно сдано курсов всего</b>:{{ total_successfully_passed }} (учитываются курсы Клуба/Центра/ШАД/Онлайн)</li>
+                    <li class="list-group-item"><b>Записей в этом семестре</b>: {{ enrollments_in_current_term }} (на курсы клуба или центра)</li>
                     </ul>
                 </div>
             {% endif %}
