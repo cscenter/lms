@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-03 17:42+0300\n"
-"PO-Revision-Date: 2016-06-03 17:46+0230\n"
-"Last-Translator:   <>\n"
+"POT-Creation-Date: 2016-06-22 14:51+0300\n"
+"PO-Revision-Date: 2016-06-22 14:54+0230\n"
+"Last-Translator:   <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "This username is already in use. Please supply a different username."
 msgstr "Извините, но никнейм уже занят."
 
-#: cscsite/csclub/templates/base.html:41
+#: cscsite/csclub/templates/base.html:40
 msgid ""
 "\n"
 "      You are currently at the new webpage of the Club. The list of all courses of the Club is available at the old page: <a href=\"http://old.compsciclub.ru/\">old.compsciclub.ru</a>\n"
@@ -32,24 +32,24 @@ msgstr ""
 "\n"
 "Сайт в процессе наполнения. Архив всех прошедших курсов доступен на старой версии сайта по адресу <a href=\"http://old.compsciclub.ru/\">old.compsciclub.ru</a>"
 
-#: cscsite/csclub/templates/base.html:50
+#: cscsite/csclub/templates/base.html:49
 msgid "Admin"
 msgstr "Админка"
 
-#: cscsite/csclub/templates/base.html:56
+#: cscsite/csclub/templates/base.html:55
 msgid "City"
 msgstr "Город"
 
-#: cscsite/csclub/templates/base.html:57
+#: cscsite/csclub/templates/base.html:56
 #: cscsite/csclub/templates/index.html:31
 msgid "Language"
 msgstr "Язык"
 
-#: cscsite/csclub/templates/base.html:78
+#: cscsite/csclub/templates/base.html:77
 msgid "Computer Science Club, 2007–16 гг."
 msgstr "Computer Science Club, 2007–16 гг."
 
-#: cscsite/csclub/templates/base.html:108
+#: cscsite/csclub/templates/base.html:106
 msgid "close all"
 msgstr "Закрыть все"
 
@@ -93,6 +93,7 @@ msgstr ""
 "<p>Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href=\"https://yandexdataschool.ru/\">ШАД</a>.</p>"
 
 #: cscsite/csclub/templates/index.html:23
+#: cscsite/csclub/templates/users/user_detail.html:45
 msgid "Courses"
 msgstr "Курсы"
 
@@ -245,6 +246,171 @@ msgstr "Фотографии"
 #| msgid "No news yet"
 msgid "No professors yet"
 msgstr "Новостей пока нет"
+
+#: cscsite/csclub/templates/users/user_detail.html:14
+#, python-format
+msgid "graduated in %(year)s"
+msgstr "закончил обучение в %(year)s"
+
+#: cscsite/csclub/templates/users/user_detail.html:14
+#: cscsite/csclub/templates/users/user_detail.html:16
+msgid "enrolled in"
+msgstr "поступил в"
+
+#: cscsite/csclub/templates/users/user_detail.html:16
+msgid "student"
+msgstr "студент"
+
+#: cscsite/csclub/templates/users/user_detail.html:32
+msgid "About me"
+msgstr "Обо мне"
+
+#: cscsite/csclub/templates/users/user_detail.html:61
+msgid "Student projects"
+msgstr "Студенческие проекты"
+
+#: cscsite/csclub/templates/users/user_detail.html:66
+#| msgid "registration"
+msgid "Presentation"
+msgstr "Презентация"
+
+#: cscsite/csclub/templates/users/user_detail.html:67
+msgid "StudentProject|Supervisor"
+msgstr "Руководитель"
+
+#: cscsite/csclub/templates/users/user_detail.html:86
+msgid "School of Data Analysis courses"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:102
+#| msgid "No active courses"
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: cscsite/csclub/templates/users/user_detail.html:117
+#| msgid "Teachers"
+msgid "teacher"
+msgstr "преподаватель"
+
+#: cscsite/csclub/templates/users/user_detail.html:135
+msgid ".iCal calendar"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:136
+msgid "Link"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:141
+msgid "Classes"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:148
+#: cscsite/csclub/templates/users/user_detail.html:216
+msgid "Assignments"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:155
+msgid "Events"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:167
+msgid "Social accounts"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:199
+#, python-format
+msgid "%(name)s about CSC"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:208
+msgid "Contact information"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:222
+#| msgid "Course name"
+msgid "Course offering"
+msgstr "Название курса"
+
+#: cscsite/csclub/templates/users/user_detail.html:223
+msgid "Assignment"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:224
+msgid "Grade"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:253
+#: cscsite/csclub/templates/users/user_detail.html:260
+msgid "books"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:267
+msgid "Student info record"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:270
+msgid "University"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:274
+msgid "Phone"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:279
+msgid "Email"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:286
+msgid "StudentInfo|University year"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:290
+msgid "Comment"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:306
+msgid "Status"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:308
+msgid "Non-degree student"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:312
+msgid "StudentInfo|Study program"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:328
+msgid "Workplace"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:337
+msgid "Student references"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:367
+msgid "Change photo"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:377
+msgid "Edit"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:381
+msgid "Edit in admin"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:386
+msgid "Create reference"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:389
+msgid "Edit info record"
+msgstr ""
+
+#: cscsite/csclub/templates/users/user_detail.html:392
+msgid "Change password"
+msgstr ""
 
 #~ msgid ""
 #~ "\n"
