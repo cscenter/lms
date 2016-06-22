@@ -1828,8 +1828,8 @@ def test_gradebook_recalculate_grading_type(client,
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
     response = client.get(user_detail_url)
-    assert smart_bytes("(enrollment|pass)") in response.content
-    assert smart_bytes("(satisfactory)") not in response.content
+    assert smart_bytes("/enrollment|pass/") in response.content
+    assert smart_bytes("/satisfactory/") not in response.content
     # Update random submission grade, grading_type shouldn't change
     submission = StudentAssignment.objects.get(student=student,
                                                assignment=assignments[0])
@@ -1844,5 +1844,5 @@ def test_gradebook_recalculate_grading_type(client,
     co.grading_type = GRADING_TYPES.default
     co.save()
     response = client.get(user_detail_url)
-    assert smart_bytes("(enrollment|pass)") not in response.content
-    assert smart_bytes("(satisfactory)") in response.content
+    assert smart_bytes("/enrollment|pass/") not in response.content
+    assert smart_bytes("/satisfactory/") in response.content

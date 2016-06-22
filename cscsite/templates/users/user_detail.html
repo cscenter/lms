@@ -36,16 +36,16 @@
 
             {% if user_object.is_graduate %}
                 <div class="progress-info">
-                    {% blocktrans with year=user_object.graduation_year %}
-                        graduated in {{ year }}{% endblocktrans %}
-                    ({% trans "enrolled in" %} {{ user_object.enrollment_year }})
+                    {% with u=user_object %}
+                    С сентября {{ u.enrollment_year }} года по июнь {{ u.graduation_year }} года<br>
+                        {% if u.gender == 'F' %}прошла{% else %}прошёл{% endif %}
+                        обучение по направлени{{ u.study_programs.all|pluralize:"ю,ям" }}
+                        {% for program in u.study_programs.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
+                    {% endwith %}
                 </div>
                 {% elif user_object.is_student %}
                 <div class="progress-info">
-                    {% trans "student"|title %}
-                    {% if user_object.enrollment_year %},
-                        {% trans "enrolled in" %}
-                        {{ user_object.enrollment_year }}{% endif %}
+                    {% trans "student"|title %}{% if user_object.enrollment_year %},{% trans "enrolled in" %}{{ user_object.enrollment_year }}{% endif %}
                 </div>
                 {% elif user_object.is_teacher %}
                 <div class="progress-info">
@@ -94,37 +94,38 @@
             {% endif %}
         </div>
 
-        <div class="profile-content"
-             {% if user_object.note.strip %}style="margin-top: -90px;"{% endif %}>
-            {% if has_curator_permissions %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">Информация для куратора</div>
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Статус</b>:
-                            {{ user_object.get_status_display|default:"—" }}
-                        </li>
-                        <li class="list-group-item"><b>Группы</b>:
-                            {% for group in user_object.groups.all %}
-                                {% trans group.name %}{% if not forloop.last %}
-                                    , {% endif %}{% empty %}нет указанных
-                                групп{% endfor %}</li>
-                    </ul>
+        <div class="profile-content" {% if user_object.note.strip %}style="margin-top: -90px;"{% endif %}>
+
+            {% if user_object.csc_review %}
+                <div class="review">
+                    <h4>{% trans "Review of Computer Science Center" %}</h4>
+                    <div class="ubertext">
+                        {% markdown 3600 "csc_review" user_object.pk user_object.modified %}
+                            {{ user_object.csc_review }}{% endmarkdown %}
+                    </div>
                 </div>
             {% endif %}
 
             <ul class="list-unstyled">
                 {% if user_object.enrollment_year %}
-                    {% if user_object.enrollment_set.all %}
+                    {% if user_object.enrollment_set.all or user_object.shadcourserecord_set.all %}
                         <li>
-                            <h4>{% trans "Courses" %}</h4>
+                            <h4>{{ user_object.first_name }} {% if user_object.gender == 'F' %}прослушала и сдала{% else %}прослушал и сдал{% endif %} следующие курсы:</h4>
                             <ul>
                                 {% for enrollment in user_object.enrollment_set.all %}
                                     <li>
                                         <a href="{% url 'course_offering_detail' enrollment.course_offering.course.slug enrollment.course_offering.semester.slug %}">
                                             {{ enrollment.course_offering }}
                                         </a>
-                                        ({{ enrollment.grade_honest|lower }})
+                                        /{{ enrollment.grade_honest|lower }}/
                                     </li>
+                                {% endfor %}
+                                {% for shad in user_object.shadcourserecord_set.all %}
+                                    <li>
+                                        {{ shad.name }} (ШАД) - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
+                                    </li>
+                                    {% empty %}
+                                    {% if user.is_curator %}<li>Нет зачтённых ШАД-курсов</li>{% endif %}
                                 {% endfor %}
                             </ul>
                         </li>
@@ -132,7 +133,7 @@
 
                     {% if student_projects %}
                         <li>
-                            <h4>{% trans "Student projects" %}</h4>
+                            <h4>Кроме того, участвовал{% if user_object.gender == 'F' %}а{% endif %} в проектах:</h4>
                             <ul>
                                 {% for project in student_projects %}
                                     <li>
@@ -160,24 +161,6 @@
                         {% elif user.is_curator %}
                         <li>Нет студенческих проектов</li>
                     {% endif %}
-
-                    {% with shad_courses=user_object.shadcourserecord_set.all %}
-                        {% if shad_courses %}
-                            <li>
-                                <h4>{% trans "School of Data Analysis courses" %}</h4>
-                                <ul>
-                                    {% for shad in shad_courses %}
-                                        <li>{{ shad.name }}
-                                            - {{ shad.teachers }}
-                                            ({{ shad.grade_display }})
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% elif user.is_curator %}
-                            <li>Нет зачтённых ШАД-курсов</li>
-                        {% endif %}
-                    {% endwith %}
 
                     {% if user_object.pk == user.pk or user.is_curator %}
                         {% with recs=user_object.onlinecourserecord_set.all %}
@@ -212,6 +195,22 @@
                     </li>
                 {% endif %}
             </ul>
+
+            {% if has_curator_permissions %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">Информация для куратора</div>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Статус</b>:
+                            {{ user_object.get_status_display|default:"—" }}
+                        </li>
+                        <li class="list-group-item"><b>Группы</b>:
+                            {% for group in user_object.groups.all %}
+                                {% trans group.name %}{% if not forloop.last %}
+                                    , {% endif %}{% empty %}нет указанных
+                                групп{% endfor %}</li>
+                    </ul>
+                </div>
+            {% endif %}
 
             {% if user_object.pk == user.pk %}
                 <table class="table calc table-condensed table-striped">
@@ -279,17 +278,6 @@
                             </td>
                         </tr>
                     </table>
-                </div>
-            {% endif %}
-
-            {% if user_object.csc_review %}
-                <div class="review">
-                    <h4>{% blocktrans with name=user_object.first_name %}
-                        {{ name }} about CSC{% endblocktrans %}:</h4>
-                    <div class="ubertext">
-                        {% markdown 3600 "csc_review" user_object.pk user_object.modified %}
-                            {{ user_object.csc_review }}{% endmarkdown %}
-                    </div>
                 </div>
             {% endif %}
 
