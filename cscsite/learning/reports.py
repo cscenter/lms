@@ -47,7 +47,9 @@ class ProgressReport(object):
         courses_headers = OrderedDict()
         for s in students_data:
             self.before_process_row(s)
-            student_courses = defaultdict(lambda: {'teachers': '', 'grade': ''})
+            student_courses = defaultdict(lambda: {'teachers': '',
+                                                   'grade': '',  # code
+                                                   'grade_repr': ''})
             for e in s.enrollments:
                 if self.skip_enrollment(e, s):
                     continue
@@ -60,7 +62,8 @@ class ProgressReport(object):
                 else:
                     grade = e.grade_display
                 student_courses[e.course_offering.course.id] = {
-                    "grade": grade.lower(),
+                    "grade": e.grade,
+                    "grade_repr": grade.lower(),
                     "teachers": ", ".join(teachers)
                 }
             s.courses = student_courses
@@ -136,18 +139,18 @@ class ProgressReport(object):
             headers.append('Онлайн-курс {}, название'.format(i))
 
     @staticmethod
-    def _is_success_grade(course):
+    def is_positive_grade(course):
+        """Check shad or club/center course is successfully passed"""
         # Skip dummy course
         if course is None:
             return False
+        # Shad course
         if hasattr(course, "grade"):
             grade = course.grade
         else:
+            # Club or center course
             grade = course["grade"]
-        # Note: Not necessary check grading type here
-        return grade not in [GRADES["unsatisfactory"].lower(),
-                             GRADES["not_graded"].lower(),
-                             '']
+        return grade not in [GRADES.unsatisfactory, GRADES.not_graded, '']
 
     @abstractmethod
     def export_row(self, row):
@@ -156,7 +159,7 @@ class ProgressReport(object):
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
             sc = student.courses[course_id]
-            row.extend([sc['grade'], sc['teachers']])
+            row.extend([sc['grade_repr'], sc['teachers']])
 
     def _export_row_append_projects(self, row, student):
         student.projects.extend(
@@ -321,8 +324,8 @@ class ProgressReportFull(ProgressReport):
 
     def export_row(self, student):
         total_success_passed = (
-            len(filter(self._is_success_grade, student.courses.values())) +
-            len(filter(self._is_success_grade, student.shads)) +
+            len(filter(self.is_positive_grade, student.courses.values())) +
+            len(filter(self.is_positive_grade, student.shads)) +
             len(student.online_courses))
         row = [
             student.last_name,
@@ -465,7 +468,7 @@ class ProgressReportForSemester(ProgressReport):
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
             sc = student.courses[course_id]
-            row.append(sc['grade'])
+            row.append(sc['grade_repr'])
 
     def export_row(self, student):
         success_total_lt_target_semester = (
