@@ -45,7 +45,7 @@
                 </div>
                 {% elif user_object.is_student %}
                 <div class="progress-info">
-                    {% trans "student"|title %}{% if user_object.enrollment_year %},{% trans "enrolled in" %}{{ user_object.enrollment_year }}{% endif %}
+                    {% trans "student"|title %}{% if user_object.enrollment_year %}, {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% endif %}
                 </div>
                 {% elif user_object.is_teacher %}
                 <div class="progress-info">
@@ -71,15 +71,10 @@
                     <ul class="nav nav-tabs nav-tabs-solid"
                         data-plugin="nav-tabs" role="tablist">
                         <li class="active" role="presentation">
-                            <a data-toggle="tab" href="#current"
-                               aria-controls="current" role="tab"
-                               aria-expanded="true">Профиль</a>
+                            <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
                         </li>
                         {% if is_editing_allowed %}
-                            <li role="presentation"><a
-                                    href="{% url 'user_update' user_object.pk %}"><i
-                                    class="fa fa-cog"></i> {% trans "Edit" %}
-                            </a></li>
+                            <li role="presentation"><a href="{% url 'user_update' user_object.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a></li>
                         {% endif %}
                         {% if user.is_curator %}
                             {% if user_object.is_student or user_object.is_graduate %}
