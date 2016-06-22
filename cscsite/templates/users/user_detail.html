@@ -101,6 +101,22 @@
                 </div>
             {% endif %}
 
+            {% if has_curator_permissions %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">Информация для куратора</div>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Статус</b>:
+                            {{ user_object.get_status_display|default:"—" }}
+                        </li>
+                        <li class="list-group-item"><b>Группы</b>:
+                            {% for group in user_object.groups.all %}
+                                {% trans group.name %}{% if not forloop.last %}
+                                    , {% endif %}{% empty %}нет указанных
+                                групп{% endfor %}</li>
+                    </ul>
+                </div>
+            {% endif %}
+
             <ul class="list-unstyled">
                 {% if user_object.enrollment_year %}
                     {% if user_object.enrollment_set.all or user_object.shadcourserecord_set.all %}
@@ -134,14 +150,9 @@
                                     <li>
                                         {{ project.semester }}:
                                         «{{ project.name }}»
-                                        {% if project.grade %}(
-                                            {{ project.get_grade_display|lower }}
-                                            ){% endif %}
-                                        {% if project.presentation %}
-                                            <a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>{% endif %}
-                                        ,
-                                        {% trans "StudentProject|Supervisor"|lower %}
-                                        — {{ project.supervisor }}
+                                        {% if project.grade %}/{{ project.get_grade_display|lower }}/{% endif %}<br>
+                                        {% if project.presentation %}<a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>, {% endif %}
+                                        {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
                                         {% if project.description %}
                                             <div class="ubertext">
                                                 {% markdown 3600 "userproject_description" project.pk project.modified %}
@@ -190,22 +201,6 @@
                     </li>
                 {% endif %}
             </ul>
-
-            {% if has_curator_permissions %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">Информация для куратора</div>
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Статус</b>:
-                            {{ user_object.get_status_display|default:"—" }}
-                        </li>
-                        <li class="list-group-item"><b>Группы</b>:
-                            {% for group in user_object.groups.all %}
-                                {% trans group.name %}{% if not forloop.last %}
-                                    , {% endif %}{% empty %}нет указанных
-                                групп{% endfor %}</li>
-                    </ul>
-                </div>
-            {% endif %}
 
             {% if user_object.pk == user.pk %}
                 <table class="table calc table-condensed table-striped">
