@@ -41,7 +41,7 @@
                         </blockquote>
                         <div>
                             {% if student.photo %}
-                            {% thumbnail student.photo "200x200" crop="center" as im %}
+                            {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                             {% endthumbnail %}
                             {% endif %}
