@@ -113,6 +113,7 @@ class AlumniView(generic.ListView):
 
 class AlumniByYearView(generic.ListView):
     filter_by_year = None
+    context_object_name = "alumni_list"
     template_name = "users/alumni_by_year.html"
 
     def get_queryset(self):
@@ -139,11 +140,18 @@ class AlumniByYearView(generic.ListView):
                     status=STUDENT_STATUS.will_graduate
                  )
                  .exclude(csc_review='').exclude(photo='')
-                 .order_by('?'))
-            testimonials = s[:5]
+                 .prefetch_related("study_programs"))
+            testimonials = s[:]
             cache.set('alumni_2016_testimonials', testimonials, 3600)
-        context['testimonials'] = testimonials
+        context['testimonials'] = self.testimonials_random(testimonials)
+        context["year"] = self.filter_by_year
         return context
+
+    @staticmethod
+    def testimonials_random(testimonials):
+        indexes = random.sample(range(len(testimonials)), 5)
+        for index in indexes:
+            yield testimonials[index]
 
 
 class RobotsView(generic.TemplateView):

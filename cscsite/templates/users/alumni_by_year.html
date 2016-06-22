@@ -5,13 +5,11 @@
 {% load markdown from core_tags %}
 
 {% block content %}
-    {% regroup object_list by graduation_year as alumni_list %}
     <div id="graduates-by-year">
         <div class="graduates-list">
-            {% for alumni_by_year in alumni_list %}
-                <h3>Выпуск {{ alumni_by_year.grouper }} в лицах</h3>
+                <h3>Выпуск {{ year }} в лицах</h3>
                 <div class="clearfix"></div>
-                {% for alumni in alumni_by_year.list %}
+                {% for alumni in alumni_list %}
                     <div class="alumni">
                         <a href="{{ alumni.get_absolute_url }}">
                         {% if alumni.photo %}
@@ -23,10 +21,9 @@
                         {% endif %}
                         </a>
                     </div>
-                {% endfor %}
                 {% empty %}
-                <div class="empty">Ждём выпуска!</div>
-            {% endfor %}
+                    <div class="empty">Пока ждём выпуска!</div>
+                {% endfor %}
         </div>
 
         <div class="clearfix"></div>
@@ -48,7 +45,7 @@
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                             {% endthumbnail %}
                             {% endif %}
-                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
+                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span>{{  student.study_programs.all|join:", " }}
                         </div>
                     </div>
                 </div>
