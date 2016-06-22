@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from learning.reports import ProgressReport
+
 try:
     import json
 except ImportError:
@@ -220,7 +222,21 @@ class UserDetailView(generic.DetailView):
                 }
             except (IOError, OSError):
                 pass
+        # Initial data for photo cropper
         context["initial"] = json.dumps(context["initial"])
+        # Collect stats about successfully passed courses
+        if u.is_curator:
+            student = context[self.context_object_name]
+            context['total_successfully_passed'] = (
+                len(filter(ProgressReport.is_positive_grade,
+                           student.enrollment_set.all())) +
+                len(filter(ProgressReport.is_positive_grade,
+                           student.shadcourserecord_set.all())) +
+                len(student.onlinecourserecord_set.all()))
+            context['enrollments_in_current_term'] = len(
+                filter(lambda e: e.course_offering.semester == context['current_semester'],
+                       student.enrollment_set.all()))
+            student.enrollment_set.all()
         return context
 
 
