@@ -25,9 +25,9 @@
                 </blockquote>
                 <div>
                     {% if student.photo %}
-                    {% thumbnail student.photo "200x200" crop="center" as im %}
-                    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% endthumbnail %}
+                        {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
                     {% endif %}
                     <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {{  student.study_programs.all|join:", " }}
                 </div>
