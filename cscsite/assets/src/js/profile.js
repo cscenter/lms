@@ -187,14 +187,23 @@
         thumbInit: function (data) {
             fn.enableLoadingState();
             // prevent caching img
-            data.url = data.url + '?' + Math.floor(Date.now() / 1000);
+            data.url = data.url + '?' + (new Date()).getTime();
+            // Now preload it before Cropper initialized. Cropper do xhr request
+            // and we want to use browser cache in that case.
+            var image = new Image();
+            image.onload = function () { fn.cropperInit(data); };
+            image.src = data.url;
+        },
+
+        cropperInit: function (data) {
             // Calculate img dimensions based on modal body width
             var modalWidth = modalBody.width() - 40; // 40px for padding
-            var preCalcHeight = Math.round((modalWidth / data.width) * data.height);
+            var propWidth = Math.min(data.width, modalWidth);
+            var propHeight = Math.round((propWidth / data.width) * data.height);
             modalBody.html(_.template(templates.thumb, {
                 url: data.url,
-                width: modalWidth,
-                height: preCalcHeight
+                width: propWidth,
+                height: propHeight
             }));
             var image = modalBody.find(".uploaded-img")[0];
             var cropper = new Cropper(image, {
@@ -231,7 +240,6 @@
                 }
                 //preview: '.thumbnail-img',
             });
-
         },
 
         thumbDone: function (cropper) {
