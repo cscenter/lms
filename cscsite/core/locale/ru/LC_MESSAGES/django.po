@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-22 13:34+0300\n"
-"PO-Revision-Date: 2016-06-22 13:34+0230\n"
+"POT-Creation-Date: 2016-06-23 15:35+0300\n"
+"PO-Revision-Date: 2016-06-23 15:35+0230\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -194,8 +194,8 @@ msgstr "Отмена"
 
 #: cscsite/learning/forms.py:26 cscsite/learning/forms.py:245
 #: cscsite/templates/learning/gradebook/form.html:25
-#: cscsite/templates/users/_user_detail_upload_photo.html:40
-#: cscsite/users/forms.py:122
+#: cscsite/templates/users/_user_detail_upload_photo.html:41
+#: cscsite/users/forms.py:124
 msgid "Save"
 msgstr "Сохранить"
 
@@ -369,7 +369,7 @@ msgstr "Имя пользователя"
 #: cscsite/learning/gallery/models.py:51 cscsite/learning/models.py:262
 #: cscsite/learning/models.py:345 cscsite/learning/models.py:418
 #: cscsite/learning/models.py:553 cscsite/learning/models.py:852
-#: cscsite/templates/users/user_detail.html:319
+#: cscsite/templates/users/user_detail.html:288
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -496,7 +496,6 @@ msgstr "Курс"
 #: cscsite/templates/learning/courses/list.html:10
 #: cscsite/templates/learning/courses/teaching_list.html:9
 #: cscsite/templates/learning/gradebook/form.html:41
-#: cscsite/templates/users/user_detail.html:117
 msgid "Courses"
 msgstr "Курсы"
 
@@ -694,7 +693,7 @@ msgstr "Занятие"
 
 #: cscsite/learning/models.py:451
 #: cscsite/templates/learning/courseoffering_detail.html:116
-#: cscsite/templates/users/user_detail.html:240
+#: cscsite/templates/users/user_detail.html:209
 msgid "Classes"
 msgstr "Занятия"
 
@@ -742,15 +741,15 @@ msgstr ""
 "пустым"
 
 #: cscsite/learning/models.py:589 cscsite/learning/models.py:632
-#: cscsite/templates/users/user_detail.html:320
+#: cscsite/templates/users/user_detail.html:289
 msgid "Assignment"
 msgstr "Задание"
 
 #: cscsite/learning/models.py:590
 #: cscsite/templates/learning/assignment_list_student.html:11
 #: cscsite/templates/learning/courseoffering_detail.html:161
-#: cscsite/templates/users/user_detail.html:247
-#: cscsite/templates/users/user_detail.html:310
+#: cscsite/templates/users/user_detail.html:216
+#: cscsite/templates/users/user_detail.html:279
 msgid "Assignments"
 msgstr "Задания"
 
@@ -806,7 +805,7 @@ msgstr "Студент"
 #: cscsite/templates/learning/courses/learning_my_courses.html:87
 #: cscsite/templates/learning/student_assignment_detail.html:116
 #: cscsite/templates/learning/student_assignment_detail_test.html:53
-#: cscsite/templates/users/user_detail.html:321
+#: cscsite/templates/users/user_detail.html:290
 msgid "Grade"
 msgstr "Оценка"
 
@@ -976,7 +975,7 @@ msgid "Students"
 msgstr "Студенты"
 
 #: cscsite/learning/models.py:1031
-#: cscsite/templates/users/user_detail.html:145
+#: cscsite/templates/users/user_detail.html:149
 msgid "StudentProject|Supervisor"
 msgstr "Руководитель"
 
@@ -989,7 +988,7 @@ msgid "StudentProject|Type"
 msgstr "Тип"
 
 #: cscsite/learning/models.py:1043
-#: cscsite/templates/users/user_detail.html:143
+#: cscsite/templates/users/user_detail.html:148
 msgid "Presentation"
 msgstr "Презентация"
 
@@ -1002,7 +1001,6 @@ msgid "Student project"
 msgstr "Студенческий проект"
 
 #: cscsite/learning/models.py:1055
-#: cscsite/templates/users/user_detail.html:133
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
@@ -1052,7 +1050,7 @@ msgid "Online course"
 msgstr "Онлайн-курс"
 
 #: cscsite/learning/models.py:1110
-#: cscsite/templates/users/user_detail.html:184
+#: cscsite/templates/users/user_detail.html:169
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -1308,8 +1306,8 @@ msgstr "Количество копий"
 msgid "book"
 msgstr "Книга"
 
-#: cscsite/library/models.py:52 cscsite/templates/users/user_detail.html:350
-#: cscsite/templates/users/user_detail.html:359
+#: cscsite/library/models.py:52 cscsite/templates/users/user_detail.html:319
+#: cscsite/templates/users/user_detail.html:328
 msgid "books"
 msgstr "Книги"
 
@@ -1902,7 +1900,7 @@ msgstr "Вы уверены, что хотите удалить"
 #: cscsite/templates/learning/student_assignment_detail.html:62
 #: cscsite/templates/learning/student_assignment_detail_test.html:98
 #: cscsite/templates/learning/student_assignment_detail_test.html:148
-#: cscsite/templates/users/user_detail.html:390 cscsite/users/models.py:290
+#: cscsite/templates/users/user_detail.html:359 cscsite/users/models.py:290
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -2056,7 +2054,7 @@ msgid "Groups"
 msgstr "Группы"
 
 #: cscsite/templates/staff/student_search.html:51
-#: cscsite/templates/users/user_detail.html:408 cscsite/users/models.py:154
+#: cscsite/templates/users/user_detail.html:377 cscsite/users/models.py:154
 #: cscsite/users/models.py:305
 msgid "Status"
 msgstr "Статус"
@@ -2081,11 +2079,11 @@ msgstr "Вы действительно хотите отменить подпи
 msgid "Profile photo"
 msgstr "Фото профиля"
 
-#: cscsite/templates/users/_user_detail_upload_photo.html:25
+#: cscsite/templates/users/_user_detail_upload_photo.html:26
 msgid "Select a file"
 msgstr "Выбрать изображение"
 
-#: cscsite/templates/users/_user_detail_upload_photo.html:39
+#: cscsite/templates/users/_user_detail_upload_photo.html:40
 msgid "Back to upload"
 msgstr "Назад к загрузке фото"
 
@@ -2114,7 +2112,7 @@ msgid "Reference|Detail|info"
 msgstr "Информация"
 
 #: cscsite/templates/users/teacher_detail.html:25
-#: cscsite/templates/users/user_detail.html:301 cscsite/users/models.py:268
+#: cscsite/templates/users/user_detail.html:270 cscsite/users/models.py:268
 msgid "Contact information"
 msgstr "Контактная информация"
 
@@ -2131,83 +2129,78 @@ msgstr "Изменить фото"
 msgid "student"
 msgstr "студент"
 
-#: cscsite/templates/users/user_detail.html:50
+#: cscsite/templates/users/user_detail.html:48
 msgid "enrolled in"
 msgstr "год поступления"
 
-#: cscsite/templates/users/user_detail.html:55
-#: cscsite/templates/users/user_detail.html:199
+#: cscsite/templates/users/user_detail.html:52
+#: cscsite/templates/users/user_detail.html:184
 msgid "teacher"
 msgstr "преподаватель"
 
-#: cscsite/templates/users/user_detail.html:62
-#: cscsite/templates/users/user_detail.html:68
+#: cscsite/templates/users/user_detail.html:59
+#: cscsite/templates/users/user_detail.html:65
 msgid "About me"
 msgstr "О себе"
 
-#: cscsite/templates/users/user_detail.html:92 cscsite/users/tests.py:608
+#: cscsite/templates/users/user_detail.html:70
+msgid "Review of Computer Science Center"
+msgstr "Отзыв о центре"
+
+#: cscsite/templates/users/user_detail.html:87 cscsite/users/tests.py:608
 #: cscsite/users/tests.py:616
 msgid "Create reference"
 msgstr "Выдать справку"
 
-#: cscsite/templates/users/user_detail.html:105
-#| msgid "International Computer Science Student Schools"
-msgid "Review of Computer Science Center"
-msgstr "Отзыв о центре"
-
-#: cscsite/templates/users/user_detail.html:165
-msgid "School of Data Analysis courses"
-msgstr "Курсы ШАД"
-
-#: cscsite/templates/users/user_detail.html:234
+#: cscsite/templates/users/user_detail.html:203
 msgid ".iCal calendar"
 msgstr ".iCal-календарь"
 
-#: cscsite/templates/users/user_detail.html:235
+#: cscsite/templates/users/user_detail.html:204
 msgid "Link"
 msgstr "Ссылка"
 
-#: cscsite/templates/users/user_detail.html:254
+#: cscsite/templates/users/user_detail.html:223
 msgid "Events"
 msgstr "События"
 
-#: cscsite/templates/users/user_detail.html:267
+#: cscsite/templates/users/user_detail.html:236
 msgid "Social accounts"
 msgstr "Аккаунты"
 
-#: cscsite/templates/users/user_detail.html:366 cscsite/users/admin.py:116
+#: cscsite/templates/users/user_detail.html:335 cscsite/users/admin.py:116
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: cscsite/templates/users/user_detail.html:369 cscsite/users/models.py:275
+#: cscsite/templates/users/user_detail.html:338 cscsite/users/models.py:275
 msgid "University"
 msgstr "Университет"
 
-#: cscsite/templates/users/user_detail.html:373 cscsite/users/models.py:279
+#: cscsite/templates/users/user_detail.html:342 cscsite/users/models.py:279
 msgid "Phone"
 msgstr "Телефон"
 
-#: cscsite/templates/users/user_detail.html:378
+#: cscsite/templates/users/user_detail.html:347
 msgid "Email"
 msgstr "Email"
 
-#: cscsite/templates/users/user_detail.html:385 cscsite/users/models.py:283
+#: cscsite/templates/users/user_detail.html:354 cscsite/users/models.py:283
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: cscsite/templates/users/user_detail.html:412
+#: cscsite/templates/users/user_detail.html:381
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: cscsite/templates/users/user_detail.html:417
+#: cscsite/templates/users/user_detail.html:386
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: cscsite/templates/users/user_detail.html:433 cscsite/users/models.py:322
+#: cscsite/templates/users/user_detail.html:402 cscsite/users/models.py:322
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/templates/users/user_detail.html:442 cscsite/users/tests.py:631
+#: cscsite/templates/users/user_detail.html:411 cscsite/users/tests.py:631
 #: cscsite/users/tests.py:636
 msgid "Student references"
 msgstr "Справки студента"
@@ -2275,15 +2268,19 @@ msgstr "Войти"
 msgid "Users of CS-club can't login on CS-center site"
 msgstr "Пользователи клуба не могут пользоваться сайтом CS Центра"
 
-#: cscsite/users/forms.py:105 cscsite/users/models.py:271
+#: cscsite/users/forms.py:101
+msgid "Tell something about yourself"
+msgstr "Расскажите что-нибудь о себе"
+
+#: cscsite/users/forms.py:107 cscsite/users/models.py:271
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
-#: cscsite/users/forms.py:106
+#: cscsite/users/forms.py:108
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: cscsite/users/forms.py:108
+#: cscsite/users/forms.py:110
 msgid "stepic.org/users/<b>STEPIC-ID</b>"
 msgstr "stepic.org/users/<b>STEPIC-ID</b>"
 
@@ -2450,6 +2447,9 @@ msgstr "Справка пользователя"
 #: cscsite/users/models.py:548
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "School of Data Analysis courses"
+#~ msgstr "Курсы ШАД"
 
 #~ msgid "Review of CSC"
 #~ msgstr "%(name)s о Центре"

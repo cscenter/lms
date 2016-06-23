@@ -97,7 +97,9 @@ class UserProfileForm(forms.ModelForm):
             'private_contacts': Ubereditor
         }
         help_texts = {
-            'note': LATEX_MARKDOWN_ENABLED,
+            'note': "{}. {}".format(
+                _("Tell something about yourself"),
+                LATEX_MARKDOWN_ENABLED),
             'csc_review': LATEX_MARKDOWN_ENABLED,
             'private_contacts': (
                 "{}; {}"
