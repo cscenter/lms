@@ -16,7 +16,7 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentSearchJSONView, StudentSearchView, \
     TotalStatisticsView, \
     ProgressReportForSemesterView, \
-    ProgressReportFullView
+    ProgressReportFullView, StudentsDiplomasStatsView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -80,6 +80,9 @@ urlpatterns = [
     url(r'^staff/exports/$',
         ExportsView.as_view(),
         name='staff_exports'),
+    url(r'^staff/exports/diplomas_stats/$',
+        StudentsDiplomasStatsView.as_view(),
+        name='staff_exports_students_diplomas_stats'),
     url(r'^staff/exports/diplomas/$',
         StudentsDiplomasView.as_view(),
         name='staff_exports_students_diplomas'),
