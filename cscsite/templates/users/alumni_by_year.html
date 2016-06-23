@@ -7,30 +7,78 @@
 {% block content %}
     <div id="graduates-by-year">
         <div class="graduates-list">
-                <h3>Выпуск {{ year }} в лицах</h3> <a href="#testimonials" class="dashed-link">Отзывы о CS центре</a>
-                <div class="clearfix"></div>
-                {% for alumni in alumni_list %}
-                    <div class="alumni">
-                        <a href="{{ alumni.get_absolute_url }}">
-                        {% if alumni.photo %}
-                            {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
-                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% endthumbnail %}
-                        {% else %}
-                            <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
-                        {% endif %}
-                        </a>
+            <h3>Выпуск {{ year }} в лицах</h3> <a href="#stats" class="dashed-link">Статистика</a><a href="#testimonials" class="dashed-link">Отзывы о CS центре</a>
+            <div class="clearfix"></div>
+            <div class="__list">
+            {% for alumni in alumni_list %}
+                <div class="alumni">
+                    <a href="{{ alumni.get_absolute_url }}">
+                    {% if alumni.photo %}
+                        {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
+                    {% endif %}
+                    </a>
+                </div>
+            {% empty %}
+                <div class="empty">Пока ждём выпуска!</div>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="clearfix"></div>
+
+        <a name="stats"></a><h3>Статистика</h3>
+        <div class="stats">
+            <div class="col-xs-6">
+                <div class="widget __hours">
+                    <div class="widget-content">
+                      <div class="counter counter-lg">
+                        <div class="counter-label text-uppercase">Провели часов в аудитории</div>
+                        <div class="counter-number-group">
+                          <span class="counter-number">11864</span>
+                        </div>
+                      </div>
                     </div>
-                {% empty %}
-                    <div class="empty">Пока ждём выпуска!</div>
-                {% endfor %}
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="widget __teachers">
+                    <div class="widget-content clearfix">
+                        <div class="counter counter-lg pull-left text-left">
+                            <div class="counter-number-group">
+                                <span class="counter-number">53</span>
+                                <span class="counter-number-related">преподавателя</span>
+                            </div>
+                        </div>
+                        <div class="pull-right white">
+                            <i class="icon icon-circle icon-2x wb-users bg-blue-600"
+                               aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget __alumni">
+                    <div class="widget-content clearfix">
+                        <div class="counter counter-md pull-left text-left">
+                            <div class="counter-number-group">
+                                <span class="counter-number">30</span>
+                                <span class="counter-number-related text-capitalize">выпускников</span>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <i class="fa fa-users" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="clearfix"></div>
         {% if testimonials %}
         <div class="testimonials-wrapper">
-            <a name="testimonials"></a>
-            <h3>Отзывы о CS центре</h3>
+           <a name="testimonials"></a><h3>Отзывы о CS центре</h3>
             <div class="testimonials __list">
                 {% for student in testimonials %}
                 <div class="col-xs-12">

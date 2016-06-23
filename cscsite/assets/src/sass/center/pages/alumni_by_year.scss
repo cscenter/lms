@@ -23,10 +23,11 @@
 
 
     .alumni {
-      float: left; // for older browsers
+      width: 150px;
+      float: left;
       overflow: hidden;
       vertical-align: top;
-      margin: 0;
+      margin: 0 5px 5px 0;
 
       img {
         max-width: 170px;
@@ -40,7 +41,10 @@
         max-width: 170px;
       }
     }
+  }
 
+  .dashed-link {
+    margin-right: 30px;
   }
 
   .testimonials {
@@ -48,3 +52,33 @@
     padding: 0;
   }
 }
+
+.stats {
+  @extend .row;
+  margin-bottom: 80px;
+
+  .fa-users {
+    font-size: 50px;
+  }
+
+  .__hours {
+    height: 238px;
+    .widget-content {
+      padding-top: 80px;
+    }
+    .counter-number {
+      font-size: 48px;
+    }
+  }
+
+  .__teachers {
+    margin-bottom: 10px;
+    height: 118px;
+  }
+
+  .__alumni {
+    height: 110px;
+  }
+}
+
+
