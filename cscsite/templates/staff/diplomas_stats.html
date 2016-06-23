@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+{% load core_tags %}
+
+{# Note: Feel the fear below. #}
+{% block content %}
+    <div class="container">
+    <h3>Учитывается статус "Будет выпускаться"</h3>
+    Преподавателей участвовало в обучении: {{unique_teachers_count}}<br>
+    Провели часов в аудитории (из расчёта 1 лекция/семинар == 1.5 часа): {{total_hours}}<br>
+    Сдали на отлично {{ excellent_total }}<br>
+    Сдали на хорошо {{ good_total }}<br>
+    Всего прослушали и сдали курсов {{ total_passed_courses }}<br>
+    Кол-во различных курсов, которые проходили студенты: {{unique_courses|length}}<br>
+    <ul>
+        {% for course in unique_courses %}
+            <li>{{ course }}</li>
+        {% endfor %}
+    </ul>
+    </div>
+{% endblock content %}

@@ -14,7 +14,8 @@ from django.views import generic
 from learning.models import Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
-from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES
+from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
+    GRADES
 from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
@@ -73,6 +74,40 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         context["prev_term"] = {"year": prev_term_year, "type": prev_term}
         return context
     template_name = "staff/exports.html"
+
+
+class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "staff/diplomas_stats.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentsDiplomasStatsView, self).get_context_data(
+            **kwargs)
+        students = ProgressReportForDiplomas.get_queryset()
+        unique_teachers = set()
+        total_hours = 0
+        total_passed_courses = 0
+        unique_courses = set()
+        excellent_total = 0
+        good_total = 0
+        for s in students:
+            for enrollment in s.enrollments:
+                total_passed_courses += 1
+                if enrollment.grade == GRADES.excellent:
+                    excellent_total += 1
+                elif enrollment.grade == GRADES.good:
+                    good_total += 1
+                unique_courses.add(enrollment.course_offering.course)
+                total_hours += enrollment.course_offering.courseclass_set.count() * 1.5
+                for teacher in enrollment.course_offering.teachers.all():
+                    unique_teachers.add(teacher.pk)
+        context['students'] = students
+        context["unique_teachers_count"] = len(unique_teachers)
+        context["total_hours"] = int(total_hours)
+        context["unique_courses"] = unique_courses
+        context["good_total"] = good_total
+        context["excellent_total"] = excellent_total
+        context["total_passed_courses"] = total_passed_courses
+        return context
 
 
 class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
