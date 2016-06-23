@@ -63,12 +63,11 @@ header {
   top: -120px;
   position: relative;
   padding: 30px 10px 0 0;
-  min-height: 72px;
+  min-height: 102px;
   overflow: hidden;
 
-  .about-me {
+  .about-me, .review {
     @extend .container;
-    min-height:60px;
     margin-bottom: 10px;
     padding: 0 0 0 225px;
 

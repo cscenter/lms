@@ -55,17 +55,25 @@
         </header>
 
         <div class="profile-additional-info">
-            <div class="about-me">{% if user_object.note.strip %}
+            {% if user_object.note.strip %}<div class="about-me">
                 <h4>{% trans "About me" %}</h4>
                 <div class="ubertext">
                     {% markdown 3600 "user_note" user_object.pk user_object.modified %}
                         {{ user_object.note }}
                     {% endmarkdown %}
-                </div>{% elif user_object.pk == user.pk or user.is_curator %}
+                </div></div>{% elif user_object.pk == user.pk or user.is_curator %}<div class="about-me">
                 <h4>{% trans "About me" %}</h4>
-                <div class="ubertext"><p><em>Информация не указана.</em></p>
+                <div class="ubertext"><p><em>Информация не указана.</em></p></div>
+            </div>{% endif %}
+            {% if user_object.csc_review %}
+                <div class="review">
+                    <h4>{% trans "Review of Computer Science Center" %}</h4>
+                    <div class="ubertext">
+                        {% markdown 3600 "csc_review" user_object.pk user_object.modified %}
+                            {{ user_object.csc_review }}{% endmarkdown %}
+                    </div>
                 </div>
-            {% endif %}</div>
+            {% endif %}
             {% if user_object.pk == user.pk or user.is_curator %}
                 <div class="nav-tabs-inverse">
                     <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
@@ -83,17 +91,7 @@
             {% endif %}
         </div>
 
-        <div class="profile-content" {% if user_object.note.strip %}style="margin-top: -90px;"{% endif %}>
-
-            {% if user_object.csc_review %}
-                <div class="review">
-                    <h4>{% trans "Review of Computer Science Center" %}</h4>
-                    <div class="ubertext">
-                        {% markdown 3600 "csc_review" user_object.pk user_object.modified %}
-                            {{ user_object.csc_review }}{% endmarkdown %}
-                    </div>
-                </div>
-            {% endif %}
+        <div class="profile-content" {% if user_object.note.strip or user_object.csc_review.strip %}style="margin-top: -90px;"{% endif %}>
 
             {% if has_curator_permissions %}
                 <div class="panel panel-default">
