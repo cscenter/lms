@@ -13,6 +13,7 @@
     Сдали на отлично {{ excellent_total }}<br>
     Сдали на хорошо {{ good_total }}<br>
     Всего прослушали и сдали курсов {{ total_passed_courses }}<br>
+    Уникальных проектов {{ unique_projects|length }}<br>
     Кол-во различных курсов, которые проходили студенты: {{unique_courses|length}}<br>
     <ul>
         {% for course in unique_courses %}
