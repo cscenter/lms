@@ -6,6 +6,7 @@
 
 {% block content %}
     <div id="graduates-by-year">
+    {% if alumni_list %}
         <div class="graduates-list">
             <h3>Выпуск {{ year }} в лицах</h3> <a href="#stats" class="dashed-link">Статистика</a><a href="#testimonials" class="dashed-link">Отзывы о CS центре</a>
             <div class="clearfix"></div>
@@ -22,8 +23,6 @@
                     {% endif %}
                     </a>
                 </div>
-            {% empty %}
-                <div class="empty">Пока ждём выпуска!</div>
             {% endfor %}
             </div>
         </div>
@@ -131,5 +130,8 @@
             <a href="{%  url "testimonials" %}" class="big-link">Читать все отзывы</a>
         </div>
         {% endif %}
+    {% else %}
+        <div class="empty">Пока ждём выпуска!</div>
+    {% endif %}
     </div>
 {% endblock content %}
