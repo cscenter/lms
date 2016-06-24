@@ -54,31 +54,22 @@
 }
 
 .stats {
-  @extend .row;
-  margin-bottom: 80px;
+  margin-bottom: 65px;
 
-  .fa-users {
-    font-size: 50px;
+  .row {
+    margin-bottom: 15px;
   }
 
-  .__hours {
-    height: 238px;
+  .__hours, .__practices, .__courses {
     .widget-content {
-      padding-top: 80px;
+      padding: 30px 15px;
     }
-    .counter-number {
-      font-size: 48px;
+    .counter-label {
+      font-size: 26px;
     }
+
   }
 
-  .__teachers {
-    margin-bottom: 10px;
-    height: 118px;
-  }
-
-  .__alumni {
-    height: 110px;
-  }
 }
 
 
