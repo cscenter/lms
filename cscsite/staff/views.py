@@ -86,10 +86,13 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         unique_teachers = set()
         total_hours = 0
         total_passed_courses = 0
+        unique_projects = set()
         unique_courses = set()
         excellent_total = 0
         good_total = 0
         for s in students:
+            for project in s.studentproject_set.all():
+                unique_projects.add(project)
             for enrollment in s.enrollments:
                 total_passed_courses += 1
                 if enrollment.grade == GRADES.excellent:
@@ -107,6 +110,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         context["good_total"] = good_total
         context["excellent_total"] = excellent_total
         context["total_passed_courses"] = total_passed_courses
+        context["unique_projects"] = unique_projects
         return context
 
 
