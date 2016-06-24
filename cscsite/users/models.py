@@ -39,17 +39,31 @@ logger = logging.getLogger(__name__)
 
 # TODO: Add tests. Looks Buggy
 class MonitorFieldMixin(object):
+    """
+    Monitor another field of the model and logging changes.
+
+    How it works:
+        Save db state after model init or synced with db.
+        When monitored field changed (depends on prev value and `when` attrs
+        update monitoring field value, add log entry
+    Args:
+        log_class (cls):
+            Class responsible for logging.
+        monitor (string):
+            Monitored field name
+        when (iter):
+            If monitored field get values from `when` attribute, monitoring
+            field updated. Defaults to None, allows all values. [Optional]
+    """
     def __init__(self, *args, **kwargs):
+        cls_name = self.__class__.__name__
         log_class = kwargs.pop('log_class', None)
         if not log_class:
-            raise TypeError(
-                '%s requires a "log_class" argument' % self.__class__.__name__)
+            raise TypeError('%s requires a "log_class" argument' % cls_name)
         self.log_class = log_class
-        # TODO: Check methods get_default_value and _prepare_blabla. raise exceptions
         monitor = kwargs.pop('monitor', None)
         if not monitor:
-            raise TypeError(
-                '%s requires a "monitor" argument' % self.__class__.__name__)
+            raise TypeError('%s requires a "monitor" argument' % cls_name)
         self.monitor = monitor
         kwargs.setdefault('help_text', _("Automatically updated when {} "
                                          "changed, but you still can set "
@@ -62,7 +76,9 @@ class MonitorFieldMixin(object):
         super(MonitorFieldMixin, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name, **kwargs):
-        self.old_value_attname = '_old_value_%s' % name
+        # Attach attrs to ModelField instance
+        # FIXME: Replace with `from_db` method?
+        self._old_value_attname = '_old_value_%s' % name
         self.monitor_attname = '_monitor_%s' % name
         models.signals.post_init.connect(self._save_initial, sender=cls)
         models.signals.post_save.connect(self._post_save, sender=cls)
@@ -72,18 +88,25 @@ class MonitorFieldMixin(object):
         return getattr(instance, self.monitor)
 
     def _save_initial(self, sender, instance, **kwargs):
-        setattr(instance, self.old_value_attname,
+        """Set current db values of monitoring and monitored fields after
+        __init__ method called or in `post_save` action"""
+        setattr(instance, self._old_value_attname,
                 getattr(instance, self.attname))
         setattr(instance, self.monitor_attname,
                 self.get_monitored_value(instance))
 
     def _post_save(self, instance, created, **kwargs):
-        previous = getattr(instance, self.monitor_attname, None)
-        current = self.get_monitored_value(instance)
-        if previous != current:
+        monitored_prev_value = getattr(instance, self.monitor_attname, None)
+        monitored_current_value = self.get_monitored_value(instance)
+        if monitored_prev_value != monitored_current_value:
             self._save_initial(instance.__class__, instance)
-            # TODO: empty attname value here instead of log_class
+            # We set default value in `pre_save`
             self.create_log_entry(instance, created)
+            # XXX: Reset FK here
+            # FIXME: Looks pretty stupid, we call save in post_save,
+            # mb move to post_save for LogModel?
+            setattr(instance, self.attname, None)
+            instance.save()
 
     def create_log_entry(self, instance, created):
         if created:
@@ -92,14 +115,14 @@ class MonitorFieldMixin(object):
         attrs[self.monitor] = self.get_monitored_value(instance)
         instance_fields = [f.attname for f in instance._meta.fields]
         for field in self.log_class._meta.fields:
+            # Do not override PK
             if isinstance(field, models.AutoField):
                 continue
             if field.attname not in instance_fields:
                 continue
             attrs[field.attname] = getattr(instance, field.attname)
-
         model = self.log_class(**attrs)
-        if model._prepare_fields(instance, self.attname):
+        if model.prepare_fields(instance, self.attname):
             model.save()
 
     def deconstruct(self):
@@ -120,7 +143,7 @@ class MonitorDateField(MonitorFieldMixin, models.DateField):
 
     def pre_save(self, model_instance, add):
         value = now()
-        attname_previous = getattr(model_instance, self.old_value_attname, None)
+        attname_previous = getattr(model_instance, self._old_value_attname, None)
         attname_current = getattr(model_instance, self.attname)
         previous = getattr(model_instance, self.monitor_attname, None)
         current = self.get_monitored_value(model_instance)
@@ -132,13 +155,21 @@ class MonitorDateField(MonitorFieldMixin, models.DateField):
 
 
 class MonitorFKField(MonitorFieldMixin, models.ForeignKey):
+    """
+    Add record to log if monitored field has been changed.
+    Reset monitoring field value by log cls after log entry was added to DB.
+    """
     def pre_save(self, model_instance, add):
+        """Set monitoring field value to defaults by log cls, if no value
+        specified"""
         value = self.log_class.get_default_value()
-        attname_current_value = getattr(model_instance, self.attname)
-        previous = getattr(model_instance, self.monitor_attname, None)
-        current = self.get_monitored_value(model_instance)
-        if previous != current and not attname_current_value:
-            if self.when is None or current in self.when:
+        monitoring_current_value = getattr(model_instance, self.attname)
+        monitored_prev_value = getattr(model_instance, self.monitor_attname,
+                                       None)
+        monitored_current_value = self.get_monitored_value(model_instance)
+        if (monitored_prev_value != monitored_current_value and
+                not monitoring_current_value):
+            if self.when is None or monitored_current_value in self.when:
                 setattr(model_instance, self.attname, value)
         return super(MonitorFKField, self).pre_save(model_instance, add)
 
@@ -163,19 +194,16 @@ class CSCUserStatusLog(models.Model):
         semester = Semester.get_current()
         return semester.pk
 
-    def _prepare_fields(self, monitored_instance, observer_field_attname):
+    def prepare_fields(self, monitored_instance, monitoring_field_attname):
         if not self.student_id:
             self.student_id = monitored_instance.pk
         if not self.semester_id:
-            semester_id = getattr(monitored_instance, observer_field_attname,
+            semester_id = getattr(monitored_instance, monitoring_field_attname,
                                   None)
             if not semester_id:
                 self.semester_id = self.get_default_value()
             else:
                 self.semester_id = semester_id
-                # checkmate, we null FK reference here. now :<
-                setattr(monitored_instance, observer_field_attname, None)
-                monitored_instance.save()
         return True
 
     def __str__(self):
@@ -575,10 +603,14 @@ class CSCUserFilter(django_filters.FilterSet):
     # FIXME: replace with range?
     enrollment_year = ListFilter(name='enrollment_year')
     status = django_filters.MethodFilter(action='status_filter')
+    status_log = django_filters.MethodFilter(action='status_log_filter')
+    # FIXME: set cscuserstatuslog__created_0 and cscuserstatuslog__created_1 EXAMPLE: 2015-01-01%208:00
+    cscuserstatuslog__created = django_filters.DateTimeFromToRangeFilter()
 
     class Meta:
         model = CSCUser
-        fields = ["name", "enrollment_year", "groups", "status", "cnt_enrollments"]
+        fields = ["name", "enrollment_year", "groups", "status",
+                  "cnt_enrollments", "cscuserstatuslog__created"]
 
     def __init__(self, *args, **kwargs):
         self.empty_query = False
@@ -591,7 +623,7 @@ class CSCUserFilter(django_filters.FilterSet):
                 if values:
                     cleaned_data.setlist(filter_name, set(values))
         self.data = cleaned_data
-        if not "groups" in self.data:
+        if "groups" not in self.data:
             if not self.data:
                 self.empty_query = True
             groups = self.FILTERING_GROUPS[:]
@@ -639,7 +671,6 @@ class CSCUserFilter(django_filters.FilterSet):
                 raise ValueError(
                     "CSCUserFilter: unrecognized status_filter choice")
         return queryset.filter(status__in=value_list).distinct()
-
 
     # FIXME: Difficult and unpredictable
     def name_filter(self, queryset, value):
