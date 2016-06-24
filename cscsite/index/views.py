@@ -147,7 +147,8 @@ class AlumniByYearView(generic.ListView):
 
     @staticmethod
     def testimonials_random(testimonials):
-        indexes = random.sample(range(len(testimonials)), 5)
+        indexes = random.sample(range(len(testimonials)),
+                                min(len(testimonials), 5))
         for index in indexes:
             yield testimonials[index]
 
