@@ -27,7 +27,7 @@ class TestimonialsListView(generic.ListView):
                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
                 .prefetch_related("study_programs")
-                .order_by("-graduation_year"))
+                .order_by("-graduation_year", "last_name"))
 
 
 class TeachersView(generic.ListView):
