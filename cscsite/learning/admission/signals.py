@@ -10,7 +10,7 @@ def post_save_interview_update_applicant_status(sender, instance, created,
     if not created:
         return
     Applicant = apps.get_model('admission', 'Applicant')
-    instance.applicant.status = Applicant.INTERVIEW_ASSIGNED
+    instance.applicant.status = Applicant.INTERVIEW_SCHEDULED
     instance.applicant.save()
 
 

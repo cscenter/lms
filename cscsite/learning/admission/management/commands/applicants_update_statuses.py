@@ -34,7 +34,7 @@ class Command(BaseCommand):
         exam record
         2. Set `REJECTED_BY_EXAM` for applicants with exam score below
         `exam_score_reject` value
-        3. Set `INTERVIEW_PHASE` for applicants with exam score above
+        3. Set `INTERVIEW_TOBE_SCHEDULED` for applicants with exam score above
         `exam_score_pass` value
         4. Set `PENDING` for applicants with exam score
         in [exam_score_reject;exam_score_pass]
@@ -52,8 +52,7 @@ class Command(BaseCommand):
         print("Total applicants: {}".format(
             Applicant.objects.filter(campaign=campaign_id).count()))
 
-        print("Cheaters: {}".format(
-            Applicant.objects
+        print("Cheaters: {}".format(Applicant.objects
                 .filter(campaign=campaign_id,
                         status=Applicant.REJECTED_BY_CHEATING).count()))
 
@@ -77,9 +76,9 @@ class Command(BaseCommand):
                                exam__score__gt=exam_score_pass)
                        .filter(Q(status__isnull=True) |
                                Q(status=Applicant.PENDING) |
-                               Q(status=Applicant.INTERVIEW_PHASE)))
+                               Q(status=Applicant.INTERVIEW_TOBE_SCHEDULED)))
         print("Pass exam: {}".format(pass_exam_q.count()))
-        pass_exam_q.update(status=Applicant.INTERVIEW_PHASE)
+        pass_exam_q.update(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
 
         pending_q = (Applicant.objects
                        .filter(campaign=campaign_id,

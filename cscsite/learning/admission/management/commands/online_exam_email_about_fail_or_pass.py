@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
         success_applicants = (Applicant.objects
                               .filter(campaign=campaign_id,
-                                      status=Applicant.INTERVIEW_PHASE))
+                                      status=Applicant.INTERVIEW_TOBE_SCHEDULED))
         print("Emails with success: {}".format(len(success_applicants)))
         for applicant in success_applicants:
             mail.send(
