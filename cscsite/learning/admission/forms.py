@@ -82,7 +82,7 @@ class ApplicantForm(ReadOnlyFieldsMixin, forms.ModelForm):
     class Meta:
         model = Applicant
         exclude = ("campaign", "first_name", "last_name", "second_name",
-                   "status", "admin_note", "yandex_id_normalize")
+                   "status", "admin_note", "yandex_id_normalize", "user")
 
 
 class ApplicantStatusForm(forms.ModelForm):
