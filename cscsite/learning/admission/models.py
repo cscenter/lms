@@ -45,8 +45,10 @@ class Applicant(TimeStampedModel):
     REJECTED_BY_TEST = 'rejected_test'
     REJECTED_BY_EXAM = 'rejected_exam'
     REJECTED_BY_CHEATING = 'rejected_cheating'
-    INTERVIEW_PHASE = 'interview_phase'
-    INTERVIEW_ASSIGNED = 'interview_assigned'
+    # TODO: rename interview codes here and in DB before next admission campaign
+    INTERVIEW_TOBE_SCHEDULED = 'interview_phase'  # permitted to interview
+    INTERVIEW_SCHEDULED = 'interview_assigned'
+    INTERVIEW_COMPLETED = 'interview_completed'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
     PENDING = 'pending'
     ACCEPT = 'accept'
@@ -56,8 +58,9 @@ class Applicant(TimeStampedModel):
         (REJECTED_BY_EXAM, _('Rejected by exam')),
         (REJECTED_BY_CHEATING, _('Cheating')),
         (PENDING, _('Pending')),
-        (INTERVIEW_PHASE, _('Can be interviewed')),
-        (INTERVIEW_ASSIGNED, _('Interview assigned')),
+        (INTERVIEW_TOBE_SCHEDULED, _('Can be interviewed')),
+        (INTERVIEW_SCHEDULED, _('Interview assigned')),
+        (INTERVIEW_COMPLETED, _('Interview completed')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
         (ACCEPT, _('Accept')),
         (VOLUNTEER, _("Applicant|Volunteer")),
