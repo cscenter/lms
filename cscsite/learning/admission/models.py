@@ -69,7 +69,7 @@ class Applicant(TimeStampedModel):
         related_name="applicants")
     first_name = models.CharField(_("First name"), max_length=255)
     second_name = models.CharField(_("Second name"), max_length=255)
-    last_name = models.CharField(_("Last name"), max_length=255)
+    last_name = models.CharField(_("Last name"), max_length=255)  # patronymic
     email = models.EmailField(
         _("Email"),
         help_text=_("Applicant|email"))
@@ -175,6 +175,13 @@ class Applicant(TimeStampedModel):
         blank=True,
         null=True,
         max_length=20)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET(models.SET_NULL),
+        null=True,
+        blank=True,
+        related_name='+',  # Don't create backwards relation
+    )
     uuid = models.UUIDField(editable=False, null=True, blank=True)
 
     class Meta:
