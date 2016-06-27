@@ -104,7 +104,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 .prefetch_related("interviews")
                 .annotate(exam_result_null=Coalesce('exam__score', Value(-1)))
                 .order_by("-exam_result_null", "-exam__score",
-                          "-online_test__score"))
+                          "-online_test__score", "pk"))
 
 
 class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
@@ -189,7 +189,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .select_related("applicant")
              .prefetch_related("interviewers")
              .annotate(average=Avg('comments__score'))
-             .order_by("date"))
+             .order_by("date", "pk"))
         if not self.request.user.is_curator:
             q = q.filter(interviewers=self.request.user)
         return q
