@@ -18,6 +18,7 @@ from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
     GRADES
 from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
+from staff.models import Hint
 from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
 
 
@@ -173,6 +174,14 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         else:
             raise ValueError("ProgressReportForSemesterView: output "
                              "format not provided")
+
+
+class HintListView(CuratorOnlyMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "staff/warehouse.html"
+
+    def get_queryset(self):
+        return Hint.objects.order_by("sort")
 
 
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
