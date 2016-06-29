@@ -16,7 +16,7 @@ from staff.views import ExportsView, StudentsDiplomasView, \
     StudentSearchJSONView, StudentSearchView, \
     TotalStatisticsView, \
     ProgressReportForSemesterView, \
-    ProgressReportFullView, StudentsDiplomasStatsView
+    ProgressReportFullView, StudentsDiplomasStatsView, HintListView
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, \
@@ -36,6 +36,7 @@ urlpatterns = [
         name="profile_update_image"),
 
     url(r'^learning/useful/$', UsefulListView.as_view(), name='learning_useful'),
+
 
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
@@ -65,6 +66,7 @@ urlpatterns = [
         name='alumni_by_study_program'),
 
     # TODO: refactor
+    url(r'^staff/warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^staff/course-marks/$',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
