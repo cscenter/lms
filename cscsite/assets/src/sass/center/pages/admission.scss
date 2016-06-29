@@ -375,7 +375,7 @@
 // print mode for interview detail page
 @media print {
   div.header, div.footer {
-    display: none;
+    display: none!important;
   }
   .admission-interview-page {
     .page-header {
