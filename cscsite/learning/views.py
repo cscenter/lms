@@ -485,12 +485,12 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
-        is_enrolled = (self.request.user.is_authenticated() and
-                       self.request.user.is_student and
-                       (self.request.user
-                        .enrolled_on_set
-                        .filter(pk=self.object.pk)
-                        .exists()))
+        is_enrolled = (
+            (self.request.user.is_student or self.request.user.is_graduate) and
+            (self.request.user
+             .enrolled_on_set
+             .filter(pk=self.object.pk)
+             .exists()))
         context['is_enrolled'] = is_enrolled
         context['enrollment_opened'] = context[self.context_object_name].enrollment_opened()
         is_actual_teacher = (self.request.user.is_authenticated() and
@@ -518,9 +518,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                                  .format(self.request.user.pk, assignment.pk))
         context['assignments'] = assignments
         context['can_view_assignments'] = (
-            self.request.user.is_student
-            or context['is_actual_teacher']
-            or self.request.user.is_curator)
+            self.request.user.is_student or
+            self.request.user.is_graduate or
+            context['is_actual_teacher'] or
+            self.request.user.is_curator)
         context['can_view_news'] = not context['is_failed_completed_course'] and (
                                    self.request.user.is_authenticated() or
                                    self.request.site.domain == settings.CLUB_DOMAIN)
@@ -1236,13 +1237,15 @@ class StudentAssignmentDetailMixin(object):
         return redirect(self.get_success_url())
 
 
-# shitty name :(
-# Note: We should redirects teacher, so replace StudentOnlyMixin with ParticipantOnlyMixin.
 # TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
 class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
                                          FailedCourseContextMixin,
                                          StudentAssignmentDetailMixin,
                                          generic.CreateView):
+    """
+    ParticipantOnlyMixin here for 2 reasons - we should redirect teachers
+    to there own view and show submissions to graduates
+    """
     user_type = 'student'
 
     def get(self, request, *args, **kwargs):

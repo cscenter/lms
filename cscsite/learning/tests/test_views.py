@@ -274,7 +274,6 @@ class CourseVideoListTests(MyUtilitiesMixin, TestCase):
                                [co for chunk in chunks for co in chunk])
 
 
-
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
@@ -1049,6 +1048,11 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
             self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(student)
+        self.assertEquals(200, self.client.get(url).status_code)
+        # Change student to graduate, make sure they have access to HW
+        student.groups.clear()
+        student.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
+        student.save()
         self.assertEquals(200, self.client.get(url).status_code)
 
     def test_assignment_contents(self):
