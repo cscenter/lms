@@ -148,7 +148,7 @@
                             {% endwith %}
                         </div>
                     <div class="comment-body media-body">
-                      <span>{{ comment.interviewer.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
+                      <span class="fio">{{ comment.interviewer.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
                       <div class="comment-content">
                           {% markdown 0 "interview_comment" %}{{ comment.text }}{% endmarkdown %}
                       </div>

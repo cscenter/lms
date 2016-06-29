@@ -23,8 +23,8 @@ function csrfSafeMethod(method) {
     $(document).ready(function () {
         fn.configureCSRFAjax();
         fn.loadMathJaxAndHightlightJS();
-        // Clear old cache befor init new editors
-        fn.clearEditorsFiles();
+        // Clear old local storage cache
+        fn.cleanLocalStorageEditorsFiles();
         fn.initUberEditor();
         fn.profileSpecificCode();
         fn.courseClassSpecificCode();
@@ -93,7 +93,13 @@ function csrfSafeMethod(method) {
             $ubereditors.each(function (i, textarea) {
                 var $textarea = $(textarea),
                     $container = $("<div/>").insertAfter($textarea),
-                    autoSaveEnabled = $textarea.data('local-persist') == true;
+                    autoSaveEnabled = $textarea.data('local-persist') == true,
+                    themeEditor = '/themes/editor/epic-light.css',
+                    buttonFullscreen = true;
+                $container.css('border', '1px solid #f2f2f2');
+                if ($textarea.data('button-fullscreen') !== undefined) {
+                    buttonFullscreen = $textarea.data('button-fullscreen');
+                }
 
                 $textarea.hide();
                 $textarea.removeProp("required");
@@ -107,10 +113,10 @@ function csrfSafeMethod(method) {
                     basePath: "/static/js/vendor/EpicEditor-v0.2.2",
                     clientSideStorage: autoSaveEnabled,
                     autogrow: {minHeight: 200},
-                    button: {bar: "show"},
+                    button: {bar: "show", fullscreen: buttonFullscreen},
                     theme: {
                         base: '/themes/base/epiceditor.css',
-                        editor: '/themes/editor/epic-light.css'
+                        editor: themeEditor
                     }
                 };
 
@@ -120,8 +126,7 @@ function csrfSafeMethod(method) {
                             "Text restore will be buggy.")
                     }
                     // Presume textarea name is unique for page!
-                    var filename = (window.location.pathname.replace(/\//g, "_")
-                        + "_" + textarea.name);
+                    var filename = fn.getLocalStorageKey(textarea);
                     opts['file'] = {
                         name: filename,
                         defaultContent: "",
@@ -195,7 +200,10 @@ function csrfSafeMethod(method) {
 
                 // Restore label behavior
                 $('label[for=id_' + textarea.name + ']').click(function() {
-                    console.log(textarea.name);
+                    editor.focus();
+                });
+                // Try to fix contenteditable focus problem in Chrome
+                $(editor.getElement("editor")).click(function() {
                     editor.focus();
                 });
 
@@ -232,7 +240,7 @@ function csrfSafeMethod(method) {
             });
         },
 
-        clearEditorsFiles: function () {
+        cleanLocalStorageEditorsFiles: function () {
             // eliminate old and persisted epiceditor "files"
             if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
                 var editor = new EpicEditor();
@@ -248,9 +256,14 @@ function csrfSafeMethod(method) {
                         if (hash in persistedHashes) {
                             editor.remove(filename);
                         }
-                    };
+                    }
                 });
             }
+        },
+
+        getLocalStorageKey: function(textarea) {
+            return (window.location.pathname.replace(/\//g, "_")
+            + "_" + textarea.name);
         },
 
         profileSpecificCode: function () {
