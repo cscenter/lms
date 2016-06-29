@@ -10,7 +10,8 @@ class ParticipantOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         return (user.is_authenticated() and
-               (user.is_teacher or user.is_student or user.is_curator))
+               (user.is_teacher or user.is_student or user.is_curator or
+                user.is_graduate))
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):
