@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit
+from crispy_forms.layout import Layout, Div, Submit, Field
 from decimal import Decimal
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
+from core.forms import Ubereditor
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant
 
@@ -46,14 +47,21 @@ class InterviewCommentForm(forms.ModelForm):
                 (-1, "не брать сейчас"),
                 (0, "нейтрально"),
                 (1, "можно взять"),
-                (2, "точно нужно взять")))
+                (2, "точно нужно взять"))),
+            'text': Ubereditor(attrs={
+                'data-local-persist': 'true',
+            })
         }
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('text', 'score'),
-            FormActions(Submit('save', _('Save')), css_class="pull-right"))
+            Div('text'),
+            Div(
+                Div('score', css_class='col-xs-6'),
+                Div(Submit('save', _('Save'), css_class='pull-right'), css_class='col-xs-6'),
+                css_class="row")
+        )
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
