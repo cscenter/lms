@@ -471,6 +471,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
         co = context[self.context_object_name]
+        # Show club courses on center site since center foundation only
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,
                                    SEMESTER_TYPES.autumn)
@@ -485,6 +486,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
+        course_offering = co = context[self.context_object_name]
         is_enrolled = (
             (self.request.user.is_student or self.request.user.is_graduate) and
             (self.request.user
@@ -492,7 +494,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
              .filter(pk=self.object.pk)
              .exists()))
         context['is_enrolled'] = is_enrolled
-        context['enrollment_opened'] = context[self.context_object_name].enrollment_opened()
+        context['enrollment_opened'] = course_offering.enrollment_opened()
+        if course_offering.is_capacity_limited():
+            context["enrollments_left"] = max(
+                0, co.capacity - co.enrollment_set.count())
         is_actual_teacher = (self.request.user.is_authenticated() and
                              self.request.user in self.object.teachers.all())
         context['is_actual_teacher'] = is_actual_teacher

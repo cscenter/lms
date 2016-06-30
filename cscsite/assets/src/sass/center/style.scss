@@ -498,7 +498,15 @@ tr.unread {
 .enroll-block {
   margin-bottom: 20px;
 }
-
+// FIXME: move to separate file
+.places-available {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 500;
+  @extend  .bg-info;
+  text-align: center;
+  padding: 10px;
+}
 .course-offering-profs {
   h4 {
     margin-top: 0;

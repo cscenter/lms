@@ -68,6 +68,16 @@
                         {% trans "Unenroll from the course" %}
                     </a>
                 {% else %}
+                    {% if course_offering.is_capacity_limited %}
+                        <div class="places-available">
+                             {%if enrollments_left > 0 %}
+                                {% trans "Places available" %}: {{ enrollments_left }}
+                            {% elif course_offering.is_capacity_limited %}
+                                {% trans "No places available" %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if not course_offering.is_capacity_limited or enrollments_left > 0 %}
                     <form method="post"
                           action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
                         {% csrf_token %}
@@ -77,6 +87,7 @@
                             {% trans "Enroll in the course" %}
                         </button>
                     </form>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}

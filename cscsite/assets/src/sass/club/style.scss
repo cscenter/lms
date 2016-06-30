@@ -516,7 +516,15 @@ tr.unread {
 #course-list > li:first-child { padding-left: 5px !important; }
 
 .semester-course-list ul { padding-left: 15px; }
-
+// Course offerings page
+.places-available {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 500;
+  .bg-info {
+    padding: 10px;
+  }
+}
 .course-offering-profs {
   ul {
 

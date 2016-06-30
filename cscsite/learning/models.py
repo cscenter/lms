@@ -218,6 +218,10 @@ class CourseOffering(TimeStampedModel):
         verbose_name=_("CourseOffering|grading_type"),
         choices=GRADING_TYPES,
         default=GRADING_TYPES.default)
+    capacity = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|capacity"),
+        default=0,
+        help_text=_("0 - unlimited"))
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
@@ -312,6 +316,9 @@ class CourseOffering(TimeStampedModel):
         if today > enroll_before:
             return False
         return True
+
+    def is_capacity_limited(self):
+        return self.capacity
 
 
 @python_2_unicode_compatible
