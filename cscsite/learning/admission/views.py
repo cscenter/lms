@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import json
 
 from braces.views._access import AccessMixin
 
@@ -10,7 +11,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Value, Q, Avg
 from django.db.models.functions import Coalesce
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.views import generic
@@ -258,6 +259,14 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         # Store values to validate submitted interviewer/interview on form level
         kwargs.update({"interviewer": interviewer})
         kwargs.update({"interview_id": interview_id})
+        if self.request.is_ajax():
+            try:
+                json_data = json.loads(self.request.body)
+                kwargs.update({
+                    'data': json_data,
+                })
+            except ValueError:
+                pass
         return kwargs
 
     def get_success_url(self):
@@ -265,3 +274,15 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                          extra_tags='timeout')
         return reverse("admission_interview_detail",
                        args=[self.object.interview.pk])
+
+    def form_valid(self, form):
+        if self.request.is_ajax():
+            _ = form.save()
+            return JsonResponse({"success": "true"})
+        return super(InterviewDetailView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.is_ajax():
+            return JsonResponse({"success": "false",
+                                 "errors": form.errors.as_json()})
+        return super(InterviewDetailView, self).form_invalid(form)

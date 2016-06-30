@@ -59,7 +59,8 @@ class InterviewCommentForm(forms.ModelForm):
             Div('text'),
             Div(
                 Div('score', css_class='col-xs-6'),
-                Div(Submit('save', _('Save'), css_class='pull-right'), css_class='col-xs-6'),
+                Div(Submit('save', _('Save'), css_class='pull-right'),
+                    css_class='col-xs-6'),
                 css_class="row")
         )
         self.interviewer = kwargs.pop("interviewer", None)

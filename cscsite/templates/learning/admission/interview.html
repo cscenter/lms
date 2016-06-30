@@ -2,33 +2,12 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load crispy_forms_tags %}
-{% load static %}
+{% load staticfiles %}
 {% load markdown from core_tags %}
 
 {% block title %} {{ applicant.campaign.code }} - {{ applicant.get_full_name }}{% endblock title %}
 
 {% block body_class %} gray{% endblock body_class %}
-
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/vendor/jquery.barrating.min.js" %}"></script>
-    <script type="text/javascript">
-        $(function () {
-            $('select#id_score').barrating({
-                theme: 'bars-movie',
-                hoverState: false
-            });
-
-            var hash = window.location.hash;
-            hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-
-            $('.nav-tabs a').click(function (e) {
-                $(this).tab('show');
-                var scrollmem = $('body').scrollTop() || $('html').scrollTop();
-                $('html,body').scrollTop(scrollmem);
-            });
-        });
-    </script>
-{% endblock javascripts %}
 
 {% block content %}
 <div class="admission-interview-page">
@@ -174,3 +153,7 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/interview.js" %}"></script>
+{% endblock javascripts %}
