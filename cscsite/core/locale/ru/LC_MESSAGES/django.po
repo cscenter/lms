@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-30 18:36+0300\n"
-"PO-Revision-Date: 2016-06-30 18:37+0230\n"
+"POT-Creation-Date: 2016-06-30 18:58+0300\n"
+"PO-Revision-Date: 2016-06-30 18:59+0230\n"
 "Last-Translator:   <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1213,62 +1213,67 @@ msgstr "Другие"
 msgid "No"
 msgstr "Нет"
 
-#: cscsite/learning/views.py:724
+#: cscsite/learning/views.py:693
+#| msgid "No places available"
+msgid "No places available, sorry"
+msgstr "Извините, свободных мест не осталось."
+
+#: cscsite/learning/views.py:733
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: cscsite/learning/views.py:727
+#: cscsite/learning/views.py:736
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: cscsite/learning/views.py:862
+#: cscsite/learning/views.py:871
 #, python-format
 msgid "The class '%s' was successfully created."
 msgstr "Занятие '%s' успешно создано."
 
-#: cscsite/learning/views.py:871
+#: cscsite/learning/views.py:880
 #, python-format
 msgid "The class '%s' was successfully updated."
 msgstr "Занятие '%s' успешно обновлено."
 
-#: cscsite/learning/views.py:980
+#: cscsite/learning/views.py:989
 msgid "Without grades"
 msgstr "Без оценки"
 
-#: cscsite/learning/views.py:981
+#: cscsite/learning/views.py:990
 msgid "With grades"
 msgstr "С оценкой"
 
-#: cscsite/learning/views.py:982
+#: cscsite/learning/views.py:991
 msgid "All"
 msgstr "Все"
 
-#: cscsite/learning/views.py:985
+#: cscsite/learning/views.py:994
 msgid "From student"
 msgstr "От студента"
 
-#: cscsite/learning/views.py:986
+#: cscsite/learning/views.py:995
 msgid "From teacher"
 msgstr "От преподавателя"
 
-#: cscsite/learning/views.py:987
+#: cscsite/learning/views.py:996
 msgid "Without comments"
 msgstr "Нет комментариев"
 
-#: cscsite/learning/views.py:988
+#: cscsite/learning/views.py:997
 msgid "No matter"
 msgstr "Неважно"
 
-#: cscsite/learning/views.py:1344
+#: cscsite/learning/views.py:1353
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: cscsite/learning/views.py:1646
+#: cscsite/learning/views.py:1655
 msgid "Gradebook successfully saved."
 msgstr "Ведомость успешно сохранена."
 
-#: cscsite/learning/views.py:1860 cscsite/learning/views.py:1880
+#: cscsite/learning/views.py:1869 cscsite/learning/views.py:1889
 msgid "Invalid form."
 msgstr ""
 

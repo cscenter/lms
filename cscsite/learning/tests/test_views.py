@@ -562,10 +562,12 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(semester=current_semester,
                                           city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="RU KZN")
+                                              city="RU KZN")
         resp = self.client.get(reverse('course_list'))
-        self.assertContains(resp, co.course.name)
-        self.assertNotContains(resp, co_kzn.course.name)
+        # Really stupid test, we filter summer courses on /courses/ page
+        if current_semester.type != Semester.TYPES.summer:
+            self.assertContains(resp, co.course.name)
+            self.assertNotContains(resp, co_kzn.course.name)
         # Note: Club related tests in csclub app
 
     def test_student_list_center_site(self):
@@ -1655,8 +1657,6 @@ class TestCompletedCourseOfferingBehaviour(object):
         assert not response.context["is_failed_completed_course"]
 
 
-
-
 class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
 
     @unittest.skip('not implemented')
@@ -1707,11 +1707,38 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
                                       .filter(student=s,
                                               assignment__course_offering=co)))
 
+    def test_enrollment_capacity(self):
+        s = UserFactory.create(groups=['Student [CENTER]'])
+        current_semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=current_semester)
+        co_url = reverse('course_offering_detail',
+                         args=[co.course.slug, co.semester.slug])
+        co_enroll_url = reverse('course_offering_enroll',
+                                args=[co.course.slug, co.semester.slug])
+        self.doLogin(s)
+        response = self.client.get(co_url)
+        assert smart_bytes(_("Places available")) not in response.content
+        assert smart_bytes(_("No places available")) not in response.content
+        co.capacity = 1
+        co.save()
+        form = {'course_offering_pk': co.pk}
+        self.client.post(co_enroll_url, form)
+        assert 1 == (Enrollment.objects.filter(student=s, course_offering=co)
+                     .count())
+        # Capacity reached, show to second student nothing
+        s2 = UserFactory.create(groups=['Student [CENTER]'])
+        self.doLogin(s2)
+        response = self.client.get(co_url)
+        assert smart_bytes(_("No places available")) in response.content
+        co.capacity = 2
+        co.save()
+        response = self.client.get(co_url)
+        assert smart_bytes(_("Places available") + b": 1") in response.content
+
 
 @pytest.mark.django_db
-def test_enrollment(client):
-    from django.utils import dateformat
-    student = UserFactory.create(groups=['Student [CENTER]'])
+def test_enrollment(client, student_center_factory):
+    student = student_center_factory.create()
     client.login(student)
     today = timezone.now()
     current_semester = SemesterFactory.create_current()
@@ -1746,6 +1773,18 @@ def test_enrollment(client):
     url = reverse('course_offering_enroll',
                   args=[old_co.course.slug, old_co.semester.slug])
     assert client.post(url, form).status_code == 403
+    # If course offering has limited capacity and we reach it - reject request
+    co.capacity = 1
+    co.save()
+    student2 = student_center_factory.create()
+    client.login(student2)
+    form = {'course_offering_pk': co.pk}
+    client.post(url, form, follow=True)
+    assert co.enrollment_set.count() == 1
+    co.capacity = 2
+    co.save()
+    client.post(url, form, follow=True)
+    assert co.enrollment_set.count() == 2
 
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
 
