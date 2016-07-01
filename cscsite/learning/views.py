@@ -363,8 +363,13 @@ class CourseStudentListView(StudentOnlyMixin,
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()
-        if semester_type == SEMESTER_TYPES.summer:
-            return {}
+        if (settings.SITE_ID != settings.CENTER_SITE_ID and
+                semester_type == SEMESTER_TYPES.summer):
+            return {
+                "course_list_available": None,
+                "enrollments_ongoing": None,
+                "enrollments_archive": None
+            }
         available = (CourseOffering.custom.site_related(self.request)
                      .filter(semester__type=semester_type,
                              semester__year=year)
