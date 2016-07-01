@@ -218,7 +218,8 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         # Note: Logic repeated from .site_related() CourseOffering queryset
         # to avoid additional query.
         if self.request.site.domain == settings.CLUB_DOMAIN:
-            q = q.filter(course_offering__is_open=True)
+            q = q.filter(course_offering__is_open=True).exclude(
+                course_offering__semester__type=SEMESTER_TYPES.summer)
             if hasattr(self.request, 'city'):
                 q = q.filter(Q(course_offering__city__pk=self.request.city.code)
                              | Q(course_offering__city__isnull=True))
