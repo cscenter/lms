@@ -313,6 +313,7 @@ class CoursesListView(generic.ListView):
         semester_list = [s for s in context["semester_list"]
                          if s.type != Semester.TYPES.summer]
         if not semester_list:
+            context["semester_list"] = semester_list
             return context
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
@@ -326,6 +327,7 @@ class CoursesListView(generic.ListView):
             (a, s) for s, a in utils.grouper(semester_list, 2) if \
                 (a and a.courseofferings) or (s and s.courseofferings)
         ]
+
         return context
 
 
@@ -684,6 +686,16 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         if self.request.site.domain == settings.CLUB_DOMAIN and \
            not course_offering.is_open:
             return HttpResponseForbidden()
+        # Reject if capacity limited and no places available
+        if course_offering.is_capacity_limited():
+            # FIXME: move to model?
+            places_left = max(
+                0, course_offering.capacity -
+                   course_offering.enrollment_set.count())
+            if not places_left:
+                msg = _("No places available, sorry")
+                messages.error(self.request, msg, extra_tags='timeout')
+                return HttpResponseRedirect(course_offering.get_absolute_url())
         Enrollment.objects.get_or_create(
             student=self.request.user, course_offering=course_offering)
         if self.request.POST.get('back') == 'course_list_student':
