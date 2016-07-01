@@ -20,8 +20,8 @@
       {% endblocktrans %}
   {% endif %}
   </div>
-  <h1>{% trans "Courses" %}: {{ current_semester }}</h1>
   {% if courses %}
+  <h1>{% trans "Courses" %}: {{ current_semester }}</h1>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -54,13 +54,11 @@
               {% endfor %}
           </tbody>
         </table>
-  {% else %}
-      <p>{% trans "No active courses" %}</p>
-  {% endif %}
   {% if LANGUAGE_CODE == 'ru' %}
       <div class="font-bigger">
       Если вы не нашли интересного курса в текущем семестре, смотрите видеозаписи прошлых лет (раздел <a href="/courses/">Курсы</a>) или онлайн-курсы <a href="https://compscicenter.ru/online/">Computer Science центра</a>.
       </div>
+  {% endif %}
   {% endif %}
 </div>
 {% endblock content %}
