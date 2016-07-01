@@ -363,6 +363,8 @@ class CourseStudentListView(StudentOnlyMixin,
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()
+        if semester_type == SEMESTER_TYPES.summer:
+            return {}
         available = (CourseOffering.custom.site_related(self.request)
                      .filter(semester__type=semester_type,
                              semester__year=year)
