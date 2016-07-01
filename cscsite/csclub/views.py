@@ -52,20 +52,24 @@ class IndexView(generic.TemplateView):
         courseclass_queryset = (CourseClass.objects
                                            .filter(date__gte=today)
                                            .order_by('date', 'starts_at'))
-        context['courses'] = (
-            CourseOffering
-            .custom
-            .site_related(self.request)
-            .filter(semester=current_semester.pk)
-            .select_related('course', 'semester')
-            .prefetch_related(
-                'teachers',
-                Prefetch(
-                    'courseclass_set',
-                    queryset=courseclass_queryset,
-                    to_attr='classes'
-                ))
-            .order_by('is_completed', 'course__name'))
+        if current_semester.type in [Semester.TYPES.spring,
+                                     Semester.TYPES.autumn]:
+            context['courses'] = (
+                CourseOffering
+                .custom
+                .site_related(self.request)
+                .filter(semester=current_semester.pk)
+                .select_related('course', 'semester')
+                .prefetch_related(
+                    'teachers',
+                    Prefetch(
+                        'courseclass_set',
+                        queryset=courseclass_queryset,
+                        to_attr='classes'
+                    ))
+                .order_by('is_completed', 'course__name'))
+        else:
+            context['courses'] = []
 
         return context
 
