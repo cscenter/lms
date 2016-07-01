@@ -521,9 +521,9 @@ tr.unread {
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: 500;
-  .bg-info {
-    padding: 10px;
-  }
+  @extend  .bg-info;
+  text-align: center;
+  padding: 10px;
 }
 .course-offering-profs {
   ul {
