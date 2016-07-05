@@ -1,0 +1,3 @@
+---
+# Global variables here, used in many roles
+group_shared: shared

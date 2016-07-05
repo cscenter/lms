@@ -5,4 +5,3 @@ project_name: cscenter
 csclub_user: csclub
 cscenter_project: csclub
 pg_version: 9.4
-group_shared: shared

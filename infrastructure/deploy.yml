@@ -19,11 +19,13 @@
 
   - name: Get stuff from git
     git: repo=git@github.com:cscenter/site.git dest={{ site_src }}
-    sudo_user: "{{ app_user }}"
+    become: yes
+    become_user: "{{ app_user }}"
 
   - name: Install requirements
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
-    sudo_user: "{{ app_user }}"
+    become: yes
+    become_user: "{{ app_user }}"
 
   - name: Migrate DB
     sudo_user: "{{ app_user }}"
