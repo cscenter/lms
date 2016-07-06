@@ -36,8 +36,8 @@
                         </td>
                         <td>{{ applicant.campaign.code }}</td>
                         <td>{{ applicant.preferred_study_programs }}</td>
-                        <td>{% if applicant.online_test %}{{ applicant.online_test.score }}{% else %}-{% endif %}</td>
-                        <td>{% if applicant.exam %}{{ applicant.exam.score }}{% else %}-{% endif %}</td>
+                        <td>{{ applicant.online_test.score|default:"-" }}</td>
+                        <td>{{ applicant.exam.score|default:"-" }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -23,7 +23,7 @@ from learning.admission.filters import ApplicantFilter, InterviewsFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
     InterviewForm, ApplicantStatusForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
-    Applicant
+    Applicant, Campaign
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 
 
@@ -286,3 +286,25 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             return JsonResponse({"success": "false",
                                  "errors": form.errors.as_json()})
         return super(InterviewDetailView, self).form_invalid(form)
+
+
+class InterviewResultsView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+    context_object_name = 'interviews'
+    model = Interview
+    template_name = "learning/admission/interview_results.html"
+    campaign = None
+
+    def get_context_data(self, **kwargs):
+        context = super(InterviewResultsView, self).get_context_data(**kwargs)
+        context["campaign"] = self.campaign
+        return context
+
+    def get_queryset(self):
+        self.campaign = Campaign.objects.get(current=True)
+        return (self.model.objects
+                .filter(applicant__campaign=self.campaign)
+                .select_related("applicant", "applicant__exam",
+                                "applicant__online_test")
+                .annotate(average=Avg('comments__score'))
+                .exclude(average__isnull=True)
+                .order_by("-average", "pk"))
