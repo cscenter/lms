@@ -52,7 +52,9 @@ class Applicant(TimeStampedModel):
     REJECTED_BY_INTERVIEW = 'rejected_interview'
     PENDING = 'pending'
     ACCEPT = 'accept'
+    ACCEPT_IF = 'accept_if'
     VOLUNTEER = 'volunteer'
+    THEY_REFUSED = 'they_refused'
     STATUS = (
         (REJECTED_BY_TEST, _('Rejected by test')),
         (REJECTED_BY_EXAM, _('Rejected by exam')),
@@ -63,7 +65,9 @@ class Applicant(TimeStampedModel):
         (INTERVIEW_COMPLETED, _('Interview completed')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
         (ACCEPT, _('Accept')),
+        (ACCEPT_IF, _('Accept with condition')),
         (VOLUNTEER, _("Applicant|Volunteer")),
+        (THEY_REFUSED, _("He or she refused")),
     )
     campaign = models.ForeignKey(
         Campaign,

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+<div class="admission-list-page">
+
+    <div class="page-content">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Результаты набора {{ campaign.code }} / {{ interviews.count }}</h3>
+        </div>
+
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Поступающий</th>
+                <th>Тест</th>
+                <th>Экзамен</th>
+                <th>Интервью</th>
+                <th>Итог</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for interview in interviews %}
+                    <tr>
+                        <td class="applicant">
+                            <a href="{%  url "admission_applicant_detail" interview.applicant.pk %}">{{ interview.applicant.get_full_name }}</a><br>
+                            {{ interview.applicant.university }}
+                        </td>
+                        <td>{{ interview.applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
+                        <td>{{ interview.applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
+                        <td>{{ interview.average|floatformat }}</td>
+                        <td>
+                            <select name="status" id="">
+                                <option value="1">берём</option>
+                                <option value="1">берём в вольные слушатели</option>
+                                <option value="1">берём с условием</option>
+                                <option value="1">не берём</option>
+                                <option value="1">отказался</option>
+                            </select>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
