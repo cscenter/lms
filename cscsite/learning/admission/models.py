@@ -358,7 +358,7 @@ class Interview(TimeStampedModel):
     )
 
     date = models.DateTimeField(_("When"))
-    applicant = models.OneToOneField(
+    applicant = models.ForeignKey(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
