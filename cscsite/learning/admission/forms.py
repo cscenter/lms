@@ -2,14 +2,23 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from collections import OrderedDict
+from functools import reduce
+
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Field
 from decimal import Decimal
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured, \
+    FieldError
 from django.core.urlresolvers import reverse
+from django.forms import BaseModelForm, CharField, ChoiceField, Select
+from django.forms.forms import DeclarativeFieldsMetaclass
+from django.forms.models import ModelFormOptions, fields_for_model, ALL_FIELDS, \
+    BaseModelFormSet, ModelForm
+from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import Ubereditor
@@ -106,3 +115,62 @@ class ApplicantStatusForm(forms.ModelForm):
             FormActions(Submit('update', _('Update')), css_class="pull-right"))
         self.helper.form_action = reverse("admission_applicant_status_update",
                                           args=[self.instance.pk]) + "#update-status-form"
+
+
+INTERVIEW_RESULTS_CHOICES = (
+    ("", "---------"),
+    (Applicant.ACCEPT, "Берём"),
+    (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
+    (Applicant.ACCEPT_IF, "Берём с условием"),
+    (Applicant.REJECTED_BY_INTERVIEW, "Не берём"),
+    (Applicant.THEY_REFUSED, "Отказался"),
+)
+
+
+class InterviewResultsModelForm(ModelForm):
+    """
+    In `InterviewResultsView` we use Interview manager
+    to retrieve data, because one applicant can have many interviews,
+    but in fact we want to update applicant model.
+    """
+    class Meta:
+        model = Applicant
+        fields = ("status",)
+        # FIXME: dont' know why it's not override status widget :<
+        widgets = {
+            'status': Select(choices=INTERVIEW_RESULTS_CHOICES),
+        }
+
+    def __init__(self, **kwargs):
+        """Swap Applicant and Interview models if needed"""
+        if 'instance' in kwargs and isinstance(kwargs['instance'], Interview):
+            interview = kwargs['instance']
+            applicant = kwargs['instance'].applicant
+            applicant.interview = interview
+            kwargs['instance'] = applicant
+        super(InterviewResultsModelForm, self).__init__(**kwargs)
+
+    status = forms.ChoiceField(choices=INTERVIEW_RESULTS_CHOICES,
+                               required=False,
+                               initial="")
+
+    def clean_status(self):
+        data = self.cleaned_data["status"]
+        if not data:
+            return self.instance.status
+        return data
+
+
+class InterviewResultsModelFormSet(BaseModelFormSet):
+    def _existing_object(self, pk):
+        """Override map of existing objects"""
+        if not hasattr(self, '_object_dict'):
+            self._object_dict = {
+                o.applicant.pk: o for o in self.get_queryset()
+            }
+        return super(InterviewResultsModelFormSet, self)._existing_object(pk)
+
+    def add_fields(self, form, index):
+        """form pk depends on queryset, override it too"""
+        super(InterviewResultsModelFormSet, self).add_fields(form, index)
+        form.fields[self._pk_field.name].initial = form.instance.pk
