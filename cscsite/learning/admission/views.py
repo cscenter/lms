@@ -5,23 +5,24 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 import json
 
-from braces.views._access import AccessMixin
-
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import Value, Q, Avg
+from django.db.models import Q, Avg, When, Value, Case, IntegerField
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.views import generic
-from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.base import TemplateResponseMixin, ContextMixin
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
+from extra_views import ModelFormSetView
 
 from learning.admission.filters import ApplicantFilter, InterviewsFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
-    InterviewForm, ApplicantStatusForm
+    InterviewForm, ApplicantStatusForm,  \
+    InterviewResultsModelForm, \
+    InterviewResultsModelFormSet
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
@@ -288,23 +289,43 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         return super(InterviewDetailView, self).form_invalid(form)
 
 
-class InterviewResultsView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
+    """
+    We can have multiple interviews for applicant
+    """
     context_object_name = 'interviews'
-    model = Interview
     template_name = "learning/admission/interview_results.html"
     campaign = None
+    model = Applicant
+    form_class = InterviewResultsModelForm
+    formset_class = InterviewResultsModelFormSet
 
     def get_context_data(self, **kwargs):
-        context = super(InterviewResultsView, self).get_context_data(**kwargs)
+        # XXX: To avoid double query to DB, skip ModelFormSetView action
+        context = ContextMixin.get_context_data(self, **kwargs)
         context["campaign"] = self.campaign
+        context["total"] = self.get_queryset().count()
         return context
 
+    def get_factory_kwargs(self):
+        kwargs = super(InterviewResultsView, self).get_factory_kwargs()
+        kwargs["extra"] = 0
+        kwargs["can_order"] = False
+        kwargs["can_delete"] = False
+        return kwargs
+
     def get_queryset(self):
+        """Sort data by average interview score"""
         self.campaign = Campaign.objects.get(current=True)
-        return (self.model.objects
+        return (Interview.objects
                 .filter(applicant__campaign=self.campaign)
                 .select_related("applicant", "applicant__exam",
                                 "applicant__online_test")
+                # FIXME: investigate how to sort by annotated None values
                 .annotate(average=Avg('comments__score'))
-                .exclude(average__isnull=True)
-                .order_by("-average", "pk"))
+                .annotate(has_comments=Case(
+                    When(average=None, then=Value(0)),
+                    default=Value('1'),
+                    output_field=IntegerField(),
+                ))
+                .order_by("-has_comments", "-average", "pk"))

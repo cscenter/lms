@@ -11,10 +11,19 @@
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Результаты набора {{ campaign.code }} / {{ interviews.count }}</h3>
+          <h3 class="panel-title">Результаты набора {{ campaign.code }} / {{ total }}</h3>
         </div>
 
         <div class="panel-body">
+        <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+        {{ formset.management_form }}
+        {% if formset.errors %}
+            <p class="errornote">
+            {% if formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+            </p>
+            {{ formset.non_form_errors }}
+        {% endif %}
+
           <table class="table">
             <thead>
               <tr>
@@ -25,31 +34,32 @@
                 <th>Итог</th>
               </tr>
             </thead>
+
             <tbody>
-                {% for interview in interviews %}
+                {% for form in formset %}
+                    {% with applicant=form.instance interview=form.instance.interview %}
                     <tr>
                         <td class="applicant">
-                            <a href="{%  url "admission_applicant_detail" interview.applicant.pk %}">{{ interview.applicant.get_full_name }}</a><br>
-                            {{ interview.applicant.university }}
+                            <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
+                            {{ applicant.university }}
                         </td>
-                        <td>{{ interview.applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
-                        <td>{{ interview.applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
+                        <td>{{ applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
+                        <td>{{ applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
                         <td>{{ interview.average|floatformat }}</td>
                         <td>
-                            <select name="status" id="">
-                                <option value="1">берём</option>
-                                <option value="1">берём в вольные слушатели</option>
-                                <option value="1">берём с условием</option>
-                                <option value="1">не берём</option>
-                                <option value="1">отказался</option>
-                            </select>
-
+                            {{ form.status }}
+                            {{ form.status.errors }}
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
                         </td>
                     </tr>
+                    {% endwith %}
                 {% endfor %}
             </tbody>
           </table>
-
+            <button type="submit" class="btn btn-primary btn-outline">Сохранить</button>
+        </form>
         </div>
       </div>
     </div>
