@@ -73,7 +73,7 @@
   }
 }
 
-.admission-list-page {
+.admission-list-page, .interview-results-page  {
   @extend .container;
 
   form {
@@ -138,6 +138,7 @@
       }
     }
   }
+
   .date {
     width: 15%;
     padding-left: 0 !important;
@@ -154,6 +155,7 @@
       font-size: 16px;
     }
   }
+
   .members {
     width: 35%;
     position: relative;
@@ -229,6 +231,10 @@
   }
   .slidePanel-inner {
     padding: 0 15px;
+  }
+
+  .grey {
+    color: $color-grey;
   }
 }
 

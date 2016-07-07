@@ -7,7 +7,7 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
-<div class="admission-list-page">
+<div class="interview-results-page">
 
     <div class="page-content">
       <div class="panel">
@@ -46,7 +46,7 @@
                         </td>
                         <td>{{ applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
-                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|unlocalize }}{% else %}{{ applicant.get_status_display }}{% endif %}</td>
+                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|unlocalize }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
                         <td>
                             {{ form.status }}
                             {{ form.status.errors }}
