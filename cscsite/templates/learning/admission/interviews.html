@@ -105,7 +105,7 @@
                         </td>
                         <td>
                             {% if interview.status == "completed" %}
-                                {{ interview.average|floatdot:1 }}
+                                {{ interview.average|floatdot:2 }}
                             {% elif not filter.form.status.value or filter.form.status.value == "agreed" %}
                                 <span>{{ interview.get_status_display }}</span>
                             {% endif %}

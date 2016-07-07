@@ -4,6 +4,7 @@
 {% load crispy_forms_tags %}
 {% load staticfiles %}
 {% load markdown from core_tags %}
+{% load floatdot from core_tags %}
 
 {% block title %} {{ applicant.campaign.code }} - {{ applicant.get_full_name }}{% endblock title %}
 
@@ -109,7 +110,7 @@
             {% if comments %}
                 <ul class="panel-info">
                     <li>
-                      <div class="num text-info">{{ interview.average_score|floatformat }}</div>
+                      <div class="num text-info">{{ interview.average_score|floatdot:2 }}</div>
                       <p>Средний балл</p>
                     </li>
                   </ul>
