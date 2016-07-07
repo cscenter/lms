@@ -47,16 +47,17 @@
                 }).done(function (data) {
                     // Form was valid and saved, reload the page
                     if (data.success == "true") {
-                        swal({
-                            title: "Данные сохранены",
-                            text: "Страница будет перезагружена\nTODO: перезагрузка будет убрана в ближайшее время!",
-                            type: "success"
-                        }, function(){ window.location.reload(); }
-                        );
-                        // $.jGrowl(
-                        //     "Комментарий успешно сохранён. Страница будет перезагружена (TODO: перезагрузка будет убрана в ближайшее время)",
-                        //     { position: 'bottom-right' }
+                        // swal({
+                        //     title: "Данные сохранены",
+                        //     text: "Страница будет перезагружена\nTODO: перезагрузка будет убрана в ближайшее время!",
+                        //     type: "success"
+                        // }, function(){ window.location.reload(); }
                         // );
+                        $.jGrowl(
+                            "Комментарий успешно сохранён. Страница будет перезагружена (TODO: перезагрузка будет убрана в ближайшее время)",
+                            { position: 'bottom-right' }
+                        );
+                        setTimeout(function() {window.location.reload();}, 500);
                         // FIXME: update #comments block instead of reload!
                     } else {
                         swal({
