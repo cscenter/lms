@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
-{% load l10n %}
+{% load floatdot from core_tags %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -46,7 +46,7 @@
                         </td>
                         <td>{{ applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
-                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|unlocalize }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
+                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
                         <td>
                             {{ form.status }}
                             {{ form.status.errors }}

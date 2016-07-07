@@ -292,6 +292,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     """
     We can have multiple interviews for applicant
     """
+    # TODO: add tests!
     context_object_name = 'interviews'
     template_name = "learning/admission/interview_results.html"
     campaign = None
@@ -315,8 +316,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
             best_interview = max(applicant.interviews.all(),
                                  key=cmp_interview_average)
             if best_interview.average is not None:
-                applicant.best_interview_score = round(best_interview.average,
-                                                       1)
+                applicant.best_interview_score = best_interview.average
             else:
                 applicant.best_interview_score = None
         context["formset"].forms.sort(

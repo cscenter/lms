@@ -153,7 +153,7 @@ def do_markdown(parser, token):
 
 
 @register.filter
-def floatdot(value, decimal_pos=4):
+def floatdot(value, decimal_pos=2):
     """print formatted float with dot as separator"""
     return format(value, ".", decimal_pos)
 floatdot.is_safe = True
