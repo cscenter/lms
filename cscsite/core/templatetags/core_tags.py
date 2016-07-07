@@ -5,6 +5,7 @@ from django.template import (
 )
 from django.template.base import TextNode
 from django.utils.timezone import now
+from django.utils.numberformat import format
 from django.utils.safestring import mark_safe
 
 from ..admin import get_admin_url
@@ -149,3 +150,10 @@ def do_markdown(parser, token):
         tokens[2],  # fragment_name
         [parser.compile_filter(t) for t in tokens[3:]],
     )
+
+
+@register.filter
+def floatdot(value, decimal_pos=4):
+    """print formatted float with dot as separator"""
+    return format(value, ".", decimal_pos)
+floatdot.is_safe = True
