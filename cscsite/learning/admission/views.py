@@ -7,7 +7,7 @@ import json
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Avg, When, Value, Case, IntegerField
+from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -21,8 +21,7 @@ from extra_views import ModelFormSetView
 from learning.admission.filters import ApplicantFilter, InterviewsFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
     InterviewForm, ApplicantStatusForm,  \
-    InterviewResultsModelForm, \
-    InterviewResultsModelFormSet
+    InterviewResultsModelForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
@@ -298,13 +297,32 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     campaign = None
     model = Applicant
     form_class = InterviewResultsModelForm
-    formset_class = InterviewResultsModelFormSet
+    UNREACHABLE_COMMENT_SCORE = Comment.MIN_SCORE - 1
 
     def get_context_data(self, **kwargs):
         # XXX: To avoid double query to DB, skip ModelFormSetView action
         context = ContextMixin.get_context_data(self, **kwargs)
+
+        def cmp_interview_average(interview):
+            if interview.average is not None:
+                return interview.average
+            else:
+                return self.UNREACHABLE_COMMENT_SCORE
+
+        for form in context["formset"].forms:
+            # Select the highest interview score to sort by
+            applicant = form.instance
+            best_interview = max(applicant.interviews.all(),
+                                 key=cmp_interview_average)
+            if best_interview.average is not None:
+                applicant.best_interview_score = round(best_interview.average,
+                                                       1)
+            else:
+                applicant.best_interview_score = None
+        context["formset"].forms.sort(
+            key=lambda f: f.instance.best_interview_score,
+            reverse=True)
         context["campaign"] = self.campaign
-        context["total"] = self.get_queryset().count()
         return context
 
     def get_factory_kwargs(self):
@@ -316,16 +334,19 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
 
     def get_queryset(self):
         """Sort data by average interview score"""
-        self.campaign = Campaign.objects.get(current=True)
-        return (Interview.objects
-                .filter(applicant__campaign=self.campaign)
-                .select_related("applicant", "applicant__exam",
-                                "applicant__online_test")
-                # FIXME: investigate how to sort by annotated None values
-                .annotate(average=Avg('comments__score'))
-                .annotate(has_comments=Case(
-                    When(average=None, then=Value(0)),
-                    default=Value('1'),
-                    output_field=IntegerField(),
-                ))
-                .order_by("-has_comments", "-average", "pk"))
+        if self.campaign is None:
+            self.campaign = Campaign.objects.get(current=True)
+        return (Applicant.objects
+            # TODO: Carefully restrict by status also to optimize query
+            .filter(campaign=self.campaign)
+            .select_related("exam", "online_test")
+            .annotate(has_interviews=Count("interviews__pk"))
+            .filter(has_interviews__gt=0)
+            .prefetch_related(
+                Prefetch(
+                    'interviews',
+                    queryset=(Interview.objects
+                              .annotate(average=Avg('comments__score'))),
+                ),
+            )
+        )
