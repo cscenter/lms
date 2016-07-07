@@ -136,41 +136,15 @@ class InterviewResultsModelForm(ModelForm):
     class Meta:
         model = Applicant
         fields = ("status",)
-        # FIXME: dont' know why it's not override status widget :<
-        widgets = {
-            'status': Select(choices=INTERVIEW_RESULTS_CHOICES),
-        }
-
-    def __init__(self, **kwargs):
-        """Swap Applicant and Interview models if needed"""
-        if 'instance' in kwargs and isinstance(kwargs['instance'], Interview):
-            interview = kwargs['instance']
-            applicant = kwargs['instance'].applicant
-            applicant.interview = interview
-            kwargs['instance'] = applicant
-        super(InterviewResultsModelForm, self).__init__(**kwargs)
+        # FIXME: don't know why widget override doesn't work here
 
     status = forms.ChoiceField(choices=INTERVIEW_RESULTS_CHOICES,
                                required=False,
                                initial="")
 
     def clean_status(self):
+        """Save old status if none provided"""
         data = self.cleaned_data["status"]
         if not data:
             return self.instance.status
         return data
-
-
-class InterviewResultsModelFormSet(BaseModelFormSet):
-    def _existing_object(self, pk):
-        """Override map of existing objects"""
-        if not hasattr(self, '_object_dict'):
-            self._object_dict = {
-                o.applicant.pk: o for o in self.get_queryset()
-            }
-        return super(InterviewResultsModelFormSet, self)._existing_object(pk)
-
-    def add_fields(self, form, index):
-        """form pk depends on queryset, override it too"""
-        super(InterviewResultsModelFormSet, self).add_fields(form, index)
-        form.fields[self._pk_field.name].initial = form.instance.pk

@@ -402,6 +402,9 @@ class Interview(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Comment(TimeStampedModel):
+    MIN_SCORE = -2
+    MAX_SCORE = 2
+
     interview = models.ForeignKey(
         Interview,
         verbose_name=_("Interview"),
@@ -418,7 +421,7 @@ class Comment(TimeStampedModel):
         null=True)
     score = models.SmallIntegerField(
         verbose_name=_("Score"),
-        validators=[MinValueValidator(-2), MaxValueValidator(2)])
+        validators=[MinValueValidator(MIN_SCORE), MaxValueValidator(MAX_SCORE)])
 
     class Meta:
         verbose_name = _("Comment")

@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
+{% load l10n %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -11,7 +12,7 @@
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Результаты набора {{ campaign.code }} / {{ total }}</h3>
+          <h3 class="panel-title">Результаты набора {{ campaign.code }} / {{ formset.total_form_count }}</h3>
         </div>
 
         <div class="panel-body">
@@ -45,7 +46,7 @@
                         </td>
                         <td>{{ applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
-                        <td>{{ interview.average|floatformat }}</td>
+                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|unlocalize }}{% else %}{{ applicant.get_status_display }}{% endif %}</td>
                         <td>
                             {{ form.status }}
                             {{ form.status.errors }}
