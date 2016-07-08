@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
+from collections import Counter
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -303,6 +304,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     def get_context_data(self, **kwargs):
         # XXX: To avoid double query to DB, skip ModelFormSetView action
         context = ContextMixin.get_context_data(self, **kwargs)
+        stats = Counter()
 
         def cmp_interview_average(interview):
             if interview.average is not None:
@@ -313,6 +315,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         for form in context["formset"].forms:
             # Select the highest interview score to sort by
             applicant = form.instance
+            stats.update((applicant.status,))
             best_interview = max(applicant.interviews.all(),
                                  key=cmp_interview_average)
             if best_interview.average is not None:
@@ -323,6 +326,8 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
             key=lambda f: f.instance.best_interview_score,
             reverse=True)
         context["campaign"] = self.campaign
+        context["stats"] = [(Applicant.get_name_by_status_code(s), cnt) for
+                            s, cnt in stats.items()]
         return context
 
     def get_factory_kwargs(self):

@@ -16,6 +16,12 @@
         </div>
 
         <div class="panel-body">
+            <b>Cтатистика</b>:
+            <ul>
+            {% for status, cnt in stats %}
+                <li>{{ status }} - {{ cnt }}</li>
+            {% endfor %}
+            </ul>
         <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
         {{ formset.management_form }}
         {% if formset.errors %}
@@ -28,6 +34,7 @@
           <table class="table">
             <thead>
               <tr>
+                <th>#</th>
                 <th>Поступающий</th>
                 <th>Тест</th>
                 <th>Экзамен</th>
@@ -40,6 +47,7 @@
                 {% for form in formset %}
                     {% with applicant=form.instance interview=form.instance.interview %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td class="applicant">
                             <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
                             {{ applicant.university }}

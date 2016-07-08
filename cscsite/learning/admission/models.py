@@ -202,6 +202,13 @@ class Applicant(TimeStampedModel):
     def clean(self):
         self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
+    @classmethod
+    def get_name_by_status_code(cls, code):
+        for status_code, status_name in cls.STATUS:
+            if status_code == code:
+                return status_name
+        return ""
+
     def __str__(self):
         if self.campaign_id:
             return smart_text(
