@@ -14,3 +14,4 @@
       redis_verify_checksum: true
       redis_socket_path: "/var/run/redis/{{ redis_port }}.sock"
       redis_socket_perm: 770
+      redis_maxmemory: 200mb
