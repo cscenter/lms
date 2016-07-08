@@ -1733,7 +1733,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
         co.capacity = 2
         co.save()
         response = self.client.get(co_url)
-        assert smart_bytes(_("Places available") + b": 1") in response.content
+        assert (smart_bytes(_("Places available")) + b": 1") in response.content
 
 
 @pytest.mark.django_db

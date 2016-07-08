@@ -227,15 +227,16 @@ class UserDetailView(generic.DetailView):
         # Collect stats about successfully passed courses
         if u.is_curator:
             student = context[self.context_object_name]
+            # TODO: Move to separate method and add tests
             context['total_successfully_passed'] = (
-                len(filter(ProgressReport.is_positive_grade,
-                           student.enrollment_set.all())) +
-                len(filter(ProgressReport.is_positive_grade,
-                           student.shadcourserecord_set.all())) +
+                sum(1 for c in student.enrollment_set.all() if
+                    ProgressReport.is_positive_grade(c)) +
+                sum(1 for c in student.shadcourserecord_set.all() if
+                    ProgressReport.is_positive_grade(c)) +
                 len(student.onlinecourserecord_set.all()))
-            context['enrollments_in_current_term'] = len(
-                filter(lambda e: e.course_offering.semester == context['current_semester'],
-                       student.enrollment_set.all()))
+            context['enrollments_in_current_term'] = sum(
+                1 for e in student.enrollment_set.all() if
+                e.course_offering.semester == context['current_semester'])
             student.enrollment_set.all()
         return context
 
