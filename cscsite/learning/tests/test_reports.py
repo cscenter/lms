@@ -146,6 +146,11 @@ def test_report_full(rf,
     check_value_for_header(progress_report, total_passed_header, 1, 1)
     assert progress_report.data[2].pk == student3.pk
     check_value_for_header(progress_report, total_passed_header, 2, 0)
+    # Add well graded shad course to student1
+    SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
+    # 2 co, 1 online course and 1 shad course
+    progress_report = get_progress_report()
+    check_value_for_header(progress_report, total_passed_header, 0, 2 + 1 + 1)
     # TODO: check excluded in report
     # TODO: check grading_type
 

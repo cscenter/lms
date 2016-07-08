@@ -293,7 +293,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     """
     We can have multiple interviews for applicant
     """
-    # TODO: add tests!
+    # TODO: add tests! Think about pagination in the future. No it's too complicated to change queryset
     context_object_name = 'interviews'
     template_name = "learning/admission/interview_results.html"
     campaign = None

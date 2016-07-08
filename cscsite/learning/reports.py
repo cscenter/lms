@@ -324,9 +324,11 @@ class ProgressReportFull(ProgressReport):
 
     def export_row(self, student):
         total_success_passed = (
-            len(filter(self.is_positive_grade, student.courses.values())) +
-            len(filter(self.is_positive_grade, student.shads)) +
-            len(student.online_courses))
+            sum(1 for c in student.courses.values() if
+                self.is_positive_grade(c)) +
+            sum(1 for c in student.shads if self.is_positive_grade(c)) +
+            sum(1 for _ in student.online_courses)
+        )
         row = [
             student.last_name,
             student.first_name,
