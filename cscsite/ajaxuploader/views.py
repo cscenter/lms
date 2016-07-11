@@ -96,7 +96,7 @@ class AjaxProfileImageUploader(generic.base.View):
             return HttpResponseBadRequest("Multi upload not supported")
 
         if len(request.FILES) == 1:
-            upload = request.FILES.values()[0]
+            upload = list(request.FILES.values())[0]
         else:
             return HttpResponseBadRequest("Check file format and size")
 
