@@ -322,9 +322,15 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
                 applicant.best_interview_score = best_interview.average
             else:
                 applicant.best_interview_score = None
-        context["formset"].forms.sort(
-            key=lambda f: f.instance.best_interview_score,
-            reverse=True)
+
+        def cpm_interview_best_score(form):
+            if form.instance.best_interview_score is None:
+                return self.UNREACHABLE_COMMENT_SCORE
+            else:
+                return form.instance.best_interview_score
+
+        context["formset"].forms.sort(key=cpm_interview_best_score,
+                                      reverse=True)
         context["campaign"] = self.campaign
         context["stats"] = [(Applicant.get_name_by_status_code(s), cnt) for
                             s, cnt in stats.items()]
