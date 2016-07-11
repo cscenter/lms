@@ -618,8 +618,10 @@ class CSCUserFilter(django_filters.FilterSet):
         # Remove empty values
         cleaned_data = QueryDict(mutable=True)
         if self.data:
-            for (filter_name, filter_values) in self.data.iterlists():
-                values = filter(None, filter_values)
+            for (filter_name, filter_values) in self.data.items():
+                if not isinstance(filter_values, list):
+                    filter_values = [filter_values]
+                values = [v for v in filter_values if v]
                 if values:
                     cleaned_data.setlist(filter_name, set(values))
         self.data = cleaned_data
@@ -633,7 +635,7 @@ class CSCUserFilter(django_filters.FilterSet):
 
     def cnt_enrollments_filter(self, queryset, value):
         value_list = value.split(u',')
-        value_list = filter(None, value_list)
+        value_list = [v for v in value_list if v]
         if not value_list:
             return queryset
         try:
@@ -661,7 +663,7 @@ class CSCUserFilter(django_filters.FilterSet):
 
     def status_filter(self, queryset, value):
         value_list = value.split(u',')
-        value_list = filter(None, value_list)
+        value_list = [v for v in value_list if v]
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
             return queryset
         elif "studying" in value_list:

@@ -76,7 +76,7 @@ def get_term_by_index(term_index):
     assert term_index >= TERMS_INDEX_START
     terms_in_year = len(SEMESTER_TYPES)
     term_index -= TERMS_INDEX_START
-    year = FOUNDATION_YEAR + term_index / terms_in_year
+    year = int(FOUNDATION_YEAR + term_index / terms_in_year)
     term = term_index % terms_in_year
     for index, (t, _) in enumerate(SEMESTER_TYPES):
         if index == term:
