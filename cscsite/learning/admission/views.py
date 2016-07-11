@@ -52,7 +52,7 @@ class ApplicantContextMixin(object):
             pass
         # get contests description
         contests = {}
-        contest_ids = filter(None, contest_ids)
+        contest_ids = [c for c in contest_ids if c]
         if contest_ids:
             contests_query = Contest.objects.filter(contest_id__in=contest_ids)
             for c in contests_query:

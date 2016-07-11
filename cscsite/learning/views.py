@@ -1023,28 +1023,28 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         return year, term, get_term_index(year, term)
 
     def filter_courses(self, term_index, course_offerings):
-        """Returns courses for selected or latest actual term"""
-        term_cos = [c for c in course_offerings if c.semester.index == term_index]
-        term_set_by_teacher = "term" in self.request.GET
-        # If no courses for default term, get for latest where teacher has activity.
-        if not term_cos and not term_set_by_teacher:
+        """
+        Returns courses for term with `term_index` or for latest term
+        when no active courses founded"""
+        if not any(True for c in course_offerings
+                   if c.semester.index == term_index):
             term_index = self.terms[0].index
-            term_cos = [c for c in course_offerings if c.semester.index == term_index]
-        elif not term_cos:
+        term_cos = [c for c in course_offerings
+                    if c.semester.index == term_index]
+        if not term_cos:
             raise Http404
-        term_cos = sorted(term_cos, key=lambda c: -c.pk)
+        term_cos.sort(key=lambda co: -co.pk)
         return term_cos
 
     def get_filter_assignments(self, assignments):
         try:
             assignments_str = self.request.GET.get("assignments", "")
-            query_assignments = list(map(int,
-                                         filter(None,
-                                                assignments_str.split(","))))
+            query_assignments = [int(a) for a in assignments_str.split(",")
+                                 if a]
         except ValueError:
             query_assignments = False
         if not query_assignments:
-            # Default value
+            # Default values
             filter_assignments = [a for a in assignments[:3]]
         else:
             filter_assignments = [a for a in assignments
