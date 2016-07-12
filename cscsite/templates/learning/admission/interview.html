@@ -26,6 +26,7 @@
         {% endif %}
     </div>
     <div class="date">Дата собеседования: {{ interview.date }}</div>
+    <div class="additional-info">Статус: {{ interview.get_status_display|default_if_none:"<не указан>" }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li class="active" role="presentation">
