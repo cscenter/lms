@@ -2,23 +2,13 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from collections import OrderedDict
-from functools import reduce
-
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field
-from decimal import Decimal
+from crispy_forms.layout import Layout, Div, Submit
 from django import forms
-from django.contrib.admin.widgets import AdminDateWidget
-from django.core.exceptions import ValidationError, ImproperlyConfigured, \
-    FieldError
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.forms import BaseModelForm, CharField, ChoiceField, Select
-from django.forms.forms import DeclarativeFieldsMetaclass
-from django.forms.models import ModelFormOptions, fields_for_model, ALL_FIELDS, \
-    BaseModelFormSet, ModelForm
-from django.utils import six
+from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import Ubereditor
@@ -118,7 +108,7 @@ class ApplicantStatusForm(forms.ModelForm):
 
 
 INTERVIEW_RESULTS_CHOICES = (
-    ("", "---------"),
+    ("", "------"),
     (Applicant.ACCEPT, "Берём"),
     (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
     (Applicant.ACCEPT_IF, "Берём с условием"),
