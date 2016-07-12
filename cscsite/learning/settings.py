@@ -71,6 +71,7 @@ SUMMER_TERM_START = '1 jul'
 
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after semester starts, in days
 
+# Presume foundation year starts from spring term
 FOUNDATION_YEAR = getattr(settings, 'FOUNDATION_YEAR', 2007)
 CENTER_FOUNDATION_YEAR = getattr(settings, 'CENTER_FOUNDATION_YEAR', 2011)
 # Used for semester index calculation

@@ -13,7 +13,7 @@ from mock import patch, MagicMock
 from learning.management.imports import ImportGradesByStepicID
 from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
                                SEMESTER_TYPES)
-from learning.utils import split_list, get_term_index
+from learning.utils import split_list, get_term_index, get_term_by_index
 from ..factories import *
 
 
@@ -69,6 +69,8 @@ def test_get_term_index():
     assert get_term_index(FOUNDATION_YEAR,
                           SEMESTER_TYPES.spring) == TERMS_INDEX_START
     assert get_term_index(FOUNDATION_YEAR,
+                          SEMESTER_TYPES.summer) == TERMS_INDEX_START + 1
+    assert get_term_index(FOUNDATION_YEAR,
                           SEMESTER_TYPES.autumn) == TERMS_INDEX_START + 2
     assert get_term_index(FOUNDATION_YEAR + 1,
                           SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt
@@ -76,3 +78,24 @@ def test_get_term_index():
                           SEMESTER_TYPES.summer) == TERMS_INDEX_START + cnt + 1
     assert get_term_index(FOUNDATION_YEAR + 7,
                           SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt * 7
+
+
+def test_get_term_by_index():
+    with pytest.raises(AssertionError) as excinfo:
+        get_term_by_index(TERMS_INDEX_START - 1)
+    year, term = get_term_by_index(TERMS_INDEX_START)
+    assert isinstance(year, int)
+    assert year == FOUNDATION_YEAR
+    # Check ordering of terms also
+    assert term == "spring"
+    _, term = get_term_by_index(TERMS_INDEX_START + 1)
+    assert term == "summer"
+    _, term = get_term_by_index(TERMS_INDEX_START + 2)
+    assert term == "autumn"
+    year, term = get_term_by_index(TERMS_INDEX_START + len(SEMESTER_TYPES))
+    assert year == FOUNDATION_YEAR + 1
+    assert term == "spring"
+    year, term = get_term_by_index(TERMS_INDEX_START + 2 * len(SEMESTER_TYPES))
+    assert year == FOUNDATION_YEAR + 2
+    assert term == "spring"
+
