@@ -1032,6 +1032,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         term_cos = [c for c in course_offerings
                     if c.semester.index == term_index]
         if not term_cos:
+            # FIXME: we should redirect here to page with appropriate GET-params
             raise Http404
         term_cos.sort(key=lambda co: -co.pk)
         return term_cos

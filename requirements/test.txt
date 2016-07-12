@@ -7,7 +7,7 @@ colour-runner==0.0.4
 pylint-django==0.7.1
 
 # Fixtures
-factory_boy==2.6.0
+factory_boy==2.7.0
 testfixtures==4.7.0
 
 # Debug

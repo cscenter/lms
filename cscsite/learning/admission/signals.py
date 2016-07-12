@@ -5,13 +5,23 @@ from __future__ import absolute_import, unicode_literals
 from django.apps import apps
 
 
-def post_save_interview_update_applicant_status(sender, instance, created,
-                                                  *args, **kwargs):
-    if not created:
-        return
+def post_save_interview(sender, instance, created,
+                        *args, **kwargs):
+    """
+    Set appropriate applicant status based on interview status.
+    Revert applicant status to `INTERVIEW_TOBE_SCHEDULED` when interview
+    status was changed to `CANCELED` or `DEFERRED`. Presume we have no
+    concurrent  active interviews for one applicant, it means we first
+    canceled old one and only after that create the new one.
+    """
     Applicant = apps.get_model('admission', 'Applicant')
-    instance.applicant.status = Applicant.INTERVIEW_SCHEDULED
-    instance.applicant.save()
+    Interview = apps.get_model('admission', 'Interview')
+    interview = instance
+    if created and interview.status in [Interview.APPROVAL, Interview.WAITING]:
+        interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
+    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
+        interview.applicant.status = Applicant.INTERVIEW_TOBE_SCHEDULED
+    interview.applicant.save()
 
 
 def post_save_interview_comment(sender, instance, created,
