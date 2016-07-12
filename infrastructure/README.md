@@ -11,6 +11,7 @@
 
 
 TODO (important):
+* install newerest version of python3.4(4-5) with ppa:fkrull/deadsnakes
 * restore db from s3
 * deploy for cscenter and csclub
 * change uwsgi process groups to `shared` if u need ability to change files from every site. Or update django upload behaviour
