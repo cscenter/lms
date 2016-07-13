@@ -122,5 +122,5 @@ class TeacherDetailView(generic.DetailView):
 
 
 @requires_csrf_token
-def custom_page_not_found(request, template_name='404.html'):
+def custom_page_not_found(request, exception, template_name='404.html'):
     return redirect('http://old.compsciclub.ru' + request.path)
