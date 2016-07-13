@@ -11,7 +11,7 @@ factory_boy==2.7.0
 testfixtures==4.7.0
 
 # Debug
-django-debug-toolbar-template-timings==0.6.4
+django-debug-toolbar-template-timings==0.6.6
 
 # Shell+
 django-extensions==1.6.1
