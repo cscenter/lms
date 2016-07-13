@@ -1,4 +1,4 @@
-Django==1.8.13
+Django==1.9.7
 
 Unipath==1.1
 requests==2.9.1
