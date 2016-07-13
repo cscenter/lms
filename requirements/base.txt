@@ -11,7 +11,7 @@ six==1.10.0
 pytz==2016.1
 
 # Db support
-psycopg2==2.6.1
+psycopg2==2.6.2
 # JsonField support for Django <= 1.8
 jsonfield==1.0.3
 django-prettyjson==0.2.1
