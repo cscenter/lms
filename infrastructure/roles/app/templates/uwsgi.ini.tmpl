@@ -3,7 +3,7 @@
 chdir           = /home/{{ item }}/site/repo/cscsite
 module          = {{ item }}.wsgi:application
 home            = /home/{{ item }}/site/env
-pythonpath      = /home/{{ item }}/site/env/lib/python2.7/site-packages
+pythonpath      = /home/{{ item }}/site/env/lib/python3.4/site-packages
 pythonpath      = /home/{{ item }}/site/repo/cscsite
 env             = DJANGO_SETTINGS_MODULE={{ item }}.settings.production
 env             = PYTHONIOENCODING=UTF-8
