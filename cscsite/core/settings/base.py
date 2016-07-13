@@ -58,7 +58,7 @@ TEMPLATES = [
     },
 ]
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'flat',
     'modeltranslation', # insert before admin
     'django.contrib.admin',
@@ -96,7 +96,7 @@ INSTALLED_APPS = (
     'prettyjson',
     'mptt',
     'learning.gallery.apps.GalleryConfig'
-)
+]
 
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
@@ -132,23 +132,23 @@ CACHES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 LANGUAGE_CODE = 'ru'
-LANGUAGES = (
+LANGUAGES = [
     ('ru', "Russian"),
     ('en', "English"),
-)
+]
 USE_I18N = True
 USE_L10N = True
-LOCALE_PATHS = (
+LOCALE_PATHS = [
     Path(PROJECT_DIR, "core", "locale"),
-)
+]
 
 TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
 AUTH_USER_MODEL = "users.CSCUser"
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     "users.backends.EmailOrUsernameModelBackend",
-)
+]
 CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
 
 LOGIN_URL = "/login/"
@@ -178,18 +178,18 @@ DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 STATIC_URL = '/static/'
 STATIC_ROOT = PROJECT_DIR.child("static")
 
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     PROJECT_DIR.child("assets"),
-)
+]
 
 # See django-pipeline for details
 PIPELINE = {}
 STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
 
-STATICFILES_FINDERS = (
+STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
+]
 
 
 HASHIDS_SALT = "***REMOVED***"

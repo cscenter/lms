@@ -1,5 +1,5 @@
 """
-CS center app specific settings
+CS club app specific settings
 """
 
 from unipath import Path
@@ -11,7 +11,7 @@ SITE_ID = 2
 ROOT_URLCONF = 'csclub.urls'
 WSGI_APPLICATION = 'csclub.wsgi.application'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'solid_i18n.middleware.SolidLocaleMiddleware',
@@ -24,12 +24,12 @@ MIDDLEWARE_CLASSES = (
 
     'core.notifications.UnreadNotificationsCacheMiddleware',
     'csclub.middleware.CurrentCityMiddleware',
-)
+]
 
-INSTALLED_APPS += (
+INSTALLED_APPS += [
     'captcha',
     'registration',
-)
+]
 
 
 SOLID_I18N_USE_REDIRECTS = False
@@ -38,9 +38,9 @@ SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
 # FIXME: Remove after Django 1.8.4 is released?
 # https://code.djangoproject.com/ticket/24159
-LOCALE_PATHS += (
+LOCALE_PATHS += [
     Path(BASE_DIR, "locale"),
-)
+]
 
 # Template overrides
 TEMPLATES[0]['DIRS'] = [BASE_DIR.child("templates")] + TEMPLATES[0]['DIRS']
