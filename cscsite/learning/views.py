@@ -1716,7 +1716,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
 
         def get_final_grade_widget(enrollment_pk):
             key = GradeBookFormFactory.FINAL_GRADE_PREFIX.format(enrollment_pk)
-            return kwargs['form'][key]
+            return context['form'][key]
 
         for enrollment in self.enrollment_list:
             student_id = enrollment.student_id
