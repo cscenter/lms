@@ -262,7 +262,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         kwargs.update({"interview_id": interview_id})
         if self.request.is_ajax():
             try:
-                json_data = json.loads(self.request.body)
+                json_data = json.loads(self.request.body.decode("utf-8"))
                 kwargs.update({
                     'data': json_data,
                 })
