@@ -16,7 +16,7 @@ MEDIA_ROOT = Path('/shared', 'media')
 RAVEN_CONFIG = {
     # Note(lebedev): see https://app.getsentry.com/cscenter/cscenter/docs/django
     # for instructions.
-    "dsn": "https://f2a254aefeae4aeaa09657771205672f@app.getsentry.com/13763"
+    "dsn": "https://8e585e0a766b4a8786870813ed7a4be4:143a5566340f4955a257151f2199c3e5@app.getsentry.com/13763"
 }
 
 CACHES = {
@@ -26,7 +26,7 @@ CACHES = {
     }
 }
 
-# INSTALLED_APPS += ['raven.contrib.django.raven_compat',]
+INSTALLED_APPS += ['raven.contrib.django.raven_compat',]
 
 LOGGING = {
     'version': 1,
