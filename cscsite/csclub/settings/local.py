@@ -2,11 +2,11 @@ import sys
 
 from .base import *
 
-INSTALLED_APPS += ('fixture_media',
+INSTALLED_APPS += ['fixture_media',
                    'debug_toolbar',
                    'django_extensions',
                    'template_timings_panel',
-                   'rosetta')
+                   'rosetta']
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',

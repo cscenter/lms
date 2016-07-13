@@ -31,9 +31,9 @@ DATABASES = {
 
 # This makes tests almost 2x faster; we don't need strong security and DEBUG
 # during tests
-PASSWORD_HASHERS = (
+PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
-)
+]
 DEBUG = False
 for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
