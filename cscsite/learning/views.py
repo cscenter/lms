@@ -1240,6 +1240,10 @@ class StudentAssignmentDetailMixin(object):
             if c.author == a_s.student:
                 setattr(c, 'first_student_comment', True)
                 break
+        # Dynamically replace label
+        if (not comments and context['user_type'] == 'student' and
+                not a_s.assignment.is_online):
+            context['form'].fields.get('text').label = _("Add solution")
         context['comments'] = comments
         context['one_teacher'] = (a_s
                                   .assignment
@@ -1335,6 +1339,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
             .order_by('assignment__deadline_at',
                       'assignment__course_offering__course__name',
                       'pk'))
+        # TODO: Replace with 1 query
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
