@@ -3,7 +3,6 @@ import sys
 from .base import *
 
 
-
 INSTALLED_APPS += ('fixture_media',
                    'debug_toolbar',
                    'django_extensions',
@@ -23,7 +22,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
     'debug_toolbar.panels.redirects.RedirectsPanel',
-    'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+    # 'template_timings_panel.panels.TemplateTimings.TemplateTimings',
     # 'djdt_flamegraph.FlamegraphPanel',
 ]
 
