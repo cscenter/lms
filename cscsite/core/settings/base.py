@@ -183,6 +183,7 @@ STATICFILES_DIRS = (
 )
 
 # See django-pipeline for details
+PIPELINE = {}
 STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
 
 STATICFILES_FINDERS = (
