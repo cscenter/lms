@@ -183,7 +183,7 @@ class UserDetailView(generic.DetailView):
 
         context['is_editing_allowed'] = (u == self.object or u.is_curator)
         context['has_curator_permissions'] = u.is_curator
-        context['student_projects'] = (self.object.studentproject_set
+        context['student_projects'] = (self.object.project_set
                                        .select_related('semester')
                                        .order_by('semester__index'))
         context['current_semester'] = Semester.get_current()

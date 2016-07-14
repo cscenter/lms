@@ -92,7 +92,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         excellent_total = 0
         good_total = 0
         for s in students:
-            for project in s.studentproject_set.all():
+            for project in s.project_set.all():
                 unique_projects.add(project)
             for enrollment in s.enrollments:
                 total_passed_courses += 1

@@ -11,7 +11,7 @@ from learning.models import Course, Semester, CourseOffering, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, StudyProgram
-from learning.projects.models import StudentProject
+from learning.projects.models import Project
 from .utils import get_current_semester_pair
 from core.models import City
 from users.factories import UserFactory
@@ -242,7 +242,7 @@ class NonCourseEventFactory(factory.DjangoModelFactory):
 
 class StudentProjectFactory(factory.DjangoModelFactory):
     class Meta:
-        model = StudentProject
+        model = Project
 
     name = factory.Sequence(lambda n: "Test student project %03d" % n)
     description = factory.Sequence(lambda n: ("Test student project "
