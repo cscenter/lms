@@ -13,12 +13,12 @@ import floppyforms.__future__ as forms
 from modeltranslation.forms import TranslationModelForm
 
 from core.forms import Ubereditor
+from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
 from learning.settings import GRADES
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, StudentAssignment, \
-    Enrollment, \
-    LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
+    Enrollment
 
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        onclick='history.go(-1);',

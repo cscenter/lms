@@ -20,8 +20,8 @@ class CSCUserQuerySet(query.QuerySet):
            practices and projects, etc"""
 
         from .models import CSCUser, SHADCourseRecord
-        from learning.models import Enrollment, CourseClass, StudentProject, \
-            Semester, CourseOffering
+        from learning.models import Enrollment, CourseClass, Semester, CourseOffering
+        from learning.projects.models import StudentProject
 
         # Note: At the same time student must be only in one of these groups
         # So, group_by not necessary for this m2m relationship (in theory)

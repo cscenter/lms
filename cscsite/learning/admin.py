@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -9,15 +11,13 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.admin import UbereditorMixin, WiderLabelsMixin
 from core.models import apply_related_spec
+from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
-    AssignmentComment, Enrollment, NonCourseEvent, StudentProject, OnlineCourse, \
+    AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
     CourseOfferingTeacher, InternationalSchool, Useful
-from learning.settings import PARTICIPANT_GROUPS
-from bitfield import BitField
-from bitfield.forms import BitFieldCheckboxSelectMultiple
 
 
 class RelatedSpecMixin(object):
@@ -189,11 +189,6 @@ class NonCourseEventAdmin(admin.ModelAdmin):
     list_display = ['name', 'date', 'venue']
 
 
-class StudentProjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'project_type', 'semester', 'grade']
-    list_filter = ['semester']
-
-
 class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
     pass
 
@@ -222,5 +217,4 @@ admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
-admin.site.register(StudentProject, StudentProjectAdmin)
 admin.site.register(Useful, UsefulAdmin)
