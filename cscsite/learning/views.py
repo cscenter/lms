@@ -218,8 +218,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         # Note: Logic repeated from .site_related() CourseOffering queryset
         # to avoid additional query.
         if self.request.site.domain == settings.CLUB_DOMAIN:
-            q = q.filter(course_offering__is_open=True).exclude(
-                course_offering__semester__type=SEMESTER_TYPES.summer)
+            q = q.filter(course_offering__is_open=True)
             if hasattr(self.request, 'city'):
                 q = q.filter(Q(course_offering__city__pk=self.request.city.code)
                              | Q(course_offering__city__isnull=True))
@@ -230,6 +229,23 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
+        # On club site hide summer classes if student not enrolled on
+        if self.request.site.domain == settings.CLUB_DOMAIN:
+            summer_enrollments = Enrollment.objects.filter(
+                student=self.request.user,
+                course_offering__is_open=True,
+                course_offering__semester__type=SEMESTER_TYPES.summer
+            ).values_list("course_offering__pk", flat=True)
+
+            def club_filter_co(course_class):
+                co = course_class.course_offering
+                if (co.semester.type != SEMESTER_TYPES.summer or
+                        co.pk in summer_enrollments):
+                    return True
+                return False
+            context["object_list"] = filter(club_filter_co,
+                                            context["object_list"])
+
         context['next_date'] = self._month_date + relativedelta(months=1)
         context['prev_date'] = self._month_date + relativedelta(months=-1)
         context['user_type'] = self.user_type
@@ -237,7 +253,6 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         events = sorted(chain(context['object_list'],
                               self._non_course_events.all()),
                         key=lambda evt: (evt.date, evt.starts_at))
-
         dates_to_events = defaultdict(list)
         for event in events:
             dates_to_events[event.date].append(event)
@@ -363,13 +378,6 @@ class CourseStudentListView(StudentOnlyMixin,
 
     def get_context_data(self, **kwargs):
         year, semester_type = utils.get_current_semester_pair()
-        if (settings.SITE_ID != settings.CENTER_SITE_ID and
-                semester_type == SEMESTER_TYPES.summer):
-            return {
-                "course_list_available": None,
-                "enrollments_ongoing": None,
-                "enrollments_archive": None
-            }
         available = (CourseOffering.custom.site_related(self.request)
                      .filter(semester__type=semester_type,
                              semester__year=year)
@@ -378,6 +386,11 @@ class CourseStudentListView(StudentOnlyMixin,
                                'course__name')
                      .select_related('course', 'semester')
                      .prefetch_related('teachers'))
+        # Show summer courses in available on center site only
+        if (settings.SITE_ID != settings.CENTER_SITE_ID and
+                    semester_type == SEMESTER_TYPES.summer):
+            available = [c for c in available
+                         if c.semester.type != SEMESTER_TYPES.summer]
 
         enrolled_on = (Enrollment.custom
                        .site_related(self.request)
