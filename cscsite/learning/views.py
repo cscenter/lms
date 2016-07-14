@@ -1628,7 +1628,12 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
         co_queryset = CourseOffering.objects
         if not self.request.user.is_curator:
             co_queryset = co_queryset.filter(teachers=self.request.user)
-
+        # TODO: Write test for MultipleObjects error returns if course offering was in the same terms in different towns
+        # FIXME: Add middleware to center site and make it more generic
+        if hasattr(self.request, 'city'):
+            co_queryset = co_queryset.filter(city=self.request.city.code)
+        else:
+            co_queryset = co_queryset.filter(city=settings.DEFAULT_CITY_CODE)
         try:
             course_offering = (co_queryset
                                .select_related('semester', 'course')
