@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import MarkdownRenderView
@@ -117,28 +118,29 @@ urlpatterns = [
     url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
 
     url(r'^users/password_change$',
-        'django.contrib.auth.views.password_change',
+        auth_views.password_change,
         {'post_change_redirect': 'password_change_complete'},
         name='password_change'),
     url(r'^users/password_change/done$',
-        'django.contrib.auth.views.password_change_done',
+        auth_views.password_change_done,
         name='password_change_complete'),
     url(r'^users/password_reset$',
-       'django.contrib.auth.views.password_reset',
-       {'post_reset_redirect' : 'password_reset_done',
-        'email_template_name': 'emails/password_reset.html'},
-       name='password_reset'),
+        auth_views.password_reset,
+        {'post_reset_redirect': 'password_reset_done',
+         'email_template_name': 'emails/password_reset.html'},
+        name='password_reset'),
     url(r'^users/password_reset/done$',
-        'django.contrib.auth.views.password_reset_done',
+        auth_views.password_reset_done,
         name='password_reset_done'),
     url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        'django.contrib.auth.views.password_reset_confirm',
+        auth_views.password_reset_confirm,
         {'post_reset_redirect' : 'password_reset_complete'},
-       name='password_reset_confirm'),
+        name='password_reset_confirm'),
     url(r'^users/reset/done$',
-        'django.contrib.auth.views.password_reset_complete',
+        auth_views.password_reset_complete,
         name='password_reset_complete'),
-    url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(), name='render_markdown'),
+    url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(),
+        name='render_markdown'),
 
     url(r'^', include('learning.urls')),
     url(r'^', include('learning.admission.urls')),
@@ -150,16 +152,19 @@ if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
 
 if settings.DEBUG:
+    from django.views.defaults import page_not_found, bad_request, \
+        permission_denied, server_error
+
     # This allows the error pages to be debugged during development, just visit
     # these url in browser to see how these error pages look like.
     urlpatterns += [
-        url(r'^400/$', 'django.views.defaults.bad_request',
+        url(r'^400/$', bad_request,
             kwargs={'exception': Exception("Page not Found")}),
-        url(r'^403/$', 'django.views.defaults.permission_denied',
+        url(r'^403/$', permission_denied,
             kwargs={'exception': Exception("Page not Found")}),
-        url(r'^404/$', 'django.views.defaults.page_not_found',
+        url(r'^404/$', page_not_found,
             kwargs={'exception': Exception("Page not Found")}),
-        url(r'^500/$', 'django.views.defaults.server_error',
+        url(r'^500/$', server_error,
             kwargs={'exception': Exception("Page not Found")}),
     ]
 
