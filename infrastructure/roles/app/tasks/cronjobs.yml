@@ -10,6 +10,7 @@
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py cscbackup
       --settings={{item}}.settings.production
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscbackup.log
       2>&1
   with_items:
@@ -26,6 +27,7 @@
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py notify
       --settings={{ item }}.settings.production
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
       2>&1
   with_items:
@@ -41,6 +43,7 @@
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py notification_cleanup
       --settings={{ item }}.settings.production
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:
     - "{{ cscenter_user }}"
