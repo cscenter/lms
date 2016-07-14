@@ -10,8 +10,8 @@ from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, StudentProject, \
-    CourseOfferingTeacher, StudyProgram
+    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, StudyProgram
+from learning.projects.models import StudentProject
 from .utils import get_current_semester_pair
 from core.models import City
 from users.factories import UserFactory
