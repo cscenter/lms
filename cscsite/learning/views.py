@@ -231,11 +231,14 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
                    .get_context_data(*args, **kwargs))
         # On club site hide summer classes if student not enrolled on
         if self.request.site.domain == settings.CLUB_DOMAIN:
-            summer_enrollments = Enrollment.objects.filter(
-                student=self.request.user,
-                course_offering__is_open=True,
-                course_offering__semester__type=SEMESTER_TYPES.summer
-            ).values_list("course_offering__pk", flat=True)
+            if self.request.user.is_authenticated():
+                summer_enrollments = Enrollment.objects.filter(
+                    student=self.request.user,
+                    course_offering__is_open=True,
+                    course_offering__semester__type=SEMESTER_TYPES.summer
+                ).values_list("course_offering__pk", flat=True)
+            else:
+                summer_enrollments = []
 
             def club_filter_co(course_class):
                 co = course_class.course_offering
