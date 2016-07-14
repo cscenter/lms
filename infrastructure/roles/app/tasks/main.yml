@@ -104,6 +104,14 @@
     group: "{{ group_shared }}"
     mode: 0775
 
+- name: Create tmp folder for django-dbbackup
+  file:
+    path: "/shared/backup_tmp"
+    state: directory
+    owner: "ubuntu"
+    group: "{{ group_shared }}"
+    mode: 0775
+
 - name: Process db
   include: db.yml
   tags:
