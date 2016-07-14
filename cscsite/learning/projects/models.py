@@ -18,7 +18,7 @@ from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair
 
 
-def studentproject_slides_file_name(self, filename):
+def project_slides_file_name(self, filename):
     year, type = get_current_semester_pair()
     return os.path.join('project_presentations',
                         '{}-{}'.format(self.semester.year, self.semester.type),
@@ -26,7 +26,7 @@ def studentproject_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
-class StudentProject(TimeStampedModel):
+class Project(TimeStampedModel):
     GRADES = GRADES
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
                             ('research', _("StudentProject|Research")))
@@ -63,7 +63,7 @@ class StudentProject(TimeStampedModel):
     presentation = models.FileField(
         _("Presentation"),
         blank=True,
-        upload_to=studentproject_slides_file_name)
+        upload_to=project_slides_file_name)
     is_external = models.BooleanField(
         _("External project"),
         default=False)

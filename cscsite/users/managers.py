@@ -21,7 +21,7 @@ class CSCUserQuerySet(query.QuerySet):
 
         from .models import CSCUser, SHADCourseRecord
         from learning.models import Enrollment, CourseClass, Semester, CourseOffering
-        from learning.projects.models import StudentProject
+        from learning.projects.models import Project
 
         # Note: At the same time student must be only in one of these groups
         # So, group_by not necessary for this m2m relationship (in theory)
@@ -92,8 +92,8 @@ class CSCUserQuerySet(query.QuerySet):
                     )
                 ),
                 Prefetch(
-                    'studentproject_set',
-                    queryset=(StudentProject.objects
+                    'project_set',
+                    queryset=(Project.objects
                               .order_by('project_type')
                               .select_related('semester')
                               .order_by('semester__index')),
