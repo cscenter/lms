@@ -26,6 +26,21 @@ def project_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
+class ProjectStudent(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL)
+    project = models.ForeignKey('Project')
+
+    class Meta:
+        verbose_name = _("Project student")
+        verbose_name_plural = _("Project students")
+        unique_together = [['student', 'project']]
+
+    def __str__(self):
+        return "{0} [{1}]".format(smart_text(self.project),
+                                  smart_text(self.student))
+
+
+@python_2_unicode_compatible
 class Project(TimeStampedModel):
     GRADES = GRADES
     PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
@@ -36,13 +51,14 @@ class Project(TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
+
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
-        # XXX: Can generate duplicates here if related user has both groups
-        # Unlikely due to admin form validation, but possible in theory
+        # XXX: Admin can generate duplicates if user has both groups
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                         PARTICIPANT_GROUPS.GRADUATE_CENTER]})
+                                         PARTICIPANT_GROUPS.GRADUATE_CENTER]},
+        through=ProjectStudent)
 
     grade = StatusField(
         verbose_name=_("Grade"),

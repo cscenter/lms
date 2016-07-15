@@ -24,9 +24,10 @@ from bs4 import BeautifulSoup
 import factory
 from icalendar import Calendar, Event
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
-from learning.factories import StudentProjectFactory, SemesterFactory, \
+from learning.factories import SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory, StudyProgramFactory
+from learning.projects.factories import StudentProjectFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
 from .admin import CSCUserCreationForm, CSCUserChangeForm

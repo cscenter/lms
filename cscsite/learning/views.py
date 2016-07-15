@@ -229,6 +229,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
     def get_context_data(self, *args, **kwargs):
         context = (super(CalendarMixin, self)
                    .get_context_data(*args, **kwargs))
+        # TODO: add tests
         # On club site hide summer classes if student not enrolled on
         if self.request.site.domain == settings.CLUB_DOMAIN:
             if self.request.user.is_authenticated():
