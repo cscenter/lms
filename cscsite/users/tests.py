@@ -328,23 +328,6 @@ class UserTests(MyUtilitiesMixin, TestCase):
         form = CSCUserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
 
-    def test_projects(self):
-        """
-        Students should have "student projects" in their info
-        """
-        user = UserFactory(groups=[CSCUser.group_pks.STUDENT_CENTER],
-                           enrollment_year='2013')
-        semester1 = SemesterFactory.create(year=2014, type='spring')
-        semester2 = SemesterFactory.create(year=2014, type='autumn')
-        sp1 = StudentProjectFactory.create(students=[user], semester=semester1)
-        sp2 = StudentProjectFactory.create(students=[user],
-                                           semester=semester2,
-                                           description="")
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertContains(resp, sp1.name)
-        self.assertContains(resp, sp1.description)
-        self.assertContains(resp, sp2.name)
-
     def test_shads(self):
         """
         Students should have "shad courses" in profile page
