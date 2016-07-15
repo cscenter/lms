@@ -11,7 +11,7 @@ def update_forward(apps, schema_editor):
     Project = apps.get_model('projects', 'Project')
     old_table = Project.students.through._meta.db_table
     ProjectStudent = apps.get_model('projects', 'ProjectStudent')
-    new_table = ProjectStudents._meta.db_table
+    new_table = ProjectStudent._meta.db_table
     cursor = connection.cursor()
     with transaction.atomic():
         cursor.execute("INSERT INTO %s (project_id, student_id) "
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ProjectStudents',
+            name='ProjectStudent',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='projects.Project')),
@@ -42,10 +42,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='students2',
-            field=models.ManyToManyField(related_name='projects', through='projects.ProjectStudents', to=settings.AUTH_USER_MODEL, verbose_name='Students'),
+            field=models.ManyToManyField(related_name='projects', through='projects.ProjectStudent', to=settings.AUTH_USER_MODEL, verbose_name='Students'),
         ),
         migrations.AlterUniqueTogether(
-            name='projectstudents',
+            name='projectstudent',
             unique_together=set([('student', 'project')]),
         ),
         migrations.RunPython(update_forward),
