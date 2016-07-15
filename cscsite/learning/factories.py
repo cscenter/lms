@@ -2,19 +2,19 @@
 from __future__ import unicode_literals, absolute_import
 
 import datetime
-import factory
 
+import factory
 from django.utils import timezone
-from learning.settings import PARTICIPANT_GROUPS
+
+from core.models import City
 from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, StudyProgram
-from learning.projects.models import Project
-from .utils import get_current_semester_pair
-from core.models import City
+from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
+from .utils import get_current_semester_pair
 
 
 class CourseFactory(factory.DjangoModelFactory):
@@ -238,23 +238,3 @@ class NonCourseEventFactory(factory.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = "13:00"
     ends_at = "13:45"
-
-
-class StudentProjectFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Project
-
-    name = factory.Sequence(lambda n: "Test student project %03d" % n)
-    description = factory.Sequence(lambda n: ("Test student project "
-                                              "description %03d" % n))
-    supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
-    project_type = 'practice'
-    semester = factory.SubFactory(SemesterFactory)
-
-    @factory.post_generation
-    def students(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            for student in extracted:
-                self.students.add(student)

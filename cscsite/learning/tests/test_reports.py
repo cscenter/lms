@@ -7,7 +7,8 @@ import pytest
 from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
-    EnrollmentFactory, StudentProjectFactory
+    EnrollmentFactory
+from learning.projects.factories import StudentProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GRADES, STUDENT_STATUS, GRADING_TYPES, \
