@@ -58,7 +58,7 @@ solid_i18n==1.1.0
 # hoep==1.0.2
 git+https://github.com/pacahon/Hoep.git@0d4c0507dcb34d1b63a099c8b08656b66394bc37
 # whitelist-based HTML sanitization
-bleach==1.4.2
+bleach==1.4.3
 
 # Admin theme
 django-flat-theme==1.1.3
