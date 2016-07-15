@@ -1590,7 +1590,8 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
                and semester.starts_at <= now_ <= semester.ends_at:
                 co = semester.courseofferings[0]
                 url = reverse(self.ms_url_name,
-                              args=[co.course.slug,
+                              args=[co.get_city(),
+                                    co.course.slug,
                                     co.semester.year,
                                     co.semester.type])
                 raise MarksSheetTeacherDispatchView.RedirectException(url)
