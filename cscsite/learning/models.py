@@ -252,8 +252,7 @@ class CourseOffering(TimeStampedModel):
         related_name='enrolled_on_set',
         blank=True,
         through='Enrollment')
-    city = models.ForeignKey(City, null=True, blank=True,
-                             default=settings.DEFAULT_CITY_CODE)
+    city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
