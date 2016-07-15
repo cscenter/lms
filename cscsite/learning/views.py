@@ -220,7 +220,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         if self.request.site.domain == settings.CLUB_DOMAIN:
             q = q.filter(course_offering__is_open=True)
             if hasattr(self.request, 'city'):
-                q = q.filter(Q(course_offering__city__pk=self.request.city.code)
+                q = q.filter(Q(course_offering__city__pk=self.request.city_code)
                              | Q(course_offering__city__isnull=True))
         else:
             q = q.filter(course_offering__city__pk=settings.DEFAULT_CITY_CODE)
@@ -955,7 +955,7 @@ class VenueListView(generic.ListView):
         q = Venue.objects.filter(sites__pk=settings.SITE_ID)
         if hasattr(self.request, 'city'):
             q = q.filter(
-                Q(city__pk=self.request.city.code) | Q(city__isnull=True))
+                Q(city__pk=self.request.city_code) | Q(city__isnull=True))
         return q
 
 
@@ -1632,12 +1632,9 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
         co_queryset = CourseOffering.objects
         if not self.request.user.is_curator:
             co_queryset = co_queryset.filter(teachers=self.request.user)
-        # TODO: Write test for MultipleObjects error returns if course offering was in the same terms in different towns
-        # FIXME: Add middleware to center site and make it more generic
-        if hasattr(self.request, 'city'):
-            co_queryset = co_queryset.filter(city=self.request.city.code)
-        else:
-            co_queryset = co_queryset.filter(city=settings.DEFAULT_CITY_CODE)
+        # TODO: add tests
+        city_code = "RU {}".format(self.kwargs['city'].upper())
+        co_queryset = co_queryset.filter(city=city_code)
         try:
             course_offering = (co_queryset
                                .select_related('semester', 'course')
@@ -1693,7 +1690,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
             url_name = 'markssheet_teacher'
         messages.info(self.request, _('Gradebook successfully saved.'),
                       extra_tags='timeout')
-        return reverse(url_name, args=[co.course.slug,
+        return reverse(url_name, args=[co.get_city(),
+                                       co.course.slug,
                                        co.semester.year,
                                        co.semester.type])
 
@@ -1827,6 +1825,11 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             base_qs = CourseOffering.objects
         else:
             base_qs = CourseOffering.objects.filter(teachers=request.user)
+
+        # TODO: add tests
+        city_code = "RU {}".format(self.kwargs['city'].upper())
+        base_qs = base_qs.filter(city=city_code)
+
         try:
             co = base_qs.get(
                 course__slug=course_slug,
@@ -1858,6 +1861,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             structured[a_s.student][a_s.assignment] = a_s.grade
 
         header = viewvalues(structured)
+        # FIXME: raise StopIteration if no students found. Add test
         header = next(iter(header)).keys()
         for _, by_assignment in structured.items():
             # we should check for "assignment consistency": that all
@@ -1895,8 +1899,10 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
         if not request.user.is_authenticated() or not request.user.is_curator:
             filter['teachers__in'] = [request.user.pk]
         co = get_object_or_404(CourseOffering, **filter)
-        url = reverse('markssheet_teacher',
-                      args=[co.course.slug, co.semester.year, co.semester.type])
+        url = reverse('markssheet_teacher', args=[co.get_city(),
+                                                  co.course.slug,
+                                                  co.semester.year,
+                                                  co.semester.type])
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():

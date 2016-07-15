@@ -71,7 +71,7 @@ urlpatterns = [
     url(r'^staff/course-marks/$',
         MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
-    url(r'^staff/course-marks/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
+    url(r'^staff/course-marks/(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         MarksSheetTeacherView.as_view(is_for_staff=True),
         name='course_markssheet_staff'),
     url(r'^staff/student-search/$',
