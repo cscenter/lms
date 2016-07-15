@@ -80,14 +80,6 @@ FILE_UPLOAD_HANDLERS = [
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/',
-        'STATS_FILE': PROJECT_DIR.child("webpack-stats-local.json"),
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
-    }
-}
-
 SLIDESHARE_API_KEY = "OX5YoPYg"
 SLIDESHARE_SECRET = "R3lITlTK"
 SLIDESHARE_USERNAME = "pacahon"

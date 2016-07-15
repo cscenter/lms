@@ -4,6 +4,7 @@ from core.models import City
 
 CITIES_LIST = []
 
+
 def cities(request):
     if not CITIES_LIST:
         cities = City.objects.all()
