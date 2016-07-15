@@ -27,7 +27,7 @@ class RelatedSpecMixin(object):
 
 
 class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
-    pass
+    list_display = ['name_ru', 'name_en']
 
 
 class CourseOfferingTeacherInline(admin.TabularInline):
