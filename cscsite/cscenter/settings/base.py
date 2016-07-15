@@ -14,6 +14,7 @@ BASE_DIR = Path(__file__).ancestor(2)
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
+    'core.middleware.CurrentCityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'users.backends.AuthenticationMiddleware',

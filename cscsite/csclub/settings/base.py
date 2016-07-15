@@ -21,9 +21,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'core.notifications.UnreadNotificationsCacheMiddleware',
-    'csclub.middleware.CurrentCityMiddleware',
+    'core.middleware.CurrentCityMiddleware',
 ]
 
 INSTALLED_APPS += [
@@ -45,7 +44,7 @@ LOCALE_PATHS += [
 # Template overrides
 TEMPLATES[0]['DIRS'] = [BASE_DIR.child("templates")] + TEMPLATES[0]['DIRS']
 TEMPLATES[0]['OPTIONS']['context_processors'] += (
-    'csclub.context_processors.cities',
+    'core.context_processors.cities',
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!

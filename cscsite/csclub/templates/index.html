@@ -5,12 +5,12 @@
 {% get_current_language as LANGUAGE_CODE %}
 
 {% block content %}
-<div class="banner _{{ request.city.code|slugify }}">{% if request.city.code == 'RU SPB' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
+<div class="banner _{{ request.city_code|slugify }}">{% if request.city_code == 'RU SPB' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
 
 
 <div class="container">
   <div class="font-bigger">
-  {% if request.city.code == 'RU SPB' %}
+  {% if request.city_code == 'RU SPB' %}
       {% blocktrans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
     {% endblocktrans %}

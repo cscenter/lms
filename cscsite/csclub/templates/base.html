@@ -51,7 +51,7 @@
       </ul>
       {% endif %}
       {% get_language_info_list for LANGUAGES as languages %}
-      <span class="cities">{% trans 'City' %}: {% for city in CITIES_LIST reversed %}{% if request.city.code == city.code %}<span>{{ city.name }}</span>{% else %}<a href="{{city.url}}{% if LANGUAGE_CODE != "ru" %}{{ LANGUAGE_CODE }}/{% endif %}">{{ city.name }}</a>{% endif %} {% endfor %}</span>
+      <span class="cities">{% trans 'City' %}: {% for city in CITY_LIST reversed %}{% if request.city_code == city.code %}<span>{{ city.name }}</span>{% else %}<a href="{{city.url}}{% if LANGUAGE_CODE != "ru" %}{{ LANGUAGE_CODE }}/{% endif %}">{{ city.name }}</a>{% endif %} {% endfor %}</span>
       <span class="languages">{% trans 'Language' %}: {% for language in languages %}
         {% if LANGUAGE_CODE == language.code %}<span>{{ language.name_local }}</span>{% else %}<a  href="/{% if language.code != 'ru' %}{{ language.code }}/{% endif %}">{{ language.name_local }}</a>{% endif %}{% endfor %}</span>
     </div>
@@ -75,7 +75,7 @@
         <div class="row">
           <div class="col-xs-9">{% trans "Computer Science Club, 2007–16 гг."%}</div>
           <div class="col-xs-3 social">
-            {% if request.city.code == 'RU SPB' %}
+            {% if request.city_code == 'RU SPB' %}
             <a href="mailto:spbinfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
             <a href="https://vk.com/spbcsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
             <a href="http://groups.google.com/group/pdmicsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>

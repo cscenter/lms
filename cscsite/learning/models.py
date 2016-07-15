@@ -189,16 +189,9 @@ class Semester(models.Model):
 
 class CustomCourseOfferingQuerySet(models.QuerySet):
     def site_related(self, request):
+        qs = self.filter(city__pk=request.city_code)
         if request.site.domain == settings.CLUB_DOMAIN:
-            qs = self.filter(is_open=True)
-            # TODO: Add city middleware to cscenter site and refactor
-            if hasattr(request, 'city'):
-                qs = qs.filter(
-                    models.Q(city__pk=request.city.code)
-                    | models.Q(city__isnull=True))
-        else:
-            # Restrict by spb for center site
-            qs = self.filter(city__pk=settings.DEFAULT_CITY_CODE)
+            qs = qs.filter(is_open=True,)
         return qs
 
 
@@ -269,6 +262,9 @@ class CourseOffering(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
+
+    def get_city(self):
+        return "".join(self.city_id.split(" ")[1:]).lower()
 
     def has_unread(self):
         cache = get_unread_notifications_cache()
@@ -827,16 +823,10 @@ class AssignmentComment(TimeStampedModel):
 
 class SiteRelatedEnrollmentQuerySet(models.QuerySet):
     def site_related(self, request):
-        qs = self.select_related("course_offering")
+        qs = self.select_related("course_offering").filter(
+            course_offering__city__pk=request.city_code)
         if request.site.domain == settings.CLUB_DOMAIN:
             qs = qs.filter(course_offering__is_open=True)
-            if hasattr(request, 'city'):
-                qs = qs.filter(
-                    models.Q(course_offering__city__pk=request.city.code) |
-                    models.Q(course_offering__city__isnull=True))
-        else:
-            # Restrict by spb for center site
-            qs = qs.filter(course_offering__city__pk=settings.DEFAULT_CITY_CODE)
         return qs
 
 

@@ -1341,7 +1341,8 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                                      course_offering=co)
         url = reverse(self.url_name)
         co_url = reverse('markssheet_teacher',
-                         args=[co.course.slug,
+                         args=[co.get_city(),
+                               co.course.slug,
                                co.semester.year,
                                co.semester.type])
         self.assertRedirects(self.client.get(url), co_url)
@@ -1356,7 +1357,8 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
         url = reverse(self.url_name)
         for co in [co1, co2]:
             co_url = reverse('markssheet_teacher',
-                             args=[co.course.slug,
+                             args=[co.get_city(),
+                                   co.course.slug,
                                    co.semester.year,
                                    co.semester.type])
             self.assertContains(self.client.get(url), co_url)
@@ -1375,7 +1377,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             EnrollmentFactory.create(student=student, course_offering=co1)
             EnrollmentFactory.create(student=student,
                                      course_offering=co2)
-        url = reverse('markssheet_teacher', args=[co1.course.slug,
+        url = reverse('markssheet_teacher', args=[co1.get_city(),
+                                                  co1.course.slug,
                                                   co1.semester.year,
                                                   co1.semester.type])
         self.doLogin(teacher)
@@ -1390,7 +1393,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             self.assertIn(field, resp.context['form'].fields)
         for co in [co1, co2]:
             url = reverse('markssheet_teacher',
-                          args=[co.course.slug,
+                          args=[co.get_city(),
+                                co.course.slug,
                                 co.semester.year,
                                 co.semester.type])
             self.assertContains(resp, url)
@@ -1406,7 +1410,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             2, course_offering=co)
         as_offline = AssignmentFactory.create_batch(
             3, course_offering=co, is_online=False)
-        url = reverse('markssheet_teacher', args=[co.course.slug,
+        url = reverse('markssheet_teacher', args=[co.get_city(),
+                                                  co.course.slug,
                                                   co.semester.year,
                                                   co.semester.type])
         self.doLogin(teacher)
@@ -1447,7 +1452,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             a_s.grade = default_grade
             a_s.save()
         expected_total_score = as_cnt * default_grade
-        url = reverse('markssheet_teacher', args=[co.course.slug,
+        url = reverse('markssheet_teacher', args=[co.get_city(),
+                                                  co.course.slug,
                                                   co.semester.year,
                                                   co.semester.type])
         self.doLogin(teacher)
@@ -1464,7 +1470,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                      course_offering=co)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                                 is_online=False)
-        url = reverse('markssheet_teacher', args=[co.course.slug,
+        url = reverse('markssheet_teacher', args=[co.get_city(),
+                                                  co.course.slug,
                                                   co.semester.year,
                                                   co.semester.type])
         self.doLogin(teacher)
@@ -1529,7 +1536,10 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(resp.status_code, 404)
         # Check redirects
         redirect_url = reverse('markssheet_teacher',
-                               args=[co.course.slug, co.semester.year, co.semester.type])
+                               args=[co.get_city(),
+                                     co.course.slug,
+                                     co.semester.year,
+                                     co.semester.type])
         url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
         resp = self.client.post(url, {'assignment': assignments[0].pk})
         self.assertRedirects(resp, redirect_url)
@@ -1546,7 +1556,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         EnrollmentFactory.create(student=student, course_offering=co)
         url = reverse('markssheet_teacher_csv',
-                      args=[co.course.slug, co.semester.slug])
+                      args=[co.get_city(), co.course.slug, co.semester.slug])
         self.assertLoginRedirect(url)
         for groups in [[], ['Student [CENTER]']]:
             self.doLogin(UserFactory.create(groups=groups))
@@ -1565,7 +1575,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         [EnrollmentFactory.create(student=s, course_offering=co)
             for s in [student1, student2]]
         url = reverse('markssheet_teacher_csv',
-                      args=[co.course.slug, co.semester.slug])
+                      args=[co.get_city(), co.course.slug, co.semester.slug])
         combos = [(a, s, grade+1)
                   for ((a, s), grade)
                   in zip([(a, s)
@@ -1842,7 +1852,8 @@ def test_gradebook_recalculate_grading_type(client,
                                                  course_offering=co,
                                                  is_online=True)
     client.login(teacher)
-    url = reverse('markssheet_teacher', args=[co.course.slug,
+    url = reverse('markssheet_teacher', args=[co.get_city(),
+                                              co.course.slug,
                                               co.semester.year,
                                               co.semester.type])
     form = {}
