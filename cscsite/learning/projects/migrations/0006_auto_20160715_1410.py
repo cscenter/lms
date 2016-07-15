@@ -12,11 +12,15 @@ class Migration(migrations.Migration):
         ('projects', '0005_auto_20160715_1342'),
     ]
 
+    # state_operations = [
+    #     migrations.RenameModel(
+    #         old_name='ProjectStudents',
+    #         new_name='ProjectStudent',
+    #     ),
+    # ]
+
     operations = [
-        migrations.RenameModel(
-            old_name='ProjectStudents',
-            new_name='ProjectStudent',
-        ),
+        # migrations.SeparateDatabaseAndState(state_operations=state_operations),
         migrations.AlterField(
             model_name='project',
             name='students',
