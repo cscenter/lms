@@ -1530,6 +1530,7 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
         return resp
 
 
+# FIXME: add simple test for all roles!!! To prevent `NoreverseMatch` errors
 class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
                                     generic.ListView):
     class RedirectException(Exception):
@@ -1923,8 +1924,12 @@ class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
         if not request.user.is_authenticated() or not request.user.is_curator:
             filter['teachers__in'] = [request.user.pk]
         co = get_object_or_404(CourseOffering, **filter)
+        # FIXME: replace with util function, too much args to pass
         url = reverse('markssheet_teacher',
-                      args=[co.course.slug, co.semester.year, co.semester.type])
+                      args=[co.get_city(),
+                            co.course.slug,
+                            co.semester.year,
+                            co.semester.type])
         form = MarksSheetTeacherImportGradesForm(
             request.POST, request.FILES, c_slug = co.course.slug)
         if form.is_valid():
