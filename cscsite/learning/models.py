@@ -36,7 +36,7 @@ from learning import settings as learn_conf
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
 from .utils import get_current_semester_pair, \
-    get_term_index, convert_term_start_to_datetime, get_term_start_by_type
+    get_term_index, convert_term_start_to_datetime, get_term_start
 
 logger = logging.getLogger(__name__)
 
@@ -83,20 +83,10 @@ class Semester(models.Model):
         help_text=_("Students can enroll on or leave the course "
                     "before this date (inclusive)"))
 
-    # Note: used for sort order and filter
     index = models.PositiveSmallIntegerField(
         verbose_name=_("Semester index"),
-        help_text=_("System field. Do not manually edit"),
+        help_text=_("System field. Used for sort order and filter."),
         editable=False)
-
-    # FIXME: legacy??? check it
-    @property
-    def type_index(self):
-        """ Return int representation of semester type """
-        for index, choice in enumerate(Semester.TYPES):
-            if choice[0] == self.type:
-                return index
-        return ImproperlyConfigured('Can not retrieve semester type index')
 
     class Meta:
         ordering = ["-year", "type"]
@@ -107,15 +97,9 @@ class Semester(models.Model):
     def __str__(self):
         return "{0} {1}".format(self.TYPES[self.type], self.year)
 
-    # FIXME: legacy??? check it. Maybe should replace with `index` attr
     def __cmp__(self, other):
-        """ Compare by year and semester type """
-        if self.year != other.year:
-            return self.year - other.year
-        else:
-            return self.type_index - other.type_index
+        return self.index - other.index
 
-    # TODO: add fucking tests or refactor with `sort` column
     def __lt__(self, other):
         return self.__cmp__(other) < 0
 
@@ -125,15 +109,17 @@ class Semester(models.Model):
 
     @cached_property
     def starts_at(self):
-        if self.type == 'spring':
-            start_str = learn_conf.SPRING_TERM_START
-        else:
-            start_str = learn_conf.AUTUMN_TERM_START
-        return convert_term_start_to_datetime(self.year, start_str)
+        """
+        Get term start point to validate class date range in `CourseClassForm`
+        """
+        return get_term_start(self.year, self.type)
 
     @cached_property
     def ends_at(self):
         if self.type == 'spring':
+            next_start_str = learn_conf.SUMMER_TERM_START
+            next_year = self.year
+        elif self.type == 'summer':
             next_start_str = learn_conf.AUTUMN_TERM_START
             next_year = self.year
         else:
@@ -300,9 +286,7 @@ class CourseOffering(TimeStampedModel):
             enroll_before += datetime.timedelta(days=1)
         else:
             year, term_type = get_current_semester_pair()
-            term_start = get_term_start_by_type(term_type)
-            current_term_start = convert_term_start_to_datetime(year,
-                                                                term_start)
+            current_term_start = get_term_start(year, term_type)
             enroll_before = current_term_start + datetime.timedelta(
                 days=learn_conf.ENROLLMENT_DURATION)
         if today > enroll_before:

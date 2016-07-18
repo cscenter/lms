@@ -44,6 +44,7 @@ def apply_related_spec(qs, related_spec):
 
 @python_2_unicode_compatible
 class City(models.Model):
+    # Note: Now `CurrentCityMiddleware` hardcoded to cities from Russia.
     code = models.CharField(
         _("Code"),
         max_length=6,

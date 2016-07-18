@@ -22,6 +22,7 @@ from learning.factories import CourseFactory, CourseOfferingFactory, \
 from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
     StudentAssignment
 from learning.settings import SEMESTER_TYPES
+from learning.utils import get_term_index
 from users.factories import UserFactory
 
 
@@ -67,46 +68,57 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 
 
-class SemesterTests(TestCase):
-    def test_starts_ends(self):
-        import datetime
-        from django.utils import timezone
-        spring_date = (datetime.datetime(2015, 4, 8, 0, 0, 0)
-                       .replace(tzinfo=timezone.utc))
-        autumn_date = (datetime.datetime(2015, 11, 8, 0, 0, 0)
-                       .replace(tzinfo=timezone.utc))
-        next_spring_date = (datetime.datetime(2016, 4, 8, 0, 0, 0)
-                            .replace(tzinfo=timezone.utc))
-        semester = Semester(type='spring', year=2015)
-        self.assertLess(semester.starts_at, spring_date)
-        self.assertLess(spring_date, semester.ends_at)
-        self.assertLess(semester.ends_at, autumn_date)
-        semester = Semester(type='autumn', year=2015)
-        self.assertLess(semester.starts_at, autumn_date)
-        self.assertLess(autumn_date, semester.ends_at)
-        self.assertLess(semester.ends_at, next_spring_date)
+def test_semester_starts_ends():
+    import datetime
+    from django.utils import timezone
+    spring_2015_date = (datetime.datetime(2015, 4, 8, 0, 0, 0)
+                        .replace(tzinfo=timezone.utc))
+    # Summer term starts from 1 jul
+    summer_2015_date = (datetime.datetime(2015, 7, 8, 0, 0, 0)
+                        .replace(tzinfo=timezone.utc))
+    autumn_2015_date = (datetime.datetime(2015, 11, 8, 0, 0, 0)
+                        .replace(tzinfo=timezone.utc))
+    spring_2016_date = (datetime.datetime(2016, 4, 8, 0, 0, 0)
+                        .replace(tzinfo=timezone.utc))
+    spring_2015 = Semester(type='spring', year=2015)
+    summer_2015 = Semester(type='summer', year=2015)
+    autumn_2015 = Semester(type='autumn', year=2015)
+    spring_2016 = Semester(type='spring', year=2016)
+    # Check starts < ends
+    assert spring_2015.starts_at < spring_2015.ends_at
+    assert summer_2015.starts_at < summer_2015.ends_at
+    assert autumn_2015.starts_at < autumn_2015.ends_at
+    # Check relativity
+    assert spring_2015.ends_at < summer_2015.starts_at
+    assert summer_2015.ends_at < autumn_2015.starts_at
+    assert autumn_2015.ends_at < spring_2016.starts_at
+    # Spring date inside spring semester
+    assert spring_2015.starts_at < spring_2015_date
+    assert spring_2015_date < spring_2015.ends_at
+    # And outside others
+    assert spring_2015_date < summer_2015.starts_at
+    assert spring_2016_date > autumn_2015.ends_at
+    # Summer date inside summer term
+    assert summer_2015_date > summer_2015.starts_at
+    assert summer_2015_date < summer_2015.ends_at
+    # Autumn date inside autumn term
+    assert autumn_2015_date > autumn_2015.starts_at
+    assert autumn_2015_date < autumn_2015.ends_at
 
-    def test_semester_cmp(self):
-        s2013_spring = Semester(type='spring', year=2013)
-        s2013_autumn = Semester(type='autumn', year=2013)
-        s2013_summer = Semester(type='summer', year=2013)
-        s2014_spring = Semester(type='spring', year=2014)
-        self.assertLess(s2013_spring, s2013_autumn)
-        self.assertLess(s2013_spring, s2013_summer)
-        self.assertLess(s2013_summer, s2013_autumn)
-        self.assertLess(s2013_summer, s2014_spring)
 
-    def test_type_index(self):
-        spring_index = 0
-        summer_index = 1
-        autumn_index = 2
-        semester = Semester(type='spring', year=2013)
-        self.assertEqual(semester.type_index, spring_index)
-        semester.type = 'summer'
-        self.assertEqual(semester.type_index, summer_index)
-        semester.type = 'autumn'
-        self.assertEqual(semester.type_index, autumn_index)
-
+def test_semester_cmp():
+    index = get_term_index(2013, 'spring')
+    s2013_spring = Semester(type='spring', year=2013, index=index)
+    index = get_term_index(2013, 'autumn')
+    s2013_autumn = Semester(type='autumn', year=2013, index=index)
+    index = get_term_index(2013, 'summer')
+    s2013_summer = Semester(type='summer', year=2013, index=index)
+    index = get_term_index(2014, 'spring')
+    s2014_spring = Semester(type='spring', year=2014, index=index)
+    assert s2013_spring < s2013_autumn
+    assert s2013_spring < s2013_summer
+    assert s2013_summer < s2013_autumn
+    assert s2013_summer < s2014_spring
 
 
 class CourseOfferingTests(TestCase):
