@@ -83,6 +83,18 @@ class Semester(models.Model):
         help_text=_("Students can enroll on or leave the course "
                     "before this date (inclusive)"))
 
+    report_starts_at = models.DateField(
+        _("Report start"),
+        blank=True,
+        null=True,
+        help_text=_("Start point of project report period."))
+
+    report_ends_at = models.DateField(
+        _("Report end"),
+        blank=True,
+        null=True,
+        help_text=_("End point of project report period."))
+
     index = models.PositiveSmallIntegerField(
         verbose_name=_("Semester index"),
         help_text=_("System field. Used for sort order and filter."),
@@ -110,7 +122,9 @@ class Semester(models.Model):
     @cached_property
     def starts_at(self):
         """
-        Get term start point to validate class date range in `CourseClassForm`
+        Term start point in datetime format.
+
+        Now helps to validate class date range in `CourseClassForm`
         """
         return get_term_start(self.year, self.type)
 
@@ -146,8 +160,9 @@ class Semester(models.Model):
         super(Semester, self).save(*args, **kwargs)
 
     # TODO: move to custom manager? Should I return queryset or id values? WIP
+    # FIXME: refactor like custom lookup field?
     @classmethod
-    def latest_academic_years(cls, year_count=1):
+    def past_academic_years(cls, year_count=1):
         """Returns queryset for semesters ids of latest N academic years.
         Academic year continues from autumn till summer"""
         current_year, current_semester_type = get_current_semester_pair()

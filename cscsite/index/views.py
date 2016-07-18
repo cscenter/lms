@@ -38,7 +38,7 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         pool = cache.get('index_page_spb_courses_with_video')
         if pool is None:
-            semester_pks = list(Semester.latest_academic_years(
+            semester_pks = list(Semester.past_academic_years(
                 year_count=2).values_list("id", flat=True))
             pool = list(CourseOffering.custom.site_related(self.request)
                 .filter(is_published_in_video=True, semester__in=semester_pks)

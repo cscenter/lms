@@ -386,15 +386,15 @@ def test_latest_academic_year_autumn(mocker):
 
     mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
     mocked_model_util.return_value = (current_year, current_semester_type)
-    queryset = Semester.latest_academic_years(year_count=1)
+    queryset = Semester.past_academic_years(year_count=1)
     assert queryset.count() == 1
     assert Semester.objects.get(year=current_year, type=current_semester_type) in queryset.all()
-    queryset = Semester.latest_academic_years(year_count=2)
+    queryset = Semester.past_academic_years(year_count=2)
     assert queryset.count() == 4
     assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.spring) not in queryset.all()
     assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.summer) not in queryset.all()
 
-    queryset = Semester.latest_academic_years(year_count=3)
+    queryset = Semester.past_academic_years(year_count=3)
     assert queryset.count() == 7
 
 
@@ -412,12 +412,12 @@ def test_latest_academic_year_summer(mocker):
 
     mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
     mocked_model_util.return_value = (current_year, current_semester_type)
-    queryset = Semester.latest_academic_years(year_count=1)
+    queryset = Semester.past_academic_years(year_count=1)
     assert queryset.count() == 3
     assert Semester.objects.get(year=current_year, type=current_semester_type) in queryset.all()
     assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
     assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.autumn) in queryset.all()
-    queryset = Semester.latest_academic_years(year_count=2)
+    queryset = Semester.past_academic_years(year_count=2)
     assert queryset.count() == 6
     assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.autumn) not in queryset.all()
     # check 2014 year
@@ -442,11 +442,11 @@ def test_latest_academic_year_spring(mocker):
     mocked_model_util = mocker.patch('learning.models.get_current_semester_pair')
     mocked_model_util.return_value = (current_year, current_semester_type)
 
-    queryset = Semester.latest_academic_years(year_count=1)
+    queryset = Semester.past_academic_years(year_count=1)
     assert queryset.count() == 2
     assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
     assert Semester.objects.get(year=current_year - 1, type=SEMESTER_TYPES.autumn) in queryset.all()
-    queryset = Semester.latest_academic_years(year_count=2)
+    queryset = Semester.past_academic_years(year_count=2)
     assert queryset.count() == 5
     assert Semester.objects.get(year=current_year, type=SEMESTER_TYPES.spring) in queryset.all()
     # check 2014 year
@@ -454,7 +454,7 @@ def test_latest_academic_year_spring(mocker):
         assert Semester.objects.get(year=current_year - 1, type=semester_type) in queryset.all()
     assert Semester.objects.get(year=current_year - 2, type=SEMESTER_TYPES.autumn) in queryset.all()
 
-    queryset = Semester.latest_academic_years(year_count=3)
+    queryset = Semester.past_academic_years(year_count=3)
     assert queryset.count() == 8
 
 
