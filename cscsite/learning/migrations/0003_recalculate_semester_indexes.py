@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('learning', '0002_auto_20160302_1445'),
+        ('learning', '0020_auto_20160718_1654'),
     ]
 
     operations = [
