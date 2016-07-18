@@ -217,7 +217,7 @@ class CourseClassForm(forms.ModelForm):
             assert semester_start <= semester_end
             if not semester_start <= date <= semester_end:
                 raise ValidationError(
-                    _("Incosistent with this course's "
+                    _("Inconsistent with this course's "
                       "semester (from %(starts_at)s to %(ends_at)s)"),
                     code='date_out_of_semester',
                     params={'starts_at': semester_start,

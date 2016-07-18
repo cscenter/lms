@@ -1563,39 +1563,28 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
         semester_index = get_term_index(current_year, semester_type)
         if semester_type == Semester.TYPES.autumn:
             semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF  # skip to spring semester
+        cos_qs = (CourseOffering.objects
+                  .select_related("course")
+                  .order_by("course__name"))
+        if not self.request.user.is_curator:
+            cos_qs = cos_qs.filter(teachers=self.request.user)
         return (self.model.objects
                 .filter(index__lte=semester_index)
                 .exclude(type=Semester.TYPES.summer)
-                .prefetch_related("courseoffering_set",
-                                  "courseoffering_set__course"))
+                .prefetch_related(
+                    Prefetch(
+                        "courseoffering_set",
+                        queryset=cos_qs,
+                        to_attr="courseofferings"
+                    )
+                ))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(MarksSheetTeacherDispatchView, self)
                    .get_context_data(**kwargs))
-        semester_list = [s for s in context["semester_list"]
-                           if s.type != Semester.TYPES.summer]
+        semester_list = list(context["semester_list"])
         if not semester_list:
             return context
-
-        now_ = now()
-        for semester in semester_list:
-            if self.request.user.is_authenticated() and self.request.user.is_curator:
-                cos = semester.courseoffering_set.all()
-            else:
-                cos = (semester.courseoffering_set
-                       .filter(teachers=self.request.user))
-            semester.courseofferings = sorted(
-                cos,
-                key=lambda co: co.course.name)
-            if len(semester.courseofferings) == 1 \
-               and semester.starts_at <= now_ <= semester.ends_at:
-                co = semester.courseofferings[0]
-                url = reverse(self.ms_url_name,
-                              args=[co.get_city(),
-                                    co.course.slug,
-                                    co.semester.year,
-                                    co.semester.type])
-                raise MarksSheetTeacherDispatchView.RedirectException(url)
 
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]

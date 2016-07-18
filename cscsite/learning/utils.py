@@ -24,15 +24,17 @@ def convert_term_start_to_datetime(year, term_start):
                      year=year))
 
 
-def get_term_start_by_type(term_type):
-    # TODO: Replace with something more generic, if you really need to edit this code
+def get_term_start(year, term_type):
+    """Returns term start point in datetime format"""
     if term_type == SEMESTER_TYPES.spring:
-        return SPRING_TERM_START
+        term_start_str = SPRING_TERM_START
     elif term_type == SEMESTER_TYPES.summer:
-        return SUMMER_TERM_START
+        term_start_str = SUMMER_TERM_START
     elif term_type == SEMESTER_TYPES.autumn:
-        return AUTUMN_TERM_START
-    raise ValueError("get_term_start_by_type: unknown term type")
+        term_start_str = AUTUMN_TERM_START
+    else:
+        raise ValueError("get_term_start: unknown term type")
+    return convert_term_start_to_datetime(year, term_start_str)
 
 
 def date_to_term_pair(date):
@@ -56,11 +58,12 @@ def date_to_term_pair(date):
 
 
 def get_term_index(target_year, target_term_type):
-    """Calculate term order index starting from FOUNDATION_YEAR spring term"""
+    """Calculate consecutive term number from spring term of FOUNDATION_YEAR"""
     if target_year < FOUNDATION_YEAR:
         raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
     if target_term_type not in SEMESTER_TYPES:
-        raise ValueError("get_term_index: unknown term type %s" % target_term_type)
+        raise ValueError("get_term_index: unknown term type %s" %
+                         target_term_type)
     terms_in_year = len(SEMESTER_TYPES)
     year_portion = (target_year - FOUNDATION_YEAR) * terms_in_year
     term_portion = TERMS_INDEX_START
@@ -72,7 +75,6 @@ def get_term_index(target_year, target_term_type):
 
 def get_term_by_index(term_index):
     """Inverse func for `get_term_index`"""
-    # TODO: add tests!
     assert term_index >= TERMS_INDEX_START
     terms_in_year = len(SEMESTER_TYPES)
     term_index -= TERMS_INDEX_START
