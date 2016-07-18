@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import pytest
 import six
 if six.PY3:
     from io import StringIO as OutputIO
@@ -128,3 +129,13 @@ class RelatedSpec(TestCase):
         apply_related_spec(test_obj, related_spec)
         test_obj.select_related.assert_called_once_with(*list_select)
         test_obj.prefetch_related.assert_called_once_with(*list_prefetch)
+
+
+@pytest.mark.django_db
+def test_middleware_center_site(client, settings):
+    """Make sure we have attached `city_code` attr to each request object"""
+    assert settings.SITE_ID == settings.CENTER_SITE_ID
+    url = reverse('index')
+    response = client.get(url)
+    assert hasattr(response.context['request'], 'city_code')
+    assert response.context['request'].city_code == settings.DEFAULT_CITY_CODE
