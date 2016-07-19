@@ -140,17 +140,17 @@
                         <li>
                             <h4>Кроме того, участвовал{% if user_object.gender == 'F' %}а{% endif %} в проектах:</h4>
                             <ul>
-                                {% for project in student_projects %}
+                                {% for ps in student_projects %}
                                     <li>
-                                        {{ project.semester }}:
-                                        «{{ project.name }}»
-                                        {% if project.grade %}/{{ project.get_grade_display|lower }}/{% endif %}<br>
-                                        {% if project.presentation %}<a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>, {% endif %}
-                                        {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
-                                        {% if project.description %}
+                                        {{ ps.project.semester }}:
+                                        «{{ ps.project.name }}»
+                                        {% if ps.final_grade %}/{{ ps.get_final_grade_display|lower }}/{% endif %}<br>
+                                        {% if ps.project.presentation %}<a href="{{ ps.project.presentation.url }}">{% trans "Presentation"|lower %}</a>, {% endif %}
+                                        {% trans "StudentProject|Supervisor"|lower %} — {{ ps.project.supervisor }}
+                                        {% if ps.project.description %}
                                             <div class="ubertext">
-                                                {% markdown 3600 "userproject_description" project.pk project.modified %}
-                                                    {{ project.description }}
+                                                {% markdown 3600 "userproject_description" ps.project.pk ps.project.modified %}
+                                                    {{ ps.project.description }}
                                                 {% endmarkdown %}
                                             </div>
                                         {% endif %}
