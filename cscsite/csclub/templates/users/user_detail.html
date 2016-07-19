@@ -60,10 +60,10 @@
         <li>
         <h4>{% trans "Student projects" %}</h4>
           <ul>
-            {% for project in student_projects %}
+            {% for ps in student_projects %}{% with project=ps.project %}
             <li>
               {{ project.semester }}:
-              «{{ project.name }}» {% if project.grade %}({{ project.get_grade_display|lower }}){% endif %} {% if project.presentation %} <a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>{% endif %},
+              «{{ project.name }}» {% if ps.final_grade %}({{ ps.get_final_grade_display|lower }}){% endif %} {% if project.presentation %} <a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>{% endif %},
               {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
               {% if project.description %}
               <div class="ubertext">
@@ -73,7 +73,7 @@
               </div>
               {% endif %}
             </li>
-            {% endfor %}
+            {% endwith %}{% endfor %}
           </ul>
         </li>
         {% elif user.is_curator %}
