@@ -4,7 +4,7 @@ from learning.factories import SemesterFactory
 from learning.projects.models import Project, ProjectStudent
 
 
-class StudentProjectFactory(factory.DjangoModelFactory):
+class ProjectFactory(factory.DjangoModelFactory):
     class Meta:
         model = Project
 

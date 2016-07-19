@@ -8,7 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     EnrollmentFactory
-from learning.projects.factories import StudentProjectFactory
+from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GRADES, STUDENT_STATUS, GRADING_TYPES, \
@@ -49,7 +49,10 @@ def test_report_common(rf,
                              grade=GRADES.not_graded)
     shad1 = SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
     shad2 = SHADCourseRecordFactory.create(student=student2, grade=GRADES.good)
-    p = StudentProjectFactory.create(students=[student1])
+    p = ProjectFactory.create(students=[student1], semester=s)
+    ps = p.projectstudent_set.all()[0]  # 1 student attached
+    ps.final_grade = GRADES.excellent
+    ps.save()
     progress_report = get_progress_report()
     assert len(progress_report.courses_headers) == 2
     assert progress_report.online_courses_max == 0
@@ -65,7 +68,7 @@ def test_report_common(rf,
     check_value_for_header(progress_report, 'Проект 1, название',
                            student1_row_index, p.name)
     check_value_for_header(progress_report, 'Проект 1, оценка',
-                           student1_row_index, p.get_grade_display())
+                           student1_row_index, ps.get_final_grade_display())
     check_value_for_header(progress_report, 'Проект 1, руководитель(и)',
                            student1_row_index, p.supervisor)
     check_value_for_header(progress_report, 'Проект 1, семестр',
@@ -91,6 +94,30 @@ def test_report_common(rf,
                            student3_row_index, '')
     # No added online-courses, but it should be displayed in progress
     assert 'Онлайн-курс 1, название' not in progress_report.headers
+    # Add project for 2 students and check grades
+    p2 = ProjectFactory.create(students=[student1, student2],
+                               semester=s)
+    for ps in p2.projectstudent_set.all():
+        if ps.student == student1:
+            ps.final_grade = GRADES.excellent
+            ps.save()
+        elif ps.student == student2:
+            ps.final_grade = GRADES.good
+            ps.save()
+    progress_report = get_progress_report()
+    assert progress_report.projects_max == 2
+    assert 'Проект 2, название' in progress_report.headers
+    # Order by semester first, then by project name
+    assert p.name < p2.name
+    check_value_for_header(progress_report, 'Проект 2, название',
+                           student1_row_index, p2.name)
+    check_value_for_header(progress_report, 'Проект 2, оценка',
+                           student1_row_index, GRADES.excellent.title())
+    # It's first project for student2
+    check_value_for_header(progress_report, 'Проект 1, название',
+                           student2_row_index, p2.name)
+    check_value_for_header(progress_report, 'Проект 1, оценка',
+                           student2_row_index, GRADES.good.title())
 
 
 @pytest.mark.django_db
@@ -337,7 +364,7 @@ def test_report_diplomas(student_center_factory,
     OnlineCourseRecordFactory.create(student=student1)
     progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
-    StudentProjectFactory.create(students=[student1, student2])
+    ProjectFactory.create(students=[student1, student2])
     progress_report = ProgressReportForDiplomas()
     # +4 headers for project
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 13

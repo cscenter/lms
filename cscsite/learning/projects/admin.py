@@ -20,7 +20,7 @@ class ProjectStudentInline(admin.TabularInline):
 
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['name', 'project_type', 'semester', 'grade']
+    list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
     inlines = [ProjectStudentInline]
 

@@ -76,8 +76,8 @@ class ProgressReport(object):
             if len(s.online_courses) > self.online_courses_max:
                 self.online_courses_max = len(s.online_courses)
 
-            if len(s.projects) > self.projects_max:
-                self.projects_max = len(s.projects)
+            if len(s.projects_through) > self.projects_max:
+                self.projects_max = len(s.projects_through)
         self.courses_headers = courses_headers
         self.headers = self.generate_headers()
         self.data = students_data
@@ -162,12 +162,14 @@ class ProgressReport(object):
             row.extend([sc['grade_repr'], sc['teachers']])
 
     def _export_row_append_projects(self, row, student):
-        student.projects.extend(
-            [None] * (self.projects_max - len(student.projects)))
-        for p in student.projects:
-            if p is not None:
-                row.extend([p.name, p.get_grade_display(), p.supervisor,
-                            p.semester])
+        student.projects_through.extend(
+            [None] * (self.projects_max - len(student.projects_through)))
+        for ps in student.projects_through:
+            if ps is not None:
+                row.extend([ps.project.name,
+                            ps.get_final_grade_display(),
+                            ps.project.supervisor,
+                            ps.project.semester])
             else:
                 row.extend(['', '', '', ''])
 

@@ -27,7 +27,7 @@ from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory, StudyProgramFactory
-from learning.projects.factories import StudentProjectFactory
+from learning.projects.factories import ProjectFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
 from .admin import CSCUserCreationForm, CSCUserChangeForm

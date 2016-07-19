@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.translation import ugettext_lazy as _
-from model_utils import Choices
+from model_utils import Choices, choices
 from model_utils.fields import StatusField
 from model_utils.models import TimeStampedModel
 
@@ -27,8 +27,27 @@ def project_slides_file_name(self, filename):
 
 @python_2_unicode_compatible
 class ProjectStudent(models.Model):
+    GRADES = GRADES
     student = models.ForeignKey(settings.AUTH_USER_MODEL)
     project = models.ForeignKey('Project')
+    final_grade = models.CharField(
+        verbose_name=_("Final grade"),
+        choices=GRADES,
+        max_length=15,
+        default=GRADES.not_graded)
+    supervisor_review = models.TextField(
+        _("Review from supervisor"),
+        blank=True)
+    # supervisor_grade = models.CharField(
+    #     verbose_name=_("Supervisor grade"),
+    #     choices=GRADES,
+    #     max_length=15,
+    #     default=GRADES.not_graded)
+    # presentation_grade = models.CharField(
+    #     verbose_name=_("Presentation grade"),
+    #     choices=GRADES,
+    #     max_length=15,
+    #     default=GRADES.not_graded)
 
     class Meta:
         verbose_name = _("Project student")
@@ -51,7 +70,6 @@ class Project(TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
@@ -59,11 +77,6 @@ class Project(TimeStampedModel):
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
                                          PARTICIPANT_GROUPS.GRADUATE_CENTER]},
         through=ProjectStudent)
-
-    grade = StatusField(
-        verbose_name=_("Grade"),
-        choices_name='GRADES',
-        default='not_graded')
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,
