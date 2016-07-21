@@ -8,7 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory
-from learning.settings import GRADES, STUDENT_STATUS
+from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
 
 
 @pytest.mark.django_db
@@ -47,3 +47,24 @@ def test_staff_diplomas_view(curator, client, student_center_factory):
     client.login(curator)
     response = client.get(reverse('staff_exports_students_diplomas'))
     assert smart_bytes(p.name) in response.content
+
+
+@pytest.mark.django_db
+def test_reviewer_list_reviewer_only(client,
+                                     student_center_factory,
+                                     user_factory,
+                                     curator):
+    student = student_center_factory()
+    client.login(student)
+    url = "{}?show=enrolled".format(reverse("projects:reviewer_projects"))
+    response = client.get(url)
+    assert response.status_code == 302
+    reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
+    client.login(reviewer)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert not response.context["projects"]
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 200
+

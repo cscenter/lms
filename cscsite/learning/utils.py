@@ -171,3 +171,7 @@ class LearningPermissionsMixin(object):
     @property
     def is_interviewer(self):
         return False
+
+    @property
+    def is_project_reviewer(self):
+        return False

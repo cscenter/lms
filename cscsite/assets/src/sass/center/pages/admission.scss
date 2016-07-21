@@ -51,6 +51,11 @@
 }
 
 .admission-list-page, .admission-interview-page {
+  .panel-body {
+    td:last-child {
+      font-size: 16px;
+    }
+  }
   .panel-info {
     float: right;
     margin: 0 10px 0 0;
@@ -75,67 +80,12 @@
 
 .admission-list-page, .interview-results-page  {
   @extend .container;
+  @extend .page-inverse;
 
   form {
     margin: 20px 0;
     select {
       -webkit-transition: none!important;
-    }
-  }
-
-  .panel {
-    border: 0;
-  }
-
-  .panel-heading {
-    overflow: auto;
-    padding: 20px;
-  }
-  .panel-body {
-    padding: 30px;
-  }
-  .panel-search-form {
-    float: left;
-  }
-  .panel-title {
-    text-transform: uppercase;
-    float: left;
-    padding: 29px 10px;
-  }
-
-  .panel-body {
-    clear: both;
-    .table {
-      th:last-child {
-        text-align: right;
-      }
-      td {
-        vertical-align: middle;
-        padding: 16px 6px;
-
-        &:first-child {
-          padding-left: 0;
-        }
-
-        &:last-child {
-          text-align: right;
-          font-size: 16px;
-          span {
-            color: $color-grey;
-          }
-        }
-        &.empty-results {
-          text-align: left;
-        }
-      }
-      tr {
-        th:first-child {
-          padding-left: 0 !important;
-        }
-        &:last-of-type td {
-          border-bottom: 1px solid #e4eaec;
-        }
-      }
     }
   }
 

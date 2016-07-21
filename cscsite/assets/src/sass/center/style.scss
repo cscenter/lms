@@ -30,6 +30,15 @@ $state-success-text: $color-green;
 @import "../_login_page.scss";
 @import "top_menu.scss";
 @import "_material_design.scss";
+
+@import "components/input-daterange";
+@import "components/buttons";
+@import "components/widgets";
+@import "components/tabs";
+@import "components/panels";
+@import "components/pagination";
+@import "components/loading";
+
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
 @import "pages/online_courses_page.scss";
 @import "pages/index";
@@ -41,17 +50,12 @@ $state-success-text: $color-green;
 @import "pages/alumni";
 @import "pages/alumni_by_year";
 @import "pages/admission";
+@import "pages/projects";
 @import "pages/_assignments";
 @import "pages/calendar";
 @import "pages/teachers_list";
 @import "pages/user_profile";
 
-@import "components/input-daterange";
-@import "components/buttons";
-@import "components/widgets";
-@import "components/tabs";
-@import "components/pagination";
-@import "components/loading";
 
 // Boostrap overrides for cscenter site
 .btn-danger, .btn-success, .btn-primary, .btn-warning {
