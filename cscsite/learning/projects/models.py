@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 import os.path
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -113,9 +114,6 @@ class Project(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
-
-    def get_absolute_url(self):
-        return self.student.get_absolute_url()
 
 
 class ReviewCriteria(TimeStampedModel):

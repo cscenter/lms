@@ -510,6 +510,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     def is_interviewer(self):
         return self.group_pks.INTERVIEWER in self._cs_group_pks
 
+    @cached_property
+    def is_project_reviewer(self):
+        return self.group_pks.PROJECT_REVIEWER in self._cs_group_pks
+
 
 @python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):

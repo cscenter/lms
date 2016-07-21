@@ -1,0 +1,25 @@
+.projects-list-page {
+  @extend .container;
+  @extend .page-inverse;
+
+  h3 {
+    text-transform: uppercase;
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+
+  th {
+    &.name {
+      width: 50%;
+    }
+
+    &.note {
+      width: 100px;
+    }
+  }
+
+  .enrolled-empty-list {
+    margin: 40px 0;
+    text-align: center;
+  }
+}
