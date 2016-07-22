@@ -500,6 +500,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     @cached_property
     def is_master(self):
         """Studying for a masters degree"""
+        # TODO: rename, too much honor
         return self.group_pks.MASTERS_DEGREE in self._cs_group_pks
 
     @cached_property
