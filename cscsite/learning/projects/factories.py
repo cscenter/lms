@@ -1,7 +1,9 @@
 import factory
+from factory.fuzzy import FuzzyInteger
 
 from learning.factories import SemesterFactory
 from learning.projects.models import Project, ProjectStudent
+from users.factories import UserFactory
 
 
 class ProjectFactory(factory.DjangoModelFactory):
@@ -21,5 +23,22 @@ class ProjectFactory(factory.DjangoModelFactory):
             return
         if extracted:
             for student in extracted:
-                ps = ProjectStudent(student=student, project=self)
-                ps.save()
+                ProjectStudentFactory(student=student, project=self)
+
+    @factory.post_generation
+    def reviewers(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for reviewer in extracted:
+                self.reviewers.add(reviewer)
+
+
+class ProjectStudentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ProjectStudent
+
+    student = factory.SubFactory(UserFactory)
+    project = factory.SubFactory(ProjectFactory)
+    supervisor_grade = FuzzyInteger(-15, 15)
+    presentation_grade = FuzzyInteger(0, 10)

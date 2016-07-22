@@ -9,6 +9,9 @@ from django.utils.encoding import smart_bytes
 from learning.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
+from learning.utils import get_current_semester_pair
+
+URL_REVIEWER_PROJECTS = reverse("projects:reviewer_projects")
 
 
 @pytest.mark.django_db
@@ -50,13 +53,16 @@ def test_staff_diplomas_view(curator, client, student_center_factory):
 
 
 @pytest.mark.django_db
-def test_reviewer_list_reviewer_only(client,
-                                     student_center_factory,
-                                     user_factory,
-                                     curator):
+def test_reviewer_list_security(client,
+                                student_center_factory,
+                                user_factory,
+                                curator):
+    """Check ProjectReviewerOnlyMixin"""
+    url = "{}?show=active".format(URL_REVIEWER_PROJECTS)
+    response = client.get(url)
+    assert response.status_code == 302
     student = student_center_factory()
     client.login(student)
-    url = "{}?show=enrolled".format(reverse("projects:reviewer_projects"))
     response = client.get(url)
     assert response.status_code == 302
     reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
@@ -67,4 +73,43 @@ def test_reviewer_list_reviewer_only(client,
     client.login(curator)
     response = client.get(url)
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_reviewer_list(client, user_factory, curator, student_center_factory):
+    url_active = "{}?show=active".format(URL_REVIEWER_PROJECTS)
+    url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
+    url_archive = "{}?show=archive".format(URL_REVIEWER_PROJECTS)
+    url_all = "{}?show=all".format(URL_REVIEWER_PROJECTS)
+    reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
+    year, term_type = get_current_semester_pair()
+    semester = SemesterFactory(year=year, type=term_type)
+    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    client.login(reviewer)
+    student = student_center_factory()
+    response = client.get(url_active)
+    assert response.status_code == 200
+    assert len(response.context["projects"]) == 0
+    # Enroll on project from prev term
+    project = ProjectFactory(students=[student], reviewers=[reviewer],
+                             semester=semester_prev)
+    response = client.get(url_active)
+    assert response.status_code == 200
+    assert len(response.context["projects"]) == 0
+    # Enroll on project from current term
+    project = ProjectFactory(students=[student], reviewers=[reviewer],
+                             semester=semester)
+    response = client.get(url_active)
+    assert len(response.context["projects"]) == 1
+    # On page with all projects show projects from current term to reviewers
+    response = client.get(url_available)
+    assert len(response.context["projects"]) == 1
+    client.login(curator)
+    response = client.get(url_active)
+    assert len(response.context["projects"]) == 0
+    response = client.get(url_available)
+    assert len(response.context["projects"]) == 1
+    response = client.get(url_all)
+    assert len(response.context["projects"]) == 2
+
 
