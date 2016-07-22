@@ -579,7 +579,7 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                 else:
                     url = base_url + "#video"
                 materials.append({'url': url,
-                                  'name': _("CourseClass|Video")})
+                                  'name': _("video")})
             if cc.courseclassattachment_set.count() > 0:
                 if is_actual_teacher:
                     url = base_teacher_url + "#div_id_attachments"
