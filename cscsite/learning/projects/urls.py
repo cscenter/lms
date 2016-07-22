@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 
-from learning.projects.views import \
-    ReviewerProjectsView, ReviewerAvailableProjectsView, ProjectDetailView
+from learning.projects.views import ReviewerProjectsView, ProjectDetailView
 
 app_name = 'projects'
 urlpatterns = [

@@ -1,0 +1,13 @@
+<ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+    <li role="presentation" {% if filter_active == "active" %}class="active"{% endif %}>
+        <a href="{% url "projects:reviewer_projects" %}?show=active">Выбранные проекты</a>
+    </li>
+    <li role="presentation" {% if filter_active == "available" %}class="active"{% endif %}>
+        <a href="{% url "projects:reviewer_projects" %}?show=available">Активные проекты</a>
+    </li>
+    {% if request.user.is_curator %}
+    <li role="presentation" {% if filter_active == "all" %}class="active"{% endif %}>
+        <a href="{% url "projects:reviewer_projects" %}?show=all">Все проекты</a>
+    </li>
+    {% endif %}
+</ul>

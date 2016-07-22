@@ -19,11 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReviewerProjectsView(ProjectReviewerOnlyMixin, generic.ListView):
-    """
-    By default, show projects on which reviewer has enrolled.
-
-    Add GET-param ?show=all to show all available projects in current term.
-    """
+    """By default, show projects on which reviewer has enrolled."""
     paginate_by = 50
     context_object_name = "projects"
     FILTER_NAME = "show"
@@ -35,13 +31,9 @@ class ReviewerProjectsView(ProjectReviewerOnlyMixin, generic.ListView):
                      PROJECT_ALL]
 
     def get_template_names(self):
-        project_type = self.request.GET[self.FILTER_NAME]
-        if project_type == self.PROJECT_AVAILABLE:
-            return ["learning/projects/all.html"]
-        elif project_type == self.PROJECT_ARCHIVE:
-            return ["learning/projects/archive.html"]
-        else:
-            return ["learning/projects/enrolled.html"]
+        assert self.FILTER_NAME in self.request.GET
+        template_name = self.request.GET[self.FILTER_NAME]
+        return ["learning/projects/{}.html".format(template_name)]
 
     def get(self, request, *args, **kwargs):
         # Dispatch, by default show enrollments from current term
@@ -71,10 +63,13 @@ class ReviewerProjectsView(ProjectReviewerOnlyMixin, generic.ListView):
             queryset = queryset.filter(reviewers=self.request.user)
         return queryset.order_by("-semester__index", "name", "pk")
 
-
-class ReviewerAvailableProjectsView(ProjectReviewerOnlyMixin, generic.ListView):
-    model = Project
+    def get_context_data(self, **kwargs):
+        context = super(ReviewerProjectsView, self).get_context_data(**kwargs)
+        context["filter_active"] = self.request.GET[self.FILTER_NAME]
+        return context
 
 
 class ProjectDetailView(ProjectReviewerOnlyMixin, generic.DetailView):
     model = Project
+    context_object_name = "project"
+    template_name = "learning/projects/project_detail.html"
