@@ -15,8 +15,13 @@
                    role="tab" aria-expanded="true">Выбранные проекты</a>
             </li>
             <li role="presentation" class="">
+                <a href="{% url "projects:reviewer_projects" %}?show=available">Активные проекты</a>
+            </li>
+            {% if request.user.is_curator %}
+            <li role="presentation" class="">
                 <a href="{% url "projects:reviewer_projects" %}?show=all">Все проекты</a>
             </li>
+            {% endif %}
 
         </ul>
 
@@ -51,7 +56,7 @@
             {% endif %}
             {% else %}
                 <div class="enrolled-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                Перейти к <a href="{% url "projects:reviewer_projects" %}?show=all">списку проектов текущего семестра</a>.</div>
+                <a href="{% url "projects:reviewer_projects" %}?show=all">Перейти к списку проектов текущего семестра</a>.</div>
             {% endif %}
         </div>
   </div>
