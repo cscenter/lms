@@ -51,6 +51,7 @@ EMAILS = {
 }
 
 
+# TODO: add tests :)
 def get_base_url(notification):
     user = notification.user
     if isinstance(notification, AssignmentNotification):
@@ -59,7 +60,7 @@ def get_base_url(notification):
         co = notification.course_offering_news.course_offering
     else:
         raise NotImplementedError()
-    if not user.is_student_center:
+    if not (user.is_student_center or user.is_volunteer):
         if co.get_city() == "spb":
             return "http://compsciclub.ru"
         else:
