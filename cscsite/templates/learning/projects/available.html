@@ -11,8 +11,9 @@
         {% include "learning/projects/_tabs.html" %}
         <div class="tab-content">
             <div class="tab-pane active" id="projects" role="tabpanel">
-                {% if projects %}
-                <h3>Все проекты</h3>
+            {% if projects %}
+                <h3>Все проекты текущего семестра</h3>
+
                 <table class="table">
                     <thead>
                     <tr>
@@ -26,10 +27,14 @@
                         <tr>
                             <td>
                                 <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
-                                {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
+                                {% if request.user.is_curator %}<br>
+                                    {{ project.semester }}{% endif %}
                             </td>
-                            <td>{{ project.students.all|join:"<br>" }}</td>
-                            <td>{% if project.is_external %}<span>Внешний проект</span>{% endif %}</td>
+                            <td>
+                                {{ project.students.all|join:"<br>" }}</td>
+                            <td>{% if project.is_external %}
+                                <span>Внешний проект</span>{% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -38,12 +43,12 @@
                 {% if is_paginated %}
                     {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
                 {% endif %}
-                {% else %}
-                    <div class="enrolled-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                    <a href="{% url "projects:reviewer_projects" %}?show=all">Перейти к списку проектов текущего семестра</a>.</div>
-                {% endif %}
+            {% else %}
+                <div class="projects-empty-list">Увы, в текущем семестре нет проектов.</div>
+            {% endif %}
             </div>
         </div>
     </div>
-</div>
+
+  </div>
 {% endblock content %}

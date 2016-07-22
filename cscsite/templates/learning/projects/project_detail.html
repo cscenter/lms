@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load markdown from core_tags %}
+
+{% block content %}
+<div id="project-detail-page">
+    <div class="row">
+        <div class="col-xs-8">
+    <h3>Название проекта </h3>
+{{ project.name }}
+
+                        <h3>Описание</h3>
+                        {% markdown 3600 "project_detail_description" project.pk project.modified %}
+                            {{ project.description  }}
+                        {% endmarkdown %}
+
+
+
+                        {% if request.user.is_curator %}
+                            <h3>Оценки</h3>
+                            Итог: Хорошо<br>
+                            Суммарный балл за отчет: XXX<br>
+                            Оценка за презентацию: XX<br>
+                            Оценка руководителя: XX (для внутренних проектов)<br>
+                        {% endif %}
+
+                        <br>TODO: Если проект текущего семестра, то показываем проверяющим кнопенцию "Интересует"/Следить за проектом
+                        TODO: показывать сообщение, что отписаться можно только через куратора (добавить функцию куратору?)
+        </div>
+        <div class="col-xs-4">
+            <h3>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h3>
+            {% if project.presentation %}
+                <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Скачать презентацию</a>
+                <br>
+            {% endif %}
+                <div class="card">
+                    <div class="card-header ch-alt">Участники проекта</div>
+                    <div class="card-body card-padding">
+                        {% for student in project.students.all %}
+                            {{ student }}<br>
+                            <a href="#">Смотреть отчет</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                        {% if request.user.is_curator %}<br>TODO: Куратору показываем отзыв руководителя{% endif %}
+        </div>
+    </div>
+
+
+  </div>
+{% endblock content %}
