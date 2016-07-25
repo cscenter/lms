@@ -214,6 +214,10 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         self.assertSameObjects(next_month_classes, classes)
 
 
+# TODO: add test: kzn courses not shown on center site and spb on kzn
+# TODO: add test: summer courses not shown on club site on main page
+
+
 class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
     """
     This TestCase is used only for security check, actual tests for
