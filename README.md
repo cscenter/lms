@@ -1,122 +1,22 @@
-Computer Science Center/Club websites
-=====================================
+# CSC websites
 
 [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
-Dev setup
----------
-sudo apt-get install libmagic-dev
-* setup python2, pip, virtualenv `libjpeg-dev`, `libpng-dev`, `libpq-dev`, `libxml2-dev`, `libxslt1-dev`
-    note for mac users: `brew install libpng libjpeg libpqxx libmagic`
-* create virtualenv for the project and open it;
-* setup PostgreSQL database:
+Production stack: AWS, ubuntu, nginx, uwsgi, python3.4, Django 1.9.x, postgresql 9.4
 
-```bash
-> sudo -u postgres psql
-[sudo] password for user:
-psql (9.4.1)
-Type "help" for help.
+Section | Description
+--- | ---
+[about.md](https://github.com/cscenter/site/tree/master/docs/about.md) | For details on architecture and general concerns (in Russian).
+[setup.md](https://github.com/cscenter/site/tree/master/docs/setup.md) | Some notes about dev and production setup.
+[deploy.md](https://github.com/cscenter/site/tree/master/docs/deploy.md) | Deploy easy and fast with ansible 2.x or manually.
 
-postgres=# CREATE DATABASE cscdb;
-CREATE DATABASE
-postgres=# CREATE USER csc WITH password 'FooBar';
-CREATE ROLE
-postgres=# GRANT ALL privileges ON DATABASE cscdb TO csc;
-GRANT
-^D
-```
 
-* Install `cscsite locally` with `pip install -e ./` and `manage.py` should work now 
+#### Misc
 
-* do the Django part of the database configuration:
+    # Minimal html to render debug toolbar in django views 
+    return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
 
-```bash
-$ python cscsite/manage.py syncdb --settings=cscenter.settings.local
-```
-
-* load data for menu with `python cscsite/manage.py loaddata` from cscsite/fixtures/ folder
-
-* run with `python manage.py runserver --settings=cscenter.settings.local`
-
-* To serving static, install grunt with npm locally
-
-```bash
-# put grunt cmd in system path
-npm install -g grunt-cli
-# go to project root dir and install grunt locally
-npm install --save-dev grunt load-grunt-tasks grunt-contrib-concat grunt-contrib-uglify grunt-sass grunt-contrib-watch
-```
-
-## Recreate DB snippet
-
+    # Recreate DB snippet
     psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
     psql -h localhost cscdb csc < /path/to/dump.sql
     ./manage.py changepassword admin
-
-
-Production setup
-----------------
-
-See [infrastructure](https://github.com/cscenter/site/tree/master/infrastructure) subdirectory.
-
-
-Production deploy
------------------
-
-Right now it's done manually (it's probably better to leave it so until staging
-environment is set up). To simplify the process, production host's ssh key is
-set as "deploy key" on github, so one can `git pull` the code from
-production. Common workflow is as follows:
-
-* `ssh ubuntu@compscicenter.ru`. You can ask Sergei Lebedev or Ekaterina
-Lebedeva to add your key into `authorized_keys`;
-* `tmux attach`. Tmux is used on the server, please consult
-[cheatsheet](http://www.dayid.org/os/notes/tm.html) for shorcuts (most used ones
-are `^b n`/`^b p` to switch "tabs", `^b c` to create tab and `^b d` to "detach",
-where `^b` is `ctrl+b`). For a bit better security, web-related stuff is done by
-a separate non-sudoers user `cscweb`, so it's handy to have two separate "tabs"
-in tmux: one with `sudo su - cscweb` (this will "switch" the tab to `cscweb`
-user) and other with `ubuntu` user;
-* `git pull` in `cscweb` "tab", optionally followed by
-
-always run `./manage.py compilemessages --settings=cscenter.settings.production`
-
-then
-
-```
-./manage.py migrate MIGRATED_APP --settings=cscenter.settings.production
-```
-
-or
-
-```
-./manage.py collectstatic --noinput --settings=cscenter.settings.production
-```
-
-or 
-
-```
-pip install -r requirements.txt
-```
-
-Don't forget to clear sometimes static folder with `--clear` option
-
-* `sudo service uwsgi reload` in `ubuntu` tab. Note that uwsgi reload is needed
-to reload translation, static file update (see
-[ManifestStaticFilesStorage docs](https://docs.djangoproject.com/en/1.7/ref/contrib/staticfiles/#django.contrib.staticfiles.storage.ManifestStaticFilesStorage)
-for details) and python modules, so you will need to reload uwsgi on almost
-every update.
-
-
-Misc
-----
-
-`npm install -g node-sass` to compile scss to css with libsass
-
-toolbar in `base.View`:
-
-    return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
-
-
-For details on architecture and general concerns, see
-[about.md](https://github.com/cscenter/site/tree/master/about.md) (in Russian).
