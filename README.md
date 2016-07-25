@@ -6,9 +6,10 @@ Production stack: AWS, ubuntu, nginx, uwsgi, python3.4, Django 1.9.x, postgresql
 
 Section | Description
 --- | ---
-[about.md](https://github.com/cscenter/site/tree/master/docs/about.md) | For details on architecture and general concerns (in Russian).
+[about.md](https://github.com/cscenter/site/tree/master/docs/about.md) | For details on architecture and general concerns (april 9, 2015, in Russian).
 [setup.md](https://github.com/cscenter/site/tree/master/docs/setup.md) | Some notes about dev and production setup.
 [deploy.md](https://github.com/cscenter/site/tree/master/docs/deploy.md) | Deploy easy and fast with ansible 2.x or manually.
+[i18n.md](https://github.com/cscenter/site/tree/master/docs/i18n.md) | Notes about translation (in Russian)
 
 
 #### Misc
