@@ -55,7 +55,7 @@ msgstr "Закрыть все"
 
 #: cscsite/csclub/templates/base_menu.html:38
 msgid "Login"
-msgstr "Логин"
+msgstr "Войти"
 
 #: cscsite/csclub/templates/base_menu.html:41
 #: cscsite/csclub/templates/registration/registration_form.html:10
@@ -411,6 +411,11 @@ msgstr ""
 #: cscsite/csclub/templates/users/user_detail.html:392
 msgid "Change password"
 msgstr ""
+
+#: cscsite/learning/forms.py:321
+#: cscsite/templates/learning/assignment_detail_teacher.html:37
+msgid "Can be passed online"
+msgstr "Можно сдать через сайт CS клуба"
 
 #~ msgid ""
 #~ "\n"

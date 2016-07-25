@@ -35,11 +35,10 @@ SOLID_I18N_USE_REDIRECTS = False
 # Redirect from /ru/... to /... if default_lang == 'ru'
 SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
-# FIXME: Remove after Django 1.8.4 is released?
 # https://code.djangoproject.com/ticket/24159
-LOCALE_PATHS += [
+LOCALE_PATHS = [
     Path(BASE_DIR, "locale"),
-]
+] + LOCALE_PATHS
 
 # Template overrides
 TEMPLATES[0]['DIRS'] = [BASE_DIR.child("templates")] + TEMPLATES[0]['DIRS']
