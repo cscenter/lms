@@ -36,10 +36,12 @@ TEMPLATES = [
             PROJECT_DIR.child("templates"),
         ],
         'OPTIONS': {
-            'loaders': (
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader'
-            ),
+            'loaders': [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
+            ],
             'context_processors': (
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
