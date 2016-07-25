@@ -9,9 +9,7 @@
     <div class="col-xs-12">
     <h1>{% trans "Courses" %}</h1>
     {% for autumn_spring in semester_list %}
-      {% if forloop.first %}
-        <h3>{% trans "Ongoing" %}</h3>
-      {% elif forloop.counter == 2 %}
+      {% if forloop.counter == 2 %}
         <h3>{% trans "Archive" %}</h3>
       {% endif %}
 
