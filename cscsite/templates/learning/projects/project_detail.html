@@ -3,12 +3,14 @@
 {% load crispy_forms_tags %}
 {% load markdown from core_tags %}
 
+{% block body_class %} gray{% endblock body_class %}
+
 {% block content %}
 <div id="project-detail-page">
     <div class="row">
         <div class="col-xs-8">
     <h3>Название проекта </h3>
-{{ project.name }}
+<div>{{ project.name }}</div>
 
                         <h3>Описание</h3>
                         {% markdown 3600 "project_detail_description" project.pk project.modified %}
@@ -30,6 +32,7 @@
                         <br>TODO: Если проект текущего семестра, то показываем проверяющим кнопенцию "Интересует"/Следить за проектом
                         TODO: показывать сообщение, что отписаться можно только через куратора (добавить функцию куратору?)
         TODO: добавить кнопку назад
+        TODO: показывать сообщение, если нет презентации? или увеличить отступ
         </div>
         <div class="col-xs-4">
             <h3>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h3>
