@@ -26,6 +26,8 @@
 
 #project-detail-page {
   @extend .container;
+  padding: 10px 30px 30px;
+  background: #fff;
 
   .card-header {
     font-size: 16px;
