@@ -6,53 +6,76 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
-<div id="project-detail-page">
-    <div class="row">
-        <div class="col-xs-8">
-    <h3>Название проекта </h3>
-<div>{{ project.name }}</div>
+    <div id="project-detail-page">
+        <div class="row">
+            <div class="col-xs-8">
+                <h2 class="project-name">{{ project.name }}</h2>
+                <div class="project-type">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</div>
+                {% if project.description %}
+                    {% markdown 3600 "project_detail_description" project.pk project.modified %}
+                        {{ project.description  }}
+                    {% endmarkdown %}
+                {% endif %}
 
-                        <h3>Описание</h3>
-                        {% markdown 3600 "project_detail_description" project.pk project.modified %}
-                            {{ project.description  }}
-                        {% endmarkdown %}
+                {% if request.user.is_curator %}
+                    <h3>Оценки</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Участник</th>
+                            <th>Отчет</th>
+                            <th>Презентация</th>
+                            {% if project.is_external %}<th>Руководитель</th>{% endif %}
+                            <th>Итог</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ps in project.projectstudent_set.all %}
+                            <tr>
+                            <td>{{ ps.student }}</td>
+                            <td>{{ ps.report.final_score }}</td>
+                            <td>{{ ps.presentation_grade|default:"-" }}</td>
+                            {% if ps.project.is_external %}<td>{{ ps.supervisor_grade|default:"-" }}</td>{% endif %}
+                            <td>{{ ps.get_final_grade_display }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
 
+                    <h3>Отзывы руководителя</h3>
+                    {% for ps in project.projectstudent_set.all %}
+                        <div class="card">
+                            <div class="card-header ch-alt">{{ ps.student }}</div>
+                            <div class="card-body card-padding">
+                                {{ ps.supervisor_review|default:"Отзыв не предоставлен." }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
-
-                        {% if request.user.is_curator %}
-                            <h3>Оценки (таблица)</h3>
-                            Итог: Хорошо<br>
-                            Суммарный балл за отчет: XXX<br>
-                            Оценка за презентацию: XX<br>
-                            Оценка руководителя: XX (для внутренних проектов)<br>
-                        {% endif %}
-
-        <h3>Отзывы руководителя</h3>
-
-                        <br>TODO: Если проект текущего семестра, то показываем проверяющим кнопенцию "Интересует"/Следить за проектом
-                        TODO: показывать сообщение, что отписаться можно только через куратора (добавить функцию куратору?)
-        TODO: добавить кнопку назад
-        TODO: показывать сообщение, если нет презентации? или увеличить отступ
-        </div>
-        <div class="col-xs-4">
-            <h3>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h3>
-            {% if project.presentation %}
-                <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Скачать презентацию</a>
-                <br>
-            {% endif %}
+            </div>
+            <div class="col-xs-4">
+                <div class="links">
+                    {% if project.is_active %}
+                        <a class="btn btn-block btn-primary" href="{{ project.presentation.url }}">Следить за проектом</a>
+                    {% endif %}
+                    {% if project.presentation %}
+                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Скачать презентацию</a>
+                        <br>
+                    {% endif %}
+                </div>
                 <div class="card">
                     <div class="card-header ch-alt">Участники проекта</div>
                     <div class="card-body card-padding">
-                        {% for student in project.students.all %}
-                            {{ student }}<br>
-                            <a href="#">Смотреть отчет</a>
+                        {% for ps in project.projectstudent_set.all %}
+                            <div class="report">
+                                {{ ps.student.last_name }} {{ ps.student.first_name }}<br>
+                                <a href="#">Смотреть отчет</a>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
-                        {% if request.user.is_curator %}<br>TODO: Куратору показываем отзыв руководителя{% endif %}
+            </div>
         </div>
     </div>
-
-
-  </div>
 {% endblock content %}

@@ -16,6 +16,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
+from learning.utils import get_current_semester_pair, get_term_index
 
 
 def project_slides_file_name(self, filename):
@@ -114,6 +115,12 @@ class Project(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
+
+    def is_active(self):
+        """Check project from current term"""
+        year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(year, term_type)
+        return self.semester.index == current_term_index
 
 
 class ReviewCriteria(TimeStampedModel):
