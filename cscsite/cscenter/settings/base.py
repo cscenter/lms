@@ -34,10 +34,10 @@ TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
 
 # FIXME: Remove after Django 1.8.4 would been released?
 # https://code.djangoproject.com/ticket/24159
-LOCALE_PATHS += [
+LOCALE_PATHS = [
     Path(BASE_DIR, "locale"),
     Path(PROJECT_DIR, "learning", "admission", "locale"),
-]
+] + LOCALE_PATHS
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'chf0ao=8=ihflu_ln2&z+jke)*cx=k0e3mzuq+pc+x+6@vxrj7'
