@@ -14,7 +14,6 @@ from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
 from learning.views import CalendarMixin
-from .utils import check_for_city
 
 
 class CalendarClubScheduleView(CalendarMixin, generic.ListView):
