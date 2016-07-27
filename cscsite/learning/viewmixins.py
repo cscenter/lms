@@ -30,7 +30,7 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
                 (user.is_interviewer or user.is_curator))
 
 
-class ProjectReviewerOnlyMixin(UserPassesTestMixin):
+class ProjectReviewerGroupOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):

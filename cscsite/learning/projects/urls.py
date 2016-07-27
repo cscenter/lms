@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 
-from learning.projects.views import ReviewerProjectsView, ProjectDetailView
+from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
+    ProjectEnrollView, ReviewerReportView
 
 app_name = 'projects'
 urlpatterns = [
@@ -9,5 +10,10 @@ urlpatterns = [
             name='reviewer_projects'),
         url(r'^(?P<pk>\d+)/$', ProjectDetailView.as_view(),
             name='reviewer_project_detail'),
+        url(r'^(?P<pk>\d+)/enroll$', ProjectEnrollView.as_view(),
+            name='reviewer_project_enroll'),
+        url(r'^(?P<project_pk>\d+)/report/(?P<student_pk>\d+)/',
+            ReviewerReportView.as_view(),
+            name='reviewer_project_report'),
     ])),
 ]

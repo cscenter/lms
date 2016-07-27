@@ -1,7 +1,7 @@
 ## Dev setup
 
  
-* Setup python3.4 under virtualenv
+* Install python3.4, pip3, virtualenv
 * Install system dependencies
 ```bash
 # Fox linux users
@@ -26,12 +26,12 @@ GRANT
 ^D
 ```
 * Load data to database from dump
-* Create virtualenv for the project and activate it
-
 ```bash
-# For empty database
+# If you want empty database by any reason, don't forget to run migrations
 $ python cscsite/manage.py syncdb --settings=cscenter.settings.local
 ```
+* Create virtualenv for the project and activate it
+
 
 * To serving static, install grunt with npm locally
 
@@ -46,7 +46,7 @@ npm install -g node-sass
 * run dev server 
 ```
 ./manage.py runserver --settings=cscenter.settings.local
-# or
+# or run make cmd from project root dir
 make
 # or
 ./manage.py gruntserver
