@@ -21,7 +21,7 @@ from learning.settings import PARTICIPANT_GROUPS
 class Campaign(models.Model):
     name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
     code = models.CharField(_("Campaign|Code"), max_length=140,
-                            help_text=_("Will be displayed in admin select"))
+                            help_text=_("Campaign year"))
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(

@@ -8,7 +8,7 @@ from post_office import mail
 from learning.admission.models import Applicant, Exam
 
 
-# ./manage.py online_exam_generate_email_about_check  --template=admission-2016-online-exam-checked --campaign_id=2
+# ./manage.py email_online_exam_contest_checked  --template=admission-2016-online-exam-checked --campaign_id=2
 class Command(BaseCommand):
     help = 'Generate mails about contest check completeness'
 
