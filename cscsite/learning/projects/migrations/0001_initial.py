@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('grade', model_utils.fields.StatusField(choices=[('not_graded', 'Not graded'), ('unsatisfactory', 'Enrollment|Unsatisfactory'), ('pass', 'Enrollment|Pass'), ('good', 'Good'), ('excellent', 'Excellent')], default='not_graded', max_length=100, no_check_for_status=True, verbose_name='Grade')),
                 ('supervisor', models.CharField(help_text='Format: Last_name First_name Patronymic, Organization', max_length=255, verbose_name='StudentProject|Supervisor')),
                 ('project_type', models.CharField(choices=[('practice', 'StudentProject|Practice'), ('research', 'StudentProject|Research')], max_length=10, verbose_name='StudentProject|Type')),
-                ('presentation', models.FileField(blank=True, upload_to=learning.projects.models.project_slides_file_name, verbose_name='Presentation')),
+                ('presentation', models.FileField(blank=True, upload_to=learning.projects.models.project_presentation_files, verbose_name='Presentation')),
                 ('is_external', models.BooleanField(default=False, verbose_name='External project')),
                 ('semester', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='learning.Semester', verbose_name='Semester')),
                 ('students', models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name='Students')),

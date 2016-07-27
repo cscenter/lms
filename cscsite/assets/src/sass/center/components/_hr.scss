@@ -1,0 +1,25 @@
+hr.code {
+    position: relative;
+    max-width: 90%;
+    border: none;
+    margin: 50px auto;
+    height: 1px;
+    background: #F1F2F1;
+    background: -webkit-linear-gradient(left,#F1F2F1 0,#b5b5b5 50%,#F1F2F1 100%);
+    background: linear-gradient(to right,#F1F2F1 0,#b5b5b5 50%,#F1F2F1 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F1F2F1', endColorstr='#F1F2F1', GradientType=1 );
+
+  &:before {
+      position: absolute;
+      display: block;
+      top: 50%;
+      left: 50%;
+      -webkit-transform: translate(-50%,-50%);
+      transform: translate(-50%,-50%);
+      background: #fff;
+      font-family: "FontAwesome";
+      content: "\f121";
+      padding: 0 25px;
+      font-size: 35px;
+  }
+}

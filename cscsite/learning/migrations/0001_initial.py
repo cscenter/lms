@@ -329,7 +329,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(help_text='LaTeX+<a href="http://en.wikipedia.org/wiki/Markdown">Markdown</a>+HTML is enabled', verbose_name='Description', blank=True)),
                 ('supervisor', models.CharField(help_text='Format: Last_name First_name Patronymic, Organization', max_length=255, verbose_name='StudentProject|Supervisor')),
                 ('project_type', models.CharField(max_length=10, verbose_name='StudentProject|Type', choices=[('practice', 'StudentProject|Practice'), ('research', 'StudentProject|Research')])),
-                ('presentation', models.FileField(upload_to=learning.projects.models.project_slides_file_name, verbose_name='Presentation', blank=True)),
+                ('presentation', models.FileField(upload_to=learning.projects.models.project_presentation_files, verbose_name='Presentation', blank=True)),
                 ('is_external', models.BooleanField(default=False, verbose_name='External project')),
                 ('semester', models.ForeignKey(verbose_name='Semester', to='learning.Semester')),
             ],

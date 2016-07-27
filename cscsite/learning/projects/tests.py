@@ -7,9 +7,10 @@ from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory
-from learning.projects.factories import ProjectFactory
+from learning.projects.factories import ProjectFactory, ProjectReviewerFactory
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair
+from users.factories import StudentCenterFactory
 
 URL_REVIEWER_PROJECTS = reverse("projects:reviewer_projects")
 
@@ -77,6 +78,7 @@ def test_reviewer_list_security(client,
 
 @pytest.mark.django_db
 def test_reviewer_list(client, user_factory, curator, student_center_factory):
+    """Test filter `show` works"""
     url_active = "{}?show=active".format(URL_REVIEWER_PROJECTS)
     url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
     url_archive = "{}?show=archive".format(URL_REVIEWER_PROJECTS)
@@ -113,3 +115,57 @@ def test_reviewer_list(client, user_factory, curator, student_center_factory):
     assert len(response.context["projects"]) == 2
 
 
+@pytest.mark.django_db
+def test_reviewer_project_detail(client, curator):
+    reviewer = ProjectReviewerFactory()
+    client.login(reviewer)
+    year, term_type = get_current_semester_pair()
+    semester = SemesterFactory(year=year, type=term_type)
+    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    student = StudentCenterFactory()
+    project = ProjectFactory(students=[student], semester=semester_prev)
+    url = reverse("projects:reviewer_project_detail", args=[project.pk])
+    response = client.get(url)
+    # hide enrollment button for past projects
+    assert smart_bytes("Следить за проектом") not in response.content
+    current_project = ProjectFactory(students=[student], semester=semester)
+    url = reverse("projects:reviewer_project_detail",
+                  args=[current_project.pk])
+    response = client.get(url)
+    assert smart_bytes("Следить за проектом") in response.content
+    assert smart_bytes("Смотреть отчет") not in response.content
+    # Also, hide button for already enrolled projects
+    current_project.reviewers.add(reviewer)
+    current_project.save()
+    response = client.get(url)
+    assert smart_bytes("Следить за проектом") not in response.content
+    assert smart_bytes("Смотреть отчет") in response.content
+    # Don't show testimonials and grade tables to reviewer
+    assert smart_bytes("Отзывы руководителя") not in response.content
+    client.login(curator)
+    response = client.get(url)
+    assert smart_bytes("Отзывы руководителя") in response.content
+
+
+@pytest.mark.django_db
+def test_reviewer_project_enroll(client, curator):
+    year, term_type = get_current_semester_pair()
+    semester = SemesterFactory(year=year, type=term_type)
+    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    student = StudentCenterFactory()
+    old_project = ProjectFactory(students=[student], semester=semester_prev)
+    url_for_old = reverse("projects:reviewer_project_enroll",
+                          args=[old_project.pk])
+    reviewer = ProjectReviewerFactory()
+    reviewer2 = ProjectReviewerFactory()
+    client.login(reviewer)
+    response = client.post(url_for_old, {})
+    assert response.status_code == 403
+    active_project = ProjectFactory(students=[student], semester=semester)
+    urL_for_active = reverse("projects:reviewer_project_enroll",
+                             args=[active_project.pk])
+    response = client.post(urL_for_active, {}, follow=True)
+    assert response.status_code == 200
+    assert len(active_project.reviewers.all()) == 1
+    assert reviewer in active_project.reviewers.all()
+    assert reviewer2 not in active_project.reviewers.all()

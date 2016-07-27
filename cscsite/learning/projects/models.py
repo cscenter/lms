@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
@@ -17,15 +18,6 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair, get_term_index
-
-
-def project_slides_file_name(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(self.semester.year, self.semester.type),
-                        # FIXME: think how to remove id
-                        self.pk,
-                        'presentation',
-                        filename)
 
 
 @python_2_unicode_compatible
@@ -65,6 +57,14 @@ class ProjectStudent(models.Model):
                                   smart_text(self.student))
 
 
+# FIXME: invent how to add model pk here
+def project_presentation_files(self, filename):
+    return os.path.join('projects',
+                        '{}-{}'.format(self.semester.year, self.semester.type),
+                        'presentations',
+                        filename)
+
+
 @python_2_unicode_compatible
 class Project(TimeStampedModel):
     GRADES = GRADES
@@ -79,7 +79,7 @@ class Project(TimeStampedModel):
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
-        # XXX: Admin view can generate duplicates if user has both groups
+        # XXX: Admin view generates duplicates if user has both groups
         limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
                                          PARTICIPANT_GROUPS.GRADUATE_CENTER]},
         through=ProjectStudent)
@@ -93,6 +93,10 @@ class Project(TimeStampedModel):
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,
         help_text=_("Format: Last_name First_name Patronymic, Organization"))
+    supervisor_presentation = models.FileField(
+        _("Supervisor presentation"),
+        blank=True,
+        upload_to=project_presentation_files)
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
@@ -104,7 +108,7 @@ class Project(TimeStampedModel):
     presentation = models.FileField(
         _("Presentation"),
         blank=True,
-        upload_to=project_slides_file_name)
+        upload_to=project_presentation_files)
     is_external = models.BooleanField(
         _("External project"),
         default=False)

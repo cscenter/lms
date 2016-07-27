@@ -9,7 +9,9 @@
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
-                <h2 class="project-name">{{ project.name }}</h2>
+                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}
+                </h2>
+
                 <div class="project-type">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</div>
                 {% if project.description %}
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
@@ -33,7 +35,7 @@
                         {% for ps in project.projectstudent_set.all %}
                             <tr>
                             <td>{{ ps.student }}</td>
-                            <td>{{ ps.report.final_score }}</td>
+                            <td>{% if ps.report %}{{ ps.report.final_score }}{% else %}-{% endif %}</td>
                             <td>{{ ps.presentation_grade|default:"-" }}</td>
                             {% if ps.project.is_external %}<td>{{ ps.supervisor_grade|default:"-" }}</td>{% endif %}
                             <td>{{ ps.get_final_grade_display }}</td>
@@ -56,12 +58,21 @@
             </div>
             <div class="col-xs-4">
                 <div class="links">
-                    {% if project.is_active %}
-                        <a class="btn btn-block btn-primary" href="{{ project.presentation.url }}">Следить за проектом</a>
+                    {% if project.is_active and not you_enrolled %}
+                        <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-block btn-primary">Следить за проектом</button>
+                        </form>
+                    {% elif project.is_active %}
+                        <div class="you-enrolled">
+                            Вы подписаны на проект<br>
+                        </div>
+                    {% endif %}
+                    {% if project.supervisor_presentation %}
+                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>
                     {% endif %}
                     {% if project.presentation %}
-                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Скачать презентацию</a>
-                        <br>
+                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Презентация участников</a>
                     {% endif %}
                 </div>
                 <div class="card">
@@ -70,11 +81,17 @@
                         {% for ps in project.projectstudent_set.all %}
                             <div class="report">
                                 {{ ps.student.last_name }} {{ ps.student.first_name }}<br>
-                                <a href="#">Смотреть отчет</a>
+                                {# TODO: Может показывать просто статус вместо двух if'ов? #}
+                                {% if you_enrolled and ps.report and ps.report.status == 'sent' %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>
+                                {% elif you_enrolled and ps.report %}<a href="{% url "projects:reviewer_project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
+                                    {# TODO: проекту добавить метод report_deadline_reached? #}
+                                {% elif you_enrolled and project.is_active %}<span class="text-muted">Крайний срок отправки отчета<br> {{ project.semester.report_ends_at }}</span>
+                                {% elif you_enrolled %}<span class="text-danger">Отчет не сдан</span>{% endif %}
                             </div>
                         {% endfor %}
                     </div>
                 </div>
+            TODO: показывать, когда появится отчет, если срок ещё не вышел (по крайней дате покаызвать)
             </div>
         </div>
     </div>
