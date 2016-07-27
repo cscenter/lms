@@ -139,7 +139,6 @@ def test_reviewer_project_detail(client, curator):
     current_project.save()
     response = client.get(url)
     assert smart_bytes("Следить за проектом") not in response.content
-    assert smart_bytes("Смотреть отчет") in response.content
     # Don't show testimonials and grade tables to reviewer
     assert smart_bytes("Отзывы руководителя") not in response.content
     client.login(curator)
