@@ -24,6 +24,7 @@
                 <th>Направление</th>
                 <th>Тест</th>
                 <th>Экзамен</th>
+                <th>#</th>
               </tr>
             </thead>
             <tbody>
@@ -38,6 +39,16 @@
                         <td>{{ applicant.preferred_study_programs }}</td>
                         <td>{{ applicant.online_test.score|default:"-" }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}</td>
+                        <td>
+                            {% if applicant.user_id %}
+                                <a title="Профиль на сайте" class="btn btn-link" href="{% url "user_detail" applicant.user_id %}" target="_blank"><i class="fa fa-2x fa-external-link" aria-hidden="true"></i></a>
+                            {% elif applicant.interview_successfull %}
+                                <form method="post" action="{% url "admission_applicant_create_user" applicant.pk %}">
+                                    {% csrf_token %}
+                                    <button title="Создать профиль на сайте" type="submit" class="btn btn-link"><i class="fa fa-2x fa-user-plus" aria-hidden="true"></i></button>
+                                </form>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -4,13 +4,18 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
+import uuid
 from collections import Counter
+from random import choice
+from string import ascii_lowercase
+from string import digits
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.views import generic
@@ -26,6 +31,7 @@ from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
+from users.models import CSCUser
 
 
 class ApplicantContextMixin(object):
@@ -361,3 +367,88 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
                 ),
             )
         )
+
+
+class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        applicant_pk = kwargs.get("pk")
+        back_url = reverse("admission_applicants")
+        try:
+            applicant = Applicant.objects.get(pk=applicant_pk)
+        except Applicant.DoesNotExist:
+            messages.error(self.request, "Анкета не найдена",
+                           extra_tags='timeout')
+            return HttpResponseRedirect(reverse("admission_applicants"))
+
+        try:
+            user = CSCUser.objects.get(email=applicant.email)
+        except CSCUser.MultipleObjectsReturned:
+            messages.error(
+                self.request,
+                "Всё плохо. Найдено несколько пользователей "
+                "с email {}".format(applicant.email))
+            return HttpResponseRedirect(back_url)
+        except CSCUser.DoesNotExist:
+            username = applicant.email.split("@", maxsplit=1)[0]
+            if CSCUser.objects.filter(username=username).exists():
+                username = self.generate_random_username(attempts=5)
+            if not username:
+                messages.error(
+                    self.request,
+                    "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
+                    "не удалось".format(username))
+                return HttpResponseRedirect(back_url)
+            random_password = CSCUser.objects.make_random_password()
+            user = CSCUser.objects.create_user(username=username,
+                                               email=applicant.email,
+                                               password=random_password)
+
+        user.groups.add(CSCUser.group_pks.STUDENT_CENTER)
+        # Sync application form info and user profile info
+        # FIXME: some shit with naming, fix before next campaign
+        user.patronymic = applicant.last_name
+        user.first_name = applicant.first_name
+        user.last_name = applicant.second_name
+        user.enrollment_year = now().year
+        # Looks like the same fields below
+        user.yandex_id = applicant.yandex_id
+        user.github_id = applicant.github_id
+        user.stepic_id = applicant.stepic_id
+        user.university = applicant.university
+        # TODO: normalize phone, add study programs
+        user.phone = applicant.phone
+        user.workplace = applicant.workplace
+        user.save()
+        # Link applicant and user
+        applicant.user = user
+        applicant.save()
+
+        return HttpResponseRedirect(reverse("admin:users_cscuser_change",
+                                            args=[user.pk]))
+
+    @staticmethod
+    def generate_random_username(length=30,
+                                 chars=ascii_lowercase + digits,
+                                 split=4,
+                                 delimiter='-',
+                                 attempts=10):
+        if not attempts:
+            return None
+
+        username = ''.join([choice(chars) for _ in range(length)])
+
+        if split:
+            username = delimiter.join(
+                [username[start:start + split] for start in
+                 range(0, len(username), split)])
+
+        try:
+            CSCUser.objects.get(username=username)
+            attempts -= 1
+            return ApplicantCreateUserView.generate_random_username(
+                length=length, chars=chars, split=split, delimiter=delimiter,
+                attempts=attempts)
+        except CSCUser.DoesNotExist:
+            return username
