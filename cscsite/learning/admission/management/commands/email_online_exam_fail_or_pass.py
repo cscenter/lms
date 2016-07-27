@@ -8,7 +8,7 @@ from post_office import mail
 from learning.admission.models import Applicant, Exam
 
 
-# ./manage.py online_exam_email_about_fail_or_pass  --template_fail=admission-2016-online-exam-fail --campaign_id=2
+# ./manage.py email_online_exam_fail_or_pass  --template_fail=admission-2016-online-exam-fail --campaign_id=2
 class Command(BaseCommand):
     help = 'Generate emails about online exam results'
 

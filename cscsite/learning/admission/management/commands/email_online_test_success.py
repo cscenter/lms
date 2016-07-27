@@ -10,7 +10,7 @@ from post_office import mail
 
 from learning.admission.models import Test, Applicant
 
-# ./manage.py ses_generate_emails --passing_score=7 --template=admission-2016-online-test-success --campaign_id=2
+# ./manage.py email_online_test_fail --passing_score=7 --template=admission-2016-online-test-success --campaign_id=2
 # TODO: refactor description
 class Command(BaseCommand):
     help = 'Generate mailing list for choosing template and action. ONLY SUCCESS EMAILS HERE'
