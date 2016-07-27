@@ -216,6 +216,10 @@ class Applicant(TimeStampedModel):
         else:
             return smart_text(self.get_full_name())
 
+    def interview_successfull(self):
+        """Successfully pass interview and ready to become student center"""
+        return self.status in [self.ACCEPT, self.ACCEPT_IF, self.VOLUNTEER]
+
 
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?
