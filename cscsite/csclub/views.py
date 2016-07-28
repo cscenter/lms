@@ -13,6 +13,8 @@ from django.shortcuts import redirect
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
+from learning.settings import SEMESTER_TYPES
+from learning.utils import get_current_semester_pair
 from learning.views import CalendarMixin
 
 
@@ -25,20 +27,22 @@ class IndexView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        current_semester = Semester.get_current()
-        context['current_semester'] = current_semester
-        today = now().date()
-        # TODO: add cache
-        courseclass_queryset = (CourseClass.objects
-                                           .filter(date__gte=today)
-                                           .order_by('date', 'starts_at'))
-        if current_semester.type in [Semester.TYPES.spring,
-                                     Semester.TYPES.autumn]:
+        try:
+            year, term_type = get_current_semester_pair()
+            if term_type == SEMESTER_TYPES.summer:
+                term_type = SEMESTER_TYPES.autumn
+            featured_term = Semester.objects.get(year=year, type=term_type)
+            context['featured_term'] = featured_term
+            today = now().date()
+            # TODO: add cache
+            courseclass_queryset = (CourseClass.objects
+                                               .filter(date__gte=today)
+                                               .order_by('date', 'starts_at'))
             context['courses'] = (
                 CourseOffering
                 .custom
                 .site_related(self.request)
-                .filter(semester=current_semester.pk)
+                .filter(semester=featured_term.pk)
                 .select_related('course', 'semester')
                 .prefetch_related(
                     'teachers',
@@ -48,9 +52,8 @@ class IndexView(generic.TemplateView):
                         to_attr='classes'
                     ))
                 .order_by('is_completed', 'course__name'))
-        else:
-            context['courses'] = []
-
+        except Semester.DoesNotExist:
+            pass
         return context
 
 
