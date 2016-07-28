@@ -23,6 +23,7 @@ from django.views.generic.base import TemplateResponseMixin, ContextMixin
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
+from extra_views.formsets import BaseModelFormSetView
 
 from learning.admission.filters import ApplicantFilter, InterviewsFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
@@ -186,14 +187,20 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         today_max = datetime.datetime.combine(now(), datetime.time.max)
         context = super(InterviewListView, self).get_context_data(**kwargs)
         # TODO: collect stats for curators here?
-        context["today"] = self.get_queryset().filter(
-            date__range=(today_min, today_max), status=Interview.WAITING).count()
+        context["today"] = self.object_list.filter(
+            date__range=(today_min, today_max),
+            status=Interview.WAITING).count()
         context["filter"] = self.filterset
         return context
 
     def get_queryset(self):
+        try:
+            campaign_current = Campaign.objects.get(current=True)
+        except Campaign.DoesNotExist:
+            messages.info(self.request, "Нет активных кампаний по набору!")
+            return Interview.objects.none()
         q = (Interview.objects
-             .filter(applicant__campaign__current=True)
+             .filter(applicant__campaign=campaign_current)
              .select_related("applicant")
              .prefetch_related("interviewers")
              .annotate(average=Avg('comments__score'))
@@ -299,7 +306,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     """
     We can have multiple interviews for applicant
     """
-    # TODO: add tests! Think about pagination in the future. No it's too complicated to change queryset
+    # TODO: Think about pagination for model formsets in the future.
     context_object_name = 'interviews'
     template_name = "learning/admission/interview_results.html"
     campaign = None
@@ -367,6 +374,14 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
                 ),
             )
         )
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object_list = self.get_queryset()
+        except Campaign.DoesNotExist:
+            messages.error(self.request, "Нет активных кампаний по набору")
+            return HttpResponseRedirect(reverse("admission_applicants"))
+        return super(BaseModelFormSetView, self).get(request, *args, **kwargs)
 
 
 class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
