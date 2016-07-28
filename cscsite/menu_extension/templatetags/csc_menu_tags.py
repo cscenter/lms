@@ -31,11 +31,16 @@ def csc_menu(context, menu_name, root_id=False):
                 item.groups_allowed = [g.id for g in item.extension.groups.all()]
                 # Override url from named_url if specified
                 if item.named_url:
-                    item.url = reverse(item.named_url)
+                    try:
+                        item.url = reverse(item.named_url)
+                    except NoReverseMatch as e:
+                        if settings.DEBUG:
+                            raise e
+                        else:
+                            item.url = "/None/"
             CSCMENU_CACHE[menu_name] = flattened
-        except (MenuItem.DoesNotExist, Menu.DoesNotExist,
-                NoReverseMatch) as e:
-            if settings.TEMPLATE_DEBUG:
+        except (MenuItem.DoesNotExist, Menu.DoesNotExist) as e:
+            if settings.DEBUG:
                 raise e
             else:
                 return []
