@@ -33,6 +33,7 @@ def render_markdown(text):
     return bleach.clean(md_rendered, tags=MARKDOWN_ALLOWED_TAGS,
                         attributes=MARKDOWN_ALLOWED_ATTRS)
 
+
 def get_club_domain(code = None):
     protocol = "http://"
     prefix = "kzn." if code == "RU KZN" else ""

@@ -3,24 +3,18 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
-import io
-
 import six
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import OrderedDict, defaultdict
 
-import unicodecsv
-from django.http import HttpResponse
-from django.utils.encoding import force_text
-from xlsxwriter import Workbook
-
+from core.views import ReportFileOutput
 from learning.settings import GRADES, STUDENT_STATUS
 from users.models import CSCUser
 
 
 # TODO: filter projects by grade?
-class ProgressReport(object):
+class ProgressReport(ReportFileOutput):
     """
     Process students info from CSCUser manager for future export in
     CSV of XLSX format. Stores separately headers and data.
@@ -152,10 +146,6 @@ class ProgressReport(object):
             grade = course["grade"]
         return grade not in [GRADES.unsatisfactory, GRADES.not_graded, '']
 
-    @abstractmethod
-    def export_row(self, row):
-        raise NotImplementedError()
-
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
             sc = student.courses[course_id]
@@ -192,45 +182,6 @@ class ProgressReport(object):
                 row.extend([online_course.name])
             else:
                 row.extend([''])
-
-    def output_csv(self):
-        output = io.BytesIO()
-        w = unicodecsv.writer(output, encoding='utf-8')
-
-        w.writerow(self.headers)
-        for student in self.data:
-            row = self.export_row(student)
-            w.writerow(row)
-
-        output.seek(0)
-        response = HttpResponse(output.read(),
-                                content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = \
-            'attachment; filename="{}.csv"'.format(self.get_filename())
-        return response
-
-    def output_xlsx(self):
-        output = io.BytesIO()
-        workbook = Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet()
-
-        format_bold = workbook.add_format({'bold': True})
-        for index, header in enumerate(self.headers):
-            worksheet.write(0, index, header, format_bold)
-
-        for row_index, raw_row in enumerate(self.data, start=1):
-            row = self.export_row(raw_row)
-            for col_index, value in enumerate(row):
-                value = "" if value is None else force_text(value)
-                worksheet.write(row_index, col_index, force_text(value))
-
-        workbook.close()
-        output.seek(0)
-        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        response = HttpResponse(output.read(), content_type=content_type)
-        response['Content-Disposition'] = \
-            'attachment; filename="{}.xlsx"'.format(self.get_filename())
-        return response
 
     def get_filename(self):
         today = datetime.datetime.now()

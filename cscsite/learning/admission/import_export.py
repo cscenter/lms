@@ -25,6 +25,7 @@ class ApplicantRecordResource(resources.ModelResource):
         model = Applicant
         import_id_fields = ['uuid']
         skip_unchanged = True
+        # TODO: In staff/ already implemented custom solution, remove this code
         # FIXME: Too slow, looking for another solution
         online_test_fields = ["online_test__" + f.name for f in
                               Test._meta.fields if f.name != 'id']
