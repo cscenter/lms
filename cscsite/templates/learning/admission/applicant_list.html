@@ -24,7 +24,7 @@
                 <th>Направление</th>
                 <th>Тест</th>
                 <th>Экзамен</th>
-                <th>#</th>
+                {% if request.user.is_curator %}<th>#</th>{% endif %}
               </tr>
             </thead>
             <tbody>
@@ -39,6 +39,7 @@
                         <td>{{ applicant.preferred_study_programs }}</td>
                         <td>{{ applicant.online_test.score|default:"-" }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}</td>
+                        {% if request.user.is_curator %}
                         <td>
                             {% if applicant.user_id %}
                                 <a title="Профиль на сайте" class="btn btn-link" href="{% url "user_detail" applicant.user_id %}" target="_blank"><i class="fa fa-2x fa-external-link" aria-hidden="true"></i></a>
@@ -49,6 +50,7 @@
                                 </form>
                             {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>

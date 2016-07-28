@@ -417,9 +417,9 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         user.github_id = applicant.github_id
         user.stepic_id = applicant.stepic_id
         user.university = applicant.university
-        # TODO: normalize phone, add study programs
         user.phone = applicant.phone
         user.workplace = applicant.workplace
+        user.uni_year_at_enrollment = applicant.course_to_numeric()
         user.save()
         # Link applicant and user
         applicant.user = user

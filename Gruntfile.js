@@ -44,8 +44,7 @@ module.exports = function (grunt) {
                 dest: '<%= JS_RUNTIME %>/profile.js'
             },
             profile_edit: {
-                src: ['<%= JS_VENDOR %>/jasny.bootstrap/jasny-bootstrap.min.js',
-                      '<%= JS_SRC %>/profile_edit.js'],
+                src: ['<%= JS_SRC %>/profile_edit.js'],
                 dest: '<%= JS_RUNTIME %>/profile_edit.js'
             },
             staff_student_search: {
