@@ -16,7 +16,7 @@
         {% if request.resolver_match.url_name == 'markssheet_teacher' %}
         <a href="{% url 'markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
         {% else %}
-        <a href="{% url 'course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
+        <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
         {% endif %}
         {% trans "Marks sheet" %}<br><small>{{ course_offering }}</small>
       </h2>

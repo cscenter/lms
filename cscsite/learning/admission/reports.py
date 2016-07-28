@@ -1,0 +1,4 @@
+
+
+class AdmissionReport(object):
+    pass

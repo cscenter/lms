@@ -49,7 +49,7 @@ def test_staff_diplomas_view(curator, client, student_center_factory):
     sp.final_grade = GRADES.good
     sp.save()
     client.login(curator)
-    response = client.get(reverse('staff_exports_students_diplomas'))
+    response = client.get(reverse('staff:exports_students_diplomas'))
     assert smart_bytes(p.name) in response.content
 
 

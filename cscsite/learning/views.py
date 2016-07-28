@@ -1540,7 +1540,7 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
         super(MarksSheetTeacherDispatchView, self).__init__(*args, **kwargs)
         if kwargs.get('is_for_staff'):
             self.is_for_staff = True
-            self.ms_url_name = 'course_markssheet_staff'
+            self.ms_url_name = 'staff:course_markssheet_staff'
         else:
             self.is_for_staff = False
             self.ms_url_name = 'markssheet_teacher'
@@ -1670,7 +1670,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
     def get_success_url(self):
         co = self.course_offering
         if self.is_for_staff:
-            url_name = 'course_markssheet_staff'
+            url_name = 'staff:course_markssheet_staff'
         else:
             url_name = 'markssheet_teacher'
         messages.info(self.request, _('Gradebook successfully saved.'),
