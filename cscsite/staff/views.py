@@ -11,6 +11,8 @@ from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
+from learning.admission.models import Campaign
+from learning.admission.reports import AdmissionReport
 from learning.models import Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
@@ -48,7 +50,7 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentSearchView, self).get_context_data(**kwargs)
-        context['json_api_uri'] = reverse('student_search_json')
+        context['json_api_uri'] = reverse('staff:student_search_json')
         context['enrollment_years'] = (CSCUser.objects
                                        .values_list('enrollment_year',
                                                     flat=True)
@@ -73,6 +75,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         context["current_term"] = {"year": year, "type": term}
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
         context["prev_term"] = {"year": prev_term_year, "type": prev_term}
+        context["campaigns"] = Campaign.objects.order_by("-name").all()
         return context
     template_name = "staff/exports.html"
 
@@ -174,6 +177,21 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         else:
             raise ValueError("ProgressReportForSemesterView: output "
                              "format not provided")
+
+
+class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+    output_format = None
+
+    def get(self, request, *args, **kwargs):
+        campaign_id = kwargs.get("campaign_id")
+        report = AdmissionReport(campaign_id=campaign_id)
+        if self.output_format == "csv":
+            return report.output_csv()
+        elif self.output_format == "xlsx":
+            return report.output_xlsx()
+        else:
+            raise ValueError("AdmissionReportView: output format not provided")
 
 
 class HintListView(CuratorOnlyMixin, generic.ListView):
