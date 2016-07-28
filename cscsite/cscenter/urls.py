@@ -153,8 +153,12 @@ if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
 
 if settings.DEBUG:
+    import debug_toolbar
     from django.views.defaults import page_not_found, bad_request, \
         permission_denied, server_error
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
 
     # This allows the error pages to be debugged during development, just visit
     # these url in browser to see how these error pages look like.
