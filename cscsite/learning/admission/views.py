@@ -197,7 +197,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         try:
             campaign_current = Campaign.objects.get(current=True)
         except Campaign.DoesNotExist:
-            messages.info(self.request, "Нет активных кампаний по набору!")
+            messages.error(self.request, "Нет активных кампаний по набору!")
             return Interview.objects.none()
         q = (Interview.objects
              .filter(applicant__campaign=campaign_current)
