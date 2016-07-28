@@ -133,8 +133,6 @@ class ReportFileOutput(object):
             row = self.export_row(data_row)
             w.writerow(row)
         output.seek(0)
-        print(output.read())
-        output.seek(0)
         response = HttpResponse(output.read(),
                                 content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = \
