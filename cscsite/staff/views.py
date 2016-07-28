@@ -184,8 +184,8 @@ class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
     output_format = None
 
     def get(self, request, *args, **kwargs):
-        campaign_id = kwargs.get("campaign_id")
-        report = AdmissionReport(campaign_id=campaign_id)
+        campaign_pk = kwargs.get("campaign_pk")
+        report = AdmissionReport(campaign_pk=campaign_pk)
         if self.output_format == "csv":
             return report.output_csv()
         elif self.output_format == "xlsx":
