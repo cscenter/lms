@@ -23,6 +23,7 @@ class Command(BaseCommand):
     )
 
     # TODO: Autocorrect yandex id (remove @ya.ru @yandex.ru and so on.)
+    # TODO: convert course text value to CSCUser.COURSES numeric value?
     def add_arguments(self, parser):
         parser.add_argument('csv', metavar='CSV',
                    help='path to csv with data')
