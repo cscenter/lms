@@ -414,7 +414,10 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         user.enrollment_year = now().year
         # Looks like the same fields below
         user.yandex_id = applicant.yandex_id
-        user.github_id = applicant.github_id
+        # For github left part after github.com/ only
+
+        user.github_id = applicant.github_id.split("github.com/",
+                                                   maxsplit=1)[-1]
         user.stepic_id = applicant.stepic_id
         user.university = applicant.university
         user.phone = applicant.phone
