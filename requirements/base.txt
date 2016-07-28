@@ -1,4 +1,4 @@
-Django==1.9.7
+Django==1.9.8
 
 Unipath==1.1
 requests==2.10.0
@@ -8,7 +8,7 @@ unicodecsv==0.14.1
 six==1.10.0
 
 # Time zones support
-pytz==2016.6
+pytz==2016.6.1
 
 # Db support
 psycopg2==2.6.2
@@ -18,8 +18,8 @@ django-prettyjson==0.2.1
 standardjson==0.3.1
 
 # Images
-Pillow==3.1.0
-python-magic==0.4.11
+Pillow==3.3.0
+python-magic==0.4.12
 sorl-thumbnail==12.3
 
 # Forms
@@ -30,7 +30,7 @@ django-crispy-forms==1.6.0
 django-model-utils==2.5
 
 # Html parsing
-beautifulsoup4==4.4.1
+beautifulsoup4==4.5.0
 
 # Translation utils
 django-rosetta==0.7.11
@@ -41,7 +41,7 @@ django-post-office==2.0.7
 django-ses==0.8.0
 
 # Amazon services
-boto==2.41.0
+boto==2.42.0
 
 # Excel 2010 support
 xlsxwriter==0.9.3
@@ -76,12 +76,14 @@ django-import-export==0.4.5
 tablib==0.11.2
 
 # Redis-based task manager
-huey==1.1.2
+huey==1.2.0
 
 # Misc utils
-django-mptt==0.8.4
+django-mptt==0.8.5
 django-bootstrap-pagination==1.6.1
-django-bitfield==1.8.0
+# django-bitfield==1.8.0
+# Fork with fixed Django 1.9 & 1.10 warnings
+git+https://github.com/goodmase/django-bitfield.git@cde12bbe093dc1c71b006ac383e3c4d5b5f7defb
 django-filter==0.13.0
 hashids==1.1.0
 django-recaptcha==1.0.5
