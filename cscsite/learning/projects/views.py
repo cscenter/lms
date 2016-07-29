@@ -125,8 +125,8 @@ class ReviewerReportView(generic.DetailView):
             Report.objects.filter(
                 project_student__student=student_pk,
                 project_student__project=project_pk,
-                status=Report.SENT
             )
         )
+        # TODO: Check if user is not curator and status =Report.SENT
         return report
 

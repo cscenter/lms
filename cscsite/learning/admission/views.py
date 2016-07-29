@@ -31,6 +31,7 @@ from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
     InterviewResultsModelForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
+from learning.admission.utils import get_best_interview
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
 
@@ -182,13 +183,10 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     template_name = "learning/admission/interviews.html"
 
     def get_context_data(self, **kwargs):
-        # TODO: In Django 1.9 implemented __date lookup field. Replace after migration
-        today_min = datetime.datetime.combine(now(), datetime.time.min)
-        today_max = datetime.datetime.combine(now(), datetime.time.max)
         context = super(InterviewListView, self).get_context_data(**kwargs)
         # TODO: collect stats for curators here?
         context["today"] = self.object_list.filter(
-            date__range=(today_min, today_max),
+            date__date=now(),
             status=Interview.WAITING).count()
         context["filter"] = self.filterset
         return context
@@ -312,25 +310,19 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     campaign = None
     model = Applicant
     form_class = InterviewResultsModelForm
-    UNREACHABLE_COMMENT_SCORE = Comment.MIN_SCORE - 1
 
     def get_context_data(self, **kwargs):
         # XXX: To avoid double query to DB, skip ModelFormSetView action
         context = ContextMixin.get_context_data(self, **kwargs)
         stats = Counter()
 
-        def cmp_interview_average(interview):
-            if interview.average is not None:
-                return interview.average
-            else:
-                return self.UNREACHABLE_COMMENT_SCORE
-
         for form in context["formset"].forms:
             # Select the highest interview score to sort by
             applicant = form.instance
             stats.update((applicant.status,))
-            best_interview = max(applicant.interviews.all(),
-                                 key=cmp_interview_average)
+            best_interview = get_best_interview(applicant)
+            # XXX: Average score already calculated with queryset
+            # No need to check interview has attr `average` or not
             if best_interview.average is not None:
                 applicant.best_interview_score = best_interview.average
             else:
@@ -338,7 +330,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
 
         def cpm_interview_best_score(form):
             if form.instance.best_interview_score is None:
-                return self.UNREACHABLE_COMMENT_SCORE
+                return Comment.UNREACHABLE_COMMENT_SCORE
             else:
                 return form.instance.best_interview_score
 

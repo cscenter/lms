@@ -12,7 +12,7 @@
                 <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}
                 </h2>
 
-                <div class="project-type">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</div>
+{#                <div class="project-type">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</div>#}
                 {% if project.description %}
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
                         {{ project.description  }}
@@ -20,7 +20,7 @@
                 {% endif %}
 
                 {% if request.user.is_curator %}
-                    <h3>Оценки</h3>
+                    <h4>Оценки</h4>
                     <table class="table table-bordered">
                         <thead>
                         <tr>
@@ -44,7 +44,7 @@
                         </tbody>
                     </table>
 
-                    <h3>Отзывы руководителя</h3>
+                    <h4>Отзывы руководителя</h4>
                     {% for ps in project.projectstudent_set.all %}
                         <div class="card">
                             <div class="card-header ch-alt">{{ ps.student }}</div>
@@ -68,12 +68,24 @@
                             Вы подписаны на проект<br>
                         </div>
                     {% endif %}
-                    {% if project.supervisor_presentation %}
-                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>
-                    {% endif %}
+{#                    {% if project.supervisor_presentation %}#}
+{#                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>#}
+{#                    {% endif %}#}
+{#                    {% if project.presentation %}#}
+{#                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Презентация участников</a>#}
+{#                    {% endif %}#}
+                </div>
+                <div class="card">
+                    <div class="card-header ch-alt">О проекте</div>
+                    <div class="card-body card-padding">
+                        {% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект <br> Семестр: {{ project.semester }}<br>
+                        {% if project.supervisor_presentation %}
+                        <a class="" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>
+                        {% endif %}
                     {% if project.presentation %}
-                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Презентация участников</a>
+                        <a class="" href="{{ project.presentation.url }}">Презентация участников</a>
                     {% endif %}
+                    </div>
                 </div>
                 <div class="card">
                     <div class="card-header ch-alt">Участники проекта</div>

@@ -3,13 +3,13 @@
 from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict
-
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.numberformat import format
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -429,7 +429,6 @@ class Interview(TimeStampedModel):
         scores = [comment.score for comment in self.comments.all()]
         if scores:
             return float(sum(scores)) / len(scores)
-        return "-"
 
     def __str__(self):
         return smart_text(self.applicant)
@@ -439,6 +438,7 @@ class Interview(TimeStampedModel):
 class Comment(TimeStampedModel):
     MIN_SCORE = -2
     MAX_SCORE = 2
+    UNREACHABLE_COMMENT_SCORE = MIN_SCORE - 1
 
     interview = models.ForeignKey(
         Interview,
