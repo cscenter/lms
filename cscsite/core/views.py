@@ -175,5 +175,6 @@ class ReportFileOutput(object):
         return "report_{}".format(today.strftime("%d.%m.%Y"))
 
     def debug_response(self):
+        # TODO: replace with table view
         return HttpResponse("<html><body></body></html>",
                             content_type='text/html; charset=utf-8')
