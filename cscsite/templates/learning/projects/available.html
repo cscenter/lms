@@ -6,11 +6,10 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
+
 <div class="projects-list-page">
-    <div class="nav-tabs-horizontal nav-tabs-inverse">
-        {% include "learning/projects/_tabs.html" %}
-        <div class="tab-content">
-            <div class="tab-pane active" id="projects" role="tabpanel">
+    <div class="panel">
+        <div class="panel-body">
             {% if projects %}
                 <h3>Проекты текущего семестра</h3>
 
@@ -19,7 +18,7 @@
                     <tr>
                         <th class="name">Название</th>
                         <th>Участники</th>
-                        <th class="note"></th>
+                        <th>Проверяют</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -27,13 +26,16 @@
                         <tr>
                             <td>
                                 <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
-                                {% if request.user.is_curator %}<br>
-                                    {{ project.semester }}{% endif %}
                             </td>
                             <td>
-                                {{ project.students.all|join:"<br>" }}</td>
-                            <td>{% if project.is_external %}
-                                <span>Внешний проект</span>{% endif %}
+                                {% for student in project.students.all %}
+                                    <a href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for reviewer in project.reviewers.all %}
+                                    {{ reviewer }}
+                                {% endfor %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -46,7 +48,6 @@
             {% else %}
                 <div class="projects-empty-list">Увы, в текущем семестре нет проектов.</div>
             {% endif %}
-            </div>
         </div>
     </div>
 
