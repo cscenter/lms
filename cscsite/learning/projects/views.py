@@ -25,12 +25,11 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
     paginate_by = 50
     context_object_name = "projects"
     FILTER_NAME = "show"
+    # FIXME: replace with `reports` name?
     PROJECT_ACTIVE = "active"  # show enrollments for current term
     PROJECT_AVAILABLE = "available"  # show all projects for current term
-    PROJECT_ARCHIVE = "archive"  # past enrollments
     PROJECT_ALL = "all"  # all projects
-    FILTER_VALUES = [PROJECT_ACTIVE, PROJECT_AVAILABLE, PROJECT_ARCHIVE,
-                     PROJECT_ALL]
+    FILTER_VALUES = [PROJECT_ACTIVE, PROJECT_AVAILABLE, PROJECT_ALL]
 
     def get_template_names(self):
         assert self.FILTER_NAME in self.request.GET
@@ -57,11 +56,11 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         project_type = self.request.GET[self.FILTER_NAME]
         queryset = (Project.objects
                     .select_related("semester")
-                    .prefetch_related("students"))
+                    .prefetch_related("students", "reviewers"))
 
         if project_type in [self.PROJECT_ACTIVE, self.PROJECT_AVAILABLE]:
             queryset = queryset.filter(semester__index=current_term_index)
-        if project_type in [self.PROJECT_ACTIVE, self.PROJECT_ARCHIVE]:
+        if project_type == self.PROJECT_ACTIVE:
             queryset = queryset.filter(reviewers=self.request.user)
         return queryset.order_by("-semester__index", "name", "pk")
 

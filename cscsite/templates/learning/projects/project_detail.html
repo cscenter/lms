@@ -49,7 +49,7 @@
                         <div class="card">
                             <div class="card-header ch-alt">{{ ps.student }}</div>
                             <div class="card-body card-padding">
-                                {{ ps.supervisor_review|default:"Отзыв не предоставлен." }}
+                                {{ ps.supervisor_review|default:"<отзыв не предоставлен>" }}
                             </div>
                         </div>
                     {% endfor %}
@@ -76,9 +76,8 @@
 {#                    {% endif %}#}
                 </div>
                 <div class="card">
-                    <div class="card-header ch-alt">О проекте</div>
+                    <div class="card-header ch-alt">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект<br> {{ project.semester }}</div>
                     <div class="card-body card-padding">
-                        {% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект <br> Семестр: {{ project.semester }}<br>
                         {% if project.supervisor_presentation %}
                         <a class="" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>
                         {% endif %}

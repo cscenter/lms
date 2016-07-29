@@ -7,42 +7,37 @@
 
 {% block content %}
 <div class="projects-list-page">
-    <div class="nav-tabs-horizontal nav-tabs-inverse">
-        {% include "learning/projects/_tabs.html" %}
-        <div class="tab-content">
-            <div class="tab-pane active" id="projects" role="tabpanel">
-                {% if projects %}
-                <h3>Интересные проекты</h3>
-                <table class="table">
-                    <thead>
+    <div class="panel">
+        <div class="panel-body">
+            {% if projects %}
+            <h3>Отчеты</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="name">Название проекта</th>
+                    <th>Участники</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for project in projects %}
                     <tr>
-                        <th class="name">Название</th>
-                        <th>Участники</th>
-                        <th class="note">#</th>
+                        <td>
+                            <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
+                            {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
+                        </td>
+                        <td>{{ project.students.all|join:"<br>" }}<br><a href="#">смотреть отчет</a></td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {% for project in projects %}
-                        <tr>
-                            <td>
-                                <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
-                                {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
-                            </td>
-                            <td>{{ project.students.all|join:"<br>" }}</td>
-                            <td>{% if project.is_external %}<span>Внешний проект</span>{% endif %}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {% endfor %}
+                </tbody>
+            </table>
 
-                {% if is_paginated %}
-                    {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
-                {% endif %}
-                {% else %}
-                    <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                    <a href="{% url "projects:reviewer_projects" %}?show=available">Перейти к списку проектов текущего семестра</a>.</div>
-                {% endif %}
-            </div>
+            {% if is_paginated %}
+                {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
+            {% endif %}
+            {% else %}
+                <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект.<br>
+                <a href="{% url "projects:reviewer_projects" %}?show=available">Перейти к списку проектов текущего семестра</a>.</div>
+            {% endif %}
         </div>
     </div>
 </div>

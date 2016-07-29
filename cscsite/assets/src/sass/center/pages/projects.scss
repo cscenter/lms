@@ -1,6 +1,5 @@
 .projects-list-page {
   @extend .container;
-  @extend .page-inverse;
 
   h3 {
     text-transform: uppercase;
@@ -76,7 +75,7 @@
   .you-enrolled {
     text-align: center;
     color: $color-green;
-    margin: 10px 0;
+    margin: 10px 0 20px;
     padding: 10px 12px;
     border: 1px solid $color-green;
   }
