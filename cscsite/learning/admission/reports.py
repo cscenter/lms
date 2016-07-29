@@ -26,9 +26,7 @@ class AdmissionReport(ReportFileOutput):
         ]
         applicant_fields = [f for f in Applicant._meta.fields if
                             f.name not in exclude_applicant_fields]
-        self.headers = []
-        for f in applicant_fields:
-            self.headers.append(force_text(f.verbose_name))
+        self.headers = [force_text(f.verbose_name) for f in applicant_fields]
         self.headers.extend([
             "Результаты теста",
             "Результаты экзамена",
@@ -43,7 +41,7 @@ class AdmissionReport(ReportFileOutput):
                 value = getattr(applicant, field.name)
                 if field.name == 'status':
                     value = applicant.get_status_display()
-                row.append(force_text(value))
+                row.append(value)
             if hasattr(applicant, "online_test"):
                 row.append(applicant.online_test.score)
             else:
@@ -69,10 +67,10 @@ class AdmissionReport(ReportFileOutput):
                             comment.text
                         )
                     )
-                row.append(force_text(comments))
+                row.append(comments)
             else:
                 row.append("-")
-            self.data.append(row)
+            self.data.append([force_text(x) for x in row])
 
     def get_queryset(self):
         return (Applicant.objects
