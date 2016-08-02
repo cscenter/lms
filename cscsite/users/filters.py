@@ -56,19 +56,18 @@ class CSCUserFilter(django_filters.FilterSet):
 
     def cnt_enrollments_filter(self, queryset, value):
         value_list = value.split(u',')
-        value_list = [v for v in value_list if v]
-        if not value_list:
-            return queryset
         try:
-            value_list = map(int, value_list)
+            value_list = [int(v) for v in value_list if v]
+            if not value_list:
+                return queryset
         except ValueError:
             return queryset
 
         queryset = queryset.annotate(
             courses_cnt=
             Count(Case(
-                When(Q(enrollment__grade=Enrollment.GRADES.not_graded) | Q(
-                    enrollment__grade=Enrollment.GRADES.unsatisfactory),
+                When(Q(enrollment__grade=Enrollment.GRADES.not_graded) |
+                     Q(enrollment__grade=Enrollment.GRADES.unsatisfactory),
                      then=Value(None)),
                 default=F("enrollment")
             ), distinct=True) +
