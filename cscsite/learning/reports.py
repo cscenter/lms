@@ -235,9 +235,9 @@ class ProgressReportForDiplomas(ProgressReport):
 class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
-        return CSCUser.objects.students_info(
-            exclude_grades=[]
-        )
+        return (CSCUser.objects
+                .students_info(exclude_grades=[])
+                .select_related("applicant"))
 
     @property
     def static_headers(self):
@@ -261,6 +261,7 @@ class ProgressReportFull(ProgressReport):
             'Дата последнего изменения комментария',
             'Работа',
             'Ссылка на профиль',
+            'Ссылка на анкету',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
         ]
 
@@ -273,12 +274,22 @@ class ProgressReportFull(ProgressReport):
         return headers
 
     def export_row(self, student):
+        from django.core.urlresolvers import reverse
+        from learning.admission.models import Applicant
+
         total_success_passed = (
             sum(1 for c in student.courses.values() if
                 self.is_positive_grade(c)) +
             sum(1 for c in student.shads if self.is_positive_grade(c)) +
             sum(1 for _ in student.online_courses)
         )
+        try:
+            applicant_form_url = self.request.build_absolute_uri(
+                reverse("admission_applicant_detail",
+                        args=[student.applicant.pk])
+            )
+        except Applicant.DoesNotExist:
+            applicant_form_url = ""
         row = [
             student.last_name,
             student.first_name,
@@ -299,6 +310,7 @@ class ProgressReportFull(ProgressReport):
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
+            applicant_form_url,
             total_success_passed,
         ]
         self._export_row_append_courses(row, student)
