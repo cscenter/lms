@@ -102,7 +102,7 @@ class ProgressReport(ReportFileOutput):
 
     @abstractmethod
     def generate_headers(self):
-        raise NotImplementedError("ProgressReport: undefined headers")
+        return self.static_headers
 
     def _append_courses_headers(self, headers):
         for course_id, course_name in six.iteritems(self.courses_headers):
@@ -135,6 +135,7 @@ class ProgressReport(ReportFileOutput):
     @staticmethod
     def is_positive_grade(course):
         """Check shad or club/center course is successfully passed"""
+        # TODO: remove inconsistency, shad - objects, center courses - dicts
         # Skip dummy course
         if course is None:
             return False
@@ -182,10 +183,6 @@ class ProgressReport(ReportFileOutput):
                 row.extend([online_course.name])
             else:
                 row.extend([''])
-
-    def get_filename(self):
-        today = datetime.datetime.now()
-        return "report_".format(today.strftime("%d.%m.%Y"))
 
 
 class ProgressReportForDiplomas(ProgressReport):
