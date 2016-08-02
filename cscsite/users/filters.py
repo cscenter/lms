@@ -5,7 +5,16 @@ from django.db.models import Count, Case, When, Q, Value, F
 from django.http import QueryDict
 
 from learning.models import Enrollment
-from users.models import CSCUser, ListFilter
+from users.models import CSCUser
+
+
+class ListFilter(django_filters.Filter):
+    """key=value1,value2,value3 filter for django_filters"""
+    def filter(self, qs, value):
+        value_list = value.split(u',')
+        value_list = filter(None, value_list)
+        return super(ListFilter, self).filter(qs, django_filters.fields.Lookup(
+            value_list, 'in'))
 
 
 class CSCUserFilter(django_filters.FilterSet):

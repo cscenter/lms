@@ -2,7 +2,6 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 
-import django_filters
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.models import Group
@@ -580,15 +579,6 @@ class CSCUserReference(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.student)
-
-
-class ListFilter(django_filters.Filter):
-    """key=value1,value2,value3 filter for django_filters"""
-    def filter(self, qs, value):
-        value_list = value.split(u',')
-        value_list = filter(None, value_list)
-        return super(ListFilter, self).filter(qs, django_filters.fields.Lookup(
-            value_list, 'in'))
 
 
 class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
