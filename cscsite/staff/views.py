@@ -26,22 +26,24 @@ from users.filters import CSCUserFilter
 
 
 class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
-    content_type = u"application/javascript; charset=utf-8"
+    content_type = "application/json"
     limit = 500
 
     def get(self, request, *args, **kwargs):
         qs = CSCUser.objects.values('first_name', 'last_name', 'pk')
-        filter = CSCUserFilter(request.GET, qs)
-        # FIXME: move to CSCUserFilter
-        if filter.empty_query:
-            return JsonResponse(dict(users=[], there_is_more=False))
-        filtered_users = filter.qs[:self.limit + 1]
+        filter_set = CSCUserFilter(request.GET, qs)
+        if filter_set.empty_query:
+            return JsonResponse({
+                "total": 0,
+                "users": [],
+                "there_is_more": False,
+            })
+        filtered_users = list(filter_set.qs[:self.limit])
         for u in filtered_users:
             u['url'] = reverse('user_detail', args=[u['pk']])
-        # TODO: JsonResponse returns unicode. Hard to debug.
-        return self.render_json_response({
-            "total": len(filtered_users[:self.limit]),
-            "users": filtered_users[:self.limit],
+        return JsonResponse({
+            "total": len(filtered_users),
+            "users": filtered_users,
             "there_is_more": len(filtered_users) > self.limit
         })
 
