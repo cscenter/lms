@@ -28,7 +28,7 @@ GRANT
 * Load data to database from dump
 ```bash
 # If you want empty database by any reason, don't forget to run migrations
-$ python cscsite/manage.py syncdb --settings=cscenter.settings.local
+$ python cscsite/manage.py migrate --settings=cscenter.settings.local
 ```
 * Create virtualenv for the project and activate it
 
