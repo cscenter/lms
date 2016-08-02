@@ -107,6 +107,11 @@
                         </li>
                         <li class="list-group-item"><b>Успешно сдано курсов всего</b>:{{ total_successfully_passed }} (учитываются курсы Клуба/Центра/ШАД/Онлайн)</li>
                     <li class="list-group-item"><b>Записей в этом семестре</b>: {{ enrollments_in_current_term }} (на курсы клуба или центра)</li>
+                    <li class="list-group-item">
+                        <b>Ссылка на анкету</b>:{% if user_object.applicant %}
+                            <a target="_blank" href="{% url "admission_applicant_detail" user_object.applicant.pk %}">#{{ user_object.applicant.pk }}</a>
+                        {% else %} не найдена{% endif %}
+                    </li>
                     </ul>
                 </div>
             {% endif %}
