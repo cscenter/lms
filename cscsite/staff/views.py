@@ -205,6 +205,7 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
         return Hint.objects.order_by("sort")
 
 
+# XXX: Not implemented
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
