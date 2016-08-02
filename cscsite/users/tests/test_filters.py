@@ -1,0 +1,131 @@
+from __future__ import unicode_literals
+
+import pytest
+from django.core.urlresolvers import reverse
+
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
+from users.factories import StudentCenterFactory, StudentClubFactory, \
+    UserFactory, VolunteerFactory
+
+SEARCH_URL = reverse('staff:student_search_json')
+
+
+@pytest.mark.django_db
+def test_student_search(client, curator):
+    """Simple test cases to make sure, multi values still works"""
+    # XXX: `name` filter not tested now due to postgres specific syntax
+    student = StudentCenterFactory(enrollment_year=2011,
+                                   status="",
+                                   last_name='Иванов',
+                                   first_name='Иван')
+    StudentCenterFactory(enrollment_year=2011,
+                         status="",
+                         last_name='Иванов',
+                         first_name='Иван')
+    StudentCenterFactory(enrollment_year=2012,
+                         status=STUDENT_STATUS.expelled,
+                         last_name='Иванов',
+                         first_name='Иван')
+    StudentClubFactory(enrollment_year=2011,
+                       last_name='Сидоров',
+                       first_name='Сидор')
+    volunteer = VolunteerFactory(enrollment_year=2011, status="")
+
+    response = client.get(SEARCH_URL)
+    assert response.status_code == 302
+    client.login(curator)
+    # Empty results by default
+    response = client.get(SEARCH_URL)
+    assert response.status_code == 200
+    assert response.json()["total"] == 0
+    response = client.get("{}?{}".format(SEARCH_URL, "enrollment_year=2011"))
+    # Club users not included
+    assert response.json()["total"] == 3
+    # 2011 & 2012 years
+    response = client.get("{}?{}".format(SEARCH_URL,
+                                         "enrollment_year=2011%2C2012"))
+    assert response.json()["total"] == 4
+    # Now test groups filter
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.MASTERS_DEGREE)
+    ))
+    assert response.json()["total"] == 0
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    ))
+    assert response.json()["total"] == 2
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.VOLUNTEER)
+    ))
+    assert response.json()["total"] == 1
+    assert response.json()["users"][0]["first_name"] == volunteer.first_name
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}&groups={}".format(
+            PARTICIPANT_GROUPS.STUDENT_CENTER,
+            PARTICIPANT_GROUPS.VOLUNTEER
+        )
+    ))
+    assert response.json()["total"] == 3
+    volunteer.status = STUDENT_STATUS.expelled
+    volunteer.save()
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}&groups={}&status={}".format(
+            PARTICIPANT_GROUPS.STUDENT_CENTER,
+            PARTICIPANT_GROUPS.VOLUNTEER,
+            STUDENT_STATUS.expelled
+        )
+    ))
+    assert response.json()["total"] == 1
+    student.status = STUDENT_STATUS.reinstated
+    student.save()
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}&groups={}&status={},{}".format(
+            PARTICIPANT_GROUPS.STUDENT_CENTER,
+            PARTICIPANT_GROUPS.VOLUNTEER,
+            STUDENT_STATUS.expelled,
+            STUDENT_STATUS.reinstated
+        )
+    ))
+    assert response.json()["total"] == 2
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}&groups={}&status={},{}&{}".format(
+            PARTICIPANT_GROUPS.STUDENT_CENTER,
+            PARTICIPANT_GROUPS.VOLUNTEER,
+            STUDENT_STATUS.expelled,
+            STUDENT_STATUS.reinstated,
+            "cnt_enrollments=2"
+        )
+    ))
+    assert response.json()["total"] == 0
+    # Check multi values still works for cnt_enrollments
+    response = client.get("{}?{}".format(
+        SEARCH_URL,
+        "enrollment_year=2011&groups={}&groups={}&status={},{}&{}".format(
+            PARTICIPANT_GROUPS.STUDENT_CENTER,
+            PARTICIPANT_GROUPS.VOLUNTEER,
+            STUDENT_STATUS.expelled,
+            STUDENT_STATUS.reinstated,
+            "cnt_enrollments=0,2"
+        )
+    ))
+    assert response.json()["total"] == 2
+
+
+@pytest.mark.django_db
+@pytest.mark.skipif(True, reason="not implemented")
+def test_student_search_enrollments(client, curator):
+    """
+    Check student search by successfully passed enrollments value
+    """
+
+
+# TODO: test when `expelled` and `studying` statuses set simultaneously in one query
+# styding -> all statuses except `expelled`?
+# TODO: test no group `GRADUATE_CENTER` if `studying` status set

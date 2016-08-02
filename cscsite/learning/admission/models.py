@@ -220,7 +220,11 @@ class Applicant(TimeStampedModel):
         return self.status in [self.ACCEPT, self.ACCEPT_IF, self.VOLUNTEER]
 
     def course_to_numeric(self):
-        """Convert text value to CSCUser COURSES numeric value"""
+        """
+        Convert text value to CSCUser COURSES numeric value
+
+        Note: relevant to admission 2016 only
+        """
         from users.models import CSCUser
         if "аспирант" in self.course:
             return CSCUser.COURSES.POSTGRADUATE

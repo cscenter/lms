@@ -38,23 +38,24 @@ def client():
 def user_factory():
     return UserFactory
 
-
+# FIXME: avoid this fixture and try to delete it in the future
 @pytest.fixture(scope="session")
 def student_factory():
     """Both club and center groups"""
     return StudentFactory
 
-
+# FIXME: avoid this fixture and try to delete it in the future
 @pytest.fixture(scope="session")
 def student_center_factory():
     return StudentCenterFactory
 
 
+# FIXME: avoid this fixture and try to delete it in the future
 @pytest.fixture(scope="session")
 def student_club_factory():
     return StudentClubFactory
 
-
+# FIXME: avoid this fixture and try to delete it in the future
 @pytest.fixture(scope="session")
 def teacher_center_factory():
     return TeacherCenterFactory
