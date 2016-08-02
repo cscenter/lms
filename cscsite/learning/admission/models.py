@@ -181,12 +181,11 @@ class Applicant(TimeStampedModel):
         blank=True,
         null=True,
         max_length=20)
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET(models.SET_NULL),
         null=True,
         blank=True,
-        related_name='+',  # Don't create backwards relation
     )
     uuid = models.UUIDField(editable=False, null=True, blank=True)
 
