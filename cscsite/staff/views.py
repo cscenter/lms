@@ -21,7 +21,8 @@ from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
 from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
-from users.models import CSCUser, CSCUserFilter, CSCUserStatusLog
+from users.models import CSCUser, CSCUserStatusLog
+from users.filters import CSCUserFilter
 
 
 class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
