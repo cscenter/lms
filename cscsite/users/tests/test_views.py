@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import re
 import unittest
@@ -27,12 +27,11 @@ from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
     AssignmentFactory, NonCourseEventFactory, CourseFactory, StudyProgramFactory
-from learning.projects.factories import ProjectFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
-from .admin import CSCUserCreationForm, CSCUserChangeForm
-from .models import CSCUser, CSCUserReference
-from .factories import UserFactory, SHADCourseRecordFactory, \
+from users.admin import CSCUserCreationForm, CSCUserChangeForm
+from users.models import CSCUser, CSCUserReference
+from users.factories import UserFactory, SHADCourseRecordFactory, \
     CSCUserReferenceFactory
 
 
