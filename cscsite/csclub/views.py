@@ -1,5 +1,6 @@
 from collections import Counter
 
+import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch, Q
@@ -34,11 +35,11 @@ class IndexView(generic.TemplateView):
             featured_term = Semester.objects.get(year=year, type=term_type)
             context['featured_term'] = featured_term
             today = now().date()
-            # TODO: add cache
+            # TODO: add cache, limit classes returned values by 1
             courseclass_queryset = (CourseClass.objects
                                                .filter(date__gte=today)
                                                .order_by('date', 'starts_at'))
-            context['courses'] = (
+            courses = list(
                 CourseOffering
                 .custom
                 .site_related(self.request)
@@ -52,9 +53,18 @@ class IndexView(generic.TemplateView):
                         to_attr='classes'
                     ))
                 .order_by('is_completed', 'course__name'))
+            # Sort courses by nearest class
+            courses.sort(key=self.cmp_courses_by_nearest_class)
+            context['courses'] = courses
         except Semester.DoesNotExist:
             pass
         return context
+
+    @staticmethod
+    def cmp_courses_by_nearest_class(course):
+        if not course.classes:
+            return datetime.date(year=now().year + 1, month=1, day=1)
+        return course.classes[0].date
 
 
 class TeachersView(generic.ListView):
