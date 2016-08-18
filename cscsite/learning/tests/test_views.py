@@ -1724,7 +1724,8 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
     def test_enrollment_capacity(self):
         s = UserFactory.create(groups=['Student [CENTER]'])
         current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester)
+        co = CourseOfferingFactory.create(semester=current_semester,
+                                          is_open=True)
         co_url = reverse('course_offering_detail',
                          args=[co.course.slug, co.semester.slug])
         co_enroll_url = reverse('course_offering_enroll',
@@ -1735,6 +1736,8 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
         assert smart_bytes(_("No places available")) not in response.content
         co.capacity = 1
         co.save()
+        response = self.client.get(co_url)
+        assert smart_bytes(_("Places available")) in response.content
         form = {'course_offering_pk': co.pk}
         self.client.post(co_enroll_url, form)
         assert 1 == (Enrollment.objects.filter(student=s, course_offering=co)

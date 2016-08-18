@@ -2,10 +2,14 @@ from collections import Counter
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from django.views import generic
 
 from core.models import Faq
 from learning.models import Semester, CourseOffering, CourseOfferingTeacher
+from learning.settings import SEMESTER_TYPES
+from learning.utils import get_current_semester_pair, get_term_index, \
+    get_term_index_academic
 from users.models import CSCUser
 
 
@@ -44,11 +48,12 @@ class TeachersView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(TeachersView, self).get_context_data(**kwargs)
-        semesters = list(Semester
-                         .past_academic_years(year_count=3)
-                         .values_list("id", flat=True))
+        # Consider the last 3 academic years. Teacher is active, if he read
+        # course in this period or will in the future.
+        year, term_type = get_current_semester_pair()
+        term_index = get_term_index_academic(year, term_type, rewind_years=3)
         active_lecturers = Counter(
-            CourseOffering.objects.filter(semester__in=semesters)
+            CourseOffering.objects.filter(semester__index__gte=term_index)
             .values_list("teachers__pk", flat=True)
         )
         context["active"] = filter(lambda t: t.pk in active_lecturers,

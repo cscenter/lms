@@ -73,6 +73,21 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
+# TODO: add tests!
+def get_term_index_academic(year, term_type, rewind_years):
+    """
+    Subtracts N academic years from `end_year` and returns term index
+    of the beginning of calculated academic year.
+    Academic year starts from autumn.
+    """
+    assert rewind_years > 0
+    if term_type == SEMESTER_TYPES.autumn:
+        target_year = year - rewind_years + 1
+    else:
+        target_year = year - rewind_years
+    return get_term_index(target_year, SEMESTER_TYPES.autumn)
+
+
 def get_term_by_index(term_index):
     """Inverse func for `get_term_index`"""
     assert term_index >= TERMS_INDEX_START

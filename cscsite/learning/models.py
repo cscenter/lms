@@ -161,6 +161,7 @@ class Semester(models.Model):
 
     # TODO: move to custom manager? Should I return queryset or id values? WIP
     # FIXME: refactor like custom lookup field?
+    # FIXME: replace with semester index and remove!
     @classmethod
     def past_academic_years(cls, year_count=1):
         """Returns queryset for semesters ids of latest N academic years.
@@ -309,7 +310,7 @@ class CourseOffering(TimeStampedModel):
         return True
 
     def is_capacity_limited(self):
-        return self.capacity
+        return self.capacity > 0
 
 
 @python_2_unicode_compatible
