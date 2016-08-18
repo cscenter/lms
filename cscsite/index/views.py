@@ -22,6 +22,8 @@ from braces import views
 from learning.models import OnlineCourse, CourseOffering, Semester, \
     StudyProgram
 from learning.settings import STUDENT_STATUS
+from learning.utils import get_current_semester_pair, get_term_index
+from learning.utils import get_term_index_academic
 from users.models import CSCUser
 from .forms import UnsubscribeForm
 from .models import EnrollmentApplEmail
@@ -38,10 +40,14 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         pool = cache.get('index_page_spb_courses_with_video')
         if pool is None:
-            semester_pks = list(Semester.past_academic_years(
-                year_count=2).values_list("id", flat=True))
+            year, term_type = get_current_semester_pair()
+            current_term_index = get_term_index(year, term_type)
+            term_index = get_term_index_academic(year, term_type,
+                                                 rewind_years=2)
             pool = list(CourseOffering.custom.site_related(self.request)
-                .filter(is_published_in_video=True, semester__in=semester_pks)
+                .filter(is_published_in_video=True,
+                        semester__index__gte=term_index,
+                        semester__index__lte=current_term_index)
                 .defer('description')
                 .select_related('course')
                 .prefetch_related('teachers', 'semester')

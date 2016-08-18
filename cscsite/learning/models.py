@@ -159,35 +159,6 @@ class Semester(models.Model):
         self.index = get_term_index(self.year, self.type)
         super(Semester, self).save(*args, **kwargs)
 
-    # TODO: move to custom manager? Should I return queryset or id values? WIP
-    # FIXME: refactor like custom lookup field?
-    # FIXME: replace with semester index and remove!
-    @classmethod
-    def past_academic_years(cls, year_count=1):
-        """Returns queryset for semesters ids of latest N academic years.
-        Academic year continues from autumn till summer"""
-        current_year, current_semester_type = get_current_semester_pair()
-        year = current_year - year_count
-        summer_spring = [SEMESTER_TYPES.summer, SEMESTER_TYPES.spring]
-        if current_semester_type == SEMESTER_TYPES.autumn:
-            year += 1
-            queryset = cls.objects.filter(year__gte=year).exclude(
-                Q(year=year) & Q(type__in=summer_spring))
-        elif current_semester_type in summer_spring:
-            queryset = cls.objects.filter(year__gte=year).exclude(
-                Q(year=year) & Q(type__in=summer_spring))
-            if current_semester_type == SEMESTER_TYPES.summer:
-                queryset = queryset.exclude(
-                    Q(year=current_year) & Q(type=SEMESTER_TYPES.autumn))
-            else:
-                queryset = queryset.exclude(
-                    Q(year=current_year) & Q(type__in=[SEMESTER_TYPES.autumn,
-                                                       SEMESTER_TYPES.summer]))
-        else:
-            raise ValueError("Semester.latest_academic_years: unexpected "
-                             "semester type")
-        return queryset
-
 
 class CustomCourseOfferingQuerySet(models.QuerySet):
     def site_related(self, request):

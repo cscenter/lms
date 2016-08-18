@@ -73,12 +73,14 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
-# TODO: add tests!
 def get_term_index_academic(year, term_type, rewind_years):
     """
     Subtracts N academic years from `end_year` and returns term index
     of the beginning of calculated academic year.
     Academic year starts from autumn.
+
+    Not properly works for FOUNDATION_YEAR spring and summer, but I believe
+    it's not really necessary.
     """
     assert rewind_years > 0
     if term_type == SEMESTER_TYPES.autumn:

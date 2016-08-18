@@ -13,7 +13,8 @@ from mock import patch, MagicMock
 from learning.management.imports import ImportGradesByStepicID
 from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
                                SEMESTER_TYPES)
-from learning.utils import split_list, get_term_index, get_term_by_index
+from learning.utils import split_list, get_term_index, get_term_by_index, \
+    get_term_index_academic
 from ..factories import *
 
 
@@ -99,3 +100,23 @@ def test_get_term_by_index():
     assert year == FOUNDATION_YEAR + 2
     assert term == "spring"
 
+
+def test_get_term_index_academic():
+    # Indexing starts from 1 of foundation year spring.
+    assert 3 == get_term_index_academic(FOUNDATION_YEAR,
+                                        SEMESTER_TYPES.autumn,
+                                        rewind_years=1)
+    assert 6 == get_term_index_academic(FOUNDATION_YEAR + 1,
+                                        SEMESTER_TYPES.autumn,
+                                        rewind_years=1)
+    # target year < FOUNDATION_YEAR
+    with pytest.raises(ValueError):
+        get_term_index_academic(FOUNDATION_YEAR,
+                                SEMESTER_TYPES.spring,
+                                rewind_years=1)
+    assert 3 == get_term_index_academic(FOUNDATION_YEAR + 1,
+                                        SEMESTER_TYPES.spring,
+                                        rewind_years=1)
+    assert 3 == get_term_index_academic(FOUNDATION_YEAR + 2,
+                                        SEMESTER_TYPES.summer,
+                                        rewind_years=2)
