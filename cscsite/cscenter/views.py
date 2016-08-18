@@ -37,6 +37,7 @@ class IndexView(generic.TemplateView):
                                                  rewind_years=2)
             pool = list(CourseOffering.custom.site_related(self.request)
                 .filter(is_published_in_video=True,
+                        is_open=False,
                         semester__index__gte=term_index,
                         semester__index__lte=current_term_index)
                 .defer('description')
