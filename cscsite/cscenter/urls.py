@@ -5,11 +5,10 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from ajaxuploader.views import AjaxProfileImageUploader
-from core.views import MarkdownRenderView
-from cscenter.views import QAListView, TestimonialsListView, TeachersView
+from core.views import RobotsView, MarkdownRenderView
+from cscenter.views import IndexView, QAListView, TestimonialsListView, \
+    TeachersView, AlumniView, AlumniByYearView
 from htmlpages import views
-from index.views import IndexView, AlumniView, RobotsView, \
-    UnsubscribeYaProxyView, EnrollmentApplicationCallback, AlumniByYearView
 from learning.views import UsefulListView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
@@ -22,10 +21,6 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
-    url(r'^unsubscribe/(?P<sub_hash>[a-f0-9]{32})/',
-        UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
-    url(r'^private/enrollment_gform_callback/',
-        EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
 
     url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
         name="profile_update_image"),

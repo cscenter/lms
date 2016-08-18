@@ -21,6 +21,17 @@ from xlsxwriter import Workbook
 from .utils import render_markdown
 
 
+class RobotsView(generic.TemplateView):
+    template_name = "robots.txt"
+
+    def render_to_response(self, context, **kwargs):
+        return (super(RobotsView, self)
+                .render_to_response(context,
+                                    content_type='text/plain',
+                                    **kwargs))
+
+
+# TODO: move mixins to separated module
 class ReadOnlyFieldsMixin(object):
     readonly_fields = ()
 

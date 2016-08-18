@@ -15,9 +15,7 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
-from index.models import EnrollmentApplEmail
 
-# import cscenter.urls
 
 EMAILS = {
     'new_comment_for_student': {
@@ -96,26 +94,6 @@ def notify(notification, name, context, f):
     msg.send()
     notification.is_notified = True
     notification.save()
-
-
-# FIXME: investigate and delete legacy code
-def notify_enrollment_appl(application, context, f):
-    name = 'enrollment_application'
-
-    rendered_str = render_to_string(EMAILS[name]['template'], context)
-    html_content = linebreaks(rendered_str)
-    text_content = strip_tags(html_content)
-
-    msg = EmailMultiAlternatives(EMAILS[name]['title'],
-                                 text_content,
-                                 settings.DEFAULT_FROM_EMAIL,
-                                 [application.email])
-    msg.attach_alternative(html_content, "text/html")
-    report(f, "sending {0} ({1})".format(smart_text(application),
-                                         smart_text(name)))
-    msg.send()
-    application.is_notified = True
-    application.save()
 
 
 class Command(BaseCommand):
@@ -208,10 +186,5 @@ class Command(BaseCommand):
                        smart_text(course_offering.course)}
 
             notify(notification, name, context, self.stdout)
-        # FIXME: looks like I have to delete this legacy code!
-        enrollment_applications = (EnrollmentApplEmail.objects
-                                   .filter(is_notified=False))
-        for ea in enrollment_applications:
-            notify_enrollment_appl(ea, {}, self.stdout)
 
         translation.deactivate()
