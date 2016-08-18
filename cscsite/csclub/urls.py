@@ -7,8 +7,7 @@ from django.contrib import admin
 from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
 
-from index.views import RobotsView, \
-    UnsubscribeYaProxyView, EnrollmentApplicationCallback
+from core.views import RobotsView
 from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, UserReferenceCreateView, UserReferenceDetailView
@@ -73,10 +72,7 @@ urlpatterns += patterns('',
     url(r'^tools/markdown/preview/$',
         MarkdownRenderView.as_view(),
         name='render_markdown'),
-    url(r'^unsubscribe/(?P<sub_hash>[a-f0-9]{32})/',
-        UnsubscribeYaProxyView.as_view(), name='unsubscribe_ya'),
-    url(r'^private/enrollment_gform_callback/',
-        EnrollmentApplicationCallback.as_view(), name='enrollment_gform_cb'),
+
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
 

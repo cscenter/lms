@@ -9,7 +9,7 @@ DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 .PHONY: clean coverage test pip static freeze msg msgcompile migrate run run_flame dumpdata loaddata test_travis clean cmd check_defined sass sass_club webpack run_club
 
 run:
-	python manage.py runserver_plus --settings=$(PROJECT).settings.local $(PORT)
+	python manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
 
 club:
 	python manage.py runserver_plus --settings=csclub.settings.local 8002

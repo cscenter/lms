@@ -84,7 +84,6 @@ INSTALLED_APPS = [
     'users',
     'core',
     'htmlpages',
-    'index',
     'learning',
     'staff',
     'library',
