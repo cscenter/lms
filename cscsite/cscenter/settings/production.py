@@ -88,7 +88,7 @@ SLIDESHARE_PASSWORD = "vorobey"
 
 YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
 YANDEX_DISK_PASSWORD = "***REMOVED***"
-YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2015-2016"
+YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2016-2017"
 
 
 # django-dbbackup settings

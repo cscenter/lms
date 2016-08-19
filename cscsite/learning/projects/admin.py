@@ -8,7 +8,8 @@ from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
 
-from learning.projects.models import Project, ProjectStudent, Report, Review
+from learning.projects.models import Project, ProjectStudent, Report, Review, \
+    ReportComment
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 
@@ -70,7 +71,12 @@ class ProjectStudentAdmin(admin.ModelAdmin):
                       args=(instance.report.id,))
         return mark_safe('<a href="{}">{}</a>'.format(url, _("Edit")))
 
+
+class ReportCommentAdmin(admin.ModelAdmin):
+    list_display = ["report", "author"]
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectStudent, ProjectStudentAdmin)
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Review, ReviewAdmin)
+admin.site.register(ReportComment, ReportCommentAdmin)

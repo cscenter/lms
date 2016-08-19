@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import os.path
+import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -15,6 +15,7 @@ from model_utils import Choices
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair, get_term_index
@@ -57,10 +58,10 @@ class ProjectStudent(models.Model):
                                   smart_text(self.student))
 
 
-# FIXME: invent how to add model pk here
 def project_presentation_files(self, filename):
     return os.path.join('projects',
                         '{}-{}'.format(self.semester.year, self.semester.type),
+                        '{}'.format(self.pk),
                         'presentations',
                         filename)
 
@@ -251,7 +252,7 @@ def report_file_name(self, filename):
 
 @python_2_unicode_compatible
 class Report(ReviewCriteria):
-    SENT = 'sent'  # TODO: send notification, whet report was created
+    SENT = 'sent'  # TODO: send notification (add common table!), whet report was created
     REVIEW = 'review'
     RATING = 'rating'  # Waiting for curator's final score
     COMPLETED = 'completed'
@@ -318,9 +319,59 @@ class Report(ReviewCriteria):
 @python_2_unicode_compatible
 class Review(ReviewCriteria):
     report = models.ForeignKey(Report)
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.CASCADE)
     # TODO: Dynamically set `is_completed` before save or calc at runtime
     is_completed = models.BooleanField(_("Completed"), default=False)
 
     class Meta:
         verbose_name = _("Review")
         verbose_name_plural = _("Reviews")
+        unique_together = [('report', 'reviewer')]
+
+
+def report_comment_attachment_upload_to(self, filename):
+    return "projects/{}-{}/{}/attachments/{}".format(
+        self.report.project_student.project.semester.year,
+        self.report.project_student.project.semester.type,
+        self.report.project_student.project.pk,
+        filename
+    )
+
+
+@python_2_unicode_compatible
+class ReportComment(TimeStampedModel):
+    report = models.ForeignKey(Report)
+    text = models.TextField(
+        _("ReportComment|text"),
+        help_text=_("LaTeX+Markdown is enabled"),
+        blank=True)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.CASCADE)
+    attached_file = models.FileField(
+        upload_to=report_comment_attachment_upload_to,
+        blank=True)
+
+    class Meta:
+        ordering = ["created"]
+        verbose_name = _("Report comment")
+        verbose_name_plural = _("Report comments")
+
+    def __str__(self):
+        return ("Comment to {0} by {1}"
+                .format(smart_text(self.report),
+                        smart_text(self.author.get_full_name())))
+
+    @property
+    def attached_file_name(self):
+        return os.path.basename(self.attached_file.name)
+
+    def attached_file_url(self):
+        return reverse(
+            "projects:report_attachments_download",
+            args=[hashids.encode(42, self.pk)]
+        )

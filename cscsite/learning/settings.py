@@ -12,6 +12,7 @@ LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
 TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 
 # Assignment types constances
+# TODO: Mb should move to core settings for hashids?
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 

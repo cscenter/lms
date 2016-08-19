@@ -1,7 +1,7 @@
 from django.conf.urls import include, url
 
 from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
-    ProjectEnrollView, ReviewerReportView
+    ProjectEnrollView, ReviewerReportView, ReportAttachmentDownloadView
 
 app_name = 'projects'
 urlpatterns = [
@@ -15,5 +15,8 @@ urlpatterns = [
         url(r'^(?P<project_pk>\d+)/report/(?P<student_pk>\d+)/',
             ReviewerReportView.as_view(),
             name='reviewer_project_report'),
+        url(r'^attachments/(?P<sid>[-\w]+)/$',
+            ReportAttachmentDownloadView.as_view(),
+            name='report_attachments_download'),
     ])),
 ]

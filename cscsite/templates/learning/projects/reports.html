@@ -7,10 +7,15 @@
 
 {% block content %}
 <div class="projects-list-page">
+    <ol class="breadcrumb">
+      <li><a href="/projects/">Проекты</a></li>
+      <li class="active">Отчеты</li>
+    </ol>
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
-            <h3>Отчеты</h3>
+{# TODO: удалить тег h3, если останется  breadcrumbs               #}
+            <h3></h3>
             <table class="table">
                 <thead>
                 <tr>
