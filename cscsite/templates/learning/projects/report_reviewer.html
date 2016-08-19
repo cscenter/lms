@@ -8,15 +8,12 @@
 {% block content %}
     {% with student=report.project_student.student project=report.project_student.project %}
 
-<script type="text/javascript">
-  window.CSCCommentPersistenceHashes = {{ hashes_json|safe }};
-</script>
 <div class="container" id="student-submission-comments">
   <div class="row">
     <div class="col-xs-12">
       <h3>
         <a href="{% url 'projects:reviewer_project_detail' project.pk %}"><span class="fa fa-angle-left"></span></a>
-        Отчет по проекту<br>{{ project.name }} {% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+        {{ project.name }}<br>
         <small>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</small>
       </h3>
       <hr>
@@ -26,9 +23,10 @@
     <div class="col-xs-9">
       <div class="csc-well">
         <div class="ubertext">
-          {% markdown 3600 "report_detail" report.pk report.modified %}
-            {{ report.description }}
-          {% endmarkdown %}
+            <h3>Отчет  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h3>
+            {% markdown 3600 "report_detail" report.pk report.modified %}
+                {{ report.description }}
+            {% endmarkdown %}
         </div>
         {% with aas=a_s.assignment.assignmentattachment_set.all %}
           {% if aas %}
@@ -47,53 +45,45 @@
           {% endif %}
         {% endwith %}
       </div>
-      {% if not comments %}
-        <div class="csc-well">
-{#            {% crispy form form.helper %}#}
-        </div>
-      {% else %}
+
         <ul class="comment-list">
-        {% for comment in comments %}
-        <li class="{% if comment.author == a_s.student %}
-                   student
-                   {% else %}
-                   teacher
-                   {% endif %}">
-          <div class="csc-well assignment-comment">
-            <h5 class="assignment">{{ comment.author }}</h5>
-            <div class="ubertext">
-              {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
-                {{ comment.text }}
-              {% endmarkdown %}
-            </div>
-            <div class="metainfo-holder">
-              {% if comment.attached_file %}
-              <span class="assignment-attachment">
-                <i class="fa fa-file"></i>
-                <a href="{{ comment.attached_file_url }}">
-                  {{ comment.attached_file_name }}
-                </a>
-              </span>
-              {% endif %}
-              <span class="metainfo pull-right
-                           {% if comment.first_student_comment and user_type == 'teacher' %}
-                           first
-                           {% endif %}">
-                {{ comment.created|date:"d.m.Y H:i" }}
-              </span>
-            </div>
-          </div>
-        </li>
-        {% endfor %}
+            {% for comment in comments %}
+            <li class="{% if comment.author == student %}student{% else %}reviewer{% endif %}">
+              <div class="csc-well assignment-comment">
+                <h5 class="assignment">{{ comment.author }}</h5>
+                <div class="ubertext">
+                  {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
+                    {{ comment.text }}
+                  {% endmarkdown %}
+                </div>
+                <div class="metainfo-holder">
+                  {% if comment.attached_file %}
+                      <span class="assignment-attachment">
+                        <i class="fa fa-file"></i> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
+                      </span>
+                  {% endif %}
+                  <span class="metainfo pull-right">{{ comment.created|date:"d.m.Y H:i" }}</span>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
         </ul>
+        <div class="csc-well">
+            {% crispy new_comment_form new_comment_form.helper %}
+        </div>
 
-        <div class="csc-well">{% crispy form %}</div>
+        <a href="#review-form" data-toggle="collapse" aria-expanded="true" class="collapse-link">Оценить работу</a>
+        <div class="panel-collapse">
+            <div class="collapse in csc-well" id="review-form">
+                {% crispy review_form %}
+            </div>
+        </div>
 
-      {% endif %}
     </div>
     <div class="col-xs-3">
-        TODO: Здесь показывать критерии? Или не мелочиться?
-      TODO: add to context `one_reviewer` instead of `one_teacher`{% if one_teacher %}
+      <h5 class="assignment">{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
+      <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
+      {% if one_reviewer %}
       <h5 class="assignment">Проверяющий</h5>
       {% else %}
       <h5 class="assignment">Проверяющие</h5>
@@ -107,13 +97,12 @@
         </li>
         {% endfor %}
       </ul>
-      <h5 class="assignment">{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
-      <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
-      <h5 class="assignment">{% trans "Deadline" %}???</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
     </div>
   </div>
 </div>
     {% endwith %}
 
+    <script type="text/javascript">
+        window.CSCCommentPersistenceHashes = {{ clean_comments_json|safe }};
+    </script>
 {% endblock content %}
