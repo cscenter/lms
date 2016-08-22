@@ -72,31 +72,28 @@
             {% crispy new_comment_form new_comment_form.helper %}
         </div>
 
-        <a href="#review-form" data-toggle="collapse" aria-expanded="true" class="collapse-link">Оценить работу</a>
+        <a href="#review-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Оценить работу</a>
         <div class="panel-collapse">
-            <div class="collapse in csc-well" id="review-form">
+            <div class="collapse csc-well" id="review-form">
                 {% crispy review_form %}
             </div>
         </div>
 
     </div>
     <div class="col-xs-3">
-      <h5 class="assignment">{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
-      <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
-      {% if one_reviewer %}
-      <h5 class="assignment">Проверяющий</h5>
-      {% else %}
-      <h5 class="assignment">Проверяющие</h5>
-      {% endif %}
-      <ul class="list-unstyled">
+        {% if request.user.is_curator %}
+            {% crispy report_status_change %}
+        {% endif %}
+        <h5>{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
+        <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
+        {% if one_reviewer %}<h5>Проверяющий</h5>{% else %}<h5>Проверяющие</h5>{% endif %}
+        <ul class="list-unstyled">
         {% for reviewer in project.reviewers.all %}
         <li>
-          <a href="{% url 'user_detail' reviewer.pk %}">
-            {{ reviewer.get_full_name }}
-          </a>
+            <a href="{% url 'user_detail' reviewer.pk %}">{{ reviewer.get_full_name }}</a>
         </li>
         {% endfor %}
-      </ul>
+        </ul>
     </div>
   </div>
 </div>

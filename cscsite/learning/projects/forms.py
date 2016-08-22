@@ -10,7 +10,29 @@ from django.utils.translation import ugettext_lazy as _
 from core import comment_persistence
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from learning.projects.models import ReportComment, Review
+from learning.projects.models import ReportComment, Review, Report
+
+
+class ReportStatusForm(forms.ModelForm):
+    prefix = "report_status_change"
+
+    class Meta:
+        model = Report
+        fields = ("status",)
+
+    def __init__(self, *args, **kwargs):
+        report = kwargs.pop('report', None)
+        # TODO: log status change?
+        author = kwargs.pop('author', None)
+        super(ReportStatusForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_show_labels = False
+        self.helper.layout.append(
+            FormActions(
+                Submit(self.prefix, _('Change status'),
+                       css_class='btn btn-block')
+            )
+        )
 
 
 class ReportCommentForm(forms.ModelForm):
@@ -61,6 +83,7 @@ class ReportCommentForm(forms.ModelForm):
         return comment
 
 
+# TODO: throw warning if is_completed=True, but some marks not checked?
 class ReportReviewForm(forms.ModelForm):
     prefix = "review_form"
 
