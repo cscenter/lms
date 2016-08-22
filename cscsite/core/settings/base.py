@@ -94,7 +94,8 @@ INSTALLED_APPS = [
     'prettyjson',
     'mptt',
     'learning.gallery.apps.GalleryConfig',
-    'learning.projects.apps.ProjectsConfig'
+    'learning.projects.apps.ProjectsConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 # oEmbed
