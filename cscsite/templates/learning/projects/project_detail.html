@@ -91,6 +91,7 @@
                     <div class="card-body card-padding">
                         {% for ps in project.projectstudent_set.all %}
                             <div class="report">
+                                {# TODO: move to _chunk #}
                                 {{ ps.student.last_name }} {{ ps.student.first_name }}<br>
                                 {# TODO: Может показывать просто статус вместо двух if'ов? #}
                                 {% if you_enrolled and ps.report and ps.report.status == 'sent' %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>

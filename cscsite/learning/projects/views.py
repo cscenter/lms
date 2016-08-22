@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.http import HttpResponsePermanentRedirect
 from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from django.views.generic.edit import FormMixin
@@ -20,7 +21,8 @@ from django.utils.translation import ugettext_lazy as _
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
-from learning.projects.forms import ReportCommentForm, ReportReviewForm
+from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
+    ReportStatusForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.utils import get_current_semester_pair, get_term_index
@@ -142,8 +144,6 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
 
     def form_valid(self, form):
         form.save()
-        messages.success(self.request, _("The data successfully saved."),
-                         extra_tags='timeout')
         return super(ReviewerReportView, self).form_valid(form)
 
     def form_invalid(self, **kwargs):
@@ -155,6 +155,10 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         context = super(FormMixin, self).get_context_data(**kwargs)
         report = context[self.context_object_name]
         form_kwargs = self.get_form_kwargs()
+        # FIXME: почему показывает ошибки на разных формах???? из-за form_kwargs? Кажется, аттачит чужой .POST, подумать как это обойти!!!
+        if ReportStatusForm.prefix not in context:
+            form_kwargs["instance"] = self.object
+            context[ReportStatusForm.prefix] = ReportStatusForm(**form_kwargs)
         if ReportCommentForm.prefix not in context:
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
         if ReportReviewForm.prefix not in context:
@@ -166,6 +170,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
                     .select_related('author'))
         context["comments"] = comments
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
+        # TODO: add is_reviewer, is_student
         return context
 
     def get_review_object(self):
@@ -181,16 +186,28 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
 
         form_kwargs = self.get_form_kwargs()
         if ReportCommentForm.prefix in request.POST:
+            success_msg = _("Comment successfully added.")
             form_class = ReportCommentForm
             form_name = ReportCommentForm.prefix
-        else:
+        elif ReportReviewForm.prefix in request.POST:
+            # TODO: check permissions?
+            success_msg = _("The data successfully saved.")
             form_class = ReportReviewForm
             form_name = ReportReviewForm.prefix
             form_kwargs["instance"] = self.get_review_object()
+        elif ReportStatusForm.prefix in request.POST:
+            # FIXME: check permissions here or inside form?
+            form_class = ReportStatusForm
+            form_name = ReportStatusForm.prefix
+            form_kwargs["instance"] = self.object
+            success_msg = _("Status was successfully updated.")
+        else:
+            return HttpResponseBadRequest()
         form = form_class(**form_kwargs)
         if form.is_valid():
-            # TODO: add messages
-            return self.form_valid(form)
+            response = self.form_valid(form)
+            messages.success(self.request, success_msg, extra_tags='timeout')
+            return response
         else:
             return self.form_invalid(**{form_name: form})
 

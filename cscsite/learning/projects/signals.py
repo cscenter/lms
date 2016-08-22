@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
 _UNSAVED_FILE_PRESENTATION = 'unsaved_presentation'
 
@@ -37,3 +38,21 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             save = True
         if save:
             instance.save()
+
+
+def post_save_comment(sender, instance, created, *args, **kwargs):
+    """Add notification when report comment has been created."""
+    from notifications.signals import notify
+    if created:
+        comment = instance
+        reviewers = comment.report.project_student.project.reviewers.all()
+        recipients = [r for r in reviewers if r != comment.author]
+        if comment.author != comment.report.project_student.student:
+            recipients.append(comment.report.project_student.student)
+        for recipient in recipients:
+            notify.send(
+                comment.author,  # actor
+                verb='comment added',
+                action_object=comment,
+                target=comment.report,
+                recipient=recipient)

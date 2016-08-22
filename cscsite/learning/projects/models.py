@@ -177,8 +177,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_global_issue_note = models.TextField(
         _("Note for criterion #1"),
-        blank=True, null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        blank=True, null=True)
     score_usefulness = models.PositiveSmallIntegerField(
         choices=USEFULNESS_CRITERION,
         verbose_name=_("Who and why this can be useful."),
@@ -188,8 +187,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_usefulness_note = models.TextField(
         _("Note for criterion #2"),
-        blank=True, null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        blank=True, null=True)
     score_progress = models.PositiveSmallIntegerField(
         choices=PROGRESS_CRITERION,
         verbose_name=_("What has been done since the start of the project."),
@@ -199,8 +197,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_progress_note = models.TextField(
         _("Note for criterion #3"),
-        blank=True, null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        blank=True, null=True)
     score_problems = models.PositiveSmallIntegerField(
         choices=PROBLEMS_CRITERION,
         verbose_name=_("What problems have arisen in the process."),
@@ -210,8 +207,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_problems_note = models.TextField(
         _("Note for criterion #4"),
-        blank=True, null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        blank=True, null=True)
     score_technologies = models.PositiveSmallIntegerField(
         choices=TECHNOLOGIES_CRITERION,
         verbose_name=_("What technologies are used."),
@@ -221,8 +217,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_technologies_note = models.TextField(
         _("Note for criterion #5"),
-        blank=True, null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        blank=True, null=True)
     score_plans = models.PositiveSmallIntegerField(
         choices=PLANS_CRITERION,
         verbose_name=_("Future plan"),
@@ -233,8 +228,7 @@ class ReviewCriteria(TimeStampedModel):
     score_plans_note = models.TextField(
         _("Note for criterion #6"),
         blank=True,
-        null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        null=True)
 
     class Meta:
         abstract = True
@@ -323,8 +317,11 @@ class Review(ReviewCriteria):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    # TODO: Dynamically set `is_completed` before save or calc at runtime
-    is_completed = models.BooleanField(_("Completed"), default=False)
+    # TODO: Dynamically set `is_completed` before save or calc at runtime?
+    is_completed = models.BooleanField(
+        _("Completed"),
+        default=False,
+        help_text=_("Check if you already completed the assessment."))
 
     class Meta:
         verbose_name = _("Review")
