@@ -80,6 +80,7 @@ h2.right-line:after {
   #onlinecourses-list {
     @extend .container;
     padding-bottom: 30px;
+    padding-top: 0;
 
     .center-header {
       border-color: #ddd;
