@@ -1,11 +1,7 @@
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.dispatch import Signal
 from django.utils import timezone
 from django.utils.six import text_type
-from django.contrib.auth.models import Group
-
-from notifications.models import Notification
 
 notify = Signal(providing_args=[
     'recipient', 'actor', 'verb', 'action_object', 'target', 'description',
@@ -20,6 +16,10 @@ def notify_handler(verb, **kwargs):
     """
     Handler function to create Notification instance upon action signal call.
     """
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.auth.models import Group
+    from notifications.models import Notification
+    from users.models import CSCUser
 
     # Pull the options out of kwargs
     kwargs.pop('signal', None)
@@ -37,8 +37,10 @@ def notify_handler(verb, **kwargs):
     # Check if User or Group
     if isinstance(recipient, Group):
         recipients = recipient.user_set.all()
-    else:
+    elif isinstance(recipient, CSCUser):
         recipients = [recipient]
+    else:
+        recipients = [None]
 
     for recipient in recipients:
         newnotify = Notification(

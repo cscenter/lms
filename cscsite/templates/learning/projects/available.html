@@ -9,8 +9,8 @@
 
 <div class="projects-list-page">
     <ol class="breadcrumb">
-      <li><a href="/projects/">Проекты</a></li>
-      <li class="active">текущий семестр (todo: заменить на конкретный семестр)</li>
+      <li><a href="/projects/?show=available">Проекты</a></li>
+      <li class="active">{{ current_term|title }}</li>
     </ol>
     <div class="panel">
         <div class="panel-body">
@@ -38,7 +38,14 @@
                             </td>
                             <td>
                                 {% for reviewer in project.reviewers.all %}
-                                    {{ reviewer }}
+                                    {{ reviewer }}<br>
+                                    {% empty %}
+                                    {% if project.is_active %}
+                                        <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-block btn-primary btn-outline btn-sm">Следить за проектом</button>
+                                        </form>
+                                    {% endif %}
                                 {% endfor %}
                             </td>
                         </tr>

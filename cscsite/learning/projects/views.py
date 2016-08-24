@@ -22,12 +22,12 @@ from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
-    ReportStatusForm
+    ReportStatusForm, ReportSummarizeForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.utils import get_current_semester_pair, get_term_index
-from learning.viewmixins import ProjectReviewerGroupOnlyMixin
-
+from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin
+from notifications.signals import notify
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,9 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         project_type = self.request.GET[self.FILTER_NAME]
         queryset = (Project.objects
                     .select_related("semester")
-                    .prefetch_related("students", "reviewers"))
+                    .prefetch_related("students", "reviewers",
+                                      "projectstudent_set__report",
+                                      "projectstudent_set__student"))
 
         if project_type in [self.PROJECT_REPORTS, self.PROJECT_AVAILABLE]:
             queryset = queryset.filter(semester__index=current_term_index)
@@ -78,6 +80,8 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(ReviewerProjectsView, self).get_context_data(**kwargs)
         context["filter_active"] = self.request.GET[self.FILTER_NAME]
+        current_year, term_type = get_current_semester_pair()
+        context["current_term"] = "{} {}".format(_(term_type), current_year)
         return context
 
 
@@ -103,7 +107,6 @@ class ProjectDetailView(ProjectReviewerGroupOnlyMixin, generic.DetailView):
         return context
 
 
-# TODO: Add log? Then implement in course enrollment action?
 class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
     http_method_names = ['post']
 
@@ -119,6 +122,12 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
 
         project.reviewers.add(request.user.pk)
         project.save()
+        # TODO: add notification when user unsubscribed
+        notify.send(
+            request.user,  # actor
+            verb='enrolled on',
+            action_object=project,
+            recipient="")
         url = reverse("projects:reviewer_project_detail", args=[project.pk])
         return HttpResponseRedirect(url)
 
@@ -138,7 +147,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             Report.objects.filter(
                 project_student__student=student_pk,
                 project_student__project=project_pk,
-            )
+            ).select_related("project_student")
         )
         return report
 
@@ -155,10 +164,11 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         context = super(FormMixin, self).get_context_data(**kwargs)
         report = context[self.context_object_name]
         form_kwargs = self.get_form_kwargs()
-        # FIXME: почему показывает ошибки на разных формах???? из-за form_kwargs? Кажется, аттачит чужой .POST, подумать как это обойти!!!
         if ReportStatusForm.prefix not in context:
-            form_kwargs["instance"] = self.object
-            context[ReportStatusForm.prefix] = ReportStatusForm(**form_kwargs)
+            context[ReportStatusForm.prefix] = ReportStatusForm(
+                instance=self.object,
+                project_pk=self.object.project_student.project_id,
+                student_pk=self.object.project_student.student_id)
         if ReportCommentForm.prefix not in context:
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
         if ReportReviewForm.prefix not in context:
@@ -170,7 +180,8 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
                     .select_related('author'))
         context["comments"] = comments
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
-        # TODO: add is_reviewer, is_student
+        context["is_reviewer"] = self.request.user in report.project_student.project.reviewers.all()
+        context["is_author"] = self.request.user == report.project_student.student
         return context
 
     def get_review_object(self):
@@ -195,12 +206,6 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             form_class = ReportReviewForm
             form_name = ReportReviewForm.prefix
             form_kwargs["instance"] = self.get_review_object()
-        elif ReportStatusForm.prefix in request.POST:
-            # FIXME: check permissions here or inside form?
-            form_class = ReportStatusForm
-            form_name = ReportStatusForm.prefix
-            form_kwargs["instance"] = self.object
-            success_msg = _("Status was successfully updated.")
         else:
             return HttpResponseBadRequest()
         form = form_class(**form_kwargs)
@@ -221,6 +226,75 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
     def get_success_url(self):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
+        return reverse_lazy(
+            "projects:reviewer_project_report",
+            kwargs={
+                "project_pk": project_pk,
+                "student_pk": student_pk
+            }
+        )
+
+
+class ReportUpdateStatusView(CuratorOnlyMixin,
+                             generic.UpdateView):
+    http_method_names = ["post"]
+    model = Report
+    form_class = ReportStatusForm
+
+    def get_object(self, queryset=None):
+        project_pk = self.kwargs.get("project_pk")
+        student_pk = self.kwargs.get("student_pk")
+        report = get_object_or_404(
+            Report.objects.filter(
+                project_student__student=student_pk,
+                project_student__project=project_pk,
+            )
+        )
+        return report
+
+    def get_success_url(self):
+        project_pk = self.kwargs.get("project_pk")
+        student_pk = self.kwargs.get("student_pk")
+        success_msg = _("Status was successfully updated.")
+        messages.success(self.request, success_msg, extra_tags='timeout')
+        return reverse_lazy(
+            "projects:reviewer_project_report",
+            kwargs={
+                "project_pk": project_pk,
+                "student_pk": student_pk
+            }
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super(ReportUpdateStatusView, self).get_form_kwargs()
+        kwargs["project_pk"] = self.kwargs.get("project_pk")
+        kwargs["student_pk"] = self.kwargs.get("student_pk")
+        return kwargs
+
+
+class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
+    model = Report
+    form_class = ReportSummarizeForm
+    template_name = "learning/projects/report_summarize.html"
+
+    # FIXME: replace with ReportObjectMixin? it's duplicated right now.
+    def get_object(self, queryset=None):
+        project_pk = self.kwargs.get("project_pk")
+        student_pk = self.kwargs.get("student_pk")
+        report = get_object_or_404(
+            Report.objects.filter(
+                project_student__student=student_pk,
+                project_student__project=project_pk,
+            )
+        )
+        return report
+
+    def get_success_url(self):
+        project_pk = self.kwargs.get("project_pk")
+        student_pk = self.kwargs.get("student_pk")
+        messages.success(self.request,
+                         _("Report was successfully updated."),
+                         extra_tags='timeout')
         return reverse_lazy(
             "projects:reviewer_project_report",
             kwargs={

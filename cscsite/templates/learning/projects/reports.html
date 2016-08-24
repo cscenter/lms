@@ -8,7 +8,7 @@
 {% block content %}
 <div class="projects-list-page">
     <ol class="breadcrumb">
-      <li><a href="/projects/">Проекты</a></li>
+      <li><a href="/projects/?show=available">Проекты</a></li>
       <li class="active">Отчеты</li>
     </ol>
     <div class="panel">
@@ -30,7 +30,11 @@
                             <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
-                        <td>{{ project.students.all|join:"<br>" }}<br><a href="#">смотреть отчет</a></td>
+                        <td>
+                            {% for ps in project.projectstudent_set.all %}
+                                {% include "learning/projects/_report_row.html" with you_enrolled=True %}
+                            {% endfor %}
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
