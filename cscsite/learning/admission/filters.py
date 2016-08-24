@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import DateTimeRangeWidget
-from learning.admission.models import Applicant, Interview
+from learning.admission.models import Applicant, Interview, Campaign
 
 EMPTY_CHOICE = ('', _('Any'))
 
@@ -31,12 +31,15 @@ class FilterEmptyChoiceMixin(object):
 
 
 class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+    campaign = django_filters.ModelChoiceFilter(
+        label=_("Campaign"),
+        queryset=Campaign.objects.order_by("-code").all())
     second_name = django_filters.CharFilter(lookup_type='icontains',
                                             label=_("Second name"))
 
     class Meta:
         model = Applicant
-        fields = ['campaign', 'status']
+        fields = ['status']
 
     @property
     def form(self):

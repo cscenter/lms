@@ -7,12 +7,6 @@
     margin-bottom: 30px;
   }
 
-  .breadcrumb {
-    background: none;
-    padding: 0;
-    font-size: 24px;
-  }
-
   th {
     &.name {
       width: 50%;
@@ -103,4 +97,27 @@
 #id_report_status_change-status {
   border-radius: 0;
   -webkit-appearance: none;
+}
+
+.presentation-link {
+  text-decoration: none!important;
+
+  i.fa {
+    margin-right: 5px;
+    color: $color-grey;
+  }
+  &:hover{
+    i.fa {
+    color: inherit;
+    }
+  }
+}
+
+.breadcrumb {
+  &.projects {
+    background: none;
+    padding: 0;
+    font-size: 24px;
+    padding-top: 10px;
+  }
 }

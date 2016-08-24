@@ -68,12 +68,13 @@
             </li>
             {% endfor %}
         </ul>
+        {% if can_comment %}
         <div class="csc-well">
             {% crispy new_comment_form new_comment_form.helper %}
-            TODO: комментарий для ревьюверов тоже прятать, если пока проверяет куратор?
         </div>
+        {% endif %}
 
-        {% if is_reviewer and report.status == report.REVIEW %}
+        {% if is_reviewer and report.review_state %}
         <a href="#review-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Оценить работу</a>
         <div class="panel-collapse">
             <div class="collapse csc-well" id="review-form">
@@ -82,13 +83,15 @@
         </div>
         {% endif %}
 
+        {% if request.user.is_curator and report.summarize_state %}
+            <a href="{% url "projects:reviewer_project_report_summarize" project_pk=report.project_student.project_id student_pk=report.project_student.student_id %}" class="btn btn-block btn-primary">
+                Подвести итоги
+            </a><br>
+        {% endif %}
+
     </div>
     <div class="col-xs-3">
         {% if request.user.is_curator %}
-                <a href="{% url "projects:reviewer_project_report_summarize" project_pk=report.project_student.project_id student_pk=report.project_student.student_id %}" class="btn btn-block btn-primary">
-                    Подвести итоги
-                </a><br>
-            TODO: Сейчас эта кнопка показывается всегда. Не понятно, нужно ли её прятать, пока все проверяющие не выставят оценку. А если они проверяли, но банально забыли выставить галку "завершено"?<br>
             <h5>Статус отчета</h5>
             {% crispy report_status_change %}
         {% endif %}

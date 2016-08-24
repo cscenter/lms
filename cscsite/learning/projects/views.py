@@ -128,6 +128,9 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
             verb='enrolled on',
             action_object=project,
             recipient="")
+        messages.success(self.request,
+                         _("You successfully enrolled on project"),
+                         extra_tags='timeout')
         url = reverse("projects:reviewer_project_detail", args=[project.pk])
         return HttpResponseRedirect(url)
 
@@ -147,7 +150,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             Report.objects.filter(
                 project_student__student=student_pk,
                 project_student__project=project_pk,
-            ).select_related("project_student")
+            ).select_related("project_student", "project_student__project")
         )
         return report
 
@@ -180,8 +183,15 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
                     .select_related('author'))
         context["comments"] = comments
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
-        context["is_reviewer"] = self.request.user in report.project_student.project.reviewers.all()
-        context["is_author"] = self.request.user == report.project_student.student
+        is_reviewer = self.request.user in report.project_student.project.reviewers.all()
+        is_author = self.request.user == report.project_student.student
+        context["can_comment"] = (
+            (is_reviewer and report.review_state()) or
+            is_author and report.status != report.COMPLETED or
+            self.request.user.is_curator
+        )
+        context["is_reviewer"] = is_reviewer
+        context["is_author"] = is_author
         return context
 
     def get_review_object(self):

@@ -302,6 +302,12 @@ class Report(ReviewCriteria):
     def __str__(self):
         return smart_text(self.project_student.student)
 
+    def review_state(self):
+        return self.status == self.REVIEW
+
+    def summarize_state(self):
+        return self.status in [self.RATING, self.COMPLETED]
+
     @property
     def final_score(self):
         """Sum of all criteria"""

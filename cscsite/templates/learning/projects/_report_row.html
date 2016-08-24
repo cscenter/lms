@@ -1,7 +1,9 @@
 <div class="report">
     {{ ps.student.last_name }} {{ ps.student.first_name }} {{ ps.student.patronymic }}<br>
     {# TODO: Может показывать просто статус вместо двух if'ов? #}
-    {% if you_enrolled and ps.report and ps.report.status == 'sent' %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>
+    {% if you_enrolled and ps.report and ps.report.status == 'sent' %}
+        <span class="text-muted">Отчет отправлен{% if not request.user.is_curator %}<br>Проверка куратором{% endif %}</span>
+            {% if request.user.is_curator %}<br><a href="{% url "projects:reviewer_project_report" project.pk ps.student.pk %}">Смотреть отчет</a>{% endif %}
     {% elif you_enrolled and ps.report %}<a href="{% url "projects:reviewer_project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
         {# TODO: проекту добавить метод report_deadline_reached? #}
     {% elif you_enrolled and project.is_active %}<span class="text-muted">Крайний срок отправки отчета<br> {{ project.semester.report_ends_at|default:"не установлен" }}</span>

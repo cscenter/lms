@@ -59,7 +59,7 @@ def test_reviewer_list_security(client,
                                 user_factory,
                                 curator):
     """Check ProjectReviewerOnlyMixin"""
-    url = "{}?show=active".format(URL_REVIEWER_PROJECTS)
+    url = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
     response = client.get(url)
     assert response.status_code == 302
     student = student_center_factory()
@@ -79,7 +79,7 @@ def test_reviewer_list_security(client,
 @pytest.mark.django_db
 def test_reviewer_list(client, user_factory, curator, student_center_factory):
     """Test filter `show` works"""
-    url_active = "{}?show=active".format(URL_REVIEWER_PROJECTS)
+    url_active = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
     url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
     url_archive = "{}?show=archive".format(URL_REVIEWER_PROJECTS)
     url_all = "{}?show=all".format(URL_REVIEWER_PROJECTS)
