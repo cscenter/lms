@@ -6,6 +6,10 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
+    <ol class="container breadcrumb projects">
+      <li><a href="/projects/?show=available">Проекты</a></li>
+        <li class="active">О проекте</li>
+    </ol>
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
@@ -20,7 +24,7 @@
                 {% endif %}
 
                 {% if request.user.is_curator %}
-                    <h4>Оценки</h4>
+                    <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     <table class="table table-bordered">
                         <thead>
                         <tr>
@@ -44,7 +48,7 @@
                         </tbody>
                     </table>
 
-                    <h4>Отзывы руководителя</h4>
+                    <h4>Отзывы руководителя <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
                         <div class="card">
                             <div class="card-header ch-alt">{{ ps.student }}</div>
@@ -79,10 +83,10 @@
                     <div class="card-header ch-alt">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект<br> {{ project.semester }}</div>
                     <div class="card-body card-padding">
                         {% if project.supervisor_presentation %}
-                        <a class="" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>
+                        <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
                         {% endif %}
                     {% if project.presentation %}
-                        <a class="" href="{{ project.presentation.url }}">Презентация участников</a>
+                        <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
                     {% endif %}
                     </div>
                 </div>
