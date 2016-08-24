@@ -246,7 +246,7 @@ def report_file_name(self, filename):
 
 @python_2_unicode_compatible
 class Report(ReviewCriteria):
-    SENT = 'sent'  # TODO: send notification (add common table!), whet report was created
+    SENT = 'sent'
     REVIEW = 'review'
     RATING = 'rating'  # Waiting for curator's final score
     COMPLETED = 'completed'

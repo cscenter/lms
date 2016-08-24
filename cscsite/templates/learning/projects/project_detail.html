@@ -90,16 +90,7 @@
                     <div class="card-header ch-alt">Участники проекта</div>
                     <div class="card-body card-padding">
                         {% for ps in project.projectstudent_set.all %}
-                            <div class="report">
-                                {# TODO: move to _chunk #}
-                                {{ ps.student.last_name }} {{ ps.student.first_name }}<br>
-                                {# TODO: Может показывать просто статус вместо двух if'ов? #}
-                                {% if you_enrolled and ps.report and ps.report.status == 'sent' %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>
-                                {% elif you_enrolled and ps.report %}<a href="{% url "projects:reviewer_project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
-                                    {# TODO: проекту добавить метод report_deadline_reached? #}
-                                {% elif you_enrolled and project.is_active %}<span class="text-muted">Крайний срок отправки отчета<br> {{ project.semester.report_ends_at }}</span>
-                                {% elif you_enrolled %}<span class="text-danger">Отчет не сдан</span>{% endif %}
-                            </div>
+                            {% include "learning/projects/_report_row.html" %}
                         {% endfor %}
                     </div>
                 </div>

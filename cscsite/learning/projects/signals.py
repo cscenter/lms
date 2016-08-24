@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth import get_user_model
 
+from learning.settings import PARTICIPANT_GROUPS
+from notifications.signals import notify
 
 _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
 _UNSAVED_FILE_PRESENTATION = 'unsaved_presentation'
@@ -40,9 +43,32 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             instance.save()
 
 
+# TODO: add tests
+def post_save_report(sender, instance, created, *args, **kwargs):
+    """ Send notifications to curators by email about new report"""
+    if created:
+        report = instance
+        CSCUser = get_user_model()
+        if report.status == report.SENT:
+            # Send email to appropriate curators
+            curators = CSCUser.objects.filter(
+                is_superuser=True,
+                is_staff=True,
+                groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
+            )
+            for curator in curators:
+                notify.send(
+                    report.project_student.student,
+                    verb='added',
+                    description="new report added",
+                    action_object=report,
+                    recipient=curator
+                )
+
+
+# TODO: add tests
 def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""
-    from notifications.signals import notify
     if created:
         comment = instance
         reviewers = comment.report.project_student.project.reviewers.all()
@@ -52,7 +78,8 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         for recipient in recipients:
             notify.send(
                 comment.author,  # actor
-                verb='comment added',
+                verb='added',
+                description="new comment added",
                 action_object=comment,
                 target=comment.report,
                 recipient=recipient)
