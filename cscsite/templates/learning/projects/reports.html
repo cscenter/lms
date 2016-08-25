@@ -14,7 +14,6 @@
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
-{# TODO: удалить тег h3, если останется  breadcrumbs               #}
             <h3></h3>
             <table class="table">
                 <thead>
@@ -27,12 +26,12 @@
                 {% for project in projects %}
                     <tr>
                         <td>
-                            <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
+                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
                         <td>
                             {% for ps in project.projectstudent_set.all %}
-                                {% include "learning/projects/_report_row.html" with you_enrolled=True %}
+                                {% include "learning/projects/_report_row.html" with you_enrolled=True can_view_report=True %}
                             {% endfor %}
                         </td>
                     </tr>

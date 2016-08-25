@@ -116,7 +116,7 @@ def test_reviewer_list(client, user_factory, curator, student_center_factory):
 
 
 @pytest.mark.django_db
-def test_reviewer_project_detail(client, curator):
+def test_project_detail(client, curator):
     reviewer = ProjectReviewerFactory()
     client.login(reviewer)
     year, term_type = get_current_semester_pair()
@@ -124,12 +124,12 @@ def test_reviewer_project_detail(client, curator):
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     student = StudentCenterFactory()
     project = ProjectFactory(students=[student], semester=semester_prev)
-    url = reverse("projects:reviewer_project_detail", args=[project.pk])
+    url = reverse("projects:project_detail", args=[project.pk])
     response = client.get(url)
     # hide enrollment button for past projects
     assert smart_bytes("Следить за проектом") not in response.content
     current_project = ProjectFactory(students=[student], semester=semester)
-    url = reverse("projects:reviewer_project_detail",
+    url = reverse("projects:project_detail",
                   args=[current_project.pk])
     response = client.get(url)
     assert smart_bytes("Следить за проектом") in response.content

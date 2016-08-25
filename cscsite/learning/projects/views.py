@@ -5,6 +5,8 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Prefetch
 from django.http import Http404
@@ -22,7 +24,7 @@ from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
-    ReportStatusForm, ReportSummarizeForm
+    ReportStatusForm, ReportSummarizeForm, ReportForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.utils import get_current_semester_pair, get_term_index
@@ -85,25 +87,118 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         return context
 
 
-class ProjectDetailView(ProjectReviewerGroupOnlyMixin, generic.DetailView):
-    model = Project
-    context_object_name = "project"
+class ProjectDetailView(generic.CreateView):
+    model = Report
+    form_class = ReportForm
+    context_object_name = "report"
     template_name = "learning/projects/project_detail.html"
 
-    def get_queryset(self):
-        qs = super(ProjectDetailView, self).get_queryset()
-        return (qs.select_related("semester").prefetch_related(
-            Prefetch("projectstudent_set",
-                     queryset=(ProjectStudent
-                               .objects
-                               .select_related("report", "student"))),
-            "reviewers")
+    def get_project(self):
+        queryset = Project.objects.select_related("semester").prefetch_related(
+            Prefetch(
+                "projectstudent_set",
+                queryset=(ProjectStudent
+                          .objects
+                          .select_related("report", "student"))
+            ),
+            "reviewers"
+        )
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        if pk is not None:
+            queryset = queryset.filter(pk=pk)
+        if pk is None:
+            raise AttributeError("Create view %s must be called with "
+                                 "either an object pk."
+                                 % self.__class__.__name__)
+        try:
+            obj = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                          {'verbose_name': queryset.model._meta.verbose_name})
+        return obj
+
+    def get_authenticated_project_student(self, project):
+        """
+        Returns related student_project instance if authenticated user
+        is student participant of current project
+        """
+        for ps in project.projectstudent_set.all():
+            if ps.student == self.request.user:
+                return ps
+        return None
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        self.project = self.get_project()
+        # Redirect student participant to report page if report exists
+        project_student = self.get_authenticated_project_student(self.project)
+        try:
+            _ = project_student.report
+            return self.response_redirect_to_report(project_student)
+        except (AttributeError, Report.DoesNotExist):
+            pass
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    @staticmethod
+    def response_redirect_to_report(project_student):
+        return HttpResponseRedirect(
+            reverse(
+                "projects:project_report",
+                kwargs={
+                    "project_pk": project_student.project.pk,
+                    "student_pk": project_student.student.pk
+                }
+            )
+        )
+
+    def post(self, request, *args, **kwargs):
+        """Check user permissions before create new report"""
+        # TODO: validate project is_active? And show form when send period already started?
+        self.object = None
+        self.project = self.get_project()
+        project_student = self.get_authenticated_project_student(self.project)
+        try:
+            _ = project_student.report
+            return self.response_redirect_to_report(project_student)
+        except Report.DoesNotExist:
+            # DoesNotExist is subclass of AttributeError
+            pass
+        except AttributeError as e:
+            # Is not student participant
+            return HttpResponseForbidden()
+        form_kwargs = self.get_form_kwargs()
+        form_kwargs["project_student"] = project_student
+        form = self.form_class(**form_kwargs)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_success_url(self):
+        messages.success(self.request,
+                         _("Report successfully sended"),
+                         extra_tags="timeout")
+        report = self.object
+        return reverse(
+            "projects:project_report",
+            kwargs={
+                "project_pk": report.project_student.project.pk,
+                "student_pk": report.project_student.student.pk
+            }
         )
 
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        context["you_enrolled"] = (self.request.user in
-                                      context["project"].reviewers.all())
+        # Permissions block
+        user = self.request.user
+        context["project"] = self.project
+        context["can_enroll"] = user.is_project_reviewer
+        # Student participant should be already redirected to report page
+        # if his report exists
+        context["can_send_report"] = user in self.project.students.all()
+        context["can_view_report"] = user.is_project_reviewer or user.is_curator
+        context["you_enrolled"] = user in self.project.reviewers.all()
         return context
 
 
@@ -131,21 +226,19 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
         messages.success(self.request,
                          _("You successfully enrolled on project"),
                          extra_tags='timeout')
-        url = reverse("projects:reviewer_project_detail", args=[project.pk])
+        url = reverse("projects:project_detail", args=[project.pk])
         return HttpResponseRedirect(url)
 
 
-class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
-                         generic.DetailView):
+class ReportView(FormMixin, generic.DetailView):
     model = Report
+    http_method_names = ["get", "post", "put"]
     context_object_name = "report"
-    template_name = "learning/projects/report_reviewer.html"
+    template_name = "learning/projects/report.html"
 
     def get_object(self, queryset=None):
-        # TODO: check permissions here. Убедиться, что текущий объект связан с этим юзером хоть как-то
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
-        # TODO: show for students, hide for reviewers if status == SENT
         report = get_object_or_404(
             Report.objects.filter(
                 project_student__student=student_pk,
@@ -154,9 +247,32 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         )
         return report
 
+    def has_permissions(self, report):
+        """Check authenticated user has access to GET- or POST-actions"""
+        is_author = report.project_student.student == self.request.user
+        is_project_reviewer = (self.request.user in
+                               report.project_student.project.reviewers.all())
+        is_curator = self.request.user.is_curator
+        add_comment_action = ReportCommentForm.prefix in self.request.POST
+        send_review_action = ReportReviewForm.prefix in self.request.POST
+        # Additional check for curators on send review action
+        if send_review_action and (not is_project_reviewer or
+                                   report.is_completed()):
+            return False
+        if is_curator:
+            return True
+        # Restrict send comment for all except curators if review is completed
+        if add_comment_action and report.is_completed():
+            return False
+        # Hide view for reviewers until report status is `SENT`.
+        if is_project_reviewer and report.status == Report.SENT:
+            return False
+        is_project_participant = is_author or is_project_reviewer or is_curator
+        return is_project_participant
+
     def form_valid(self, form):
         form.save()
-        return super(ReviewerReportView, self).form_valid(form)
+        return super(ReportView, self).form_valid(form)
 
     def form_invalid(self, **kwargs):
         messages.error(self.request, _("Data not saved. Check errors."))
@@ -167,6 +283,9 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         context = super(FormMixin, self).get_context_data(**kwargs)
         report = context[self.context_object_name]
         form_kwargs = self.get_form_kwargs()
+        if report.summarize_state() and self.request.user.is_curator:
+            context[ReportSummarizeForm.prefix] = ReportSummarizeForm(
+                instance=self.object)
         if ReportStatusForm.prefix not in context:
             context[ReportStatusForm.prefix] = ReportStatusForm(
                 instance=self.object,
@@ -185,11 +304,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
         is_reviewer = self.request.user in report.project_student.project.reviewers.all()
         is_author = self.request.user == report.project_student.student
-        context["can_comment"] = (
-            (is_reviewer and report.review_state()) or
-            is_author and report.status != report.COMPLETED or
-            self.request.user.is_curator
-        )
+        context["can_comment"] = report.status != report.COMPLETED
         context["is_reviewer"] = is_reviewer
         context["is_author"] = is_author
         return context
@@ -202,8 +317,17 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             review = None
         return review
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.has_permissions(self.object):
+            return redirect_to_login(request.get_full_path())
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        if not self.has_permissions(self.object):
+            return HttpResponseForbidden()
 
         form_kwargs = self.get_form_kwargs()
         if ReportCommentForm.prefix in request.POST:
@@ -211,7 +335,6 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             form_class = ReportCommentForm
             form_name = ReportCommentForm.prefix
         elif ReportReviewForm.prefix in request.POST:
-            # TODO: check permissions?
             success_msg = _("The data successfully saved.")
             form_class = ReportReviewForm
             form_name = ReportReviewForm.prefix
@@ -227,7 +350,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
             return self.form_invalid(**{form_name: form})
 
     def get_form_kwargs(self):
-        form_kwargs = super(ReviewerReportView, self).get_form_kwargs()
+        form_kwargs = super(ReportView, self).get_form_kwargs()
         # Required fields for both models, not represented in form
         form_kwargs["report"] = self.object
         form_kwargs["author"] = self.request.user
@@ -237,7 +360,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
         return reverse_lazy(
-            "projects:reviewer_project_report",
+            "projects:project_report",
             kwargs={
                 "project_pk": project_pk,
                 "student_pk": student_pk
@@ -247,7 +370,7 @@ class ReviewerReportView(ProjectReviewerGroupOnlyMixin, FormMixin,
 
 class ReportUpdateStatusView(CuratorOnlyMixin,
                              generic.UpdateView):
-    http_method_names = ["post"]
+    http_method_names = ["post", "put"]
     model = Report
     form_class = ReportStatusForm
 
@@ -268,7 +391,7 @@ class ReportUpdateStatusView(CuratorOnlyMixin,
         success_msg = _("Status was successfully updated.")
         messages.success(self.request, success_msg, extra_tags='timeout')
         return reverse_lazy(
-            "projects:reviewer_project_report",
+            "projects:project_report",
             kwargs={
                 "project_pk": project_pk,
                 "student_pk": student_pk
@@ -282,7 +405,9 @@ class ReportUpdateStatusView(CuratorOnlyMixin,
         return kwargs
 
 
+# TODO: replace UPDATEVIEW with baseupdateview? no need in template here
 class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
+    http_method_names = ["post", "put"]
     model = Report
     form_class = ReportSummarizeForm
     template_name = "learning/projects/report_summarize.html"
@@ -306,7 +431,7 @@ class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
                          _("Report was successfully updated."),
                          extra_tags='timeout')
         return reverse_lazy(
-            "projects:reviewer_project_report",
+            "projects:project_report",
             kwargs={
                 "project_pk": project_pk,
                 "student_pk": student_pk
