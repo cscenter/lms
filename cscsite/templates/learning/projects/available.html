@@ -29,7 +29,7 @@
                     {% for project in projects %}
                         <tr>
                             <td>
-                                <a href="{% url "projects:reviewer_project_detail" project.pk %}">{{ project.name }}</a>
+                                <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
                             </td>
                             <td>
                                 {% for student in project.students.all %}

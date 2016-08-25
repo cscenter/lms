@@ -121,3 +121,20 @@
     padding-top: 10px;
   }
 }
+
+#project-report-detail-page {
+  label[for=id_text] {
+    font-size: 18px;
+    margin: 10px 0;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-weight: 400;
+  }
+}
+.o-send-report-form {
+  h2 {
+    margin: 0 0 20px!important;
+  }
+}

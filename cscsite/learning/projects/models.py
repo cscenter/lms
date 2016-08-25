@@ -122,50 +122,55 @@ class Project(TimeStampedModel):
         return smart_text(self.name)
 
     def is_active(self):
-        """Check project from current term"""
+        """Check project is from current term"""
         year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(year, term_type)
         return self.semester.index == current_term_index
 
+    def can_submit_report(self):
+        """Report deadline not exceeded"""
+        today = now()
+        return self.semester.report_ends_at >= today.date()
+
 
 class ReviewCriteria(TimeStampedModel):
     GLOBAL_ISSUE_CRITERION = (
-        (0, _("Does not understand the task at all")),
-        (1, _("Understands, but very superficial")),
-        (2, _("Understands everything"))
+        (0, _("0 - Does not understand the task at all")),
+        (1, _("1 - Understands, but very superficial")),
+        (2, _("2 - Understands everything"))
     )
 
     USEFULNESS_CRITERION = (
-        (0, _("Does not understand")),
-        (1, _("Writing something about the usefulness")),
-        (2, _("Understands and explains"))
+        (0, _("0 - Does not understand")),
+        (1, _("1 - Writing something about the usefulness")),
+        (2, _("2 - Understands and explains"))
     )
 
     PROGRESS_CRITERION = (
-        (0, _("Understand only theory, or even less")),
-        (1, _("Some progress, but not enough")),
-        (2, _("The normal rate of work"))
+        (0, _("0 - Understand only theory, or even less")),
+        (1, _("1 - Some progress, but not enough")),
+        (2, _("2 - The normal rate of work"))
     )
 
     PROBLEMS_CRITERION = (
-        (0, _("Problems not mentioned in the report")),
-        (1, _("Problems are mentioned without any details")),
-        (2, _("Problems are mentioned and explained how they been solved"))
+        (0, _("0 - Problems not mentioned in the report")),
+        (1, _("1 - Problems are mentioned without any details")),
+        (2, _("2 - Problems are mentioned and explained how they been solved"))
     )
 
     TECHNOLOGIES_CRITERION = (
-        (0, _("Listed, but not explained why.")),
-        (1, _("The student does not understand about everything and "
+        (0, _("0 - Listed, but not explained why.")),
+        (1, _("1 - The student does not understand about everything and "
               "does not try to understand, but knows something")),
-        (2, _("Understands why choose one or the other technology"))
+        (2, _("2 - Understands why choose one or the other technology"))
     )
 
     PLANS_CRITERION = (
-        (0, _("Much less than what has already been done, or the student "
+        (0, _("0 - Much less than what has already been done, or the student "
               "does not understand them")),
-        (1, _("It seems to have plans of normal size, but does not "
+        (1, _("1 - It seems to have plans of normal size, but does not "
               "understand what to do.")),
-        (2, _("All right with them"))
+        (2, _("2 - All right with them"))
     )
 
     score_global_issue = models.PositiveSmallIntegerField(
@@ -175,9 +180,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_global_issue_note = models.TextField(
-        _("Note for criterion #1"),
-        blank=True, null=True)
     score_usefulness = models.PositiveSmallIntegerField(
         choices=USEFULNESS_CRITERION,
         verbose_name=_("Who and why this can be useful."),
@@ -185,9 +187,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_usefulness_note = models.TextField(
-        _("Note for criterion #2"),
-        blank=True, null=True)
     score_progress = models.PositiveSmallIntegerField(
         choices=PROGRESS_CRITERION,
         verbose_name=_("What has been done since the start of the project."),
@@ -195,9 +194,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_progress_note = models.TextField(
-        _("Note for criterion #3"),
-        blank=True, null=True)
     score_problems = models.PositiveSmallIntegerField(
         choices=PROBLEMS_CRITERION,
         verbose_name=_("What problems have arisen in the process."),
@@ -205,9 +201,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_problems_note = models.TextField(
-        _("Note for criterion #4"),
-        blank=True, null=True)
     score_technologies = models.PositiveSmallIntegerField(
         choices=TECHNOLOGIES_CRITERION,
         verbose_name=_("What technologies are used."),
@@ -215,9 +208,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_technologies_note = models.TextField(
-        _("Note for criterion #5"),
-        blank=True, null=True)
     score_plans = models.PositiveSmallIntegerField(
         choices=PLANS_CRITERION,
         verbose_name=_("Future plan"),
@@ -225,21 +215,17 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-    score_plans_note = models.TextField(
-        _("Note for criterion #6"),
-        blank=True,
-        null=True)
 
     class Meta:
         abstract = True
 
 
-# FIXME: prevent unauthorized download!
 def report_file_name(self, filename):
     return os.path.join('projects',
-                        '{}-{}'.format(self.semester.year, self.semester.type),
-                        # FIXME: remove id?
-                        self.student.project.pk,
+                        '{}-{}'.format(
+                            self.project_student.project.semester.year,
+                            self.project_student.project.semester.type),
+                        '{}'.format(self.project_student.project.pk),
                         'reports',
                         filename)
 
@@ -258,13 +244,23 @@ class Report(ReviewCriteria):
 
     )
 
+    ACTIVITY = (
+        (0, _("0")),
+        (1, _("1")),
+    )
+    QUALITY = (
+        (0, _("0")),
+        (1, _("1")),
+    )
+
+
     project_student = models.OneToOneField(ProjectStudent)
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Status"),
         default=SENT,
         max_length=15)
-    description = models.TextField(
+    text = models.TextField(
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
@@ -277,14 +273,14 @@ class Report(ReviewCriteria):
     score_activity = models.PositiveSmallIntegerField(
         verbose_name=_("Student activity in cvs"),
         validators=[MaxValueValidator(1)],
-        default=0,
+        choices=ACTIVITY,
         blank=True,
         null=True
     )
     score_quality = models.PositiveSmallIntegerField(
         verbose_name=_("Report's quality"),
         validators=[MaxValueValidator(2)],
-        default=0,
+        choices=QUALITY,
         blank=True,
         null=True
     )
@@ -292,8 +288,7 @@ class Report(ReviewCriteria):
     final_score_note = models.TextField(
         _("Final score note"),
         blank=True,
-        null=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        null=True)
 
     class Meta:
         verbose_name = _("Reports")
@@ -308,12 +303,20 @@ class Report(ReviewCriteria):
     def summarize_state(self):
         return self.status in [self.RATING, self.COMPLETED]
 
+    def is_completed(self):
+        return self.status == self.COMPLETED
+
     @property
     def final_score(self):
         """Sum of all criteria"""
-        return sum(getattr(self, field.name) for field in self._meta.fields()
-                   if isinstance(field, models.IntegerField)
-                   and field.name.startswith("score_"))
+        if not self.is_completed():
+            return _("review not completed")
+        return sum(
+            getattr(self, field.name) for field in self._meta.get_fields()
+            if isinstance(field, models.IntegerField) and
+            field.name.startswith("score_") and
+            getattr(self, field.name) is not None
+        )
 
 
 @python_2_unicode_compatible
@@ -323,11 +326,37 @@ class Review(ReviewCriteria):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    # TODO: Dynamically set `is_completed` before save or calc at runtime?
+
+    score_global_issue_note = models.TextField(
+        _("Note for criterion #1"),
+        blank=True, null=True)
+
+    score_usefulness_note = models.TextField(
+        _("Note for criterion #2"),
+        blank=True, null=True)
+
+    score_progress_note = models.TextField(
+        _("Note for criterion #3"),
+        blank=True, null=True)
+
+    score_problems_note = models.TextField(
+        _("Note for criterion #4"),
+        blank=True, null=True)
+
+    score_technologies_note = models.TextField(
+        _("Note for criterion #5"),
+        blank=True, null=True)
+
+    score_plans_note = models.TextField(
+        _("Note for criterion #6"),
+        blank=True,
+        null=True)
+
     is_completed = models.BooleanField(
         _("Completed"),
         default=False,
         help_text=_("Check if you already completed the assessment."))
+
 
     class Meta:
         verbose_name = _("Review")

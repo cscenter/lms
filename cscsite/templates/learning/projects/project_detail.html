@@ -13,14 +13,19 @@
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
-                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}
-                </h2>
-
-{#                <div class="project-type">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</div>#}
+                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h2>
                 {% if project.description %}
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
                         {{ project.description  }}
                     {% endmarkdown %}
+                {% endif %}
+
+                {% if can_send_report %}
+                    <div class="csc-well o-send-report-form">
+                        TODO: давать отправить отчет, только если попадаем в диапазон отправки
+                        <h2>{% trans "Send report form" %}</h2>
+                        {% crispy form %}
+                    </div>
                 {% endif %}
 
                 {% if request.user.is_curator %}
@@ -62,22 +67,16 @@
             </div>
             <div class="col-xs-4">
                 <div class="links">
-                    {% if project.is_active and not you_enrolled %}
-                        <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-block btn-primary">Следить за проектом</button>
-                        </form>
-                    {% elif project.is_active %}
-                        <div class="you-enrolled">
-                            Вы подписаны на проект<br>
-                        </div>
+                    {% if can_enroll %}
+                        {% if project.is_active and not you_enrolled %}
+                            <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-block btn-primary">Следить за проектом</button>
+                            </form>
+                        {% elif project.is_active %}
+                            <div class="you-enrolled">Вы подписаны на проект</div>
+                        {% endif %}
                     {% endif %}
-{#                    {% if project.supervisor_presentation %}#}
-{#                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.supervisor_presentation.url }}">Презентация руководителя</a>#}
-{#                    {% endif %}#}
-{#                    {% if project.presentation %}#}
-{#                        <a class="btn btn-outline btn-block btn-primary" href="{{ project.presentation.url }}">Презентация участников</a>#}
-{#                    {% endif %}#}
                 </div>
                 <div class="card">
                     <div class="card-header ch-alt">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект<br> {{ project.semester }}</div>
@@ -85,9 +84,9 @@
                         {% if project.supervisor_presentation %}
                         <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
                         {% endif %}
-                    {% if project.presentation %}
-                        <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
-                    {% endif %}
+                        {% if project.presentation %}
+                            <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="card">
