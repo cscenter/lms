@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 
+from django.apps import apps
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -130,7 +131,9 @@ class Project(TimeStampedModel):
     def can_submit_report(self):
         """Report deadline not exceeded"""
         today = now()
-        return self.semester.report_ends_at >= today.date()
+        if self.semester.report_ends_at:
+            return self.semester.report_ends_at >= today.date()
+        return False
 
 
 class ReviewCriteria(TimeStampedModel):
@@ -251,8 +254,8 @@ class Report(ReviewCriteria):
     QUALITY = (
         (0, _("0")),
         (1, _("1")),
+        (2, _("2")),
     )
-
 
     project_student = models.OneToOneField(ProjectStudent)
     status = models.CharField(
@@ -284,6 +287,22 @@ class Report(ReviewCriteria):
         blank=True,
         null=True
     )
+
+    @property
+    def file_name(self):
+        if self.file:
+            return os.path.basename(self.file.name)
+
+    def file_url(self):
+        return reverse(
+            "projects:report_attachments_download",
+            args=[
+                hashids.encode(
+                    apps.get_app_config("projects").REPORT_ATTACHMENT,
+                    self.pk
+                )]
+        )
+
     # TODO: Visible to curator and student only
     final_score_note = models.TextField(
         _("Final score note"),
@@ -301,7 +320,7 @@ class Report(ReviewCriteria):
         return self.status == self.REVIEW
 
     def summarize_state(self):
-        return self.status in [self.RATING, self.COMPLETED]
+        return self.status == self.RATING
 
     def is_completed(self):
         return self.status == self.COMPLETED
@@ -324,7 +343,7 @@ class Review(ReviewCriteria):
     report = models.ForeignKey(Report)
     reviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("Author"),
+        verbose_name=_("Project reviewer"),
         on_delete=models.CASCADE)
 
     score_global_issue_note = models.TextField(
@@ -356,7 +375,6 @@ class Review(ReviewCriteria):
         _("Completed"),
         default=False,
         help_text=_("Check if you already completed the assessment."))
-
 
     class Meta:
         verbose_name = _("Review")
@@ -405,5 +423,8 @@ class ReportComment(TimeStampedModel):
     def attached_file_url(self):
         return reverse(
             "projects:report_attachments_download",
-            args=[hashids.encode(42, self.pk)]
+            args=[hashids.encode(
+                apps.get_app_config("projects").REPORT_COMMENT_ATTACHMENT,
+                self.pk
+            )]
         )

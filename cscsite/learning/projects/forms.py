@@ -138,7 +138,6 @@ class ReportReviewForm(forms.ModelForm):
 
     class Meta:
         model = Review
-        # TODO: replace with __fields__
         fields = (
             "score_global_issue",
             "score_global_issue_note",
@@ -183,12 +182,19 @@ class ReportReviewForm(forms.ModelForm):
 class ReportSummarizeForm(forms.ModelForm):
     prefix = "report_summary_form"
 
+    complete = forms.BooleanField(
+        label=_("Complete"),
+        help_text=_("Check if you want to send results to student"),
+        required=False,
+    )
+
     class Meta:
         model = Report
         fields = (
             "score_activity",
             "score_quality",
             "final_score_note",
+            "complete"
         )
 
     def __init__(self, *args, **kwargs):
@@ -197,7 +203,7 @@ class ReportSummarizeForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(
-                Submit(self.prefix, _('Send'))
+                Submit(self.prefix, _('Save'))
             )
         )
         self.helper.form_action = reverse_lazy(
@@ -207,3 +213,11 @@ class ReportSummarizeForm(forms.ModelForm):
                 "student_pk": self.instance.project_student.student_id
             }
         )
+
+    def save(self, commit=True):
+        if self.cleaned_data.get('complete', False):
+            # TODO: Calculate mean values for score_* model field
+            self.instance.status = self._meta.model.COMPLETED
+            # TODO: send notification by email
+        instance = super(ReportSummarizeForm, self).save(commit)
+        return instance

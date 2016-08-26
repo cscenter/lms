@@ -12,29 +12,31 @@
 
   <div class="row">
     <div class="col-xs-12">
-      <h2>{% if not is_author %}<a href="{% url 'projects:project_detail' project.pk %}"><span class="fa fa-angle-left"></span></a> {% endif %}{{ project.name }}</h2>
+      <h2><a href="{% if not is_author %}{% url 'projects:project_detail' project.pk %}{% else %}{% url "projects:student_projects" %}{% endif %}"><span class="fa fa-angle-left"></span></a> {{ project.name }}</h2>
       <hr>
     </div>
   </div>
   <div class="row">
     <div class="col-xs-9">
-        <a href="#project-description" data-toggle="collapse" aria-expanded="false" class="collapse-link">Описание проекта</a>
-        <div class="panel-collapse">
-            <div class="collapse csc-well" id="project-description">
-                {{ project.description }}
-            </div>
+
+    <div class="o-project-description">
+        <div class="panel-heading">
+            <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description">Описание проекта</a>
         </div>
+        <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
+            <div class="panel-body">{{ project.description|default:"Описание проекта не найдено." }}</div>
+        </div>
+    </div>
+
       <div class="csc-well">
         <div class="ubertext">
-            TODO: Выводить приложенный файл
-            <br>TODO: запретить скачивать файлы, если не участник проекта<br>
-            TODO: где показывать финальные результаты? Только по почте отправить и всё?<br>
-            TODO: ещё раз - выставлять итог можно только если стоит соответствующий статус?<br>
-            TODO: Если отправлен ревью, у него статус "Завершено" - проверить, что все ревью завершены и если это так, то автоматом поменять статус отчета на "Подведение итогов"
             <h3>Отчет  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h3>
             {% markdown 3600 "report_detail" report.pk report.modified %}
                 {{ report.text }}
             {% endmarkdown %}
+              {% if report.file %}
+              <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ report.file_url }}">{{ report.file_name }}</a>
+              {% endif %}
         </div>
         {% with aas=a_s.assignment.assignmentattachment_set.all %}
           {% if aas %}
@@ -42,10 +44,7 @@
               {% for aa in aas %}
                 <li>
                   <span class="assignment-attachment">
-                    <i class="fa fa-file"></i>
-                    <a href="{{ aa.file_url }}">
-                      {{ aa.file_name }}
-                    </a>
+                    <i class="fa fa-file"></i> <a href="{{ aa.file_url }}">{{ aa.file_name }}</a>
                   </span>
                 </li>
               {% endfor %}
@@ -66,9 +65,8 @@
                 </div>
                 <div class="metainfo-holder">
                   {% if comment.attached_file %}
-                      <span class="assignment-attachment">
-                        <i class="fa fa-file"></i> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
-                      </span>
+                      <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
+
                   {% endif %}
                   <span class="metainfo pull-right">{{ comment.created|date:"d.m.Y H:i" }}</span>
                 </div>
@@ -112,11 +110,15 @@
         <h5>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h5>
         {{ project.semester }}
         <h5>Презентации</h5>
-        {% if project.supervisor_presentation %}
-            <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
-        {% endif %}
-        {% if project.presentation %}
-            <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
+        {% if project.supervisor_presentation or project.presentation %}
+            {% if project.supervisor_presentation %}
+                <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
+            {% endif %}
+            {% if project.presentation %}
+                <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
+            {% endif %}
+        {% else %}
+            Не предоставлены
         {% endif %}
         <h5>{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
         <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
