@@ -7,7 +7,6 @@
 
 {% block content %}
     <ol class="container breadcrumb projects">
-      <li><a href="/projects/?show=available">Проекты</a></li>
         <li class="active">О проекте</li>
     </ol>
     <div id="project-detail-page">
@@ -22,7 +21,6 @@
 
                 {% if can_send_report %}
                     <div class="csc-well o-send-report-form">
-                        TODO: давать отправить отчет, только если попадаем в диапазон отправки
                         <h2>{% trans "Send report form" %}</h2>
                         {% crispy form %}
                     </div>

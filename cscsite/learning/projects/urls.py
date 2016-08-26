@@ -2,10 +2,13 @@ from django.conf.urls import include, url
 
 from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
     ProjectEnrollView, ReportView, ReportAttachmentDownloadView, \
-    ReportUpdateStatusView, ReportSummarizeView
+    ReportUpdateStatusView, ReportSummarizeView, StudentProjectsView
 
 app_name = 'projects'
 urlpatterns = [
+    url(r'^learning/projects/$',
+        StudentProjectsView.as_view(),
+        name='student_projects'),
     url(r'^projects/', include([
         url(r'^$', ReviewerProjectsView.as_view(),
             name='reviewer_projects'),

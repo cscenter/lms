@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
@@ -28,10 +29,22 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.utils import get_current_semester_pair, get_term_index
-from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin
+from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
+    StudentOnlyMixin
 from notifications.signals import notify
 
 logger = logging.getLogger(__name__)
+
+
+class StudentProjectsView(StudentOnlyMixin, generic.ListView):
+    context_object_name = "projects"
+    template_name = "learning/projects/student_projects.html"
+
+    def get_queryset(self):
+        return (ProjectStudent.objects
+                .filter(student=self.request.user)
+                .select_related("project", "project__semester", "student")
+                .order_by("-project__semester__index", "project__name"))
 
 
 class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
@@ -154,7 +167,6 @@ class ProjectDetailView(generic.CreateView):
 
     def post(self, request, *args, **kwargs):
         """Check user permissions before create new report"""
-        # TODO: validate project is_active? And show form when send period already started?
         self.object = None
         self.project = self.get_project()
         project_student = self.get_authenticated_project_student(self.project)
@@ -166,6 +178,9 @@ class ProjectDetailView(generic.CreateView):
             pass
         except AttributeError as e:
             # Is not student participant
+            return HttpResponseForbidden()
+        # Prevent action if deadline exceeded
+        if not self.project.can_submit_report():
             return HttpResponseForbidden()
         form_kwargs = self.get_form_kwargs()
         form_kwargs["project_student"] = project_student
@@ -196,9 +211,10 @@ class ProjectDetailView(generic.CreateView):
         context["can_enroll"] = user.is_project_reviewer
         # Student participant should be already redirected to report page
         # if his report exists
-        context["can_send_report"] = user in self.project.students.all()
+        context["can_send_report"] = (user in self.project.students.all() and
+                                      self.project.can_submit_report())
         context["can_view_report"] = user.is_project_reviewer or user.is_curator
-        context["you_enrolled"] = user in self.project.reviewers.all()
+        context["you_enrolled"] = user in self.project.reviewers.all() or user.is_curator
         return context
 
 
@@ -217,7 +233,7 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
 
         project.reviewers.add(request.user.pk)
         project.save()
-        # TODO: add notification when user unsubscribed
+        # TODO: add notification when user unsubscribed?
         notify.send(
             request.user,  # actor
             verb='enrolled on',
@@ -243,7 +259,8 @@ class ReportView(FormMixin, generic.DetailView):
             Report.objects.filter(
                 project_student__student=student_pk,
                 project_student__project=project_pk,
-            ).select_related("project_student", "project_student__project")
+            ).select_related("project_student",
+                             "project_student__project")
         )
         return report
 
@@ -446,13 +463,28 @@ class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):
             attachment_type, pk = hashids.decode(kwargs['sid'])
         except IndexError:
             raise Http404
-
-        qs = ReportComment.objects.filter(pk=pk)
-        if not request.user.is_project_reviewer and not request.user.is_curator:
-            qs = qs.filter(report__project_student__student=request.user)
-        comment = get_object_or_404(qs)
-        file_name = comment.attached_file_name
-        file_url = comment.attached_file.url
+        projects_app = apps.get_app_config("projects")
+        user = request.user
+        if attachment_type == projects_app.REPORT_COMMENT_ATTACHMENT:
+            qs = ReportComment.objects.filter(pk=pk)
+            if not user.is_project_reviewer and not user.is_curator:
+                qs = qs.filter(report__project_student__student=user)
+            comment = get_object_or_404(qs)
+            if not comment.attached_file:
+                raise Http404
+            file_name = comment.attached_file_name
+            file_url = comment.attached_file.url
+        elif attachment_type == projects_app.REPORT_ATTACHMENT:
+            qs = Report.objects.filter(pk=pk)
+            if not user.is_project_reviewer and not user.is_curator:
+                qs = qs.filter(project_student__student=user)
+            report = get_object_or_404(qs)
+            if not report.file:
+                raise Http404
+            file_name = report.file_name
+            file_url = report.file.url
+        else:
+            raise Http404
 
         response = HttpResponse()
         del response['Content-Type']

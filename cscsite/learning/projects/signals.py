@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from django.apps import apps
 from django.contrib.auth import get_user_model
 
 from learning.settings import PARTICIPANT_GROUPS
@@ -46,6 +48,7 @@ def post_save_project(sender, instance, created, *args, **kwargs):
 # TODO: add tests
 def post_save_report(sender, instance, created, *args, **kwargs):
     """ Send notifications to curators by email about new report"""
+    # FIXME: Looks like you need send emails to reviewers!
     if created:
         report = instance
         CSCUser = get_user_model()
@@ -64,6 +67,20 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                     action_object=report,
                     recipient=curator
                 )
+
+
+def post_save_review(sender, instance, created, *args, **kwargs):
+    """Update report status if all reviews are completed."""
+    review = instance
+    report = review.report
+    Report = apps.get_model('projects', 'Report')
+    if review.is_completed:
+        total_reviewers = len(report.project_student.project.reviewers.all())
+        completed_reviews = sum(r.is_completed for r in report.review_set.all())
+        if completed_reviews == total_reviewers:
+            report.status = Report.RATING
+            # TODO: Mb send notification to curators?
+            report.save()
 
 
 # TODO: add tests

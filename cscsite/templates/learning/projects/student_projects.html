@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
+{% load core_tags %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+<div class="projects-list-page">
+    <ol class="container breadcrumb projects">
+        <li class="active">Проекты</li>
+    </ol>
+    <div class="panel">
+        <div class="panel-body">
+            {% if projects %}
+            <h3></h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="name">Название</th>
+                    <th width="10%">Оценка</th>
+                    <th width="15%">Семестр</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ps in projects %}
+                    {% with project=ps.project student=ps.student %}
+                    <tr>
+                        <td>
+                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                        </td>
+                        <td>
+                            <span style="white-space: nowrap;" class="badge assignment-status {{ ps.final_grade|to_css }}">{{ ps.get_final_grade_display }}</span>
+                        </td>
+                        <td>{{ project.semester }}</td>
+                    </tr>
+                    {% endwith %}
+                {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+                <div class="enrolled-empty-list">Список проектов пуст</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
