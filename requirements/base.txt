@@ -42,6 +42,7 @@ django-ses==0.8.0
 
 # Amazon services
 boto==2.42.0
+boto3==1.4.0
 
 # Excel 2010 support
 xlsxwriter==0.9.3
