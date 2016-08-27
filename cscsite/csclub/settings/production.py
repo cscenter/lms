@@ -96,14 +96,6 @@ YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/2015-2016"
 # django-dbbackup settings
 DBBACKUP_CLEANUP_KEEP = 30
 DBBACKUP_CLEANUP_KEEP_MEDIA = 30
-# FIXME(Dmitry): for now, django-dbbackup is buggy, see [1] and [2].
-#                Therefore, we provide our own implementation of S3 upload,
-#                so next line is commented out and backups go to /tmp
-#
-#                [1] https://bitbucket.org/mjs7231/django-dbbackup/issue/55/
-#                [2] https://bitbucket.org/mjs7231/django-dbbackup/issue/50/
-#
-# DBBACKUP_STORAGE = 'dbbackup.storage.s3_storage'
 CSC_TMP_BACKUP_DIR = "/tmp/csclub_backup"
 DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
 
