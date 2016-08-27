@@ -96,7 +96,8 @@ DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 DBBACKUP_STORAGE_OPTIONS = {
     'location': '/',
     'bucket_name': 'cscenter',
-    'host': 's3.eu-central-1.amazonaws.com',
+    # 'host': 's3.eu-central-1.amazonaws.com',
+    'region_name': 'eu-central-1',
     'access_key': '***REMOVED***',
     'secret_key': '***REMOVED***',
     # 'calling_format': 'boto.s3.connection.OrdinaryCallingFormat'
