@@ -13,6 +13,15 @@ from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.projects.models import ReportComment, Review, Report
 
+REVIEW_SCORE_FIELDS = [
+    "score_global_issue",
+    "score_usefulness",
+    "score_progress",
+    "score_problems",
+    "score_technologies",
+    "score_plans",
+]
+
 
 class ReportForm(forms.ModelForm):
     prefix = "send_report_form"
@@ -132,7 +141,6 @@ class ReportCommentForm(forms.ModelForm):
         return comment
 
 
-# TODO: throw warning if is_completed=True, but some marks not checked?
 class ReportReviewForm(forms.ModelForm):
     prefix = "review_form"
 
@@ -173,10 +181,19 @@ class ReportReviewForm(forms.ModelForm):
                 Submit(self.prefix, _('Assess'))
             )
         )
-
         # Append required data not represented in form fields
         self.instance.report = report
         self.instance.reviewer = reviewer
+
+    def clean(self):
+        cleaned_data = super(ReportReviewForm, self).clean()
+        if cleaned_data["is_completed"]:
+            # Check all scores presented
+            for field_name in REVIEW_SCORE_FIELDS:
+                if cleaned_data.get(field_name) is None:
+                    raise forms.ValidationError(
+                        _("Assess all items before set `is_completed`"))
+        return cleaned_data
 
 
 class ReportSummarizeForm(forms.ModelForm):
@@ -198,7 +215,6 @@ class ReportSummarizeForm(forms.ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
-        form_action = kwargs.pop('form_action', '')
         super(ReportSummarizeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(
@@ -216,7 +232,20 @@ class ReportSummarizeForm(forms.ModelForm):
 
     def save(self, commit=True):
         if self.cleaned_data.get('complete', False):
-            # TODO: Calculate mean values for score_* model field
+            # Calculate mean values for review score fields
+            scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
+            reviews = Review.objects.filter(report=self.instance).all()
+            for review in reviews:
+                for field_name in REVIEW_SCORE_FIELDS:
+                    total, count = scores[field_name]
+                    if getattr(review, field_name) is not None:
+                        scores[field_name] = (
+                            total + getattr(review, field_name),
+                            count + 1
+                        )
+            for field_name in REVIEW_SCORE_FIELDS:
+                total, count = scores.get(field_name)
+                setattr(self.instance, field_name, total / count)
             self.instance.status = self._meta.model.COMPLETED
             # TODO: send notification by email
         instance = super(ReportSummarizeForm, self).save(commit)
