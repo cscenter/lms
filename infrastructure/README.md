@@ -2,6 +2,7 @@
 # TODO (critical):
 * install and configure memcached
 * restore db and media/ with playbook
+* Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * `apt-get install ntpd` with servers in /etc/ntp.conf
     server ru.pool.ntp.org
     server pool.ntp.org
