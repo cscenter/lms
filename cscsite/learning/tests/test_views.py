@@ -349,12 +349,17 @@ class CourseListStudentTests(GroupSecurityCheckMixin,
 class CourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_course_detail(self):
         c = CourseFactory.create()
-        CourseOfferingFactory.create_batch(2, course=c)
-        resp = self.client.get(c.get_absolute_url())
-        self.assertContains(resp, c.name)
-        self.assertContains(resp, c.description)
-        self.assertSameObjects(resp.context['offerings'],
-                               c.courseoffering_set.all())
+        co1, co2 = CourseOfferingFactory.create_batch(
+            2, course=c, city=settings.DEFAULT_CITY_CODE)
+        response = self.client.get(c.get_absolute_url())
+        self.assertContains(response, c.name)
+        self.assertContains(response, c.description)
+        assert [c.pk for c in response.context['offerings']] == [co1.pk, co2.pk]
+        co2.city_id = "RU KZN"
+        co2.save()
+        response = self.client.get(c.get_absolute_url())
+        if settings.SITE_ID == settings.CENTER_SITE_ID:
+            assert [c.pk for c in response.context['offerings']] == [co1.pk]
 
 
 class CourseUpdateTests(MyUtilitiesMixin, TestCase):

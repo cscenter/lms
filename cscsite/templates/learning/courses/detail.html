@@ -26,14 +26,15 @@
       </div>
       <hr>
       <h4>{% trans 'Course offerings:|course-singular' %}</h4>
-      <ul>
-      {% for offering in offerings %}
-      <li>
-        <a href="{% url 'course_offering_detail' course.slug offering.semester.slug %}">{{ offering.semester }}</a>
-      </li>
-      {% empty %}
-      {% endfor %}
-      </ul>
+        {% if offerings %}
+          <ul>
+          {% for offering in offerings %}
+          <li><a href="{% url 'course_offering_detail' course.slug offering.semester.slug %}">{{ offering.semester }}</a></li>
+          {% endfor %}
+          </ul>
+        {% else %}
+            Прочтений данного курса пока не было.
+        {% endif %}
     </div>
   </div>
 </div>
