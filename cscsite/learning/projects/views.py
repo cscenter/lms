@@ -299,7 +299,10 @@ class ReportView(FormMixin, generic.DetailView):
         # skip FormMixin.get_context_data() here
         context = super(FormMixin, self).get_context_data(**kwargs)
         report = context[self.context_object_name]
-        form_kwargs = self.get_form_kwargs()
+        form_kwargs = {
+            "report": self.object,
+            "author": self.request.user
+        }
         if report.summarize_state() and self.request.user.is_curator:
             context[ReportSummarizeForm.prefix] = ReportSummarizeForm(
                 instance=self.object)

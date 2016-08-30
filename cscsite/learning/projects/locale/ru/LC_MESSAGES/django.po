@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-26 18:49+0300\n"
-"PO-Revision-Date: 2016-08-26 18:49+0230\n"
+"POT-Creation-Date: 2016-08-30 17:26+0300\n"
+"PO-Revision-Date: 2016-08-30 17:27+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -55,7 +55,7 @@ msgid "Add comment"
 msgstr "Добавить комментарий"
 
 #: cscsite/learning/projects/forms.py:108
-#: cscsite/learning/projects/forms.py:206
+#: cscsite/learning/projects/forms.py:223
 msgid "Save"
 msgstr "Сохранить"
 
@@ -63,16 +63,19 @@ msgstr "Сохранить"
 msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
 
-#: cscsite/learning/projects/forms.py:173
+#: cscsite/learning/projects/forms.py:181
 msgid "Assess"
 msgstr "Оценить"
 
-#: cscsite/learning/projects/forms.py:186
+#: cscsite/learning/projects/forms.py:195
+msgid "Assess all items before set `is_completed`"
+msgstr "Проверьте, что все оценки выставлены."
+
+#: cscsite/learning/projects/forms.py:203
 msgid "Complete"
 msgstr "Завершить"
 
-#: cscsite/learning/projects/forms.py:187
-#| msgid "Check if you want to complete review"
+#: cscsite/learning/projects/forms.py:204
 msgid "Check if you want to send results to student"
 msgstr "Отметьте, чтобы отправить результаты студенту"
 
@@ -429,19 +432,19 @@ msgstr "Вы успешно подписаны на проект."
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: cscsite/learning/projects/views.py:351
+#: cscsite/learning/projects/views.py:354
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: cscsite/learning/projects/views.py:355
+#: cscsite/learning/projects/views.py:358
 msgid "The data successfully saved."
 msgstr "Данные успешно сохранены."
 
-#: cscsite/learning/projects/views.py:408
+#: cscsite/learning/projects/views.py:411
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: cscsite/learning/projects/views.py:448
+#: cscsite/learning/projects/views.py:451
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
