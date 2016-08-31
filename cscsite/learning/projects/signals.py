@@ -87,11 +87,23 @@ def post_save_review(sender, instance, created, *args, **kwargs):
 def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""
     if created:
+        Report = apps.get_model('projects', 'Report')
+        CSCUser = get_user_model()
         comment = instance
-        reviewers = comment.report.project_student.project.reviewers.all()
-        recipients = [r for r in reviewers if r != comment.author]
+        curators = (CSCUser.objects
+            .filter(
+                is_superuser=True,
+                is_staff=True,
+                groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
+            )
+            .exclude(pk=comment.author.pk)
+        )
+        recipients = list(curators)
         if comment.author != comment.report.project_student.student:
             recipients.append(comment.report.project_student.student)
+        if comment.report.status == Report.REVIEW:
+            reviewers = comment.report.project_student.project.reviewers.all()
+            recipients.extend(r for r in reviewers if r != comment.author)
         for recipient in recipients:
             notify.send(
                 comment.author,  # actor
