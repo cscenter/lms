@@ -15,7 +15,7 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
-
+from notifications.notifier import notifier
 
 EMAILS = {
     'new_comment_for_student': {
@@ -186,5 +186,7 @@ class Command(BaseCommand):
                        smart_text(course_offering.course)}
 
             notify(notification, name, context, self.stdout)
+
+        print(notifier.get_registered_configs())
 
         translation.deactivate()
