@@ -120,7 +120,7 @@
                         <div class="media-left">
                             {% with user=comment.interviewer %}
                             {% if user.photo %}
-                                {% thumbnail user.photo "100x100" crop="center" as im %}
+                                {% thumbnail user.photo "60x60" crop="center" as im %}
                                     <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                                 {% endthumbnail %}
                             {% else %}

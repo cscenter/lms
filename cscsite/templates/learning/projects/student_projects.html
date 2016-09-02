@@ -19,7 +19,8 @@
                 <thead>
                 <tr>
                     <th class="name">Название</th>
-                    <th width="10%">Оценка</th>
+                    <th width="10%">Балл за отчет</th>
+                    <th width="10%">Итог</th>
                     <th width="15%">Семестр</th>
                 </tr>
                 </thead>
@@ -28,8 +29,10 @@
                     {% with project=ps.project student=ps.student %}
                     <tr>
                         <td>
-                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a><br>
+                            Руководители:<br> {{ project.supervisor }}
                         </td>
+                        <td>{{ ps.report.final_score|default:"-" }}</td>
                         <td>
                             <span style="white-space: nowrap;" class="badge assignment-status {{ ps.final_grade|to_css }}">{{ ps.get_final_grade_display }}</span>
                         </td>

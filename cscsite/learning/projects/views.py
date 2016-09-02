@@ -18,14 +18,15 @@ from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import generic
-from django.views.generic.edit import FormMixin
+from django.views.generic.edit import FormMixin, BaseUpdateView
 from django.utils.translation import ugettext_lazy as _
 
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
-    ReportStatusForm, ReportSummarizeForm, ReportForm
+    ReportStatusForm, ReportSummarizeForm, ReportForm, \
+    ReportCuratorAssessmentForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.utils import get_current_semester_pair, get_term_index
@@ -180,7 +181,7 @@ class ProjectDetailView(generic.CreateView):
             # Is not student participant
             return HttpResponseForbidden()
         # Prevent action if deadline exceeded
-        if not self.project.can_submit_report():
+        if not self.project.report_submit_period_active():
             return HttpResponseForbidden()
         form_kwargs = self.get_form_kwargs()
         form_kwargs["project_student"] = project_student
@@ -212,7 +213,7 @@ class ProjectDetailView(generic.CreateView):
         # Student participant should be already redirected to report page
         # if his report exists
         context["can_send_report"] = (user in self.project.students.all() and
-                                      self.project.can_submit_report())
+                                      self.project.report_submit_period_active())
         context["can_view_report"] = user.is_project_reviewer or user.is_curator
         context["you_enrolled"] = user in self.project.reviewers.all() or user.is_curator
         return context
@@ -252,6 +253,7 @@ class ReportView(FormMixin, generic.DetailView):
     context_object_name = "report"
     template_name = "learning/projects/report.html"
 
+    # TODO: move select_related to GetReportObjectMixin and replace? See ReportUddateViewMixin
     def get_object(self, queryset=None):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
@@ -308,9 +310,10 @@ class ReportView(FormMixin, generic.DetailView):
                 instance=self.object)
         if ReportStatusForm.prefix not in context:
             context[ReportStatusForm.prefix] = ReportStatusForm(
-                instance=self.object,
-                project_pk=self.object.project_student.project_id,
-                student_pk=self.object.project_student.student_id)
+                instance=self.object)
+        if ReportCuratorAssessmentForm.prefix not in context:
+            context[ReportCuratorAssessmentForm.prefix] = \
+                ReportCuratorAssessmentForm(instance=self.object)
         if ReportCommentForm.prefix not in context:
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
         if ReportReviewForm.prefix not in context:
@@ -325,6 +328,8 @@ class ReportView(FormMixin, generic.DetailView):
         is_reviewer = self.request.user in report.project_student.project.reviewers.all()
         is_author = self.request.user == report.project_student.student
         context["can_comment"] = report.status != report.COMPLETED
+        context["can_assess"] = (report.status == report.SENT and
+                                 self.request.user.is_curator)
         context["is_reviewer"] = is_reviewer
         context["is_author"] = is_author
         return context
@@ -388,51 +393,10 @@ class ReportView(FormMixin, generic.DetailView):
         )
 
 
-class ReportUpdateStatusView(CuratorOnlyMixin,
-                             generic.UpdateView):
+class ReportUpdateViewMixin(CuratorOnlyMixin, BaseUpdateView):
     http_method_names = ["post", "put"]
     model = Report
-    form_class = ReportStatusForm
 
-    def get_object(self, queryset=None):
-        project_pk = self.kwargs.get("project_pk")
-        student_pk = self.kwargs.get("student_pk")
-        report = get_object_or_404(
-            Report.objects.filter(
-                project_student__student=student_pk,
-                project_student__project=project_pk,
-            )
-        )
-        return report
-
-    def get_success_url(self):
-        project_pk = self.kwargs.get("project_pk")
-        student_pk = self.kwargs.get("student_pk")
-        success_msg = _("Status was successfully updated.")
-        messages.success(self.request, success_msg, extra_tags='timeout')
-        return reverse_lazy(
-            "projects:project_report",
-            kwargs={
-                "project_pk": project_pk,
-                "student_pk": student_pk
-            }
-        )
-
-    def get_form_kwargs(self):
-        kwargs = super(ReportUpdateStatusView, self).get_form_kwargs()
-        kwargs["project_pk"] = self.kwargs.get("project_pk")
-        kwargs["student_pk"] = self.kwargs.get("student_pk")
-        return kwargs
-
-
-# TODO: replace UPDATEVIEW with baseupdateview? no need in template here
-class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
-    http_method_names = ["post", "put"]
-    model = Report
-    form_class = ReportSummarizeForm
-    template_name = "learning/projects/report_summarize.html"
-
-    # FIXME: replace with ReportObjectMixin? it's duplicated right now.
     def get_object(self, queryset=None):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
@@ -448,7 +412,7 @@ class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
         messages.success(self.request,
-                         _("Report was successfully updated."),
+                         self.get_success_msg(),
                          extra_tags='timeout')
         return reverse_lazy(
             "projects:project_report",
@@ -457,6 +421,43 @@ class ReportSummarizeView(CuratorOnlyMixin, generic.UpdateView):
                 "student_pk": student_pk
             }
         )
+
+    @staticmethod
+    def get_success_msg():
+        return _("Report was successfully updated.")
+
+    def form_invalid(self, form):
+        """
+        Silently fail and redirect. Form will be invalid only if you fake data.
+        """
+        messages.error(self.request, _("Data not saved. Check errors."))
+        return HttpResponseRedirect(reverse(
+            "projects:project_report",
+            kwargs={
+                "project_pk": self.kwargs.get("project_pk"),
+                "student_pk": self.kwargs.get("student_pk")
+            }
+        ))
+
+
+class ReportUpdateStatusView(ReportUpdateViewMixin):
+    form_class = ReportStatusForm
+
+    @staticmethod
+    def get_success_msg():
+        return _("Status was successfully updated.")
+
+
+class ReportCuratorAssessmentView(ReportUpdateViewMixin):
+    form_class = ReportCuratorAssessmentForm
+
+    @staticmethod
+    def get_success_msg():
+        return _("Grades successfully updated.")
+
+
+class ReportCuratorSummarizeView(ReportUpdateViewMixin):
+    form_class = ReportSummarizeForm
 
 
 class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):

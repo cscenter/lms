@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 {% load markdown from core_tags %}
 {% load humanize %}
+{% load thumbnail %}
 {% load core_tags %}
 
 {% block content %}
@@ -12,7 +13,7 @@
 
   <div class="row">
     <div class="col-xs-12">
-      <h2><a href="{% if not is_author %}{% url 'projects:project_detail' project.pk %}{% else %}{% url "projects:student_projects" %}{% endif %}"><span class="fa fa-angle-left"></span></a> {{ project.name }}</h2>
+      <h2>{{ project.name }}</h2>
       <hr>
     </div>
   </div>
@@ -28,30 +29,30 @@
         </div>
     </div>
 
-      <div class="csc-well">
-        <div class="ubertext">
-            <h3>Отчет  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h3>
+    <div class="card">
+        <div class="card-header ch-alt">Текст отчета  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</div>
+        <div class="card-body card-padding">
+            <div class="ubertext">
             {% markdown 3600 "report_detail" report.pk report.modified %}
                 {{ report.text }}
             {% endmarkdown %}
+            </div>
               {% if report.file %}
               <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ report.file_url }}">{{ report.file_name }}</a>
               {% endif %}
         </div>
-        {% with aas=a_s.assignment.assignmentattachment_set.all %}
-          {% if aas %}
-            <ul class="list-unstyled">
-              {% for aa in aas %}
-                <li>
-                  <span class="assignment-attachment">
-                    <i class="fa fa-file"></i> <a href="{{ aa.file_url }}">{{ aa.file_name }}</a>
-                  </span>
-                </li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-      </div>
+    </div>
+{#      <div class="csc-well">#}
+{#        <div class="ubertext">#}
+{#            <h3>Текст отчета  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h3>#}
+{#            {% markdown 3600 "report_detail" report.pk report.modified %}#}
+{#                {{ report.text }}#}
+{#            {% endmarkdown %}#}
+{#              {% if report.file %}#}
+{#              <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ report.file_url }}">{{ report.file_name }}</a>#}
+{#              {% endif %}#}
+{#        </div>#}
+{#      </div>#}
 
         <ul class="comment-list">
             {% for comment in comments %}
@@ -80,6 +81,15 @@
         </div>
         {% endif %}
 
+        {% if request.user.is_curator and report.status != report.SENT %}
+            <div class="card">
+                <div class="card-header ch-alt">Предварительные оценки</div>
+                <div class="card-body card-padding">
+                    -
+                </div>
+            </div>
+        {% endif %}
+
         {% if is_reviewer and report.review_state %}
         <a href="#review-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Оценить работу</a>
         <div class="panel-collapse">
@@ -87,6 +97,10 @@
                 {% crispy review_form %}
             </div>
         </div>
+        {% endif %}
+
+        {% if can_assess %}
+            {% crispy report_curator_assessment_form %}
         {% endif %}
 
         {% if request.user.is_curator and report.summarize_state %}
@@ -97,8 +111,8 @@
                 </div>
             </div>
         {% endif %}
-
     </div>
+
     <div class="col-xs-3">
         {% if request.user.is_curator %}
             <h5>Статус отчета</h5>
@@ -109,6 +123,20 @@
         {% endif %}
         <h5>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h5>
         {{ project.semester }}
+        {% if is_reviewer %}
+            <h5>Название проекта</h5>
+            <a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a>
+        {% endif %}
+        {% if report.is_completed %}
+            <h5>Суммарный балл за отчет</h5>
+            {{ report.final_score }}
+        {% endif %}
+        {% if report.project_student.final_grade != "not_graded" %}
+            <h5>Итоговая оценка</h5>
+            <span style="white-space: nowrap;" class="badge assignment-status {{ report.project_student.final_grade|to_css }}">
+             {{ report.project_student.get_final_grade_display }}
+            </span>
+        {% endif %}
         <h5>Презентации</h5>
         {% if project.supervisor_presentation or project.presentation %}
             {% if project.supervisor_presentation %}
@@ -121,14 +149,34 @@
             Не предоставлены
         {% endif %}
         <h5>{% if student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
-        <a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a>
+        <ul class="list-unstyled o-users-vlist-with-photo">
+                <li>
+                    <a href="{{ student.get_absolute_url }}">
+                    {% if student.photo %}
+                        {% thumbnail student.photo "60x60" crop="center" cropbox=student.photo_thumbnail_cropbox as im %}
+                            <img alt="{{ student.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <div class="square-photo-stub" data-toggle="tooltip" data-placement="top" title="{{ student.get_full_name }}">{{ student.first_name|slice:":1" }}{{ student.last_name|slice:":1" }}</div>
+                    {% endif %}
+                    {{ student.get_full_name }}
+                    </a>
+                </li>
+        </ul>
         {% if one_reviewer %}<h5>Проверяющий</h5>{% else %}<h5>Проверяющие</h5>{% endif %}
-        <ul class="list-unstyled">
-        {% for reviewer in project.reviewers.all %}
-        <li>
-            <a href="{% url 'user_detail' reviewer.pk %}">{{ reviewer.get_full_name }}</a>
-        </li>
-        {% endfor %}
+        <ul class="list-unstyled o-users-vlist-with-photo">
+            {% for reviewer in project.reviewers.all %}
+                <li>
+                    {% if reviewer.photo %}
+                        {% thumbnail reviewer.photo "60x60" crop="center" cropbox=reviewer.photo_thumbnail_cropbox as im %}
+                            <img alt="{{ reviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <div class="square-photo-stub" data-toggle="tooltip" data-placement="top" title="{{ reviewer.get_full_name }}">{{ reviewer.first_name|slice:":1" }}{{ reviewer.last_name|slice:":1" }}</div>
+                    {% endif %}
+                    {{ reviewer.get_full_name }}
+                </li>
+            {% endfor %}
         </ul>
     </div>
   </div>

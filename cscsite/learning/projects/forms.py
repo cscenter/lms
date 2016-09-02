@@ -27,7 +27,7 @@ class ReportForm(forms.ModelForm):
     prefix = "send_report_form"
 
     text = forms.CharField(
-        label=_("Description"),
+        label=_("Report content"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=True,
         widget=Ubereditor(attrs={'data-quicksend': 'true',
@@ -67,16 +67,18 @@ class ReportStatusForm(forms.ModelForm):
         fields = ("status",)
 
     def __init__(self, *args, **kwargs):
-        project_pk = kwargs.pop('project_pk', None)
-        student_pk = kwargs.pop('student_pk', None)
         # TODO: log status change?
         super(ReportStatusForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_show_labels = False
-        self.helper.form_action = reverse(
+        self.helper.form_action = reverse_lazy(
             "projects:project_report_update_status",
-            kwargs={"project_pk": project_pk, "student_pk": student_pk}
+            kwargs={
+                "project_pk": self.instance.project_student.project_id,
+                "student_pk": self.instance.project_student.student_id
+            }
         )
+
         self.helper.layout = Layout(
             FieldWithButtons("status", StrictButton(
                 '<i class="fa fa-refresh" aria-hidden="true"></i>',
@@ -163,12 +165,12 @@ class ReportReviewForm(forms.ModelForm):
         )
 
         widgets = {
-            "score_global_issue_note": forms.Textarea(attrs={"rows": 5}),
-            "score_usefulness_note": forms.Textarea(attrs={"rows": 5}),
-            "score_progress_note": forms.Textarea(attrs={"rows": 5}),
-            "score_problems_note": forms.Textarea(attrs={"rows": 5}),
-            "score_technologies_note": forms.Textarea(attrs={"rows": 5}),
-            "score_plans_note": forms.Textarea(attrs={"rows": 5}),
+            "score_global_issue_note": forms.Textarea(attrs={"rows": 3}),
+            "score_usefulness_note": forms.Textarea(attrs={"rows": 3}),
+            "score_progress_note": forms.Textarea(attrs={"rows": 3}),
+            "score_problems_note": forms.Textarea(attrs={"rows": 3}),
+            "score_technologies_note": forms.Textarea(attrs={"rows": 3}),
+            "score_plans_note": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -208,8 +210,6 @@ class ReportSummarizeForm(forms.ModelForm):
     class Meta:
         model = Report
         fields = (
-            "score_activity",
-            "score_quality",
             "final_score_note",
             "complete"
         )
@@ -250,3 +250,31 @@ class ReportSummarizeForm(forms.ModelForm):
             # TODO: send notification by email
         instance = super(ReportSummarizeForm, self).save(commit)
         return instance
+
+
+class ReportCuratorAssessmentForm(forms.ModelForm):
+    """Form shown to the curators to score report after it have been sent."""
+    prefix = "report_curator_assessment_form"
+
+    class Meta:
+        model = Report
+        fields = (
+            "score_activity",
+            "score_quality",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(ReportCuratorAssessmentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(
+            FormActions(
+                Submit(self.prefix, _('Save'))
+            )
+        )
+        self.helper.form_action = reverse_lazy(
+            "projects:project_report_curator_assessment",
+            kwargs={
+                "project_pk": self.instance.project_student.project_id,
+                "student_pk": self.instance.project_student.student_id
+            }
+        )

@@ -40,6 +40,7 @@ $state-danger-text: $color-red;
 @import "components/pagination";
 @import "components/loading";
 @import "components/links";
+@import "components/lists";
 @import "components/cards";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
@@ -90,6 +91,16 @@ $state-danger-text: $color-red;
     a {
         text-transform: uppercase;
     }
+}
+
+// TODO: move somewhere. Replace in admission.scss div.square with this styles?
+div.square-photo-stub {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  @extend .bg-info;
+  color: #333;
 }
 
 input.form-control[type=file] {
@@ -516,24 +527,6 @@ tr.unread {
   @extend  .bg-info;
   text-align: center;
   padding: 10px;
-}
-.course-offering-profs {
-  h4 {
-    margin-top: 0;
-  }
-  ul {
-
-    li {
-      padding-bottom: 10px;
-      @extend .clearfix;
-
-      img {
-        float: left;
-        margin-right: 10px;
-      }
-    }
-
-  }
 }
 
 .input-grade {

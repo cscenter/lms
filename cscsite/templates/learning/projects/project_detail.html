@@ -22,7 +22,18 @@
                 {% if can_send_report %}
                     <div class="csc-well o-send-report-form">
                         <h2>{% trans "Send report form" %}</h2>
+                        <b>Крайний срок отправки отчета</b>: {{ project.semester.report_ends_at }}<br><br>
                         {% crispy form %}
+                    </div>
+                {% elif project.is_active and request.user in project.students.all and not project.report_period_started %}
+                    <div class="card o-send-report-timetable">
+                        <div class="card-header ch-alt">Сроки отправки отчета</div>
+                        <div class="card-body card-padding">
+                            <dl class="dl-horizontal">
+                            <dt>Дата начала:</dt> <dd>{{ project.semester.report_starts_at }}</dd>
+                            <dt>Дедлайн:</dt> <dd>{{ project.semester.report_ends_at }}</dd>
+                            </dl>
+                        </div>
                     </div>
                 {% endif %}
 
@@ -32,9 +43,9 @@
                         <thead>
                         <tr>
                             <th>Участник</th>
-                            <th>Отчет</th>
+                            <th>Статус&nbsp;отчета</th>
                             <th>Презентация</th>
-                            {% if project.is_external %}<th>Руководитель</th>{% endif %}
+                            <th>Руководитель</th>
                             <th>Итог</th>
                         </tr>
                         </thead>
@@ -44,7 +55,7 @@
                             <td>{{ ps.student }}</td>
                             <td>{% if ps.report %}{{ ps.report.final_score }}{% else %}-{% endif %}</td>
                             <td>{{ ps.presentation_grade|default:"-" }}</td>
-                            {% if ps.project.is_external %}<td>{{ ps.supervisor_grade|default:"-" }}</td>{% endif %}
+                            <td>{{ ps.supervisor_grade|default:"-" }}</td>
                             <td>{{ ps.get_final_grade_display }}</td>
                             </tr>
                         {% endfor %}

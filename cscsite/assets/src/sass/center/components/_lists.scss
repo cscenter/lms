@@ -1,0 +1,15 @@
+.o-users-vlist-with-photo {
+  h4 {
+    margin-top: 0;
+  }
+
+  li {
+    padding-bottom: 10px;
+    @extend .clearfix;
+
+    img, .square-photo-stub {
+      float: left;
+      margin-right: 10px;
+    }
+  }
+}

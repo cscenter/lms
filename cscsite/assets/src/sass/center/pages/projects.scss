@@ -89,6 +89,19 @@
 
 }
 
+.o-send-report-timetable {
+  margin-top: 20px;
+  dl {
+    margin: 0;
+  }
+  dt {
+    width: 100px;
+  }
+  dd {
+    margin-left: 120px;
+  }
+}
+
 .comment-list li.reviewer {
   margin-left: 40px;
   margin-right: 0;
@@ -138,7 +151,12 @@
       margin-top: 0;
     }
   }
+
+  .media {
+    margin-bottom: 10px;
+  }
 }
+
 .o-send-report-form {
   margin-top: 40px;
   h2 {
