@@ -91,14 +91,14 @@
                 {% endif %}
             </div>
         {% endif %}
-        <div class="course-offering-profs">
+        <div class="o-users-vlist-with-photo">
             <h4>{% trans "Teachers" %}:</h4>
             <ul class="list-unstyled">
                 {% for teacher in course_offering.teachers.all %}
                     <li>
                         <a href="{% url 'teacher_detail' teacher.pk %}">
                             {% if teacher.photo %}
-                                {% thumbnail teacher.photo "60x60" crop="center" as im %}
+                                {% thumbnail teacher.photo "60x60" crop="center" cropbox=teacher.photo_thumbnail_cropbox as im %}
                                     <img src="{{ im.url }}"
                                          width="{{ im.width }}"
                                          height="{{ im.height }}">

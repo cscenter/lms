@@ -108,7 +108,7 @@ class Project(TimeStampedModel):
         verbose_name=_("StudentProject|Type"),
         max_length=10)
     presentation = models.FileField(
-        _("Presentation"),
+        _("Participants presentation"),
         blank=True,
         upload_to=project_presentation_files)
     is_external = models.BooleanField(
@@ -128,11 +128,22 @@ class Project(TimeStampedModel):
         current_term_index = get_term_index(year, term_type)
         return self.semester.index == current_term_index
 
-    def can_submit_report(self):
-        """Report deadline not exceeded"""
-        today = now()
-        if self.semester.report_ends_at:
-            return self.semester.report_ends_at >= today.date()
+    def report_period_started(self):
+        today = now().date()
+        return self.semester.report_starts_at >= today
+
+    def report_period_ended(self):
+        today = now().date()
+        return self.semester.report_ends_at > today
+
+    def report_submit_period_active(self):
+        """Returns True if we in report period range"""
+        today = now().date()
+        if self.semester.report_starts_at and self.semester.report_ends_at:
+            return (self.semester.report_starts_at <= today <=
+                    self.semester.report_ends_at)
+        elif self.semester.report_ends_at:
+            return self.semester.report_ends_at >= today
         return False
 
 

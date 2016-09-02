@@ -43,7 +43,6 @@ class ReportAdmin(admin.ModelAdmin):
     list_select_related = ["project_student", "project_student__project"]
     list_display = ['get_student_name', 'get_project_name', 'status']
     list_filter = ['status']
-    readonly_fields = ('project_student',)
 
     def get_student_name(self, instance):
         return instance.project_student.student
@@ -52,6 +51,14 @@ class ReportAdmin(admin.ModelAdmin):
     def get_project_name(self, instance):
         return instance.project_student.project
     get_project_name.short_description = _("Project")
+
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        if db_field.name == "project_student":
+            kwargs["queryset"] = (ProjectStudent.objects
+                                  .select_related("project", "student")
+                                  .order_by("project__name"))
+        return super(ReportAdmin,
+                     self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class ReviewAdmin(admin.ModelAdmin):
