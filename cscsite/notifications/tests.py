@@ -51,7 +51,8 @@ class NotificationManagersTest(TestCase):
         self.message_count = 10
         self.from_user = UserFactory.create(username="from2", password="pwd", email="example@example.com")
         self.to_user = UserFactory.create(username="to2", password="pwd", email="example@example.com")
-        self.to_group = Group.objects.create(name="to2_g")
+        # XXX: Travis db returns wrong auto-id, lets reuse existed groups
+        self.to_group = Group.objects.create(name="STUDENT_CENTER")
         self.to_group.user_set.add(self.to_user)
         for i in range(self.message_count):
             notify.send(self.from_user, recipient=self.to_user, verb='commented', action_object=self.from_user)
