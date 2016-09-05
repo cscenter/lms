@@ -257,9 +257,6 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
         CourseOfferingFactory.create(course=c, semester=s, teachers=[u])
         resp = self.client.get(reverse('course_list'))
         self.assertEqual(4, len(resp.context['semester_list']))
-        # dummy semester object should be present for 2016 spring
-        self.assertEqual(0, len(resp.context['semester_list'][0][1]
-                                .courseofferings))
         cos = self.cos_from_semester_list(resp.context['semester_list'])
         self.assertEqual(7, len(cos))
 
@@ -354,12 +351,12 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(c.get_absolute_url())
         self.assertContains(response, c.name)
         self.assertContains(response, c.description)
-        assert [c.pk for c in response.context['offerings']] == [co1.pk, co2.pk]
+        assert [c.pk for c in response.context['offerings']] == {co1.pk, co2.pk}
         co2.city_id = "RU KZN"
         co2.save()
         response = self.client.get(c.get_absolute_url())
         if settings.SITE_ID == settings.CENTER_SITE_ID:
-            assert [c.pk for c in response.context['offerings']] == [co1.pk]
+            assert [c.pk for c in response.context['offerings']] == {co1.pk}
 
 
 class CourseUpdateTests(MyUtilitiesMixin, TestCase):
