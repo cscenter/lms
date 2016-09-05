@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from core import comment_persistence
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
+from core.views import ReadOnlyFieldsMixin
 from learning.projects.models import ReportComment, Review, Report
 
 REVIEW_SCORE_FIELDS = [
@@ -186,6 +187,11 @@ class ReportReviewForm(forms.ModelForm):
         # Append required data not represented in form fields
         self.instance.report = report
         self.instance.reviewer = reviewer
+        # Hide help text
+        for field in self.Meta.fields:
+            if field.endswith("_note"):
+                self.fields[field].help_text = self.fields[field].label
+                self.fields[field].label = ""
 
     def clean(self):
         cleaned_data = super(ReportReviewForm, self).clean()

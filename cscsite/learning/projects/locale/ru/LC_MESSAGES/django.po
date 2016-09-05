@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-02 20:17+0300\n"
-"PO-Revision-Date: 2016-09-02 20:17+0230\n"
+"PO-Revision-Date: 2016-09-05 16:20+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -369,27 +369,28 @@ msgstr ""
 
 #: cscsite/learning/projects/models.py:361
 msgid "Note for criterion #1"
-msgstr "Заметка к критерию #1"
+msgstr "Заметка к критерию \"Глобальная задача на семестр\""
 
 #: cscsite/learning/projects/models.py:365
 msgid "Note for criterion #2"
-msgstr "Заметка к критерию #2"
+msgstr "Заметка к критерию \"Кому и зачем это может быть полезно\""
 
 #: cscsite/learning/projects/models.py:369
 msgid "Note for criterion #3"
-msgstr "Заметка к критерию #3"
+msgstr ""
+"Заметка к критерию \"Что было сделано с момента старта работы над проектом\""
 
 #: cscsite/learning/projects/models.py:373
 msgid "Note for criterion #4"
-msgstr "Заметка к критерию #4"
+msgstr "Заметка к критерию \"Какие проблемы возникли при работе\""
 
 #: cscsite/learning/projects/models.py:377
 msgid "Note for criterion #5"
-msgstr "Заметка к критерию #5"
+msgstr "Заметка к критерию \"Какие технологии используются\""
 
 #: cscsite/learning/projects/models.py:381
 msgid "Note for criterion #6"
-msgstr "Заметка к критерию #6"
+msgstr "Заметка к критерию \"Планы до конца семестра\""
 
 #: cscsite/learning/projects/models.py:388
 msgid "Check if you already completed the assessment."

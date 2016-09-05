@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load crispy_forms_tags %}
-{% load markdown from core_tags %}
 {% load humanize %}
 {% load thumbnail %}
 {% load core_tags %}
+{% load projects_tags %}
 
 {% block content %}
     {% with student=report.project_student.student project=report.project_student.project %}
@@ -22,7 +22,7 @@
 
     <div class="o-project-description">
         <div class="panel-heading">
-            <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description">Описание проекта</a>
+            <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description"><span>Описание проекта</span></a>
         </div>
         <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
             <div class="panel-body">{{ project.description|default:"Описание проекта не найдено." }}</div>
@@ -82,11 +82,26 @@
         {% endif %}
 
         {% if request.user.is_curator and report.status != report.SENT %}
-            <div class="card">
-                <div class="card-header ch-alt">Предварительные оценки</div>
-                <div class="card-body card-padding">
-                    -
+            <div class="review-scores">
+            <h3>Предварительные оценки</h3>
+            {% for review in report.review_set.all %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a class="panel-title" aria-expanded="false" data-toggle="collapse"
+                           href="#project-review-{{ review.pk }}">{{ review.reviewer }}</a>
+                    </div>
+                    <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
+                        <div class="panel-body">
+                            {# TODO: move this logic to view, too much custom tags, don't like it #}
+                            {% for field in review_fields %}
+                                <b>{{ review|verbose_name_by_attr_name:field }}</b>: {{ review|lookup_display:field|default:"-" }}<br>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
+            {% empty %}
+                Нет предварительных оценок.
+            {% endfor %}
             </div>
         {% endif %}
 
