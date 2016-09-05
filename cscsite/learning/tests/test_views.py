@@ -351,12 +351,13 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(c.get_absolute_url())
         self.assertContains(response, c.name)
         self.assertContains(response, c.description)
-        assert [c.pk for c in response.context['offerings']] == {co1.pk, co2.pk}
+        # Course offerings not repeated, used set to compare
+        assert {c.pk for c in response.context['offerings']} == {co1.pk, co2.pk}
         co2.city_id = "RU KZN"
         co2.save()
         response = self.client.get(c.get_absolute_url())
         if settings.SITE_ID == settings.CENTER_SITE_ID:
-            assert [c.pk for c in response.context['offerings']] == {co1.pk}
+            assert {c.pk for c in response.context['offerings']} == {co1.pk}
 
 
 class CourseUpdateTests(MyUtilitiesMixin, TestCase):
