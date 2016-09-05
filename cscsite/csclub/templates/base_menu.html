@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load staticfiles %}
-{% load getattribute from core_tags %}
+{% load lookup from core_tags %}
 {% load csc_menu_tags %}
 
 {% csc_menu "compsciclub_"|add:LANGUAGE_CODE as menu %}
@@ -59,9 +59,9 @@
                             <a href="{{ second_level.url }}">
                                 {% trans second_level.caption context 'menu' %}
 
-                                {% if second_level.extension.budge and request.unread_notifications_cache|getattribute:second_level.extension.budge %}
+                                {% if second_level.extension.budge and request.unread_notifications_cache|lookup:second_level.extension.budge %}
                                 <span class="badge">
-                                  {{ request.unread_notifications_cache|getattribute:second_level.extension.budge|length }}
+                                  {{ request.unread_notifications_cache|lookup:second_level.extension.budge|length }}
                                 </span>
                                 {% endif %}
                             </a>

@@ -155,6 +155,11 @@
   .media {
     margin-bottom: 10px;
   }
+
+  .review-scores {
+    padding: 13px;
+    border: 1px solid #f8f8f8;
+  }
 }
 
 .o-send-report-form {
@@ -169,4 +174,14 @@
   border: 1px solid #f2f2f2;
   background: #f8f8f8;
   margin-bottom: 10px;
+
+  .panel-heading, .panel-body {
+    padding: 10px 26px;
+  }
+  .panel-title {
+    text-decoration: none;
+  }
+  .panel-title span {
+    border-bottom: 1px dashed $color-grey;
+  }
 }

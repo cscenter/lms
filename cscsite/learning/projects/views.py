@@ -332,6 +332,8 @@ class ReportView(FormMixin, generic.DetailView):
                                  self.request.user.is_curator)
         context["is_reviewer"] = is_reviewer
         context["is_author"] = is_author
+        # Append preliminary scores
+        context["review_fields"] = ReportReviewForm._meta.fields
         return context
 
     def get_review_object(self):

@@ -190,42 +190,36 @@ class ReviewCriteria(TimeStampedModel):
     score_global_issue = models.PositiveSmallIntegerField(
         choices=GLOBAL_ISSUE_CRITERION,
         verbose_name=_("The global task for term"),
-        help_text=_("Criterion #1"),
         blank=True,
         null=True
     )
     score_usefulness = models.PositiveSmallIntegerField(
         choices=USEFULNESS_CRITERION,
         verbose_name=_("Who and why this can be useful."),
-        help_text=_("Criterion #2"),
         blank=True,
         null=True
     )
     score_progress = models.PositiveSmallIntegerField(
         choices=PROGRESS_CRITERION,
         verbose_name=_("What has been done since the start of the project."),
-        help_text=_("Criterion #3"),
         blank=True,
         null=True
     )
     score_problems = models.PositiveSmallIntegerField(
         choices=PROBLEMS_CRITERION,
         verbose_name=_("What problems have arisen in the process."),
-        help_text=_("Criterion #4"),
         blank=True,
         null=True
     )
     score_technologies = models.PositiveSmallIntegerField(
         choices=TECHNOLOGIES_CRITERION,
         verbose_name=_("What technologies are used."),
-        help_text=_("Criterion #5"),
         blank=True,
         null=True
     )
     score_plans = models.PositiveSmallIntegerField(
         choices=PLANS_CRITERION,
         verbose_name=_("Future plan"),
-        help_text=_("Criterion #6"),
         blank=True,
         null=True
     )
