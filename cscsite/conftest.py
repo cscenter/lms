@@ -62,11 +62,11 @@ def teacher_center_factory():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def replace_django_data_migrations_with_pytest_fixture(_django_db_setup,
-                                                       _django_cursor_wrapper):
+def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
+                                                       django_db_blocker):
     """Django data migrations with py.test due to tests runs with --nomigrations
     """
-    with _django_cursor_wrapper:
+    with django_db_blocker.unblock():
         # Create user groups
         for group_id, group_name in PARTICIPANT_GROUPS:
             Group.objects.update_or_create(
