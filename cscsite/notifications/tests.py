@@ -15,7 +15,6 @@ except ImportError:
     from django.test.utils import override_settings
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils.timezone import utc, localtime
@@ -48,6 +47,7 @@ class NotificationTest(TestCase):
 class NotificationManagersTest(TestCase):
 
     def setUp(self):
+        from django.contrib.auth.models import Group
         self.message_count = 10
         self.from_user = UserFactory.create(username="from2", password="pwd", email="example@example.com")
         self.to_user = UserFactory.create(username="to2", password="pwd", email="example@example.com")
