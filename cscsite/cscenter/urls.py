@@ -62,7 +62,7 @@ urlpatterns = [
     url(r'^testimonials/$', TestimonialsListView.as_view(), name='testimonials'),
 
     url(r'^login/$', LoginView.as_view(), name='login'),
-    url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
+    url(r'^logout/$', LogoutView.as_view(), name='logout'),
 
     url(r'^users/password_change$',
         auth_views.password_change,
