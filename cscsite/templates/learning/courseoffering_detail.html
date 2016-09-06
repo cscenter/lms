@@ -98,7 +98,7 @@
                     <li>
                         <a href="{% url 'teacher_detail' teacher.pk %}">
                             {% if teacher.photo %}
-                                {% thumbnail teacher.photo "60x60" crop="center" cropbox=teacher.photo_thumbnail_cropbox as im %}
+                                {% thumbnail teacher.photo "60x60" crop="center top" cropbox=teacher.photo_thumbnail_cropbox as im %}
                                     <img src="{{ im.url }}"
                                          width="{{ im.width }}"
                                          height="{{ im.height }}">

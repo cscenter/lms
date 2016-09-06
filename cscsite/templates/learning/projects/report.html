@@ -168,7 +168,7 @@
                 <li>
                     <a href="{{ student.get_absolute_url }}">
                     {% if student.photo %}
-                        {% thumbnail student.photo "60x60" crop="center" cropbox=student.photo_thumbnail_cropbox as im %}
+                        {% thumbnail student.photo "60x60" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
                             <img alt="{{ student.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                         {% endthumbnail %}
                     {% else %}
@@ -183,7 +183,7 @@
             {% for reviewer in project.reviewers.all %}
                 <li>
                     {% if reviewer.photo %}
-                        {% thumbnail reviewer.photo "60x60" crop="center" cropbox=reviewer.photo_thumbnail_cropbox as im %}
+                        {% thumbnail reviewer.photo "60x60" crop="center top" cropbox=reviewer.photo_thumbnail_cropbox as im %}
                             <img alt="{{ reviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                         {% endthumbnail %}
                     {% else %}
