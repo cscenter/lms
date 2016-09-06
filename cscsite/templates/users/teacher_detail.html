@@ -54,7 +54,7 @@
 <div class="col-xs-3 profile-sidebar">
     <div class="thumbnail text-center">
     {% if teacher.photo %}
-        {% thumbnail teacher.photo "200x200" crop="center" as im %}
+        {% thumbnail teacher.photo "150x150" crop="center" as im %}
         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
         {% endthumbnail %}
     {% else %}

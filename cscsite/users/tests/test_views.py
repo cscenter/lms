@@ -219,7 +219,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertIn('_auth_user_id', self.client.session)
         resp = self.client.get(reverse('logout'))
         self.assertRedirects(resp, settings.LOGOUT_REDIRECT_URL,
-                             status_code=301)
+                             status_code=302)
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_logout_redirect_works(self):
@@ -229,7 +229,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('course_video_list')})
         self.assertRedirects(resp, reverse('course_video_list'),
-                             status_code=301)
+                             status_code=302)
 
     def test_yandex_id_from_email(self):
         """
@@ -416,7 +416,6 @@ def test_alumni(client,
                 teacher_center_factory):
     graduated = user_factory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
     student_center = student_center_factory()
-    client.login(graduated)
     url_list_all = reverse('alumni')
     response = client.get(url_list_all)
     assert student_center.last_name not in force_text(response.content)
