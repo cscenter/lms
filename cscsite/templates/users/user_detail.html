@@ -12,7 +12,7 @@
                 <div class="thumbnail-inner">
                     <div class="thumbnail-img">
                         {% if user_object.photo %}
-                            {% thumbnail user_object.photo "170x238" crop="center" cropbox=user_object.photo_thumbnail_cropbox as im %}
+                            {% thumbnail user_object.photo "170x238" crop="center top" cropbox=user_object.photo_thumbnail_cropbox as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}"
                                      height="{{ im.height }}">
                             {% endthumbnail %}

@@ -36,7 +36,7 @@
                     {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
                 <div class="col-xs-6">
                         {% if user.photo %}
-                              {% thumbnail user.photo "150x150" crop="center" cropbox=user.photo_thumbnail_cropbox as im %}
+                              {% thumbnail user.photo "150x150" crop="center top" cropbox=user.photo_thumbnail_cropbox as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                               {% endthumbnail %}
                         {% else %}

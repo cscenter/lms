@@ -80,14 +80,12 @@ table {
   }
 }
 
-// teacher profile overrides
-#teachers-detail {
+// teacher detail hack
+.profile-sidebar {
   .thumbnail {
-    float: left;
+    width: 150px;
   }
 }
-
-
 
 .banner {
 

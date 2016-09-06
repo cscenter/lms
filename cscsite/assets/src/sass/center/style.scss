@@ -608,3 +608,9 @@ tr.unread {
   overflow-x: hidden;
 }
 
+// teacher detail hack
+.profile-sidebar {
+  &.col-xs-3 {
+    width: 20%;
+  }
+}

@@ -61,7 +61,7 @@
         <img src="{% static 'img/center/brain.jpg' %}">
     {% endif %}
     </div>
-    {% if user.is_curator %}<a href="{% url "user_detail" teacher.pk %}">Смотреть профиль </a><i class="fa fa-eye" aria-hidden="true"></i>{% endif %}
+    {% if user.is_curator %}<i class="fa fa-user-secret" aria-hidden="true"></i> <a href="{% url "user_detail" teacher.pk %}">Смотреть профиль </a>{% endif %}
 </div>
 </div>
 </div>
