@@ -161,7 +161,12 @@
   height: 0;
   content: '';
   border: 7px solid transparent;
-  border-top-width: 0
+  border-top-width: 0;
+}
+
+.dropdown-menu.bullet.pull-right:after, .dropdown-menu.bullet.pull-right:before {
+  right: 22px;
+  left: auto;
 }
 
 .dropdown-menu.bullet:before {

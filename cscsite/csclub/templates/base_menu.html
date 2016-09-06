@@ -27,7 +27,7 @@
                 {% endfor %}
             </ul>
         </div>
-        <div class="col-xs-3 login">
+        <div class="col-xs-3 login" id="login" data-user-id="{{ user.pk }}">
             {% if user.is_authenticated %}
                     <a class="btn" href="{{ user.get_absolute_url }}">
                         <i class="fa fa-cog fa-2x"></i>

@@ -44,9 +44,9 @@ var ravenOptions = {
     ]
 };
 Raven.config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763', ravenOptions).install();
-var $faUser = $(".login .fa-user")
-if ($faUser.length > 0) {
+var $faUser = $("#login").data('user-id');
+if (!isNaN(parseInt($faUser))) {
     Raven.setUserContext({
-        id: $faUser.data('user-id')
+        id: $faUser
     });
 }

@@ -135,14 +135,6 @@ $header-lvl2-bg:                 #99B6C3;
         border: 1px solid white;
     }
 
-    .login {
-        text-align: right;
-
-        .logout-url {
-            font-weight: normal;
-        }
-    }
-
     .logo-cell {
         position: relative;
         margin-left: 15px;
@@ -155,5 +147,42 @@ $header-lvl2-bg:                 #99B6C3;
     .logo-container {
         position: absolute;
         z-index: 1000;
+    }
+}
+
+#login {
+    text-align: right;
+    padding-left: 0;
+
+    .logout-url {
+        font-weight: normal;
+    }
+    ul {
+        margin: 0;
+    }
+    li {
+        float: none;
+        padding: 0;
+
+        a {
+            padding: 8px 24px;
+        }
+    }
+
+}
+#user-menu {
+    text-decoration: none!important;
+    display: block;
+    height: 50px;
+    padding-top: 10px;
+    line-height: 1;
+
+    .caret {
+        border-width: 5px;
+    }
+    img {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
     }
 }
