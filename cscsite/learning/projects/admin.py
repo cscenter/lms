@@ -21,7 +21,7 @@ class ReviewersInline(admin.StackedInline):
 class ProjectStudentInline(admin.TabularInline):
     model = ProjectStudent
     extra = 0
-    min_num = 1
+    min_num = 0
     show_change_link = True
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
