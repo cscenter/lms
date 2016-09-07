@@ -25,7 +25,7 @@
       }
     }
     &.ch-alt:not([class*="bgm-"]) {
-      background-color: #f7f7f7;
+      background-color: $background-grey;
     }
     &[class*="bgm-"] h2 {
       color: #fff;

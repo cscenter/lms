@@ -56,3 +56,46 @@
 .nav-tabs-inverse .tab-content {
   background: #ffffff;
 }
+
+  // material design tabs
+.nav-tabs {
+  &.material {
+    border-bottom: 1px solid $color-gray-90;
+
+    li {
+      margin: 0 10px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
+    a {
+      padding: 10px 0;
+    }
+
+    > li > a {
+      color: #76838f;
+      border-radius: 0!important;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      @include transition(.25s);
+
+      &:hover {
+        border-bottom-color: darken($color-gray-90, 10%);
+        background: transparent;
+      }
+    }
+
+    > li.active > a {
+      color: $color-blue !important;
+      border-bottom: 2px solid $color-blue;
+      background-color: #fff;
+
+      &:hover {
+        border: 0;
+        border-bottom: 2px solid $color-blue;
+      }
+    }
+  }
+}

@@ -2,13 +2,16 @@
 $min-width: 960px;
 
 // Common colors;
-$color-blue: #337ab7;
+$color-blue: #4078c0;
 $color-grey: #9B9B9B;
 $color-orange: #f2a654;
 $color-green: #5cb85c;
 $color-red: #f96868;
 $color-yellow: #f9cd48;
 $color-purple: #6a679e;
+$color-gray-20: #333333;
+$color-gray-60: #666666;
+$color-gray-90: #e5e5e5;
 
 $background-white: #fff;
 $background-grey: #f8f8f8;
@@ -22,6 +25,8 @@ $brand-danger: #d9534f;
 $state-info-text: $color-blue;
 $state-success-text: $color-green;
 $state-danger-text: $color-red;
+
+$panel-default-heading-bg: $background-grey;
 
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";
@@ -222,7 +227,8 @@ html {
   width: 100%;
   min-width: 940px;
   margin-bottom: 0;
-  background-color: #EDEDED;
+  background-color: $background-grey;
+  border-top: 1px solid $color-gray-90;
   line-height: 60px;
   color: #9B9B9B;
   margin-top: 75px;

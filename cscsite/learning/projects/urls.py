@@ -7,9 +7,6 @@ from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
 
 app_name = 'projects'
 urlpatterns = [
-    url(r'^learning/projects/$',
-        StudentProjectsView.as_view(),
-        name='student_projects'),
     url(r'^projects/', include([
         url(r'^$', ReviewerProjectsView.as_view(),
             name='reviewer_projects'),
@@ -32,5 +29,15 @@ urlpatterns = [
         url(r'^attachments/(?P<sid>[-\w]+)/$',
             ReportAttachmentDownloadView.as_view(),
             name='report_attachments_download'),
+    ])),
+
+    url(r'^learning/projects/', include([
+        url(r'^$', StudentProjectsView.as_view(),
+            name='student_projects'),
+        url(r'^(?P<pk>\d+)/$', ProjectDetailView.as_view(),
+            name='student_project_detail'),
+        url(r'^(?P<project_pk>\d+)/report/(?P<student_pk>\d+)/',
+            ReportView.as_view(),
+            name='student_project_report'),
     ])),
 ]

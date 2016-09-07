@@ -18,9 +18,9 @@
               </a>
             </div>
             <ul>
-                {% for menu_item in menu %}
+                {% for menu_item in menu.tree %}
                     {% if not menu_item.hidden %}
-                    <li {% if menu_item.extension.classes %}class="{{menu_item.extension.classes}}"{% endif %}>
+                    <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
                         <a href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-caret-down"></i>{% endif %}</a>
                     </li>
                     {% endif %}
@@ -46,16 +46,18 @@
     </div>
 </div>
 
-{% for menu_item in menu %}
-    {% if 'current' in menu_item.extension.classes and menu_item.children and not menu_item.hidden %}
-          <div class="header lvl2 {{menu_item.extension.classes}}">
+{% for menu_item in menu.tree %}
+    {% if menu_item.id in menu.active_items and menu_item.children and not menu_item.hidden %}
+          <div class="header lvl2 {{menu_item.extension.classes}} active">
             <div class="container">
               <div class="row">
                 <div class="col-xs-12">
                   <div class="logo-cell"></div>
                   <ul>
                     {% for second_level in menu_item.children %}
-                        <li {% if second_level.extension.classes %}class="{{second_level.extension.classes}}"{% endif %}>
+                        <li {% if second_level.id in menu.active_items and second_level.extension.classes %}class="{{second_level.extension.classes}} active"
+                        {% elif second_level.extension.classes %}class="{{ second_level.extension.classes }}"
+                        {% elif second_level.id in menu.active_items %}class="active"{% endif %}>
                             <a href="{{ second_level.url }}">
                                 {% trans second_level.caption context 'menu' %}
 
