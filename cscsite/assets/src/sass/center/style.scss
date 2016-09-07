@@ -80,9 +80,18 @@ $panel-default-heading-bg: $background-grey;
   border-radius: 3px;
 }
 
+.page-header {
+  margin-top: 0;
+
+  h1, h2, h3, h4, h5 {
+      margin-top: 0;
+  }
+}
+
 .center-header {
     @extend .page-header;
     text-align: center;
+    margin-top: 40px;
 
     h1 {
         text-align: center;
@@ -345,18 +354,20 @@ h2 small a {
   color: #999;
 }
 
-.h2-and-buttons h2 {
-  float: left;
-}
+.h2-and-buttons {
+  h2 {
+    float: left;
+    margin-top: 0;
+  }
 
-.h2-and-buttons .btn-toolbar {
-  float: right;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
+  .btn-toolbar {
+    float: right;
+    margin-bottom: 10px;
+  }
 
-.h2-and-buttons hr {
-  clear: both;
+  hr {
+    clear: both;
+  }
 }
 
 .btn {

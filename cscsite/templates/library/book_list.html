@@ -7,7 +7,7 @@
 {% block content %}
     <div class="container">
         <div id="library" class="row">
-            <h2>
+            <h2 class="content-title">
                 {% trans "library"|capfirst %}
                 {% if user.is_authenticated and user.is_curator %}
                     <a href="{% admin_url books %}" target="_blank" class="btn btn-link">

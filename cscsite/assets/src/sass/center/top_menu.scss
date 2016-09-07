@@ -28,7 +28,8 @@ $header-lvl2-bg:                 #99B6C3;
 
     .badge {
         background-color: transparent;
-        border: 1px solid white;
+        border: 1px solid $color-gray-20;
+        color: $color-gray-20;
     }
 
     ul {
@@ -121,6 +122,11 @@ $header-lvl2-bg:                 #99B6C3;
         &.for-teachers {
             background-color: #A6A8CD;
 
+            .badge {
+                border: 1px solid #fff;
+                color: #fff;
+            }
+
             ul {
                 margin-left: 0;
             }
@@ -139,6 +145,10 @@ $header-lvl2-bg:                 #99B6C3;
 
                 a {
                     border-color: transparent!important;
+
+                    &:hover {
+                        color: #fff;
+                    }
                 }
             }
         }

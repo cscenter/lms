@@ -1,6 +1,10 @@
 #questions-wrapper {
   @extend .container;
 
+  .center-header {
+    margin-top: 0;
+  }
+
   .panel-title {
     font-size: 18px;
     line-height: 1.2;
