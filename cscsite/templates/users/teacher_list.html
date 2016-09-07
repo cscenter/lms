@@ -7,7 +7,7 @@
 
 {% block content %}
     <div class="container teachers-list">
-        <h1>Преподаватели</h1>
+        <h1 class="content-title">Преподаватели</h1>
         {% for user in object_list.active %}
         {% if forloop.counter0|divisibleby:2 %}<div class="row">{% endif %}
         <div class="col-xs-6">{% spaceless %}

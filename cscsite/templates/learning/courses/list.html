@@ -7,7 +7,7 @@
   {% if semester_list %}
   <div class="row">
     <div class="col-xs-12">
-    <h1>{% trans "Courses" %}</h1>
+    <h1 class="content-title">{% trans "Courses" %}</h1>
     {% for autumn_spring in semester_list %}
       {% if forloop.counter == 2 %}
         <h3>{% trans "Archive" %}</h3>
