@@ -98,14 +98,14 @@ $header-lvl2-bg:                 #E6E6E6;
         background-color: $header-lvl2-bg;
         min-width: $min-width;
 
-        &.current {
+        &.active {
             display: block;
             z-index: 100;  
         }
 
         li {
 
-            &.current, &:hover {
+            &.active, &:hover {
                 background-color: darken($header-lvl2-bg, 10%);
             }
         }
@@ -146,7 +146,7 @@ $header-lvl2-bg:                 #E6E6E6;
             font-weight: bolder;
             cursor: pointer;
 
-            &.current, &:hover {
+            &.active, &:hover {
                 background-color: darken($header-lvl1-bg, 10%);
             }
 
@@ -224,25 +224,25 @@ $header-lvl2-bg:                 #E6E6E6;
 }
 
 
-li.for-students.current {
+li.for-students.active {
   background-color: #A84234 !important;
 }
 .header.for-students li:hover {
   background-color: #D37265;
 }
-.header.for-students li.current {
+.header.for-students li.active {
   background-color: #A84234 !important;
 }
 
 
 
-li.for-teachers.current {
+li.for-teachers.active {
   background-color: #515492 !important;
 }
 .header.for-teachers li:hover {
   background-color: #787AAE;
 }
-.header.for-teachers li.current {
+.header.for-teachers li.active {
   background-color: #515492 !important;
 }
 
@@ -252,13 +252,13 @@ li.for-teachers.current {
 .header.lvl2.for-staff .row {
   background-color: #E4C46C;
 }
-li.for-staff.current {
+li.for-staff.active {
   background-color: #D3B665 !important;
 }
 .header.for-staff li:hover {
   background-color: #DBBD68;
 }
-.header.for-staff li.current {
+.header.for-staff li.active {
   background-color: #D3B665 !important;
 }
 

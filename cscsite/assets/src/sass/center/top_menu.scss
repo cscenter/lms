@@ -1,57 +1,120 @@
 $header-lvl1-bg:                 #4F86A0;
 $header-lvl2-bg:                 #99B6C3;
 
-// FIXME: Don't forget remove 'margin-top: -50px' if redesign menu. Grep by 'hack'
-
 .header {
-    line-height: 50px;
-    &.lvl1 {
+    margin: 0 0 50px 0;
+    -webkit-font-smoothing: antialiased;
+
+    .logo-cell {
+        position: relative;
+        margin: 0 15px 0 0;
+        width: 80px;
+        float: left;
         height: 50px;
+    }
+
+    .logo-container {
+        position: absolute;
+        z-index: 1000;
+    }
+
+    a {
+        display: block;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    .badge {
+        background-color: transparent;
+        border: 1px solid white;
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+
+        li {
+            list-style: none;
+            float: left;
+            padding: 0 6px;
+            cursor: pointer;
+
+            i {
+                font-weight: normal;
+            }
+        }
+    }
+
+    .menu.lvl1 {
+        height: 50px;
+        line-height: 50px;
         color: white;
         background-color: $header-lvl1-bg;
         min-width: $min-width;
-        margin-bottom: 60px;
 
+        .container {
+            padding: 0;
+        }
+
+        a {
+            color: #fff;
+        }
+
+        li {
+            &:hover {
+                background-color: darken($header-lvl1-bg, 6%);
+            }
+
+            &.active {
+                background-color: darken($header-lvl1-bg, 14%) !important;
+            }
+        }
     }
 
-    &.lvl2 {
-        margin-top: -60px;
+    .menu.lvl2 {
         width: 100%;
-        /* width: 960px; */
-        color: white;
-        display: none;
-        position: absolute;
-        z-index: -1;
-        background-color: $header-lvl2-bg;
+        background-color: $background-grey;
         min-width: $min-width;
+        border-bottom: 1px solid $color-gray-90;
 
-        &.current {
-            display: block;
-            z-index: 100;  
+        ul {
+            margin-left: -10px;
+        }
+
+        li {
+            padding: 0 10px;
+            // rename with `active`
+            &.active {
+                a {
+                    border-bottom-color: $color-blue;
+                    color: #000;
+                }
+            }
+        }
+
+        a {
+            color: $color-gray-20;
+            line-height: 50px;
+            border-bottom: 4px solid transparent;
+
+            &:hover {
+                color: $color-blue;
+
+            }
         }
 
         &.for-students {
-            background-color: #F6BE80;
-
             li {
-                &:hover {
-                    background-color: darken(#F4B066, 10%);
+                &.active {
+                    //background-color: #F2A654!important;
                     a {
-                        color: #fff;
+                        //color: #fff;
+                        border-color: #F6BE80;
                     }
                 }
 
-                &.current {
-                    background-color: #F2A654!important;
-                    a {
-                        color: #fff;
-                    }
-                }
-
-                a {
-                    color: #37474f;
-                    font-weight:400;
-                }
             }
         }
 
@@ -63,14 +126,25 @@ $header-lvl2-bg:                 #99B6C3;
                     background-color: #787AAE;
                 }
 
-                &.current {
+                &.active {
                     background-color: #515492 !important;
+                    a {
+                        color: #fff;
+                    }
+                }
+
+                a {
+                    border-color: transparent!important;
                 }
             }
         }
 
         &.for-staff {
             background-color: #bad896;
+
+            ul {
+                margin-left: 0;
+            }
 
             li {
                 &:hover {
@@ -80,7 +154,7 @@ $header-lvl2-bg:                 #99B6C3;
                     }
                 }
 
-                &.current {
+                &.active {
                     background-color: darken(#bad896, 20%)!important;
                     a {
                         color: #fff;
@@ -90,63 +164,11 @@ $header-lvl2-bg:                 #99B6C3;
                 a {
                     color: #37474f;
                     font-weight:400;
+                    border-color: transparent!important;
+
                 }
             }
         }
-    }
-
-    ul {
-        padding-left: 0px;
-
-        a {
-            display: block;
-        }
-
-        li {
-            list-style: none;
-            float: left;
-            padding: 0 6px;
-            cursor: pointer;
-
-            &:hover {
-                background-color: #437185;
-            }
-
-            &.current {
-                background-color: #24556A !important;
-            }
-
-            i {
-                font-weight: normal;
-            }
-        }
-    }
-
-    a {
-       color: white;
-
-       &:hover {
-            text-decoration: none;
-        }
-    }
-
-    .badge {
-        background-color: transparent;
-        border: 1px solid white;
-    }
-
-    .logo-cell {
-        position: relative;
-        margin-left: 15px;
-        margin-right: 10px;
-        width: 80px;
-        float: left;
-        height: 40px;
-    }
-
-    .logo-container {
-        position: absolute;
-        z-index: 1000;
     }
 }
 
@@ -166,6 +188,7 @@ $header-lvl2-bg:                 #99B6C3;
 
         a {
             padding: 8px 24px;
+            color: $color-gray-20;
         }
     }
 
