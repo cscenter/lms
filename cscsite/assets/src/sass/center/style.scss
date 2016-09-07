@@ -98,6 +98,10 @@ $panel-default-heading-bg: $background-grey;
     }
 }
 
+.content-title {
+  margin-top: 0!important;
+}
+
 // TODO: move somewhere. Replace in admission.scss div.square with this styles?
 div.square-photo-stub {
   width: 60px;

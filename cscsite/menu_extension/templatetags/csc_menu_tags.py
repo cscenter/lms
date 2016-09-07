@@ -13,8 +13,6 @@ register = template.Library()
 
 
 # TODO: Add nested level support
-# FIXME: Remove deepcopy
-# FIXME: Don't modify current list in `handle_selected`
 @register.assignment_tag(takes_context=True)
 def csc_menu(context, menu_name, root_id=False):
     """Caching version of show_menu template tag."""

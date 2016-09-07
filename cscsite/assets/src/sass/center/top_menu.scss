@@ -121,6 +121,10 @@ $header-lvl2-bg:                 #99B6C3;
         &.for-teachers {
             background-color: #A6A8CD;
 
+            ul {
+                margin-left: 0;
+            }
+
             li {
                 &:hover {
                     background-color: #787AAE;
