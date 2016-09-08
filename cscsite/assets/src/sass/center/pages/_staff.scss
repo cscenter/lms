@@ -18,10 +18,18 @@
         position: absolute;
         bottom: 0;
         padding: .5rem;
-        min-height: 5rem;
 
       &:hover {
         opacity: 0.8;
+      }
+
+      &.expelled {
+        background: $color-red;
+        opacity: 0.8;
+
+        &:hover {
+          opacity: 1;
+        }
       }
     }
   }
