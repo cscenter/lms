@@ -1,21 +1,11 @@
 // CLUB main styles
 
-$min-width: 940px;
-$color-blue: #337ab7;
-$color-green: #5cb85c;
-$color-red: #FF6B78;
-$color-orange: #F39700;
-$color-grey: #9B9B9B;
-$btn-primary-bg: #7a9cc6;
-
-$background-white: #fff;
-$background-grey: #f8f8f8;
-
+@import "variables";
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
 @import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
-@import "../_profile_page.scss";
-@import "../_login_page.scss";
+@import "profile_page";
+@import "../center/pages/login";
 @import "../center/pages/courses_list_student.scss";
 @import "../center/pages/_calendar";
 @import "../center/pages/_assignments";
@@ -40,6 +30,11 @@ table {
   th._language {
     width: 84px;
   }
+}
+
+// course offering detail page
+.enroll-block {
+  margin-bottom: 20px;
 }
 
 #index-notice {

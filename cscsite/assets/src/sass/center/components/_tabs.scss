@@ -92,7 +92,7 @@
       border-bottom: 2px solid $color-blue;
       background-color: #fff;
 
-      &:hover {
+      &:hover, &:active, &:focus {
         border: 0;
         border-bottom: 2px solid $color-blue;
       }

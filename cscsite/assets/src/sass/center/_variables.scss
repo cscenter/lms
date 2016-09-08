@@ -1,0 +1,32 @@
+@import "../bootstrap/variables.scss";
+
+$min-width: 960px;
+
+$link-hover-color: darken($link-color, 5%);
+$pre-bg: #f8f8f8;
+
+$color-blue: #4078c0;
+$color-grey: #9B9B9B;
+$color-orange: #f2a654;
+$color-green: #5cb85c;
+$color-red: #f96868;
+$color-yellow: #f9cd48;
+$color-purple: #6a679e;
+$color-gray-20: #333333;
+$color-gray-60: #666666;
+$color-gray-90: #e5e5e5;
+
+$background-white: #fff;
+$background-grey: #f8f8f8;
+
+$btn-primary-bg:  $color-blue;
+$btn-primary-border:  $btn-primary-bg;
+
+$brand-success: $color-green;
+$brand-danger: #d9534f;
+
+$state-info-text: $color-blue;
+$state-success-text: $color-green;
+$state-danger-text: $color-red;
+
+$panel-default-heading-bg: $background-grey;
