@@ -8,7 +8,7 @@
 <div class="container">
 <div class="row" id="teachers-detail">
 <div class="col-xs-9 profile-body">
-    <h2>{{ teacher.get_full_name }}</h2>
+    <h2 class="content-title">{{ teacher.get_full_name }}</h2>
 
     {% if teacher.note %}
         <div class="about-me">
@@ -35,7 +35,7 @@
         <h4>{% trans "Course offerings" %}</h4>
         <table class="table table-bordered">
           <thead>
-            <tr>
+            <tr class="active">
               <th>Курс</th>
               <th>Дата</th>
             </tr>

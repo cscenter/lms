@@ -6,7 +6,8 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
-    <ol class="container breadcrumb projects">
+<div class="container">
+    <ol class=" breadcrumb projects">
         <li class="active">О проекте</li>
     </ol>
     <div id="project-detail-page">
@@ -41,7 +42,7 @@
                     <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     <table class="table table-bordered">
                         <thead>
-                        <tr>
+                        <tr class="active">
                             <th>Участник</th>
                             <th>Статус&nbsp;отчета</th>
                             <th>Презентация</th>
@@ -109,4 +110,5 @@
             </div>
         </div>
     </div>
+</div>
 {% endblock content %}

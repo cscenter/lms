@@ -1,5 +1,4 @@
 $header-lvl1-bg:                 #4F86A0;
-$header-lvl2-bg:                 #99B6C3;
 
 .header {
     margin: 0 0 50px 0;
@@ -154,33 +153,13 @@ $header-lvl2-bg:                 #99B6C3;
         }
 
         &.for-staff {
-            background-color: #bad896;
-
-            ul {
-                margin-left: 0;
-            }
-
             li {
-                &:hover {
-                    background-color: darken(#bad896, 10%);
-                    a {
-                        color: #fff;
-                    }
-                }
-
                 &.active {
-                    background-color: darken(#bad896, 20%)!important;
                     a {
-                        color: #fff;
+                        border-color: $color-green;
                     }
                 }
 
-                a {
-                    color: #37474f;
-                    font-weight:400;
-                    border-color: transparent!important;
-
-                }
             }
         }
     }

@@ -16,7 +16,7 @@
                     <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                   {% endthumbnail %}
             {% else %}
-                <img src="{% static "img/center/brain.jpg" %}" width="100" height="100" alt="">
+                <img src="{% static "img/center/brain.jpg" %}" width="150" height="150" alt="">
             {% endif %}{% endspaceless %}
             <div class="ubertext">
                 <a class="h4" href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a>

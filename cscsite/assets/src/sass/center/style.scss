@@ -1,40 +1,15 @@
-// CENTER main styles
-$min-width: 960px;
 
-// Common colors;
-$color-blue: #4078c0;
-$color-grey: #9B9B9B;
-$color-orange: #f2a654;
-$color-green: #5cb85c;
-$color-red: #f96868;
-$color-yellow: #f9cd48;
-$color-purple: #6a679e;
-$color-gray-20: #333333;
-$color-gray-60: #666666;
-$color-gray-90: #e5e5e5;
 
-$background-white: #fff;
-$background-grey: #f8f8f8;
-
-$btn-primary-bg:  $color-blue;
-$btn-primary-border:  $btn-primary-bg;
-
-$brand-success: $color-green;
-$brand-danger: #d9534f;
-
-$state-info-text: $color-blue;
-$state-success-text: $color-green;
-$state-danger-text: $color-red;
-
-$panel-default-heading-bg: $background-grey;
-
+@import "variables";
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
 @import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
-@import "../_profile_page.scss";
-@import "../_login_page.scss";
 @import "top_menu.scss";
+
+// Material design elements based on bootstrap
+@import "components/labels";
+@import "components/page_aside";
 @import "_material_design.scss";
 
 @import "components/input-daterange";
@@ -49,10 +24,11 @@ $panel-default-heading-bg: $background-grey;
 @import "components/cards";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
+@import "pages/login";
 @import "pages/online_courses_page.scss";
 @import "pages/index";
 @import "pages/testimonials";
-@import "pages/gradebook.scss";
+@import "pages/gradebook";
 @import "pages/courses_list_student.scss";
 @import "pages/student_submission_comments";
 @import "pages/faq";
