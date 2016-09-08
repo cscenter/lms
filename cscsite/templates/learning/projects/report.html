@@ -82,8 +82,8 @@
         {% endif %}
 
         {% if request.user.is_curator and report.status != report.SENT and not report.is_completed %}
-            <div class="review-scores">
             <h3>Предварительные оценки</h3>
+            <div class="panel-group">
             {% for review in report.review_set.all %}
                 <div class="panel panel-default">
                     <div class="panel-heading">

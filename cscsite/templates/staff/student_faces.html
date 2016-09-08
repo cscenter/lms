@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="container">
+        <ul class="nav nav-pills">
+            {% for year in years %}
+                <li {% if year == current_year %}class="active"{% endif %}>
+                    <a href="{% url "staff:student_faces" %}?year={{ year }}">{{ year }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="c-student-faces">
+        {% if students %}
+            {% for student in students %}
+                <div class="student">
+                    <a href="{{ student.get_absolute_url }}">
+                    {% if student.photo %}
+                        {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
+                    {% endif %}
+                        <figcaption>{{ student.get_full_name }}</figcaption>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">пусто!</div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock content %}
+
+{# TODO: customize scripts if neccessary #}
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}
