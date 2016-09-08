@@ -212,7 +212,6 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StudentFacesView, self).get_context_data(**kwargs)
         enrollment_year = self.request.GET.get("year", None)
-        print(enrollment_year)
         year, current_term = get_current_semester_pair()
         try:
             enrollment_year = int(enrollment_year)
