@@ -78,10 +78,9 @@ def test_reviewer_list_security(client,
 
 @pytest.mark.django_db
 def test_reviewer_list(client, user_factory, curator, student_center_factory):
-    """Test filter `show` works"""
-    url_active = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
+    """Test GET-filter `show` works"""
+    url_reports = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
     url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
-    url_archive = "{}?show=archive".format(URL_REVIEWER_PROJECTS)
     url_all = "{}?show=all".format(URL_REVIEWER_PROJECTS)
     reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
     year, term_type = get_current_semester_pair()
@@ -89,25 +88,25 @@ def test_reviewer_list(client, user_factory, curator, student_center_factory):
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     client.login(reviewer)
     student = student_center_factory()
-    response = client.get(url_active)
+    response = client.get(url_reports)
     assert response.status_code == 200
     assert len(response.context["projects"]) == 0
     # Enroll on project from prev term
     project = ProjectFactory(students=[student], reviewers=[reviewer],
                              semester=semester_prev)
-    response = client.get(url_active)
+    response = client.get(url_reports)
     assert response.status_code == 200
     assert len(response.context["projects"]) == 0
     # Enroll on project from current term
-    project = ProjectFactory(students=[student], reviewers=[reviewer],
-                             semester=semester)
-    response = client.get(url_active)
+    ProjectFactory.create(students=[student], reviewers=[reviewer],
+                          semester=semester)
+    response = client.get(url_reports)
     assert len(response.context["projects"]) == 1
-    # On page with all projects show projects from current term to reviewers
+    # With ?show=available filter show projects from current term to reviewers
     response = client.get(url_available)
     assert len(response.context["projects"]) == 1
     client.login(curator)
-    response = client.get(url_active)
+    response = client.get(url_reports)
     assert len(response.context["projects"]) == 0
     response = client.get(url_available)
     assert len(response.context["projects"]) == 1
@@ -139,11 +138,16 @@ def test_project_detail(client, curator):
     current_project.save()
     response = client.get(url)
     assert smart_bytes("Следить за проектом") not in response.content
-    # Don't show testimonials and grade tables to reviewer
+    # Don't show testimonials and grade tables to reviewer or students
     assert smart_bytes("Отзывы руководителя") not in response.content
     client.login(curator)
     response = client.get(url)
     assert smart_bytes("Отзывы руководителя") in response.content
+    client.login(student)
+    response = client.get(url)
+    assert smart_bytes("Отзывы руководителя") not in response.content
+    # TODO: check visibility of different forms for curator/reviewer/student in separated tests, check with different statuses
+    # TODO: check availability to send form
 
 
 @pytest.mark.django_db

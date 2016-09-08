@@ -17,7 +17,7 @@ from learning.models import Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
-    GRADES
+    GRADES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
@@ -203,6 +203,28 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         return Hint.objects.order_by("sort")
+
+
+class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
+    """Show students faces with names to memorize newbies"""
+    template_name = "staff/student_faces.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentFacesView, self).get_context_data(**kwargs)
+        enrollment_year = self.request.GET.get("year", None)
+        print(enrollment_year)
+        year, current_term = get_current_semester_pair()
+        try:
+            enrollment_year = int(enrollment_year)
+        except TypeError:
+            enrollment_year = year
+        context['students'] = (CSCUser.objects.filter(
+            groups__in=[CSCUser.group_pks.STUDENT_CENTER,
+                        CSCUser.group_pks.VOLUNTEER],
+            enrollment_year=enrollment_year).distinct())
+        context["years"] = reversed(range(CENTER_FOUNDATION_YEAR, year + 1))
+        context["current_year"] = enrollment_year
+        return context
 
 
 # XXX: Not implemented

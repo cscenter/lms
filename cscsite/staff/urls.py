@@ -6,7 +6,8 @@ from learning.views import MarksSheetTeacherDispatchView, MarksSheetTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
-    ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView
+    ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
+    StudentFacesView
 
 urlpatterns = [
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
@@ -19,6 +20,9 @@ urlpatterns = [
     url(r'^student-search/$',
         StudentSearchView.as_view(),
         name='student_search'),
+    url(r'^faces/$',
+        StudentFacesView.as_view(),
+        name='student_faces'),
     url(r'^student-search.json$',
         StudentSearchJSONView.as_view(),
         name='student_search_json'),
