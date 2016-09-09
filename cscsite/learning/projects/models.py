@@ -122,6 +122,9 @@ class Project(TimeStampedModel):
     def __str__(self):
         return smart_text(self.name)
 
+    def get_absolute_url(self):
+        return reverse('projects:project_detail', args=[self.pk])
+
     def is_active(self):
         """Check project is from current term"""
         year, term_type = get_current_semester_pair()
@@ -144,6 +147,8 @@ class Project(TimeStampedModel):
                     self.semester.report_ends_at)
         elif self.semester.report_ends_at:
             return self.semester.report_ends_at >= today
+        elif self.semester.report_starts_at:
+            return self.semester.report_starts_at <= today
         return False
 
 
@@ -320,6 +325,13 @@ class Report(ReviewCriteria):
 
     def __str__(self):
         return smart_text(self.project_student.student)
+
+    def get_absolute_url(self):
+        """May been inefficient if `project_student` not prefetched """
+        return reverse("projects:project_report", kwargs={
+            "project_pk": self.project_student.project_id,
+            "student_pk": self.project_student.student_id
+        })
 
     def review_state(self):
         return self.status == self.REVIEW

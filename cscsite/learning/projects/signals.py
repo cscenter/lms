@@ -45,27 +45,26 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             instance.save()
 
 
-# TODO: add tests
 def post_save_report(sender, instance, created, *args, **kwargs):
     """ Send notifications to curators by email about new report"""
-    # FIXME: Looks like you need send emails to reviewers!
     if created:
         report = instance
         CSCUser = get_user_model()
         if report.status == report.SENT:
-            # Send email to appropriate curators
-            curators = CSCUser.objects.filter(
+            # Send email to curators
+            recipients = CSCUser.objects.filter(
                 is_superuser=True,
                 is_staff=True,
                 groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
             )
-            for curator in curators:
+            for recipient in recipients:
                 notify.send(
                     report.project_student.student,
                     verb='added',
                     description="new report added",
                     action_object=report,
-                    recipient=curator
+                    target=report.project_student.project,
+                    recipient=recipient
                 )
 
 
