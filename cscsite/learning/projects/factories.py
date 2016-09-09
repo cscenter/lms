@@ -2,8 +2,7 @@ import factory
 from factory.fuzzy import FuzzyInteger
 
 from learning.factories import SemesterFactory
-from learning.projects.models import Project, ProjectStudent
-from learning.settings import PARTICIPANT_GROUPS
+from learning.projects.models import Project, ProjectStudent, Report
 from users.factories import UserFactory
 
 
@@ -45,5 +44,9 @@ class ProjectStudentFactory(factory.DjangoModelFactory):
     presentation_grade = FuzzyInteger(0, 10)
 
 
-class ProjectReviewerFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
+class ReportFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Report
+
+    project_student = factory.SubFactory(ProjectStudentFactory)
+

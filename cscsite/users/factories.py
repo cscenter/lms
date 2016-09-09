@@ -66,6 +66,10 @@ class VolunteerFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.VOLUNTEER]
 
 
+class ProjectReviewerFactory(UserFactory):
+    groups = [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
+
+
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):
     class Meta:
         model = OnlineCourseRecord

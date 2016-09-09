@@ -181,7 +181,8 @@ class ProjectDetailView(generic.CreateView):
             # Is not student participant
             return HttpResponseForbidden()
         # Prevent action if deadline exceeded
-        if not self.project.report_submit_period_active():
+        if (not self.project.is_active() or
+                not self.project.report_submit_period_active()):
             return HttpResponseForbidden()
         form_kwargs = self.get_form_kwargs()
         form_kwargs["project_student"] = project_student
@@ -209,10 +210,13 @@ class ProjectDetailView(generic.CreateView):
         # Permissions block
         user = self.request.user
         context["project"] = self.project
-        context["can_enroll"] = user.is_project_reviewer
+        context["can_enroll"] = (user.is_project_reviewer and
+                                 self.project.is_active() and
+                                 user not in self.project.reviewers.all())
         # Student participant should be already redirected to report page
         # if his report exists
         context["can_send_report"] = (user in self.project.students.all() and
+                                      self.project.is_active() and
                                       self.project.report_submit_period_active())
         context["can_view_report"] = user.is_project_reviewer or user.is_curator
         context["you_enrolled"] = user in self.project.reviewers.all() or user.is_curator
