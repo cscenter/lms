@@ -247,12 +247,12 @@ def report_file_name(self, filename):
 class Report(ReviewCriteria):
     SENT = 'sent'
     REVIEW = 'review'
-    RATING = 'rating'  # Waiting for curator's final score
+    SUMMARY = 'rating'  # Summarize
     COMPLETED = 'completed'
     STATUS = (
         (SENT, _("Sent")),
         (REVIEW, _("Review")),
-        (RATING, _("Waiting for final score")),
+        (SUMMARY, _("Waiting for final score")),
         (COMPLETED, _("Completed")),
 
     )
@@ -337,7 +337,7 @@ class Report(ReviewCriteria):
         return self.status == self.REVIEW
 
     def summarize_state(self):
-        return self.status == self.RATING
+        return self.status == self.SUMMARY
 
     def is_completed(self):
         return self.status == self.COMPLETED

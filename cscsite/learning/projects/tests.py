@@ -8,13 +8,14 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from learning.factories import SemesterFactory
-from learning.projects.factories import ProjectFactory, ReportFactory
-from learning.projects.models import Report, ProjectStudent
+from learning.projects.factories import ProjectFactory, ReportFactory, \
+    ProjectStudentFactory
+from learning.projects.models import Report, ProjectStudent, Project
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
-    UserFactory
+    UserFactory, CuratorFactory
 
 URL_REVIEWER_PROJECTS = reverse("projects:reviewer_projects")
 
@@ -75,18 +76,19 @@ def test_reviewer_list_security(client,
     response = client.get(url)
     assert response.status_code == 200
     assert not response.context["projects"]
+    # Curator must have project_reviewer group
     client.login(curator)
     response = client.get(url)
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db
-def test_reviewer_list(client, user_factory, curator, student_center_factory):
+def test_reviewer_list(client, curator, student_center_factory):
     """Test GET-filter `show` works"""
     url_reports = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
     url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
     url_all = "{}?show=all".format(URL_REVIEWER_PROJECTS)
-    reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
+    reviewer = ProjectReviewerFactory.create()
     year, term_type = get_current_semester_pair()
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
@@ -109,6 +111,7 @@ def test_reviewer_list(client, user_factory, curator, student_center_factory):
     # With ?show=available filter show projects from current term to reviewers
     response = client.get(url_available)
     assert len(response.context["projects"]) == 1
+    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
     client.login(curator)
     response = client.get(url_reports)
     assert len(response.context["projects"]) == 0
@@ -299,13 +302,17 @@ def test_reviewer_project_enroll(client, curator):
     response = client.post(url_for_old, {})
     assert response.status_code == 403
     active_project = ProjectFactory(students=[student], semester=semester)
-    urL_for_active = reverse("projects:reviewer_project_enroll",
-                             args=[active_project.pk])
-    response = client.post(urL_for_active, {}, follow=True)
+    url_enroll_in_active = reverse("projects:reviewer_project_enroll",
+                                   args=[active_project.pk])
+    response = client.post(url_enroll_in_active, {}, follow=True)
     assert response.status_code == 200
     assert len(active_project.reviewers.all()) == 1
     assert reviewer in active_project.reviewers.all()
     assert reviewer2 not in active_project.reviewers.all()
+    # Curator has no reviewers group
+    client.login(curator)
+    response = client.post(url_enroll_in_active, {})
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -345,9 +352,112 @@ def test_report_page_permissions(client, curator):
     response = client.get(report.get_absolute_url())
     assert response.status_code == 302
 
-# TODO: простой тест о том, что обновлять статус может только куратор (чекать, что добавлен mixin? вроде это самый простой вариант)
-# TODO: нельзя писать комменты, если проект уже не активен (прочекать состояния в зависимости от статуса отчета)
-# TODO: нотификации добавляются при отправке комментов и нужным людям.
+
+@pytest.mark.django_db
+def test_report_page_update_permissions():
+    """Check report updating restricted to curators only"""
+    from learning.projects.views import (ReportUpdateStatusView,
+        ReportCuratorAssessmentView)
+    from learning.viewmixins import CuratorOnlyMixin
+    assert issubclass(ReportCuratorAssessmentView, CuratorOnlyMixin)
+    assert issubclass(ReportUpdateStatusView, CuratorOnlyMixin)
+
+
+@pytest.mark.django_db
+def test_report_page_notifications(client, curator):
+    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator2 = CuratorFactory.create()
+    reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
+    client.login(reviewer1)
+    year, term_type = get_current_semester_pair()
+    semester = SemesterFactory(year=year, type=term_type)
+    student1, student2 = StudentCenterFactory.create_batch(2)
+    project = ProjectFactory(students=[student1, student2],
+                             semester=semester,
+                             reviewers=[reviewer1, reviewer2])
+    ps1, _ = ProjectStudent.objects.get_or_create(project=project,
+                                                  student=student1)
+    report = ReportFactory(project_student=ps1)
+    assert report.status == Report.SENT
+    assert Notification.objects.count() == 1
+    Notification.objects.get_queryset().delete()
+    form = {"new_comment_form-text": "test", "new_comment_form": "Save"}
+    # Reviewer can't send comments when status is `SENT`
+    client.login(reviewer1)
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 0
+    client.login(student1)
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 1
+    assert Notification.objects.all()[0].recipient == curator
+    Notification.objects.get_queryset().delete()
+    client.login(curator)
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 1
+    assert Notification.objects.all()[0].recipient == student1
+    Notification.objects.get_queryset().delete()
+    report.status = Report.REVIEW
+    report.save()
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 3
+    Notification.objects.get_queryset().delete()
+    client.login(student1)
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 3
+    Notification.objects.get_queryset().delete()
+    client.login(reviewer1)
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 3
+    recipients = [n.recipient for n in Notification.objects.all()]
+    assert reviewer2 in recipients
+    assert curator in recipients
+    assert student1 in recipients
+    Notification.objects.get_queryset().delete()
+    # If report is completed, can't send comments
+    report.status = Report.COMPLETED
+    report.save()
+    response = client.post(report.get_absolute_url(), form)
+    assert response.status_code == 403
+    assert Notification.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_report_page_summarize_notifications(client, curator):
+    from learning.viewmixins import CuratorOnlyMixin
+    from learning.projects.views import ReportCuratorSummarizeView
+    assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
+    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator2 = CuratorFactory.create()
+    reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
+    client.login(reviewer1)
+    year, term_type = get_current_semester_pair()
+    semester = SemesterFactory(year=year, type=term_type)
+    student1, student2 = StudentCenterFactory.create_batch(2)
+    project = ProjectFactory(students=[student1, student2],
+                             semester=semester,
+                             reviewers=[reviewer1, reviewer2])
+    ps1, _ = ProjectStudent.objects.get_or_create(project=project,
+                                                  student=student1)
+    report = ReportFactory(project_student=ps1)
+    report.status = Report.SUMMARY
+    report.save()
+    client.login(curator)
+    form = {
+        "report_summary_form": "Save",
+        "report_summary_form-final_score_note": "test",
+    }
+    Notification.objects.get_queryset().delete()
+    client.post(report.get_absolute_url(), form)
+    assert Notification.objects.count() == 0
+    form["report_summary_form-complete"] = "1"
+    url = reverse("projects:project_report_summarize", kwargs={
+        "student_pk": report.project_student.student.pk,
+        "project_pk": report.project_student.project.pk,
+    })
+    client.post(url, form)
+    assert Notification.objects.count() == 1
+    assert Notification.objects.all()[0].recipient == student1
+    # TODO: test mean values
 
 # TODO: проверить видимость форм, на уровне контекста, post-запросы
-# TODO: прочекать средний балл.
+# TODO: test notifications was read on target pages: new comment, new report

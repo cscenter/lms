@@ -13,9 +13,11 @@ An example how to add notification to queue:
         target=report,  # The object to which the activity was performed.
         recipient=recipient)
 
-Other example to clarify what are target/action/actor/verb:
+Other example to clarify what is target/action/actor/verb:
     justquick (actor) closed (verb) issue 2 (object)
     on activity-stream (target) 12 hours ago
+
+Set `target` only if you have no action object, e.g. report status was updated.
 """
 import os
 import sys
