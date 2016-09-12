@@ -148,6 +148,7 @@ class Notification(models.Model):
 
     timestamp = models.DateTimeField(default=timezone.now)
 
+    # System notification if not public
     public = models.BooleanField(default=True)
     deleted = models.BooleanField(default=False)
     emailed = models.BooleanField(default=False)

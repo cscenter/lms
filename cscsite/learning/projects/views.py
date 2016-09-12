@@ -225,6 +225,7 @@ class ProjectDetailView(generic.CreateView):
 
 class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
     http_method_names = ['post']
+    raise_exception = True  # raise if not in project_reviewer group
 
     def post(self, request, *args, **kwargs):
         project_pk = kwargs.get("pk")
@@ -241,8 +242,9 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
         # TODO: add notification when user unsubscribed?
         notify.send(
             request.user,  # actor
-            verb='enrolled on',
+            verb='enrolled in',
             action_object=project,
+            public=False,
             recipient="")
         messages.success(self.request,
                          _("You successfully enrolled on project"),
@@ -464,6 +466,21 @@ class ReportCuratorAssessmentView(ReportUpdateViewMixin):
 
 class ReportCuratorSummarizeView(ReportUpdateViewMixin):
     form_class = ReportSummarizeForm
+
+    def form_valid(self, form):
+        response = super(ReportCuratorSummarizeView, self).form_valid(form)
+
+        # Send email notification to student participant
+        from notifications.signals import notify
+        notify.send(
+            self.request.user,
+            verb='complete',
+            description="report review is completed",
+            # In this case action_object and target are the same
+            target=self.object,
+            recipient=self.object.project_student.student
+        )
+        return response
 
 
 class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):

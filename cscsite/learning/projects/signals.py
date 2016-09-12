@@ -77,12 +77,10 @@ def post_save_review(sender, instance, created, *args, **kwargs):
         total_reviewers = len(report.project_student.project.reviewers.all())
         completed_reviews = sum(r.is_completed for r in report.review_set.all())
         if completed_reviews == total_reviewers:
-            report.status = Report.RATING
-            # TODO: Mb send notification to curators?
+            report.status = Report.SUMMARY
             report.save()
 
 
-# TODO: add tests
 def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""
     if created:

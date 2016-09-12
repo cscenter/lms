@@ -68,7 +68,7 @@ class ReportStatusForm(forms.ModelForm):
         fields = ("status",)
 
     def __init__(self, *args, **kwargs):
-        # TODO: log status change?
+        # TODO: log status change? Can add to django log, only curators can change status
         super(ReportStatusForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_show_labels = False
@@ -90,7 +90,7 @@ class ReportStatusForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(ReportStatusForm, self).save(commit)
-        # TODO: send notification
+        # TODO: send notification to reviewers?
         if "status" in self.changed_data:
             pass
         return instance
@@ -251,9 +251,9 @@ class ReportSummarizeForm(forms.ModelForm):
                         )
             for field_name in REVIEW_SCORE_FIELDS:
                 total, count = scores.get(field_name)
-                setattr(self.instance, field_name, total / count)
+                mean = (total / count) if count else 0
+                setattr(self.instance, field_name, mean)
             self.instance.status = self._meta.model.COMPLETED
-            # TODO: send notification by email
         instance = super(ReportSummarizeForm, self).save(commit)
         return instance
 

@@ -44,6 +44,11 @@ class UserFactory(factory.DjangoModelFactory):
         self.raw_password = raw_password
 
 
+class CuratorFactory(UserFactory):
+    is_superuser = True
+    is_staff = True
+
+
 class StudentFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.STUDENT_CENTER,
               PARTICIPANT_GROUPS.STUDENT_CLUB]

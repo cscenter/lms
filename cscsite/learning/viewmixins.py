@@ -31,11 +31,11 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
 
 
 class ProjectReviewerGroupOnlyMixin(UserPassesTestMixin):
+    """Curator must have this group"""
     raise_exception = False
 
     def test_func(self, user):
-        return (user.is_authenticated() and
-                (user.is_project_reviewer or user.is_curator))
+        return user.is_authenticated() and user.is_project_reviewer
 
 
 class StudentOnlyMixin(UserPassesTestMixin):
