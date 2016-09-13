@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
 from django.core.urlresolvers import reverse
@@ -187,6 +188,7 @@ class Command(BaseCommand):
 
             notify(notification, name, context, self.stdout)
 
-        print(notifier.get_registered_configs())
+        for config in notifier.get_registered_configs():
+            config().execute()
 
         translation.deactivate()

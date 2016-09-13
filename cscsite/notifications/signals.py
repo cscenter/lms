@@ -33,6 +33,7 @@ def notify_handler(verb, **kwargs):
     description = kwargs.pop('description', None)
     timestamp = kwargs.pop('timestamp', timezone.now())
     level = kwargs.pop('level', Notification.LEVELS.info)
+    data = kwargs.pop('data', None)
 
     # Check if User or Group
     if isinstance(recipient, Group):
@@ -52,6 +53,7 @@ def notify_handler(verb, **kwargs):
             description=description,
             timestamp=timestamp,
             level=level,
+            data=data,
         )
 
         # Set optional objects
