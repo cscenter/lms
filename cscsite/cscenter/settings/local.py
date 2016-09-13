@@ -43,6 +43,7 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -53,31 +54,59 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter': 'simple'
+        'sql': {
+            '()': 'core.utils.SQLFormatter',
+            'format': '[%(duration).3f] %(statement)s',
         }
     },
     'root': {
-        'handlers': ['console'],
         'level': 'DEBUG',
+        'handlers': ['console'],
     },
-    'loggers': {
-        'learning.management.imports': {
-            'handlers': ['console'],
-            'propagate': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'sql': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'sql',
             'level': 'DEBUG',
         },
-        'learning.models': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.template': {
+            'handlers': ['null'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['null'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends.schema': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        "notifications.notifier": {
+            'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False,
-            'level': 'DEBUG',
         },
     },
 }
+
 
 FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
