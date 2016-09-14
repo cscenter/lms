@@ -57,17 +57,23 @@ LOGGING = {
         'sql': {
             '()': 'core.utils.SQLFormatter',
             'format': '[%(duration).3f] %(statement)s',
-        }
-    },
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['console'],
+        },
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
+        },
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
         },
         'sql': {
             'class': 'logging.StreamHandler',
@@ -79,6 +85,11 @@ LOGGING = {
         },
     },
     'loggers': {
+        # root logger
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
         'django': {
             'handlers': ['console'],
             'level': 'DEBUG',
@@ -102,6 +113,11 @@ LOGGING = {
         "notifications.notifier": {
             'level': 'DEBUG',
             'handlers': ['console'],
+            'propagate': False,
+        },
+        "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "DEBUG",
             'propagate': False,
         },
     },

@@ -1,12 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
-import posixpath
 import itertools
 
 from django.apps import apps
 from django.utils import timezone
 
-from slides import yandex_disk, slideshare
+import django_rq
+
+from slides import tasks
 
 
 def create_student_assignments_for_new_assignment(sender, instance, created,
@@ -28,6 +29,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
                                 student_assignment=a_s,
                                 is_about_creation=True)
          .save())
+
 
 def create_deadline_change_notification(sender, instance, created,
                                         *args, **kwargs):
@@ -89,6 +91,7 @@ def update_last_comment_info_on_student_assignment(sender, instance,
         sa.last_comment_from = sa.LAST_COMMENT_STUDENT
     sa.save()
 
+
 def mark_assignment_passed(sender, instance, created,
                            *args, **kwargs):
     if not created:
@@ -100,29 +103,17 @@ def mark_assignment_passed(sender, instance, created,
         a_s.is_passed = True
         a_s.save()
 
+
 def track_fields_post_init(sender, instance, **kwargs):
     instance.__class__.update_track_fields(instance)
 
-def maybe_upload_slides(sender, instance, **kwargs):
-    CourseClass = apps.get_model('learning', 'CourseClass')
-    # XXX we might want to delegate this to cron or Celery.
+
+def add_upload_slides_job(sender, instance, **kwargs):
     if instance.slides and not instance.slides_url:
-        course_offering = instance.course_offering
-        course = course_offering.course
+        queue = django_rq.get_queue('default')
+        queue.enqueue(tasks.maybe_upload_slides_yandex, instance.pk)
+        queue.enqueue(tasks.maybe_upload_slides_slideshare, instance.pk)
 
-        # a) Yandex.Disk
-        yandex_disk.upload_slides(
-            instance.slides.file,
-            posixpath.join(course.slug, instance.slides_file_name))
-
-        # b) SlideShare
-        instance.slides_url = slideshare.upload_slides(
-            instance.slides.file,
-            "{0}: {1}".format(course_offering, instance),
-            instance.description, tags=[course.slug])
-        if instance.slides_url:
-            CourseClass.objects.filter(pk=instance.pk).update(
-                slides_url=instance.slides_url)
 
 def create_course_offering_news_notification(sender, instance, created,
                                              *args, **kwargs):

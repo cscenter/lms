@@ -2,14 +2,14 @@ from django.apps import AppConfig
 from django.db.models.signals import post_save, post_init
 from django.utils.translation import ugettext_lazy as _
 
-from .signals import (maybe_upload_slides,
-                      create_student_assignments_for_new_assignment,
+from .signals import (create_student_assignments_for_new_assignment,
                       create_deadline_change_notification,
                       populate_assignments_for_new_enrolled_student,
                       create_assignment_comment_notification,
                       update_last_comment_info_on_student_assignment,
                       create_course_offering_news_notification,
-                      mark_assignment_passed, track_fields_post_init)
+                      mark_assignment_passed, track_fields_post_init,
+                      add_upload_slides_job)
 
 
 class LearningConfig(AppConfig):
@@ -30,9 +30,9 @@ class LearningConfig(AppConfig):
         post_init.connect(track_fields_post_init,
                           sender=self.get_model('CourseClass'),
                           dispatch_uid='learning.signals.course_class_post_init')
-        post_save.connect(maybe_upload_slides,
+        post_save.connect(add_upload_slides_job,
                           sender=self.get_model('CourseClass'),
-                          dispatch_uid='learning.signals.course_class_maybe_upload_slides')
+                          dispatch_uid='learning.signals.course_class_add_upload_slides_job')
         post_save.connect(create_course_offering_news_notification,
                           sender=self.get_model('CourseOfferingNews'))
         post_save.connect(populate_assignments_for_new_enrolled_student,
