@@ -31,10 +31,6 @@ INSTALLED_APPS += ['raven.contrib.django.raven_compat',]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry'],
-    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
@@ -52,6 +48,10 @@ LOGGING = {
         }
     },
     'loggers': {
+        '': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+        },
         'django.db.backends': {
             'level': 'ERROR',
             'handlers': ['console'],
@@ -65,6 +65,11 @@ LOGGING = {
         'raven': {
             'level': 'DEBUG',
             'handlers': ['console'],
+            'propagate': False,
+        },
+        "rq.worker": {
+            "handlers": ["console"],
+            "level": "WARNING",
             'propagate': False,
         },
         'sentry.errors': {

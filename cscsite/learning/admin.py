@@ -65,9 +65,17 @@ class CourseClassAttachmentInline(admin.TabularInline):
 class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
-    list_filter = ['course_offering', 'venue', 'type']
-    list_display = ['name', 'course_offering', 'date', 'venue', 'type']
+    list_filter = ['type', 'venue']
+    search_fields = ['course_offering__course__name']
+    list_display = ['id', 'name', 'course_offering', 'date', 'venue', 'type']
     inlines = [CourseClassAttachmentInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'course_offering':
+            kwargs['queryset'] = (CourseOffering.objects
+                                  .select_related("course", "semester"))
+        return (super(CourseClassAdmin, self)
+                .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
 class CourseOfferingNewsAdmin(UbereditorMixin, admin.ModelAdmin):
@@ -99,8 +107,8 @@ class AssignmentAdminForm(forms.ModelForm):
 
 
 class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
-    list_display = ['title', 'course_offering', 'created', 'deadline_at']
-    list_filter = ['course_offering']
+    list_display = ['id', 'title', 'course_offering', 'created', 'deadline_at']
+    search_fields = ['course_offering__course__name']
     form = AssignmentAdminForm
 
     def get_readonly_fields(self, request, obj=None):

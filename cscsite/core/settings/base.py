@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'learning.gallery.apps.GalleryConfig',
     'learning.projects.apps.ProjectsConfig',
     'notifications.apps.NotificationsConfig',
+    'django_rq',
 ]
 
 # oEmbed
@@ -202,3 +203,22 @@ MICAWBER_DEFAULT_SETTINGS = {
 
 # SORL settings
 THUMBNAIL_DUMMY = True
+
+
+# Make sure settings are the same as in ansible configuration
+RQ_QUEUES = {
+    'default': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
+        'DEFAULT_TIMEOUT': 350,
+    },
+    'high': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
+        'DEFAULT_TIMEOUT': 500,
+    },
+}

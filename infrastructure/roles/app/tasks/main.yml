@@ -61,6 +61,22 @@
     virtualenv: "/home/{{ csclub_user }}/site/env/"
     virtualenv_python: python3.4
 
+- name: Copy upstart rqworkers config
+  template:
+    src: rqworkers.tmpl
+    dest: /etc/init/rqworkers.conf
+  tags:
+    - redis
+    - queue
+
+#- name: Copy upstart rqscheduler config
+#  template:
+#    src: rqscheduler.tmpl
+#    dest: /etc/init/rqscheduler.conf
+#  tags:
+#    - redis
+#    - queue
+
 - name: Copy upstart uwsgi config
   template:
     src: uwsgi-upstart.tmpl

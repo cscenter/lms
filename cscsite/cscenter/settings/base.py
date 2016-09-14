@@ -26,7 +26,7 @@ MIDDLEWARE_CLASSES = [
 INSTALLED_APPS += [
     'learning.admission.apps.AdmissionConfig',
     # 'django_ses'
-    'post_office'
+    'post_office',
 ]
 
 # Add site specific templates
@@ -64,3 +64,4 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
+

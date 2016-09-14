@@ -1,17 +1,18 @@
 - name: Setup ec2 instance for cscenter and csclub website
-#  hosts: "{{ aws_ec2_host_new }}"
-  hosts: "tag_Name_aging-biology"
+  hosts: "{{ aws_ec2_host_new }}"
+#  hosts: "tag_Name_aging-biology"
   user: ubuntu
   sudo: True
   vars_files:
     - vars/aws.yml
   roles:
-#    - app
+    - app
     - role: DavidWittman.redis
       redis_bind: 127.0.0.1
       redis_group: "{{ group_shared }}"
-      redis_version: 3.2.1
+      redis_version: 3.2.3
       redis_verify_checksum: true
       redis_socket_path: "/var/run/redis/{{ redis_port }}.sock"
       redis_socket_perm: 770
-      redis_maxmemory: 200mb
+      redis_maxmemory: 256mb
+      redis_password: 3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN

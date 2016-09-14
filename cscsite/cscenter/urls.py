@@ -120,5 +120,10 @@ if settings.DEBUG:
             kwargs={'exception': Exception("Page not Found")}),
     ]
 
+# Required `is_staff` only. Mb restrict to `is_superuser`?
+urlpatterns += [
+    url(r'^narnia/django-rq/', include('django_rq.urls')),
+]
+
 # Note: htmlpages should be the last one
 urlpatterns += [url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages')]
