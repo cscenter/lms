@@ -122,8 +122,7 @@ class Notification(models.Model):
 
     actor_content_type = models.ForeignKey(ContentType,
                                            related_name='notify_actor')
-    # FIXME: replace with PositiveIntegerField?
-    actor_object_id = models.CharField(max_length=255)
+    actor_object_id = models.PositiveIntegerField()
     actor = GenericForeignKey('actor_content_type', 'actor_object_id')
 
     verb = models.CharField(max_length=255)
@@ -133,8 +132,7 @@ class Notification(models.Model):
                                             related_name='notify_target',
                                             blank=True,
                                             null=True)
-    # FIXME: replace with PositiveIntegerField?
-    target_object_id = models.CharField(max_length=255, blank=True, null=True)
+    target_object_id = models.PositiveIntegerField(blank=True, null=True)
     target = GenericForeignKey('target_content_type', 'target_object_id')
 
     action_object_content_type = models.ForeignKey(
@@ -142,10 +140,7 @@ class Notification(models.Model):
         blank=True,
         null=True,
         related_name='notify_action_object')
-    # FIXME: replace with PositiveIntegerField?
-    action_object_object_id = models.CharField(max_length=255,
-                                               blank=True,
-                                               null=True)
+    action_object_object_id = models.PositiveIntegerField(blank=True, null=True)
     action_object = GenericForeignKey('action_object_content_type',
                                       'action_object_object_id')
 
