@@ -18,6 +18,9 @@ Other example to clarify what is target/action/actor/verb:
     on activity-stream (target) 12 hours ago
 
 Set `target` only if you have no action object, e.g. report status was updated.
+
+Limitations:
+    actor, action_object and target models should have PK as `int`
 """
 import os
 import sys
