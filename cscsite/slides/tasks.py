@@ -29,3 +29,4 @@ def maybe_upload_slides_slideshare(class_pk):
     if instance.slides_url:
         CourseClass.objects.filter(pk=instance.pk).update(
             slides_url=instance.slides_url)
+        return instance.slides_url
