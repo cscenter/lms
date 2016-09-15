@@ -27,14 +27,6 @@
     become: yes
     become_user: "{{ app_user }}"
 
-  - name: Migrate DB
-    sudo_user: "{{ app_user }}"
-    django_manage:
-      command: "migrate"
-      app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.production"
-      virtualenv: "{{ venv_dir }}"
-
   - name: Collectstatic
     sudo_user: "{{ app_user }}"
     django_manage:
@@ -43,8 +35,30 @@
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 
+  - name: reload cscenter workers
+    service: name=rqworkers state=reloaded
+    become: yes
+    become_method: sudo
+    when: app_user == "cscenter"
+
+  - name: reload club site worker
+    service: name=rqworker_club state=reloaded
+    become: yes
+    become_method: sudo
+    when: app_user == "csclub"
+
+  - name: Migrate DB
+    sudo_user: "{{ app_user }}"
+    django_manage:
+      command: "migrate"
+      app_path: "{{ site_src }}"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
+
   - name: Touch config file to reload uwsgi
     file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
-    sudo: True
+    become: yes
+    become_method: sudo
 
 
