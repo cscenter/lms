@@ -159,6 +159,7 @@ module.exports = function (grunt) {
         },
         // Arbitrary properties used in task configuration templates.
         sass_files: {
+            'cscsite/assets/css/center/staff.css': '<%= SASS_SRC %>/center/staff.scss',
             'cscsite/assets/css/center/style.css': '<%= SASS_SRC %>/center/style.scss',
             'cscsite/assets/css/club/style.css': '<%= SASS_SRC %>/club/style.scss',
             'cscsite/assets/css/magnific-popup.css': '<%= SASS_SRC %>/jquery.magnific-popup/main.scss',

@@ -9,7 +9,7 @@ setuid {{ cscenter_user }}
 setgid {{ cscenter_user }}
 
 
-exec /home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/cscsite/manage.py rqworker high default --settings={{ cscenter_user }}.settings.production --pythonpath='/home/{{ cscenter_user }}/site/repo/cscsite' >> /home/{{ cscenter_user }}/site/logs/redis_queue_workers.log 2>&1
+exec /home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/manage.py rqworker high default --settings={{ cscenter_user }}.settings.production --pythonpath='/home/{{ cscenter_user }}/site/repo/cscsite' >> /home/{{ cscenter_user }}/site/logs/redis_queue_workers.log 2>&1
 
 respawn
 respawn limit 10 5

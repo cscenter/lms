@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load staticfiles %}
+{% load core_tags %}
+
+{% block content %}
+{% if students %}
+    {% for chunk in students|chunks:"12" %}
+        <page size="A4" class="student-faces-printable">
+            {% for student in chunk %}
+                <div class="student">
+                    {% if student.photo %}
+                        {% thumbnail student.photo "150x302" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <img width="150" height="302" data-src="holder.js/150x302?text=%3F&fontweight=normal&size=50" />
+                    {% endif %}
+                        <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }}<br>{{ student.first_name }}</figcaption>
+                </div>
+            {% endfor %}
+        </page>
+    {% endfor %}
+
+{% else %}
+    <div class="empty">пусто!</div>
+{% endif %}
+{% endblock content %}
+
+{# TODO: customize scripts if neccessary #}
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}

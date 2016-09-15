@@ -1,0 +1,12 @@
+.student-faces-printable {
+  display: flex!important;
+  flex-wrap: wrap;
+  align-content: flex-start;
+
+  .student {
+    flex-grow: 1;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+}

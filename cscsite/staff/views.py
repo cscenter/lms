@@ -209,6 +209,11 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
     """Show students faces with names to memorize newbies"""
     template_name = "staff/student_faces.html"
 
+    def get_template_names(self):
+        if "print" in self.request.GET:
+            self.template_name = "staff/student_faces_printable.html"
+        return super(StudentFacesView, self).get_template_names()
+
     def get_context_data(self, **kwargs):
         context = super(StudentFacesView, self).get_context_data(**kwargs)
         enrollment_year = self.request.GET.get("year", None)
