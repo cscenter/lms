@@ -37,7 +37,7 @@
                     {% endif %}
                     <span class="caret"></span>
                   </a>
-                  <ul class="dropdown-menu bullet pull-right" aria-labelledby="user-menu">
+                  <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
                       {% if user.is_staff %}
                           <li><a href="{% url 'admin:index' %}" target="_blank">{% trans "Admin page" %}</a></li>
                       {% endif %}
