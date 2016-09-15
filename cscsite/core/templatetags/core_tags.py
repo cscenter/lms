@@ -1,5 +1,6 @@
 import re
 
+import itertools
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
 from django.template import (
@@ -161,3 +162,17 @@ def floatdot(value, decimal_pos=2):
     """print formatted float with dot as separator"""
     return format(value, ".", decimal_pos)
 floatdot.is_safe = True
+
+
+@register.filter
+def chunks(value, chunk_length):
+    """
+    Breaks a list up into a list of lists of size <chunk_length>
+    """
+    i = iter(value)
+    while True:
+        chunk = list(itertools.islice(i, int(chunk_length)))
+        if chunk:
+            yield chunk
+        else:
+            break
