@@ -3,6 +3,7 @@ $header-lvl1-bg:                 #4F86A0;
 .header {
     margin: 0 0 50px 0;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
     .logo-cell {
         position: relative;
@@ -183,6 +184,19 @@ $header-lvl1-bg:                 #4F86A0;
             padding: 8px 24px;
             color: $color-gray-20;
         }
+    }
+
+    .dropdown {
+        float: right;
+        padding: 0 6px;
+
+        &.open, &:hover {
+            background-color: darken($header-lvl1-bg, 6%);
+        }
+    }
+
+    .dropdown-menu {
+        border-radius: 2px;
     }
 
 }
