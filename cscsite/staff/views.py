@@ -220,7 +220,7 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
         year, current_term = get_current_semester_pair()
         try:
             enrollment_year = int(enrollment_year)
-        except ValueError:
+        except (TypeError, ValueError):
             # TODO: make redirect
             enrollment_year = year
         context['students'] = (CSCUser.objects.filter(
