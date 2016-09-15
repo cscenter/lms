@@ -12,7 +12,7 @@
             {% for student in chunk %}
                 <div class="student">
                     {% if student.photo %}
-                        {% thumbnail student.photo "150x210" padding=True crop="noop" cropbox=student.photo_thumbnail_cropbox as im %}
+                        {% thumbnail student.photo "150x210" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                         {% endthumbnail %}
                     {% else %}
