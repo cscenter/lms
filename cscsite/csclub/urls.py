@@ -3,6 +3,8 @@ from django.conf.urls import patterns, include, url
 from solid_i18n.urls import solid_i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
@@ -16,8 +18,7 @@ from learning.urls import course_patterns, course_offering_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView
 from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
-    TeacherDetailView
-
+    TeacherDetailView, AsyncEmailRegistrationView
 
 admin.autodiscover()
 
@@ -32,6 +33,8 @@ urlpatterns = solid_i18n_patterns(
     url(r"^schedule/$", CalendarClubScheduleView.as_view(),
         name="public_schedule"),
     # Registration
+    url(r'^register/$', AsyncEmailRegistrationView.as_view(),
+        name='registration_register'),
     url(r'^', include('registration.backends.default.urls')),
     # Teachers/Lecturers
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
@@ -42,33 +45,34 @@ urlpatterns = solid_i18n_patterns(
         name="international_schools_list"),
     # Auth
     url(r'^login/$', LoginView.as_view(), name='login'),
+
     url(r'^users/password_change$',
-        'django.contrib.auth.views.password_change',
+        auth_views.password_change,
         {'post_change_redirect': 'password_change_complete'},
         name='password_change'),
     url(r'^users/password_change/done$',
-        'django.contrib.auth.views.password_change_done',
+        auth_views.password_change_done,
         name='password_change_complete'),
     url(r'^users/password_reset$',
-       'django.contrib.auth.views.password_reset',
-       {'post_reset_redirect' : 'password_reset_done',
-        'email_template_name': 'emails/password_reset.html'},
-       name='password_reset'),
+        auth_views.password_reset,
+        {'post_reset_redirect': 'password_reset_done',
+         'email_template_name': 'emails/password_reset.html'},
+        name='password_reset'),
     url(r'^users/password_reset/done$',
-        'django.contrib.auth.views.password_reset_done',
+        auth_views.password_reset_done,
         name='password_reset_done'),
     url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        'django.contrib.auth.views.password_reset_confirm',
-        {'post_reset_redirect' : 'password_reset_complete'},
-       name='password_reset_confirm'),
+        auth_views.password_reset_confirm,
+        {'post_reset_redirect': 'password_reset_complete'},
+        name='password_reset_confirm'),
     url(r'^users/reset/done$',
-        'django.contrib.auth.views.password_reset_complete',
+        auth_views.password_reset_complete,
         name='password_reset_complete'),
 )
 
-urlpatterns += patterns('',
+urlpatterns += [
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
-    url(r'^logout/$', LogoutView.as_view(permanent=True), name='logout'),
+    url(r'^logout/$', LogoutView.as_view(permanent=False), name='logout'),
     url(r'^tools/markdown/preview/$',
         MarkdownRenderView.as_view(),
         name='render_markdown'),
@@ -98,8 +102,8 @@ urlpatterns += patterns('',
     venues_patterns,
 
     url(r'^narnia/', include(admin.site.urls)),
-    url(r'^narnia/', include('loginas.urls')),
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^narnia/', include(loginas_urls)),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
