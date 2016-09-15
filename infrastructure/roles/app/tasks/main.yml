@@ -69,6 +69,14 @@
     - redis
     - queue
 
+- name: Copy upstart rqworker config for club site
+  template:
+    src: rqworker_club.tmpl
+    dest: /etc/init/rqworker_club.conf
+  tags:
+    - redis
+    - queue
+
 #- name: Copy upstart rqscheduler config
 #  template:
 #    src: rqscheduler.tmpl

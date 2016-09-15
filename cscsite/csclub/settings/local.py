@@ -40,6 +40,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
@@ -47,23 +48,71 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
+        'sql': {
+            '()': 'core.utils.SQLFormatter',
+            'format': '[%(duration).3f] %(statement)s',
+        },
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
     },
     'handlers': {
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
             'formatter': 'simple'
-        }
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
+        },
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        },
+        'sql': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'sql',
+            'level': 'DEBUG',
+        },
+        'null': {
+            'class': 'logging.NullHandler',
+        },
     },
     'loggers': {
-        'learning.utils': {
+        # root logger
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.template': {
+            'handlers': ['null'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['sql'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends.schema': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        "notifications.notifier": {
+            'level': 'DEBUG',
             'handlers': ['console'],
             'propagate': False,
-            'level': 'DEBUG',
+        },
+        "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "DEBUG",
+            'propagate': False,
         },
     },
 }

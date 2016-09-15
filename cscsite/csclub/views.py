@@ -1,8 +1,11 @@
 from collections import Counter
 
 import datetime
+
+import django_rq
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse, Http404
 from django.utils.timezone import now
@@ -12,6 +15,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.shortcuts import redirect
 from registration.backends.default.views import RegistrationView
 
+from csclub import tasks
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
@@ -22,7 +26,17 @@ from learning.views import CalendarMixin
 
 class AsyncEmailRegistrationView(RegistrationView):
     """Send activation email with queue"""
-    pass
+    SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
+
+    def register(self, form):
+        new_user = super(AsyncEmailRegistrationView, self).register(form)
+        queue = django_rq.get_queue('club')
+        site = get_current_site(self.request)
+        queue.enqueue(tasks.send_activation_email,
+                      site.pk,
+                      new_user.registrationprofile.pk,
+                      self.request.LANGUAGE_CODE)
+        return new_user
 
 
 class CalendarClubScheduleView(CalendarMixin, generic.ListView):
