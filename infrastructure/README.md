@@ -1,6 +1,5 @@
 
 # TODO (critical):
-* install and configure memcached
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * `apt-get install ntpd` with servers in /etc/ntp.conf
@@ -12,10 +11,9 @@
 
 
 TODO (important):
+* add `registration` app to cscenter, then remove club worker?
 * install newerest version of python3.4(4-5) with ppa:fkrull/deadsnakes
 * restore db from s3
-* deploy for cscenter and csclub
-* change uwsgi process groups to `shared` if u need ability to change files from every site. Or update django upload behaviour
 * add tags. Then use it. E.g. `ansible-playbook -i inventory/ec2.py  provision.yml -v -t lvm` setup lvm only
 
 Requirements
@@ -63,7 +61,7 @@ backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` 
 backup_restore.yml | Should restore db and media/ folder. But it doesn't work now.
 provision.yml | Create security groups. Launch instance. Create additional Volume, attach to new instance. Setup LVM on additional Volume
 setup.yml | Part of provision (but can be used independently). Create app on new instance.
-deploy.yml | Deploy one of site (cscenter or csclub)
+deploy.yml | Deploy one of the sites (cscenter or csclub)
 
 
 ## Deploy
