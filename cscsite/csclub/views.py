@@ -10,6 +10,7 @@ from django.views import generic
 # TODO: (XXX) Dont' forget to remove it after old.* termination.
 from django.views.decorators.csrf import requires_csrf_token
 from django.shortcuts import redirect
+from registration.backends.default.views import RegistrationView
 
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
@@ -17,6 +18,11 @@ from learning.models import CourseOffering, Semester, \
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_current_semester_pair
 from learning.views import CalendarMixin
+
+
+class AsyncEmailRegistrationView(RegistrationView):
+    """Send activation email with queue"""
+    pass
 
 
 class CalendarClubScheduleView(CalendarMixin, generic.ListView):

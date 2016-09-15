@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import RobotsView, MarkdownRenderView
@@ -93,7 +94,7 @@ urlpatterns = [
     url(r'^', include('learning.admission.urls')),
     url(r'^', include('learning.projects.urls')),
     url(r'^narnia/', include(admin.site.urls)),
-    url(r'^narnia/', include('loginas.urls')),
+    url(r'^narnia/', include(loginas_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'rosetta' in settings.INSTALLED_APPS:

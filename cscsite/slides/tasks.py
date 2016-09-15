@@ -8,7 +8,6 @@ from slides import yandex_disk, slideshare
 def maybe_upload_slides_yandex(class_pk):
     CourseClass = apps.get_model('learning', 'CourseClass')
     instance = CourseClass.objects.get(pk=class_pk)
-    # TODO: remove all jobs related to this action first? Or do it before add new job?
     course_offering = instance.course_offering
     course = course_offering.course
     yandex_disk.upload_slides(
