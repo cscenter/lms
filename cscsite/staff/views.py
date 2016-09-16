@@ -205,6 +205,13 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
         return Hint.objects.order_by("sort")
 
 
+def debug_test_job(id):
+    from django import apps
+    CourseClass = apps.get_model('learning', 'CourseClass')
+    instance = CourseClass.objects.get(pk=1660)
+    return instance.pk
+
+
 class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
     """Show students faces with names to memorize newbies"""
     template_name = "staff/student_faces.html"
@@ -215,6 +222,10 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_context_data(self, **kwargs):
+        # FIXME: add test job, remove after debug!
+        import django_rq
+        queue = django_rq.get_queue('default')
+        queue.enqueue(debug_test_job, 1660)
         context = super(StudentFacesView, self).get_context_data(**kwargs)
         enrollment_year = self.request.GET.get("year", None)
         year, current_term = get_current_semester_pair()
