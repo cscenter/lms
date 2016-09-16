@@ -206,7 +206,7 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
 
 
 def debug_test_job(id):
-    from django import apps
+    from django.apps import apps
     CourseClass = apps.get_model('learning', 'CourseClass')
     instance = CourseClass.objects.get(pk=1660)
     return instance.pk
