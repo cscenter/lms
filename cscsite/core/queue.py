@@ -1,9 +1,12 @@
 from rq import Worker
-from django.db import connection
+from django.db import close_old_connections
 
 
 class CustomRQWorker(Worker):
     """
+    Do the actual work in a fail-safe context, but make sure first that
+    db connection is still alive.
+
     Use it in management command using `--worker-class` param, for example:
     ```
     ./manage.py rqworker --worker-class=core.queue.CustomRQWorker default
@@ -19,7 +22,7 @@ class CustomRQWorker(Worker):
         * http://dev.mysql.com/doc/refman/5.7/en/gone-away.html
         * https://dev.mysql.com/doc/refman/5.7/en/error-lost-connection.html
         """
-        connection.close_if_unusable_or_obsolete()
+        close_old_connections()
         result = super(CustomRQWorker, self).perform_job(*args, **kwargs)
-        connection.close_if_unusable_or_obsolete()
+        close_old_connections()
         return result
