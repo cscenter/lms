@@ -147,6 +147,4 @@
 - include: cronjobs.yml
   tags:
     - cronjobs
-#- include: redis_consumer.yml
-#  tags:
-#    - redis
+

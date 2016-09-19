@@ -2,9 +2,11 @@
   hosts: "{{ aws_ec2_host_new }}"
 #  hosts: "tag_Name_aging-biology"
   user: ubuntu
-  sudo: True
+  become: yes
+  become_method: sudo
   vars_files:
     - vars/aws.yml
+    - roles/app/vars/main.yml
   roles:
     - app
     - role: DavidWittman.redis
@@ -16,3 +18,44 @@
       redis_socket_perm: 770
       redis_maxmemory: 256mb
       redis_password: 3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN
+    - role: supervisord
+      supervisor_version: 3.3.1
+      supervisor_programs_present:
+        rqworker_default:
+          command: "/home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/manage.py rqworker default --settings={{ cscenter_user }}.settings.production --pythonpath='/home/{{ cscenter_user }}/site/repo/cscsite' --worker-class='core.queue.CustomRQWorker'"
+          autostart: true
+          autorestart: true
+          startretries: 3
+          stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_default.log"
+          stdout_logfile_maxbytes: 50MB
+          user: "{{ cscenter_user }}"
+          numprocs: 1
+          process_name: "%(program_name)s-%(process_num)s"
+        rqworker_high:
+          command: "/home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/manage.py rqworker high --settings={{ cscenter_user }}.settings.production --pythonpath='/home/{{ cscenter_user }}/site/repo/cscsite' --worker-class='core.queue.CustomRQWorker'"
+          autostart: true
+          autorestart: true
+          startretries: 3
+          stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_high.log"
+          stdout_logfile_maxbytes: 50MB
+          user: "{{ cscenter_user }}"
+          numprocs: 1
+          process_name: "%(program_name)s-%(process_num)s"
+        rqworker_club:
+          command: "/home/{{ csclub_user }}/site/env/bin/python /home/{{ csclub_user }}/site/repo/manage.py rqworker club --settings={{ csclub_user }}.settings.production --pythonpath='/home/{{ csclub_user }}/site/repo/cscsite' --worker-class='core.queue.CustomRQWorker'"
+          autostart: true
+          autorestart: true
+          startretries: 3
+          stdout_logfile: "/home/{{ csclub_user }}/site/logs/rqworker_club.log"
+          stdout_logfile_maxbytes: 50MB
+          user: "{{ csclub_user }}"
+          numprocs: 1
+          process_name: "%(program_name)s-%(process_num)s"
+
+      supervisor_groups_present:
+        rqworkers:
+          programs:
+            - rqworker_default
+            - rqworker_high
+            - rqworker_club
+          priority: 10

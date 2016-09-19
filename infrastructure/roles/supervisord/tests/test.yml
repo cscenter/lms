@@ -1,0 +1,9 @@
+# test file for supervisor
+---
+- hosts: localhost
+  connection: local
+  sudo: true
+  pre_tasks:
+    - include: pre.yml
+  roles:
+    - ../../
