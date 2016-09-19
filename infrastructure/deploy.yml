@@ -35,18 +35,6 @@
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 
-  - name: reload cscenter workers
-    service: name=rqworkers state=reloaded
-    become: yes
-    become_method: sudo
-    when: app_user == "cscenter"
-
-  - name: reload club site worker
-    service: name=rqworker_club state=reloaded
-    become: yes
-    become_method: sudo
-    when: app_user == "csclub"
-
   - name: Migrate DB
     sudo_user: "{{ app_user }}"
     django_manage:
@@ -55,10 +43,14 @@
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 
-
   - name: Touch config file to reload uwsgi
     file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
     become: yes
     become_method: sudo
+
+  - name: Gracefully kill rq workers to reload there state
+    become: yes
+    become_method: sudo
+    shell: "supervisorctl signal SIGTERM rqworkers:"
 
 
