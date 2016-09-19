@@ -209,8 +209,6 @@ def debug_test_job(id):
     from django.apps import apps
     CourseClass = apps.get_model('learning', 'CourseClass')
     instance = CourseClass.objects.get(pk=1660)
-    import time
-    time.sleep(60)
     return instance.pk
 
 
