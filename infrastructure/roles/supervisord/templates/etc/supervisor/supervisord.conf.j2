@@ -1,5 +1,21 @@
 ; {{ ansible_managed }}
 
+; set options for a section
+{% macro set_section(section_label, subsections) %}
+{% for section in subsections %}
+[{{ section_label }}:{{ section.name }}]
+{% for option, value in section.items() %}
+{% if option != 'name' %}
+{% if option == 'environment' and value is iterable and value is not string %}
+{{ option }} ={% for k,v in value.items() %}{{ k }}="{{v}}", {% endfor %}
+{% else %}
+{{ option }} = {{ value }}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endmacro %}
+
 ; supervisor config file
 
 [unix_http_server]
@@ -23,6 +39,9 @@ childlogdir={{ supervisor_supervisord_childlogdir }} ; ('AUTO' child log dir, de
 ; added by defining them in separate rpcinterface: sections
 [rpcinterface:supervisor]
 supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+; events
+{{ set_section('eventlistener', supervisor_events) }}
 
 [supervisorctl]
 serverurl={{ supervisor_supervisorctl_serverurl }} ; use a unix:// URL  for a unix socket

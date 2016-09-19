@@ -8,7 +8,7 @@
     server time.nist.gov
     server ntp.psn.ru
     server ntp1.imvp.ru
-
+* Problems with restarting supervisor. All programs can be in RUNNING state, but ansible task failed.
 
 TODO (important):
 * add `registration` app to cscenter, then remove club worker?

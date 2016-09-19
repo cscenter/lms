@@ -16,3 +16,7 @@
   when: "supervisor_version == 'latest'"
   tags:
     - supervisor-install-latest
+
+- name: Install superlance
+  pip: name=superlance
+  when: supervisor_superlance

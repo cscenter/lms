@@ -27,3 +27,7 @@ supervisor_programs_present: {}
 supervisor_programs_absent: {}
 supervisor_groups_present: {}
 supervisor_groups_absent: {}
+
+supervisor_superlance: false              # Install superlance (http://superlance.readthedocs.org/
+supervisor_events: []                     # similar to tasks/programs but for eventlisteners like crashmail
+supervisor_events_email_to: "webmaster@localhost.ru"
