@@ -28,6 +28,7 @@
           startretries: 3
           stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_default.log"
           stdout_logfile_maxbytes: 50MB
+          redirect_stderr: true
           user: "{{ cscenter_user }}"
           numprocs: 1
           process_name: "%(program_name)s-%(process_num)s"
@@ -38,6 +39,7 @@
           startretries: 3
           stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_high.log"
           stdout_logfile_maxbytes: 50MB
+          redirect_stderr: true
           user: "{{ cscenter_user }}"
           numprocs: 1
           process_name: "%(program_name)s-%(process_num)s"
@@ -48,6 +50,7 @@
           startretries: 3
           stdout_logfile: "/home/{{ csclub_user }}/site/logs/rqworker_club.log"
           stdout_logfile_maxbytes: 50MB
+          redirect_stderr: true
           user: "{{ csclub_user }}"
           numprocs: 1
           process_name: "%(program_name)s-%(process_num)s"
@@ -68,7 +71,7 @@
           events: TICK_60
           process_name: memmon
         # Send email if all attempts to restart process are failed
-        # FIXME: disable, shoul test first
+        # FIXME: disable, should test first
 #        - name: fatalmailbatch
 #          command: fatalmailbatch --toEmail {{ supervisor_events_email_to }}
 #          events: PROCESS_STATE_FATAL
