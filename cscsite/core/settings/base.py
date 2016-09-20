@@ -165,6 +165,7 @@ SLIDESHARE_SECRET = "dummy_ss_secret"
 SLIDESHARE_USERNAME = "dummy_ss_username"
 SLIDESHARE_PASSWORD = "dummy_ss_password"
 
+YANDEX_DISK_YEARS_FOLDER = "2016-2017"
 YANDEX_DISK_USERNAME = "dummy_ya_username"
 YANDEX_DISK_PASSWORD = "dummy_ya_password"
 YANDEX_DISK_SLIDES_ROOT = "/dummy_ya_root"
@@ -178,7 +179,6 @@ DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = PROJECT_DIR.child("static")
-
 STATICFILES_DIRS = [
     PROJECT_DIR.child("assets"),
 ]
