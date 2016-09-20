@@ -48,7 +48,7 @@ boto3==1.4.0
 xlsxwriter==0.9.3
 
 # External services
-yandexwebdav==0.2.11
+webdavclient==1.0.5
 git+https://github.com/pacahon/slideshare.git
 raven==5.26.0
 
