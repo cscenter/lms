@@ -28,13 +28,11 @@ def mkdirs(client, path):
     mkdirs(client, posixpath.dirname(path))
     _, ext = posixpath.splitext(path)
     if not ext:
-        try:
-            client.list(path)
-        except wc.RemoteParentNotFound:
+        if not client.check(path):
             client.mkdir(path)
 
 
-def upload_slides(handle, path, retries=3):
+def upload_slides(local_file, path, retries=3):
     options = {
         'webdav_hostname': "https://webdav.yandex.ru",
         'webdav_login': settings.YANDEX_DISK_USERNAME,
@@ -42,16 +40,32 @@ def upload_slides(handle, path, retries=3):
     }
     client = wc.Client(options)
 
-    path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT, path)
+    local_path = local_file.name
+    remote_path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT, path)
+
+    try:
+        if client.check(remote_path):
+            logger.debug("Resource {} already exists".format(remote_path))
+            return
+    except wc.MethodNotSupported:
+        # Webdav client can raise `MethodNotSupported` exception here
+        # even on 404 HTTP status. To avoid this we should recursively check
+        # existence of each directory in the path or just ignore
+        # this type of error due to yandex webdav api supports PROPFIND
+        pass
+    except wc.WebDavException as e:
+        logger.error(e)
+        return
 
     exc = None
     for i in range(retries):
         try:
-            mkdirs(client, path)
-
-            client.upload_sync(remote_path=path, local_path=handle.name)
+            mkdirs(client, remote_path)
+            client.upload_sync(remote_path=remote_path, local_path=local_path)
         except wc.WebDavException as webdav_exc:
             exc = webdav_exc
         else:
+            logger.debug("Slides successfully uploaded "
+                         "to {} on Yandex.Disk".format(remote_path))
             return
     logger.error(exc)
