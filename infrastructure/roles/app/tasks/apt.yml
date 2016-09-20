@@ -60,6 +60,8 @@
     - libjpeg-dev
     - libpng-dev
     - libmagic-dev
+    - libcurl4-openssl-dev
+    - python-pycurl
     # utilities
     - zsh
     - tmux
