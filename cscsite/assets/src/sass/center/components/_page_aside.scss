@@ -111,7 +111,7 @@
       float: right;
     }
     &:focus, &:hover {
-      background-color: #f3f7f9;
+      background-color: $background-grey;
       border: none;
       color: #62a8ea;
     }
@@ -119,13 +119,13 @@
       color: #62a8ea;
     }
     &.active {
-      background-color: #f3f7f9;
+      background-color: $background-grey;
       color: #62a8ea;
       > .icon {
         color: #62a8ea;
       }
       &:focus, &:hover {
-        background-color: #f3f7f9;
+        background-color: $background-grey;
         border: none;
         color: #62a8ea;
       }
