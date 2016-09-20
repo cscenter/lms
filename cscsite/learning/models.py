@@ -159,6 +159,13 @@ class Semester(models.Model):
         self.index = get_term_index(self.year, self.type)
         super(Semester, self).save(*args, **kwargs)
 
+    def get_academic_year(self):
+        """Academic year starts from autumn term"""
+        if self.type == SEMESTER_TYPES.autumn:
+            return self.year
+        else:
+            return self.year - 1
+
 
 class CustomCourseOfferingQuerySet(models.QuerySet):
     def site_related(self, request):

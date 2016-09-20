@@ -32,7 +32,7 @@ def mkdirs(client, path):
             client.mkdir(path)
 
 
-def upload_slides(local_file, path, retries=3):
+def upload_slides(local_file, path, academic_year, retries=3):
     options = {
         'webdav_hostname': "https://webdav.yandex.ru",
         'webdav_login': settings.YANDEX_DISK_USERNAME,
@@ -41,8 +41,10 @@ def upload_slides(local_file, path, retries=3):
     client = wc.Client(options)
 
     local_path = local_file.name
-    remote_path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT, path)
-
+    academic_period = "{}-{}".format(academic_year, academic_year + 1)
+    remote_path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT,
+                                 academic_period,
+                                 path)
     try:
         if client.check(remote_path):
             logger.debug("Resource {} already exists".format(remote_path))
@@ -65,7 +67,7 @@ def upload_slides(local_file, path, retries=3):
         except wc.WebDavException as webdav_exc:
             exc = webdav_exc
         else:
-            logger.debug("Slides successfully uploaded "
-                         "to {} on Yandex.Disk".format(remote_path))
+            logger.debug("Slides successfully uploaded on Yandex.Disk "
+                         "to {}".format(remote_path))
             return
     logger.error(exc)
