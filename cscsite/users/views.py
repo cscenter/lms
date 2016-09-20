@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from collections import OrderedDict
+
 from learning.reports import ProgressReport
 
 try:
@@ -282,7 +284,7 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
                    .get_context_data(*args, **kwargs))
         student_info = CSCUser.objects.students_info().get(
             pk=self.object.student.pk)
-        enrollments = {}
+        enrollments = OrderedDict()
         # From duplicated enrollments get one with higher grade
         for e in student_info.enrollments:
             if e.created > self.object.created:
