@@ -8,7 +8,7 @@ pylint-django==0.7.1
 
 # Fixtures
 factory_boy==2.7.0
-testfixtures==4.10.0
+testfixtures==4.10.1
 
 # Debug
 django-debug-toolbar-template-timings==0.6.6
@@ -19,11 +19,11 @@ django-extensions==1.6.7
 
 ### Python 3.5 support
 
-mock==1.3.0
+mock==2.0.0
 coverage==4.2
 
 # Nice tracebacks
-Werkzeug==0.11.10
+Werkzeug==0.11.11
 
 # Debug
 django-debug-toolbar==1.4
@@ -34,8 +34,8 @@ ipdb==0.10.1
 
 pytest==2.9.2
 pytest-django==3.0.0
-pytest-cov==2.3.0
-pytest-xdist==1.14
+pytest-cov==2.3.1
+pytest-xdist==1.15.0
 pytest-mock==1.1
 pytest-pythonpath==0.7
 
