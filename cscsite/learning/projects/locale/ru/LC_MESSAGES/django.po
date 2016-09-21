@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-02 20:17+0300\n"
-"PO-Revision-Date: 2016-09-05 16:20+0230\n"
+"POT-Creation-Date: 2016-09-21 15:04+0300\n"
+"PO-Revision-Date: 2016-09-21 15:05+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +28,7 @@ msgid "Project"
 msgstr "Проект"
 
 #: cscsite/learning/projects/admin.py:80
-#: cscsite/learning/projects/models.py:105
+#: cscsite/learning/projects/models.py:110
 msgid "Semester"
 msgstr "Семестр"
 
@@ -40,41 +40,41 @@ msgstr "Изменить"
 msgid "Student Projects"
 msgstr "Студенческие проекты"
 
-#: cscsite/learning/projects/forms.py:30
+#: cscsite/learning/projects/forms.py:31
 msgid "Report content"
 msgstr "Текст отчета"
 
-#: cscsite/learning/projects/forms.py:50
+#: cscsite/learning/projects/forms.py:51
 msgid "Send"
 msgstr "Отправить"
 
-#: cscsite/learning/projects/forms.py:102
+#: cscsite/learning/projects/forms.py:103
 msgid "Add comment"
 msgstr "Добавить комментарий"
 
-#: cscsite/learning/projects/forms.py:119
-#: cscsite/learning/projects/forms.py:222
-#: cscsite/learning/projects/forms.py:271
+#: cscsite/learning/projects/forms.py:120
+#: cscsite/learning/projects/forms.py:228
+#: cscsite/learning/projects/forms.py:277
 msgid "Save"
 msgstr "Сохранить"
 
-#: cscsite/learning/projects/forms.py:137
+#: cscsite/learning/projects/forms.py:138
 msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
 
-#: cscsite/learning/projects/forms.py:183
+#: cscsite/learning/projects/forms.py:184
 msgid "Assess"
 msgstr "Оценить"
 
-#: cscsite/learning/projects/forms.py:197
+#: cscsite/learning/projects/forms.py:203
 msgid "Assess all items before set `is_completed`"
 msgstr "Проверьте, что все оценки выставлены."
 
-#: cscsite/learning/projects/forms.py:205
+#: cscsite/learning/projects/forms.py:211
 msgid "Complete"
 msgstr "Завершить"
 
-#: cscsite/learning/projects/forms.py:206
+#: cscsite/learning/projects/forms.py:212
 msgid "Check if you want to send results to student"
 msgstr "Отметьте, чтобы отправить результаты студенту"
 
@@ -123,7 +123,7 @@ msgid "StudentProject|Name"
 msgstr "Название"
 
 #: cscsite/learning/projects/models.py:78
-#: cscsite/learning/projects/models.py:278
+#: cscsite/learning/projects/models.py:287
 msgid "Description"
 msgstr "Описание"
 
@@ -147,83 +147,96 @@ msgstr "Формат: Фамилия Имя Отчество, Организац
 msgid "Supervisor presentation"
 msgstr "Презентация руководителя"
 
-#: cscsite/learning/projects/models.py:108
+#: cscsite/learning/projects/models.py:103
+msgid "Link to supervisor presentation"
+msgstr "URL с презентацией руководителя"
+
+#: cscsite/learning/projects/models.py:106
+#: cscsite/learning/projects/models.py:123
+msgid "Supported public link to Yandex.Disk only"
+msgstr "Поддерживаются только публичные ссылки на Яндекс.Диск"
+
+#: cscsite/learning/projects/models.py:113
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: cscsite/learning/projects/models.py:111
+#: cscsite/learning/projects/models.py:116
 msgid "Participants presentation"
 msgstr "Презентация участников"
 
-#: cscsite/learning/projects/models.py:115
+#: cscsite/learning/projects/models.py:120
+msgid "Link to participants presentation"
+msgstr "URL с презентацией участников"
+
+#: cscsite/learning/projects/models.py:125
 msgid "External project"
 msgstr "Внешний проект"
 
-#: cscsite/learning/projects/models.py:119
+#: cscsite/learning/projects/models.py:129
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: cscsite/learning/projects/models.py:120
+#: cscsite/learning/projects/models.py:130
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
-#: cscsite/learning/projects/models.py:152
+#: cscsite/learning/projects/models.py:167
 msgid "0 - Does not understand the task at all"
 msgstr "0 - совсем не понимает задачу"
 
-#: cscsite/learning/projects/models.py:153
+#: cscsite/learning/projects/models.py:168
 msgid "1 - Understands, but very superficial"
 msgstr "1 - понимает, но очень поверхностно"
 
-#: cscsite/learning/projects/models.py:154
+#: cscsite/learning/projects/models.py:169
 msgid "2 - Understands everything"
 msgstr "2 - всё понимает"
 
-#: cscsite/learning/projects/models.py:158
+#: cscsite/learning/projects/models.py:173
 msgid "0 - Does not understand"
 msgstr "0 - не понимает"
 
-#: cscsite/learning/projects/models.py:159
+#: cscsite/learning/projects/models.py:174
 msgid "1 - Writing something about the usefulness"
 msgstr "1 - ни то, ни сё, но что-то про полезность пишет"
 
-#: cscsite/learning/projects/models.py:160
+#: cscsite/learning/projects/models.py:175
 msgid "2 - Understands and explains"
 msgstr "2 - понимает и рассказывает"
 
-#: cscsite/learning/projects/models.py:164
+#: cscsite/learning/projects/models.py:179
 msgid "0 - Understand only theory, or even less"
 msgstr "0 - разобрана только теория или даже меньше"
 
-#: cscsite/learning/projects/models.py:165
+#: cscsite/learning/projects/models.py:180
 msgid "1 - Some progress, but not enough"
 msgstr ""
 "1 - что-то сделано, но кажется, что за это время можно было бы и больше"
 
-#: cscsite/learning/projects/models.py:166
+#: cscsite/learning/projects/models.py:181
 msgid "2 - The normal rate of work"
 msgstr "2 - работа идёт в разумном темпе"
 
-#: cscsite/learning/projects/models.py:170
+#: cscsite/learning/projects/models.py:185
 msgid "0 - Problems not mentioned in the report"
 msgstr "0 - никакие проблемы и их решения не указаны в отчёте"
 
-#: cscsite/learning/projects/models.py:171
+#: cscsite/learning/projects/models.py:186
 msgid "1 - Problems are mentioned without any details"
 msgstr "1- проблемы указаны, но как их решили и решили ли, непонятно"
 
-#: cscsite/learning/projects/models.py:172
+#: cscsite/learning/projects/models.py:187
 msgid "2 - Problems are mentioned and explained how they been solved"
 msgstr ""
 "2- доступно написано про возникшие трудности и про то, как с ними справились"
 
-#: cscsite/learning/projects/models.py:176
+#: cscsite/learning/projects/models.py:191
 msgid "0 - Listed, but not explained why."
 msgstr ""
 "0 - студент лишь перечислил, но, почему используется именно это, объяснить "
 "не может"
 
-#: cscsite/learning/projects/models.py:177
+#: cscsite/learning/projects/models.py:192
 msgid ""
 "1 - The student does not understand about everything and does not try to "
 "understand, but knows something"
@@ -231,18 +244,18 @@ msgstr ""
 "1 - студент не про всё понимает и не пытается понять, но про что-то знает, "
 "зачем"
 
-#: cscsite/learning/projects/models.py:179
+#: cscsite/learning/projects/models.py:194
 msgid "2 - Understands why choose one or the other technology"
 msgstr "2 - студент понимает, почему выбрана та или иная технология"
 
-#: cscsite/learning/projects/models.py:183
+#: cscsite/learning/projects/models.py:198
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
 msgstr ""
 "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
-#: cscsite/learning/projects/models.py:185
+#: cscsite/learning/projects/models.py:200
 msgid ""
 "1 - It seems to have plans of normal size, but does not understand what to "
 "do."
@@ -250,173 +263,149 @@ msgstr ""
 "1 - вроде планы есть нормального размера, но не до конца понимает, что "
 "именно нужно сделать"
 
-#: cscsite/learning/projects/models.py:187
+#: cscsite/learning/projects/models.py:202
 msgid "2 - All right with them"
 msgstr "2 - всё в порядке с ними"
 
-#: cscsite/learning/projects/models.py:192
+#: cscsite/learning/projects/models.py:207
 msgid "The global task for term"
 msgstr "Глобальная задача на семестр"
 
-#: cscsite/learning/projects/models.py:193
-msgid "Criterion #1"
-msgstr "Критерий #1"
-
-#: cscsite/learning/projects/models.py:199
+#: cscsite/learning/projects/models.py:213
 msgid "Who and why this can be useful."
 msgstr "Кому и зачем это может быть полезно"
 
-#: cscsite/learning/projects/models.py:200
-msgid "Criterion #2"
-msgstr "Критерий #2"
-
-#: cscsite/learning/projects/models.py:206
+#: cscsite/learning/projects/models.py:219
 msgid "What has been done since the start of the project."
 msgstr "Что было сделано с момента старта работы над проектом"
 
-#: cscsite/learning/projects/models.py:207
-msgid "Criterion #3"
-msgstr "Критерий #3"
-
-#: cscsite/learning/projects/models.py:213
+#: cscsite/learning/projects/models.py:225
 msgid "What problems have arisen in the process."
 msgstr "Какие проблемы возникли при работе"
 
-#: cscsite/learning/projects/models.py:214
-msgid "Criterion #4"
-msgstr "Критерий #4"
-
-#: cscsite/learning/projects/models.py:220
+#: cscsite/learning/projects/models.py:231
 msgid "What technologies are used."
 msgstr "Какие технологии используются"
 
-#: cscsite/learning/projects/models.py:221
-msgid "Criterion #5"
-msgstr "Критерий #5"
-
-#: cscsite/learning/projects/models.py:227
+#: cscsite/learning/projects/models.py:237
 msgid "Future plan"
 msgstr "Планы до конца семестра"
 
-#: cscsite/learning/projects/models.py:228
-msgid "Criterion #6"
-msgstr "Критерий #6"
-
-#: cscsite/learning/projects/models.py:254
+#: cscsite/learning/projects/models.py:263
 msgid "Sent"
 msgstr "Отправлен"
 
-#: cscsite/learning/projects/models.py:255
-#: cscsite/learning/projects/models.py:391
+#: cscsite/learning/projects/models.py:264
+#: cscsite/learning/projects/models.py:407
 msgid "Review"
 msgstr "Проверка"
 
-#: cscsite/learning/projects/models.py:256
+#: cscsite/learning/projects/models.py:265
 msgid "Waiting for final score"
 msgstr "Подведение итогов куратором"
 
-#: cscsite/learning/projects/models.py:257
-#: cscsite/learning/projects/models.py:386
+#: cscsite/learning/projects/models.py:266
+#: cscsite/learning/projects/models.py:402
 msgid "Completed"
 msgstr "Завершено"
 
-#: cscsite/learning/projects/models.py:262
-#: cscsite/learning/projects/models.py:266
+#: cscsite/learning/projects/models.py:271
+#: cscsite/learning/projects/models.py:275
 msgid "0"
 msgstr ""
 
-#: cscsite/learning/projects/models.py:263
-#: cscsite/learning/projects/models.py:267
+#: cscsite/learning/projects/models.py:272
+#: cscsite/learning/projects/models.py:276
 msgid "1"
 msgstr ""
 
-#: cscsite/learning/projects/models.py:268
+#: cscsite/learning/projects/models.py:277
 msgid "2"
 msgstr ""
 
-#: cscsite/learning/projects/models.py:274
+#: cscsite/learning/projects/models.py:283
 msgid "Status"
 msgstr "Статус"
 
-#: cscsite/learning/projects/models.py:282
+#: cscsite/learning/projects/models.py:291
 msgid "Report file"
 msgstr "Файл отчета"
 
-#: cscsite/learning/projects/models.py:288
+#: cscsite/learning/projects/models.py:297
 msgid "Student activity in cvs"
 msgstr "Жизнь в репозитории"
 
-#: cscsite/learning/projects/models.py:295
+#: cscsite/learning/projects/models.py:304
 msgid "Report's quality"
 msgstr "Качество отчета"
 
-#: cscsite/learning/projects/models.py:319
+#: cscsite/learning/projects/models.py:328
 msgid "Final score note"
 msgstr "Итоговый комментарий к отчету"
 
-#: cscsite/learning/projects/models.py:324
-#: cscsite/learning/projects/models.py:325
+#: cscsite/learning/projects/models.py:333
+#: cscsite/learning/projects/models.py:334
 msgid "Reports"
 msgstr "Отчеты"
 
-#: cscsite/learning/projects/models.py:343
+#: cscsite/learning/projects/models.py:359
 msgid "review not completed"
 msgstr "проверка не завершена"
 
-#: cscsite/learning/projects/models.py:357
+#: cscsite/learning/projects/models.py:373
 msgid "Project reviewer"
 msgstr ""
 
-#: cscsite/learning/projects/models.py:361
+#: cscsite/learning/projects/models.py:377
 msgid "Note for criterion #1"
 msgstr "Заметка к критерию \"Глобальная задача на семестр\""
 
-#: cscsite/learning/projects/models.py:365
+#: cscsite/learning/projects/models.py:381
 msgid "Note for criterion #2"
 msgstr "Заметка к критерию \"Кому и зачем это может быть полезно\""
 
-#: cscsite/learning/projects/models.py:369
+#: cscsite/learning/projects/models.py:385
 msgid "Note for criterion #3"
 msgstr ""
 "Заметка к критерию \"Что было сделано с момента старта работы над проектом\""
 
-#: cscsite/learning/projects/models.py:373
+#: cscsite/learning/projects/models.py:389
 msgid "Note for criterion #4"
 msgstr "Заметка к критерию \"Какие проблемы возникли при работе\""
 
-#: cscsite/learning/projects/models.py:377
+#: cscsite/learning/projects/models.py:393
 msgid "Note for criterion #5"
 msgstr "Заметка к критерию \"Какие технологии используются\""
 
-#: cscsite/learning/projects/models.py:381
+#: cscsite/learning/projects/models.py:397
 msgid "Note for criterion #6"
 msgstr "Заметка к критерию \"Планы до конца семестра\""
 
-#: cscsite/learning/projects/models.py:388
+#: cscsite/learning/projects/models.py:404
 msgid "Check if you already completed the assessment."
 msgstr "Отметьте, если вы закончили проверку отчёта."
 
-#: cscsite/learning/projects/models.py:392
+#: cscsite/learning/projects/models.py:408
 msgid "Reviews"
 msgstr "Проверка отчетов"
 
-#: cscsite/learning/projects/models.py:409
+#: cscsite/learning/projects/models.py:425
 msgid "ReportComment|text"
 msgstr "Текст комментария"
 
-#: cscsite/learning/projects/models.py:410
+#: cscsite/learning/projects/models.py:426
 msgid "LaTeX+Markdown is enabled"
 msgstr "Доступна разметка LaTeX+Markdown"
 
-#: cscsite/learning/projects/models.py:414
+#: cscsite/learning/projects/models.py:430
 msgid "Author"
 msgstr "Автор"
 
-#: cscsite/learning/projects/models.py:422
+#: cscsite/learning/projects/models.py:438
 msgid "Report comment"
 msgstr "Комментарий к отчету"
 
-#: cscsite/learning/projects/models.py:423
+#: cscsite/learning/projects/models.py:439
 msgid "Report comments"
 msgstr "Комментарии к отчету"
 
@@ -425,39 +414,56 @@ msgstr "Комментарии к отчету"
 msgid "No %(verbose_name)s found matching the query"
 msgstr ""
 
-#: cscsite/learning/projects/views.py:196
+#: cscsite/learning/projects/views.py:197
 msgid "Report successfully sended"
 msgstr "Отчет успешно отправлен."
 
-#: cscsite/learning/projects/views.py:244
+#: cscsite/learning/projects/views.py:250
 msgid "You successfully enrolled on project"
 msgstr "Вы успешно подписаны на проект."
 
-#: cscsite/learning/projects/views.py:297
-#: cscsite/learning/projects/views.py:433
+#: cscsite/learning/projects/views.py:303
+#: cscsite/learning/projects/views.py:441
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: cscsite/learning/projects/views.py:359
+#: cscsite/learning/projects/views.py:367
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: cscsite/learning/projects/views.py:363
+#: cscsite/learning/projects/views.py:371
 msgid "The data successfully saved."
 msgstr "Данные успешно сохранены."
 
-#: cscsite/learning/projects/views.py:427
+#: cscsite/learning/projects/views.py:435
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: cscsite/learning/projects/views.py:448
+#: cscsite/learning/projects/views.py:456
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: cscsite/learning/projects/views.py:456
-#| msgid "Report was successfully updated."
+#: cscsite/learning/projects/views.py:464
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
+
+#~ msgid "Criterion #1"
+#~ msgstr "Критерий #1"
+
+#~ msgid "Criterion #2"
+#~ msgstr "Критерий #2"
+
+#~ msgid "Criterion #3"
+#~ msgstr "Критерий #3"
+
+#~ msgid "Criterion #4"
+#~ msgstr "Критерий #4"
+
+#~ msgid "Criterion #5"
+#~ msgstr "Критерий #5"
+
+#~ msgid "Criterion #6"
+#~ msgstr "Критерий #6"
 
 #~ msgid "Presentation"
 #~ msgstr "Презентация студентов"
