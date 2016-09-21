@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from django.apps import apps
 from django.contrib.auth import get_user_model
 
@@ -27,8 +26,12 @@ def pre_save_project(sender, instance, **kwargs):
 
 
 def post_save_project(sender, instance, created, *args, **kwargs):
+    import django_rq
+    from learning.projects.tasks import (
+        download_presentation_from_yandex_disk_supervisor,
+        download_presentation_from_yandex_disk_students)
+    save = False
     if created:
-        save = False
         if hasattr(instance, _UNSAVED_FILE_SUPERVISOR_PRESENTATION):
             instance.supervisor_presentation = getattr(
                 instance,
@@ -41,8 +44,18 @@ def post_save_project(sender, instance, created, *args, **kwargs):
                                             _UNSAVED_FILE_PRESENTATION)
             instance.__dict__.pop(_UNSAVED_FILE_PRESENTATION)
             save = True
-        if save:
-            instance.save()
+    # Download presentations from yandex.disk
+    if (instance.supervisor_presentation_url and
+            instance.supervisor_presentation == ''):
+        queue = django_rq.get_queue('default')
+        queue.enqueue(download_presentation_from_yandex_disk_supervisor,
+                      instance.pk)
+    if instance.presentation_url and instance.presentation == '':
+        queue.enqueue(download_presentation_from_yandex_disk_students,
+                      instance.pk)
+
+    if save:
+        instance.save()
 
 
 def post_save_report(sender, instance, created, *args, **kwargs):

@@ -211,14 +211,12 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
-        'DEFAULT_TIMEOUT': 350,
     },
     'high': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
-        'DEFAULT_TIMEOUT': 500,
     },
     'club': {
         'HOST': '127.0.0.1',
