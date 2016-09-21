@@ -74,6 +74,9 @@ def _download_presentation(instance, public_link, file_attribute_name,
     r = requests.get(download_data["href"], stream=True)
     exc = None
     full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+    # Create all intermediate directories if not exists
+    os.makedirs(posixpath.dirname(full_path),
+                settings.FILE_UPLOAD_DIRECTORY_PERMISSIONS, exist_ok=True)
     for i in range(retries):
         try:
             with open(full_path, 'wb') as f:
