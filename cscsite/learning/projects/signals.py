@@ -45,9 +45,9 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             instance.__dict__.pop(_UNSAVED_FILE_PRESENTATION)
             save = True
     # Download presentations from yandex.disk
+    queue = django_rq.get_queue('default')
     if (instance.supervisor_presentation_url and
             instance.supervisor_presentation == ''):
-        queue = django_rq.get_queue('default')
         queue.enqueue(download_presentation_from_yandex_disk_supervisor,
                       instance.pk)
     if instance.presentation_url and instance.presentation == '':
