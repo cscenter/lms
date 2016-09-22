@@ -57,6 +57,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'django.template': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': True,
+        },
         'django.request': {
             'level': 'ERROR',
             'handlers': ['console'],
