@@ -87,8 +87,6 @@
     {% endif %}
 
     {% block javascripts %}{% endblock javascripts %}
-    {% if not debug %}
-        {% sitemetrics by yandex for "25844420" %}
-    {% endif %}
+    {% sitemetrics by yandex for "25844420" %}
   </body>
 </html>
