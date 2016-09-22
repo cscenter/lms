@@ -16,11 +16,9 @@
             </div>
             <ul>
                 {% for menu_item in menu.tree %}
-                    {% if not menu_item.hidden %}
                     <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
                         <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
-                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -55,7 +53,7 @@
 </div>
 
 {% for menu_item in menu.tree %}
-    {% if menu_item.id in menu.active_items and menu_item.children and not menu_item.hidden %}
+    {% if menu_item.id in menu.active_items and menu_item.children %}
       <div class="menu lvl2 {{menu_item.extension.classes}}">
         <div class="container">
               <ul>
