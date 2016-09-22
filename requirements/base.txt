@@ -23,7 +23,7 @@ python-magic==0.4.12
 sorl-thumbnail==12.3
 
 # Forms
-django-floppyforms==1.6.2
+django-floppyforms==1.7.0
 django-crispy-forms==1.6.0
 
 # Models
