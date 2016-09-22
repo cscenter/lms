@@ -41,6 +41,7 @@ def get_api():
 
 
 def upload_slides(handle, title, description, tags):
+    """Used in `maybe_upload_slides_slideshare` task"""
     api = get_api()
     path_to_file = handle.name
     try:
@@ -54,4 +55,5 @@ def upload_slides(handle, title, description, tags):
         return sl_meta["Slideshow"]["URL"]
     except (SlideShareError, URLError) as e:
         logger.error(e)
-        return ""
+        # Reraise to save exception in failed jobs queue also
+        raise
