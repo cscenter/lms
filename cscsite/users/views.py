@@ -190,6 +190,7 @@ class UserDetailView(generic.DetailView):
                                                        'project__semester')
                                        .order_by('project__semester__index'))
         context['current_semester'] = Semester.get_current()
+        a_ss = None
         if u.is_curator:
             related = ['assignment',
                        'assignment__course_offering',
@@ -211,7 +212,7 @@ class UserDetailView(generic.DetailView):
                 if a_s.assignment.course_offering != current_co:
                     setattr(a_s, 'hacky_co_change', True)
                     current_co = a_s.assignment.course_offering
-            context['a_ss'] = a_ss
+        context['a_ss'] = a_ss
         context["initial"] = {}
         if context['is_editing_allowed']:
             context["initial"]["user_id"] = context[self.context_object_name].pk
