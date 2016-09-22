@@ -1527,43 +1527,31 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
         return resp
 
 
-# FIXME: add simple test for all roles!!! To prevent `NoreverseMatch` errors
-class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
-                                    generic.ListView):
-    class RedirectException(Exception):
-        def __init__(self, url):
-            self.url = url
-
+class MarksSheetTeacherDispatchView(TeacherOnlyMixin, generic.ListView):
     is_for_staff = None
-    ms_url_name = None
     model = Semester
-    template_name = "learning/markssheet_teacher_dispatch.html"
 
     def __init__(self, *args, **kwargs):
         super(MarksSheetTeacherDispatchView, self).__init__(*args, **kwargs)
-        if kwargs.get('is_for_staff'):
-            self.is_for_staff = True
-            self.ms_url_name = 'staff:course_markssheet_staff'
-        else:
-            self.is_for_staff = False
-            self.ms_url_name = 'markssheet_teacher'
+        self.is_for_staff = kwargs.get('is_for_staff', False)
 
-    def get(self, request, *args, **kwargs):
-        try:
-            return (super(MarksSheetTeacherDispatchView, self)
-                    .get(request, *args, **kwargs))
-        except MarksSheetTeacherDispatchView.RedirectException as re:
-            return HttpResponseRedirect(re.url)
+    def get_template_names(self):
+        if self.is_for_staff:
+            return ["learning/gradebook/list_curator.html"]
+        else:
+            return ["learning/gradebook/list_teacher.html"]
 
     def get_queryset(self):
         current_year, semester_type = get_current_semester_pair()
         semester_index = get_term_index(current_year, semester_type)
         if semester_type == Semester.TYPES.autumn:
-            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF  # skip to spring semester
+            # Skip to spring semester
+            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF
         cos_qs = (CourseOffering.objects
                   .select_related("course")
                   .order_by("course__name"))
-        if not self.request.user.is_curator:
+        is_curator = self.request.user.is_curator
+        if not is_curator or (is_curator and not self.is_for_staff):
             cos_qs = cos_qs.filter(teachers=self.request.user)
         return (self.model.objects
                 .filter(index__lte=semester_index)
@@ -1582,6 +1570,10 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
         semester_list = list(context["semester_list"])
         if not semester_list:
             return context
+        co_count = sum(len(s.courseofferings) for s in semester_list)
+        if not co_count:
+            context["semester_list"] = []
+            return context
 
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
@@ -1591,9 +1583,12 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin,
             semester.courseofferings = []
             semester_list.insert(0, semester)
 
-        context["semester_list"] = [
-            (a, s) for s, a in utils.grouper(semester_list, 2)]
-        context['ms_url_name'] = self.ms_url_name
+        if self.is_for_staff:
+            context["semester_list"] = [(a, s) for s, a in
+                                        utils.grouper(semester_list, 2)]
+            context['ms_url_name'] = 'staff:course_markssheet_staff'
+        else:
+            context['ms_url_name'] = 'markssheet_teacher'
         return context
 
 
