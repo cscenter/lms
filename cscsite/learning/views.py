@@ -31,7 +31,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_DIFF, \
+    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
     CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
     GRADING_TYPES
 from learning.utils import get_current_semester_pair, get_term_index
@@ -1527,13 +1527,29 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
         return resp
 
 
-class MarksSheetTeacherDispatchView(TeacherOnlyMixin, generic.ListView):
+class GradebookDispatchView(TeacherOnlyMixin, generic.ListView):
+    """
+    Redirect teacher to appropriate gradebook page if he has only
+    one course offering in current term.
+    """
+
     is_for_staff = None
     model = Semester
 
+    class RedirectException(Exception):
+        def __init__(self, url):
+            self.url = url
+
     def __init__(self, *args, **kwargs):
-        super(MarksSheetTeacherDispatchView, self).__init__(*args, **kwargs)
+        super(GradebookDispatchView, self).__init__(*args, **kwargs)
         self.is_for_staff = kwargs.get('is_for_staff', False)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return super(GradebookDispatchView,
+                         self).get(request, *args, **kwargs)
+        except GradebookDispatchView.RedirectException as e:
+            return HttpResponseRedirect(e.url)
 
     def get_template_names(self):
         if self.is_for_staff:
@@ -1542,11 +1558,11 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin, generic.ListView):
             return ["learning/gradebook/list_teacher.html"]
 
     def get_queryset(self):
-        current_year, semester_type = get_current_semester_pair()
-        semester_index = get_term_index(current_year, semester_type)
-        if semester_type == Semester.TYPES.autumn:
-            # Skip to spring semester
-            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_DIFF
+        current_year, term_type = get_current_semester_pair()
+        semester_index = get_term_index(current_year, term_type)
+        # Skip to spring semester
+        if term_type == Semester.TYPES.autumn:
+            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
         cos_qs = (CourseOffering.objects
                   .select_related("course")
                   .order_by("course__name"))
@@ -1565,15 +1581,30 @@ class MarksSheetTeacherDispatchView(TeacherOnlyMixin, generic.ListView):
                 ))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(MarksSheetTeacherDispatchView, self)
+        current_year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(current_year, term_type)
+        context = (super(GradebookDispatchView, self)
                    .get_context_data(**kwargs))
         semester_list = list(context["semester_list"])
         if not semester_list:
             return context
-        co_count = sum(len(s.courseofferings) for s in semester_list)
-        if not co_count:
-            context["semester_list"] = []
-            return context
+
+        # If teacher offer only 1 course in current term - redirect him
+        if not self.is_for_staff:
+            co_count = 0
+            for semester in semester_list:
+                if semester.index == current_term_index:
+                    if len(semester.courseofferings) == 1:
+                        co = semester.courseofferings[0]
+                        url = reverse('markssheet_teacher', args=[
+                            co.get_city(), co.course.slug, co.semester.year,
+                            co.semester.type
+                        ])
+                        raise GradebookDispatchView.RedirectException(url)
+                co_count += len(semester.courseofferings)
+            if not co_count:
+                context["semester_list"] = []
+                return context
 
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
