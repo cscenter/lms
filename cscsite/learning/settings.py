@@ -81,9 +81,9 @@ CENTER_FOUNDATION_YEAR = getattr(settings, 'CENTER_FOUNDATION_YEAR', 2011)
 # Used for semester index calculation
 TERMS_INDEX_START = getattr(settings, 'TERMS_INDEX_START', 1)
 
-SEMESTER_AUTUMN_SPRING_INDEX_DIFF = getattr(settings,
+SEMESTER_AUTUMN_SPRING_INDEX_OFFSET = getattr(settings,
                                             'SEMESTER_AUTUMN_SPRING_INDEX_DIFF',
-                                            1)
+                                              1)
 
 PROFILE_THUMBNAIL_WIDTH = getattr(settings, 'PROFILE_THUMBNAIL_WIDTH',  170)
 PROFILE_THUMBNAIL_HEIGHT = getattr(settings, 'PROFILE_THUMBNAIL_HEIGHT',  238)

@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 
 
 app_name = 'staff'
-from learning.views import MarksSheetTeacherDispatchView, MarksSheetTeacherView
+from learning.views import GradebookDispatchView, MarksSheetTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
@@ -12,7 +12,7 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
 urlpatterns = [
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^course-marks/$',
-        MarksSheetTeacherDispatchView.as_view(is_for_staff=True),
+        GradebookDispatchView.as_view(is_for_staff=True),
         name='course_markssheet_staff_dispatch'),
     url(r'^course-marks/(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         MarksSheetTeacherView.as_view(is_for_staff=True),
