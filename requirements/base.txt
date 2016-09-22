@@ -96,7 +96,7 @@ django-bootstrap3==7.0.1
 django-extra-views==0.8.0
 # Generic, reusable mixins
 django-braces==1.9.0
-django-sitemetrics==0.5.2
+django-sitemetrics==0.6.0
 django-taggit==0.20.2
 icalendar==3.9.1
 python-dateutil==2.5.3
