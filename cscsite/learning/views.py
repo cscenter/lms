@@ -1562,14 +1562,16 @@ class GradebookDispatchView(generic.ListView):
                     )
                 ))
 
-    def get_context_data(self, *args, **kwargs):
 
-        context = (super(GradebookDispatchView, self)
-                   .get_context_data(**kwargs))
+class GradebookCuratorDispatchView(CuratorOnlyMixin, GradebookDispatchView):
+    template_name = "learning/gradebook/list_curator.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(GradebookCuratorDispatchView,
+                        self).get_context_data(**kwargs)
         semester_list = list(context["semester_list"])
         if not semester_list:
             return context
-
         # Check if we have only the fall semester for the ongoing year.
         current = semester_list[0]
         if current.type == Semester.TYPES.autumn:
@@ -1577,17 +1579,8 @@ class GradebookDispatchView(generic.ListView):
                                 year=current.year + 1)
             semester.courseofferings = []
             semester_list.insert(0, semester)
-        return context
-
-
-class GradebookCuratorDispatchView(CuratorOnlyMixin, GradebookDispatchView):
-    template_name = "learning/gradebook/list_curator.html"
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(GradebookCuratorDispatchView,
-                        self).get_context_data(*args, **kwargs)
         context["semester_list"] = [(a, s) for s, a in
-                                    utils.grouper(context["semester_list"], 2)]
+                                    utils.grouper(semester_list, 2)]
         return context
 
 
@@ -1602,11 +1595,11 @@ class GradebookTeacherDispatchView(TeacherOnlyMixin, GradebookDispatchView):
         qs = super(GradebookTeacherDispatchView, self).get_co_queryset()
         return qs.filter(teachers=self.request.user)
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         current_year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(current_year, term_type)
         context = super(GradebookTeacherDispatchView,
-                        self).get_context_data(*args, **kwargs)
+                        self).get_context_data(**kwargs)
         co_count = 0
         for semester in context["semester_list"]:
             if semester.index == current_term_index:
@@ -1620,7 +1613,6 @@ class GradebookTeacherDispatchView(TeacherOnlyMixin, GradebookDispatchView):
             co_count += len(semester.courseofferings)
         if not co_count:
             context["semester_list"] = []
-
         return context
 
 
