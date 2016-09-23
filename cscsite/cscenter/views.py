@@ -62,7 +62,7 @@ class IndexView(generic.TemplateView):
         today = now().date()
         pool = list(OnlineCourse
                     .objects
-                    .filter(Q(end__gt=today) |
+                    .filter(Q(end__date__gt=today) |
                             Q(is_self_paced=True))
                     .order_by("start", "name"))
         random.shuffle(pool)
