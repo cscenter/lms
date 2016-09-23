@@ -29,7 +29,7 @@ from .views import \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
     MarksSheetTeacherImportCSVFromStepicView, \
     MarksSheetTeacherImportCSVFromYandexView, \
-    GradebookDispatchView, \
+    GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView
 
@@ -128,7 +128,7 @@ teaching_section_patterns = url(
         ])),
         url(r'^marks/', include([
             url(r'^$',
-                GradebookDispatchView.as_view(),
+                GradebookTeacherDispatchView.as_view(),
                 name='markssheet_teacher_dispatch'),
             url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
                 MarksSheetTeacherView.as_view(),

@@ -4,6 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict
 
+from loginas.utils import restore_original_login
+
 from learning.reports import ProgressReport
 
 try:
@@ -103,6 +105,8 @@ class LogoutView(LoginRequiredMixin,
     redirect_field_name = auth.REDIRECT_FIELD_NAME
 
     def get(self, request, *args, **kwargs):
+        # FIXME: enable after bugfix in django-loginas
+        # restore_original_login(request)
         auth.logout(request)
         return super(LogoutView, self).get(request, *args, **kwargs)
 

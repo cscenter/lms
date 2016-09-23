@@ -11,14 +11,14 @@
           <thead>
             <tr class="active">
               <th>Курс</th>
-              <th>Дата</th>
+              <th>Семестр</th>
             </tr>
           </thead>
         {% if semester_list %}
             {% for semester in semester_list %}
                 {% for co in semester.courseofferings %}
                   <tr>
-                    <td><a href="{% url ms_url_name co.get_city co.course.slug co.semester.year co.semester.type %}">{{ co.course.name }}</a></td>
+                    <td><a href="{% url 'markssheet_teacher' co.get_city co.course.slug co.semester.year co.semester.type %}">{{ co.course.name }}</a></td>
                     <td>{{ co.semester }}</td>
                   </tr>
                 {% endfor %}
