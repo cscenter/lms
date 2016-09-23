@@ -145,7 +145,7 @@ class YandexDiskRestAPI(object):
     def _attach_token_header(self, headers):
         if not hasattr(self, "_auth_header"):
             raise YandexDiskException("Set token first")
-        return headers.update(self._auth_header)
+        headers.update(self._auth_header)
 
     @staticmethod
     def _check_status(response):

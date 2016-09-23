@@ -203,6 +203,7 @@ MICAWBER_DEFAULT_SETTINGS = {
 # SORL settings
 THUMBNAIL_DUMMY = True
 # Lets store keys in redis and share them between csclub and cscenter sites
+# It's safe while we store images in shared directory
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
 REDIS_PASSWORD = '***REMOVED***'
 THUMBNAIL_REDIS_HOST = '127.0.0.1'

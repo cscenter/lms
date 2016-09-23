@@ -1527,22 +1527,12 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
         return resp
 
 
-class GradebookDispatchView(TeacherOnlyMixin, generic.ListView):
-    """
-    Redirect teacher to appropriate gradebook page if he has only
-    one course offering in current term.
-    """
-
-    is_for_staff = None
+class GradebookDispatchView(generic.ListView):
     model = Semester
 
     class RedirectException(Exception):
         def __init__(self, url):
             self.url = url
-
-    def __init__(self, *args, **kwargs):
-        super(GradebookDispatchView, self).__init__(*args, **kwargs)
-        self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -1551,11 +1541,9 @@ class GradebookDispatchView(TeacherOnlyMixin, generic.ListView):
         except GradebookDispatchView.RedirectException as e:
             return HttpResponseRedirect(e.url)
 
-    def get_template_names(self):
-        if self.is_for_staff:
-            return ["learning/gradebook/list_curator.html"]
-        else:
-            return ["learning/gradebook/list_teacher.html"]
+    def get_co_queryset(self):
+        return (CourseOffering.objects.select_related("course")
+                .order_by("course__name"))
 
     def get_queryset(self):
         current_year, term_type = get_current_semester_pair()
@@ -1563,63 +1551,76 @@ class GradebookDispatchView(TeacherOnlyMixin, generic.ListView):
         # Skip to spring semester
         if term_type == Semester.TYPES.autumn:
             semester_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
-        cos_qs = (CourseOffering.objects
-                  .select_related("course")
-                  .order_by("course__name"))
-        is_curator = self.request.user.is_curator
-        if not is_curator or (is_curator and not self.is_for_staff):
-            cos_qs = cos_qs.filter(teachers=self.request.user)
         return (self.model.objects
                 .filter(index__lte=semester_index)
                 .exclude(type=Semester.TYPES.summer)
                 .prefetch_related(
                     Prefetch(
                         "courseoffering_set",
-                        queryset=cos_qs,
+                        queryset=self.get_co_queryset(),
                         to_attr="courseofferings"
                     )
                 ))
 
     def get_context_data(self, *args, **kwargs):
-        current_year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(current_year, term_type)
+
         context = (super(GradebookDispatchView, self)
                    .get_context_data(**kwargs))
         semester_list = list(context["semester_list"])
         if not semester_list:
             return context
 
-        # If teacher offer only 1 course in current term - redirect him
-        if not self.is_for_staff:
-            co_count = 0
-            for semester in semester_list:
-                if semester.index == current_term_index:
-                    if len(semester.courseofferings) == 1:
-                        co = semester.courseofferings[0]
-                        url = reverse('markssheet_teacher', args=[
-                            co.get_city(), co.course.slug, co.semester.year,
-                            co.semester.type
-                        ])
-                        raise GradebookDispatchView.RedirectException(url)
-                co_count += len(semester.courseofferings)
-            if not co_count:
-                context["semester_list"] = []
-                return context
-
-        # Check if we only have the fall semester for the ongoing year.
+        # Check if we have only the fall semester for the ongoing year.
         current = semester_list[0]
         if current.type == Semester.TYPES.autumn:
             semester = Semester(type=Semester.TYPES.spring,
                                 year=current.year + 1)
             semester.courseofferings = []
             semester_list.insert(0, semester)
+        return context
 
-        if self.is_for_staff:
-            context["semester_list"] = [(a, s) for s, a in
-                                        utils.grouper(semester_list, 2)]
-            context['ms_url_name'] = 'staff:course_markssheet_staff'
-        else:
-            context['ms_url_name'] = 'markssheet_teacher'
+
+class GradebookCuratorDispatchView(CuratorOnlyMixin, GradebookDispatchView):
+    template_name = "learning/gradebook/list_curator.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(GradebookCuratorDispatchView,
+                        self).get_context_data(*args, **kwargs)
+        context["semester_list"] = [(a, s) for s, a in
+                                    utils.grouper(context["semester_list"], 2)]
+        return context
+
+
+class GradebookTeacherDispatchView(TeacherOnlyMixin, GradebookDispatchView):
+    """
+    Redirect teacher to appropriate gradebook page if he has only
+    one course offering in current term.
+    """
+    template_name = "learning/gradebook/list_teacher.html"
+
+    def get_co_queryset(self):
+        qs = super(GradebookTeacherDispatchView, self).get_co_queryset()
+        return qs.filter(teachers=self.request.user)
+
+    def get_context_data(self, *args, **kwargs):
+        current_year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(current_year, term_type)
+        context = super(GradebookTeacherDispatchView,
+                        self).get_context_data(*args, **kwargs)
+        co_count = 0
+        for semester in context["semester_list"]:
+            if semester.index == current_term_index:
+                if len(semester.courseofferings) == 1:
+                    co = semester.courseofferings[0]
+                    url = reverse('markssheet_teacher', args=[
+                        co.get_city(), co.course.slug, co.semester.year,
+                        co.semester.type
+                    ])
+                    raise GradebookDispatchView.RedirectException(url)
+            co_count += len(semester.courseofferings)
+        if not co_count:
+            context["semester_list"] = []
+
         return context
 
 
