@@ -96,7 +96,7 @@ LOGGING = {
             'propagate': True,
         },
         'django.template': {
-            'handlers': ['null'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -134,3 +134,5 @@ SLIDESHARE_API_KEY = "OX5YoPYg"
 SLIDESHARE_SECRET = "R3lITlTK"
 SLIDESHARE_USERNAME = "pacahon"
 SLIDESHARE_PASSWORD = "q3wcp001"
+
+THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'

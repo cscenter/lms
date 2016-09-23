@@ -202,7 +202,11 @@ MICAWBER_DEFAULT_SETTINGS = {
 
 # SORL settings
 THUMBNAIL_DUMMY = True
-
+# Lets store keys in redis and share them between csclub and cscenter sites
+THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+REDIS_PASSWORD = '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN'
+THUMBNAIL_REDIS_HOST = '127.0.0.1'
+THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
 
 # Make sure settings are the same as in ansible configuration
 RQ_QUEUES = {
@@ -210,18 +214,19 @@ RQ_QUEUES = {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
+        'PASSWORD': REDIS_PASSWORD,
     },
     'high': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
+        'PASSWORD': REDIS_PASSWORD,
     },
     'club': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'PASSWORD': '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN',
+        'PASSWORD': REDIS_PASSWORD,
     },
 }
+

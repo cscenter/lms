@@ -1370,6 +1370,8 @@ class MarksSheetTeacherTests(GroupSecurityCheckMixin,
                                    co.semester.type])
             self.assertContains(self.client.get(url), co_url)
 
+    # TODO: test redirect to gradebook for teachers if only 1 course in current term
+
 
 class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
     # TODO(Dmitry): test security
