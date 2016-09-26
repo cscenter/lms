@@ -164,7 +164,7 @@ class Project(TimeStampedModel):
 
     def report_period_started(self):
         today = now().date()
-        return self.semester.report_starts_at >= today
+        return today >= self.semester.report_starts_at
 
     def report_period_ended(self):
         today = now().date()
