@@ -55,7 +55,8 @@ def post_save_project(sender, instance, created, *args, **kwargs):
     saved_path = instance.supervisor_presentation
     if hasattr(instance, "_loaded_values"):
         old_path = instance._loaded_values.get("supervisor_presentation")
-    if saved_path != old_path or job:
+    if (saved_path != old_path or job or
+            not instance.supervisor_presentation_slideshare_url):
         queue.enqueue(upload_presentation_to_slideshare,
                       instance.pk,
                       "supervisor_presentation",
@@ -68,7 +69,7 @@ def post_save_project(sender, instance, created, *args, **kwargs):
     saved_path = instance.presentation
     if hasattr(instance, "_loaded_values"):
         old_path = instance._loaded_values.get("presentation")
-    if saved_path != old_path or job:
+    if saved_path != old_path or job or not instance.presentation_slideshare_url:
         queue.enqueue(upload_presentation_to_slideshare,
                       instance.pk,
                       "presentation",
