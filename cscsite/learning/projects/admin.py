@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
@@ -37,6 +38,16 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
     inlines = [ProjectStudentInline]
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == "reviewers":
+            kwargs["queryset"] = (
+                CSCUser.objects
+                    .filter(Q(groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER) |
+                            Q(is_superuser=True, is_staff=True))
+                    .distinct())
+        return super(ProjectAdmin,
+                     self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class ReportAdmin(admin.ModelAdmin):

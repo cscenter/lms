@@ -9,7 +9,7 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
-        {{ course_class.name }} <small><a href="{{ course_class.course_offering.get_absolute_url }}">{{ course_class.course_offering.course.name }}</a></small>
+        {{ course_class.name }}<br><small><a href="{{ course_class.course_offering.get_absolute_url }}">{{ course_class.course_offering.course.name }}</a></small>
       </h2>
       {% if user.is_curator or user.is_teacher and is_actual_teacher %}
       <div class="btn-toolbar">
@@ -54,15 +54,14 @@
 
         {% if course_class.video_oembed %}
             <a id="video" href="#"></a><h4 class="bigger-margin">{% trans "Video" %}</h4>
-            <div class="embed-responsive embed-responsive-16by9">
+            <div class="">
                 {{ course_class.video_oembed.html|safe }}
             </div>
         {% endif %}
 
       {% if course_class.other_materials or course_class.slides_url %}
       <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
-        {% comment %} TODO: replace with oembed processing on client {% endcomment %}
-        {% cache 7200 slideshare_oembed course_class.pk course_class.slides_url %}
+        {% cache 86400 slideshare_oembed course_class.pk course_class.slides_url %}
           {{ course_class.slides_url|oembed }}
         {% endcache %}
       <div class="ubertext">

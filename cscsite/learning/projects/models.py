@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -90,7 +91,9 @@ class Project(TimeStampedModel):
         verbose_name=_("Reviewers"),
         related_name='project_reviewers',
         blank=True,
-        limit_choices_to={'groups': PARTICIPANT_GROUPS.PROJECT_REVIEWER},)
+        limit_choices_to=(Q(groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER) |
+                          Q(is_superuser=True))
+    )
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,

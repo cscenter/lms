@@ -39,7 +39,6 @@ def test_user_detail(client, student_center_factory):
     sp2.save()
     resp = client.get(reverse('user_detail', args=[student.pk]))
     assert smart_bytes(p1.name) in resp.content
-    assert smart_bytes(p1.description) in resp.content
     assert smart_bytes(p2.name) in resp.content
     assert smart_bytes(sp2.get_final_grade_display().lower()) in resp.content
 
@@ -76,10 +75,9 @@ def test_reviewer_list_security(client,
     response = client.get(url)
     assert response.status_code == 200
     assert not response.context["projects"]
-    # Curator must have project_reviewer group
     client.login(curator)
     response = client.get(url)
-    assert response.status_code == 302
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
@@ -309,10 +307,10 @@ def test_reviewer_project_enroll(client, curator):
     assert len(active_project.reviewers.all()) == 1
     assert reviewer in active_project.reviewers.all()
     assert reviewer2 not in active_project.reviewers.all()
-    # Curator has no reviewers group
+    # Curator has no reviewers group, but it's ok
     client.login(curator)
-    response = client.post(url_enroll_in_active, {})
-    assert response.status_code == 403
+    response = client.post(url_enroll_in_active, {}, follow=True)
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
