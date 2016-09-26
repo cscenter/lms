@@ -94,7 +94,7 @@
             </div>
             <div class="col-xs-4">
                 <div class="links">
-                    {% if can_enroll %}
+                    {% if has_enroll_permissions %}
                         {% if project.is_active and not you_enrolled %}
                             <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
                                 {% csrf_token %}
