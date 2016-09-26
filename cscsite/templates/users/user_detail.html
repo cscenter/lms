@@ -147,18 +147,8 @@
                             <ul>
                                 {% for ps in student_projects %}
                                     <li>
-                                        {{ ps.project.semester }}:
-                                        «{{ ps.project.name }}»
-                                        {% if ps.final_grade %}/{{ ps.get_final_grade_display|lower }}/{% endif %}<br>
-                                        {% if ps.project.presentation %}<a href="{{ ps.project.presentation.url }}">{% trans "Presentation"|lower %}</a>, {% endif %}
-                                        {% trans "StudentProject|Supervisor"|lower %} — {{ ps.project.supervisor }}
-                                        {% if ps.project.description %}
-                                            <div class="ubertext">
-                                                {% markdown 3600 "userproject_description" ps.project.pk ps.project.modified %}
-                                                    {{ ps.project.description }}
-                                                {% endmarkdown %}
-                                            </div>
-                                        {% endif %}
+                                        <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a>
+                                        {% if ps.final_grade != 'not_graded' %}/{{ ps.get_final_grade_display|lower }}/{% endif %}<br>
                                     </li>
                                 {% endfor %}
                             </ul>

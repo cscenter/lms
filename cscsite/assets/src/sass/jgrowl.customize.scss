@@ -1,4 +1,7 @@
-@import "jgrowl/jgrowl.scss";
+@import "jgrowl/jgrowl.variables.scss";
+$jgrowl-backgroundColor: $color-green;
+@import "jgrowl/jgrowl.core.scss";
+
 
 /* jGrowl overrides */
 .jGrowl {
@@ -6,17 +9,24 @@
   font-size: 14px;
 }
 .jGrowl-notification {
-  background-color: rgba(76, 175, 80, 0.7);
   border-color: transparent;
-  padding: 10px 10px 10px 25px;
+  padding: 15px 20px;
   width: 350px;
+  border-radius: 4px;
 }
 
 .jGrowl-notification .jGrowl-close {
   background-color: rgba(0, 0, 0, 0);
   font-size: 18px;
-  top: -7px;
+  top: -4px;
+  right: -6px;
+  padding: 0 0 0 4px;
   position: relative;
+  color: #000;
+  opacity: .5;
+  &:hover {
+    opacity: .8;
+  }
 }
 
 .jGrowl-closer {

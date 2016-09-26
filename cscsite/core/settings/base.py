@@ -101,6 +101,10 @@ INSTALLED_APPS = [
 
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
+MICAWBER_DEFAULT_SETTINGS = {
+    'maxwidth': 597,
+    'maxheight': 487,
+}
 
 # Email settings
 EMAIL_HOST = 'smtp.yandex.ru'
@@ -193,12 +197,6 @@ STATICFILES_FINDERS = [
 
 
 HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
-
-# Oembed defaults
-MICAWBER_DEFAULT_SETTINGS = {
-    'maxwidth': 910,
-    'maxheight': 512,
-}
 
 # SORL settings
 THUMBNAIL_DUMMY = True

@@ -10,6 +10,12 @@
     <ol class="breadcrumb projects">
       <li class="active">Отчеты</li>
     </ol>
+    {% if request.user.is_curator and not request.user.is_project_reviewer %}
+    <div role="alert" class="alert alert-info alert-dismissible">
+      <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span></button>
+      <p>Уведомления не будут приходить на почту, если не добавить себе группу "Project reviewer".</p>
+    </div>
+    {% endif %}
     <div class="panel">
         <div class="panel-body">
             {% if projects %}

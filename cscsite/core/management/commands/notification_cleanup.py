@@ -4,14 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import datetime
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.core.management.base import BaseCommand, CommandError
-from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
-from django.utils import translation
-from django.utils.encoding import smart_text
-from django.utils.html import strip_tags, linebreaks
+from django.core.management.base import BaseCommand
+
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification

@@ -26,7 +26,12 @@ $brand-success: $color-green;
 $brand-danger: #d9534f;
 
 $state-info-text: $color-blue;
+$alert-info-border: $alert-info-bg;
 $state-success-text: $color-green;
 $state-danger-text: $color-red;
+
+$alert-warning-border: rgba(255, 243, 230, 0.8);
+$alert-warning-bg: rgba(255, 243, 230, 0.8);
+$alert-warning-text: $color-orange;
 
 $panel-default-heading-bg: $background-grey;
