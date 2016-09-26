@@ -216,8 +216,9 @@ class ProjectDetailView(generic.CreateView):
                                       self.project.report_submit_period_active()
                                       and user in self.project.students.all())
         context["you_enrolled"] = user in self.project.reviewers.all()
-        context["can_enroll"] = ((user.is_project_reviewer or user.is_curator)
-                                 and self.project.is_active())
+        context["has_enroll_permissions"] = (
+            (user.is_project_reviewer or user.is_curator)
+            and self.project.is_active())
         context["can_view_report"] = user.is_curator or (
             user.is_project_reviewer and context["you_enrolled"])
         return context

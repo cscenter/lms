@@ -46,26 +46,28 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             save = True
     queue = django_rq.get_queue('default')
     # Download presentation from yandex.disk if local copy not saved.
-    job = None
+    job, old_path = None, ""
     if (instance.supervisor_presentation_url and
             instance.supervisor_presentation == ''):
         job = queue.enqueue(download_presentation_from_yandex_disk_supervisor,
                             instance.pk)
     # Try to upload to slideshare. Skip if no local copy of presentation
     saved_path = instance.supervisor_presentation
-    old_path = instance._loaded_values.get("supervisor_presentation")
+    if hasattr(instance, "_loaded_values"):
+        old_path = instance._loaded_values.get("supervisor_presentation")
     if saved_path != old_path or job:
         queue.enqueue(upload_presentation_to_slideshare,
                       instance.pk,
                       "supervisor_presentation",
                       "supervisor_presentation_slideshare_url",
                       depends_on=job)
-    job = None
+    job, old_path = None, ""
     if instance.presentation_url and instance.presentation == '':
         job = queue.enqueue(download_presentation_from_yandex_disk_students,
                             instance.pk)
     saved_path = instance.presentation
-    old_path = instance._loaded_values.get("presentation")
+    if hasattr(instance, "_loaded_values"):
+        old_path = instance._loaded_values.get("presentation")
     if saved_path != old_path or job:
         queue.enqueue(upload_presentation_to_slideshare,
                       instance.pk,

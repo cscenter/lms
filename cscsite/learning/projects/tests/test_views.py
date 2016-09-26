@@ -148,8 +148,8 @@ def test_project_detail_unauth(client):
     response = client.get(project.get_absolute_url())
     assert smart_bytes("Отзывы руководителя") not in response.content
     assert smart_bytes("Следить за проектом") not in response.content
-    assert "can_enroll" in response.context
-    assert response.context["can_enroll"] is False
+    assert "has_enroll_permissions" in response.context
+    assert response.context["has_enroll_permissions"] is False
     assert "can_send_report" in response.context
     assert response.context["can_send_report"] is False
     assert "can_view_report" in response.context
@@ -174,8 +174,8 @@ def test_project_detail_student_participant(client):
                                     semester=semester)
     client.login(student)
     response = client.get(project.get_absolute_url())
-    assert "can_enroll" in response.context
-    assert response.context["can_enroll"] is False
+    assert "has_enroll_permissions" in response.context
+    assert response.context["has_enroll_permissions"] is False
     assert smart_bytes("Отзывы руководителя") not in response.content
     form = {"send_report_form-text": "report text content"}
     response = client.post(project.get_absolute_url(), form)
@@ -264,19 +264,18 @@ def test_project_detail_reviewer(client, curator):
     url = project.get_absolute_url()
     response = client.get(url)
     # hide enrollment button for past projects
-    assert "can_enroll" in response.context
-    assert response.context["can_enroll"] is False
+    assert "has_enroll_permissions" in response.context
+    assert response.context["has_enroll_permissions"] is False
     current_project = ProjectFactory(students=[student], semester=semester)
     url = reverse("projects:project_detail",
                   args=[current_project.pk])
     response = client.get(url)
-    assert response.context["can_enroll"] is True
+    assert response.context["has_enroll_permissions"] is True
     assert smart_bytes("Смотреть отчет") not in response.content
     # Also, hide button for already enrolled projects
     current_project.reviewers.add(reviewer)
     current_project.save()
     response = client.get(url)
-    assert response.context["can_enroll"] is False
     assert smart_bytes("Следить за проектом") not in response.content
     # Don't show testimonials and grade tables to reviewer or students
     assert smart_bytes("Отзывы руководителя") not in response.content
