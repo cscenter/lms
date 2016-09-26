@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.cache import cache
 
 from micawber.providers import Provider, bootstrap_basic
@@ -15,8 +16,8 @@ class CustomSlideShareProvider(Provider):
         json_data = super(CustomSlideShareProvider,
                           self).handle_response(response, url)
         soup = BeautifulSoup(json_data["html"], 'html.parser')
-        soup.iframe["width"] = 597
-        soup.iframe["height"] = 487
+        soup.iframe["width"] = settings.MICAWBER_DEFAULT_SETTINGS["maxwidth"]
+        soup.iframe["height"] = settings.MICAWBER_DEFAULT_SETTINGS["maxheight"]
         json_data["html"] = str(soup.iframe)
         return json_data
     # TODO: replace http request with https

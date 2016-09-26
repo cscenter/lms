@@ -102,8 +102,10 @@ INSTALLED_APPS = [
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
 MICAWBER_DEFAULT_SETTINGS = {
-    'maxwidth': 597,
-    'maxheight': 487,
+    'maxwidth': 599,
+    'maxheight': 467,
+    'width': 599,
+    'height': 487
 }
 
 # Email settings

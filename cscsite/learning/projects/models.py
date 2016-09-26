@@ -107,6 +107,8 @@ class Project(TimeStampedModel):
         blank=True,
         null=True,
         help_text=_("Supported public link to Yandex.Disk only"))
+    supervisor_presentation_slideshare_url = models.URLField(
+        _("SlideShare URL for supervisor presentation"), null=True, blank=True)
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
@@ -124,6 +126,9 @@ class Project(TimeStampedModel):
         blank=True,
         null=True,
         help_text=_("Supported public link to Yandex.Disk only"))
+    presentation_slideshare_url = models.URLField(
+        _("SlideShare URL for participants presentation"),
+        null=True, blank=True)
     is_external = models.BooleanField(
         _("External project"),
         default=False)
