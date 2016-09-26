@@ -8,6 +8,7 @@ import shutil
 from django.apps import apps
 from django.conf import settings
 
+from slides import slideshare
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,36 @@ def _download_presentation(instance, public_link, file_attribute_name,
     logger.error("Errors occurred during file downloading for "
                  "project {}".format(instance.pk))
     raise exc
+
+
+def upload_presentation_to_slideshare(project_pk,
+                                      slides_attribute,
+                                      slides_url_attribute):
+    """
+    Get path to file from slides_attribute, upload source to slideshare
+    and save url to slides_url_attribute
+    """
+    Project = apps.get_model('projects', 'Project')
+    project = Project.objects.get(pk=project_pk)
+    file_attr = getattr(project, slides_attribute)
+    # Local file not found
+    if not file_attr:
+        return
+
+    if slides_attribute.startswith("supervisor"):
+        title_suffix = "Презентация руководителя"
+        tags = ["project", "supervisor"]
+    else:
+        title_suffix = "Презентация участников"
+        tags = ["project", "participants"]
+    slideshare_url = slideshare.upload_slides(
+        file_attr.file,
+        "{0}. {1}".format(project.name, title_suffix),
+        project.description, tags=tags)
+    if slideshare_url:
+        Project.objects.filter(pk=project.pk).update(
+            **{slides_url_attribute: slideshare_url})
+        return slideshare_url
 
 
 class YandexDiskException(Exception):

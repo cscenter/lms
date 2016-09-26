@@ -4,7 +4,7 @@ from django.apps import apps
 
 from slides import yandex_disk, slideshare
 
-
+# TODO: move tasks to learning app
 def maybe_upload_slides_yandex(class_pk):
     CourseClass = apps.get_model('learning', 'CourseClass')
     instance = CourseClass.objects.get(pk=class_pk)

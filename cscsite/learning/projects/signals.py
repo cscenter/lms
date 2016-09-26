@@ -11,8 +11,7 @@ _UNSAVED_FILE_PRESENTATION = 'unsaved_presentation'
 
 def pre_save_project(sender, instance, **kwargs):
     """
-    Save presentation files when project model already created and we can
-    get project pk.
+    Save presentation files after project created and we can get project pk.
     """
     if not instance.pk:
         if not hasattr(instance, _UNSAVED_FILE_SUPERVISOR_PRESENTATION):
@@ -29,7 +28,8 @@ def post_save_project(sender, instance, created, *args, **kwargs):
     import django_rq
     from learning.projects.tasks import (
         download_presentation_from_yandex_disk_supervisor,
-        download_presentation_from_yandex_disk_students)
+        download_presentation_from_yandex_disk_students,
+        upload_presentation_to_slideshare)
     save = False
     if created:
         if hasattr(instance, _UNSAVED_FILE_SUPERVISOR_PRESENTATION):
@@ -44,16 +44,34 @@ def post_save_project(sender, instance, created, *args, **kwargs):
                                             _UNSAVED_FILE_PRESENTATION)
             instance.__dict__.pop(_UNSAVED_FILE_PRESENTATION)
             save = True
-    # Download presentations from yandex.disk
     queue = django_rq.get_queue('default')
+    # Download presentation from yandex.disk if local copy not saved.
+    job = None
     if (instance.supervisor_presentation_url and
             instance.supervisor_presentation == ''):
-        queue.enqueue(download_presentation_from_yandex_disk_supervisor,
-                      instance.pk)
+        job = queue.enqueue(download_presentation_from_yandex_disk_supervisor,
+                            instance.pk)
+    # Try to upload to slideshare. Skip if no local copy of presentation
+    saved_path = instance.supervisor_presentation
+    old_path = instance._loaded_values.get("supervisor_presentation")
+    if saved_path != old_path or job:
+        queue.enqueue(upload_presentation_to_slideshare,
+                      instance.pk,
+                      "supervisor_presentation",
+                      "supervisor_presentation_slideshare_url",
+                      depends_on=job)
+    job = None
     if instance.presentation_url and instance.presentation == '':
-        queue.enqueue(download_presentation_from_yandex_disk_students,
-                      instance.pk)
-
+        job = queue.enqueue(download_presentation_from_yandex_disk_students,
+                            instance.pk)
+    saved_path = instance.presentation
+    old_path = instance._loaded_values.get("presentation")
+    if saved_path != old_path or job:
+        queue.enqueue(upload_presentation_to_slideshare,
+                      instance.pk,
+                      "presentation",
+                      "presentation_slideshare_url",
+                      depends_on=job)
     if save:
         instance.save()
 

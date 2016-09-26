@@ -137,6 +137,19 @@ class Project(TimeStampedModel):
         verbose_name = _("Student project")
         verbose_name_plural = _("Student projects")
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        """
+        In post save signal we enqueue task with uploading to slideshare
+        if path to presentation file (supervisor or participants)
+        has been changed.
+        """
+        instance = super(Project, cls).from_db(db, field_names, values)
+        save_fields = ["presentation", "supervisor_presentation"]
+        instance._loaded_values = {k: v for (k, v) in zip(field_names, values)
+                                   if k in save_fields}
+        return instance
+
     def __str__(self):
         return smart_text(self.name)
 
