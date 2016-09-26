@@ -118,6 +118,7 @@ def upload_presentation_to_slideshare(project_pk,
         file_attr.file,
         "{0}. {1}".format(project.name, title_suffix),
         project.description, tags=tags)
+    # TODO: requeue if limit exceeded
     if slideshare_url:
         Project.objects.filter(pk=project.pk).update(
             **{slides_url_attribute: slideshare_url})
