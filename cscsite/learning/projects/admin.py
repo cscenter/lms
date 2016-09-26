@@ -38,6 +38,8 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
     inlines = [ProjectStudentInline]
+    readonly_fields = ["supervisor_presentation_slideshare_url",
+                       "presentation_slideshare_url"]
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "reviewers":
