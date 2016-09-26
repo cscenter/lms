@@ -2,6 +2,8 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load markdown from core_tags %}
+{% load oembed from micawber_tags %}
+{% load cache %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -13,11 +15,26 @@
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
-                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h2>
+                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+                <span class="small">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</span></h2>
                 {% if project.description %}
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
                         {{ project.description  }}
                     {% endmarkdown %}
+                {% endif %}
+
+                {% if project.supervisor_presentation_slideshare_url %}
+                    <h4>Презентация руководителя</h4>
+                    {% cache 86400 slideshare_oembed project_supervisor project.pk project.supervisor_presentation_slideshare_url %}
+                        {{ project.supervisor_presentation_slideshare_url|oembed }}
+                    {% endcache %}
+                {% endif %}
+
+                {% if project.presentation_slideshare_url %}
+                    <h4>Презентация участников</h4>
+                    {% cache 86400 slideshare_oembed project_participants project.pk project.presentation_slideshare_url %}
+                        {{ project.presentation_slideshare_url|oembed }}
+                    {% endcache %}
                 {% endif %}
 
                 {% if can_send_report %}
@@ -89,7 +106,14 @@
                     {% endif %}
                 </div>
                 <div class="card">
-                    <div class="card-header ch-alt">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект<br> {{ project.semester }}</div>
+                    <div class="card-header ch-alt">Руководители</div>
+                    <div class="card-body card-padding">
+                        {{ project.supervisor }}
+                    </div>
+                </div>
+                {% if not project.supervisor_presentation_slideshare_url and not project.presentation_slideshare_url %}
+                <div class="card">
+                    <div class="card-header ch-alt">Презентации</div>
                     <div class="card-body card-padding">
                         {% if project.supervisor_presentation or project.presentation %}
                         {% if project.supervisor_presentation %}
@@ -103,6 +127,7 @@
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
                 <div class="card">
                     <div class="card-header ch-alt">Участники проекта</div>
                     <div class="card-body card-padding">
