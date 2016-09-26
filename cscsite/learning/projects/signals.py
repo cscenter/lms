@@ -44,6 +44,10 @@ def post_save_project(sender, instance, created, *args, **kwargs):
                                             _UNSAVED_FILE_PRESENTATION)
             instance.__dict__.pop(_UNSAVED_FILE_PRESENTATION)
             save = True
+    if save:
+        # post save signal will be resend here
+        instance.save()
+        return
     queue = django_rq.get_queue('default')
     # Download presentation from yandex.disk if local copy not saved.
     job, old_path = None, ""
@@ -75,8 +79,6 @@ def post_save_project(sender, instance, created, *args, **kwargs):
                       "presentation",
                       "presentation_slideshare_url",
                       depends_on=job)
-    if save:
-        instance.save()
 
 
 def post_save_report(sender, instance, created, *args, **kwargs):
