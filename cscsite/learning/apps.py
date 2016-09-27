@@ -27,6 +27,7 @@ class LearningConfig(AppConfig):
                           sender=self.get_model('AssignmentComment'))
         post_save.connect(mark_assignment_passed,
                           sender=self.get_model('AssignmentComment'))
+        # FIXME: redesign with `from_db` method!
         post_init.connect(track_fields_post_init,
                           sender=self.get_model('CourseClass'),
                           dispatch_uid='learning.signals.course_class_post_init')
