@@ -1016,10 +1016,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         ("all", _("All"))
     )
     filter_by_comments = (
+        ("any", _("No matter")),
         ("student", _("From student")),
         ("teacher", _("From teacher")),
         ("empty", _("Without comments")),
-        ("nomatter", _("No matter")),
     )
 
     def get_term_data(self):
@@ -1113,9 +1113,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             filters["grade__isnull"] = False
         query["grades"] = filter_grade
         # Set status filter
-        filter_by_comments = self.request.GET.get("comment", "student")
+        filter_by_comments = self.request.GET.get("comment", "any")
         if filter_by_comments not in (k for k, v in self.filter_by_comments):
-            filter_by_comments = "student"
+            filter_by_comments = "any"
         if filter_by_comments == "student":
             filters["last_comment_from"] = StudentAssignment.LAST_COMMENT_STUDENT
         elif filter_by_comments == "teacher":
