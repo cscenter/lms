@@ -82,14 +82,13 @@ def update_last_comment_info_on_student_assignment(sender, instance,
         return
 
     sa = instance.student_assignment
-    sa.last_commented = timezone.now()
 
-    teachers = [t.teacher_id for t in sa.assignment.notify_teachers.all()]
-    if instance.author_id in teachers:
-        sa.last_comment_from = sa.LAST_COMMENT_TEACHER
+    if instance.author_id == sa.student_id:
+        last_comment_from = sa.LAST_COMMENT_STUDENT
     else:
-        sa.last_comment_from = sa.LAST_COMMENT_STUDENT
-    sa.save()
+        last_comment_from = sa.LAST_COMMENT_TEACHER
+    sa.__class__.objects.filter(pk=sa.pk).update(
+        last_comment_from=last_comment_from)
 
 
 def mark_assignment_passed(sender, instance, created,
