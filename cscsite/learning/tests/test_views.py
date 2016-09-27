@@ -972,18 +972,16 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         as1 = AssignmentFactory.create_batch(2, course_offering=co)
         resp = self.client.get(reverse(self.url_name))
         # By default we show submissions from last 3 assignments,
-        # without grades and with comments
-        self.assertEquals(0, len(resp.context['student_assignment_list']))
-        # Let's check assignments without comments too
-        resp = self.client.get(reverse(self.url_name) + "?comment=nomatter")
+        # without grades and any last commentator
         self.assertEquals(6, len(resp.context['student_assignment_list']))
-        self.assertSameObjects([(StudentAssignment.objects
-                                 .get(student=student,
-                                      assignment=assignment))
-                                for student in students
-                                for assignment in as1],
-                               resp.context['student_assignment_list'])
-        # Teacher commented on an assignment, now it should show up with appropriate filter
+        sas = ((StudentAssignment.objects.get(student=student,
+                                              assignment=assignment))
+               for student in students for assignment in as1)
+        self.assertSameObjects(sas, resp.context['student_assignment_list'])
+        # Let's check assignments with last comment from student only
+        resp = self.client.get(reverse(self.url_name) + "?comment=student")
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
+        # Teacher commented on an assignment, Show with appropriate filter.
         a = as1[0]
         student = students[0]
         a_s = StudentAssignment.objects.get(student=student, assignment=a)
@@ -991,15 +989,15 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
                                         author=teacher)
         resp = self.client.get(reverse(self.url_name) + "?comment=teacher")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
-        # If student have commented, it should show up due to default filter
+        # If student have commented, it should show up
         AssignmentCommentFactory.create(student_assignment=a_s,
                                         author=student)
-        resp = self.client.get(reverse(self.url_name))
+        resp = self.client.get(reverse(self.url_name) + "?comment=student")
         self.assertSameObjects([a_s], resp.context['student_assignment_list'])
         # if teacher has set a grade, assignment shouldn't show up
         a_s.grade = 3
         a_s.save()
-        resp = self.client.get(reverse(self.url_name))
+        resp = self.client.get(reverse(self.url_name) + "?comment=student")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
 
 
