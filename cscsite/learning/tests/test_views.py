@@ -973,6 +973,9 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(reverse(self.url_name))
         # By default we show submissions from last 3 assignments,
         # without grades and any last commentator
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
+        # Show without comments
+        resp = self.client.get(reverse(self.url_name) + "?comment=empty")
         self.assertEquals(6, len(resp.context['student_assignment_list']))
         sas = ((StudentAssignment.objects.get(student=student,
                                               assignment=assignment))

@@ -1116,7 +1116,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         filter_by_comments = self.request.GET.get("comment", "any")
         if filter_by_comments not in (k for k, v in self.filter_by_comments):
             filter_by_comments = "any"
-        if filter_by_comments == "student":
+        if filter_by_comments == "any":
+            filters["last_commented__isnull"] = False
+        elif filter_by_comments == "student":
             filters["last_comment_from"] = StudentAssignment.LAST_COMMENT_STUDENT
         elif filter_by_comments == "teacher":
             filters["last_comment_from"] = StudentAssignment.LAST_COMMENT_TEACHER
