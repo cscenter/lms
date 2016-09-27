@@ -1,38 +1,46 @@
 import logging
 import os
 import posixpath
-
-import requests
 import shutil
 
+import requests
 from django.apps import apps
 from django.conf import settings
+from django_rq import job
 
+from core.yandex_api import YandexDiskRestAPI
 from slides import slideshare
 
 logger = logging.getLogger(__name__)
 
 
+@job('default')
 def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
     """Download supervisor presentation to local storage by public link"""
     from learning.projects.models import project_presentation_files
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
-    return _download_presentation(
+    file_path = _download_presentation(
         instance=project,
         public_link=project.supervisor_presentation_url,
         file_attribute_name="supervisor_presentation",
         file_path_without_ext=project_presentation_files(project, "supervisor"),
         retries=retries
     )
+    upload_presentation_to_slideshare.delay(
+        project_id,
+        "supervisor_presentation",
+        "supervisor_presentation_slideshare_url")
+    return file_path
 
 
+@job('default')
 def download_presentation_from_yandex_disk_students(project_id, retries=3):
     """Download participants presentation to local storage by public link"""
     from learning.projects.models import project_presentation_files
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
-    return _download_presentation(
+    file_path = _download_presentation(
         instance=project,
         public_link=project.presentation_url,
         file_attribute_name="presentation",
@@ -40,6 +48,11 @@ def download_presentation_from_yandex_disk_students(project_id, retries=3):
                                                          "participants"),
         retries=retries
     )
+    upload_presentation_to_slideshare.delay(
+        project_id,
+        "presentation",
+        "presentation_slideshare_url")
+    return file_path
 
 
 def _download_presentation(instance, public_link, file_attribute_name,
@@ -48,6 +61,7 @@ def _download_presentation(instance, public_link, file_attribute_name,
     Download file by public link and save it with predefined name.
 
     Notes:
+        We ignore original file name, but get extension from it.
         All tasks runs in fail-safe context.
     Properties:
         object : instance
@@ -94,6 +108,7 @@ def _download_presentation(instance, public_link, file_attribute_name,
     raise exc
 
 
+@job('default')
 def upload_presentation_to_slideshare(project_pk,
                                       slides_attribute,
                                       slides_url_attribute):
@@ -104,9 +119,6 @@ def upload_presentation_to_slideshare(project_pk,
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_pk)
     file_attr = getattr(project, slides_attribute)
-    # Local file not found
-    if not file_attr:
-        return
 
     if slides_attribute.startswith("supervisor"):
         title_suffix = "Презентация руководителя"
@@ -123,63 +135,3 @@ def upload_presentation_to_slideshare(project_pk,
         Project.objects.filter(pk=project.pk).update(
             **{slides_url_attribute: slideshare_url})
         return slideshare_url
-
-
-class YandexDiskException(Exception):
-    pass
-
-
-# TODO: Move to separated module
-class YandexDiskRestAPI(object):
-    BASE_URL = "https://cloud-api.yandex.net/v1"
-    PUBLIC_RESOURCE_URL = BASE_URL + "/disk/public/resources"
-    DOWNLOAD_DATA_URL = PUBLIC_RESOURCE_URL + "/download"
-
-    def __init__(self, token=None):
-        self.token = token
-
-        self.base_headers = {
-            "Accept": "application/json",
-            "Host": "cloud-api.yandex.net"
-        }
-        if self.token:
-            self._auth_header = {"Authorization": "OAuth " + self.token}
-
-    def get_metadata(self, key_or_path, public=True):
-        """
-        Returns meta data for file or folder.
-
-        Required token if file/folder not published
-        """
-        payload = {'public_key': key_or_path}
-        headers = self.base_headers
-        if not public:
-            headers = self._attach_token_header(headers)
-        r = requests.get(self.PUBLIC_RESOURCE_URL,
-                         headers=headers,
-                         params=payload)
-        self._check_status(r)
-        data = r.json()
-        logger.debug("Meta data in JSON: {}".format(data))
-        return data
-
-    def get_download_data(self, key_or_path):
-        """Pass public_key or public url"""
-        payload = {'public_key': key_or_path}
-        r = requests.get(self.DOWNLOAD_DATA_URL,
-                         headers=self.base_headers,
-                         params=payload)
-        self._check_status(r)
-        data = r.json()
-        logger.debug("Download data in JSON: {}".format(data))
-        return data
-
-    def _attach_token_header(self, headers):
-        if not hasattr(self, "_auth_header"):
-            raise YandexDiskException("Set token first")
-        headers.update(self._auth_header)
-
-    @staticmethod
-    def _check_status(response):
-        if response.status_code != 200:
-            raise YandexDiskException(response.status_code, response.text)
