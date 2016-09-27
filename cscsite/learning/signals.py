@@ -82,13 +82,13 @@ def update_last_comment_info_on_student_assignment(sender, instance,
         return
 
     sa = instance.student_assignment
-
     if instance.author_id == sa.student_id:
-        last_comment_from = sa.LAST_COMMENT_STUDENT
+        sa.last_comment_from = sa.LAST_COMMENT_STUDENT
     else:
-        last_comment_from = sa.LAST_COMMENT_TEACHER
+        sa.last_comment_from = sa.LAST_COMMENT_TEACHER
+
     sa.__class__.objects.filter(pk=sa.pk).update(
-        last_comment_from=last_comment_from)
+        last_comment_from=sa.last_comment_from)
 
 
 def mark_assignment_passed(sender, instance, created,
