@@ -26,9 +26,6 @@
   position: relative;
   min-height:500px;
 
-  h5 {
-    margin-bottom: 20px;
-  }
 
   .list-group-item {
     background: $background-grey;
@@ -49,10 +46,7 @@
     &:last-child {
       border-bottom-width: 0;
     }
-    &:first-child:last-child {
-      border-top-width: 1px;
-      border-bottom-width: 1px;
-    }
+
 
     &:hover, &:focus {
       color: $color-blue;
@@ -77,6 +71,10 @@
   .filters-wrapper {
     height: 40px;
     margin: 0 0 20px 0;
+  }
+
+  .table {
+    margin-bottom: 0;
   }
 
   .filters {
