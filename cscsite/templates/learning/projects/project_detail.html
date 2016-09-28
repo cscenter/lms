@@ -40,7 +40,7 @@
                 {% if can_send_report %}
                     <div class="csc-well o-send-report-form">
                         <h2>{% trans "Send report form" %}</h2>
-                        <b>Крайний срок отправки отчета</b>: {{ project.semester.report_ends_at }}<br><br>
+                        <b>Дедлайн</b>: {{ project.semester.report_ends_at }}<br><br>
                         {% crispy form %}
                     </div>
                 {% elif project.is_active and request.user in project.students.all and not project.report_period_started %}

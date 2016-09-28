@@ -13,7 +13,7 @@
 }
 
 
-// teacher assignment submissions page
+// TEACHER assignment submissions page
 #assignments-select-button {
   @extend .btn;
   @extend .btn-primary;
@@ -26,39 +26,71 @@
   position: relative;
   min-height:500px;
 
-  .page-aside {
-    top: -10px;
-    bottom: -30px;
-    position: relative;
-    float: left;
+  h5 {
+    margin-bottom: 20px;
   }
-  .page-main {
-    padding: 30px 20px;
-    h3 {
-      display: inline-block;
-      margin: 0;
+
+  .list-group-item {
+    background: $background-grey;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    padding: 8px;
+    border-bottom: 1px solid $color-gray-90;
+    border-color: $color-gray-90!important;
+    white-space: nowrap;
+    overflow:hidden;
+    -ms-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+
+    &:first-child {
+      border-top: 0;
+    }
+    &:last-child {
+      border-bottom: 0;
     }
 
-    .filters-wrapper {
-      height: 40px;
-      margin: 0 0 40px 0;
-    }
-
-    .filters {
-      @extend .pull-right;
-      @extend .btn-group;
-      margin: 0;
-
-      select {
-        width: 100px;
-      }
-      .multiselect-container>li>a>label.radio, .multiselect-container>li>a>label.checkbox {
-        width:276px;
-        white-space: normal;
-      }
-
+    &:hover, &:focus {
+      color: $color-blue;
     }
   }
 
+  .list-group-item.active {
+    background: $color-blue;
+    color: #fff!important;
+    border:0;
+    padding: 8px;
+  }
 
+  h3 {
+    display: inline-block;
+    margin: 0;
+  }
+
+  .assignments-inner {
+    padding: 30px;
+    background: #fff;
+  }
+
+  .filters-wrapper {
+    height: 40px;
+    margin: 0 0 20px 0;
+  }
+
+  .filters {
+    @extend .btn-group;
+    @extend .pull-right;
+
+    .btn-default {
+      background: inherit;
+    }
+
+    select {
+      width: 100px;
+    }
+    .multiselect-container>li>a>label.radio, .multiselect-container>li>a>label.checkbox {
+      width:276px;
+      white-space: normal;
+    }
+  }
 }

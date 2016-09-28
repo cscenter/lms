@@ -4,114 +4,104 @@
 {% load core_tags %}
 {% load static %}
 
+{% block body_class %} gray{% endblock body_class %}
+
 {% block content %}
 <div class="container" id="assignments-page">
-<div class="page-aside">
-  <div class="page-aside-inner">
-    <section class="page-aside-section">
-      <h5 class="page-aside-title">СТАТУС</h5>
-      <div class="list-group has-actions">
-          {% for code, name in filter_by_grades %}
-              <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignments={{ query.assignments_qs }}"
-                 class="list-group-item{% if code == query.grades %} active{% endif %}">
-                  {{ name }}</a>
-          {% endfor %}
-      </div>
-    </section>
+<div class="row">
 
-    <section class="page-aside-section">
-        <h5 class="page-aside-title">ПОСЛЕДНИЙ<br>КОММЕНТАРИЙ</h5>
-        <div class="list-group has-actions">
-          {% for code, comment in filter_by_comments %}
-              <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
-                 class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment }}</a>
-          {% endfor %}
-        </div>
-    </section>
+<div class="col-xs-3">
+    <h5>СТАТУС</h5>
+    <div class="list-group">
+      {% for code, name in filter_by_grades %}
+          <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignments={{ query.assignments_qs }}"
+             class="list-group-item{% if code == query.grades %} active{% endif %}">
+              {{ name }}</a>
+      {% endfor %}
+    </div>
 
-  {% if course_offerings %}
-    <section class="page-aside-section">
-      <h5 class="page-aside-title">КУРС</h5>
-      <div class="list-group has-actions">
+    <h5>ПОСЛЕДНИЙ<br>КОММЕНТАРИЙ</h5>
+    <div class="list-group">
+      {% for code, comment in filter_by_comments %}
+          <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
+             class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment }}</a>
+      {% endfor %}
+    </div>
+
+    {% if course_offerings %}
+        <h5>КУРС</h5>
+        <div class="list-group">
           {% for co in course_offerings %}
             <a href="{% url "assignment_list_teacher" %}?year={{ co.semester.year }}&term={{ co.semester.type }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
-               data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}">{{ co.course.name }}</a>
+               data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}" title="{{ co.course.name }}">{{ co.course.name }}</a>
           {% endfor %}
-      </div>
-    </section>
-  {% endif %}
+        </div>
+    {% endif %}
 
     {% if terms %}
-        <section class="page-aside-section">
-          <h5 class="page-aside-title">СЕМЕСТР</h5>
-          <div class="list-group has-actions">
-              {% for term in terms %}
-                <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&comment={{ query.comment }}"
-                   class="list-group-item{% if term.index == query.term_index %} active{% endif %}">{{ term }}</a>
-              {% endfor %}
-          </div>
-        </section>
+        <h5>СЕМЕСТР</h5>
+        <div class="list-group">
+          {% for term in terms %}
+            <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&comment={{ query.comment }}"
+               class="list-group-item{% if term.index == query.term_index %} active{% endif %}">{{ term }}</a>
+          {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="col-xs-9">
+    {% if assignments %}
+        <div class="filters">
+            <form action="{{ query.form_url }}" method="GET">
+                <input type="hidden" name="assignments" value="" />
+                <select id="assignments-select" multiple="multiple" size="1">
+                    {% for assignment in assignments %}
+                        <option {% if assignment in query.assignments %}selected{% endif %} value="{{ assignment.pk }}">{{ assignment.title }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" id="assignments-select-button">Фильтровать задания</button>
+                <div class="loading"><i class="fa fa-refresh fa-spin"></i></div>
+            </form>
+        </div>
+    {% endif %}
+    <ol class="breadcrumb gray">
+        <li class="active">Выполнение заданий</li>
+    </ol>
+    <div class="clearfix"></div>
+
+    <div class="assignments-inner">
+    {% if student_assignment_list %}
+      <table class="table" width="100%">
+        <thead>
+        <tr>
+            <th width="25%">{% trans "Deadline" %}</th>
+            <th></th>
+            <th width="30%">{% trans "Student" %}</th>
+        </tr>
+        </thead>
+        {% for s_a in student_assignment_list %}
+        <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
+          <td>
+            <div class="assignment-date {{ s_a.assignment.deadline_at|date_soon_css }}">
+              <span style="white-space: nowrap;">
+                {{ s_a.assignment.deadline_at|naturalday:"d E" }} {{ s_a.assignment.deadline_at|time:"H:i" }}
+              </span>
+
+            </div>
+          </td>
+          <td><a href="{% url 'a_s_detail_teacher' s_a.pk %}">{{ s_a.assignment.title }}</a></td>
+          <td><a href="{{ s_a.student.get_absolute_url }}">{{ s_a.student.get_short_name }}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+        Задайте другие критерии поиска.
     {% endif %}
     </div>
 </div>
 
-<div class="page-main">
-  <div class="row">
-    <div class="col-xs-12">
-        <div class="filters-wrapper">
-
-        <h3>Выполнение заданий</h3>
-        {% if assignments %}
-            <div class="filters">
-                <form action="{{ query.form_url }}" method="GET">
-                    <input type="hidden" name="assignments" value="" />
-                    <select id="assignments-select" multiple="multiple" size="1">
-                        {% for assignment in assignments %}
-                            <option {% if assignment in query.assignments %}selected{% endif %} value="{{ assignment.pk }}">{{ assignment.title }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="submit" id="assignments-select-button">Фильтровать задания</button>
-                    <div class="loading"><i class="fa fa-refresh fa-spin"></i></div>
-                </form>
-            </div>
-            <div>
-            </div>
-            <div class="clearfix"></div>
-        {% endif %}
-        </div>
-
-        {% if student_assignment_list %}
-          <table class="table" width="100%">
-            <thead>
-            <tr>
-                <th width="25%">{% trans "Deadline" %}</th>
-                <th></th>
-                <th width="30%">{% trans "Student" %}</th>
-            </tr>
-            </thead>
-            {% for s_a in student_assignment_list %}
-            <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
-              <td>
-                <div class="assignment-date {{ s_a.assignment.deadline_at|date_soon_css }}">
-                  <span style="white-space: nowrap;">
-                    {{ s_a.assignment.deadline_at|naturalday:"d E" }} {{ s_a.assignment.deadline_at|time:"H:i" }}
-                  </span>
-
-                </div>
-              </td>
-              <td><a href="{% url 'a_s_detail_teacher' s_a.pk %}">{{ s_a.assignment.title }}</a></td>
-              <td><a href="{{ s_a.student.get_absolute_url }}">{{ s_a.student.get_short_name }}</a></td>
-            </tr>
-            {% endfor %}
-          </table>
-        {% else %}
-            Задайте другие критерии поиска.
-        {% endif %}
-    </div>
-  </div>
 </div>
 </div>
-
 {% endblock content %}
 
 {% block javascripts %}

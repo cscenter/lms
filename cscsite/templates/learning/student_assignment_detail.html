@@ -68,7 +68,7 @@
                    {% else %}
                    teacher
                    {% endif %}">
-          <div class="csc-well assignment-comment">
+          <div class="csc-well assignment-comment" {% if user.is_curator %}data-id="{{ comment.pk }}"{% endif %}>
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
               {% markdown 3600 "assignment_comment" comment.pk comment.modified %}

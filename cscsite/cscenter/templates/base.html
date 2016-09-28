@@ -13,7 +13,10 @@
     {% comment %} Bootstrap inside style.css {% endcomment %}
     <link href="{% static "css/center/style.css" %}" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+    {% block hightlight_styles %}
     <link href="{% static "css/vendor/highlight-styles/tomorrow.css" %}" rel="stylesheet">
+    {% endblock hightlight_styles %}
+
     {% if request.user.is_curator %}
         <link href="{% static "css/center/staff.css" %}" rel="stylesheet">
     {% endif %}

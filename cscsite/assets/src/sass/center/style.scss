@@ -8,7 +8,7 @@
 
 // Material design elements based on bootstrap
 @import "components/labels";
-@import "components/page_aside";
+//@import "components/page_aside";
 @import "_material_design.scss";
 
 @import "components/input-daterange";
@@ -21,6 +21,7 @@
 @import "components/links";
 @import "components/lists";
 @import "components/cards";
+@import "components/breadcrumbs";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
 @import "pages/login";
@@ -413,13 +414,13 @@ h5.assignment {
 }
 
 .comment-list li.student {
-  margin-right: 80px;
+  margin-right: 60px;
   margin-left: 0px;
 }
 
 .comment-list li.teacher {
   margin-right: 0px;
-  margin-left: 80px;
+  margin-left: 60px;
 }
 
 #div_id_deadline_at {

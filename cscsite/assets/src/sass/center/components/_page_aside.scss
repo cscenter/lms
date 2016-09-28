@@ -51,7 +51,7 @@
     content: '';
     position: relative;
     display: block;
-    margin: 22px;
+    margin: 10px;
     border-bottom: 1px solid #e4eaec;
   }
   &:last-child:after {
@@ -82,7 +82,7 @@
 }
 
 .page-aside-title {
-  padding: 10px 30px;
+  padding: 10px;
   margin: 20px 0 10px;
   font-weight: 500;
   line-height: 1.3;
@@ -98,7 +98,7 @@
     margin-bottom: 22px;
   }
   .list-group-item {
-    padding: 13px 30px;
+    padding: 10px 10px;
     margin-bottom: 1px;
     border: none;
     //white-space: nowrap;

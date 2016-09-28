@@ -99,8 +99,6 @@ class InterviewCommentAdmin(admin.ModelAdmin):
             kwargs['queryset'] = (
                 Interview.objects.select_related("applicant",
                                                  "applicant__campaign", ))
-        if db_field.name == 'get_interview':
-            print("test")
         return (super(InterviewCommentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
