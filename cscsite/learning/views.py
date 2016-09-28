@@ -1618,6 +1618,7 @@ class GradebookTeacherDispatchView(TeacherOnlyMixin, GradebookDispatchView):
         return context
 
 
+# TODO: add transaction.atomic
 class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
     is_for_staff = False
     user_type = 'teacher'

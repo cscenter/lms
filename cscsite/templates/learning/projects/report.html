@@ -5,6 +5,11 @@
 {% load thumbnail %}
 {% load core_tags %}
 {% load projects_tags %}
+{% load staticfiles %}
+
+{% block hightlight_styles %}
+<link href="{% static "css/vendor/highlight-styles/monokai_sublime.css" %}" rel="stylesheet">
+{% endblock hightlight_styles %}
 
 {% block content %}
     {% with student=report.project_student.student project=report.project_student.project %}
@@ -22,7 +27,7 @@
 
     <div class="o-project-description">
         <div class="panel-heading">
-            <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description"><span>Описание проекта</span></a>
+            <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description"><span>Цели и задачи проекта</span></a>
         </div>
         <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
             <div class="panel-body">{{ project.description|default:"Описание проекта не найдено." }}</div>

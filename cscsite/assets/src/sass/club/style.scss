@@ -16,6 +16,7 @@
 @import "../center/components/loading";
 @import "../center/components/cropper";
 @import "../center/components/lists";
+@import "../center/components/breadcrumbs";
 @import "../center/components/upload_photo";
 @import "top_menu.scss";
 
@@ -31,6 +32,15 @@ table {
     width: 84px;
   }
 }
+
+#assignments-page {
+  margin-top: 40px;
+
+  .assignments-inner {
+    padding: 0;
+  }
+}
+
 
 // course offering detail page
 .enroll-block {
