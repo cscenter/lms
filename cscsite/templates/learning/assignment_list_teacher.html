@@ -20,7 +20,7 @@
       {% endfor %}
     </div>
 
-    <h5>ПОСЛЕДНИЙ<br>КОММЕНТАРИЙ</h5>
+    <h5>ПОСЛЕДНИЙ КОММЕНТАРИЙ</h5>
     <div class="list-group">
       {% for code, comment in filter_by_comments %}
           <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
