@@ -11,7 +11,7 @@ from django.core.management import CommandError
 
 from learning import settings
 from learning.models import CourseClass
-from slides.tasks import maybe_upload_slides_yandex
+from learning.tasks import maybe_upload_slides_yandex
 
 
 class Command(BaseCommand):

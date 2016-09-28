@@ -130,6 +130,13 @@
 
 
 #project-report-detail-page {
+  .__report-text {
+    &.ch-alt {
+      padding: 10px 26px;
+      font-size: 16px;
+    }
+  }
+
   label[for=id_text] {
     font-size: 18px;
     margin: 10px 0;
