@@ -35,7 +35,7 @@
     border-radius: 0;
     border-left: 0;
     border-right: 0;
-    padding: 8px;
+    padding: 8px 0;
     border-bottom: 1px solid $color-gray-90;
     border-color: $color-gray-90!important;
     white-space: nowrap;
@@ -44,10 +44,14 @@
     text-overflow: ellipsis;
 
     &:first-child {
-      border-top: 0;
+      border-top-width: 0;
     }
     &:last-child {
-      border-bottom: 0;
+      border-bottom-width: 0;
+    }
+    &:first-child:last-child {
+      border-top-width: 1px;
+      border-bottom-width: 1px;
     }
 
     &:hover, &:focus {
@@ -56,10 +60,8 @@
   }
 
   .list-group-item.active {
-    background: $color-blue;
-    color: #fff!important;
-    border:0;
-    padding: 8px;
+    color: $color-blue!important;
+    font-weight: bold;
   }
 
   h3 {
