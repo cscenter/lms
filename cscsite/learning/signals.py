@@ -3,11 +3,11 @@ from __future__ import absolute_import, unicode_literals
 import itertools
 
 from django.apps import apps
-from django.utils import timezone
 
 import django_rq
 
-from slides import tasks
+from learning.tasks import (maybe_upload_slides_yandex,
+                            maybe_upload_slides_slideshare)
 
 
 def create_student_assignments_for_new_assignment(sender, instance, created,
@@ -110,8 +110,8 @@ def track_fields_post_init(sender, instance, **kwargs):
 def add_upload_slides_job(sender, instance, **kwargs):
     if instance.slides and not instance.slides_url:
         queue = django_rq.get_queue('default')
-        queue.enqueue(tasks.maybe_upload_slides_yandex, instance.pk)
-        queue.enqueue(tasks.maybe_upload_slides_slideshare, instance.pk)
+        queue.enqueue(maybe_upload_slides_yandex, instance.pk)
+        queue.enqueue(maybe_upload_slides_slideshare, instance.pk)
 
 
 def create_course_offering_news_notification(sender, instance, created,

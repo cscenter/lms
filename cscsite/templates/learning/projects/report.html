@@ -35,7 +35,7 @@
     </div>
 
     <div class="card">
-        <div class="card-header ch-alt">Текст отчета  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</div>
+        <div class="card-header ch-alt __report-text">Текст отчета  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</div>
         <div class="card-body card-padding">
             <div class="ubertext">
             {% markdown 3600 "report_detail" report.pk report.modified %}
