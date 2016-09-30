@@ -48,8 +48,10 @@ def csc_menu(context, menu_name, root_id=False):
     root_id = int(root_id)
     # Flattened to tree
     menu_tree = []
+    user = context['request'].user
+    user_groups = set(user._cs_group_pks)
     for item in flattened:
-        if not has_permissions(item, context['request'].user):
+        if not has_permissions(item, user, user_groups):
             continue
         # FIXME: What is root id?
         if root_id and item.level == 1 and item.id != root_id:
@@ -66,13 +68,9 @@ def csc_menu(context, menu_name, root_id=False):
     }
 
 
-def has_permissions(item, user, **kwargs):
+def has_permissions(item, user, user_groups, **kwargs):
     """Check user has permissions for view menu item"""
     if len(item.groups_allowed) > 0:
-        if user.is_authenticated():
-            user_groups = set(user._cs_group_pks)
-        else:
-            user_groups = set()
         if not user_groups.intersection(item.groups_allowed):
             return False
     if item.extension.unauthenticated and user.is_authenticated():

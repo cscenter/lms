@@ -91,8 +91,7 @@ def update_last_comment_info_on_student_assignment(sender, instance,
         last_comment_from=sa.last_comment_from)
 
 
-def mark_assignment_passed(sender, instance, created,
-                           *args, **kwargs):
+def mark_assignment_passed(sender, instance, created, *args, **kwargs):
     if not created:
         return
     a_s = instance.student_assignment

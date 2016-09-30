@@ -431,6 +431,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @cached_property
     def _cs_group_pks(self):
+        # TODO: refactor with set
         try:
             user_groups = self._prefetched_objects_cache['groups']
             user_groups = [group.pk for group in user_groups]

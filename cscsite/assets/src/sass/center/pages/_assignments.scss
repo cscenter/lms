@@ -18,6 +18,8 @@
   @extend .btn;
   @extend .btn-primary;
   @extend .btn-outline;
+  background: #fff;
+  border-color: #ccc;
   padding: 6px 12px!important;
 }
 
@@ -28,6 +30,7 @@
 
 
   .list-group-item {
+    color: $color-gray-20;
     background: $background-grey;
     border-radius: 0;
     border-left: 0;
@@ -83,7 +86,7 @@
     @extend .pull-right;
 
     .btn-default {
-      background: inherit;
+      background: #fff;
     }
 
     select {

@@ -92,7 +92,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
             )
             for recipient in recipients:
                 notify.send(
-                    report.project_student.student,
+                    report.project_student.student,  # actor
                     verb='added',
                     description="new report added",
                     action_object=report,

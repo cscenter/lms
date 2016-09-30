@@ -260,7 +260,12 @@ class ReportView(FormMixin, generic.DetailView):
     context_object_name = "report"
     template_name = "learning/projects/report.html"
 
-    # TODO: move select_related to GetReportObjectMixin and replace? See ReportUddateViewMixin
+    def __init__(self, **kwargs):
+        super(ReportView, self).__init__(**kwargs)
+        self.is_author = None
+        self.is_project_reviewer = None
+        self.is_curator = None
+
     def get_object(self, queryset=None):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
@@ -269,16 +274,25 @@ class ReportView(FormMixin, generic.DetailView):
                 project_student__student=student_pk,
                 project_student__project=project_pk,
             ).select_related("project_student",
-                             "project_student__project")
-        )
+                             "project_student__project",
+                             "project_student__project__semester"))
         return report
+
+    def set_roles(self, report):
+        """Cache roles of authenticated user in current project """
+        user = self.request.user
+        self.is_author = report.project_student.student_id == user.pk
+        self.is_project_reviewer = (
+            user in report.project_student.project.reviewers.all())
+        self.is_curator = user.is_curator
 
     def has_permissions(self, report):
         """Check authenticated user has access to GET- or POST-actions"""
-        is_author = report.project_student.student == self.request.user
-        is_project_reviewer = (self.request.user in
-                               report.project_student.project.reviewers.all())
+        is_author = self.is_author
+        is_project_reviewer = self.is_project_reviewer
         is_curator = self.request.user.is_curator
+        is_project_participant = is_author or is_project_reviewer or is_curator
+
         add_comment_action = ReportCommentForm.prefix in self.request.POST
         send_review_action = ReportReviewForm.prefix in self.request.POST
         # Additional check for curators on send review action
@@ -293,7 +307,6 @@ class ReportView(FormMixin, generic.DetailView):
         # Hide view for reviewers until report status is `SENT`.
         if is_project_reviewer and report.status == Report.SENT:
             return False
-        is_project_participant = is_author or is_project_reviewer or is_curator
         return is_project_participant
 
     def form_valid(self, form):
@@ -332,13 +345,11 @@ class ReportView(FormMixin, generic.DetailView):
                     .select_related('author'))
         context["comments"] = comments
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
-        is_reviewer = self.request.user in report.project_student.project.reviewers.all()
-        is_author = self.request.user == report.project_student.student
         context["can_comment"] = report.status != report.COMPLETED
         context["can_assess"] = (report.status == report.SENT and
                                  self.request.user.is_curator)
-        context["is_reviewer"] = is_reviewer
-        context["is_author"] = is_author
+        context["is_reviewer"] = self.is_project_reviewer
+        context["is_author"] = self.is_author
         # Append preliminary scores
         context["review_fields"] = ReportReviewForm._meta.fields
         return context
@@ -352,14 +363,16 @@ class ReportView(FormMixin, generic.DetailView):
         return review
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        report = self.object = self.get_object()
+        self.set_roles(report)
         if not self.has_permissions(self.object):
             return redirect_to_login(request.get_full_path())
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        report = self.object = self.get_object()
+        self.set_roles(report)
         if not self.has_permissions(self.object):
             return HttpResponseForbidden()
 

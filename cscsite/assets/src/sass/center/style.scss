@@ -605,7 +605,11 @@ tr.unread {
   overflow: hidden;
 
   pre {
-    padding: 0.5em;
+    padding: 1em;
+
+    code {
+      padding: 0;
+    }
   }
   table {
     @extend .table;
