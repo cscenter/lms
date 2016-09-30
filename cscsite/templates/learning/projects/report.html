@@ -8,7 +8,7 @@
 {% load staticfiles %}
 
 {% block hightlight_styles %}
-<link href="{% static "css/vendor/highlight-styles/monokai_sublime.css" %}" rel="stylesheet">
+<link href="{% static "css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
 {% endblock hightlight_styles %}
 
 {% block content %}
@@ -47,17 +47,6 @@
               {% endif %}
         </div>
     </div>
-{#      <div class="csc-well">#}
-{#        <div class="ubertext">#}
-{#            <h3>Текст отчета  {% if request.user.is_curator %} <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</h3>#}
-{#            {% markdown 3600 "report_detail" report.pk report.modified %}#}
-{#                {{ report.text }}#}
-{#            {% endmarkdown %}#}
-{#              {% if report.file %}#}
-{#              <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ report.file_url }}">{{ report.file_name }}</a>#}
-{#              {% endif %}#}
-{#        </div>#}
-{#      </div>#}
 
         <ul class="comment-list">
             {% for comment in comments %}
@@ -80,6 +69,7 @@
             </li>
             {% endfor %}
         </ul>
+
         {% if can_comment %}
         <div class="csc-well">
             {% crispy new_comment_form new_comment_form.helper %}
@@ -97,7 +87,7 @@
                     </div>
                     <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
                         <div class="panel-body">
-                            {# TODO: move this logic to view, too much custom tags, don't like it #}
+                             TODO: move this logic to view, too much custom tags, don't like it
                             {% for field in review_fields %}
                                 <b>{{ review|verbose_name_by_attr_name:field }}</b>: {{ review|lookup_display:field|default:"-" }}<br>
                             {% endfor %}
