@@ -36,7 +36,9 @@ class NotificationTest(TestCase):
 
         from_user = UserFactory.create(username="from", password="pwd", email="example@example.com")
         to_user = UserFactory.create(username="to", password="pwd", email="example@example.com")
-        notify.send(from_user, recipient=to_user, verb='commented', action_object=from_user)
+        notify.send(from_user, notification_type=0,
+                    recipient=to_user, verb='commented',
+                    action_object=from_user)
         notification = Notification.objects.get(recipient=to_user)
         delta = timezone.now().replace(tzinfo=utc) - localtime(notification.timestamp, pytz.timezone(settings.TIME_ZONE))
         self.assertTrue(delta.seconds < 60)

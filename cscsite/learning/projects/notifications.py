@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
+
 from django.core.urlresolvers import reverse
-from django.db.models import Prefetch
 
-from notifications.decorators import register
+from notifications.decorators import register, NotificationType
 from notifications.models import Notification
-from notifications.notifier import NotificationConfig
+from notifications.notifier import NotificationService
 
 
-@register
-class NewCommentNotification(NotificationConfig):
+class Type(NotificationType):
+    REMINDER = 2
+
+
+@register(notification_uid=Type.REMINDER)
+def test_handler():
+    pass
+
+
+class NewCommentNotification(NotificationService):
     title = "Преподаватель оставил комментарий к отчету {}"
     template = "emails/projects/new_comment.html"
 

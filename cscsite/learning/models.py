@@ -668,14 +668,9 @@ class StudentAssignment(TimeStampedModel):
         verbose_name=_("Is passed"),
         help_text=_("It's online and has comments"),
         default=False)
-    last_commented = models.DateTimeField(
-        verbose_name=_("Last comment date"),
-        null=True,
-        blank=True)
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("Last comment from"),
-        help_text=_(
-            "System field. 0 - no comments yet. 1 - from student. 2 - from teacher"),
+        help_text=_("0 - no comments yet, 1 - from student, 2 - from teacher"),
         editable=False,
         default=LAST_COMMENT_NOBODY)
 

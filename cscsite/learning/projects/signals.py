@@ -90,15 +90,15 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                 is_staff=True,
                 groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
             )
-            for recipient in recipients:
-                notify.send(
-                    report.project_student.student,  # actor
-                    verb='added',
-                    description="new report added",
-                    action_object=report,
-                    target=report.project_student.project,
-                    recipient=recipient
-                )
+            # for recipient in recipients:
+            #     notify.send(
+            #         report.project_student.student,  # actor
+            #         verb='added',
+            #         description="new report added",
+            #         action_object=report,
+            #         target=report.project_student.project,
+            #         recipient=recipient
+            #     )
 
 
 def post_save_review(sender, instance, created, *args, **kwargs):
@@ -137,17 +137,17 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         # Note: Doesn't hit database here if content types already cached
         project = comment.report.project_student.project
         student = comment.report.project_student.student
-        for recipient in recipients:
-            notify.send(
-                comment.author,  # actor
-                verb='added',
-                description="new comment added",
-                action_object=comment,
-                target=comment.report,
-                recipient=recipient,
-                data={
-                    "project_name": project.name,
-                    "project_pk": project.pk,
-                    "student_pk": student.pk,
-                }
-            )
+        # for recipient in recipients:
+        #     notify.send(
+        #         comment.author,  # actor
+        #         verb='added',
+        #         description="new comment added",
+        #         action_object=comment,
+        #         target=comment.report,
+        #         recipient=recipient,
+        #         data={
+        #             "project_name": project.name,
+        #             "project_pk": project.pk,
+        #             "student_pk": student.pk,
+        #         }
+        #     )

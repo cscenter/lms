@@ -5,6 +5,22 @@
 {% load core_tags %}
 {% load markdown from core_tags %}
 
+{% block javascripts %}
+    {% if user.is_curator %}
+    <script type="text/javascript">
+        // TODO: move to separated js-file
+        $('.assignment-attachment a:contains(".ipynb")').each(function() {
+            if ( $(this).text().trim().match(".ipynb$") ) {
+                $(this).clone()
+                        .attr("href", this.href + "?html=1")
+                        .attr("target", "_blank")
+                        .text("[html]").insertAfter(this);
+            }
+        });
+    </script>
+    {% endif %}
+{% endblock javascripts %}
+
 {% block content %}
 <script type="text/javascript">
   window.CSCCommentPersistenceHashes = {{ hashes_json|safe }};
@@ -84,12 +100,7 @@
                 </a>
               </span>
               {% endif %}
-              <span class="metainfo pull-right
-                           {% if comment.first_student_comment and user_type == 'teacher' %}
-                           first
-                           {% endif %}">
-                {{ comment.created|date:"d.m.Y H:i" }}
-              </span>
+              <span class="metainfo pull-right{% if comment.first_student_comment and user_type == 'teacher' %} first{% endif %}">{{ comment.created|date:"d.m.Y H:i" }}</span>
             </div>
           </div>
         </li>

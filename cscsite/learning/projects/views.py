@@ -241,12 +241,12 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
         project.reviewers.add(request.user.pk)
         project.save()
         # TODO: add notification when user unsubscribed?
-        notify.send(
-            request.user,  # actor
-            verb='enrolled in',
-            action_object=project,
-            public=False,
-            recipient="")
+        # notify.send(
+        #     request.user,  # actor
+        #     verb='enrolled in',
+        #     action_object=project,
+        #     public=False,
+        #     recipient="")
         messages.success(self.request,
                          _("You successfully enrolled on project"),
                          extra_tags='timeout')
@@ -486,14 +486,14 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
 
         # Send email notification to student participant
         from notifications.signals import notify
-        notify.send(
-            self.request.user,
-            verb='complete',
-            description="report review is completed",
-            # In this case action_object and target are the same
-            target=self.object,
-            recipient=self.object.project_student.student
-        )
+        # notify.send(
+        #     self.request.user,
+        #     verb='complete',
+        #     description="report review is completed",
+        #     # In this case action_object and target are the same
+        #     target=self.object,
+        #     recipient=self.object.project_student.student
+        # )
         return response
 
 

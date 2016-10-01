@@ -951,9 +951,8 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         self.assertStatusCode(404, self.url_name)
 
     def test_list(self):
-        """Leave this test for group security checks.
-        Don't want rewrite it in pytest style
-        """
+        # Default filter for grade - `no_grade`
+        TEACHER_ASSIGNMENTS_PAGE = reverse(self.url_name)
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         now_year, now_season = get_current_semester_pair()
@@ -962,46 +961,90 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         co_other = CourseOfferingFactory.create(semester=s)
         AssignmentFactory.create_batch(2, course_offering=co_other)
         self.doLogin(teacher)
-        # no course offerings and assignments yet, return 404
-        resp = self.client.get(reverse(self.url_name))
+        # no course offerings yet, return 404
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         self.assertEquals(404, resp.status_code)
         # Create co, assignments and enroll students
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student, course_offering=co)
-        as1 = AssignmentFactory.create_batch(2, course_offering=co)
-        resp = self.client.get(reverse(self.url_name))
+        as1, as2 = AssignmentFactory.create_batch(2, course_offering=co)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
+        # TODO: add wrong term type and check redirect.
+        # TODO: add wrong term year and check redirect to latest co term
         # By default we show submissions from last 3 assignments,
-        # without grades and any last commentator
+        # without grades and with any last commentator
         self.assertEquals(0, len(resp.context['student_assignment_list']))
-        # Show without comments
-        resp = self.client.get(reverse(self.url_name) + "?comment=empty")
+        # Show submissions only without comments
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
         self.assertEquals(6, len(resp.context['student_assignment_list']))
         sas = ((StudentAssignment.objects.get(student=student,
                                               assignment=assignment))
-               for student in students for assignment in as1)
+               for student in students for assignment in (as1, as2))
         self.assertSameObjects(sas, resp.context['student_assignment_list'])
         # Let's check assignments with last comment from student only
-        resp = self.client.get(reverse(self.url_name) + "?comment=student")
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
-        # Teacher commented on an assignment, Show with appropriate filter.
-        a = as1[0]
-        student = students[0]
-        a_s = StudentAssignment.objects.get(student=student, assignment=a)
-        AssignmentCommentFactory.create(student_assignment=a_s,
-                                        author=teacher)
+        # Teacher commented on an assignment
+        student, student2 = students[0], students[1]
+        a_s1 = StudentAssignment.objects.get(student=student, assignment=as1)
+        a_s2 = StudentAssignment.objects.get(student=student, assignment=as2)
+        AssignmentCommentFactory.create(student_assignment=a_s1, author=teacher)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
         resp = self.client.get(reverse(self.url_name) + "?comment=teacher")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
-        # If student have commented, it should show up
-        AssignmentCommentFactory.create(student_assignment=a_s,
-                                        author=student)
-        resp = self.client.get(reverse(self.url_name) + "?comment=student")
-        self.assertSameObjects([a_s], resp.context['student_assignment_list'])
-        # if teacher has set a grade, assignment shouldn't show up
-        a_s.grade = 3
-        a_s.save()
-        resp = self.client.get(reverse(self.url_name) + "?comment=student")
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(5, len(resp.context['student_assignment_list']))
+        # Student commented on another assignment
+        AssignmentCommentFactory.create_batch(2, student_assignment=a_s2,
+                                              author=student)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
+        self.assertEquals(2, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        self.assertSameObjects([a_s2], resp.context['student_assignment_list'])
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(4, len(resp.context['student_assignment_list']))
+        # Teacher answered on the assignment
+        AssignmentCommentFactory.create(student_assignment=a_s2, author=teacher)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
+        self.assertEquals(2, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
+        self.assertEquals(2, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(4, len(resp.context['student_assignment_list']))
+        # Other student add comment
+        a1_s2 = StudentAssignment.objects.get(student=student2, assignment=as1)
+        AssignmentCommentFactory.create_batch(3, student_assignment=a1_s2,
+                                              author=student2)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
+        self.assertEquals(2, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
+        # teacher has set a grade
+        a1_s2.grade = 3
+        a1_s2.save()
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
+                               "?comment=student&grades=all")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        a_s1.grade = 3
+        a_s1.save()
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
+                               "?comment=student&grades=yes")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
 
 
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
@@ -1833,7 +1876,7 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_studentassignment_last_commented_from(client,
+def test_studentassignment_last_comment_from(client,
                                                student_center_factory,
                                                teacher_center_factory):
     teacher = teacher_center_factory.create()
