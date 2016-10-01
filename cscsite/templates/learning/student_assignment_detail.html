@@ -6,7 +6,7 @@
 {% load markdown from core_tags %}
 
 {% block javascripts %}
-    {% if user.is_curator %}
+    {% if is_actual_teacher %}
     <script type="text/javascript">
         // TODO: move to separated js-file
         $('.assignment-attachment a:contains(".ipynb")').each(function() {
