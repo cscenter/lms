@@ -5,6 +5,7 @@ import itertools
 from django.apps import apps
 
 import django_rq
+from django.utils import timezone
 
 from learning.tasks import (maybe_upload_slides_yandex,
                             maybe_upload_slides_slideshare)
@@ -75,6 +76,7 @@ def create_assignment_comment_notification(sender, instance, created,
         AssignmentNotification(user=student, student_assignment=s_a).save()
 
 
+# TODO: refactor with decorators!
 def update_last_comment_info_on_student_assignment(sender, instance,
                                                    created,
                                                    *args, **kwargs):

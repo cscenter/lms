@@ -1,6 +1,5 @@
 import logging
-from abc import ABC, ABCMeta, abstractmethod, abstractproperty
-from collections import Iterable
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -18,7 +17,7 @@ class NotRegistered(Exception):
     pass
 
 
-class NotificationConfig(object):
+class NotificationService(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -114,49 +113,3 @@ class NotificationConfig(object):
 
     def get_absolute_url(self, url, context):
         return self.get_site_url(context) + url
-
-
-class Notifier(object):
-    """
-    A Notifier object encapsulates an instance of the notifications application
-    and used for sending notifications to recipients.
-    Models are registered with the Notifier using the register() method.
-    """
-    def __init__(self):
-        self._registry = set()
-
-    def register(self, config_class, **options):
-        """
-        Registers the given config class with the given options.
-        If a config is already registered, this will raise AlreadyRegistered.
-        """
-
-        if config_class in self._registry:
-            raise AlreadyRegistered(
-                'The config %s is already registered' % config_class.__name__)
-        self._registry.add(config_class)
-
-    def unregister(self, config_or_iterable):
-        """
-        Unregisters the given config(s).
-
-        If a model isn't already registered, this will raise NotRegistered.
-        """
-        if not isinstance(config_or_iterable, Iterable):
-            config_or_iterable = [config_or_iterable]
-        for config in config_or_iterable:
-            if config not in self._registry:
-                raise NotRegistered(
-                    'The config %s is not registered' % config.__name__)
-            self._registry.remove(config)
-
-    def is_registered(self, config):
-        """
-        Check if a config class is registered with this `Notifier`.
-        """
-        return config in self._registry
-
-    def get_registered_configs(self):
-        return self._registry
-
-notifier = Notifier()

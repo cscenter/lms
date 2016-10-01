@@ -4,17 +4,18 @@ from django.utils import timezone
 from django.utils.six import text_type
 
 notify = Signal(providing_args=[
-    'recipient', 'actor', 'verb', 'action_object', 'target', 'description',
-    'timestamp', 'level'
+    'notification_type', 'recipient', 'actor', 'verb', 'action_object',
+    'target', 'description', 'timestamp', 'level'
 ])
 
 
 EXTRA_DATA = getattr(settings, 'NOTIFICATIONS_USE_JSONFIELD', False)
 
 
-def notify_handler(verb, **kwargs):
+# TODO: investigate how to make notification_type required!
+def notify_handler(notification_type, **kwargs):
     """
-    Handler function to create Notification instance upon action signal call.
+    Dispatch data to appropriate signal handler based on notification type
     """
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.auth.models import Group
@@ -34,6 +35,7 @@ def notify_handler(verb, **kwargs):
     timestamp = kwargs.pop('timestamp', timezone.now())
     level = kwargs.pop('level', Notification.LEVELS.info)
     data = kwargs.pop('data', None)
+    verb = kwargs.pop('verb', None)
 
     # Check if User or Group
     if isinstance(recipient, Group):
