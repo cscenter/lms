@@ -483,9 +483,16 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return self.group_pks.STUDENT_CLUB in self._cs_group_pks
 
     @cached_property
+    def is_teacher_club(self):
+        return self.group_pks.TEACHER_CLUB in self._cs_group_pks
+
+    @cached_property
+    def is_teacher_center(self):
+        return self.group_pks.TEACHER_CENTER in self._cs_group_pks
+
+    @cached_property
     def is_teacher(self):
-        return self.group_pks.TEACHER_CENTER in self._cs_group_pks or \
-               self.group_pks.TEACHER_CLUB in self._cs_group_pks
+        return self.is_teacher_center or self.is_teacher_club
 
     @cached_property
     def is_graduate(self):
