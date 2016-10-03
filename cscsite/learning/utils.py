@@ -166,11 +166,19 @@ class LearningPermissionsMixin(object):
         return False
 
     @property
-    def is_teacher(self):
+    def is_student(self):
         return False
 
     @property
-    def is_student(self):
+    def is_teacher_club(self):
+        return False
+
+    @property
+    def is_teacher_center(self):
+        return False
+
+    @property
+    def is_teacher(self):
         return False
 
     @property
