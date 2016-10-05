@@ -2,10 +2,10 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import logging
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
 from django.core.urlresolvers import reverse
@@ -16,7 +16,10 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
-from notifications import notifier
+from notifications import types as notification_types
+from notifications.models import Type
+
+logger = logging.getLogger(__name__)
 
 EMAILS = {
     'new_comment_for_student': {
@@ -189,4 +192,30 @@ class Command(BaseCommand):
 
             notify(notification, name, context, self.stdout)
 
+        from notifications.models import Notification
+        from notifications.registry import registry
+        unread_notifications = (Notification.objects
+                                .unread()
+                                .filter(public=True, emailed=False)
+                                .select_related("recipient"))
+
+        types_map = {t.id: t.code for t in Type.objects.all()}
+        # TODO: skip EMPTY type notifications?
+        # TODO: What if recipient have no email?
+        for notification in unread_notifications:
+            try:
+                code = types_map[notification.type_id]
+            except KeyError:
+                logger.error("Couldn't find code to type_id {}".format(
+                    notification.type_id
+                ))
+                # TODO: mark as deleted? or what?
+                continue
+            notification_type = getattr(notification_types, code)
+            if notification_type in registry:
+                registry[code].notify(notification)
+            else:
+                logger.warning("Handler for type '{}' not registered".format(
+                    code
+                ))
         translation.deactivate()

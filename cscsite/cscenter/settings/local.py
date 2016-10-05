@@ -110,6 +110,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'notifications.handlers': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         "notifications.notifier": {
             'level': 'DEBUG',
             'handlers': ['console'],

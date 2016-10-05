@@ -1,6 +1,13 @@
 from collections import Iterable
+from notifications import types
 
-from notifications.notifier import AlreadyRegistered, NotRegistered
+
+class AlreadyRegistered(Exception):
+    pass
+
+
+class NotRegistered(Exception):
+    pass
 
 
 class NotificationRegistry(object):
@@ -12,17 +19,18 @@ class NotificationRegistry(object):
     def __init__(self):
         self._registry = {}
 
-    def register(self, notification_id, signal_handler, **options):
+    def register(self, notification_type, handler_class, **options):
         """
         Registers the given handler.
         If notification already registered, this will raise AlreadyRegistered.
         """
 
-        if notification_id in self._registry:
+        # TODO: We can register many resolvers instead
+        if notification_type in self._registry:
             raise AlreadyRegistered(
-                'The notification with uid={} is already registered. Type {} '
-                'skiped.'.format(notification_id, str(notification_id)))
-        self._registry[notification_id] = signal_handler
+                'The notification type {} is already registered. '
+                'Skipped.'.format(notification_type, notification_type.name))
+        self._registry[notification_type.name] = handler_class()
 
     def unregister(self, type_or_iterable):
         """
@@ -32,29 +40,35 @@ class NotificationRegistry(object):
         """
         if not isinstance(type_or_iterable, Iterable):
             type_or_iterable = [type_or_iterable]
-        for notification_uid in type_or_iterable:
-            if notification_uid not in self._registry:
+        for notification_type in type_or_iterable:
+            if notification_type not in self._registry:
                 raise NotRegistered('The notification type %s is not '
-                                    'registered' % str(notification_uid))
-            del self._registry[notification_uid]
+                                    'registered' % notification_type.name)
+            del self._registry[notification_type.name]
 
-    def is_registered(self, notification_uid):
-        """
-        Check if a notification type is registered with this `Notifier`.
-        """
-        return notification_uid in self._registry
+    def default_handler_class(self):
+        return self[types.EMPTY]
 
-    def __iter__(self):
-        return self._registry
+    def __contains__(self, notification_type):
+        if not isinstance(notification_type, types):
+            return False
+        return notification_type.name in self._registry
 
     def __len__(self):
         return len(self._registry)
 
+    def __iter__(self):
+        return self._registry
+
+    def __getitem__(self, notification_type):
+        if isinstance(notification_type, types):
+            code = notification_type.name
+        else:
+            code = notification_type
+        return self._registry[code]
+
     def items(self):
         return self._registry.items()
-
-    def __getitem__(self, item):
-        return self._registry[item]
 
 
 registry = NotificationRegistry()

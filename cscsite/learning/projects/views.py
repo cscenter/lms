@@ -32,6 +32,7 @@ from learning.projects.models import Project, ProjectStudent, Report, \
 from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin
+from notifications import types
 from notifications.signals import notify
 
 logger = logging.getLogger(__name__)
@@ -241,14 +242,15 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
         project.reviewers.add(request.user.pk)
         project.save()
         # TODO: add notification when user unsubscribed?
-        # notify.send(
-        #     request.user,  # actor
-        #     verb='enrolled in',
-        #     action_object=project,
-        #     public=False,
-        #     recipient="")
+        notify.send(
+            request.user,  # actor
+            type=types.PROJECT_REVIEWER_ENROLLED,
+            verb='enrolled in',
+            action_object=project,
+            public=False,
+            recipient="")
         messages.success(self.request,
-                         _("You successfully enrolled on project"),
+                         _("You successfully enrolled on the project"),
                          extra_tags='timeout')
         url = reverse("projects:project_detail", args=[project.pk])
         return HttpResponseRedirect(url)
@@ -485,16 +487,26 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         response = super(ReportCuratorSummarizeView, self).form_valid(form)
 
         # Send email notification to student participant
-        from notifications.signals import notify
-        # notify.send(
-        #     self.request.user,
-        #     verb='complete',
-        #     description="report review is completed",
-        #     # In this case action_object and target are the same
-        #     target=self.object,
-        #     recipient=self.object.project_student.student
-        # )
+        if self.object.status == self.object.COMPLETED:
+            self.send_email_notification()
         return response
+
+    def send_email_notification(self):
+        # FIXME: test db hitting
+        context = {
+            "project_name": self.object.project_student.project.name,
+            "final_score": self.object.final_score,
+            "message": self.object.final_score_note
+        }
+        notify.send(
+            self.request.user,  # Curator who complete reviewing
+            type=types.PROJECT_REPORT_REVIEWING_COMPLETED,
+            verb='complete',
+            # In this case action_object and target are the same
+            target=self.object,
+            recipient=self.object.project_student.student,
+            data=context
+        )
 
 
 class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):

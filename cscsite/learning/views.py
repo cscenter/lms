@@ -1026,11 +1026,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         ("empty", _("Without comments")),
     )
 
-    def get_filter_term_index(self):
+    def _get_term_index(self):
         """
-        Calculate term index for `term` and `year` GET-params.
-        If term index not presented in teachers terms_list, redirect
-        to the latest valid term
+        Calculate term index from `term` and `year` GET-params.
+        If term index not presented in teachers term_list, redirect
+        to the latest available valid term from this list.
         """
         current_year, current_term_type = get_current_semester_pair()
         term = self.request.GET.get("term", current_term_type)
@@ -1050,11 +1050,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             query_term_index = self.terms[0].index
         return query_term_index
 
-    def get_filter_assignments(self, assignments):
+    def prepare_queryset_filter_assignments(self, assignments):
         try:
             assignments_str = self.request.GET.get("assignments", "")
-            # TODO: replace with set
-            query = [int(a) for a in assignments_str.split(",") if a]
+            query = set((int(a) for a in assignments_str.split(",") if a))
         except ValueError:
             query = False
         if not query:
@@ -1065,8 +1064,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             filter_assignments = [a for a in assignments if a.pk in query]
         return filter_assignments
 
-    def get_queryset_filters(self):
+    def prepare_queryset_filters(self):
         filters = {}
+        # All teacher course offerings
         teacher_course_offerings = (CourseOffering.objects
                                     .filter(teachers=self.request.user)
                                     .select_related("course", "semester")
@@ -1079,11 +1079,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         # Collect terms for filter view
         all_terms = set(c.semester for c in teacher_course_offerings)
         self.terms = sorted(all_terms, key=lambda t: -t.index)
-        # Get all course offerings from selected term
-        query_term_index = self.get_filter_term_index()
+        # Get all course offerings for requested term
+        query_term_index = self._get_term_index()
         self.course_offerings = [c for c in teacher_course_offerings
                                  if c.semester.index == query_term_index]
-        # Get course_offering associated with GET-param `course`
+        # Get requested course_offering by GET-param `course`
         course_slug = self.request.GET.get("course", False)
         try:
             co = next(c for c in self.course_offerings if
@@ -1091,14 +1091,15 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         except StopIteration:
             # TODO: get self.course_offerings[0].slug and redirect
             co = self.course_offerings[0]
-
+        # Set assignments filter
         self.assignments = list(
             Assignment.objects
             .filter(notify_teachers__teacher=self.request.user,
                     course_offering=co)
             .only("pk", "deadline_at", "title", "course_offering_id")
             .order_by("-deadline_at"))
-        filter_assignments = self.get_filter_assignments(self.assignments)
+        filter_assignments = self.prepare_queryset_filter_assignments(
+            self.assignments)
         filters["assignment__in"] = filter_assignments
         # Set grade filter
         filter_grade = self.request.GET.get("grades", self.filter_grades_empty)
@@ -1135,7 +1136,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         return filters
 
     def get_queryset(self):
-        filters = self.get_queryset_filters()
+        filters = self.prepare_queryset_filters()
         today = now()
         base_qs = (
             self.model.objects
@@ -1156,7 +1157,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
                 # Hide fat fields
                 .defer("assignment__text",
                        "student__university",
-                       # Note: Can't hide `student_comment`. See details in CSCUser.__init__() method
+                       # Note: Can't hide `student_comment`.
+                       # See details in CSCUser.__init__() method
                        "assignment__course_offering__description",
                        "assignment__course_offering__description_ru",
                        "assignment__course_offering__description_en",
