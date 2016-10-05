@@ -1,7 +1,9 @@
 import pytest
+from django.conf import settings
 
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
+from notifications.models import Type
 from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
 
@@ -106,6 +108,15 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
                 "name": "Kazan"
             }
         )
+
+        from notifications import types
+        for t in types:
+            Type.objects.update_or_create(
+                id=t.value,
+                defaults={
+                    "code": t.name
+                }
+            )
 
 
 @pytest.fixture(scope="function")

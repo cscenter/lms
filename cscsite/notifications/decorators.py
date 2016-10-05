@@ -1,45 +1,33 @@
 # -*- coding: utf-8 -*-
-from enum import IntEnum
+from notifications import types
+from notifications.service import NotificationService
+from notifications.registry import registry as notification_registry
 
 
-class NotificationType(IntEnum):
-    """Enumerate all available notification types"""
-
-    def __init__(self, *args):
-        # Restrict by positive int
-        if self.value < 0:
-            raise ValueError("NotificationType must be positive")
-        # Disallow duplication
-        cls = self.__class__
-        if any(self.value == e.value for e in cls):
-            a = self.name
-            e = cls(self.value).name
-            raise ValueError("aliases not allowed in NotificationType:  "
-                             "%r --> %r" % (a, e))
-
-
-def register(notification_uid):
+def register(notification_type):
     """
-    Registers the given notification uid and associated signal handler.
+    Registers the given notification type and associated handler.
 
-    If the notification uid is already registered, this will raise an exception.
+    If the notification type is already registered,
+    this will raise an exception.
 
     Example:
-        from notifications.decorators import register, NotificationType
+        from notifications import types
+        from notifications.decorators import register
+        from notifications.service import NotificationService
 
-        class Types(NotificationType):
-            TEST_UID = 1
-
-        @register(notification_uid=Types.TEST_UID)
-        def test_handler(*args, **kwargs):
+        @register(notification_type=types.LOG)
+        class LogNotificationHandler(NotificationService):
             pass
     """
-    from notifications.registry import registry as notification_registry
 
-    if not isinstance(notification_uid, NotificationType):
-        raise ValueError('notification_uid must subclass NotificationType.')
+    if not isinstance(notification_type, types):
+        raise ValueError('notification type must be instance of '
+                         'NotificationTypes.')
 
-    def wrapper(signal_handler):
-        notification_registry.register(notification_uid, signal_handler)
-        return signal_handler
+    def wrapper(service_cls):
+        if not issubclass(service_cls, NotificationService):
+            raise ValueError('Wrapped class must subclass NotificationService.')
+        notification_registry.register(notification_type, service_cls)
+        return service_cls
     return wrapper

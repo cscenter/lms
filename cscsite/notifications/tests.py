@@ -3,6 +3,7 @@ This file demonstrates writing tests using the unittest module. These will pass
 when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
+from django.apps import apps
 from django.test import TestCase, RequestFactory
 
 from users.factories import UserFactory
@@ -36,7 +37,8 @@ class NotificationTest(TestCase):
 
         from_user = UserFactory.create(username="from", password="pwd", email="example@example.com")
         to_user = UserFactory.create(username="to", password="pwd", email="example@example.com")
-        notify.send(from_user, notification_type=0,
+        from notifications import types
+        notify.send(from_user, type=types.LOG,
                     recipient=to_user, verb='commented',
                     action_object=from_user)
         notification = Notification.objects.get(recipient=to_user)

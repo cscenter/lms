@@ -4,6 +4,7 @@ from django.db import transaction
 from django.contrib.auth import get_user_model
 
 from learning.settings import PARTICIPANT_GROUPS
+from notifications import types
 from notifications.signals import notify
 
 _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
@@ -90,15 +91,24 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                 is_staff=True,
                 groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
             )
-            # for recipient in recipients:
-            #     notify.send(
-            #         report.project_student.student,  # actor
-            #         verb='added',
-            #         description="new report added",
-            #         action_object=report,
-            #         target=report.project_student.project,
-            #         recipient=recipient
-            #     )
+            # TODO: test database hitting
+            project = report.project_student.project
+            student = report.project_student.student
+            for recipient in recipients:
+                notify.send(
+                    report.project_student.student,  # actor
+                    type=types.NEW_PROJECT_REPORT,
+                    verb='sent',
+                    action_object=report,
+                    target=report.project_student.project,
+                    recipient=recipient,
+                    # Unmodified context
+                    data={
+                        "project_name": project.name,
+                        "project_pk": project.pk,
+                        "student_pk": student.pk,
+                    }
+                )
 
 
 def post_save_review(sender, instance, created, *args, **kwargs):
@@ -134,20 +144,21 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         if comment.report.status == Report.REVIEW:
             reviewers = comment.report.project_student.project.reviewers.all()
             recipients.extend(r for r in reviewers if r != comment.author)
-        # Note: Doesn't hit database here if content types already cached
+        # Note: Doesn't hit database here if relations already cached
         project = comment.report.project_student.project
         student = comment.report.project_student.student
-        # for recipient in recipients:
-        #     notify.send(
-        #         comment.author,  # actor
-        #         verb='added',
-        #         description="new comment added",
-        #         action_object=comment,
-        #         target=comment.report,
-        #         recipient=recipient,
-        #         data={
-        #             "project_name": project.name,
-        #             "project_pk": project.pk,
-        #             "student_pk": student.pk,
-        #         }
-        #     )
+
+        for recipient in recipients:
+            notify.send(
+                comment.author,  # actor
+                type=types.NEW_PROJECT_REPORT_COMMENT,
+                verb='added',
+                action_object=comment,
+                target=comment.report,
+                recipient=recipient,
+                data={
+                    "project_name": project.name,
+                    "project_pk": project.pk,  # unmodified
+                    "student_pk": student.pk,  # unmodified
+                }
+            )

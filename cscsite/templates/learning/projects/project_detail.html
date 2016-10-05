@@ -38,9 +38,9 @@
                 {% endif %}
 
                 {% if can_send_report %}
+                    <h3>{% trans "Send report form" %}</h3>
+                    <b>Отправить можно до</b> {{ project.semester.report_ends_at }}<br>
                     <div class="csc-well o-send-report-form">
-                        <h2>{% trans "Send report form" %}</h2>
-                        <b>Дедлайн</b>: {{ project.semester.report_ends_at }}<br><br>
                         {% crispy form %}
                     </div>
                 {% elif project.is_active and request.user in project.students.all and not project.report_period_started %}

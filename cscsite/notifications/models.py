@@ -82,22 +82,8 @@ class NotificationQuerySet(models.query.QuerySet):
         return qs.update(deleted=False)
 
 
-# class Reminder(models.Model):
-#     """
-#     Reminder model describing what recipient shouldn't forget to do
-#     """
-#     TYPES = Choices(
-#         (0, 'project_reporting_starting'),
-#         (1, 'project_reporting_ending'),
-#     )
-#     type = models.PositiveIntegerField(
-#         verbose_name=_("Reminder type"),
-#         choices=TYPES)
-#     recipients = models.ManyToManyField(
-#         settings.AUTH_USER_MODEL,
-#         verbose_name=_("Recipients"),
-#         related_name='recipients',
-#     )
+class Type(models.Model):
+    code = models.CharField(max_length=255, unique=True)
 
 
 class Notification(models.Model):
@@ -129,12 +115,11 @@ class Notification(models.Model):
         <a href="http://oebfare.com/">brosner</a> commented on <a href="http://github.com/pinax/pinax">pinax/pinax</a> 2 hours ago
 
     """
-    # FIXME: specify types?
-    NONE_TYPE = 0  # Undefined type
+
     LEVELS = Choices('success', 'info', 'warning', 'error')
     level = models.CharField(choices=LEVELS, default=LEVELS.info, max_length=20)
 
-    type = models.IntegerField(editable=False, default=NONE_TYPE)
+    type = models.ForeignKey(Type, related_name="+")
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   blank=True,

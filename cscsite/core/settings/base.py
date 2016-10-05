@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/1.6/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
+from enum import IntEnum
 
 from unipath import Path
 
@@ -231,3 +232,17 @@ RQ_QUEUES = {
     },
 }
 
+
+NOTIFICATION_TYPES = [
+    "NEW_PROJECT_REPORT",
+    "NEW_PROJECT_REPORT_COMMENT",
+    "PROJECT_REPORTING_STARTED",
+    "PROJECT_REPORTING_ENDED",
+    "PROJECT_REVIEWER_ENROLLED",
+    "PROJECT_REPORT_REVIEWING_COMPLETED",
+    "NEW_ASSIGNMENT",
+    "NEW_ASSIGNMENT_NEWS",
+    "NEW_ASSIGNMENT_SUBMISSION",
+    "ASSIGNMENT_DEADLINE_UPDATED",
+    "NEW_ASSIGNMENT_SUBMISSION_COMMENT",
+]
