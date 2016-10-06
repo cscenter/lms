@@ -42,9 +42,9 @@ class NewReport(NotificationService):
             "project_name": notification.data.get("project_name", "")
         }
 
-    @staticmethod
-    def get_site_url(**kwargs):
-        return "https://compscicenter.ru"
+    # TODO: make as default implementation?
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
 
 
 @register(notification_type=types.NEW_PROJECT_REPORT_COMMENT)
@@ -85,9 +85,8 @@ class NewReportComment(NotificationService):
             "project_name": notification.data.get("project_name", "")
         }
 
-    @staticmethod
-    def get_site_url(**kwargs):
-        return "https://compscicenter.ru"
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
 
 
 @register(notification_type=types.PROJECT_REPORT_REVIEWING_COMPLETED)
@@ -117,10 +116,69 @@ class ReviewCompleted(NotificationService):
     def get_context(self, notification):
         return notification.data
 
-    @staticmethod
-    def get_site_url(**kwargs):
-        return "https://compscicenter.ru"
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
 
     @staticmethod
     def get_email_from():
         return "curators@compscicenter.ru"
+
+
+@register(notification_type=types.PROJECT_REPORTING_STARTED)
+class ProjectReportingStarted(NotificationService):
+    """
+    Was sent notification <action_object> about the beginning of the
+    reporting period <verb> for Semester <target> to Student <recipient>
+
+    Models:
+        action_object - None/self
+        target - Semester (not sure)
+    """
+
+    subject = "Начало отчетного периода. {}"
+    template = "emails/projects/report_period_start.html"
+
+    def add_to_queue(self, notification, *args, **kwargs):
+        self.logger.debug("Notification [report_ending] was generated "
+                          "for recipient {}".format(notification.recipient))
+        notification.save()
+
+    def get_subject(self, notification, **kwargs):
+        return self.subject.format(notification.data["semester_name"])
+
+    def get_context(self, notification):
+        return notification.data
+
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
+
+
+@register(notification_type=types.PROJECT_REPORTING_ENDED)
+class ProjectReportingEnded(NotificationService):
+    """
+    Was sent notification <action_object> about the ending of the
+    reporting period <verb> for Semester <target> to Student <recipient>
+
+    Models:
+        action_object - None/self
+        target - Semester (not sure)
+    """
+
+    subject = "Окончание отчетного периода. {}"
+    template = "emails/projects/report_period_end.html"
+
+    def add_to_queue(self, notification, *args, **kwargs):
+        self.logger.debug("Notification [report_ending] was generated "
+                          "for recipient {}".format(notification.recipient))
+        notification.save()
+
+    def get_subject(self, notification, **kwargs):
+        return self.subject.format(notification.data["semester_name"])
+
+    def get_context(self, notification):
+        context = notification.data
+        context["student"] = notification.recipient.get_full_name()
+        return context
+
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL

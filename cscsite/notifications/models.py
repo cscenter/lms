@@ -116,6 +116,7 @@ class Notification(models.Model):
 
     """
 
+    # Note: not used at all
     LEVELS = Choices('success', 'info', 'warning', 'error')
     level = models.CharField(choices=LEVELS, default=LEVELS.info, max_length=20)
 
@@ -128,8 +129,9 @@ class Notification(models.Model):
     unread = models.BooleanField(default=True, blank=False)
 
     actor_content_type = models.ForeignKey(ContentType,
-                                           related_name='notify_actor')
-    actor_object_id = models.PositiveIntegerField()
+                                           related_name='notify_actor',
+                                           blank=True, null=True)
+    actor_object_id = models.PositiveIntegerField(blank=True, null=True)
     actor = GenericForeignKey('actor_content_type', 'actor_object_id')
 
     verb = models.CharField(max_length=255)
