@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 from datetime import datetime
 
+from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
@@ -199,7 +200,9 @@ class Command(BaseCommand):
                                 .filter(public=True, emailed=False)
                                 .select_related("recipient"))
 
-        types_map = {t.id: t.code for t in Type.objects.all()}
+        # id => code
+        types_map = {v: k for k, v in
+                     apps.get_app_config('notifications').type_map.items()}
         # TODO: skip EMPTY type notifications?
         # TODO: What if recipient have no email?
         for notification in unread_notifications:

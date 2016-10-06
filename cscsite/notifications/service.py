@@ -18,6 +18,8 @@ class NotificationService(object):
     """
     __metaclass__ = ABCMeta
 
+    SITE_CENTER_URL = "https://compscicenter.ru"
+
     @abstractproperty
     def template(self):
         pass
@@ -82,8 +84,7 @@ class NotificationService(object):
     def get_context(self, notification):
         return {}
 
-    @staticmethod
-    def get_site_url(**kwargs):
+    def get_site_url(self, **kwargs):
         raise NotImplementedError()
         """Returns site url based on context information"""
         notification = kwargs.pop("notification")

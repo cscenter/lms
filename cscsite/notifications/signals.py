@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.dispatch import Signal
 from django.utils import timezone
@@ -12,8 +13,6 @@ notify = Signal(providing_args=[
 
 
 EXTRA_DATA = getattr(settings, 'NOTIFICATIONS_USE_JSONFIELD', False)
-
-NOTIFICATION_TYPES_MAP = None
 
 
 def notify_handler(type, **kwargs):
@@ -36,13 +35,9 @@ def notify_handler(type, **kwargs):
     else:
         notification_service = registry.default_handler_class()
 
-    # Cache types translation
-    # FIXME: think where to move this init code. Can use this in notify management command too.
-    global NOTIFICATION_TYPES_MAP
-    if NOTIFICATION_TYPES_MAP is None:
-        NOTIFICATION_TYPES_MAP = {t.code: t.id for t in Type.objects.all()}
+    type_map = apps.get_app_config('notifications').type_map
     try:
-        type_id = NOTIFICATION_TYPES_MAP[type.name]
+        type_id = type_map[type.name]
     except KeyError:
         raise NotRegistered('Notification type %s is not registered in DB' %
                             type.name)
@@ -50,7 +45,7 @@ def notify_handler(type, **kwargs):
     # Pull the options out of kwargs
     kwargs.pop('signal', None)
     recipient = kwargs.pop('recipient')
-    actor = kwargs.pop('sender')
+    actor = kwargs.pop('sender', None)
     optional_objs = [
         (kwargs.pop(opt, None), opt)
         for opt in ('target', 'action_object')
@@ -74,8 +69,6 @@ def notify_handler(type, **kwargs):
         new_notification = Notification(
             type_id=type_id,
             recipient=recipient,
-            actor_content_type=ContentType.objects.get_for_model(actor),
-            actor_object_id=actor.pk,
             verb=text_type(verb),
             public=public,
             description=description,
@@ -84,6 +77,12 @@ def notify_handler(type, **kwargs):
             data=data,
         )
 
+        # Make an actor optional too. But it's little bit complicated due
+        # to an actor object retrieves from `sender`
+        if actor is not None:
+            setattr(new_notification, 'actor_object_id', actor.pk)
+            setattr(new_notification, 'actor_content_type',
+                    ContentType.objects.get_for_model(actor))
         # Set optional objects
         for obj, opt in optional_objs:
             if obj is not None:
