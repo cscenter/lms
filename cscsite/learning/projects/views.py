@@ -7,19 +7,16 @@ import logging
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.db.models import Prefetch
-from django.http import Http404
-from django.http import HttpResponse
-from django.http import HttpResponseForbidden
-from django.http import HttpResponsePermanentRedirect
-from django.http import HttpResponseRedirect
+from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
+from django.http import Http404, HttpResponse, HttpResponseForbidden, \
+    HttpResponsePermanentRedirect, HttpResponseRedirect
+
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import FormMixin, BaseUpdateView
-from django.utils.translation import ugettext_lazy as _
 
 from core import comment_persistence
 from core.utils import hashids
@@ -86,13 +83,23 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
                     .select_related("semester")
                     .prefetch_related("students", "reviewers",
                                       "projectstudent_set__report",
-                                      "projectstudent_set__student"))
-
+                                      "projectstudent_set__student")
+                    .order_by("-semester__index", "name", "pk"))
+        if project_type == self.PROJECT_AVAILABLE:
+            queryset = (queryset
+                        .annotate(reviewers_cnt=Count("reviewers"))
+                        .annotate(
+                            have_reviewers=Case(
+                                When(reviewers_cnt__gt=0, then=Value(1)),
+                                default=Value(0),
+                                output_field=BooleanField()))
+                        .order_by("-semester__index", "have_reviewers",
+                                 "name", "pk"))
         if project_type in [self.PROJECT_REPORTS, self.PROJECT_AVAILABLE]:
             queryset = queryset.filter(semester__index=current_term_index)
         if project_type == self.PROJECT_REPORTS:
             queryset = queryset.filter(reviewers=self.request.user)
-        return queryset.order_by("-semester__index", "name", "pk")
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(ReviewerProjectsView, self).get_context_data(**kwargs)
