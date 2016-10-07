@@ -234,10 +234,13 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
         except (TypeError, ValueError):
             # TODO: make redirect
             enrollment_year = year
-        context['students'] = (CSCUser.objects.filter(
+        qs = (CSCUser.objects.filter(
             groups__in=[CSCUser.group_pks.STUDENT_CENTER,
                         CSCUser.group_pks.VOLUNTEER],
             enrollment_year=enrollment_year).distinct())
+        if "print" in self.request.GET:
+            qs = qs.exclude(status=CSCUser.STATUS.expelled)
+        context['students'] = qs
         context["years"] = reversed(range(CENTER_FOUNDATION_YEAR, year + 1))
         context["current_year"] = enrollment_year
         return context
