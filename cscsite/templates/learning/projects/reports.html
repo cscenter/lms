@@ -32,7 +32,7 @@
                     <tr>
                         <td>
                             <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
-                            {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
+                            {% if request.user.is_curator %}<br>{{ current_term }}{% endif %}
                         </td>
                         <td>
                             {% for ps in project.projectstudent_set.all %}
@@ -53,5 +53,8 @@
             {% endif %}
         </div>
     </div>
+
+    Начало отправки отчетов: {{ current_term.report_starts_at }}<br>
+    Окончание отправки отчетов: {{ current_term.report_ends_at }}<br>
 </div>
 {% endblock content %}

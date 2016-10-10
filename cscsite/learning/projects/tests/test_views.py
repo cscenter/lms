@@ -178,18 +178,10 @@ def test_project_detail_student_participant(client):
     assert response.context["has_enroll_permissions"] is False
     assert smart_bytes("Отзывы руководителя") not in response.content
     form = {"send_report_form-text": "report text content"}
-    response = client.post(project.get_absolute_url(), form)
-    assert response.status_code == 403  # not active period for sending reports
     today = now().date()
     semester.report_starts_at = today + timedelta(days=2)
     semester.save()
     # Too early to send reports
-    response = client.post(project.get_absolute_url(), form)
-    assert response.status_code == 403
-    semester.report_starts_at = today - timedelta(days=7)
-    semester.report_ends_at = today - timedelta(days=2)
-    semester.save()
-    # Sending period ended
     response = client.post(project.get_absolute_url(), form)
     assert response.status_code == 403
     # Project already stale
@@ -197,11 +189,11 @@ def test_project_detail_student_participant(client):
     project.save()
     response = client.post(project.get_absolute_url(), form)
     assert response.status_code == 403
-    # Ok
+    # Sending period ended, but it still Ok
     project.semester = semester
     project.save()
-    semester.report_starts_at = today
-    semester.report_ends_at = today + timedelta(days=1)
+    semester.report_starts_at = today - timedelta(days=7)
+    semester.report_ends_at = today - timedelta(days=2)
     semester.save()
     response = client.post(project.get_absolute_url(), form, follow=True)
     assert response.status_code == 200
@@ -220,11 +212,13 @@ def test_project_detail_student_participant(client):
     assert response.context["can_send_report"] is False
     project.semester = semester
     project.save()
+    # If report_starts_at not specified, allow sending report while project
+    # is active
     semester.report_starts_at = None
     semester.report_ends_at = None
     semester.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["can_send_report"] is False
+    assert response.context["can_send_report"] is True
 
 
 @pytest.mark.django_db
