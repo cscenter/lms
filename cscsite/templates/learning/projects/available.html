@@ -21,6 +21,7 @@
                     <tr>
                         <th class="name">Название</th>
                         <th>Участники</th>
+                        <th>Руководители</th>
                         <th>Проверяют</th>
                     </tr>
                     </thead>
@@ -35,6 +36,7 @@
                                     <a href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
                                 {% endfor %}
                             </td>
+                            <td>{{ project.supervisor }}</td>
                             <td>
                                 {% for reviewer in project.reviewers.all %}
                                     {{ reviewer }}<br>
