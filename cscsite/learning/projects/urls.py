@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
     ProjectEnrollView, ReportView, ReportAttachmentDownloadView, \
     ReportUpdateStatusView, ReportCuratorSummarizeView, StudentProjectsView, \
-    ReportCuratorAssessmentView
+    ReportCuratorAssessmentView, ProjectPrevNextView
 
 app_name = 'projects'
 urlpatterns = [
@@ -12,6 +12,12 @@ urlpatterns = [
             name='reviewer_projects'),
         url(r'^(?P<pk>\d+)/$', ProjectDetailView.as_view(),
             name='project_detail'),
+        url(r'^prev/(?P<project_id>\d+)/$',
+            ProjectPrevNextView.as_view(direction="prev"),
+            name='project_detail_prev'),
+        url(r'^next/(?P<project_id>\d+)/$',
+            ProjectPrevNextView.as_view(direction="next"),
+            name='project_detail_next'),
         url(r'^(?P<pk>\d+)/enroll$', ProjectEnrollView.as_view(),
             name='reviewer_project_enroll'),
         url(r'^(?P<project_pk>\d+)/report/(?P<student_pk>\d+)/status/',
