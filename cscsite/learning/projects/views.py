@@ -79,6 +79,7 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         current_year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(current_year, term_type)
         project_type = self.request.GET[self.FILTER_NAME]
+        # FIXME: separate views for projects and reports?????!!!!11111
         queryset = (Project.objects
                     .select_related("semester")
                     .prefetch_related("students", "reviewers",
@@ -94,7 +95,7 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
                                 default=Value(0),
                                 output_field=BooleanField()))
                         .order_by("-semester__index", "have_reviewers",
-                                 "name", "pk"))
+                                  "name", "pk"))
         if project_type in [self.PROJECT_REPORTS, self.PROJECT_AVAILABLE]:
             queryset = queryset.filter(semester__index=current_term_index)
         if project_type == self.PROJECT_REPORTS:
@@ -230,6 +231,47 @@ class ProjectDetailView(generic.CreateView):
         context["can_view_report"] = user.is_curator or (
             user.is_project_reviewer and context["you_enrolled"])
         return context
+
+
+class ProjectPrevNextView(generic.RedirectView):
+    """
+    Based on `direction` get prev or next project relative to passed project id
+    """
+    direction = None
+    # TODO: add tests
+    def get_queryset(self):
+        current_year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(current_year, term_type)
+        queryset = (Project.objects
+                    .filter(semester__index=current_term_index)
+                    .annotate(reviewers_cnt=Count("reviewers"))
+                    .annotate(
+                        have_reviewers=Case(
+                            When(reviewers_cnt__gt=0, then=Value(1)),
+                            default=Value(0),
+                            output_field=BooleanField())
+                    )
+                    .values_list("pk", flat=True)
+                    .order_by("have_reviewers", "name", "pk"))
+        return queryset
+
+    def get_redirect_url(self, *args, **kwargs):
+        project_id = int(self.kwargs.get("project_id"))
+        # Not so many projects to care about performance
+        qs = self.get_queryset()
+        if self.direction == "prev":
+            qs = qs.reverse()
+        next_project_id, first, prev_id = (None,) * 3
+        for p in qs:
+            if prev_id == project_id:
+                next_project_id = p
+                break
+            if first is None:
+                # Rotate if we didn't find next project
+                next_project_id = p
+                first = p
+            prev_id = p
+        return reverse("projects:project_detail", args=[next_project_id])
 
 
 class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):

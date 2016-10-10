@@ -12,6 +12,18 @@
     <ol class=" breadcrumb projects">
         <li class="active">О проекте</li>
     </ol>
+    {% if request.user.is_project_reviewer or request.user.is_curator %}
+    <nav>
+        <ul class="pager pager-square">
+            <li class="previous">
+                <a href="{% url "projects:project_detail_prev" project.pk %}"><span aria-hidden="true">←</span> Предудущий проект</a>
+            </li>
+            <li class="next">
+                <a href="{% url "projects:project_detail_next" project.pk %}">Следующий проект <span aria-hidden="true">→</span></a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
@@ -111,19 +123,15 @@
                         {{ project.supervisor }}
                     </div>
                 </div>
-                {% if not project.supervisor_presentation_slideshare_url and not project.presentation_slideshare_url %}
+                {% if project.supervisor_presentation or project.presentation %}
                 <div class="card">
                     <div class="card-header ch-alt">Презентации</div>
                     <div class="card-body card-padding">
-                        {% if project.supervisor_presentation or project.presentation %}
                         {% if project.supervisor_presentation %}
                         <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
                         {% endif %}
                         {% if project.presentation %}
                             <a class="presentation-link" href="{{ project.presentation.url }}"><i class="fa fa-file "></i> Презентация участников</a>
-                        {% endif %}
-                        {% else %}
-                            Нет презентаций
                         {% endif %}
                     </div>
                 </div>
