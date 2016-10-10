@@ -4,6 +4,10 @@ from __future__ import absolute_import, unicode_literals
 
 import pytest
 import six
+
+from learning.settings import PARTICIPANT_GROUPS
+from users.factories import UserFactory
+
 if six.PY3:
     from io import StringIO as OutputIO
 else:
@@ -22,7 +26,7 @@ from learning.models import AssignmentNotification, \
 from learning.factories import AssignmentNotificationFactory, \
     CourseOfferingNewsNotificationFactory, StudentAssignmentFactory
 
-from .management.commands.notify import Command
+from .management.commands.notify import Command, get_base_url
 from .models import related_spec_to_list, apply_related_spec
 
 
@@ -139,3 +143,25 @@ def test_middleware_center_site(client, settings):
     response = client.get(url)
     assert hasattr(response.context['request'], 'city_code')
     assert response.context['request'].city_code == settings.DEFAULT_CITY_CODE
+
+
+@pytest.mark.django_db
+def test_get_base_url():
+    """Site domain in notifications depends on recipient user groups"""
+    user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
+    notification = AssignmentNotificationFactory(user=user)
+    assert get_base_url(notification) == "https://compscicenter.ru"
+    user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER,
+                               PARTICIPANT_GROUPS.STUDENT_CLUB])
+    notification = AssignmentNotificationFactory(user=user)
+    assert get_base_url(notification) == "https://compscicenter.ru"
+    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CLUB])
+    assert get_base_url(notification) == "http://compsciclub.ru"
+    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER,
+                                            PARTICIPANT_GROUPS.TEACHER_CLUB])
+    assert get_base_url(notification) == "https://compscicenter.ru"
+    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.TEACHER_CLUB])
+    assert get_base_url(notification) == "http://compsciclub.ru"
+    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.TEACHER_CLUB,
+                                            PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    assert get_base_url(notification) == "https://compscicenter.ru"

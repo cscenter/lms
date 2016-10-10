@@ -17,6 +17,7 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
+from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER, PARTICIPANT_GROUPS
 from notifications import types as notification_types
 from notifications.models import Type
 
@@ -53,9 +54,20 @@ EMAILS = {
     }
 }
 
+# Student and teacher groups which can access center site.
+LEARNING_PARTICIPANTS_CENTER = {
+    PARTICIPANT_GROUPS.STUDENT_CENTER,
+    PARTICIPANT_GROUPS.VOLUNTEER,
+    PARTICIPANT_GROUPS.GRADUATE_CENTER,
+    PARTICIPANT_GROUPS.TEACHER_CENTER,
+}
 
-# TODO: add tests!
+
 def get_base_url(notification):
+    """
+    XXX: we resolve notifications for students or teachers only.
+    Don't care about interviewers or project reviewers.
+    """
     receiver = notification.user
     if isinstance(notification, AssignmentNotification):
         co = notification.student_assignment.assignment.course_offering
@@ -63,8 +75,8 @@ def get_base_url(notification):
         co = notification.course_offering_news.course_offering
     else:
         raise NotImplementedError()
-    if receiver.is_student_club or (receiver.is_teacher_club and
-                                    not receiver.is_teacher_center):
+    user_groups = {g.pk for g in receiver.groups.all()}
+    if not user_groups.intersection(LEARNING_PARTICIPANTS_CENTER):
         if co.get_city() == "spb":
             return "http://compsciclub.ru"
         else:
