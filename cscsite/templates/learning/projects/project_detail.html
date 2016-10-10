@@ -12,17 +12,19 @@
     <ol class=" breadcrumb projects">
         <li class="active">О проекте</li>
     </ol>
-    {% if request.user.is_project_reviewer or request.user.is_curator %}
-    <nav>
-        <ul class="pager pager-square">
-            <li class="previous">
-                <a href="{% url "projects:project_detail_prev" project.pk %}"><span aria-hidden="true">←</span> Предудущий проект</a>
-            </li>
-            <li class="next">
-                <a href="{% url "projects:project_detail_next" project.pk %}">Следующий проект <span aria-hidden="true">→</span></a>
-            </li>
-        </ul>
-    </nav>
+    {% if project.is_active %}
+        {% if request.user.is_project_reviewer or request.user.is_curator %}
+        <nav>
+            <ul class="pager pager-square">
+                <li class="previous">
+                    <a href="{% url "projects:project_detail_prev" project.pk %}"><span aria-hidden="true">←</span> Предудущий проект</a>
+                </li>
+                <li class="next">
+                    <a href="{% url "projects:project_detail_next" project.pk %}">Следующий проект <span aria-hidden="true">→</span></a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
     {% endif %}
     <div id="project-detail-page">
         <div class="row">
