@@ -5,8 +5,7 @@
             {% if not request.user.is_curator %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>
             {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>{% endif %}
         {% elif ps.report %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
-        {% elif project.is_active and not project.report_period_started %}<span class="text-muted">Начало отчетного периода<br> {{ project.semester.report_starts_at|default:"не установлено" }}</span>
-        {% elif project.is_active and project.report_period_started %}<span class="text-muted">Крайний срок отправки отчета<br> {{ project.semester.report_ends_at|default:"не установлен" }}</span>
+        {% elif project.is_active %}<span class="text-muted">Начало отчетного периода<br> {{ project.semester.report_starts_at|default:"не установлено" }}</span>
         {% elif not project.is_active or project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
         {% endif %}
     {% endif %}

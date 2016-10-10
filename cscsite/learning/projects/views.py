@@ -21,6 +21,7 @@ from django.views.generic.edit import FormMixin, BaseUpdateView
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
+from learning.models import Semester
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
     ReportCuratorAssessmentForm
@@ -105,8 +106,7 @@ class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(ReviewerProjectsView, self).get_context_data(**kwargs)
         context["filter_active"] = self.request.GET[self.FILTER_NAME]
-        current_year, term_type = get_current_semester_pair()
-        context["current_term"] = "{} {}".format(_(term_type), current_year)
+        context["current_term"] = Semester.get_current()
         return context
 
 
@@ -189,9 +189,9 @@ class ProjectDetailView(generic.CreateView):
         except AttributeError as e:
             # Is not student participant
             return HttpResponseForbidden()
-        # Prevent action if deadline exceeded
+        # Prevent action if reporting period not started yet or stale
         if (not self.project.is_active() or
-                not self.project.report_submit_period_active()):
+                not self.project.report_period_started()):
             return HttpResponseForbidden()
         form_kwargs = self.get_form_kwargs()
         form_kwargs["project_student"] = project_student
@@ -222,8 +222,7 @@ class ProjectDetailView(generic.CreateView):
         # Student participant should be already redirected to report page
         # if his report exists
         context["can_send_report"] = (self.project.is_active() and
-                                      self.project.report_submit_period_active()
-                                      and user in self.project.students.all())
+                                      user in self.project.students.all())
         context["you_enrolled"] = user in self.project.reviewers.all()
         context["has_enroll_permissions"] = (
             (user.is_project_reviewer or user.is_curator)

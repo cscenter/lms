@@ -53,7 +53,7 @@
 
                 {% if can_send_report %}
                     <h3>{% trans "Send report form" %}</h3>
-                    <b>Отправить можно до</b> {{ project.semester.report_ends_at }}<br>
+                    Отправить желательно до {{ project.semester.report_ends_at }}<br>
                     <div class="csc-well o-send-report-form">
                         {% crispy form %}
                     </div>
@@ -63,7 +63,7 @@
                         <div class="card-body card-padding">
                             <dl class="dl-horizontal">
                             <dt>Дата начала:</dt> <dd>{{ project.semester.report_starts_at }}</dd>
-                            <dt>Дедлайн:</dt> <dd>{{ project.semester.report_ends_at }}</dd>
+                            <dt>Дата окончания (soft):</dt> <dd>{{ project.semester.report_ends_at }}</dd>
                             </dl>
                         </div>
                     </div>

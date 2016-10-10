@@ -163,24 +163,14 @@ class Project(TimeStampedModel):
         return self.semester.index == current_term_index
 
     def report_period_started(self):
+        if not self.semester.report_starts_at:
+            return self.is_active()
         today = now().date()
         return today >= self.semester.report_starts_at
 
     def report_period_ended(self):
         today = now().date()
         return self.semester.report_ends_at > today
-
-    def report_submit_period_active(self):
-        """Returns True if we in report period range"""
-        today = now().date()
-        if self.semester.report_starts_at and self.semester.report_ends_at:
-            return (self.semester.report_starts_at <= today <=
-                    self.semester.report_ends_at)
-        elif self.semester.report_ends_at:
-            return self.semester.report_ends_at >= today
-        elif self.semester.report_starts_at:
-            return self.semester.report_starts_at <= today
-        return False
 
 
 class ReviewCriteria(TimeStampedModel):
