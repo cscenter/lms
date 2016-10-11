@@ -86,14 +86,6 @@ def meta(text=None, **kwargs):
     return decorator
 
 
-class UbereditorMixin(object):
-    def __init__(self, *args, **kwargs):
-        self.formfield_overrides.update(
-            {models.TextField: {'widget': Ubereditor}})
-
-        super(UbereditorMixin, self).__init__(*args, **kwargs)
-
-
 class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}

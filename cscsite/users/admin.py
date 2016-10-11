@@ -5,12 +5,13 @@ from __future__ import unicode_literals, absolute_import
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.db import models as db_models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail.admin import AdminImageMixin
 from import_export.admin import ImportExportMixin, ImportMixin
 
-from core.admin import UbereditorMixin
+from core.forms import AdminRichTextAreaWidget
 from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, CSCUserReference, \
     OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
@@ -91,7 +92,7 @@ class SHADCourseRecordInlineAdmin(admin.StackedInline):
     extra = 0
 
 
-class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
+class CSCUserAdmin(AdminImageMixin, UserAdmin):
     form = CSCUserChangeForm
     add_form = CSCUserCreationForm
     change_form_template = 'admin/user_change_form.html'
@@ -102,6 +103,10 @@ class CSCUserAdmin(AdminImageMixin, UbereditorMixin, UserAdmin):
                        'last_login', 'date_joined']
     list_display = ('id', 'username', 'email', 'first_name', 'last_name',
         'is_staff')
+
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),

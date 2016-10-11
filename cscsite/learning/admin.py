@@ -6,10 +6,12 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.admin import UbereditorMixin, WiderLabelsMixin
+from core.admin import WiderLabelsMixin
+from core.forms import AdminRichTextAreaWidget
 from core.models import apply_related_spec
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
@@ -26,8 +28,11 @@ class RelatedSpecMixin(object):
         return apply_related_spec(qs, self.related_spec)
 
 
-class CourseAdmin(TranslationAdmin, UbereditorMixin, admin.ModelAdmin):
+class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['name_ru', 'name_en']
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
 class CourseOfferingTeacherInline(admin.TabularInline):
@@ -46,11 +51,13 @@ class CourseOfferingTeacherInline(admin.TabularInline):
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
-class CourseOfferingAdmin(UbereditorMixin, WiderLabelsMixin, TranslationAdmin,
-                          admin.ModelAdmin):
+class CourseOfferingAdmin(WiderLabelsMixin, TranslationAdmin, admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
     inlines = (CourseOfferingTeacherInline,)
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
@@ -62,13 +69,16 @@ class CourseClassAttachmentInline(admin.TabularInline):
     model = CourseClassAttachment
 
 
-class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
+class CourseClassAdmin(admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['type', 'venue']
     search_fields = ['course_offering__course__name']
     list_display = ['id', 'name', 'course_offering', 'date', 'venue', 'type']
     inlines = [CourseClassAttachmentInline]
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
@@ -78,13 +88,18 @@ class CourseClassAdmin(UbereditorMixin, admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class CourseOfferingNewsAdmin(UbereditorMixin, admin.ModelAdmin):
+class CourseOfferingNewsAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     list_display = ['title', 'course_offering', 'created']
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
-class VenueAdmin(UbereditorMixin, admin.ModelAdmin):
-    pass
+class VenueAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
 class AssignmentAdminForm(forms.ModelForm):
@@ -106,10 +121,13 @@ class AssignmentAdminForm(forms.ModelForm):
                           "of them not related to selected course offering")))
 
 
-class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
+class AssignmentAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'course_offering', 'created', 'deadline_at']
     search_fields = ['course_offering__course__name']
     form = AssignmentAdminForm
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
     def get_readonly_fields(self, request, obj=None):
         return ['course_offering'] if obj else []
@@ -146,10 +164,11 @@ class AssignmentAdmin(UbereditorMixin, admin.ModelAdmin):
         return super(AssignmentAdmin, self).save_related(request, form, formsets, change)
 
 
-class AssignmentCommentAdmin(RelatedSpecMixin,
-                             UbereditorMixin,
-                             admin.ModelAdmin):
+class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     readonly_fields = ['student_assignment']
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
     related_spec = {'select': [('student_assignment',
                                 [('assignment',
                                   [('course_offering',
@@ -197,12 +216,17 @@ class NonCourseEventAdmin(admin.ModelAdmin):
     list_display = ['name', 'date', 'venue']
 
 
-class OnlineCourseAdmin(UbereditorMixin, admin.ModelAdmin):
-    pass
+class OnlineCourseAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
-class InternationalSchoolAdmin(UbereditorMixin, admin.ModelAdmin):
+class InternationalSchoolAdmin(admin.ModelAdmin):
     list_display = ['name', 'deadline', 'has_grants']
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
 class UsefulAdmin(admin.ModelAdmin):
