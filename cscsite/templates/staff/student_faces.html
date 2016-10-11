@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load staticfiles %}
+{% load userpreview from custom_thumbnail %}
 
 {% block content %}
     <div class="container">
@@ -18,13 +19,9 @@
             {% for student in students %}
                 <div class="student">
                     <a href="{{ student.get_absolute_url }}">
-                    {% if student.photo %}
-                        {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
-                    {% else %}
-                        <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
-                    {% endif %}
+                    {% userpreview student "150x150" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
                         <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
                     </a>
                 </div>

@@ -15,8 +15,12 @@ register = Library()
 class StubImage(BaseImageFile):
     url = staticfiles_storage.url("img/center/profile_no_photo.png")
 
-    def __init__(self):
-        self.size = 175, 238
+    def __init__(self, **kwargs):
+        geometry = kwargs.get("geometry", None)
+        if geometry:
+            self.size = geometry.split("x")
+        else:
+            self.size = 175, 238
 
     def exists(self):
         return True
@@ -90,11 +94,11 @@ class UserThumbnailNode(ThumbnailNodeBase):
         if not thumbnail or isinstance(thumbnail, DummyImageFile):
             cls = user.__class__
             if not user.is_teacher and user.gender == cls.GENDER_MALE:
-                thumbnail = BoyStubImage()
+                thumbnail = BoyStubImage(geometry=geometry)
             elif not user.is_teacher and user.gender == cls.GENDER_FEMALE:
-                thumbnail = GirlStubImage()
+                thumbnail = GirlStubImage(geometry=geometry)
             else:
-                thumbnail = StubImage()
+                thumbnail = StubImage(geometry=geometry)
 
         if self.as_var:
             context.push()

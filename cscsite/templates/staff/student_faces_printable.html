@@ -4,6 +4,7 @@
 {% load thumbnail %}
 {% load staticfiles %}
 {% load core_tags %}
+{% load userpreview from custom_thumbnail %}
 
 {% block content %}
 {% if students %}
@@ -11,13 +12,9 @@
         <page size="A4" class="student-faces-printable">
             {% for student in chunk %}
                 <div class="student">
-                    {% if student.photo %}
-                        {% thumbnail student.photo "150x210" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
-                    {% else %}
-                        <img width="150" height="210" data-src="holder.js/150x210?text=%3F&fontweight=normal&size=50" />
-                    {% endif %}
+                    {% userpreview student "150x210" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
                         <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }}<br>{{ student.first_name }}</figcaption>
                 </div>
             {% endfor %}
