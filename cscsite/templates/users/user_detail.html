@@ -4,6 +4,7 @@
 {% load core_tags %}
 {% load staticfiles %}
 {% load markdown from core_tags %}
+{% load userpreview from custom_thumbnail %}
 
 {% block content %}
     <div id="profile">
@@ -11,14 +12,10 @@
             <div class="thumbnail text-center">
                 <div class="thumbnail-inner">
                     <div class="thumbnail-img">
-                        {% if user_object.photo %}
-                            {% thumbnail user_object.photo "170x238" crop="center top" cropbox=user_object.photo_thumbnail_cropbox as im %}
-                                <img src="{{ im.url }}" width="{{ im.width }}"
-                                     height="{{ im.height }}">
-                            {% endthumbnail %}
-                        {% else %}
-                            <img src="{% static 'img/center/profile_no_photo.png' %}">
-                        {% endif %}
+                        {% userpreview user_object "170x238" as im %}
+                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% enduserpreview %}
+
                     </div>
                     {% if user_object.pk == user.pk or user.is_curator %}
                         <div class="photo-actions">
