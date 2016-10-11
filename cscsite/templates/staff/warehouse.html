@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load staticfiles %}
+{% load markdown from core_tags %}
+
 {% block body_class %} gray{% endblock body_class %}
 {% block title %}Hints warehouse{% endblock title %}
+
 {% block content %}
     <div id="questions-wrapper">
         <h2 class="center-header">Hints</h2>
@@ -14,7 +17,11 @@
                            href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
                     </div>
                     <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
-                        <div class="panel-body">{{ qa.answer|safe }}</div>
+                        <div class="panel-body">
+                            {% markdown 0 "warehouse_answer" qa.pk  %}
+                                {{ qa.answer|safe }}
+                            {% endmarkdown %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
