@@ -11,8 +11,8 @@
     <div class="col-xs-12 h2-and-buttons">
       <h2>
         <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
-        {{ assignment.title }}
-        <small>{{ assignment.course_offering }} </small>
+        {{ assignment.title }}<br>
+          <small><a href="{{ assignment.course_offering.get_absolute_url }}">{{ assignment.course_offering }}</a></small>
       </h2>
       <div class="btn-toolbar">
         <a href="{% url 'assignment_edit' assignment.course_offering.course.slug assignment.course_offering.semester.slug assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
