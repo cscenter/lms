@@ -328,8 +328,9 @@ class AssignmentForm(forms.ModelForm):
         initial=5)
 
     def __init__(self, *args, **kwargs):
-        remove_links = kwargs.get('remove_links', "")
-        del kwargs['remove_links']
+        course_offering = kwargs.pop('course_offering', None)
+        assert course_offering is not None
+        remove_links = kwargs.pop('remove_links', "")
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(
@@ -353,13 +354,7 @@ class AssignmentForm(forms.ModelForm):
             ),
             CANCEL_SAVE_PAIR)
         super(AssignmentForm, self).__init__(*args, **kwargs)
-        # No protection is needed if user is a superuser
-        # if not user.is_superuser:
-        #     self.fields['course_offering'].queryset = \
-        #         CourseOffering.objects.filter(teachers=user)
-        # else:
-        #     self.fields['course_offering'].queryset = \
-        #         CourseOffering.objects.all()
+        self.instance.course_offering = course_offering
 
     class Meta:
         model = Assignment

@@ -1290,7 +1290,7 @@ class StudentAssignmentDetailMixin(object):
         return redirect(self.get_success_url())
 
 
-# TODO: Practice says it's not really good idea to use generic for this action. Refactor ASAP?
+# TODO: Refactor without generic view
 class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
                                          FailedCourseContextMixin,
                                          StudentAssignmentDetailMixin,
@@ -1405,32 +1405,25 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
     template_name = "learning/simple_crispy_form.html"
     form_class = AssignmentForm
-    success_url = reverse_lazy('assignment_list_teacher')
 
-    def __init__(self, *args, **kwargs):
-        self._course_offering = None
-        super(AssignmentCreateUpdateMixin, self).__init__(*args, **kwargs)
+    def get_queryset(self):
+        return self.model.objects.select_related("course_offering",
+                                                 "course_offering__course",
+                                                 "course_offering__semester")
 
     def is_form_allowed(self, user, obj):
-        return (obj is None or
-                (user.is_authenticated() and user.is_curator) or
+        return (obj is None or user.is_curator or
                 user in obj.course_offering.teachers.all())
 
-    def get_initial(self):
-        initial = super(AssignmentCreateUpdateMixin, self).get_initial()
-        course_slug, semester_year, semester_type \
-            = utils.co_from_kwargs(self.kwargs)
-        if self.request.user.is_curator:
-            base_qs = CourseOffering.objects
-        else:
-            base_qs = (CourseOffering.objects
-                       .filter(teachers=self.request.user))
-        self._course_offering = get_object_or_404(
-            base_qs.filter(course__slug=course_slug,
-                           semester__year=semester_year,
-                           semester__type=semester_type))
-        initial['course_offering'] = self._course_offering
-        return initial
+    def get_course_offering(self):
+        course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
+        queryset = CourseOffering.objects
+        if not self.request.user.is_curator:
+            queryset = queryset.filter(teachers=self.request.user)
+        return get_object_or_404(
+            queryset.filter(course__slug=course_slug,
+                            semester__year=term_year,
+                            semester__type=term_type))
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -1440,33 +1433,28 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             #               that forms are generated in code
             co = self.object.course_offering
             remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
-                "".join("<li>"
-                        "<i class=\"fa fa-times\"></i>&nbsp;"
-                        "<a href=\"{0}\">{1}</a>"
-                        "</li>"
+                "".join("<li><i class=\"fa fa-times\"></i>&nbsp;"
+                        "<a href=\"{0}\">{1}</a></li>"
                         .format(reverse('assignment_attachment_delete',
                                         args=[co.course.slug,
                                               co.semester.slug,
                                               self.object.pk,
                                               aa.pk]),
                                 aa.file_name)
-                        for aa
-                        in self.object.assignmentattachment_set.all()))
+                        for aa in self.object.assignmentattachment_set.all()))
         else:
             remove_links = ""
-        return form_class(remove_links=remove_links, **self.get_form_kwargs())
-
+        course_offering = self.get_course_offering()
+        form_kwargs = self.get_form_kwargs()
+        form_kwargs["remove_links"] = remove_links
+        form_kwargs["course_offering"] = course_offering
+        return form_class(**form_kwargs)
 
     def get_success_url(self):
-        return reverse('course_offering_detail',
-                       args=[self._course_offering.course.slug,
-                             self._course_offering.semester.slug])
+        return reverse('assignment_detail_teacher', args=[self.object.pk])
 
     def save_instance(self, form):
-        self.object = form.save(commit=False)
-        assert self._course_offering is not None
-        self.object.course_offering = self._course_offering
-        self.object.save()
+        self.object = form.save()
 
     def form_valid(self, form):
         self.save_instance(form)
@@ -1474,8 +1462,7 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if attachments:
             for attachment in attachments:
                 (AssignmentAttachment.objects
-                 .create(assignment=self.object,
-                         attachment=attachment))
+                 .create(assignment=self.object, attachment=attachment))
         return redirect(self.get_success_url())
 
 
@@ -1485,11 +1472,10 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin,
     def save_instance(self, form):
         super(AssignmentCreateView, self).save_instance(form)
         # Populate notification receivers
-        co_teachers = self._course_offering.courseofferingteacher_set.all()
+        course_offering = self.object.course_offering
+        co_teachers = course_offering.courseofferingteacher_set.all()
         notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
         self.object.notify_teachers.add(*notify_teachers)
-
-
 
 
 # Same here

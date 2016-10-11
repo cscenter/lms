@@ -1335,8 +1335,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         url = reverse('assignment_add',
                       args=[co.course.slug, co.semester.slug])
         self.doLogin(teacher)
-        self.assertRedirects(self.client.post(url, form),
-                             co.get_absolute_url())
+        self.client.post(url, form)
+        assert Assignment.objects.count() == 1
 
     def test_update(self):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
@@ -1360,7 +1360,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.doLogin(teacher)
         self.assertNotContains(self.client.get(list_url), form['title'])
         self.assertRedirects(self.client.post(url, form),
-                             co.get_absolute_url())
+                             reverse("assignment_detail_teacher", args=[a.pk]))
         # Show student assignments without comments
         self.assertContains(self.client.get( list_url + "?status=all"), form['title'])
 
