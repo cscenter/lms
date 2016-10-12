@@ -2010,12 +2010,15 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                     # TODO: move html_exporter to separated module
                     # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
                     html_exporter = nbconvert.HTMLExporter()
-                    nb_node, _ = html_exporter.from_filename(ipynb_src_path)
-                    with open(converted_path, 'w') as f:
-                        f.write(nb_node)
-                file_name += html_ext
-                response['X-Accel-Redirect'] = file_url + html_ext
-                return response
+                    try:
+                        nb_node, _ = html_exporter.from_filename(ipynb_src_path)
+                        with open(converted_path, 'w') as f:
+                            f.write(nb_node)
+                        file_name += html_ext
+                        response['X-Accel-Redirect'] = file_url + html_ext
+                        return response
+                    except FileNotFoundError:
+                        pass
 
         del response['Content-Type']
         response['Content-Disposition'] = "attachment; filename={}".format(
