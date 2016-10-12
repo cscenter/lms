@@ -26,7 +26,7 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% userpreview user "30x42" as im %}
+                    {% userpreview user "60x84" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduserpreview %}
 
