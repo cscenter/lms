@@ -30,7 +30,7 @@
                     <tr>
                         <td>
                             <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a><br>
-                            Руководители:<br> {{ project.supervisor }}
+                            Руководители: {{ project.supervisor }}
                         </td>
                         <td>{{ ps.report.final_score|default:"-" }}</td>
                         <td>

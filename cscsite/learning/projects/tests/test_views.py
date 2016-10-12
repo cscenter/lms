@@ -17,7 +17,9 @@ from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
-URL_REVIEWER_PROJECTS = reverse("projects:reviewer_projects")
+URL_REPORTS = reverse("projects:report_list_reviewers")
+URL_PROJECTS = reverse("projects:current_term_projects")
+URL_ALL_PROJECTS = reverse("projects:all_projects")
 
 
 @pytest.mark.django_db
@@ -58,64 +60,59 @@ def test_staff_diplomas_view(curator, client, student_center_factory):
 
 
 @pytest.mark.django_db
-def test_reviewer_list_security(client,
-                                student_center_factory,
-                                user_factory,
-                                curator):
-    """Check ProjectReviewerOnlyMixin"""
-    url = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
-    response = client.get(url)
+def test_project_reviewer_only_mixin_security(client,
+                                              student_center_factory,
+                                              user_factory,
+                                              curator):
+    response = client.get(URL_REPORTS)
     assert response.status_code == 302
     student = student_center_factory()
     client.login(student)
-    response = client.get(url)
+    response = client.get(URL_REPORTS)
     assert response.status_code == 302
     reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
     client.login(reviewer)
-    response = client.get(url)
+    response = client.get(URL_REPORTS)
     assert response.status_code == 200
     assert not response.context["projects"]
     client.login(curator)
-    response = client.get(url)
+    response = client.get(URL_REPORTS)
     assert response.status_code == 200
 
 
 @pytest.mark.django_db
 def test_reviewer_list(client, curator, student_center_factory):
     """Test GET-filter `show` works"""
-    url_reports = "{}?show=reports".format(URL_REVIEWER_PROJECTS)
-    url_available = "{}?show=available".format(URL_REVIEWER_PROJECTS)
-    url_all = "{}?show=all".format(URL_REVIEWER_PROJECTS)
     reviewer = ProjectReviewerFactory.create()
     year, term_type = get_current_semester_pair()
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     client.login(reviewer)
     student = student_center_factory()
-    response = client.get(url_reports)
+    response = client.get(URL_REPORTS)
     assert response.status_code == 200
     assert len(response.context["projects"]) == 0
     # Enroll on project from prev term
     project = ProjectFactory(students=[student], reviewers=[reviewer],
                              semester=semester_prev)
-    response = client.get(url_reports)
+    response = client.get(URL_REPORTS)
     assert response.status_code == 200
     assert len(response.context["projects"]) == 0
     # Enroll on project from current term
     ProjectFactory.create(students=[student], reviewers=[reviewer],
                           semester=semester)
-    response = client.get(url_reports)
+    response = client.get(URL_REPORTS)
     assert len(response.context["projects"]) == 1
     # With ?show=available filter show projects from current term to reviewers
-    response = client.get(url_available)
+    response = client.get(URL_PROJECTS)
     assert len(response.context["projects"]) == 1
     curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
     client.login(curator)
-    response = client.get(url_reports)
+    response = client.get(URL_REPORTS)
     assert len(response.context["projects"]) == 0
-    response = client.get(url_available)
+    response = client.get(URL_PROJECTS)
     assert len(response.context["projects"]) == 1
-    response = client.get(url_all)
+    response = client.get(URL_ALL_PROJECTS)
     assert len(response.context["projects"]) == 2
 
 

@@ -36,6 +36,70 @@ from notifications.signals import notify
 logger = logging.getLogger(__name__)
 
 
+class ReportListReviewerView(ProjectReviewerGroupOnlyMixin, generic.ListView):
+    context_object_name = "projects"
+    template_name = "learning/projects/reports.html"
+
+    def get_queryset(self):
+        current_year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(current_year, term_type)
+        queryset = (Project.objects
+                    .select_related("semester")
+                    .filter(semester__index=current_term_index,
+                            reviewers=self.request.user)
+                    .prefetch_related("students", "reviewers",
+                                      "projectstudent_set__report",
+                                      "projectstudent_set__student")
+                    .order_by("name", "pk"))
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportListReviewerView, self).get_context_data(**kwargs)
+        context["current_term"] = Semester.get_current()
+        return context
+
+
+class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
+    paginate_by = 50
+    context_object_name = "projects"
+    template_name = "learning/projects/available.html"
+
+    def get_queryset(self):
+        current_year, term_type = get_current_semester_pair()
+        current_term_index = get_term_index(current_year, term_type)
+        queryset = (Project.objects
+                    .filter(semester__index=current_term_index)
+                    .select_related("semester")
+                    .prefetch_related("students", "reviewers")
+                    .annotate(reviewers_cnt=Count("reviewers"))
+                    .annotate(
+                        have_reviewers=Case(
+                            When(reviewers_cnt__gt=0, then=Value(1)),
+                            default=Value(0),
+                            output_field=BooleanField()))
+                    .order_by("have_reviewers", "name", "pk"))
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(CurrentTermProjectsView,
+                        self).get_context_data(**kwargs)
+        context["current_term"] = Semester.get_current()
+        return context
+
+
+class ProjectListView(CuratorOnlyMixin, generic.ListView):
+    paginate_by = 50
+    context_object_name = "projects"
+    template_name = "learning/projects/all.html"
+
+    def get_queryset(self):
+        queryset = (Project.objects
+                    .select_related("semester")
+                    .prefetch_related("students", "reviewers")
+                    .order_by("-semester__index", "name", "pk"))
+        return queryset
+
+
 class StudentProjectsView(StudentOnlyMixin, generic.ListView):
     context_object_name = "projects"
     template_name = "learning/projects/student_projects.html"
