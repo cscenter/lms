@@ -18,6 +18,7 @@
   }
 
   .projects-empty-list {
+    font-size: 18px;
     margin: 40px 0;
     text-align: center;
   }
@@ -97,7 +98,14 @@
   .profile-link {
     color: $color-gray-20;
   }
+}
 
+.reviewers-list {
+  margin: -10px 0 20px 0;
+
+  h5 {
+    margin: 0 0 5px 0;
+  }
 }
 
 .o-send-report-timetable {

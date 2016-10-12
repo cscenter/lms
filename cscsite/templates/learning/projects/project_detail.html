@@ -119,6 +119,17 @@
                         {% endif %}
                     {% endif %}
                 </div>
+
+                {% if request.user.is_project_reviewer or request.user.is_curator %}
+                    {% if  project.reviewers.all %}
+                    <div class="reviewers-list">
+                        <h5>Проверяющие:</h5>
+                        {% for reviewer in project.reviewers.all %}
+                            {{ reviewer }}<br>
+                        {% endfor %}
+                    </div>
+                        {% endif %}
+                {% endif %}
                 <div class="card">
                     <div class="card-header ch-alt">Руководители</div>
                     <div class="card-body card-padding">
