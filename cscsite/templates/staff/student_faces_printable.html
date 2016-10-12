@@ -12,8 +12,8 @@
         <page size="A4" class="student-faces-printable">
             {% for student in chunk %}
                 <div class="student">
-                    {% userpreview student "150x210" as im %}
-                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% userpreview student "250x350" as im %}
+                        <img src="{{ im.url }}" width="150" height="210">
                     {% enduserpreview %}
                         <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }}<br>{{ student.first_name }}</figcaption>
                 </div>
