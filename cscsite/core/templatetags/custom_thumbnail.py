@@ -37,7 +37,8 @@ class GirlStubImage(StubImage):
 class UserThumbnailNode(ThumbnailNodeBase):
     """
     If picture not found, show empty stub picture based on user groups.
-    May hit db to get user groups in that case.
+    May hit db to get user groups in that case, but csc-menu do it right
+    now on each request.
     """
     child_nodelists = ('nodelist_file',)
     error_msg = ('Syntax error. Expected: ``userpreview user_obj '
