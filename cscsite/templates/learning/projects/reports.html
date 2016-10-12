@@ -10,6 +10,7 @@
     <ol class="breadcrumb projects">
       <li class="active">Отчеты, {{ current_term }}</li>
     </ol>
+    <div class="deadlines">Период отправки отчета: {{ current_term.report_starts_at|date:"d E" }} &mdash; {{ current_term.report_ends_at|date:"d E Y" }} г.</div>
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
@@ -17,8 +18,9 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th class="name">Проект</th>
+                    <th>Проект</th>
                     <th>Участник</th>
+                    <th>Статус</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -36,6 +38,7 @@
                             <td>
                                 <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.last_name }} {{ ps.student.first_name }} {{ ps.student.patronymic }}</a>
                             </td>
+                            <td>{{ ps.report.get_status_display }}</td>
                             <td>
                                 {% if ps.report and ps.report.status == 'sent' %}
                                     {% if not request.user.is_curator %}<span class="text-muted">Отправлен<br>Проверка куратором</span>
@@ -67,7 +70,5 @@
     {% if request.user.is_curator and not request.user.is_project_reviewer %}
       <span class="text-danger">Уведомления не будут приходить на почту, если не добавить себе группу "Project reviewer".</span><br>
     {% endif %}
-    Начало отправки отчетов: {{ current_term.report_starts_at }}<br>
-    Дедлайн (soft) отправки отчетов: {{ current_term.report_ends_at }}<br>
 </div>
 {% endblock content %}
