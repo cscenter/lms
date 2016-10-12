@@ -199,7 +199,7 @@ $header-lvl1-bg:                 #4F86A0;
 
     .dropdown {
         float: right;
-        padding: 0 6px;
+        padding: 0;
 
         &.open, &:hover {
             background-color: darken($header-lvl1-bg, 6%);
@@ -215,7 +215,7 @@ $header-lvl1-bg:                 #4F86A0;
     text-decoration: none!important;
     display: block;
     height: 50px;
-    padding-top: 6px;
+    padding: 6px 6px 0 6px;
     line-height: 1;
 
     .caret {

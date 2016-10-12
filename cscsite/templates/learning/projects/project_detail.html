@@ -10,7 +10,7 @@
 {% block content %}
 <div class="container">
     <ol class=" breadcrumb projects">
-        <li class="active">О проекте</li>
+        <li class="active">О проекте{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</li>
     </ol>
     {% if project.is_active %}
         {% if request.user.is_project_reviewer or request.user.is_curator %}
@@ -29,7 +29,7 @@
     <div id="project-detail-page">
         <div class="row">
             <div class="col-xs-8">
-                <h2 class="project-name">{{ project.name }}{% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+                <h2 class="project-name">{{ project.name }}<br>
                 <span class="small">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}</span></h2>
                 {% if project.description %}
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
@@ -39,14 +39,14 @@
 
                 {% if project.supervisor_presentation_slideshare_url %}
                     <h4>Презентация руководителя</h4>
-                    {% cache 86400 slideshare_oembed project_supervisor project.pk project.supervisor_presentation_slideshare_url %}
+                    {% cache 86400 slideshare_oembed project_supervisor project.pk project.supervisor_presentation_slideshare_url project.modified %}
                         {{ project.supervisor_presentation_slideshare_url|oembed }}
                     {% endcache %}
                 {% endif %}
 
                 {% if project.presentation_slideshare_url %}
                     <h4>Презентация участников</h4>
-                    {% cache 86400 slideshare_oembed project_participants project.pk project.presentation_slideshare_url %}
+                    {% cache 86400 slideshare_oembed project_participants project.pk project.presentation_slideshare_url project.modified %}
                         {{ project.presentation_slideshare_url|oembed }}
                     {% endcache %}
                 {% endif %}

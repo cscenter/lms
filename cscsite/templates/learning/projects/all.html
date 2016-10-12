@@ -7,16 +7,18 @@
 
 {% block content %}
 <div class="projects-list-page">
+    <ol class="breadcrumb projects">
+      <li class="active">Все проекты</li>
+    </ol>
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
-            <h3>Все проекты</h3>
+            <h3></h3>
             <table class="table">
                 <thead>
                 <tr>
                     <th class="name">Название</th>
                     <th>Участники</th>
-                    <th class="note">#</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -27,19 +29,18 @@
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
                         <td>{{ project.students.all|join:"<br>" }}</td>
-                        <td>{% if project.is_external %}<span>Внешний проект</span>{% endif %}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
 
-            {% if is_paginated %}
-                {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
-            {% endif %}
             {% else %}
                 <div class="enrolled-empty-list">Список проектов пуст.</div>
             {% endif %}
         </div>
     </div>
+    {% if is_paginated %}
+        {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
+    {% endif %}
 </div>
 {% endblock content %}

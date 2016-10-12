@@ -8,14 +8,8 @@
 {% block content %}
 <div class="projects-list-page">
     <ol class="breadcrumb projects">
-      <li class="active">Отчеты</li>
+      <li class="active">Отчеты, {{ current_term }}</li>
     </ol>
-    {% if request.user.is_curator and not request.user.is_project_reviewer %}
-    <div role="alert" class="alert alert-info alert-dismissible">
-      <button aria-label="Close" data-dismiss="alert" class="close" type="button"><span aria-hidden="true">×</span></button>
-      <p>Уведомления не будут приходить на почту, если не добавить себе группу "Project reviewer".</p>
-    </div>
-    {% endif %}
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
@@ -23,23 +17,40 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th class="name">Название проекта</th>
-                    <th>Участники</th>
+                    <th class="name">Проект</th>
+                    <th>Участник</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for project in projects %}
-                    <tr>
-                        <td>
-                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
-                            {% if request.user.is_curator %}<br>{{ current_term }}{% endif %}
-                        </td>
-                        <td>
-                            {% for ps in project.projectstudent_set.all %}
-                                {% include "learning/projects/_report_row.html" with you_enrolled=True can_view_report=True %}
-                            {% endfor %}
-                        </td>
-                    </tr>
+                    {% for ps in project.projectstudent_set.all %}
+                        <tr>
+                            <td>
+                                {% if forloop.first %}
+                                    <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                                {% else %}
+                                    <span style="color: #CCC">—〃—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.last_name }} {{ ps.student.first_name }} {{ ps.student.patronymic }}</a>
+                            </td>
+                            <td>
+                                {% if ps.report and ps.report.status == 'sent' %}
+                                    {% if not request.user.is_curator %}<span class="text-muted">Отправлен<br>Проверка куратором</span>
+                                    {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Оценить отчет</a>{% endif %}
+                                {% elif ps.report %}
+                                    <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
+                                       href="{% url "projects:project_report" project.pk ps.student.pk %}">{{ ps.report.created|date:"d E Y" }}
+                                    </a>
+                                {% elif project.is_active %}<span class="text-muted">Не отправлен</span>
+                                {% elif not project.is_active or project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
                 {% endfor %}
                 </tbody>
             </table>
@@ -49,12 +60,14 @@
             {% endif %}
             {% else %}
                 <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                <a href="{% url "projects:reviewer_projects" %}?show=available">Перейти к списку проектов текущего семестра</a>.</div>
+                <a href="{% url "projects:current_term_projects" %}">Смотреть список проектов текущего семестра</a></div>
             {% endif %}
         </div>
     </div>
-
+    {% if request.user.is_curator and not request.user.is_project_reviewer %}
+      <span class="text-danger">Уведомления не будут приходить на почту, если не добавить себе группу "Project reviewer".</span><br>
+    {% endif %}
     Начало отправки отчетов: {{ current_term.report_starts_at }}<br>
-    Окончание отправки отчетов: {{ current_term.report_ends_at }}<br>
+    Дедлайн (soft) отправки отчетов: {{ current_term.report_ends_at }}<br>
 </div>
 {% endblock content %}
