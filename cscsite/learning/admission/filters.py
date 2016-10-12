@@ -49,6 +49,7 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
             self._form.fields["status"].help_text = ""
             self._form.fields["second_name"].help_text = ""
             self._form.helper = FormHelper()
+            # Looks like I disable it due to GET method
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(

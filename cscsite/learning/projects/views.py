@@ -17,11 +17,13 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import FormMixin, BaseUpdateView
+from django_filters.views import BaseFilterView
 
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from learning.models import Semester
+from learning.projects.filters import ProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
     ReportCuratorAssessmentForm
@@ -87,8 +89,9 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         return context
 
 
-class ProjectListView(CuratorOnlyMixin, generic.ListView):
+class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
     paginate_by = 50
+    filterset_class = ProjectsFilter
     context_object_name = "projects"
     template_name = "learning/projects/all.html"
 
@@ -98,6 +101,11 @@ class ProjectListView(CuratorOnlyMixin, generic.ListView):
                     .prefetch_related("students", "reviewers")
                     .order_by("-semester__index", "name", "pk"))
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectListView, self).get_context_data(**kwargs)
+        context["filter"] = self.filterset
+        return context
 
 
 class StudentProjectsView(StudentOnlyMixin, generic.ListView):
@@ -109,69 +117,6 @@ class StudentProjectsView(StudentOnlyMixin, generic.ListView):
                 .filter(student=self.request.user)
                 .select_related("project", "project__semester", "student")
                 .order_by("-project__semester__index", "project__name"))
-
-
-class ReviewerProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
-    """By default, show projects on which reviewer has enrolled."""
-    paginate_by = 50
-    context_object_name = "projects"
-    FILTER_NAME = "show"
-    PROJECT_REPORTS = "reports"  # show enrollments for current term
-    PROJECT_AVAILABLE = "available"  # show all projects for current term
-    PROJECT_ALL = "all"  # all projects
-    FILTER_VALUES = [PROJECT_REPORTS, PROJECT_AVAILABLE, PROJECT_ALL]
-
-    def get_template_names(self):
-        assert self.FILTER_NAME in self.request.GET
-        template_name = self.request.GET[self.FILTER_NAME]
-        return ["learning/projects/{}.html".format(template_name)]
-
-    def get(self, request, *args, **kwargs):
-        # Dispatch, by default show enrollments from current term
-        is_valid_filter = (self.FILTER_NAME in request.GET and
-                           request.GET[self.FILTER_NAME] in self.FILTER_VALUES)
-        if not is_valid_filter:
-            path = request.path
-            params = request.GET.copy()
-            params[self.FILTER_NAME] = self.PROJECT_REPORTS
-            return HttpResponsePermanentRedirect(
-                "{}?{}".format(path, params.urlencode())
-            )
-
-        return super(ReviewerProjectsView, self).get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        current_year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(current_year, term_type)
-        project_type = self.request.GET[self.FILTER_NAME]
-        # FIXME: separate views for projects and reports?????!!!!11111
-        queryset = (Project.objects
-                    .select_related("semester")
-                    .prefetch_related("students", "reviewers",
-                                      "projectstudent_set__report",
-                                      "projectstudent_set__student")
-                    .order_by("-semester__index", "name", "pk"))
-        if project_type == self.PROJECT_AVAILABLE:
-            queryset = (queryset
-                        .annotate(reviewers_cnt=Count("reviewers"))
-                        .annotate(
-                            have_reviewers=Case(
-                                When(reviewers_cnt__gt=0, then=Value(1)),
-                                default=Value(0),
-                                output_field=BooleanField()))
-                        .order_by("-semester__index", "have_reviewers",
-                                  "name", "pk"))
-        if project_type in [self.PROJECT_REPORTS, self.PROJECT_AVAILABLE]:
-            queryset = queryset.filter(semester__index=current_term_index)
-        if project_type == self.PROJECT_REPORTS:
-            queryset = queryset.filter(reviewers=self.request.user)
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super(ReviewerProjectsView, self).get_context_data(**kwargs)
-        context["filter_active"] = self.request.GET[self.FILTER_NAME]
-        context["current_term"] = Semester.get_current()
-        return context
 
 
 class ProjectDetailView(generic.CreateView):

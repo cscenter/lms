@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 
-from learning.projects.views import ReviewerProjectsView, ProjectDetailView, \
+from learning.projects.views import ProjectDetailView, \
     ProjectEnrollView, ReportView, ReportAttachmentDownloadView, \
     ReportUpdateStatusView, ReportCuratorSummarizeView, StudentProjectsView, \
     ReportCuratorAssessmentView, ProjectPrevNextView, ReportListReviewerView, \
@@ -15,8 +15,6 @@ urlpatterns = [
             name='current_term_projects'),
         url(r'^all/$', ProjectListView.as_view(),
             name='all_projects'),
-        # url(r'^$', ReviewerProjectsView.as_view(),
-        #     name='reviewer_projects'),
         url(r'^(?P<pk>\d+)/$', ProjectDetailView.as_view(),
             name='project_detail'),
         url(r'^prev/(?P<project_id>\d+)/$',
