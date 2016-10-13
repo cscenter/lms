@@ -6,8 +6,8 @@
 {% load markdown from core_tags %}
 
 {% block javascripts %}
-    {% if is_actual_teacher or request.user.is_curator %}
     <script type="text/javascript">
+    {% if is_actual_teacher or request.user.is_curator %}
         // TODO: move to separated js-file
         $('.assignment-attachment a:contains(".ipynb")').each(function() {
             if ( $(this).text().trim().match(".ipynb$") ) {
@@ -17,8 +17,23 @@
                         .text("[html]").insertAfter(this);
             }
         });
-    </script>
     {% endif %}
+    // TODO: move to external file
+    $(function () {
+        var sidebar_top = $('#o-sidebar').offset().top - 20;
+        var bottom = ($('.footer').offset().top - 75 );
+        // 500 - random number which needs to solve fast scroll problem in chrome
+        if (bottom - sidebar_top > 500 ) {
+            $('#o-sidebar').affix({
+                offset: {
+                    top: sidebar_top,
+                    bottom: ($('.footer').outerHeight(true))
+                }
+            });
+        }
+    })
+    </script>
+
 {% endblock javascripts %}
 
 {% block content %}
@@ -111,53 +126,57 @@
 
       {% endif %}
     </div>
-    <div class="col-xs-3">
-      {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
-      <a href="{% url 'a_s_detail_teacher' next_a_s_pk %}"
-         class="btn btn-default">
-        {% trans "Next unchecked[assignment]" %}
-        <i class="fa fa-angle-right"></i>
-      </a>
-      {% endif %}
-      <h5 class="assignment">{% trans "Grade" %}</h5>
-      {% if user_type == 'teacher' and is_actual_teacher %}
-      {% crispy grade_form %}
-      {% else %}
-      <span style="white-space: nowrap;"
-            class="badge assignment-status {{ a_s.state|to_css }}">
-        {{ a_s.state_display }}
-      </span>
-      {% endif %}
-      {% if one_teacher %}
-      <h5 class="assignment">{% trans "Professor" %}</h5>
-      {% else %}
-      <h5 class="assignment">{% trans "Professors" %}</h5>
-      {% endif %}
-      <ul class="list-unstyled">
-        {% for teacher in a_s.assignment.course_offering.teachers.all %}
-        <li>
-          <a href="{% url 'teacher_detail' teacher.pk %}">
-            {{ teacher.get_full_name }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-      <h5 class="assignment">{% if a_s.student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
-      <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
-      <h5 class="assignment">{% trans "Deadline" %}</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
-      <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.grade_max }}</span>
-      <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
-      <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
-      <h5 class="assignment">{% trans "Assignment created" %}</h5>
-      {{ a_s.assignment.created|date:"d E Y" }}
-      {% if a_s.assignment.is_online %}
-      <h4>{% trans "Can be passed online "%}</h4>
-      {% else %}
-      <h4>{% trans "Should be passed offline "%}</h4>
-      {% endif %}
+
+        <div class="col-xs-3">
+            <div class="-submission" id="o-sidebar">
+                {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
+                  <a href="{% url 'a_s_detail_teacher' next_a_s_pk %}" class="btn btn-default">
+                    {% trans "Next unchecked[assignment]" %} <i class="fa fa-angle-right"></i>
+                  </a>
+                {% endif %}
+
+                <h5 class="assignment">{% trans "Grade" %}</h5>
+                {% if user_type == 'teacher' and is_actual_teacher %}
+                {% crispy grade_form %}
+                {% else %}
+                <span style="white-space: nowrap;" class="badge assignment-status {{ a_s.state|to_css }}">{{ a_s.state_display }}</span>
+                {% endif %}
+
+                {% if not is_actual_teacher %}
+                      {% if one_teacher %}
+                      <h5 class="assignment">{% trans "Professor" %}</h5>
+                      {% else %}
+                      <h5 class="assignment">{% trans "Professors" %}</h5>
+                      {% endif %}
+                      <ul class="list-unstyled">
+                        {% for teacher in a_s.assignment.course_offering.teachers.all %}
+                        <li>
+                          <a href="{% url 'teacher_detail' teacher.pk %}">
+                            {{ teacher.get_full_name }}
+                          </a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                {% endif %}
+                <h5 class="assignment">{% if a_s.student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
+                <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
+
+                <h5 class="assignment">{% trans "Deadline" %}</h5>
+                <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
+
+                <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
+                <span style="white-space: nowrap;">{{ a_s.assignment.grade_max }}</span>
+
+                <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
+                <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
+
+                <h5 class="assignment">{% trans "Assignment created" %}</h5>
+                {{ a_s.assignment.created|date:"d E Y" }}
+                {% if a_s.assignment.is_online %}
+                <h4>{% trans "Can be passed online "%}</h4>
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock content %}

@@ -6,6 +6,23 @@
   }
 }
 
+#o-sidebar {
+  width: 240px;
+
+  &.-submission {
+    h5:first-child {
+      margin-top: 0;
+    }
+
+    &.affix {
+      top: 20px;
+    }
+    &.affix-bottom {
+      position: absolute;
+    }
+  }
+}
+
 // Test page
 //#student-assignment {
 //  .comment-list {
