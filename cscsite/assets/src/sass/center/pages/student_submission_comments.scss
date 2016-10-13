@@ -7,7 +7,7 @@
 }
 
 #o-sidebar {
-  width: 240px;
+  width: 220px;
 
   &.-submission {
     h5:first-child {
@@ -22,6 +22,15 @@
     }
   }
 }
+
+@media (max-width: 940px) {
+    .affix {
+        position: static;
+    }
+}
+
+
+
 
 // Test page
 //#student-assignment {

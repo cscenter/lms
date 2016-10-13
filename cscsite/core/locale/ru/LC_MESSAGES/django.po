@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-13 15:30+0300\n"
-"PO-Revision-Date: 2016-10-13 15:33+0230\n"
+"POT-Creation-Date: 2016-10-13 17:29+0300\n"
+"PO-Revision-Date: 2016-10-13 17:29+0230\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -283,7 +283,7 @@ msgstr "Оценка не может быть больше максимальн�
 #: cscsite/templates/learning/assignment_list_student.html:45
 #: cscsite/templates/learning/assignment_list_student.html:101
 #: cscsite/templates/learning/assignment_list_teacher.html:77
-#: cscsite/templates/learning/assignment_submission_detail.html:148
+#: cscsite/templates/learning/assignment_submission_detail.html:164
 msgid "Deadline"
 msgstr "Срок сдачи"
 
@@ -297,12 +297,12 @@ msgid "Can be passed online"
 msgstr "Можно сдать через сайт CS центра"
 
 #: cscsite/learning/forms.py:324 cscsite/learning/models.py:546
-#: cscsite/templates/learning/assignment_submission_detail.html:154
+#: cscsite/templates/learning/assignment_submission_detail.html:170
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
 #: cscsite/learning/forms.py:327 cscsite/learning/models.py:550
-#: cscsite/templates/learning/assignment_submission_detail.html:151
+#: cscsite/templates/learning/assignment_submission_detail.html:167
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
@@ -796,7 +796,7 @@ msgid "StudentAssignment|student"
 msgstr "Студент"
 
 #: cscsite/learning/models.py:661
-#: cscsite/templates/learning/assignment_submission_detail.html:122
+#: cscsite/templates/learning/assignment_submission_detail.html:138
 #: cscsite/templates/learning/courses/learning_my_courses.html:87
 #: cscsite/templates/users/user_detail.html:281
 msgid "Grade"
@@ -819,8 +819,6 @@ msgid "Last comment from"
 msgstr "От кого последний комментарий"
 
 #: cscsite/learning/models.py:673
-#| msgid ""
-#| "System field. 0 - no comments yet. 1 - from student. 2 - from teacher"
 msgid "0 - no comments yet, 1 - from student, 2 - from teacher"
 msgstr ""
 "Системное поле. 0 - ещё нет комментариев. 1 - от студента. 2 - от "
@@ -862,7 +860,7 @@ msgstr "Комментарии к заданиям"
 #: cscsite/learning/models.py:814
 #: cscsite/templates/learning/assignment_detail_teacher.html:64
 #: cscsite/templates/learning/assignment_list_teacher.html:79
-#: cscsite/templates/learning/assignment_submission_detail.html:145
+#: cscsite/templates/learning/assignment_submission_detail.html:161
 #: cscsite/templates/learning/projects/report.html:161
 #: cscsite/users/models.py:186 cscsite/users/models.py:528
 #: cscsite/users/models.py:546 cscsite/users/models.py:580
@@ -1057,7 +1055,7 @@ msgstr "Выпускник"
 
 #: cscsite/learning/settings.py:23
 #: cscsite/templates/learning/assignment_detail_teacher.html:72
-#: cscsite/templates/learning/assignment_submission_detail.html:145
+#: cscsite/templates/learning/assignment_submission_detail.html:161
 #: cscsite/templates/learning/projects/report.html:161
 msgid "Volunteer"
 msgstr "Вольнослушатель"
@@ -1225,15 +1223,20 @@ msgstr "Нет комментариев"
 msgid "Add solution"
 msgstr "Добавить решение"
 
-#: cscsite/learning/views.py:1374
+#: cscsite/learning/views.py:1370
+#| msgid "Gradebook successfully saved."
+msgid "Grade successfully saved"
+msgstr "Оценка успешно сохранена."
+
+#: cscsite/learning/views.py:1376
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: cscsite/learning/views.py:1675
+#: cscsite/learning/views.py:1677
 msgid "Gradebook successfully saved."
 msgstr "Ведомость успешно сохранена."
 
-#: cscsite/learning/views.py:1898 cscsite/learning/views.py:1922
+#: cscsite/learning/views.py:1900 cscsite/learning/views.py:1924
 msgid "Invalid form."
 msgstr ""
 
@@ -1541,7 +1544,7 @@ msgid "Please correct the errors below."
 msgstr "Пожалуйста, исправьте ошибки."
 
 #: cscsite/templates/learning/assignment_detail_teacher.html:18
-#: cscsite/templates/learning/assignment_submission_detail.html:44
+#: cscsite/templates/learning/assignment_submission_detail.html:59
 #: cscsite/templates/learning/courseclass_detail.html:16
 #: cscsite/templates/learning/courses/detail.html:14
 #: cscsite/templates/users/user_detail.html:80
@@ -1592,32 +1595,28 @@ msgstr "Архив"
 msgid "No assignments yet"
 msgstr "Список заданий пуст"
 
-#: cscsite/templates/learning/assignment_submission_detail.html:118
+#: cscsite/templates/learning/assignment_submission_detail.html:134
 msgid "Next unchecked[assignment]"
 msgstr "Следующее непроверенное"
 
-#: cscsite/templates/learning/assignment_submission_detail.html:131
+#: cscsite/templates/learning/assignment_submission_detail.html:147
 msgid "Professor"
 msgstr "Преподаватель"
 
-#: cscsite/templates/learning/assignment_submission_detail.html:133
+#: cscsite/templates/learning/assignment_submission_detail.html:149
 #: cscsite/templates/learning/courses/learning_my_courses.html:35
 #: cscsite/templates/learning/courses/learning_my_courses.html:56
 #: cscsite/templates/learning/courses/teaching_list.html:22
 msgid "Professors"
 msgstr "Преподаватели"
 
-#: cscsite/templates/learning/assignment_submission_detail.html:157
+#: cscsite/templates/learning/assignment_submission_detail.html:173
 msgid "Assignment created"
 msgstr "Задание добавлено"
 
-#: cscsite/templates/learning/assignment_submission_detail.html:160
+#: cscsite/templates/learning/assignment_submission_detail.html:176
 msgid "Can be passed online "
 msgstr "Можно сдать через сайт CS центра"
-
-#: cscsite/templates/learning/assignment_submission_detail.html:162
-msgid "Ask a question or leave a comment"
-msgstr "Можно задать вопрос, а также оставить комментарий"
 
 #: cscsite/templates/learning/calendar.html:23
 #: cscsite/templates/learning/timetable_student.html:26
@@ -2424,6 +2423,9 @@ msgstr "Справка пользователя"
 #: cscsite/users/models.py:586
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "Ask a question or leave a comment"
+#~ msgstr "Можно задать вопрос, а также оставить комментарий"
 
 #~ msgid "Last comment date"
 #~ msgstr "Дата последнего комментария"
