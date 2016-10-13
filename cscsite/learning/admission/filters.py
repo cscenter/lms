@@ -10,24 +10,8 @@ from crispy_forms.layout import Layout, Div, Submit, Row
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from core.widgets import DateTimeRangeWidget
+from core.filters import FilterEmptyChoiceMixin
 from learning.admission.models import Applicant, Interview, Campaign
-
-EMPTY_CHOICE = ('', _('Any'))
-
-
-class FilterEmptyChoiceMixin(object):
-    """add empty choice to all choice fields"""
-    def __init__(self, *args, **kwargs):
-        super(FilterEmptyChoiceMixin, self).__init__(*args, **kwargs)
-
-        choices = filter(
-            lambda f: isinstance(self.filters[f], django_filters.ChoiceFilter),
-            self.filters)
-        for field_name in choices:
-            extended_choices = ((EMPTY_CHOICE,) +
-                                self.filters[field_name].extra['choices'])
-            self.filters[field_name].extra['choices'] = extended_choices
 
 
 class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
