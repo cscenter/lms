@@ -1207,7 +1207,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
 
 class StudentAssignmentDetailMixin(object):
     model = AssignmentComment
-    template_name = "learning/student_assignment_detail.html"
+    template_name = "learning/assignment_submission_detail.html"
     form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
