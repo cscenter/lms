@@ -1367,6 +1367,8 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
             if form.is_valid():
                 a_s.grade = form.cleaned_data['grade']
                 a_s.save()
+                messages.success(self.request, _("Grade successfully saved"),
+                                 extra_tags='timeout')
                 return redirect(reverse('a_s_detail_teacher', args=[pk]))
             else:
                 # not sure if we can do anything more meaningful here.
