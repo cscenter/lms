@@ -561,32 +561,17 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
 
         course_classes = list(self.object.courseclass_set.all())
         for cc in course_classes:
-            rev_args = [self.object.course.slug,
-                        self.object.semester.slug,
-                        cc.pk]
-            base_url = reverse('class_detail', args=rev_args)
-            base_teacher_url = reverse('course_class_edit', args=rev_args)
+            class_url = reverse('class_detail', args=[co.course.slug,
+                                                      co.semester.slug, cc.pk])
             materials = []
             if cc.slides:
-                if is_actual_teacher:
-                    url = base_teacher_url + "#div_id_slides"
-                else:
-                    url = base_url + "#slides"
-                materials.append({'url': url,
+                materials.append({'url': class_url + "#slides",
                                   'name': _("Slides")})
             if cc.video_url:
-                if is_actual_teacher:
-                    url = base_teacher_url + "#div_id_video"
-                else:
-                    url = base_url + "#video"
-                materials.append({'url': url,
+                materials.append({'url': class_url + "#video",
                                   'name': _("video")})
             if cc.courseclassattachment_set.count() > 0:
-                if is_actual_teacher:
-                    url = base_teacher_url + "#div_id_attachments"
-                else:
-                    url = base_url + "#attachments"
-                materials.append({'url': url,
+                materials.append({'url': class_url + "#attachments",
                                   'name': _("Files")})
             other_materials_embed = (
                 cc.other_materials.startswith(
@@ -594,14 +579,10 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                      "<iframe src=\"http://www.slideshare"))
                 and cc.other_materials.strip().endswith("</iframe>"))
             if cc.other_materials and not other_materials_embed:
-                if is_actual_teacher:
-                    url = base_teacher_url + "#div_id_other_materials"
-                else:
-                    url = base_url + "#other_materials"
-                materials.append({'url': url,
+                materials.append({'url': class_url + "#other_materials",
                                   'name': _("CourseClass|Other [materials]")})
-            for x in materials:
-                x.update({'name': x['name'].lower()})
+            for m in materials:
+                m['name'] = m['name'].lower()
             materials_str = ", ".join(",&nbsp;"
                                       .join(("<a href={url}>{name}</a>"
                                              .format(**x))
