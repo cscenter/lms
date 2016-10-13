@@ -10,6 +10,7 @@ from crispy_forms.layout import Layout, Div, Submit, Row
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from core.filters import FilterEmptyChoiceMixin
 from learning.projects.models import Project
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
@@ -17,7 +18,7 @@ from users.models import CSCUser
 EMPTY_CHOICE = ('', _('Any'))
 
 
-class ProjectsFilter(django_filters.FilterSet):
+class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
         queryset=(CSCUser.objects
@@ -28,13 +29,17 @@ class ProjectsFilter(django_filters.FilterSet):
             .all())
     )
 
+    supervisor = django_filters.CharFilter(lookup_type='icontains',
+                                           label=_("Supervisor"))
+
     def filter_by_score(self, queryset, value):
         return queryset
 
     class Meta:
         model = Project
-        fields = ['semester', 'project_type', 'supervisor', 'students',
+        fields = ['semester', 'is_external', 'supervisor', 'students',
                   'projectstudent__final_grade']
+
 
     @property
     def form(self):
@@ -49,19 +54,16 @@ class ProjectsFilter(django_filters.FilterSet):
             self._form.helper.layout = Layout(
                 Row(
                     Div('semester', css_class="col-xs-4"),
-                    Div('project_type', css_class="col-xs-4"),
+                    Div('is_external', css_class="col-xs-4"),
                     Div('supervisor', css_class="col-xs-4"),
                 ),
                 Row(
                     Div('students', css_class="col-xs-4"),
                     Div('projectstudent__final_grade', css_class="col-xs-4"),
+                    Div(Submit('', _('Filter'), css_class="btn-block -inline-submit"),
+                        css_class="col-xs-4")
                 ),
                 Row(
-                    Div(Submit('', _('Filter')), css_class="col-xs-4")
                 )
             )
         return self._form
-
-    # TODO: 1. Submit вровень со 2й строкой.
-    # TODO: 2. Empty choice для типов практик. Переделать на Внешний/Внутренний и итоговую оценку тоже там добавить. Руководитель - ILIKE поиск
-    # TODO: 3. Фильтр по оценке из связанных моделей. Хотя бы 1?
