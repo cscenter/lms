@@ -26,8 +26,10 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% userpreview user "60x84" as im %}
+                    {% userpreview user "60x60" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        {% empty %}
+                        <img src="{% if user.gender == "F" %}{% static "img/csc_girl_head.svg" %}{% else %}{% static "img/csc_boy_head.svg" %}{% endif %}" class="_empty">
                     {% enduserpreview %}
 
                     <span class="caret"></span>

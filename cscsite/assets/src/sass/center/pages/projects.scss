@@ -1,6 +1,10 @@
 .projects-list-page {
   @extend .container;
 
+  .table {
+    margin: 20px 0;
+  }
+
   h3 {
     text-transform: uppercase;
     font-size: 16px;
@@ -19,8 +23,7 @@
 
   .projects-empty-list {
     font-size: 16px;
-    margin: 40px 0;
-    text-align: center;
+    margin: 10px;
   }
 
   .pagination a {

@@ -19,7 +19,6 @@
     <div class="panel">
         <div class="panel-body">
             {% if projects %}
-            <h3></h3>
             <table class="table">
                 <thead>
                 <tr>
@@ -68,7 +67,7 @@
             {% endif %}
             {% else %}
                 <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                <a href="{% url "projects:current_term_projects" %}">Перейти к списку проектов текущего семестра</a></div>
+                <a href="{% url "projects:current_term_projects" %}">Перейти к списку проектов текущего семестра</a>.</div>
             {% endif %}
         </div>
     </div>
