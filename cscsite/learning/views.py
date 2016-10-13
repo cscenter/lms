@@ -1997,11 +1997,12 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                         nb_node, _ = html_exporter.from_filename(ipynb_src_path)
                         with open(converted_path, 'w') as f:
                             f.write(nb_node)
-                        file_name += html_ext
-                        response['X-Accel-Redirect'] = file_url + html_ext
-                        return response
                     except FileNotFoundError:
                         pass
+                # FIXME: if file doesn't exists - returns 404?
+                file_name += html_ext
+                response['X-Accel-Redirect'] = file_url + html_ext
+                return response
 
         del response['Content-Type']
         response['Content-Disposition'] = "attachment; filename={}".format(
