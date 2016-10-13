@@ -213,17 +213,21 @@ $header-lvl1-bg:                 #4F86A0;
 }
 #user-menu {
     text-decoration: none!important;
-    display: block;
+    display: inline-block;
     height: 50px;
-    padding: 6px 6px 0 6px;
-    line-height: 1;
+    padding: 0 6px 0 6px;
 
     .caret {
         border-width: 5px;
     }
     img {
-        width: 28px;
-        height: 38px;
+        width: 30px;
+        height: 30px;
         border-radius: 4px;
+
+        &._empty {
+            width: 36px;
+            height: 36px;
+        }
     }
 }

@@ -40,7 +40,7 @@ class UserThumbnailNode(ThumbnailNodeBase):
     May hit db to get user groups in that case, but csc-menu do it right
     now on each request.
     """
-    child_nodelists = ('nodelist_file',)
+    child_nodelists = ('nodelist_file', 'nodelist_empty')
     error_msg = ('Syntax error. Expected: ``userpreview user_obj '
                  '[key1=val1 key2=val2...] as var``')
 
@@ -67,8 +67,10 @@ class UserThumbnailNode(ThumbnailNodeBase):
 
         if bits[-2] == 'as':
             self.as_var = bits[-1]
-            self.nodelist_file = parser.parse(('enduserpreview',))
-            parser.delete_first_token()
+            self.nodelist_file = parser.parse(('empty', 'enduserpreview',))
+            if parser.next_token().contents == 'empty':
+                self.nodelist_empty = parser.parse(('enduserpreview',))
+                parser.delete_first_token()
 
     def _render(self, context):
         """Replace DummyImage with csc girl/boy"""
@@ -92,7 +94,9 @@ class UserThumbnailNode(ThumbnailNodeBase):
 
         thumbnail = get_thumbnail(file_, geometry, **options)
 
+        render_empty = False
         if not thumbnail or isinstance(thumbnail, DummyImageFile):
+            render_empty = True
             cls = user.__class__
             if not user.is_teacher and user.gender == cls.GENDER_MALE:
                 thumbnail = BoyStubImage(geometry=geometry)
@@ -104,9 +108,13 @@ class UserThumbnailNode(ThumbnailNodeBase):
         if self.as_var:
             context.push()
             context[self.as_var] = thumbnail
-            output = self.nodelist_file.render(context)
+            if render_empty and self.nodelist_empty:
+                output = self.nodelist_empty.render(context)
+            else:
+                output = self.nodelist_file.render(context)
             context.pop()
         else:
+            # ?
             output = thumbnail.url
 
         return output
@@ -116,6 +124,8 @@ class UserThumbnailNode(ThumbnailNodeBase):
 
     def __iter__(self):
         for node in self.nodelist_file:
+            yield node
+        for node in self.nodelist_empty:
             yield node
 
 
