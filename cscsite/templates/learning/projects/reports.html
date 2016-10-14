@@ -45,7 +45,7 @@
                             <td>{{ ps.report.get_status_display }}</td>
                             <td>
                                 {% if ps.report and ps.report.status == 'sent' %}
-                                    {% if not request.user.is_curator %}<span class="text-muted">Отправлен<br>Проверка куратором</span>
+                                    {% if not request.user.is_curator %}<span class="text-muted">Проверка куратором</span>
                                     {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Оценить отчет</a>{% endif %}
                                 {% elif ps.report %}
                                     <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
@@ -66,8 +66,7 @@
                 {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
             {% endif %}
             {% else %}
-                <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект.<br>
-                <a href="{% url "projects:current_term_projects" %}">Перейти к списку проектов текущего семестра</a>.</div>
+                <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект. Список проектов текущего семестра можно найти <a href="{% url "projects:current_term_projects" %}">здесь</a>.</div>
             {% endif %}
         </div>
     </div>
