@@ -186,13 +186,14 @@ $header-lvl1-bg:                 #4F86A0;
     }
     ul {
         margin: 0;
+        padding: 6px 0;
     }
     li {
         float: none;
         padding: 0;
 
         a {
-            padding: 8px 24px;
+            padding: 5px 24px;
             color: $color-gray-20;
         }
     }
@@ -208,6 +209,16 @@ $header-lvl1-bg:                 #4F86A0;
 
     .dropdown-menu {
         border-radius: 2px;
+    }
+
+
+    .dropdown-header {
+        padding: 6px 24px 4px;
+        cursor: inherit;
+
+        &:hover {
+            background: inherit;
+        }
     }
 
 }
