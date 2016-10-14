@@ -11,6 +11,10 @@
     <ol class="breadcrumb projects">
       <li class="active">Проекты, {{ current_term }}</li>
     </ol>
+    {% if user.is_curator %}
+    {% crispy filter.form %}<br>
+    {% endif %}
+
     <div class="panel">
         <div class="panel-body">
             {% if projects %}

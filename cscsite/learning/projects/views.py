@@ -17,13 +17,13 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import FormMixin, BaseUpdateView
-from django_filters.views import BaseFilterView
+from django_filters.views import BaseFilterView, FilterMixin
 
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from learning.models import Semester
-from learning.projects.filters import ProjectsFilter
+from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
     ReportCuratorAssessmentForm
@@ -61,8 +61,10 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         return context
 
 
-class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
+class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
+                              generic.ListView):
     paginate_by = 50
+    filterset_class = CurrentTermProjectsFilter
     context_object_name = "projects"
     template_name = "learning/projects/available.html"
 
@@ -86,7 +88,17 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         context = super(CurrentTermProjectsView,
                         self).get_context_data(**kwargs)
         context["current_term"] = Semester.get_current()
+        context["filter"] = self.filterset
         return context
+
+    def get(self, request, *args, **kwargs):
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+        print(self.filterset.qs.query)
+        self.object_list = self.filterset.qs
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
 
 
 class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
