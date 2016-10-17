@@ -1973,36 +1973,38 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
             qs = AssignmentAttachment.objects.filter(pk=pk)
             assignment_attachment = get_object_or_404(qs)
-            file_name = assignment_attachment.file_name
-            file_url = assignment_attachment.attachment.url
+            file_field = assignment_attachment.attachment
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
             if not request.user.is_teacher and not request.user.is_curator:
                 qs = qs.filter(student_assignment__student_id=request.user.pk)
             comment = get_object_or_404(qs)
-            file_name = comment.attached_file_name
-            file_url = comment.attached_file.url
-            # Try to generate html version of ipynb
-            if self.request.GET.get("html", False):
-                html_ext = ".html"
-                _, ext = posixpath.splitext(file_name)
-                if ext == ".ipynb":
-                    ipynb_src_path = comment.attached_file.path
-                    converted_path = ipynb_src_path + html_ext
-                    if not os.path.exists(converted_path):
-                        # TODO: move html_exporter to separated module
-                        # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
-                        html_exporter = nbconvert.HTMLExporter()
-                        try:
-                            nb_node, _ = html_exporter.from_filename(ipynb_src_path)
-                            with open(converted_path, 'w') as f:
-                                f.write(nb_node)
-                        except FileNotFoundError:
-                            pass
-                    # FIXME: if file doesn't exists - returns 404?
-                    file_name += html_ext
-                    response['X-Accel-Redirect'] = file_url + html_ext
-                    return response
+            file_field = comment.attached_file
+        else:
+            return HttpResponseBadRequest()
+        file_url = file_field.url
+        file_name = os.path.basename(file_field.name)
+        # Try to generate html version of ipynb
+        if self.request.GET.get("html", False):
+            html_ext = ".html"
+            _, ext = posixpath.splitext(file_name)
+            if ext == ".ipynb":
+                ipynb_src_path = file_field.path
+                converted_path = ipynb_src_path + html_ext
+                if not os.path.exists(converted_path):
+                    # TODO: move html_exporter to separated module
+                    # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
+                    html_exporter = nbconvert.HTMLExporter()
+                    try:
+                        nb_node, _ = html_exporter.from_filename(ipynb_src_path)
+                        with open(converted_path, 'w') as f:
+                            f.write(nb_node)
+                    except FileNotFoundError:
+                        pass
+                # FIXME: if file doesn't exists - returns 404?
+                file_name += html_ext
+                response['X-Accel-Redirect'] = file_url + html_ext
+                return response
 
         del response['Content-Type']
         response['Content-Disposition'] = "attachment; filename={}".format(
