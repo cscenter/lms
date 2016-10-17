@@ -7,8 +7,7 @@ import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row
-from django.db.models import Count
-from django.db.models import F
+from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -69,6 +68,70 @@ class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         return self._form
 
 
+class SupervisorGradeFilter(django_filters.ChoiceFilter):
+    NO = "no_any"
+    NO_ALL = "no_all"
+    YES = "yes_all"
+    CHOICES = (
+        (NO, "У кого-то нет"),
+        (NO_ALL, "У всех нет"),
+        (YES, "У всех есть"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        kwargs["choices"] = self.CHOICES
+        super(SupervisorGradeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value == self.NO:
+            return qs.filter(projectstudent__supervisor_grade__isnull=True)
+        elif value == self.YES or value == self.NO_ALL:
+            qs = qs.annotate(without_grade_cnt=Sum(
+                Case(
+                    When(projectstudent__supervisor_grade__isnull=True,
+                         then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField())))
+            if value == self.YES:
+                return qs.filter(without_grade_cnt=0)
+            else:
+                return (qs.annotate(ps_cnt=Count("projectstudent"))
+                          .filter(without_grade_cnt=F('ps_cnt')))
+        return qs
+
+
+class PresentationGradeFilter(django_filters.ChoiceFilter):
+    NO = "no_any"
+    NO_ALL = "no_all"
+    YES = "yes_all"
+    CHOICES = (
+        (NO, "У кого-то нет"),
+        (NO_ALL, "У всех нет"),
+        (YES, "У всех есть"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        kwargs["choices"] = self.CHOICES
+        super(PresentationGradeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value == self.NO:
+            return qs.filter(projectstudent__presentation_grade__isnull=True)
+        elif value == self.YES or value == self.NO_ALL:
+            qs = qs.annotate(without_grade_cnt=Sum(
+                Case(
+                    When(projectstudent__presentation_grade__isnull=True,
+                         then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField())))
+            if value == self.YES:
+                return qs.filter(without_grade_cnt=0)
+            else:
+                return (qs.annotate(ps_cnt=Count("projectstudent"))
+                          .filter(without_grade_cnt=F('ps_cnt')))
+        return qs
+
+
 class SlidesStatusFilter(django_filters.ChoiceFilter):
     NO = "0"
     YES = "1"
@@ -102,7 +165,7 @@ class FinalGradeFilter(django_filters.ChoiceFilter):
     def filter(self, qs, value):
         if value == self.NO:
             return qs.filter(
-                projectstudent__report__final_grade=ProjectStudent.GRADES.not_graded)
+                projectstudent__final_grade=ProjectStudent.GRADES.not_graded)
         return qs
 
 
@@ -130,13 +193,16 @@ class CurrentTermProjectsFilter(FilterEmptyChoiceMixin,
 
     participant_slides = SlidesStatusFilter(
         label=_("Participants presentation"), help_text="")
+    supervisor_grade = SupervisorGradeFilter(label=_("Supervisor grade"),
+                                             help_text="")
+    presentation_grade = PresentationGradeFilter(label=_("Presentation grade"))
     final_grade = FinalGradeFilter(label=_("Final grade"), help_text="")
     report = ReportFilter(label=_("Report"), help_text="")
 
     class Meta:
         model = Project
-        fields = ['projectstudent__supervisor_grade',
-                  'projectstudent__presentation_grade',
+        fields = ['supervisor_grade',
+                  'presentation_grade',
                   'final_grade',
                   'report',
                   'participant_slides'
@@ -155,8 +221,8 @@ class CurrentTermProjectsFilter(FilterEmptyChoiceMixin,
                 self._form.fields[attr].help_text = ""
             self._form.helper.layout = Layout(
                 Row(
-                    Div('projectstudent__supervisor_grade', css_class="col-xs-4"),
-                    Div('projectstudent__presentation_grade', css_class="col-xs-4"),
+                    Div('supervisor_grade', css_class="col-xs-4"),
+                    Div('presentation_grade', css_class="col-xs-4"),
                     Div('final_grade', css_class="col-xs-4"),
                 ),
                 Row(
