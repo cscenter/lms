@@ -87,7 +87,7 @@
                     </div>
                     <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
                         <div class="panel-body">
-                             TODO: move this logic to view, too much custom tags, don't like it
+{#                             TODO: move this logic to view, too much custom tags, don't like it#}
                             {% for field in review_fields %}
                                 <b>{{ review|verbose_name_by_attr_name:field }}</b>: {{ review|lookup_display:field|default:"-" }}<br>
                             {% endfor %}
@@ -101,9 +101,9 @@
         {% endif %}
 
         {% if is_reviewer and report.review_state %}
-        <a href="#review-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Оценить работу</a>
+        <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">Оценить работу</a>
         <div class="panel-collapse">
-            <div class="collapse csc-well" id="review-form">
+            <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
                 {% crispy review_form %}
             </div>
         </div>

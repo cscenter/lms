@@ -88,13 +88,17 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         context = super(CurrentTermProjectsView,
                         self).get_context_data(**kwargs)
         context["current_term"] = Semester.get_current()
-        context["filter"] = self.filterset
+        if self.request.user.is_curator:
+            context["filter"] = self.filterset
+        else:
+            context["filter"] = ""
         return context
 
     def get(self, request, *args, **kwargs):
+        if not request.user.is_curator:
+            return super().get(request, *args, **kwargs)
         filterset_class = self.get_filterset_class()
         self.filterset = self.get_filterset(filterset_class)
-        print(self.filterset.qs.query)
         self.object_list = self.filterset.qs
         context = self.get_context_data(filter=self.filterset,
                                         object_list=self.object_list)
@@ -385,8 +389,10 @@ class ReportView(FormMixin, generic.DetailView):
         return super(ReportView, self).form_valid(form)
 
     def form_invalid(self, **kwargs):
-        messages.error(self.request, _("Data not saved. Check errors."))
-        return self.render_to_response(self.get_context_data(**kwargs))
+        messages.error(self.request, _("Data not saved. Fix errors."))
+        context = self.get_context_data(**kwargs)
+        context["has_errors"] = True
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         # skip FormMixin.get_context_data() here

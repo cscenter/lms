@@ -2,7 +2,7 @@
     <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.last_name }} {{ ps.student.first_name }} {{ ps.student.patronymic }}</a><br>
     {% if can_view_report %}
         {% if ps.report and ps.report.status == 'sent' %}
-            {% if not request.user.is_curator %}<span class="text-muted">Отчет отправлен<br>Проверка куратором</span>
+            {% if not request.user.is_curator %}<span class="text-muted">Проверка отчета куратором</span>
             {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>{% endif %}
         {% elif ps.report %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
         {% elif project.is_active %}<span class="text-muted">Начало отчетного периода<br> {{ project.semester.report_starts_at|default:"не установлено" }}</span>
