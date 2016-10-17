@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-10-17 16:36+0300\n"
-"PO-Revision-Date: 2016-10-17 16:38+0230\n"
+"PO-Revision-Date: 2016-10-17 16:52+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -165,7 +165,7 @@ msgstr "Проверяющие"
 
 #: cscsite/learning/projects/models.py:98
 msgid "StudentProject|Supervisor"
-msgstr "Тип"
+msgstr "Руководители"
 
 #: cscsite/learning/projects/models.py:100
 msgid "Format: Last_name First_name Patronymic, Organization"
