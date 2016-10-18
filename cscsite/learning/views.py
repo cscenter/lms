@@ -16,6 +16,9 @@ import nbconvert
 import nbformat
 import unicodecsv as csv
 from annoying.exceptions import Redirect
+from django.http.response import JsonResponse
+from django.views.generic.edit import BaseUpdateView
+
 from core import comment_persistence
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, get_club_domain
@@ -50,7 +53,8 @@ from .forms import CourseOfferingPKForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
-    MarksSheetTeacherImportGradesForm, GradeBookFormFactory
+    MarksSheetTeacherImportGradesForm, GradeBookFormFactory, \
+    AssignmentModalCommentForm
 from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
@@ -1465,6 +1469,38 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin,
 class AssignmentUpdateView(AssignmentCreateUpdateMixin,
                            generic.UpdateView):
     pass
+
+
+class AssignmentCommentUpdateView(generic.UpdateView):
+    model = AssignmentComment
+    pk_url_kwarg = 'comment_pk'
+    context_object_name = "comment"
+    template_name = "learning/_modal_submission_comment.html"
+    form_class = AssignmentModalCommentForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({"success": 1, "id": self.object.pk})
+
+    def form_invalid(self, form):
+        return JsonResponse({"success": 0, "errors": form.errors})
+
+    def check_permissions(self, comment):
+        # Allow view/edit own comments to teachers and all to curators
+        if not self.request.user.is_curator:
+            is_teacher = self.request.user.is_teacher
+            if comment.author_id != self.request.user.pk or not is_teacher:
+                raise PermissionDenied
+
+    def get(self, request, *args, **kwargs):
+        self.object =  self.get_object()
+        self.check_permissions(self.object)
+        return super(BaseUpdateView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.check_permissions(self.object)
+        return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
 class AssignmentDeleteView(TeacherOnlyMixin,

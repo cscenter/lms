@@ -23,6 +23,7 @@
 @import "components/cards";
 @import "components/breadcrumbs";
 @import "components/pager";
+@import "components/comment";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
 @import "pages/login";
@@ -375,54 +376,7 @@ h2 small a {
   width: 6em;
 }
 
-.csc-well {
-  background-color: #f8f8f8;
-  min-height: 20px;
-  padding: 19px;
-  margin-bottom: 20px;
-}
 
-h5.assignment {
-  font-weight: bold;
-}
-
-.assignment-attachment {
-  color: #999;
-}
-
-.assignment-comment {
-  .metainfo {
-    color: #999;
-
-    &.first {
-      color: #888;
-      font-weight: bold;
-    }
-  }
-
-  .metainfo-holder {
-    min-height: 20px;
-  }
-
-  hr {
-    border-color: #CFCFCF;
-  }
-}
-
-.comment-list {
-  list-style: none;
-  padding: 0px;
-}
-
-.comment-list li.student {
-  margin-right: 60px;
-  margin-left: 0px;
-}
-
-.comment-list li.teacher {
-  margin-right: 0px;
-  margin-left: 60px;
-}
 
 #div_id_deadline_at {
   width: 408px;
@@ -593,10 +547,8 @@ tr.unread {
   color: #1F4C66;
 }
 
-.csc-well blockquote {
-  border-left-color: #CFCFCF;
-}
 
+// Used on students detail page?
 .student-comment-metainfo {
   color: #999;
   font-size: 0.75em;

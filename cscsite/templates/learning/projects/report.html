@@ -194,6 +194,6 @@
     {% endwith %}
 
     <script type="text/javascript">
-        window.CSCCommentPersistenceHashes = {{ clean_comments_json|safe }};
+        CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
     </script>
 {% endblock content %}

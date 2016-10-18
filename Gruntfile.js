@@ -87,6 +87,10 @@ module.exports = function (grunt) {
                 ],
                 dest: '<%= JS_RUNTIME %>/alumni.js'
             },
+            assignment_submission: {
+                src: ['<%= JS_SRC %>/assignment-submission.js'],
+                dest: '<%= JS_DEST %>/assignment-submission.js'
+            },
             assignment_submissions: {
                 src: ['<%= JS_SRC %>/assignment-submissions.js'],
                 dest: '<%= JS_DEST %>/assignment-submissions.js'

@@ -3,12 +3,13 @@
 {% load humanize %}
 {% load crispy_forms_tags %}
 {% load core_tags %}
+{% load staticfiles %}
 {% load markdown from core_tags %}
 
+
 {% block javascripts %}
-    <script type="text/javascript">
     {% if is_actual_teacher or request.user.is_curator %}
-        // TODO: move to separated js-file
+        <script type="text/javascript">
         $('.assignment-attachment a:contains(".ipynb")').each(function() {
             if ( $(this).text().trim().match(".ipynb$") ) {
                 $(this).clone()
@@ -17,28 +18,15 @@
                         .text("[html]").insertAfter(this);
             }
         });
+        </script>
     {% endif %}
-    // TODO: move to external file
-    $(function () {
-        var sidebar_top = $('#o-sidebar').offset().top - 20;
-        var bottom = ($('.footer').offset().top - 75 );
-        // 500 - random number which needs to solve fast scroll problem in chrome
-        if (bottom - sidebar_top > 500 ) {
-            $('#o-sidebar').affix({
-                offset: {
-                    top: sidebar_top,
-                    bottom: ($('.footer').outerHeight(true))
-                }
-            });
-        }
-    })
-    </script>
-
+    <script type="text/javascript" src="{% static "js/assignment-submission.js" %}"></script>
 {% endblock javascripts %}
+
 
 {% block content %}
 <script type="text/javascript">
-  window.CSCCommentPersistenceHashes = {{ hashes_json|safe }};
+  CSC.config.localStorage.hashes = {{ hashes_json|safe }};
 </script>
 <div class="container" id="student-submission-comments">
   <div class="row">
@@ -94,12 +82,11 @@
       {% else %}
         <ul class="comment-list">
         {% for comment in comments %}
-        <li class="{% if comment.author == a_s.student %}
-                   student
-                   {% else %}
-                   teacher
-                   {% endif %}">
+        <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
           <div class="csc-well assignment-comment" {% if user.is_curator %}data-id="{{ comment.pk }}"{% endif %}>
+            {% if is_actual_teacher and comment.author_id == user.pk or user.is_curator %}
+                <a href="{% url "assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">Правка</a>
+            {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
               {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
@@ -179,4 +166,17 @@
         </div>
     </div>
 </div>
+
+{#  XXX: Due to bug with `fade` class and `shown.bs.modal` event put this html code here  #}
+    <div id='submission-comment-model-form' class='modal fade' tabindex='-1' role='dialog'>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Редактировать комментарий</h4>
+                </div>
+                <div class="inner"></div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}
