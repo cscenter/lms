@@ -35,36 +35,40 @@
                 });
             });
             // Handle form submission
-            modalFormWrapper.on('submit', function(event) {
-                event.preventDefault();
-                var form = event.target;
-                // TODO: validate empty comment here
-                $.ajax({
-                    url : form.action,
-                    type : "POST",
-                    data : $(form).serialize(),
-                })
-                .done(function (json) {
-                    if (json.success == 1) {
-                        modalFormWrapper.modal('hide');
-                        var target = comment.filter(function() {
-                          return $(this).data("id") == json.id
-                        });
-                        var textElement = $('.ubertext', target);
-                        textElement.html(json.html);
-                        processUberText(textElement.get(0));
-                        $.jGrowl('Комментарий успешно сохранён.',
-                            { position: 'bottom-right'});
-                    } else {
-                        $.jGrowl('Комментарий не был сохранён.',
-                            { position: 'bottom-right', theme: 'error' });
-                    }
-                })
-                .error(function () {
-                        $.jGrowl('Комментарий не был сохранён.',
-                            { position: 'bottom-right', theme: 'error' });
-                });
+            modalFormWrapper.on('submit', 'form', fn.submitEventHandler);
+        },
+
+        submitEventHandler: function(event) {
+            event.preventDefault();
+            var form = event.target;
+            // TODO: validate empty comment here
+            $.ajax({
+                url : form.action,
+                type : "POST",
+                data : $(form).serialize(),
+            })
+            .done(function (json) {
+                if (json.success == 1) {
+                    modalFormWrapper.modal('hide');
+                    var target = comment.filter(function() {
+                      return $(this).data("id") == json.id
+                    });
+                    var textElement = $('.ubertext', target);
+                    textElement.html(json.html);
+                    processUberText(textElement.get(0));
+                    $.jGrowl('Комментарий успешно сохранён.',
+                        { position: 'bottom-right'});
+                } else {
+                    $.jGrowl('Комментарий не был сохранён.',
+                        { position: 'bottom-right', theme: 'error' });
+                }
+            })
+            .error(function () {
+                    $.jGrowl('Комментарий не был сохранён.',
+                        { position: 'bottom-right', theme: 'error' });
             });
+            event.stopPropagation();
+            return false;
         },
 
         initStickySidebar: function () {
