@@ -21,7 +21,7 @@ from django.views.generic.edit import BaseUpdateView
 
 from core import comment_persistence
 from core.notifications import get_unread_notifications_cache
-from core.utils import hashids, get_club_domain
+from core.utils import hashids, get_club_domain, render_markdown
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, ValidateWeekMixin
 from dateutil.relativedelta import relativedelta
@@ -1471,6 +1471,7 @@ class AssignmentUpdateView(AssignmentCreateUpdateMixin,
     pass
 
 
+# TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
 class AssignmentCommentUpdateView(generic.UpdateView):
     model = AssignmentComment
     pk_url_kwarg = 'comment_pk'
@@ -1480,7 +1481,10 @@ class AssignmentCommentUpdateView(generic.UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        return JsonResponse({"success": 1, "id": self.object.pk})
+        html = render_markdown(self.object.text)
+        return JsonResponse({"success": 1,
+                             "id": self.object.pk,
+                             "html": html})
 
     def form_invalid(self, form):
         return JsonResponse({"success": 0, "errors": form.errors})
