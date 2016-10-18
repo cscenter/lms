@@ -85,7 +85,7 @@
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
           <div class="csc-well assignment-comment" {% if user.is_curator %}data-id="{{ comment.pk }}"{% endif %}>
             {% if is_actual_teacher and comment.author_id == user.pk or user.is_curator %}
-                <a href="{% url "assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">Правка</a>
+                <a href="{% url "assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}Редактировать{% endif %}</a>
             {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
