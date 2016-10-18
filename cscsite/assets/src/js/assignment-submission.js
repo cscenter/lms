@@ -25,16 +25,19 @@
             modalFormWrapper.on('shown.bs.modal', function (event) {
                 var textarea = $(event.target).find('textarea').get(0);
                 editor = initUberEditor(textarea);
+                modalFormWrapper.css('opacity', '1');
+
             });
             // Show modal
             $('.__edit', comment).click(function (e) {
                 e.preventDefault();
                 $.get(this.href, function (data) {
+                    modalFormWrapper.css('opacity', '0');
                     $('.inner', modalFormWrapper).html(data);
                     modalFormWrapper.modal('toggle');
                 });
             });
-            // Handle form submission
+
             modalFormWrapper.on('submit', 'form', fn.submitEventHandler);
         },
 
@@ -67,7 +70,6 @@
                     $.jGrowl('Комментарий не был сохранён.',
                         { position: 'bottom-right', theme: 'error' });
             });
-            event.stopPropagation();
             return false;
         },
 
