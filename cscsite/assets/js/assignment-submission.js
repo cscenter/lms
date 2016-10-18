@@ -47,14 +47,14 @@
                 .done(function (json) {
                     if (json.success == 1) {
                         modalFormWrapper.modal('hide');
-                        window.location.reload();
-                        // var target = comment.filter(function() {
-                        //   return $(this).data("id") == json.id
-                        // });
-                        // var textElement = $('.ubertext', target);
-                        // textElement.html(form.text.value);
-                        // processUberText(textElement.get(0));
-                        // TODO: replace markdown with html, then process .ubertext
+                        var target = comment.filter(function() {
+                          return $(this).data("id") == json.id
+                        });
+                        var textElement = $('.ubertext', target);
+                        textElement.html(json.html);
+                        processUberText(textElement.get(0));
+                        $.jGrowl('Комментарий успешно сохранён.',
+                            { position: 'bottom-right'});
                     } else {
                         $.jGrowl('Комментарий не был сохранён.',
                             { position: 'bottom-right', theme: 'error' });
