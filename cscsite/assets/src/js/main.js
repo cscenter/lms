@@ -149,7 +149,7 @@ function initUberEditor(textarea) {
         // FIXME: use .on here
         editorBody.addEventListener('keydown', function (e) {
             if (e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
-                $textarea[0].form.submit();
+                $textarea.closest("form").submit();
             }
         });
     }
