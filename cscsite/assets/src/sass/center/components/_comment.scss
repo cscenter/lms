@@ -27,8 +27,7 @@
   }
 
   .__edit {
-    opacity: 0.3;
-    @include transition(opacity 0.1s ease-out);
+    color: $color-gray-20;
     line-height: 1.1;
   }
 }

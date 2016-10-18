@@ -10,6 +10,7 @@
 @import "../center/pages/_calendar";
 @import "../center/pages/_assignments";
 @import "../center/pages/gradebook.scss";
+@import "../center/pages/student_submission_comments";
 @import "../center/components/buttons";
 @import "../center/components/labels";
 @import "../center/components/page_aside";
@@ -608,7 +609,11 @@ tr.unread {
   overflow: hidden;
 
   pre {
-    padding: 0.5em;
+    padding: 1em;
+
+    code {
+      padding: 0;
+    }
   }
   table {
     @extend .table;
