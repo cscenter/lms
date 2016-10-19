@@ -25,6 +25,7 @@
 
 
 {% block content %}
+    {#    TODO: append instead of replace #}
 <script type="text/javascript">
   CSC.config.localStorage.hashes = {{ hashes_json|safe }};
 </script>
@@ -84,7 +85,7 @@
         {% for comment in comments %}
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
           <div class="csc-well assignment-comment" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
-            {% if is_actual_teacher and comment.author_id == user.pk or user.is_curator %}
+            {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
                 <a href="{% url "assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
             {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>

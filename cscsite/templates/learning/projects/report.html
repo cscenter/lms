@@ -194,6 +194,7 @@
     {% endwith %}
 
     <script type="text/javascript">
+{#    TODO: append instead of replace #}
         CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
     </script>
 {% endblock content %}

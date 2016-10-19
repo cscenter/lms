@@ -1495,6 +1495,9 @@ class AssignmentCommentUpdateView(generic.UpdateView):
             is_teacher = self.request.user.is_teacher
             if comment.author_id != self.request.user.pk or not is_teacher:
                 raise PermissionDenied
+            # Check comment not in stale state for edit
+            if comment.is_stale_for_edit():
+                raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
         self.object =  self.get_object()
