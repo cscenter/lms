@@ -31,10 +31,17 @@
             // Show modal
             $('.__edit', comment).click(function (e) {
                 e.preventDefault();
+                var $this = $(this);
                 $.get(this.href, function (data) {
                     modalFormWrapper.css('opacity', '0');
                     $('.inner', modalFormWrapper).html(data);
                     modalFormWrapper.modal('toggle');
+                }).error(function (data) {
+                    if (data.status == 403) {
+                        $.jGrowl('Доступ запрещён. Вероятно, время редактирования комментария истекло.',
+                        { position: 'bottom-right', theme: 'error' });
+                        $this.remove();
+                    }
                 });
             });
 

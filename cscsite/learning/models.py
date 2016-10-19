@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
-from django.utils.timezone import utc
+from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from micawber.contrib.mcdjango import extract_oembed
 from model_utils import Choices, FieldTracker
@@ -792,6 +792,10 @@ class AssignmentComment(TimeStampedModel):
                 learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
                 self.pk)]
         )
+
+    def is_stale_for_edit(self):
+        # Teacher can edit comment during 10 min period only
+        return (now() - self.created).total_seconds() > 600
 
 
 class SiteRelatedEnrollmentQuerySet(models.QuerySet):
