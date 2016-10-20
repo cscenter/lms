@@ -3,11 +3,14 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+from distutils.util import strtobool
+
 import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row
-from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
+from django.db.models import Case, Count, F, When, Value, Sum, IntegerField, \
+    BooleanField
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -17,9 +20,20 @@ from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 
 EMPTY_CHOICE = ('', _('Any'))
+BOOLEAN_CHOICES = (
+    ('', '---------'),
+    ('false', 'Нет'),
+    ('true', 'Да'),
+)
 
 
 class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+    is_external = django_filters.TypedChoiceFilter(
+        label=_("External project"),
+        choices=BOOLEAN_CHOICES,
+        coerce=strtobool
+    )
+
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
         queryset=(CSCUser.objects
@@ -32,9 +46,6 @@ class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
 
     supervisor = django_filters.CharFilter(lookup_type='icontains',
                                            label=_("Supervisor"))
-
-    def filter_by_score(self, queryset, value):
-        return queryset
 
     class Meta:
         model = Project
@@ -221,13 +232,13 @@ class CurrentTermProjectsFilter(FilterEmptyChoiceMixin,
                 self._form.fields[attr].help_text = ""
             self._form.helper.layout = Layout(
                 Row(
-                    Div('supervisor_grade', css_class="col-xs-4"),
-                    Div('presentation_grade', css_class="col-xs-4"),
+                    Div('report', css_class="col-xs-4"),
+                    Div('participant_slides', css_class="col-xs-4"),
                     Div('final_grade', css_class="col-xs-4"),
                 ),
                 Row(
-                    Div('participant_slides', css_class="col-xs-4"),
-                    Div('report', css_class="col-xs-4"),
+                    Div('supervisor_grade', css_class="col-xs-4"),
+                    Div('presentation_grade', css_class="col-xs-4"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
                         css_class="col-xs-4")
