@@ -120,7 +120,7 @@ class ReviewCompleted(NotificationService):
         return self.SITE_CENTER_URL
 
     @staticmethod
-    def get_email_from():
+    def get_reply_to():
         return "curators@compscicenter.ru"
 
 
