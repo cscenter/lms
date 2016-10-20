@@ -20,6 +20,7 @@
                 <tr>
                     <th class="name">Название</th>
                     <th>Участники</th>
+                    <th>Руководители</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -30,6 +31,7 @@
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
                         <td>{{ project.students.all|join:"<br>" }}</td>
+                        <td>{{ project.supervisor }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
