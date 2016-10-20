@@ -246,8 +246,8 @@ class ProjectDetailView(generic.CreateView):
         context["project"] = self.project
         # Student participant should be already redirected to report page
         # if his report exists
-        context["can_send_report"] = (self.project.is_active() and
-                                      user in self.project.students.all())
+        context["has_sending_report_permissions"] = (
+            self.project.is_active() and user in self.project.students.all())
         context["you_enrolled"] = user in self.project.reviewers.all()
         context["has_enroll_permissions"] = (
             (user.is_project_reviewer or user.is_curator)

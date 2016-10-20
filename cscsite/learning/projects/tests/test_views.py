@@ -147,8 +147,8 @@ def test_project_detail_unauth(client):
     assert smart_bytes("Следить за проектом") not in response.content
     assert "has_enroll_permissions" in response.context
     assert response.context["has_enroll_permissions"] is False
-    assert "can_send_report" in response.context
-    assert response.context["can_send_report"] is False
+    assert "has_sending_report_permissions" in response.context
+    assert response.context["has_sending_report_permissions"] is False
     assert "can_view_report" in response.context
     assert response.context["can_view_report"] is False
     assert "you_enrolled" in response.context
@@ -201,12 +201,12 @@ def test_project_detail_student_participant(client):
     Report.objects.get_queryset().delete()  # delete reports to skip redirect
     response = client.get(project.get_absolute_url())
     assert response.status_code == 200
-    assert "can_send_report" in response.context
-    assert response.context["can_send_report"] is True
+    assert "has_sending_report_permissions" in response.context
+    assert response.context["has_sending_report_permissions"] is True
     project.semester = semester_prev
     project.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["can_send_report"] is False
+    assert response.context["has_sending_report_permissions"] is False
     project.semester = semester
     project.save()
     # If report_starts_at not specified, allow sending report while project
@@ -215,7 +215,7 @@ def test_project_detail_student_participant(client):
     semester.report_ends_at = None
     semester.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["can_send_report"] is True
+    assert response.context["has_sending_report_permissions"] is True
 
 
 @pytest.mark.django_db
