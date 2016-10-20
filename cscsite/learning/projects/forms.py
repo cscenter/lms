@@ -82,7 +82,7 @@ class ReportStatusForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             FieldWithButtons("status", StrictButton(
-                '<i class="fa fa-refresh" aria-hidden="true"></i>',
+                '<i class="fa fa-floppy-o" aria-hidden="true"></i>',
                 name="new_comment_form",
                 type="submit",
                 css_class="btn btn-primary")),
