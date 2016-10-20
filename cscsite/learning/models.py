@@ -483,9 +483,14 @@ class CourseClass(TimeStampedModel, object):
                 cache.set(cache_key, embed, 3600 * 2)
             except ValueError:
                 logger.info("Extract oembed error. Return default iframe")
-                embed = dict(
-                    html="<iframe src={} allowfullscreen=1></iframe>".format(
-                        self.video_url))
+                iframe_template = """<iframe src={} allowfullscreen=1
+                    width="{}" height="{}"></iframe>"""
+                embed = {
+                    "html": iframe_template.format(
+                        self.video_url,
+                        settings.MICAWBER_DEFAULT_SETTINGS["maxwidth"],
+                        settings.MICAWBER_DEFAULT_SETTINGS["maxheight"])
+                }
         return embed
 
     # TODO: test this
