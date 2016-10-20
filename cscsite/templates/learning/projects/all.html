@@ -32,7 +32,7 @@
                         </td>
                         <td>
                             {% for student in project.students.all %}
-                                <a href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
+                                <a class="nowrap" href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
                             {% endfor %}
                         </td>
                         <td>{{ project.supervisor }}</td>
