@@ -30,7 +30,11 @@
                             <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
-                        <td>{{ project.students.all|join:"<br>" }}</td>
+                        <td>
+                            {% for student in project.students.all %}
+                                <a href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
+                            {% endfor %}
+                        </td>
                         <td>{{ project.supervisor }}</td>
                     </tr>
                 {% endfor %}
