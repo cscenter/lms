@@ -121,7 +121,7 @@ class ReviewCompleted(NotificationService):
 
     @staticmethod
     def get_reply_to():
-        return "curators@compscicenter.ru"
+        return "practice@compscicenter.ru"
 
 
 @register(notification_type=types.PROJECT_REPORTING_STARTED)
