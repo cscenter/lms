@@ -55,7 +55,7 @@ class NotificationService(object):
             pass
 
     @staticmethod
-    def get_email_from():
+    def get_reply_to():
         return settings.DEFAULT_FROM_EMAIL
 
     @atomic
@@ -75,8 +75,9 @@ class NotificationService(object):
 
         msg = EmailMultiAlternatives(self.get_subject(notification),
                                      text_content,
-                                     self.get_email_from(),
-                                     [notification.recipient.email])
+                                     settings.DEFAULT_FROM_EMAIL,
+                                     [notification.recipient.email],
+                                     reply_to=self.get_reply_to())
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         Notification.objects.filter(pk=notification.pk).update(emailed=True)

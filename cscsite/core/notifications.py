@@ -58,6 +58,8 @@ class UnreadNotificationsCacheMiddleware(object):
         _installed_middleware = True
 
     def process_request(self, request):
+        # FIXME: Don't know what is the point to save cache in _thread_locals
+        # when it's unique for each request
         _thread_locals.unread_notifications_cache = None
         if request.user.is_authenticated():
             cache = UnreadNotificationsCache(
