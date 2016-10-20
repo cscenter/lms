@@ -51,22 +51,24 @@
                     {% endcache %}
                 {% endif %}
 
-                {% if can_send_report %}
-                    <h3>{% trans "Send report form" %}</h3>
-                    Отправить желательно до {{ project.semester.report_ends_at }}<br>
-                    <div class="csc-well o-send-report-form">
-                        {% crispy form %}
-                    </div>
-                {% elif project.is_active and request.user in project.students.all and not project.report_period_started %}
-                    <div class="card o-send-report-timetable">
-                        <div class="card-header ch-alt">Сроки отправки отчета</div>
-                        <div class="card-body card-padding">
-                            <dl class="dl-horizontal">
-                            <dt>Дата начала:</dt> <dd>{{ project.semester.report_starts_at }}</dd>
-                            <dt>Дата окончания (soft):</dt> <dd>{{ project.semester.report_ends_at }}</dd>
-                            </dl>
+                {% if has_sending_report_permissions %}
+                    {% if not project.report_period_started %}
+                        <div class="card o-send-report-timetable">
+                            <div class="card-header ch-alt">Сроки отправки отчета</div>
+                            <div class="card-body card-padding">
+                                <dl class="dl-horizontal">
+                                <dt>Дата начала:</dt> <dd>{{ project.semester.report_starts_at }}</dd>
+                                <dt>Дедлайн:</dt> <dd>{{ project.semester.report_ends_at }}</dd>
+                                </dl>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <h3>{% trans "Send report form" %}</h3>
+                        Отправить желательно до {{ project.semester.report_ends_at }}<br>
+                        <div class="csc-well o-send-report-form">
+                            {% crispy form %}
+                        </div>
+                    {% endif %}
                 {% endif %}
 
                 {% if request.user.is_curator %}
