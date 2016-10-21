@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-21 13:38+0300\n"
-"PO-Revision-Date: 2016-10-21 13:39+0230\n"
+"POT-Creation-Date: 2016-10-21 14:32+0300\n"
+"PO-Revision-Date: 2016-10-21 14:33+0230\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -88,18 +88,14 @@ msgid "Report content"
 msgstr "Текст отчета"
 
 #: cscsite/learning/projects/forms.py:51
+#: cscsite/learning/projects/forms.py:120
 msgid "Send"
 msgstr "Отправить"
 
 #: cscsite/learning/projects/forms.py:103
-msgid "Add comment"
-msgstr "Добавить комментарий"
-
-#: cscsite/learning/projects/forms.py:120
-#: cscsite/learning/projects/forms.py:228
-#: cscsite/learning/projects/forms.py:277
-msgid "Save"
-msgstr "Сохранить"
+#| msgid "Add comment"
+msgid "New comment"
+msgstr "Новый комментарий"
 
 #: cscsite/learning/projects/forms.py:138
 msgid "Either text or file should be non-empty"
@@ -120,6 +116,11 @@ msgstr "Завершить"
 #: cscsite/learning/projects/forms.py:212
 msgid "Check if you want to send results to student"
 msgstr "Отметьте, чтобы отправить результаты студенту"
+
+#: cscsite/learning/projects/forms.py:228
+#: cscsite/learning/projects/forms.py:277
+msgid "Save"
+msgstr "Сохранить"
 
 #: cscsite/learning/projects/models.py:35
 msgid "Integer value from -15 to 15"

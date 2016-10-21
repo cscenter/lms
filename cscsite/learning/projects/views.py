@@ -412,6 +412,7 @@ class ReportView(FormMixin, generic.DetailView):
             context[ReportCuratorAssessmentForm.prefix] = \
                 ReportCuratorAssessmentForm(instance=self.object)
         if ReportCommentForm.prefix not in context:
+            form_kwargs["prefix"] = ReportCommentForm.prefix
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
         if ReportReviewForm.prefix not in context:
             form_kwargs["instance"] = self.get_review_object()
@@ -427,8 +428,10 @@ class ReportView(FormMixin, generic.DetailView):
                                  self.request.user.is_curator)
         context["is_reviewer"] = self.is_project_reviewer
         context["is_author"] = self.is_author
-        # Append preliminary scores
-        context["review_fields"] = ReportReviewForm._meta.fields
+        # Preliminary scores
+        context['reviews'] = report.review_set
+        context['own_review'] = report.review_set.filter(
+            reviewer=self.request.user)
         return context
 
     def get_review_object(self):

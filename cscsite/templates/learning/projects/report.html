@@ -76,26 +76,24 @@
         </div>
         {% endif %}
 
-        {% if request.user.is_curator and report.status != report.SENT and not report.is_completed %}
-            <h3>Предварительные оценки</h3>
+        {% if request.user.is_curator and report.status != report.SENT %}
+            <h3>Проверка отчета</h3>
             <div class="panel-group">
-            {% for review in report.review_set.all %}
+            {% for review in reviews.all %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <a class="panel-title" aria-expanded="false" data-toggle="collapse"
-                           href="#project-review-{{ review.pk }}">{{ review.reviewer }}</a>
+                        <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-review-{{ review.pk }}">
+                            {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
+                        </a>
                     </div>
                     <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
-                        <div class="panel-body">
-{#                             TODO: move this logic to view, too much custom tags, don't like it#}
-                            {% for field in review_fields %}
-                                <b>{{ review|verbose_name_by_attr_name:field }}</b>: {{ review|lookup_display:field|default:"-" }}<br>
-                            {% endfor %}
+                        <div class="panel-body -preliminary-scores">
+                            {% include "learning/projects/_report_preliminary_assessment.html" %}
                         </div>
                     </div>
                 </div>
             {% empty %}
-                Нет предварительных оценок.
+                Нет оценок.
             {% endfor %}
             </div>
         {% endif %}
@@ -107,6 +105,13 @@
                 {% crispy review_form %}
             </div>
         </div>
+        {% elif is_reviewer and not user.is_curator and report.status != report.SENT %}
+            <div class="card">
+                <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
+                <div class="card-body card-padding -preliminary-scores">
+                    {% include "learning/projects/_report_preliminary_assessment.html" with review=own_review %}
+                </div>
+            </div>
         {% endif %}
 
         {% if can_assess %}
