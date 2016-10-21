@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import math
 from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
@@ -250,7 +251,7 @@ class ReportSummarizeForm(forms.ModelForm):
                         )
             for field_name in REVIEW_SCORE_FIELDS:
                 total, count = scores.get(field_name)
-                mean = (total / count) if count else 0
+                mean = math.ceil(total / count) if count else 0
                 setattr(self.instance, field_name, mean)
             self.instance.status = self._meta.model.COMPLETED
         instance = super(ReportSummarizeForm, self).save(commit)
