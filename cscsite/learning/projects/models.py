@@ -279,13 +279,13 @@ class Report(ReviewCriteria):
     )
 
     ACTIVITY = (
-        (0, _("0")),
-        (1, _("1")),
+        (0, _("Poor commit history")),
+        (1, _("Normal activity")),
     )
     QUALITY = (
-        (0, _("0")),
-        (1, _("1")),
-        (2, _("2")),
+        (0, _("Bad report quality and unrelated comments")),
+        (1, _("Bad report quality, but sensible comments")),
+        (2, _("Good report quality and sensible comments")),
     )
 
     project_student = models.OneToOneField(ProjectStudent)

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-17 16:36+0300\n"
-"PO-Revision-Date: 2016-10-17 16:52+0230\n"
-"Last-Translator: b'  <>'\n"
+"POT-Creation-Date: 2016-10-21 13:38+0300\n"
+"PO-Revision-Date: 2016-10-21 13:39+0230\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,7 +20,7 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.7.11\n"
 
 #: cscsite/learning/projects/admin.py:62
-#: cscsite/learning/projects/filters.py:24
+#: cscsite/learning/projects/filters.py:38
 msgid "Student"
 msgstr "Студент"
 
@@ -41,42 +41,45 @@ msgstr "Изменить"
 msgid "Student Projects"
 msgstr "Студенческие проекты"
 
-#: cscsite/learning/projects/filters.py:19
+#: cscsite/learning/projects/filters.py:22
 msgid "Any"
 msgstr ""
 
-#: cscsite/learning/projects/filters.py:34
-#| msgid "Supervisor grade"
+#: cscsite/learning/projects/filters.py:32
+#: cscsite/learning/projects/models.py:133
+msgid "External project"
+msgstr "Внешний проект"
+
+#: cscsite/learning/projects/filters.py:48
 msgid "Supervisor"
 msgstr "Руководитель"
 
-#: cscsite/learning/projects/filters.py:64
-#: cscsite/learning/projects/filters.py:231
+#: cscsite/learning/projects/filters.py:75
+#: cscsite/learning/projects/filters.py:242
 msgid "Filter"
 msgstr "Фильтр"
 
-#: cscsite/learning/projects/filters.py:195
+#: cscsite/learning/projects/filters.py:206
 #: cscsite/learning/projects/models.py:121
 msgid "Participants presentation"
 msgstr "Презентация участников"
 
-#: cscsite/learning/projects/filters.py:196
+#: cscsite/learning/projects/filters.py:207
 #: cscsite/learning/projects/models.py:33
 msgid "Supervisor grade"
 msgstr "Оценка руководителя"
 
-#: cscsite/learning/projects/filters.py:198
+#: cscsite/learning/projects/filters.py:209
 #: cscsite/learning/projects/models.py:42
 msgid "Presentation grade"
 msgstr "Оценка за презентацию"
 
-#: cscsite/learning/projects/filters.py:199
+#: cscsite/learning/projects/filters.py:210
 #: cscsite/learning/projects/models.py:48
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: cscsite/learning/projects/filters.py:200
-#| msgid "Reports"
+#: cscsite/learning/projects/filters.py:211
 msgid "Report"
 msgstr "Отчет"
 
@@ -201,10 +204,6 @@ msgstr "URL с презентацией участников"
 #: cscsite/learning/projects/models.py:130
 msgid "SlideShare URL for participants presentation"
 msgstr "Slideshare URL с презентацией участников"
-
-#: cscsite/learning/projects/models.py:133
-msgid "External project"
-msgstr "Внешний проект"
 
 #: cscsite/learning/projects/models.py:137
 msgid "Student project"
@@ -344,18 +343,26 @@ msgid "Completed"
 msgstr "Завершено"
 
 #: cscsite/learning/projects/models.py:282
-#: cscsite/learning/projects/models.py:286
-msgid "0"
+msgid "Poor commit history"
 msgstr ""
+"0 - у студента нет коммитов в репозитории или 1-2 в начале или прямо перед "
+"отчётом"
 
 #: cscsite/learning/projects/models.py:283
+msgid "Normal activity"
+msgstr "1 - активная жизнь в репозитории"
+
+#: cscsite/learning/projects/models.py:286
+msgid "Bad report quality and unrelated comments"
+msgstr "0 - отчёт и комментарии к нему написаны плохо"
+
 #: cscsite/learning/projects/models.py:287
-msgid "1"
-msgstr ""
+msgid "Bad report quality, but sensible comments"
+msgstr "1 - отчёт написан плохо, но комментарии полные и разумные"
 
 #: cscsite/learning/projects/models.py:288
-msgid "2"
-msgstr ""
+msgid "Good report quality and sensible comments"
+msgstr "2 - отчёт и комментарии к нему написаны хорошо"
 
 #: cscsite/learning/projects/models.py:294
 msgid "Status"
@@ -457,7 +464,6 @@ msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
 #: cscsite/learning/projects/views.py:392
-#| msgid "Data not saved. Check errors."
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
