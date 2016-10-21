@@ -213,3 +213,11 @@
 .nowrap {
   white-space: nowrap;
 }
+
+.-preliminary-scores {
+  padding: 15px!important;
+
+  .list-group-item {
+    border: 0;
+  }
+}

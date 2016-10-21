@@ -100,11 +100,10 @@ class ReportCommentForm(forms.ModelForm):
     prefix = "new_comment_form"
 
     text = forms.CharField(
-        label=_("Add comment"),
+        label=_("New comment"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
-        widget=Ubereditor(attrs={'data-quicksend': 'true',
-                                 'data-local-persist': 'true'}))
+        widget=Ubereditor(attrs={'data-local-persist': 'true'}))
     attached_file = forms.FileField(
         label="",
         required=False,
@@ -117,7 +116,7 @@ class ReportCommentForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div('text'),
             Div(Div('attached_file',
-                    Div(Submit('new_comment_form', _('Save')),
+                    Div(Submit('new_comment_form', _('Send')),
                         css_class='pull-right'),
                     css_class="form-inline"),
                 css_class="form-group"))

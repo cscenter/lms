@@ -144,6 +144,8 @@ function initUberEditor(textarea) {
     });
 
     // Ctrl+Enter to send form
+    // Submit button value won't be attached to form data, be aware
+    // if your form process logic depends on prefix, for example
     if ($textarea[0].dataset.quicksend == 'true') {
         var editorBody = editor.getElement('editor').body;
         // FIXME: use .on here
