@@ -89,11 +89,42 @@ class NewReportComment(NotificationService):
         return self.SITE_CENTER_URL
 
 
+@register(notification_type=types.PROJECT_REPORT_IN_REVIEW_STATE)
+class ReportInReviewState(NotificationService):
+    """
+    Curator <actor> changed <verb> status on "Report for project" <target>
+    to "review". This means project reviewers can see report now and assess it.
+
+    Models:
+        actor - CSCUser
+        action_object - <None>
+        target - Report
+    """
+
+    subject = "Отчет по проекту «{}» доступен для проверки"
+    template = "emails/projects/report_review_state.html"
+
+    def add_to_queue(self, notification, *args, **kwargs):
+        self.logger.debug("Notification was generated for recipient {}".format(
+            notification.recipient
+        ))
+        notification.save()
+
+    def get_subject(self, notification, **kwargs):
+        return self.subject.format(notification.data["project_name"])
+
+    def get_context(self, notification):
+        return notification.data
+
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
+
+
 @register(notification_type=types.PROJECT_REPORT_REVIEWING_COMPLETED)
 class ReviewCompleted(NotificationService):
     """
     Curator <actor> sent email <verb> to Student <recipient>
-    that reviewing <target> for project completed
+    that reviewing <target> of project report completed
 
     Models:
         actor - CSCUser
