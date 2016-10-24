@@ -1244,14 +1244,17 @@ class StudentAssignmentDetailMixin(object):
         comments = (AssignmentComment.objects.filter(student_assignment=a_s)
                                              .order_by('created')
                                              .select_related('author'))
+        first_comment_after_deadline = None
         for c in comments:
-            if c.author == a_s.student:
-                setattr(c, 'first_student_comment', True)
-                break
+            if (first_comment_after_deadline is None and
+                    c.created >= a_s.assignment.deadline_at):
+                first_comment_after_deadline = c.pk
         # Dynamically replace label
         if (not comments and context['user_type'] == 'student' and
                 not a_s.assignment.is_online):
             context['form'].fields.get('text').label = _("Add solution")
+
+        context['first_comment_after_deadline'] = first_comment_after_deadline
         context['comments'] = comments
         context['one_teacher'] = (a_s
                                   .assignment

@@ -4,10 +4,10 @@ hr.code {
     border: none;
     margin: 50px auto;
     height: 1px;
-    background: #F1F2F1;
-    background: -webkit-linear-gradient(left,#F1F2F1 0,#b5b5b5 50%,#F1F2F1 100%);
-    background: linear-gradient(to right,#F1F2F1 0,#b5b5b5 50%,#F1F2F1 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F1F2F1', endColorstr='#F1F2F1', GradientType=1 );
+    background: #f2f2f2;
+    background: -webkit-linear-gradient(left,#f2f2f2 0,#b5b5b5 50%,#f2f2f2 100%);
+    background: linear-gradient(to right,#f2f2f2 0,#b5b5b5 50%,#f2f2f2 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f2f2', endColorstr='#f2f2f2', GradientType=1 );
 
   &:before {
       position: absolute;
@@ -22,4 +22,18 @@ hr.code {
       padding: 0 25px;
       font-size: 35px;
   }
+}
+
+hr.deadline {
+    @extend hr.code;
+
+    margin: 30px auto;
+    max-width: 80%;
+
+    &:before {
+        content: "после дедлайна";
+        font-size: 14px;
+        color: #b5b5b5;
+        font-family: inherit;
+    }
 }
