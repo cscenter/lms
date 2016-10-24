@@ -551,6 +551,28 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
     def get_success_msg():
         return _("Status was successfully updated.")
 
+    def form_valid(self, form):
+        response = super(ReportUpdateStatusView, self).form_valid(form)
+        if "status" in form.changed_data and self.object.status == Report.REVIEW:
+            self.send_email_notification()
+        return response
+
+    def send_email_notification(self):
+        """Send email notification to reviewers"""
+        context = {
+            "project_name": self.object.project_student.project.name,
+        }
+        reviewers = self.object.project_student.project.reviewers.all()
+        for recipient in reviewers:
+            notify.send(
+                self.request.user,  # Curator who changed status
+                type=types.PROJECT_REPORT_IN_REVIEW_STATE,
+                verb='changed',
+                target=self.object,
+                recipient=recipient,
+                data=context
+            )
+
 
 class ReportCuratorAssessmentView(ReportUpdateViewMixin):
     form_class = ReportCuratorAssessmentForm
