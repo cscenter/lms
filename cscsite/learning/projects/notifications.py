@@ -18,7 +18,7 @@ class NewReport(NotificationService):
         target - Project
     """
 
-    subject = "Отправлен отчет по проекту {}"
+    subject = "{} отправил отчёт по проекту"
     template = "emails/projects/new_report.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -28,19 +28,22 @@ class NewReport(NotificationService):
         notification.save()
 
     def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["project_name"])
+        return self.subject.format(notification.actor.get_full_name())
 
     def get_context(self, notification):
         report_url = reverse("projects:project_report", kwargs={
             "project_pk": notification.data["project_pk"],
             "student_pk": notification.data["student_pk"]
         })
-        # Low chance project name will be updated
+        project_url = reverse("projects:student_project_detail",
+                              args=[notification.data["project_pk"]])
         return {
             "author": notification.actor.get_full_name(),
+            "project_name": notification.data.get("project_name", ""),
+            "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
-            "project_name": notification.data.get("project_name", "")
         }
+        # Low chance project name will be updated
 
     # TODO: make as default implementation?
     def get_site_url(self, **kwargs):
@@ -59,7 +62,7 @@ class NewReportComment(NotificationService):
         target - Report
     """
 
-    subject = "Новый комментарий к отчету {}"
+    subject = "Новый комментарий к отчёту по проекту {} ({})"
     template = "emails/projects/new_comment.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -69,7 +72,8 @@ class NewReportComment(NotificationService):
         notification.save()
 
     def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["project_name"])
+        return self.subject.format(notification.data["project_name"],
+                                   notification.actor.get_full_name())
 
     def get_context(self, notification):
         """
@@ -79,10 +83,13 @@ class NewReportComment(NotificationService):
             "project_pk": notification.data["project_pk"],
             "student_pk": notification.data["student_pk"]
         })
+        project_url = reverse("projects:student_project_detail",
+                              args=[notification.data["project_pk"]])
         return {
             "author": notification.actor.get_full_name(),
+            "project_name": notification.data.get("project_name", ""),
+            "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
-            "project_name": notification.data.get("project_name", "")
         }
 
     def get_site_url(self, **kwargs):
@@ -132,7 +139,7 @@ class ReviewCompleted(NotificationService):
         target - Report
     """
 
-    subject = "Проверка отчета по проекту «{}» завершена"
+    subject = "Результаты проверки отчёта"
     template = "emails/projects/report_completed.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -140,9 +147,6 @@ class ReviewCompleted(NotificationService):
             notification.recipient
         ))
         notification.save()
-
-    def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["project_name"])
 
     def get_context(self, notification):
         return notification.data
@@ -166,7 +170,7 @@ class ProjectReportingStarted(NotificationService):
         target - Semester (not sure)
     """
 
-    subject = "Начало отчетного периода. {}"
+    subject = "Время присылать отчёты по практике"
     template = "emails/projects/report_period_start.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -174,11 +178,11 @@ class ProjectReportingStarted(NotificationService):
                           "for recipient {}".format(notification.recipient))
         notification.save()
 
-    def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["semester_name"])
-
     def get_context(self, notification):
-        return notification.data
+        context = notification.data
+        context["project_url"] = reverse("projects:student_project_detail",
+                                         args=[notification.data["project_id"]])
+        return context
 
     def get_site_url(self, **kwargs):
         return self.SITE_CENTER_URL
@@ -195,7 +199,7 @@ class ProjectReportingEnded(NotificationService):
         target - Semester (not sure)
     """
 
-    subject = "Окончание отчетного периода. {}"
+    subject = "До сдачи отчёта остался один день"
     template = "emails/projects/report_period_end.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -203,12 +207,10 @@ class ProjectReportingEnded(NotificationService):
                           "for recipient {}".format(notification.recipient))
         notification.save()
 
-    def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["semester_name"])
-
     def get_context(self, notification):
         context = notification.data
-        context["student"] = notification.recipient.get_full_name()
+        context["project_url"] = reverse("projects:student_project_detail",
+                                         args=[notification.data["project_id"]])
         return context
 
     def get_site_url(self, **kwargs):
