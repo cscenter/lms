@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-21 14:32+0300\n"
-"PO-Revision-Date: 2016-10-21 14:33+0230\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2016-10-21 20:30+0300\n"
+"PO-Revision-Date: 2016-10-24 14:32+0230\n"
+"Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -83,17 +83,17 @@ msgstr "Итоговая оценка"
 msgid "Report"
 msgstr "Отчет"
 
-#: cscsite/learning/projects/forms.py:31
+#: cscsite/learning/projects/forms.py:32
 msgid "Report content"
 msgstr "Текст отчета"
 
-#: cscsite/learning/projects/forms.py:51
+#: cscsite/learning/projects/forms.py:52
 #: cscsite/learning/projects/forms.py:120
+#: cscsite/learning/projects/forms.py:187
 msgid "Send"
 msgstr "Отправить"
 
-#: cscsite/learning/projects/forms.py:103
-#| msgid "Add comment"
+#: cscsite/learning/projects/forms.py:104
 msgid "New comment"
 msgstr "Новый комментарий"
 
@@ -101,24 +101,20 @@ msgstr "Новый комментарий"
 msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
 
-#: cscsite/learning/projects/forms.py:184
-msgid "Assess"
-msgstr "Оценить"
+#: cscsite/learning/projects/forms.py:188
+msgid "Save draft"
+msgstr "Сохранить как черновик"
 
-#: cscsite/learning/projects/forms.py:203
-msgid "Assess all items before set `is_completed`"
-msgstr "Убедитесь, что все оценки выставлены."
-
-#: cscsite/learning/projects/forms.py:211
+#: cscsite/learning/projects/forms.py:214
 msgid "Complete"
 msgstr "Завершить"
 
-#: cscsite/learning/projects/forms.py:212
+#: cscsite/learning/projects/forms.py:215
 msgid "Check if you want to send results to student"
 msgstr "Отметьте, чтобы отправить результаты студенту"
 
-#: cscsite/learning/projects/forms.py:228
-#: cscsite/learning/projects/forms.py:277
+#: cscsite/learning/projects/forms.py:231
+#: cscsite/learning/projects/forms.py:280
 msgid "Save"
 msgstr "Сохранить"
 
@@ -464,33 +460,45 @@ msgstr "Отчет успешно отправлен."
 msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
-#: cscsite/learning/projects/views.py:392
+#: cscsite/learning/projects/views.py:391
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
-#: cscsite/learning/projects/views.py:458
+#: cscsite/learning/projects/views.py:460
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: cscsite/learning/projects/views.py:462
-msgid "The data successfully saved."
-msgstr "Данные успешно сохранены."
+#: cscsite/learning/projects/views.py:465
+#| msgid "The data successfully saved."
+msgid "The draft successfully saved."
+msgstr "Черновик успешно сохранён."
 
-#: cscsite/learning/projects/views.py:526
+#: cscsite/learning/projects/views.py:467
+#| msgid "The data successfully saved."
+msgid "The review successfully saved."
+msgstr "Проверка отчёта успешно завершена."
+
+#: cscsite/learning/projects/views.py:531
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: cscsite/learning/projects/views.py:532
+#: cscsite/learning/projects/views.py:537
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: cscsite/learning/projects/views.py:547
+#: cscsite/learning/projects/views.py:552
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: cscsite/learning/projects/views.py:555
+#: cscsite/learning/projects/views.py:560
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
+
+#~ msgid "Assess"
+#~ msgstr "Оценить"
+
+#~ msgid "Assess all items before set `is_completed`"
+#~ msgstr "Убедитесь, что все оценки выставлены."
 
 #~ msgid "Criterion #1"
 #~ msgstr "Критерий #1"

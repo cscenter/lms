@@ -186,6 +186,12 @@
       @extend .list-unstyled;
     }
   }
+
+  .panel {
+    border-radius: 0;
+    border-color: $color-gray-90;
+
+  }
 }
 
 
