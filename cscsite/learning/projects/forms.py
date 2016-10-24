@@ -184,7 +184,7 @@ class ReportReviewForm(forms.ModelForm):
             FormActions(
                 HTML('<input type="hidden" name={} value=1>'.format(
                     self.prefix)),
-                Submit(self.prefix + "-send", _('Complete')),
+                Submit(self.prefix + "-send", _('Save')),
                 StrictButton(_("Save draft"),
                              name=self.prefix + "-draft",
                              type="submit",

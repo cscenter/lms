@@ -120,7 +120,7 @@
 
         {% if is_reviewer and report.review_state %}
             <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">
-                {% if review_form.instance.is_completed %}Проверка отчета завершена{% else %}Оценить работу{% endif %}
+                Оценить работу{% if review_form.instance.is_completed %} / завершено{% endif %}
             </a>
             <div class="panel-collapse">
                 <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
@@ -143,7 +143,8 @@
                     {% crispy report_summary_form %}
                 </div>
             </div>
-        {% elif request.user.is_curator or is_author %}
+        {% elif report.is_completed  %}
+            {% if request.user.is_curator or is_author %}
             <div class="card">
                 <div class="card-header ch-alt"><h2>Итог</h2></div>
                 <div class="card-body card-padding -preliminary-scores">
@@ -156,6 +157,7 @@
 
                 </div>
             </div>
+            {% endif %}
         {% endif %}
     </div>
 
