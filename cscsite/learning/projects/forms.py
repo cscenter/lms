@@ -4,7 +4,7 @@ import math
 from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Button, Div, HTML, Fieldset, Row
+    Button, Div, HTML, Fieldset, Row, BaseInput
 from django import forms
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -172,6 +172,7 @@ class ReportReviewForm(forms.ModelForm):
             "score_problems_note": forms.Textarea(attrs={"rows": 3}),
             "score_technologies_note": forms.Textarea(attrs={"rows": 3}),
             "score_plans_note": forms.Textarea(attrs={"rows": 3}),
+            "is_completed": forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -181,7 +182,13 @@ class ReportReviewForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(
-                Submit(self.prefix, _('Assess'))
+                HTML('<input type="hidden" name={} value=1>'.format(
+                    self.prefix)),
+                Submit(self.prefix + "-send", _('Complete')),
+                StrictButton(_("Save draft"),
+                             name=self.prefix + "-draft",
+                             type="submit",
+                             css_class="btn-default"),
             )
         )
         # Append required data not represented in form fields
@@ -195,12 +202,8 @@ class ReportReviewForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(ReportReviewForm, self).clean()
-        if cleaned_data["is_completed"]:
-            # Check all scores presented
-            for field_name in REVIEW_SCORE_FIELDS:
-                if cleaned_data.get(field_name) is None:
-                    raise forms.ValidationError(
-                        _("Assess all items before set `is_completed`"))
+        if self.prefix + "-send" in self.data:
+            cleaned_data["is_completed"] = True
         return cleaned_data
 
 

@@ -367,7 +367,6 @@ class ReportView(FormMixin, generic.DetailView):
         is_project_reviewer = self.is_project_reviewer
         is_curator = self.request.user.is_curator
         is_project_participant = is_author or is_project_reviewer or is_curator
-
         add_comment_action = ReportCommentForm.prefix in self.request.POST
         send_review_action = ReportReviewForm.prefix in self.request.POST
         # Additional check for curators on send review action
@@ -412,10 +411,11 @@ class ReportView(FormMixin, generic.DetailView):
             context[ReportCuratorAssessmentForm.prefix] = \
                 ReportCuratorAssessmentForm(instance=self.object)
         if ReportCommentForm.prefix not in context:
-            form_kwargs["prefix"] = ReportCommentForm.prefix
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
+        # TODO: can we avoid this query on each request? E.g for status=SENT it's not really neccessary
+        own_review = self.get_review_object()
         if ReportReviewForm.prefix not in context:
-            form_kwargs["instance"] = self.get_review_object()
+            form_kwargs["instance"] = own_review
             context[ReportReviewForm.prefix] = ReportReviewForm(**form_kwargs)
         comments = (ReportComment.objects
                     .filter(report=report)
@@ -430,8 +430,7 @@ class ReportView(FormMixin, generic.DetailView):
         context["is_author"] = self.is_author
         # Preliminary scores
         context['reviews'] = report.review_set
-        context['own_review'] = report.review_set.filter(
-            reviewer=self.request.user)
+        context['own_review'] = own_review
         return context
 
     def get_review_object(self):
@@ -462,7 +461,10 @@ class ReportView(FormMixin, generic.DetailView):
             form_class = ReportCommentForm
             form_name = ReportCommentForm.prefix
         elif ReportReviewForm.prefix in request.POST:
-            success_msg = _("The data successfully saved.")
+            if ReportReviewForm.prefix + "-draft" in request.POST:
+                success_msg = _("The draft successfully saved.")
+            else:
+                success_msg = _("The review successfully saved.")
             form_class = ReportReviewForm
             form_name = ReportReviewForm.prefix
             form_kwargs["instance"] = self.get_review_object()

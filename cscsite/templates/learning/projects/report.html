@@ -76,6 +76,26 @@
         </div>
         {% endif %}
 
+        {% if can_assess %}
+            {% crispy report_curator_assessment_form %}
+        {% elif user.is_curator %}
+            <div class="card">
+                <div class="card-header ch-alt"><h2>Оценка куратора</h2></div>
+                <div class="card-body card-padding -preliminary-scores">
+                    <ul class="list-unstyled">
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">Жизнь в репозитории</h4>
+                            <p class="list-group-item-text">{{ report.get_score_activity_display }}</p>
+                        </li>
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">Качество отчета</h4>
+                            <p class="list-group-item-text">{{ report.get_score_quality_display }}</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
         {% if request.user.is_curator and report.status != report.SENT %}
             <h3>Проверка отчета</h3>
             <div class="panel-group">
@@ -99,12 +119,14 @@
         {% endif %}
 
         {% if is_reviewer and report.review_state %}
-        <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">Оценить работу</a>
-        <div class="panel-collapse">
-            <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
-                {% crispy review_form %}
+            <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">
+                {% if review_form.instance.is_completed %}Проверка отчета завершена{% else %}Оценить работу{% endif %}
+            </a>
+            <div class="panel-collapse">
+                <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
+                    {% crispy review_form %}
+                </div>
             </div>
-        </div>
         {% elif is_reviewer and not user.is_curator and report.status != report.SENT %}
             <div class="card">
                 <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
@@ -114,15 +136,24 @@
             </div>
         {% endif %}
 
-        {% if can_assess %}
-            {% crispy report_curator_assessment_form %}
-        {% endif %}
-
         {% if request.user.is_curator and report.summarize_state %}
             <a href="#report-summarize-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Подвести итоги</a>
             <div class="panel-collapse">
                 <div class="collapse csc-well" id="report-summarize-form">
                     {% crispy report_summary_form %}
+                </div>
+            </div>
+        {% elif request.user.is_curator %}
+            <div class="card">
+                <div class="card-header ch-alt"><h2>Итог</h2></div>
+                <div class="card-body card-padding -preliminary-scores">
+                    <ul class="list-unstyled">
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">Суммарный балл &mdash; {{ report.final_score }}</h4>
+                            <p class="list-group-item-text">{{ report.final_score_note }}</p>
+                        </li>
+                    </ul>
+
                 </div>
             </div>
         {% endif %}
