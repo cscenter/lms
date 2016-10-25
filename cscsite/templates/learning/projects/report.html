@@ -99,7 +99,7 @@
         {% if request.user.is_curator and report.status != report.SENT %}
             <h3>Проверка отчета</h3>
             <div class="panel-group">
-            {% for review in reviews.all %}
+            {% for review in reviews %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-review-{{ review.pk }}">
@@ -112,22 +112,29 @@
                         </div>
                     </div>
                 </div>
-            {% empty %}
-                Нет оценок.
+            {% endfor %}
+            {% for reviewer in without_reviews %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title no-collapse">
+                            {{ reviewer }} / <b>Не оценивал</b>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
             </div>
         {% endif %}
 
-        {% if is_reviewer and report.review_state %}
+        {% if is_reviewer and report.review_state and not review_form.instance.is_completed %}
             <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">
-                Оценить работу{% if review_form.instance.is_completed %} / завершено{% endif %}
+                Оценить работу
             </a>
             <div class="panel-collapse">
                 <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
                     {% crispy review_form %}
                 </div>
             </div>
-        {% elif is_reviewer and not user.is_curator and report.status != report.SENT %}
+        {% elif is_reviewer and not user.is_curator and review_form.instance.is_completed %}
             <div class="card">
                 <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
                 <div class="card-body card-padding -preliminary-scores">
@@ -213,7 +220,7 @@
         </ul>
         <h5>Проверяющие</h5>
         <ul class="list-unstyled o-users-vlist-with-photo">
-            {% for reviewer in project.reviewers.all %}
+            {% for reviewer in reviewers %}
                 <li>
                     {% if reviewer.photo %}
                         {% thumbnail reviewer.photo "60x60" crop="center top" cropbox=reviewer.photo_thumbnail_cropbox as im %}
