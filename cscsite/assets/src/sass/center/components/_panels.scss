@@ -61,3 +61,11 @@
     }
   }
 }
+
+.panel-title {
+  &.no-collapse {
+    &:before, &:after {
+      display: none;
+    }
+  }
+}

@@ -428,8 +428,17 @@ class ReportView(FormMixin, generic.DetailView):
                                  self.request.user.is_curator)
         context["is_reviewer"] = self.is_project_reviewer
         context["is_author"] = self.is_author
+        context["reviewers"] = report.project_student.project.reviewers.all()
         # Preliminary scores
-        context['reviews'] = report.review_set
+        if self.request.user.is_curator:
+            context['reviews'] = report.review_set.all()
+            # Collect those who without report at all
+            has_reviews = [r.reviewer_id for r in context['reviews']]
+            context["without_reviews"] = [r for r in context["reviewers"]
+                                          if r.pk not in has_reviews]
+        else:
+            context['reviews'] = set()
+            context["without_reviews"] = set()
         context['own_review'] = own_review
         return context
 
