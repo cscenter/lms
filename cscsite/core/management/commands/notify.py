@@ -221,16 +221,19 @@ class Command(BaseCommand):
             try:
                 code = types_map[notification.type_id]
             except KeyError:
-                logger.error("Couldn't find code to type_id {}".format(
-                    notification.type_id
-                ))
-                # TODO: mark as deleted? or what?
+                # On notification type deletion, we should cascading
+                # delete all notifications, low chance of error this type.
+                logger.error("Couldn't map code to type_id {}. "
+                             "Mark as deleted.".format(notification.type_id))
+                Notification.objects.filter(pk=notification.pk).update(
+                    deleted=True)
                 continue
             notification_type = getattr(notification_types, code)
             if notification_type in registry:
                 registry[code].notify(notification)
             else:
-                logger.warning("Handler for type '{}' not registered".format(
-                    code
-                ))
+                logger.warning("Handler for type '{}' not registered. "
+                               "Mark as deleted.".format(code))
+                Notification.objects.filter(pk=notification.pk).update(
+                    deleted=True)
         translation.deactivate()

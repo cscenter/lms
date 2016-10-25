@@ -236,7 +236,8 @@ RQ_QUEUES = {
 NOTIFICATION_TYPES = [
     "NEW_PROJECT_REPORT",
     "NEW_PROJECT_REPORT_COMMENT",
-    "PROJECT_REPORT_IN_REVIEW_STATE",  # can be reviewed by project reviewers
+    # All project reports checked by curators
+    "PROJECT_REPORTS_IN_REVIEW_STATE",
     "PROJECT_REPORTING_STARTED",
     "PROJECT_REPORTING_ENDED",
     "PROJECT_REVIEWER_ENROLLED",

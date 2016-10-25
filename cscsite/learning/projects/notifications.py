@@ -113,7 +113,7 @@ class NewReportComment(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORT_IN_REVIEW_STATE)
+@register(notification_type=types.PROJECT_REPORTS_IN_REVIEW_STATE)
 class ReportInReviewState(NotificationService):
     """
     Curator <actor> changed <verb> status on "Report for project" <target>
