@@ -2,6 +2,7 @@
 
 from django.core.urlresolvers import reverse
 
+from learning.projects.models import ReportComment
 from notifications.decorators import register
 from notifications.service import NotificationService
 from notifications import types
@@ -85,12 +86,19 @@ class NewReportComment(NotificationService):
         })
         project_url = reverse("projects:student_project_detail",
                               args=[notification.data["project_pk"]])
-        return {
+        context = {
             "author": notification.actor.get_full_name(),
             "project_name": notification.data.get("project_name", ""),
             "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
         }
+        # Attach comment text
+        c = (ReportComment.objects
+             .only("text", "attached_file")
+             .get(pk=notification.action_object_object_id))
+        context["message"] = c.text
+        context["has_attach"] = bool(c.attached_file)
+        return context
 
     def get_site_url(self, **kwargs):
         return self.SITE_CENTER_URL
