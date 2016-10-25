@@ -80,24 +80,33 @@ class NewReportComment(NotificationService):
         """
         In theory `project_name` can be already changed,  don't care now.
         """
-        report_url = reverse("projects:project_report", kwargs={
+        # Fetch comment from db
+        c = (ReportComment.objects
+             .only("text", "attached_file")
+             .get(pk=notification.action_object_object_id))
+        student_id = notification.data.get("student_id", False)
+        notification_for_student = (student_id == notification.recipient_id)
+        if notification_for_student:
+            report_url_name = "projects:student_project_report"
+            project_url_name = "projects:student_project_detail"
+        else:
+            report_url_name = "projects:project_report"
+            project_url_name = "projects:project_detail"
+        report_url = reverse(report_url_name, kwargs={
             "project_pk": notification.data["project_pk"],
             "student_pk": notification.data["student_pk"]
         })
-        project_url = reverse("projects:student_project_detail",
+        project_url = reverse(project_url_name,
                               args=[notification.data["project_pk"]])
         context = {
             "author": notification.actor.get_full_name(),
             "project_name": notification.data.get("project_name", ""),
             "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
+            "message": c.text,
+            "has_attach": bool(c.attached_file)
         }
-        # Attach comment text
-        c = (ReportComment.objects
-             .only("text", "attached_file")
-             .get(pk=notification.action_object_object_id))
-        context["message"] = c.text
-        context["has_attach"] = bool(c.attached_file)
+
         return context
 
     def get_site_url(self, **kwargs):

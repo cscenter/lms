@@ -138,17 +138,19 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
             )
             .exclude(pk=comment.author.pk)
         )
-        recipients = list(curators)
-        if comment.author != comment.report.project_student.student:
-            recipients.append(comment.report.project_student.student)
+        # Make dict to avoid duplicates
+        recipients = {c.pk: c for c in curators}
+        student = comment.report.project_student.student
+        if comment.author != student:
+            recipients[student.pk] = comment.report.project_student.student
         if comment.report.status == Report.REVIEW:
             reviewers = comment.report.project_student.project.reviewers.all()
-            recipients.extend(r for r in reviewers if r != comment.author)
+            recipients.update({r.pk: r for r in reviewers if r != comment.author})
         # Note: Doesn't hit database here if relations already cached
         project = comment.report.project_student.project
         student = comment.report.project_student.student
 
-        for recipient in recipients:
+        for recipient in recipients.values():
             notify.send(
                 comment.author,  # actor
                 type=types.NEW_PROJECT_REPORT_COMMENT,
@@ -157,6 +159,7 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
                 target=comment.report,
                 recipient=recipient,
                 data={
+                    "student_id": student.pk,
                     "project_name": project.name,
                     "project_pk": project.pk,  # unmodified
                     "student_pk": student.pk,  # unmodified
