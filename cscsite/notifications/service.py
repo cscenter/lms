@@ -2,7 +2,9 @@ import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Model
 from django.db.transaction import atomic
 from django.template.loader import render_to_string, get_template
 from django.utils.functional import cached_property
@@ -61,8 +63,13 @@ class NotificationService(object):
     @atomic
     def notify(self, notification):
         from notifications.models import Notification
-
-        context = self.get_context(notification)
+        try:
+            context = self.get_context(notification)
+        except ObjectDoesNotExist:
+            self.logger.exception("Can't get context for {}".format(
+                notification.pk))
+            Notification.objects.filter(pk=notification.pk).update(deleted=True)
+            return
         if not notification.recipient.email:
             self.logger.warning("user {0} doesn't have an email".format(
                 notification.recipient))
