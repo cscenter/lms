@@ -567,11 +567,13 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
     def form_valid(self, form):
         response = super(ReportUpdateStatusView, self).form_valid(form)
         if "status" in form.changed_data and self.object.status == Report.REVIEW:
+            # FIXME: DONT SEND NOW
             self.send_email_notification()
         return response
 
     def send_email_notification(self):
         """Send email notification to reviewers"""
+        return
         context = {
             "project_name": self.object.project_student.project.name,
         }
@@ -579,7 +581,7 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
         for recipient in reviewers:
             notify.send(
                 self.request.user,  # Curator who changed status
-                type=types.PROJECT_REPORT_IN_REVIEW_STATE,
+                type=types.PROJECT_REPORTS_IN_REVIEW_STATE,
                 verb='changed',
                 target=self.object,
                 recipient=recipient,
