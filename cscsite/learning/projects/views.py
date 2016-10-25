@@ -192,7 +192,7 @@ class ProjectDetailView(generic.CreateView):
     def response_redirect_to_report(project_student):
         return HttpResponseRedirect(
             reverse(
-                "projects:project_report",
+                "projects:student_project_report",
                 kwargs={
                     "project_pk": project_student.project.pk,
                     "student_pk": project_student.student.pk
@@ -488,8 +488,12 @@ class ReportView(FormMixin, generic.DetailView):
     def get_success_url(self):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
+        if self.is_author:
+            url_name = "projects:student_project_report"
+        else:
+            url_name = "projects:project_report"
         return reverse_lazy(
-            "projects:project_report",
+            url_name,
             kwargs={
                 "project_pk": project_pk,
                 "student_pk": student_pk
