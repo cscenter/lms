@@ -642,7 +642,7 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         }
         notify.send(
             self.request.user,  # Curator who complete reviewing
-            type=types.PROJECT_REPORT_REVIEWING_COMPLETED,
+            type=types.PROJECT_REPORT_COMPLETED,
             verb='complete',
             # In this case action_object and target are the same
             target=self.object,
