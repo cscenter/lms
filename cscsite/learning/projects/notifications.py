@@ -153,11 +153,11 @@ class ReportInReviewState(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORT_REVIEWING_COMPLETED)
-class ReviewCompleted(NotificationService):
+@register(notification_type=types.PROJECT_REPORT_COMPLETED)
+class ReportCompleted(NotificationService):
     """
     Curator <actor> sent email <verb> to Student <recipient>
-    that reviewing <target> of project report completed
+    that assessment of project report <target> completed
 
     Models:
         actor - CSCUser

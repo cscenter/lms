@@ -86,7 +86,7 @@ Lets enumerate all existing notifications for the moment:
             action_object - AssignmentComment
             target - Assignment
     9. PROJECT_REVIEWER_ENROLLED
-    10. PROJECT_REPORT_REVIEWING_COMPLETED
+    10. PROJECT_REPORT_COMPLETED
     11. PROJECT_REPORT_IN_REVIEW_STATE
 
 """
