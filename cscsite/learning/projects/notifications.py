@@ -6,6 +6,7 @@ from learning.projects.models import ReportComment, Report
 from notifications.decorators import register
 from notifications.service import NotificationService
 from notifications import types
+from users.models import CSCUser
 
 
 @register(notification_type=types.NEW_PROJECT_REPORT)
@@ -38,8 +39,12 @@ class NewReport(NotificationService):
         })
         project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
+        author_declension = ""
+        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+            author_declension = "a"
         return {
             "author": notification.actor.get_full_name(),
+            "author_declension": author_declension,
             "project_name": notification.data.get("project_name", ""),
             "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
@@ -98,8 +103,12 @@ class NewReportComment(NotificationService):
         })
         project_url = reverse(project_url_name,
                               args=[notification.data["project_pk"]])
+        author_declension = ""
+        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+            author_declension = "a"
         context = {
             "author": notification.actor.get_full_name(),
+            "author_declension": author_declension,
             "project_name": notification.data.get("project_name", ""),
             "project_link": self.get_absolute_url(project_url),
             "report_link": self.get_absolute_url(report_url),
@@ -216,6 +225,9 @@ class ReviewCompleted(NotificationService):
         context["project_link"] = self.get_absolute_url(project_url)
         context["report_link"] = self.get_absolute_url(report_url)
         context["reviewer"] = notification.actor.get_full_name()
+        context["reviewer_declension"] = ""
+        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+            context["reviewer_declension"] = "a"
         # Get other reports statuses
         rs = (Report.objects
               .filter(pk__in=context["other_reports"])
