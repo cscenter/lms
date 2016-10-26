@@ -59,6 +59,9 @@ def csc_menu(context, menu_name, root_id=False):
         if item.level == 1:
             item.children = children(item.id, flattened, user, user_groups)
             menu_tree.append(item)
+        elif item.level > 1:
+            # Items sorted by level
+            break
     # For simplicity at the current time we have only one selected item.
     active_items = set()
     find_active_menu_items(menu_tree, context['request'], active_items)
