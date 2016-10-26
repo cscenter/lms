@@ -64,7 +64,7 @@
                         </div>
                     {% else %}
                         <h3>{% trans "Send report form" %}</h3>
-                        Отправить желательно до {{ project.semester.report_ends_at }}<br>
+                        Отправить до {{ project.semester.report_ends_at }}<br>
                         <div class="csc-well o-send-report-form">
                             {% crispy form %}
                         </div>
