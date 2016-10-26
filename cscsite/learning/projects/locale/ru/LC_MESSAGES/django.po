@@ -8,15 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-21 20:30+0300\n"
-"PO-Revision-Date: 2016-10-24 14:32+0230\n"
+"POT-Creation-Date: 2016-10-26 13:33+0300\n"
+"PO-Revision-Date: 2016-10-26 13:31+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.7.11\n"
 
 #: cscsite/learning/projects/admin.py:62
@@ -87,9 +89,7 @@ msgstr "Отчет"
 msgid "Report content"
 msgstr "Текст отчета"
 
-#: cscsite/learning/projects/forms.py:52
-#: cscsite/learning/projects/forms.py:120
-#: cscsite/learning/projects/forms.py:187
+#: cscsite/learning/projects/forms.py:52 cscsite/learning/projects/forms.py:120
 msgid "Send"
 msgstr "Отправить"
 
@@ -100,6 +100,10 @@ msgstr "Новый комментарий"
 #: cscsite/learning/projects/forms.py:138
 msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
+
+#: cscsite/learning/projects/forms.py:187
+msgid "Complete assessment"
+msgstr "Завершить проверку"
 
 #: cscsite/learning/projects/forms.py:188
 msgid "Save draft"
@@ -282,8 +286,7 @@ msgstr "2 - студент понимает, почему выбрана та и
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
-msgstr ""
-"0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
+msgstr "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
 #: cscsite/learning/projects/models.py:211
 msgid ""
@@ -447,50 +450,48 @@ msgstr "Комментарий к отчету"
 msgid "Report comments"
 msgstr "Комментарии к отчету"
 
-#: cscsite/learning/projects/views.py:164
+#: cscsite/learning/projects/views.py:165
 #, python-format
 msgid "No %(verbose_name)s found matching the query"
 msgstr ""
 
-#: cscsite/learning/projects/views.py:231
+#: cscsite/learning/projects/views.py:232
 msgid "Report successfully sended"
 msgstr "Отчет успешно отправлен."
 
-#: cscsite/learning/projects/views.py:326
+#: cscsite/learning/projects/views.py:327
 msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
-#: cscsite/learning/projects/views.py:391
+#: cscsite/learning/projects/views.py:392
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
-#: cscsite/learning/projects/views.py:460
+#: cscsite/learning/projects/views.py:470
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: cscsite/learning/projects/views.py:465
-#| msgid "The data successfully saved."
+#: cscsite/learning/projects/views.py:475
 msgid "The draft successfully saved."
 msgstr "Черновик успешно сохранён."
 
-#: cscsite/learning/projects/views.py:467
-#| msgid "The data successfully saved."
+#: cscsite/learning/projects/views.py:477
 msgid "The review successfully saved."
 msgstr "Проверка отчёта успешно завершена."
 
-#: cscsite/learning/projects/views.py:531
+#: cscsite/learning/projects/views.py:545
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: cscsite/learning/projects/views.py:537
+#: cscsite/learning/projects/views.py:551
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: cscsite/learning/projects/views.py:552
+#: cscsite/learning/projects/views.py:566
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: cscsite/learning/projects/views.py:560
+#: cscsite/learning/projects/views.py:622
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
 
@@ -605,8 +606,8 @@ msgstr "Баллы успешно обновлены"
 #~ msgstr "Текст"
 
 #~ msgid ""
-#~ "First {n_par} paragraphs or anything before {marker} will serve as excerpt; "
-#~ "LaTeX+Markdown is enabled"
+#~ "First {n_par} paragraphs or anything before {marker} will serve as "
+#~ "excerpt; LaTeX+Markdown is enabled"
 #~ msgstr ""
 #~ "Первые {n_par} параграфов или всё до {marker} будут выдержкой; доступны "
 #~ "LaTeX и Markdown"

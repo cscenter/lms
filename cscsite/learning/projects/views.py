@@ -7,6 +7,7 @@ import logging
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
@@ -564,18 +565,42 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
     def get_success_msg():
         return _("Status was successfully updated.")
 
+    def get_queryset(self):
+        qs = super(ReportUpdateStatusView, self).get_queryset()
+        return qs.select_related("project_student__project")
+
     def form_valid(self, form):
         response = super(ReportUpdateStatusView, self).form_valid(form)
-        if "status" in form.changed_data and self.object.status == Report.REVIEW:
-            # FIXME: DONT SEND NOW
-            self.send_email_notification()
+        report = self.object
+        project_id = report.project_student.project_id
+        if "status" in form.changed_data and report.status == Report.REVIEW:
+            project_students = (ProjectStudent.objects
+                                .filter(project_id=project_id)
+                                .select_related("student", "report"))
+            all_reports_in_review_state = True
+            for ps in project_students:
+                try:
+                    if ps.report.status != Report.REVIEW:
+                        all_reports_in_review_state = False
+                        break
+                except ObjectDoesNotExist:
+                    all_reports_in_review_state = False
+                    break
+            if all_reports_in_review_state:
+                self.send_email_notification(project_students)
         return response
 
-    def send_email_notification(self):
-        """Send email notification to reviewers"""
-        return
+    def send_email_notification(self, project_students):
+        """
+        All project reports in review state, send notification to reviewers
+        about that fact.
+        """
+        reports = [(ps.student.pk, ps.student.get_short_name()) for ps
+                   in project_students]
         context = {
+            "project_pk": self.object.project_student.project.pk,
             "project_name": self.object.project_student.project.name,
+            "reports": reports
         }
         reviewers = self.object.project_student.project.reviewers.all()
         for recipient in reviewers:

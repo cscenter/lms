@@ -71,8 +71,8 @@ class NotificationService(object):
             Notification.objects.filter(pk=notification.pk).update(deleted=True)
             return
         if not notification.recipient.email:
-            self.logger.warning("user {0} doesn't have an email".format(
-                notification.recipient))
+            self.logger.warning("user {0} doesn't have an email. Mark "
+                                "as deleted".format(notification.recipient))
             Notification.objects.filter(pk=notification.pk).update(deleted=True)
             return
 
@@ -95,6 +95,7 @@ class NotificationService(object):
     def get_site_url(self, **kwargs):
         raise NotImplementedError()
         """Returns site url based on context information"""
+        # TODO: Delete after migrating all notifications to new module
         notification = kwargs.pop("notification")
         receiver = notification.user
         if isinstance(notification, AssignmentNotification):

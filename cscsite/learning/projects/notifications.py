@@ -36,7 +36,7 @@ class NewReport(NotificationService):
             "project_pk": notification.data["project_pk"],
             "student_pk": notification.data["student_pk"]
         })
-        project_url = reverse("projects:student_project_detail",
+        project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
         return {
             "author": notification.actor.get_full_name(),
@@ -125,8 +125,8 @@ class ReportInReviewState(NotificationService):
         target - Report
     """
 
-    subject = "Отчет по проекту «{}» доступен для проверки"
-    template = "emails/projects/report_review_state.html"
+    subject = "Можно приступать к проверке отчетов проекта"
+    template = "emails/projects/reviewers_can_view_project_reports.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
         self.logger.debug("Notification was generated for recipient {}".format(
@@ -134,11 +134,20 @@ class ReportInReviewState(NotificationService):
         ))
         notification.save()
 
-    def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.data["project_name"])
-
     def get_context(self, notification):
-        return notification.data
+        context = notification.data
+        project_url = reverse("projects:project_detail",
+                              args=[notification.data["project_pk"]])
+        context["project_link"] = self.get_absolute_url(project_url)
+        reports = []
+        for student_id, student_name in context["reports"]:
+            report_url = reverse("projects:project_report", kwargs={
+                "project_pk": context["project_pk"],
+                "student_pk": student_id
+            })
+            reports.append((student_name, self.get_absolute_url(report_url)))
+        context["reports"] = reports
+        return context
 
     def get_site_url(self, **kwargs):
         return self.SITE_CENTER_URL
