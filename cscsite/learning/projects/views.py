@@ -30,11 +30,13 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCuratorAssessmentForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
+from learning.settings import PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin
 from notifications import types
 from notifications.signals import notify
+from users.models import CSCUser
 
 logger = logging.getLogger(__name__)
 
@@ -384,8 +386,42 @@ class ReportView(FormMixin, generic.DetailView):
             return False
         return is_project_participant
 
+    def send_notification_to_curators(self, review):
+        curators = (CSCUser.objects.filter(
+            is_superuser=True,
+            is_staff=True,
+            groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER))
+        report = (Report.objects
+                  .select_related("project_student",
+                                  "project_student__project",
+                                  "project_student__student")
+                  .get(pk=review.report_id))
+        other_reports = (Report.objects
+            .filter(project_student__project=report.project_student.project)
+            .exclude(project_student=report.project_student)
+            .values_list("pk", flat=True))
+        context = {
+            "student_pk": report.project_student.student.pk,
+            "student": report.project_student.student.get_short_name(),
+            "project_pk": report.project_student.project.pk,
+            "project_name": report.project_student.project.name,
+            "other_reports": other_reports
+        }
+        for recipient in curators:
+            notify.send(
+                self.request.user,  # Reviewer
+                type=types.PROJECT_REPORT_REVIEW_COMPLETED,
+                verb='changed',
+                action_object=review,
+                target=report,
+                recipient=recipient,
+                data=context
+            )
+
     def form_valid(self, form):
-        form.save()
+        model = form.save()
+        if form.prefix == ReportReviewForm.prefix and model.is_completed:
+            self.send_notification_to_curators(model)
         return super(ReportView, self).form_valid(form)
 
     def form_invalid(self, **kwargs):
@@ -624,6 +660,10 @@ class ReportCuratorAssessmentView(ReportUpdateViewMixin):
 
 class ReportCuratorSummarizeView(ReportUpdateViewMixin):
     form_class = ReportSummarizeForm
+
+    @staticmethod
+    def get_success_msg():
+        return _("The report results are summed up successfully.")
 
     def form_valid(self, form):
         response = super(ReportCuratorSummarizeView, self).form_valid(form)

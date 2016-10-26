@@ -2,7 +2,7 @@
 
 from django.core.urlresolvers import reverse
 
-from learning.projects.models import ReportComment
+from learning.projects.models import ReportComment, Report
 from notifications.decorators import register
 from notifications.service import NotificationService
 from notifications import types
@@ -183,6 +183,50 @@ class ReportCompleted(NotificationService):
     @staticmethod
     def get_reply_to():
         return "practice@compscicenter.ru"
+
+
+@register(notification_type=types.PROJECT_REPORT_REVIEW_COMPLETED)
+class ReviewCompleted(NotificationService):
+    """
+    Reviewer <actor> complete <verb> review <action_object> on "Report" <target>
+
+    Models:
+        actor - CSCUser
+        action_object - Review
+        target - Report
+    """
+
+    subject = "Проверяющий завершил проверку отчёта"
+    template = "emails/projects/review_completed.html"
+
+    def add_to_queue(self, notification, *args, **kwargs):
+        self.logger.debug("Notification was generated for recipient {}".format(
+            notification.recipient
+        ))
+        notification.save()
+
+    def get_context(self, notification):
+        context = notification.data
+        project_url = reverse("projects:project_detail",
+                              args=[notification.data["project_pk"]])
+        report_url = reverse("projects:project_report", kwargs={
+            "project_pk": notification.data["project_pk"],
+            "student_pk": notification.data["student_pk"]
+        })
+        context["project_link"] = self.get_absolute_url(project_url)
+        context["report_link"] = self.get_absolute_url(report_url)
+        context["reviewer"] = notification.actor.get_full_name()
+        # Get other reports statuses
+        rs = (Report.objects
+              .filter(pk__in=context["other_reports"])
+              .select_related("project_student__student"))
+        reports = [(r.project_student.student.get_full_name(),
+                    r.get_status_display()) for r in rs]
+        context["other_reports"] = reports
+        return context
+
+    def get_site_url(self, **kwargs):
+        return self.SITE_CENTER_URL
 
 
 @register(notification_type=types.PROJECT_REPORTING_STARTED)

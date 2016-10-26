@@ -88,6 +88,7 @@ Lets enumerate all existing notifications for the moment:
     9. PROJECT_REVIEWER_ENROLLED
     10. PROJECT_REPORT_COMPLETED
     11. PROJECT_REPORT_IN_REVIEW_STATE
+    12. PROJECT_REPORT_REVIEW_COMPLETED
 
 """
 import os

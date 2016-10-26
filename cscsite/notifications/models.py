@@ -2,9 +2,9 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-
 from django.db import models
 from model_utils import Choices
+from django.utils.translation import ugettext_lazy as _
 from jsonfield.fields import JSONField
 
 from django.contrib.auth.models import Group
@@ -84,6 +84,11 @@ class NotificationQuerySet(models.query.QuerySet):
 
 class Type(models.Model):
     code = models.CharField(max_length=255, unique=True)
+    deleted = models.BooleanField(
+        default=False,
+        help_text=_("""Check if you want to save
+        related notifications in DB, but show,
+        that you are not using this notification type anymore."""))
 
 
 class Notification(models.Model):
