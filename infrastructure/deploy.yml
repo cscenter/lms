@@ -48,7 +48,7 @@
     become: yes
     become_method: sudo
 
-  - name: Gracefully kill rq workers to reload there state
+  - name: Gracefully kill rq workers to reload their state
     become: yes
     become_method: sudo
     shell: "supervisorctl signal SIGTERM rqworkers:"
