@@ -57,7 +57,7 @@ def csc_menu(context, menu_name, root_id=False):
         if root_id and item.level == 1 and item.id != root_id:
             continue
         if item.level == 1:
-            item.children = children(item.id, flattened)
+            item.children = children(item.id, flattened, user, user_groups)
             menu_tree.append(item)
     # For simplicity at the current time we have only one selected item.
     active_items = set()
@@ -82,10 +82,11 @@ def has_permissions(item, user, user_groups, **kwargs):
     return True
 
 
-def children(parent_id, items):
-    cs = [item for item in items if item.parent_id == parent_id]
+def children(parent_id, items, user, user_groups):
+    cs = [i for i in items
+          if i.parent_id == parent_id and has_permissions(i, user, user_groups)]
     for c in cs:
-        c.children = children(c.id, items)
+        c.children = children(c.id, items, user, user_groups)
     return cs
 
 

@@ -429,6 +429,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         lf = normalized_note.find("\n")
         return self.note if lf == -1 else normalized_note[:lf]
 
+    # TODO: think how to add declension method with ru/en support
+
     @cached_property
     def _cs_group_pks(self):
         # TODO: refactor with set
