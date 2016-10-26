@@ -132,6 +132,10 @@ class Project(TimeStampedModel):
     is_external = models.BooleanField(
         _("External project"),
         default=False)
+    canceled = models.BooleanField(
+        default=False,
+        help_text=_("Check if all participants leave project before "
+                    "reporting period"))
 
     class Meta:
         verbose_name = _("Student project")

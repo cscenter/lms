@@ -75,7 +75,8 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         current_year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(current_year, term_type)
         queryset = (Project.objects
-                    .filter(semester__index=current_term_index)
+                    .filter(semester__index=current_term_index,
+                            canceled=False)
                     .select_related("semester")
                     .prefetch_related("students", "reviewers")
                     .annotate(reviewers_cnt=Count("reviewers"))
@@ -270,7 +271,8 @@ class ProjectPrevNextView(generic.RedirectView):
         current_year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(current_year, term_type)
         queryset = (Project.objects
-                    .filter(semester__index=current_term_index)
+                    .filter(semester__index=current_term_index,
+                            canceled=False)
                     .annotate(reviewers_cnt=Count("reviewers"))
                     .annotate(
                         have_reviewers=Case(
@@ -387,6 +389,7 @@ class ReportView(FormMixin, generic.DetailView):
         return is_project_participant
 
     def send_notification_to_curators(self, review):
+        """Reviewer complete assessment"""
         curators = (CSCUser.objects.filter(
             is_superuser=True,
             is_staff=True,
@@ -620,6 +623,10 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
                         all_reports_in_review_state = False
                         break
                 except ObjectDoesNotExist:
+                    # Don't take into stats if student already has
+                    # unsatisfactory grade. It means he left project.
+                    if ps.final_grade == ProjectStudent.GRADES.unsatisfactory:
+                        continue
                     all_reports_in_review_state = False
                     break
             if all_reports_in_review_state:

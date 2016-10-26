@@ -178,7 +178,7 @@
         {% endif %}
         <h5>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h5>
         {{ project.semester }}
-        {% if is_reviewer %}
+        {% if is_reviewer or user.is_curator %}
             <h5>Название проекта</h5>
             <a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a>
         {% endif %}
