@@ -143,7 +143,7 @@ def test_project_detail_unauth(client):
     project = ProjectFactory.create(students=[student], reviewers=[reviewer],
                                     semester=semester)
     response = client.get(project.get_absolute_url())
-    assert smart_bytes("Отзывы руководителя") not in response.content
+    assert smart_bytes("Отзывы руководителей") not in response.content
     assert smart_bytes("Следить за проектом") not in response.content
     assert "has_enroll_permissions" in response.context
     assert response.context["has_enroll_permissions"] is False
@@ -173,7 +173,7 @@ def test_project_detail_student_participant(client):
     response = client.get(project.get_absolute_url())
     assert "has_enroll_permissions" in response.context
     assert response.context["has_enroll_permissions"] is False
-    assert smart_bytes("Отзывы руководителя") not in response.content
+    assert smart_bytes("Отзывы руководителей") not in response.content
     form = {"send_report_form-text": "report text content"}
     today = now().date()
     semester.report_starts_at = today + timedelta(days=2)
@@ -269,10 +269,10 @@ def test_project_detail_reviewer(client, curator):
     response = client.get(url)
     assert smart_bytes("Следить за проектом") not in response.content
     # Don't show testimonials and grade tables to reviewer or students
-    assert smart_bytes("Отзывы руководителя") not in response.content
+    assert smart_bytes("Отзывы руководителей") not in response.content
     client.login(curator)
     response = client.get(url)
-    assert smart_bytes("Отзывы руководителя") in response.content
+    assert smart_bytes("Отзывы руководителей") in response.content
 
 
 @pytest.mark.django_db
