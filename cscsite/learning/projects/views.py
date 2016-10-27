@@ -606,11 +606,15 @@ class ReportUpdateViewMixin(CuratorOnlyMixin, BaseUpdateView):
     def get_success_msg():
         return _("Report was successfully updated.")
 
+    @staticmethod
+    def get_error_msg(form):
+        return _("Data not saved. Check errors.")
+
     def form_invalid(self, form):
         """
         Silently fail and redirect. Form will be invalid only if you fake data.
         """
-        messages.error(self.request, _("Data not saved. Check errors."))
+        messages.error(self.request, self.get_error_msg(form))
         return HttpResponseRedirect(reverse(
             "projects:project_report",
             kwargs={
@@ -626,6 +630,12 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
     @staticmethod
     def get_success_msg():
         return _("Status was successfully updated.")
+
+    @staticmethod
+    def get_error_msg(form):
+        msg = "<br>".join("<br>".join(errors) for errors in
+                          form.errors.values())
+        return "Статус не был обновлён.<br>" + msg
 
     def get_queryset(self):
         qs = super(ReportUpdateStatusView, self).get_queryset()

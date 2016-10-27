@@ -89,6 +89,13 @@ class ReportStatusForm(forms.ModelForm):
                 css_class="btn btn-primary")),
         )
 
+    def clean(self):
+        cleaned_data = super(ReportStatusForm, self).clean()
+        if (self.instance.score_activity is None or
+                    self.instance.score_quality is None):
+            raise forms.ValidationError("Оценки куратора ещё не выставлены.")
+        return cleaned_data
+
     def save(self, commit=True):
         instance = super(ReportStatusForm, self).save(commit)
         # TODO: send notification to reviewers?
