@@ -400,8 +400,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return full_name or self.username
 
     def get_short_name(self):
-        return (smart_text(" ".join([self.last_name,
-                                     self.first_name]).strip())
+        return (smart_text(" ".join([self.first_name,
+                                     self.last_name]).strip())
                 or self.username)
 
     def get_abbreviated_name(self):

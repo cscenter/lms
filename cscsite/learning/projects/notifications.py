@@ -20,7 +20,7 @@ class NewReport(NotificationService):
         target - Project
     """
 
-    subject = "{} отправил отчёт по проекту"
+    subject = "{} отправил{} отчёт по проекту"
     template = "emails/projects/new_report.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -30,7 +30,10 @@ class NewReport(NotificationService):
         notification.save()
 
     def get_subject(self, notification, **kwargs):
-        return self.subject.format(notification.actor.get_full_name())
+        return self.subject.format(
+            notification.actor.get_full_name(),
+            "а" if notification.actor.gender == CSCUser.GENDER_FEMALE else ""
+        )
 
     def get_context(self, notification):
         report_url = reverse("projects:project_report", kwargs={
