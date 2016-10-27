@@ -381,7 +381,8 @@ class ReportView(FormMixin, generic.DetailView):
         if is_curator:
             return True
         # Restrict send comment for all except curators if review is completed
-        if add_comment_action and report.is_completed():
+        if add_comment_action and report.status in [report.COMPLETED,
+                                                    report.SUMMARY]:
             return False
         # Hide view for reviewers until report status is `SENT`.
         if is_project_reviewer and report.status == Report.SENT:
@@ -457,8 +458,7 @@ class ReportView(FormMixin, generic.DetailView):
                 ReportCuratorAssessmentForm(instance=self.object)
         if ReportCommentForm.prefix not in context:
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
-        # TODO: can we avoid this query on each request? E.g for status=SENT it's not really neccessary
-        own_review = self.get_review_object()
+        own_review = self.get_review_object(report)
         if ReportReviewForm.prefix not in context:
             form_kwargs["instance"] = own_review
             context[ReportReviewForm.prefix] = ReportReviewForm(**form_kwargs)
@@ -468,7 +468,7 @@ class ReportView(FormMixin, generic.DetailView):
                     .select_related('author'))
         context["comments"] = comments
         context['clean_comments_json'] = comment_persistence.get_hashes_json()
-        context["can_comment"] = report.status != report.COMPLETED
+        context["can_comment"] = self.can_comment(report, own_review)
         context["can_assess"] = (report.status == report.SENT and
                                  self.request.user.is_curator)
         context["is_reviewer"] = self.is_project_reviewer
@@ -487,10 +487,27 @@ class ReportView(FormMixin, generic.DetailView):
         context['own_review'] = own_review
         return context
 
-    def get_review_object(self):
+    def can_comment(self, report, review):
+        # When report has sent, reviewers can't see the whole page until
+        # next status
+        if report.status == report.SENT:
+            return True
+        # On review stage reviewers can't comment after review was completed
+        if report.status == report.REVIEW:
+            if (self.is_project_reviewer and not self.is_curator and
+                    review and review.is_completed):
+                return False
+            return True
+        # On last 2 stages nobody can comment
+        return False
+
+    def get_review_object(self, report):
+        if report.status == report.SENT:
+            # No reviews at all on this stage
+            return None
         try:
             review = Review.objects.get(
-                report=self.object, reviewer=self.request.user)
+                report=report, reviewer=self.request.user)
         except Review.DoesNotExist:
             review = None
         return review
@@ -511,6 +528,7 @@ class ReportView(FormMixin, generic.DetailView):
 
         form_kwargs = self.get_form_kwargs()
         if ReportCommentForm.prefix in request.POST:
+            # TODO: Check `can_comment` permissions
             success_msg = _("Comment successfully added.")
             form_class = ReportCommentForm
             form_name = ReportCommentForm.prefix
@@ -521,7 +539,7 @@ class ReportView(FormMixin, generic.DetailView):
                 success_msg = _("The review successfully saved.")
             form_class = ReportReviewForm
             form_name = ReportReviewForm.prefix
-            form_kwargs["instance"] = self.get_review_object()
+            form_kwargs["instance"] = self.get_review_object(report)
         else:
             return HttpResponseBadRequest()
         form = form_class(**form_kwargs)

@@ -146,11 +146,9 @@
         {% endif %}
 
         {% if request.user.is_curator and report.summarize_state %}
-            <a href="#report-summarize-form" data-toggle="collapse" aria-expanded="false" class="collapse-link">Подвести итоги</a>
-            <div class="panel-collapse">
-                <div class="collapse csc-well" id="report-summarize-form">
-                    {% crispy report_summary_form %}
-                </div>
+            <div class="csc-well" id="report-summarize-form">
+                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подвести итоги</span>
+                {% crispy report_summary_form %}
             </div>
         {% elif report.is_completed  %}
             {% if request.user.is_curator or is_author %}
