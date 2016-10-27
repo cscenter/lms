@@ -205,7 +205,7 @@ class ReviewCompleted(NotificationService):
         target - Report
     """
 
-    subject = "Проверяющий завершил проверку отчёта"
+    subject = "{} завершил{} проверку отчёта"
     template = "emails/projects/review_completed.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
@@ -225,17 +225,29 @@ class ReviewCompleted(NotificationService):
         context["project_link"] = self.get_absolute_url(project_url)
         context["report_link"] = self.get_absolute_url(report_url)
         context["reviewer"] = notification.actor.get_full_name()
-        context["reviewer_declension"] = ""
-        if notification.actor.gender == CSCUser.GENDER_FEMALE:
-            context["reviewer_declension"] = "a"
-        # Get other reports statuses
+        # Get other reports data (name, link, status)
+        reports = []
         rs = (Report.objects
               .filter(pk__in=context["other_reports"])
               .select_related("project_student__student"))
-        reports = [(r.project_student.student.get_full_name(),
-                    r.get_status_display()) for r in rs]
+        for r in rs:
+            report_url = reverse("projects:project_report", kwargs={
+                "project_pk": notification.data["project_pk"],
+                "student_pk": r.project_student.student.pk
+            })
+            row = (r.project_student.student.get_full_name(),
+                   self.get_absolute_url(report_url),
+                   r.get_status_display())
+            reports.append(row)
         context["other_reports"] = reports
         return context
+
+    def get_subject(self, notification, **kwargs):
+        reviewer = notification.actor.get_full_name()
+        reviewer_declension = ""
+        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+            reviewer_declension = "a"
+        return self.subject.format(reviewer, reviewer_declension)
 
     def get_site_url(self, **kwargs):
         return self.SITE_CENTER_URL

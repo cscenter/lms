@@ -1,13 +1,11 @@
-{{ reviewer }} завершил{{ reviewer_declension }} проверку отчёта
-
 Здравствуйте.
 
-{{ student }} получил финальные оценки за отчёт по проекту <a href="{{ project_link }}">«{{ project_name }}»</a> от проверяющего ({{ reviewer }}).
+{{ student }} получил{{ student_declension }} финальные оценки за отчёт по проекту <a href="{{ project_link }}">"{{ project_name }}"</a> от проверяющего ({{ reviewer }}).
 
 {% if other_reports %}
-В этом проекте участвуют другие студенты:<br>
-{% for student, status in other_reports %}
-— {{ student }} — статус отчёта &mdash; {{ status }}
+В этом проекте участвуют другие студенты:
+
+{% for student, report_link, status in other_reports %}— {{ student }} — статус <a href="{{ report_link }}">отчёта</a> &mdash; {{ status }}
 {% endfor %}
 {% endif %}
 
