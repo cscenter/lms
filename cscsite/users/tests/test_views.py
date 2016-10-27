@@ -119,10 +119,10 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
                        patronymic=u"Васильевна")
         self.assertEqual(user.get_short_name(),
-                         u"Иванова Анна")
+                         u"Анна Иванова")
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_short_name(),
-                         u"Иванова Анна")
+                         u"Анна Иванова")
 
     def test_to_string(self):
         user = CSCUser(first_name=u"Анна", last_name=u"Иванова",

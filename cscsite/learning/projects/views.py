@@ -654,6 +654,8 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
                     break
             if all_reports_in_review_state:
                 self.send_email_notification(project_students)
+            # For all reviews drop is_complete flag
+            Review.objects.filter(report=report).update(is_completed=False)
         return response
 
     def send_email_notification(self, project_students):
