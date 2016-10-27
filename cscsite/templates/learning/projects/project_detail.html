@@ -79,7 +79,7 @@
                             <th>Участник</th>
                             <th>Статус&nbsp;отчета</th>
                             <th>Презентация</th>
-                            <th>Руководитель</th>
+                            <th>Руководители</th>
                             <th>Итог</th>
                         </tr>
                         </thead>
@@ -96,12 +96,12 @@
                         </tbody>
                     </table>
 
-                    <h4>Отзывы руководителя <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
+                    <h4>Отзывы руководителей <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
                         <div class="card">
                             <div class="card-header ch-alt">{{ ps.student }}</div>
                             <div class="card-body card-padding">
-                                {{ ps.supervisor_review|default:"<отзыв не предоставлен>" }}
+                                {{ ps.supervisor_review|default:"Отзыв ещё не прислали" }}
                             </div>
                         </div>
                     {% endfor %}

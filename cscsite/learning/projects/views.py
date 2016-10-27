@@ -403,9 +403,14 @@ class ReportView(FormMixin, generic.DetailView):
             .filter(project_student__project=report.project_student.project)
             .exclude(project_student=report.project_student)
             .values_list("pk", flat=True))
+        student = report.project_student.student
+        student_declension = ""
+        if student.gender == CSCUser.GENDER_FEMALE:
+            student_declension = "a"
         context = {
-            "student_pk": report.project_student.student.pk,
-            "student": report.project_student.student.get_short_name(),
+            "student_pk": student.pk,
+            "student": student.get_short_name(),
+            "student_declension": student_declension,
             "project_pk": report.project_student.project.pk,
             "project_name": report.project_student.project.name,
             "other_reports": other_reports
