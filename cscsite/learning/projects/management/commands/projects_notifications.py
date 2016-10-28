@@ -80,7 +80,6 @@ class Command(BaseCommand):
         }
         for ps in project_students:
             context.update({
-                "project_name": ps.project.name,
                 "project_id": ps.project_id
             })
             notify.send(
