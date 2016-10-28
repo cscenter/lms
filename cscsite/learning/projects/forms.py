@@ -92,16 +92,9 @@ class ReportStatusForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(ReportStatusForm, self).clean()
         if (self.instance.score_activity is None or
-                    self.instance.score_quality is None):
+                self.instance.score_quality is None):
             raise forms.ValidationError("Оценки куратора ещё не выставлены.")
         return cleaned_data
-
-    def save(self, commit=True):
-        instance = super(ReportStatusForm, self).save(commit)
-        # TODO: send notification to reviewers?
-        if "status" in self.changed_data:
-            pass
-        return instance
 
 
 class ReportCommentForm(forms.ModelForm):

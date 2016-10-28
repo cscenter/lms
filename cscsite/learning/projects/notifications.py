@@ -271,14 +271,15 @@ class ProjectReportingStarted(NotificationService):
     template = "emails/projects/report_period_start.html"
 
     def add_to_queue(self, notification, *args, **kwargs):
-        self.logger.debug("Notification [report_ending] was generated "
+        self.logger.debug("Notification [report_start] was generated "
                           "for recipient {}".format(notification.recipient))
         notification.save()
 
     def get_context(self, notification):
         context = notification.data
-        context["project_url"] = reverse("projects:student_project_detail",
-                                         args=[notification.data["project_id"]])
+        project_url = reverse("projects:student_project_detail",
+                              args=[notification.data["project_id"]])
+        context["project_link"] = self.get_absolute_url(project_url)
         return context
 
     def get_site_url(self, **kwargs):
@@ -306,8 +307,9 @@ class ProjectReportingEnded(NotificationService):
 
     def get_context(self, notification):
         context = notification.data
-        context["project_url"] = reverse("projects:student_project_detail",
-                                         args=[notification.data["project_id"]])
+        project_url = reverse("projects:student_project_detail",
+                              args=[notification.data["project_id"]])
+        context["project_link"] = self.get_absolute_url(project_url)
         return context
 
     def get_site_url(self, **kwargs):
