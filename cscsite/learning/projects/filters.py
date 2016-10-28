@@ -11,12 +11,13 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row
 from django.db.models import Case, Count, F, When, Value, Sum, IntegerField, \
     BooleanField
+from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from core.filters import FilterEmptyChoiceMixin
 from learning.projects.models import Project, ProjectStudent
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS, GRADES
 from users.models import CSCUser
 
 EMPTY_CHOICE = ('', _('Any'))
@@ -181,9 +182,11 @@ class FinalGradeFilter(django_filters.ChoiceFilter):
 
 
 class ReportFilter(django_filters.ChoiceFilter):
-    NO = "0"
+    NO = "no_any"
+    YES_ALL = "yes_all"
     CHOICES = (
         (NO, "Кто-то не прислал"),
+        (YES_ALL, "Все прислали"),
     )
 
     def __init__(self, *args, **kwargs):
@@ -191,11 +194,36 @@ class ReportFilter(django_filters.ChoiceFilter):
         super(ReportFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
+        # Exclude those who was graded, but didn't send a report.
         if value == self.NO:
             return (qs
                     .annotate(reports_cnt=Count("projectstudent__report"))
-                    .annotate(ps_cnt=Count("projectstudent"))
+
+                    .annotate(ps_cnt=Sum(
+                        Case(
+                            When(Q(projectstudent__report__isnull=True) &
+                                 ~Q(projectstudent__final_grade=GRADES.not_graded),
+                                 then=Value(0)
+                            ),
+                            default=Value(1),
+                            output_field=IntegerField()
+                        )
+                    ))
                     .exclude(reports_cnt=F("ps_cnt")))
+        elif value == self.YES_ALL:
+            # FIXME: consider cases when projectstudent left project
+            qs = (qs.annotate(reports_cnt=Count("projectstudent__report"))
+                    .annotate(ps_cnt=Sum(
+                        Case(
+                            When(Q(projectstudent__report__isnull=True) &
+                                 ~Q(projectstudent__final_grade=GRADES.not_graded),
+                                 then=Value(0)
+                            ),
+                            default=Value(1),
+                            output_field=IntegerField()
+                        )
+                    ))
+                    .filter(reports_cnt=F("ps_cnt")))
         return qs
 
 
