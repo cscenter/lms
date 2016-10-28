@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-10-26 17:12+0300\n"
-"PO-Revision-Date: 2016-10-27 16:46+0230\n"
+"PO-Revision-Date: 2016-10-28 16:21+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -57,7 +57,7 @@ msgstr "Руководитель"
 #: cscsite/learning/projects/filters.py:75
 #: cscsite/learning/projects/filters.py:242
 msgid "Filter"
-msgstr "Фильтр"
+msgstr "Фильтровать"
 
 #: cscsite/learning/projects/filters.py:206
 #: cscsite/learning/projects/models.py:121
