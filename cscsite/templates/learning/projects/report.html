@@ -30,7 +30,11 @@
             <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description"><span>Цели и задачи проекта</span></a>
         </div>
         <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
-            <div class="panel-body">{{ project.description|default:"Описание проекта не найдено." }}</div>
+            <div class="panel-body">
+                {% markdown 3600 "project_detail_description" project.pk project.modified %}
+                        {{ project.description|default:"Описание проекта не найдено." }}
+                {% endmarkdown %}
+            </div>
         </div>
     </div>
 

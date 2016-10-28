@@ -11,6 +11,7 @@ from django.utils.timezone import now
 
 from learning.models import Semester
 from learning.projects.models import ProjectStudent
+from learning.settings import GRADES
 from notifications import types
 from notifications.models import Notification
 from notifications.signals import notify
@@ -29,14 +30,14 @@ class Command(BaseCommand):
         """
         current_term = Semester.get_current()
         today = now()
-        type_map = apps.get_app_config('notifications').type_map
+        notification_type_map = apps.get_app_config('notifications').type_map
         remind_about_start_today = (
             today.date() == current_term.report_starts_at - timedelta(days=3))
         remind_about_end_today = (
             today.date() == current_term.report_ends_at - timedelta(days=1))
         if remind_about_start_today:
             notification_code = types.PROJECT_REPORTING_STARTED.name
-            notification_type_id = type_map[notification_code]
+            notification_type_id = notification_type_map[notification_code]
             # Check notifications since term start
             filters = dict(
                 type_id=notification_type_id,
@@ -48,7 +49,7 @@ class Command(BaseCommand):
                                         types.PROJECT_REPORTING_STARTED)
         elif remind_about_end_today:
             notification_code = types.PROJECT_REPORTING_ENDED.name
-            notification_type_id = type_map[notification_code]
+            notification_type_id = notification_type_map[notification_code]
             # Check notifications since reporting period start
             filters = dict(
                 type_id=notification_type_id,
@@ -67,7 +68,9 @@ class Command(BaseCommand):
         """
         project_students = (ProjectStudent.objects
                             .filter(project__semester=term,
+                                    project__canceled=False,
                                     report__isnull=True)
+                            .exclude(final_grade=GRADES.unsatisfactory)
                             .select_related("student", "project")
                             .distinct()
                             .all())
