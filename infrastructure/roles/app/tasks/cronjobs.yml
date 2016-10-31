@@ -47,3 +47,19 @@
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:
     - "{{ cscenter_user }}"
+
+- name: Project deadlines notification
+  sudo_user: "{{ item }}"
+  cron:
+    name: Send project notification about deadline if neccessary
+    user: "{{ item }}"
+    hour: "1,13"
+    minute: "0"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/manage.py projects_notifications
+      --settings={{ item }}.settings.production
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
+      >> /home/{{ item }}/site/logs/cscnotifier.log
+  with_items:
+    - "{{ cscenter_user }}"
