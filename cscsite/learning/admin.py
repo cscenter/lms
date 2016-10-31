@@ -202,6 +202,7 @@ class StudentAssignmentAdmin(RelatedSpecMixin,
     related_spec = {'select': [('assignment',
                                 [('course_offering', ['semester', 'course'])]),
                                'student']}
+    search_fields = ['student__last_name']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
