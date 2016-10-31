@@ -46,7 +46,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                 'text': a.text,
                 'grade_min': 0,
                 'grade_max': 5,
-                'deadline_at_0': str(a.deadline_at.date()),
+                'deadline_at_0': a.deadline_at__date(),
                 'deadline_at_1': '00:00'
         }
         url = reverse('assignment_add', args=[co.course.slug, co.semester.slug])
@@ -131,7 +131,7 @@ def test_notification_teachers_list_for_assignment(client,
         'text': a.text,
         'grade_min': 0,
         'grade_max': 5,
-        'deadline_at_0': str(a.deadline_at.date()),
+        'deadline_at_0': a.deadline_at__date(),
         'deadline_at_1': '00:00'
     }
     url = reverse('assignment_add', args=[co.course.slug, co.semester.slug])

@@ -601,6 +601,10 @@ class Assignment(TimeStampedModel, object):
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
 
+    def deadline_at__date(self):
+        return self.deadline_at.strftime('%d.%m.%Y')
+
+
 
 def assignmentattach_upload_to(instance, filename):
     return ("assignment_{0}/attachments/{1}".format(
