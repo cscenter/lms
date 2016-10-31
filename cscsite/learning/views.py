@@ -1393,7 +1393,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
 
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
-    template_name = "learning/simple_crispy_form.html"
+    template_name = "learning/assignment_form.html"
     form_class = AssignmentForm
 
     def get_queryset(self):

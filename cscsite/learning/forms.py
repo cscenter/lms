@@ -2,13 +2,15 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.forms.utils import to_current_timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
-from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions
+from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions, \
+    PrependedText
 import floppyforms.__future__ as forms
 from modeltranslation.forms import TranslationModelForm
 
@@ -318,6 +320,55 @@ class AssignmentGradeForm(forms.Form):
         return cleaned_data
 
 
+# TODO: don't forget to move widgets if you want to reuse this code somewhere else!
+class DateInputAsTextInput(forms.DateInput):
+    input_type = 'text'
+
+    def __init__(self, attrs=None, format=None):
+        super(DateInputAsTextInput, self).__init__(attrs, format)
+        self.format = '%d.%m.%Y'
+
+
+class CustomSplitDateTimeWidget(forms.MultiWidget):
+    """Using bootstrap datetimepicker for assignment form"""
+    supports_microseconds = False
+
+    def __init__(self, attrs=None, date_format=None, time_format=None):
+        date_attrs = attrs or {}
+        date_attrs['class'] = 'datepicker'
+        widgets = (DateInputAsTextInput(attrs=date_attrs),
+                   forms.TimeInput(attrs=attrs, format=time_format))
+        super(CustomSplitDateTimeWidget, self).__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            value = to_current_timezone(value)
+            return [value.date(), value.time().replace(microsecond=0)]
+        return [None, None]
+
+    def format_output(self, rendered_widgets):
+        return ("""
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </span>
+                    {0}
+                </div>
+                <span class="help-block">{format}: dd.mm.yyyy</span>
+            </div>
+            <div class="col-xs-6">
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        <i class="fa fa-clock-o"></i>
+                    </span>
+                    {1}
+                </div>
+            </div>
+        </div>""".format(*rendered_widgets, format=_("Format")))
+
+
 class AssignmentForm(forms.ModelForm):
     title = forms.CharField(
         label=_("Title"),
@@ -326,15 +377,13 @@ class AssignmentForm(forms.ModelForm):
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
-
     deadline_at = forms.SplitDateTimeField(
         label=_("Deadline"),
-        input_date_formats=["%Y-%m-%d"],
+        input_date_formats=["%d.%m.%Y"],
         input_time_formats=["%H:%M"],
-        widget = forms.SplitDateTimeWidget(date_format="%Y-%m-%d",
-                                           time_format="%H:%M")
-        # help_text=_("Example: 1990-07-13 12:00"),
-        )
+        widget=CustomSplitDateTimeWidget(date_format="%d.%m.%Y",
+                                         time_format="%H:%M")
+    )
     attachments = forms.FileField(
         label=_("Attached file"),
         required=False,
