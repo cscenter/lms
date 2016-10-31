@@ -1326,7 +1326,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         CourseOfferingFactory.create_batch(3, teachers=[teacher])
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = AssignmentFactory.attributes(create=True)
-        deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
+        deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
         deadline_time = form['deadline_at'].strftime("%H:%M")
         form.update({'course_offering': co.pk,
                      'attached_file': None,
@@ -1347,7 +1347,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                                      course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         form = model_to_dict(a)
-        deadline_date = form['deadline_at'].strftime("%Y-%m-%d")
+        deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
         deadline_time = form['deadline_at'].strftime("%H:%M")
         form.update({'title': a.title + " foo42bar",
                      'course_offering': co.pk,
