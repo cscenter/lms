@@ -41,7 +41,7 @@
                             <td>{{ project.supervisor }}</td>
                             <td>
                                 {% for reviewer in project.reviewers.all %}
-                                    {{ reviewer }}<br>
+                                    {{ reviewer.get_short_name }}<br>
                                     {% empty %}
                                     {% if project.is_active %}
                                         <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">

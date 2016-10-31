@@ -211,7 +211,6 @@ class ReportFilter(django_filters.ChoiceFilter):
                     ))
                     .exclude(reports_cnt=F("ps_cnt")))
         elif value == self.YES_ALL:
-            # FIXME: consider cases when projectstudent left project
             qs = (qs.annotate(reports_cnt=Count("projectstudent__report"))
                     .annotate(ps_cnt=Sum(
                         Case(
