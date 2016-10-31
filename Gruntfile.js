@@ -101,6 +101,12 @@ module.exports = function (grunt) {
                 ],
                 dest: '<%= JS_DEST %>/diplomas.js'
             },
+            projects_report: {
+                src: [
+                    '<%= JS_SRC %>/center/projects_report.js'
+                ],
+                dest: '<%= JS_RUNTIME %>/center/projects_report.js'
+            },
             raven_conf: {
                 src: ['<%= JS_SRC %>/raven_conf.js'],
                 dest: '<%= JS_DEST %>/raven_conf.js'
@@ -144,6 +150,11 @@ module.exports = function (grunt) {
             gradebook: {
                 files: {
                     '<%= JS_DEST %>/gradebook.js': ['<%= JS_RUNTIME %>/gradebook.js']
+                }
+            },
+            projects_report: {
+                files: {
+                    '<%= JS_DEST %>/projects_report.js': ['<%= JS_RUNTIME %>/center/projects_report.js']
                 }
             },
         },
