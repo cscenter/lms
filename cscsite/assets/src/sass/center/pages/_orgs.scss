@@ -1,0 +1,51 @@
+#orgs-page {
+  font-size: 16px;
+
+  .lead {
+    text-align: justify;
+  }
+
+  .center-header:first-child {
+    margin-top: 0;
+    margin-bottom: 40px;
+  }
+  .name {
+    margin: 10px 0 0;
+    color: $color-gray-20;
+    font-size: 24px;
+    display: block;
+    white-space: nowrap;
+  }
+}
+.board-list {
+  margin: 0 0 30px 0;
+
+  img {
+    border-radius: 1000px;
+  }
+}
+
+
+.curators-list {
+  margin-top: 20px;
+
+  @extend .media-list;
+
+  .person {
+    @extend .media;
+    font-size: 16px;
+  }
+
+  .preview {
+    @extend .media-left;
+    padding-right: 15px;
+  }
+  .info {
+    @extend .media-body;
+  }
+
+  .media-heading {
+    font-size: 21px;
+    margin: 0;
+  }
+}
