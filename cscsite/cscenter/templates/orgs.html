@@ -6,46 +6,47 @@
 {% block content %}
     <div id="orgs-page">
         <div class="container">
-            <div class="center-header"><h1>Команда</h1></div>
-            <h2>Совет CS центра</h2>
-            <p class="lead">Совет отвечает за содержание учебного процесса и развитие центра. Цель Совета — сделать так, чтобы каждому студенту центра было полезно и интересно учиться, а ряды преподавателей и выпускников пополнялись из года в год. В последнее время Совет также активно занимается онлайн-образованием и расширением деятельности CS центра за пределы Санкт-Петербурга.</p>
-            <div class="row board-list">
-                <div class="col-xs-4">
-                    <div class="text-center">
-                        {% userpreview board.andrey_ivanov "200x200" as im %}
-                            <a href="http://www.linkedin.com/in/yaivanov"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                        {% enduserpreview %}
-                        <div class="body text-center">
-                            <a class="name" href="http://www.linkedin.com/in/yaivanov">{{ board.andrey_ivanov.get_short_name }}</a>
-                               <a href="http://jetbrains.ru/">JetBrains</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>
+            <div class="board">
+                <h1 class="center-header">Совет CS центра</h1>
+                <div class="row board-list">
+                    <div class="col-xs-4">
+                        <div class="text-center">
+                            {% userpreview board.andrey_ivanov "200x200" as im %}
+                                <a href="http://www.linkedin.com/in/yaivanov"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                            {% enduserpreview %}
+                            <div class="body text-center">
+                                <a class="name" href="http://www.linkedin.com/in/yaivanov">{{ board.andrey_ivanov.get_short_name }}</a>
+                                   <a href="http://jetbrains.ru/">JetBrains</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="text-center">
+                            {% userpreview board.alexander_kulikov "200x200" as im %}
+                                <a href="http://logic.pdmi.ras.ru/~kulikov/"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                            {% enduserpreview %}
+                            <div class="body text-center">
+                                <a class="name" href="http://logic.pdmi.ras.ru/~kulikov/">{{ board.alexander_kulikov.get_short_name }}</a>
+                                   <a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://compsciclub.ru/">CS клуб</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="text-center">
+                            {% userpreview board.evgeniya_kulikova "200x200" as im %}
+                                <a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                            {% enduserpreview %}
+                            <div class="body text-center">
+                                <a class="name" href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">{{ board.evgeniya_kulikova.get_short_name }}</a>
+                                   <a href="https://yandex.ru/company/">Яндекс</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-4">
-                    <div class="text-center">
-                        {% userpreview board.alexander_kulikov "200x200" as im %}
-                            <a href="http://logic.pdmi.ras.ru/~kulikov/"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                        {% enduserpreview %}
-                        <div class="body text-center">
-                            <a class="name" href="http://logic.pdmi.ras.ru/~kulikov/">{{ board.alexander_kulikov.get_short_name }}</a>
-                               <a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://compsciclub.ru/">CS клуб</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-4">
-                    <div class="text-center">
-                        {% userpreview board.evgeniya_kulikova "200x200" as im %}
-                            <a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                        {% enduserpreview %}
-                        <div class="body text-center">
-                            <a class="name" href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">{{ board.evgeniya_kulikova.get_short_name }}</a>
-                               <a href="https://yandex.ru/company/">Яндекс</a>
-                        </div>
-                    </div>
-                </div>
+                <p>Совет отвечает за содержание учебного процесса и развитие центра. Цель Совета — сделать так, чтобы каждому студенту центра было полезно и интересно учиться, а ряды преподавателей и выпускников пополнялись из года в год. В последнее время Совет также активно занимается онлайн-образованием и расширением деятельности CS центра за пределы Санкт-Петербурга.</p>
             </div>
 
-            <h2>Кураторы</h2>
+            <h1 class="center-header">Кураторы</h1>
             <ul class="curators-list">
               <li class="person">
                 <div class="preview">
@@ -82,14 +83,14 @@
               </li>
             </ul>
 
-            <h2>Техническая поддержка</h2>
+            <h1 class="center-header">Техническая поддержка</h1>
             <ul class="list-unstyled">
             <li><b>Алексей Белозёров</b> — подготовка видеозаписей лекций.</li>
             <li><b>Сергей Жеревчук</b> — разработка сайта CS центра.</li>
             </ul>
 
-            <div class="center-header"><h1>История</h1></div>
-            <p class="lead">
+            <h1 class="center-header">История</h1>
+            <p>
         Computer Science Center создан в Санкт-Петербурге в 2011 году на базе <a href="http://amse.ru/">Академии современного программирования</a> и <a href="http://compsciclub.ru/">Computer Science клуба</a> в сотрудничестве со <a href="http://yandexdataschool.ru/">Школой анализа данных</a>.
 
         После создания CS центра Академия современного программирования стала его частью. CS клуб продолжает существовать как самостоятельная активность: курсы CS клуба являются открытыми для всех желающих, для студентов CS центра они внесены в программу обучения как курсы по выбору.

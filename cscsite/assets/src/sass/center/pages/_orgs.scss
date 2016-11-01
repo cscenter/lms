@@ -5,9 +5,13 @@
     text-align: justify;
   }
 
-  .center-header:first-child {
-    margin-top: 0;
-    margin-bottom: 40px;
+  .center-header {
+    border: 0;
+    margin-bottom: 20px;
+
+    &:first-child {
+      margin-top: 0;
+    }
   }
   .name {
     margin: 10px 0 0;
@@ -46,6 +50,5 @@
 
   .media-heading {
     font-size: 21px;
-    margin: 0;
   }
 }
