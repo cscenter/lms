@@ -778,7 +778,7 @@ class CourseClassDetailView(generic.DetailView):
 
 class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = CourseClass
-    template_name = "learning/simple_crispy_form.html"
+    template_name = "learning/forms/course_class.html"
     form_class = CourseClassForm
 
     def __init__(self, *args, **kwargs):

@@ -1,26 +1,21 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.core.exceptions import ValidationError
-from django.conf import settings
-from django.forms.utils import to_current_timezone
-from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
-
+import floppyforms.__future__ as forms
+from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions, \
+    PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
-from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions, \
-    PrependedText
-import floppyforms.__future__ as forms
-from modeltranslation.forms import TranslationModelForm
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
 from learning.settings import GRADES
+from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, Assignment, AssignmentComment, StudentAssignment, \
-    Enrollment
+    CourseClass, Venue, Assignment, AssignmentComment
 
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        onclick='history.go(-1);',
@@ -154,15 +149,15 @@ class CourseClassForm(forms.ModelForm):
         widget=Ubereditor)
     date = forms.DateField(
         label=_("Date"),
-        # help_text=_("Example: 1990-07-13"),
-        widget=forms.DateInput(format="%Y-%m-%d"))
+        help_text=_("Format: dd.mm.yyyy"),
+        widget=DateInputAsTextInput(attrs={'class': 'datepicker'}))
     starts_at = forms.TimeField(
         label=_("Starts at"),
-        # help_text=_("Example: 14:00"),
+        help_text="&nbsp;",
         widget=forms.TimeInput(format="%H:%M"))
     ends_at = forms.TimeField(
         label=_("Ends at"),
-        # help_text=_("Example: 14:40"),
+        help_text="&nbsp;",
         widget=forms.TimeInput(format="%H:%M"))
 
     def __init__(self, *args, **kwargs):
@@ -178,7 +173,7 @@ class CourseClassForm(forms.ModelForm):
             Div('name',
                 'description',
                 css_class="form-group"),
-            Div(Div('date',
+            Div(Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
                     HTML("&nbsp;"),
                     'starts_at',
                     HTML("&nbsp;"),
@@ -318,55 +313,6 @@ class AssignmentGradeForm(forms.Form):
                                           "maximum one ({0})")
                                         .format(self.grade_max))
         return cleaned_data
-
-
-# TODO: don't forget to move widgets if you want to reuse this code somewhere else!
-class DateInputAsTextInput(forms.DateInput):
-    input_type = 'text'
-
-    def __init__(self, attrs=None, format=None):
-        super(DateInputAsTextInput, self).__init__(attrs, format)
-        self.format = '%d.%m.%Y'
-
-
-class CustomSplitDateTimeWidget(forms.MultiWidget):
-    """Using bootstrap datetime picker for assignment form"""
-    supports_microseconds = False
-
-    def __init__(self, attrs=None, date_format=None, time_format=None):
-        date_attrs = attrs or {}
-        date_attrs['class'] = 'datepicker'
-        widgets = (DateInputAsTextInput(attrs=date_attrs),
-                   forms.TimeInput(attrs=attrs, format=time_format))
-        super(CustomSplitDateTimeWidget, self).__init__(widgets, attrs)
-
-    def decompress(self, value):
-        if value:
-            value = to_current_timezone(value)
-            return [value.date(), value.time().replace(microsecond=0)]
-        return [None, None]
-
-    def format_output(self, rendered_widgets):
-        return ("""
-        <div class="row">
-            <div class="col-xs-6">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <i class="fa fa-calendar"></i>
-                    </span>
-                    {0}
-                </div>
-                <span class="help-block">{format}: dd.mm.yyyy</span>
-            </div>
-            <div class="col-xs-6">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <i class="fa fa-clock-o"></i>
-                    </span>
-                    {1}
-                </div>
-            </div>
-        </div>""".format(*rendered_widgets, format=_("Format")))
 
 
 class AssignmentForm(forms.ModelForm):
