@@ -27,7 +27,8 @@
   .name {
     margin: 10px 0 0;
     color: $color-gray-20;
-    font-size: 24px;
+    font-size: 21px;
+    font-weight: 500;
     display: block;
     white-space: nowrap;
   }
@@ -53,13 +54,15 @@
 
   @extend .media-list;
 
-  .media-heading {
-    font-size: 21px;
-  }
+
 }
 .orgs-person {
   @extend .media;
   font-size: 16px;
+
+  .media-heading {
+    font-size: 21px;
+  }
 }
 
 .orgs-preview {
