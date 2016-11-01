@@ -7,7 +7,7 @@
     <div id="orgs-page">
         <div class="container">
             <div class="board">
-                <h1 class="center-header">Совет CS центра</h1>
+                <h1 class="orgs-header">Совет CS центра</h1>
                 <div class="row board-list">
                     <div class="col-xs-4">
                         <div class="text-center">
@@ -46,48 +46,72 @@
                 <p>Совет отвечает за содержание учебного процесса и развитие центра. Цель Совета — сделать так, чтобы каждому студенту центра было полезно и интересно учиться, а ряды преподавателей и выпускников пополнялись из года в год. В последнее время Совет также активно занимается онлайн-образованием и расширением деятельности CS центра за пределы Санкт-Петербурга.</p>
             </div>
 
-            <h1 class="center-header">Кураторы</h1>
+            <h1 class="orgs-header">Кураторы</h1>
             <ul class="curators-list">
-              <li class="person">
-                <div class="preview">
+              <li class="orgs-person">
+                <div class="orgs-preview">
                     {% userpreview curators.katya_lebedeva "150x210" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduserpreview %}
                 </div>
-                <div class="info">
+                <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.katya_lebedeva.get_short_name }}, <a href="https://yandex.ru/company/">Яндекс</a></h4>
                     Куратор CS центра. Организует учебный процесс, приём новых студентов и выпускной для тех, кто успешно справился с курсами, заботится о студентах и умеет отвечать на любой вопрос об учёбе в центре.
                 </div>
               </li>
-              <li class="person">
-                <div class="preview">
+              <li class="orgs-person">
+                <div class="orgs-preview">
                     {% userpreview curators.kristina_smolnikova "150x210" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduserpreview %}
                 </div>
-                <div class="info">
+                <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.kristina_smolnikova.get_short_name }}, <a href="http://jetbrains.ru/">JetBrains</a></h4>
                     Куратор онлайн-курсов. Помогает преподавателям центра перекладывать свой опыт в онлайн-курсы, организует создание курсов и обеспечивает их комфортное изучение слушателями.
                 </div>
               </li>
-              <li class="person">
-                <div class="preview">
+              <li class="orgs-person">
+                <div class="orgs-preview">
                     {% userpreview curators.katya_artamonova "150x210" as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduserpreview %}
                 </div>
-                <div class="info">
+                <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.katya_artamonova.get_short_name }}, <a href="http://jetbrains.ru/">JetBrains</a></h4>
                     Куратор практических работ студентов CS центра. Ищет проекты для студентов, организует представления самих проектов и итоговых презентаций, проводит отчётные мероприятия и помогает практикам стать лучше.
                 </div>
               </li>
             </ul>
 
-            <h1 class="center-header">Техническая поддержка</h1>
-            <ul class="list-unstyled">
-            <li><b>Алексей Белозёров</b> — подготовка видеозаписей лекций.</li>
-            <li><b>Сергей Жеревчук</b> — разработка сайта CS центра.</li>
-            </ul>
+            <h1 class="orgs-header">Техническая поддержка</h1>
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="orgs-person">
+                        <div class="orgs-preview">
+                            {% userpreview tech.aleksey_belozerov "150x210" as im %}
+                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            {% enduserpreview %}
+                        </div>
+                        <div class="orgs-info">
+                          <h4 class="media-heading">{{ tech.aleksey_belozerov.get_short_name }}</h4>
+                            Подготовка видеозаписей лекций.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="orgs-person">
+                        <div class="orgs-preview">
+                            {% userpreview tech.sergey_zherevchuk "150x210" as im %}
+                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            {% enduserpreview %}
+                        </div>
+                        <div class="orgs-info">
+                          <h4 class="media-heading">{{ tech.sergey_zherevchuk.get_short_name }}</h4>
+                            Разработка сайта CS центра.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <h1 class="center-header">История</h1>
             <p>
