@@ -8,7 +8,7 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import RobotsView, MarkdownRenderView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
-    TeachersView, AlumniView, AlumniByYearView
+    TeachersView, AlumniView, AlumniByYearView, TeamView
 from htmlpages import views
 from learning.views import UsefulListView
 
@@ -22,6 +22,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
+    url(r'^orgs/$', TeamView.as_view(), name='orgs'),
 
     url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
         name="profile_update_image"),

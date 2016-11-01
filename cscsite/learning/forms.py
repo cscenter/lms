@@ -330,7 +330,7 @@ class DateInputAsTextInput(forms.DateInput):
 
 
 class CustomSplitDateTimeWidget(forms.MultiWidget):
-    """Using bootstrap datetimepicker for assignment form"""
+    """Using bootstrap datetime picker for assignment form"""
     supports_microseconds = False
 
     def __init__(self, attrs=None, date_format=None, time_format=None):

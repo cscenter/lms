@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load userpreview from custom_thumbnail %}
+
+{% block content %}
+    <div id="orgs-page">
+        <div class="container">
+            <div class="center-header"><h1>Команда</h1></div>
+            <h2>Совет CS центра</h2>
+            <p class="lead">Совет отвечает за содержание учебного процесса и развитие центра. Цель Совета — сделать так, чтобы каждому студенту центра было полезно и интересно учиться, а ряды преподавателей и выпускников пополнялись из года в год. В последнее время Совет также активно занимается онлайн-образованием и расширением деятельности CS центра за пределы Санкт-Петербурга.</p>
+            <div class="row board-list">
+                <div class="col-xs-4">
+                    <div class="text-center">
+                        {% userpreview board.andrey_ivanov "200x200" as im %}
+                            <a href="http://www.linkedin.com/in/yaivanov"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                        {% enduserpreview %}
+                        <div class="body text-center">
+                            <a class="name" href="http://www.linkedin.com/in/yaivanov">{{ board.andrey_ivanov.get_short_name }}</a>
+                               <a href="http://jetbrains.ru/">JetBrains</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="text-center">
+                        {% userpreview board.alexander_kulikov "200x200" as im %}
+                            <a href="http://logic.pdmi.ras.ru/~kulikov/"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                        {% enduserpreview %}
+                        <div class="body text-center">
+                            <a class="name" href="http://logic.pdmi.ras.ru/~kulikov/">{{ board.alexander_kulikov.get_short_name }}</a>
+                               <a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://compsciclub.ru/">CS клуб</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="text-center">
+                        {% userpreview board.evgeniya_kulikova "200x200" as im %}
+                            <a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+                        {% enduserpreview %}
+                        <div class="body text-center">
+                            <a class="name" href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">{{ board.evgeniya_kulikova.get_short_name }}</a>
+                               <a href="https://yandex.ru/company/">Яндекс</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Кураторы</h2>
+            <ul class="curators-list">
+              <li class="person">
+                <div class="preview">
+                    {% userpreview curators.katya_lebedeva "150x210" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
+                </div>
+                <div class="info">
+                  <h4 class="media-heading">{{ curators.katya_lebedeva.get_short_name }}, <a href="https://yandex.ru/company/">Яндекс</a></h4>
+                    Куратор CS центра. Организует учебный процесс, приём новых студентов и выпускной для тех, кто успешно справился с курсами, заботится о студентах и умеет отвечать на любой вопрос об учёбе в центре.
+                </div>
+              </li>
+              <li class="person">
+                <div class="preview">
+                    {% userpreview curators.kristina_smolnikova "150x210" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
+                </div>
+                <div class="info">
+                  <h4 class="media-heading">{{ curators.kristina_smolnikova.get_short_name }}, <a href="http://jetbrains.ru/">JetBrains</a></h4>
+                    Куратор онлайн-курсов. Помогает преподавателям центра перекладывать свой опыт в онлайн-курсы, организует создание курсов и обеспечивает их комфортное изучение слушателями.
+                </div>
+              </li>
+              <li class="person">
+                <div class="preview">
+                    {% userpreview curators.katya_artamonova "150x210" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
+                </div>
+                <div class="info">
+                  <h4 class="media-heading">{{ curators.katya_artamonova.get_short_name }}, <a href="http://jetbrains.ru/">JetBrains</a></h4>
+                    Куратор практических работ студентов CS центра. Ищет проекты для студентов, организует представления самих проектов и итоговых презентаций, проводит отчётные мероприятия и помогает практикам стать лучше.
+                </div>
+              </li>
+            </ul>
+
+            <h2>Техническая поддержка</h2>
+            <ul class="list-unstyled">
+            <li><b>Алексей Белозёров</b> — подготовка видеозаписей лекций.</li>
+            <li><b>Сергей Жеревчук</b> — разработка сайта CS центра.</li>
+            </ul>
+
+            <div class="center-header"><h1>История</h1></div>
+            <p class="lead">
+        Computer Science Center создан в Санкт-Петербурге в 2011 году на базе <a href="http://amse.ru/">Академии современного программирования</a> и <a href="http://compsciclub.ru/">Computer Science клуба</a> в сотрудничестве со <a href="http://yandexdataschool.ru/">Школой анализа данных</a>.
+
+        После создания CS центра Академия современного программирования стала его частью. CS клуб продолжает существовать как самостоятельная активность: курсы CS клуба являются открытыми для всех желающих, для студентов CS центра они внесены в программу обучения как курсы по выбору.
+            </p>
+
+                <h4>Центр был создан при активном участии учредителей</h4>
+                <ul>
+                <li><a href="http://www.linkedin.com/in/yaivanov">Андрей Иванов</a> (<a href="http://jetbrains.ru/">JetBrains</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>);</li>
+                <li><a href="http://halgebra.math.msu.su/wiki/doku.php/staff:bunina">Елена Бунина</a> (<a href="http://www.company.yandex.ru/">Яндекс</a>, <a href="http://yandexdataschool.ru/">ШАД</a>, <a href="http://msu.ru/">МГУ</a>);</li>
+                <li><a href="http://logic.pdmi.ras.ru/~kulikov/">Александр Куликов</a> (<a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://compsciclub.ru/">CS клуб</a>);</li>
+                <li>Александр Смаль (<a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>);</li>
+                <li><a href="http://logic.pdmi.ras.ru/~hirsch/">Эдуард Гирш</a> (<a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>);</li>
+                <li><a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">Евгения Куликова</a> (<a href="http://www.company.yandex.ru/">Яндекс</a>).</li>
+                </ul>
+                <h4>С момента создания основную поддержку центру оказывают</h4>
+                <ul>
+                <li><a href="http://company.yandex.ru/">Яндекс</a>;</li>
+                <li><a href="http://jetbrains.ru/">JetBrains</a>;</li>
+                <li>Антон Лиходедов (Deutsche Bank) и Юрий Богданов (Rigmora Holdings).</li>
+                </ul>
+
+                <i>За разработку логотипа и участие в изготовлении сувенирной продукции CS центра спасибо <b><a href="http://ferrethills.com">Никите Лебедеву</a></b>.</i>
+        </div>
+    </div>
+
+{% endblock content %}

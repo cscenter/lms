@@ -70,6 +70,33 @@ class IndexView(generic.TemplateView):
         return context
 
 
+class TeamView(generic.TemplateView):
+    template_name = "orgs.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(TeamView, self).get_context_data(**kwargs)
+        board = {
+            863: "andrey_ivanov",
+            5: "alexander_kulikov",
+            607: "evgeniya_kulikova",
+        }
+        curators = {
+            38: "katya_lebedeva",
+            617: "kristina_smolnikova",
+            1213: "katya_artamonova"
+        }
+        context["board"] = {}
+        context["curators"] = {}
+        users_pk = list(board)
+        users_pk.extend(curators.keys())
+        for u in CSCUser.objects.filter(pk__in=users_pk).all():
+            if u.pk in board:
+                context["board"][board[u.pk]] = u
+            else:
+                context["curators"][curators[u.pk]] = u
+        return context
+
+
 class QAListView(generic.ListView):
     context_object_name = "faq"
     template_name = "faq.html"
