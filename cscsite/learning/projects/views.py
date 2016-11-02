@@ -41,7 +41,11 @@ from users.models import CSCUser
 logger = logging.getLogger(__name__)
 
 
-class ReportListReviewerView(ProjectReviewerGroupOnlyMixin, generic.ListView):
+class RaiseRedirect(Exception):
+    pass
+
+
+class ReportListViewMixin(object):
     context_object_name = "projects"
     template_name = "learning/projects/reports.html"
 
@@ -50,8 +54,7 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         current_term_index = get_term_index(current_year, term_type)
         queryset = (Project.objects
                     .select_related("semester")
-                    .filter(semester__index=current_term_index,
-                            reviewers=self.request.user)
+                    .filter(semester__index=current_term_index)
                     .prefetch_related("students", "reviewers",
                                       "projectstudent_set__report",
                                       "projectstudent_set__student")
@@ -59,9 +62,44 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin, generic.ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(ReportListReviewerView, self).get_context_data(**kwargs)
+        context = super(ReportListViewMixin, self).get_context_data(**kwargs)
         context["current_term"] = Semester.get_current()
         return context
+
+
+class ReportListReviewerView(ProjectReviewerGroupOnlyMixin,
+                             ReportListViewMixin,
+                             generic.ListView):
+    def get_queryset(self):
+        qs = super(ReportListReviewerView, self).get_queryset()
+        return qs.filter(reviewers=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportListReviewerView, self).get_context_data(**kwargs)
+        if not context[self.context_object_name] and self.request.user.is_curator:
+            raise RaiseRedirect
+        return context
+
+    def get(self, request, *args, **kwargs):
+        """
+        If you are not subscribed on any project and has curator permissions,
+        you will be redirected to curator reports view
+        """
+        try:
+            response = super(ReportListViewMixin, self).get(request, *args,
+                                                            **kwargs)
+            return response
+        except RaiseRedirect:
+            msg = ("Вы были перенаправлены на список всех отчетов "
+                   "текущего семестра")
+            messages.info(request, msg, extra_tags="timeout")
+            redirect_to = reverse("projects:report_list_curators")
+            return HttpResponseRedirect(redirect_to=redirect_to)
+
+
+class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
+                            generic.ListView):
+    pass
 
 
 class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,

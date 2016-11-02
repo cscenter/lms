@@ -76,7 +76,8 @@ def test_project_reviewer_only_mixin_security(client,
     assert response.status_code == 200
     assert not response.context["projects"]
     client.login(curator)
-    response = client.get(URL_REPORTS)
+    response = client.get(URL_REPORTS, follow=True)
+    # Redirects to reports-all page
     assert response.status_code == 200
 
 
@@ -108,8 +109,9 @@ def test_reviewer_list(client, curator, student_center_factory):
     assert len(response.context["projects"]) == 1
     curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
     client.login(curator)
-    response = client.get(URL_REPORTS)
-    assert len(response.context["projects"]) == 0
+    # Redirects to list with all reports
+    response = client.get(URL_REPORTS, follow=True)
+    assert len(response.context["projects"]) == 1
     response = client.get(URL_PROJECTS)
     assert len(response.context["projects"]) == 1
     response = client.get(URL_ALL_PROJECTS)

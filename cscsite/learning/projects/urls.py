@@ -4,13 +4,15 @@ from learning.projects.views import ProjectDetailView, \
     ProjectEnrollView, ReportView, ReportAttachmentDownloadView, \
     ReportUpdateStatusView, ReportCuratorSummarizeView, StudentProjectsView, \
     ReportCuratorAssessmentView, ProjectPrevNextView, ReportListReviewerView, \
-    CurrentTermProjectsView, ProjectListView
+    CurrentTermProjectsView, ProjectListView, ReportListCuratorView
 
 app_name = 'projects'
 urlpatterns = [
     url(r'^projects/', include([
         url(r'^reports/$', ReportListReviewerView.as_view(),
             name='report_list_reviewers'),
+        url(r'^reports-all/$', ReportListCuratorView.as_view(),
+            name='report_list_curators'),
         url(r'^available/$', CurrentTermProjectsView.as_view(),
             name='current_term_projects'),
         url(r'^all/$', ProjectListView.as_view(),
