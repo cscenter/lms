@@ -51,7 +51,7 @@
                                     <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
                                        href="{% url "projects:project_report" project.pk ps.student.pk %}">Перейти к отчету
                                     </a>
-                                {% elif project.is_active %}<span class="text-muted">Не отправлен</span>
+                                {% elif project.is_active %}<span class="text-muted">Не&nbsp;отправлен</span>
                                 {% elif not project.is_active or project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
                                 {% endif %}
                             </td>

@@ -88,6 +88,16 @@
 		background: $color-red;
 		word-break: normal;
 	}
+	&.info {
+		background: #d9edf7;
+		word-break: normal;
+		color: $color-gray-20;
+	}
+	&.warning {
+		background: #f9cd48;
+		word-break: normal;
+		color: $color-gray-20;
+	}
 }
 
 .jGrowl-closer {
