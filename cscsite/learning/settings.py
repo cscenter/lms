@@ -26,6 +26,7 @@ PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
     (7, 'INTERVIEWER', _('Interviewer [Admission]')),
     (8, 'MASTERS_DEGREE', _('Studying for a master degree')),
     (9, 'PROJECT_REVIEWER', _('Project reviewer')),
+    (10, 'CURATOR_PROJECTS', _('Curator of projects')),
 ))
 
 GROUPS_HAS_ACCESS_TO_CENTER = (

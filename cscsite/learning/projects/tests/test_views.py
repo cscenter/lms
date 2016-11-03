@@ -224,7 +224,7 @@ def test_project_detail_student_participant(client):
 def test_project_detail_student_participant_notifications(client, curator):
     """Test notifications are added to the queue after report has been sent"""
     from datetime import timedelta
-    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator.groups.add(PARTICIPANT_GROUPS.CURATOR_PROJECTS)
     curator.save()
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = UserFactory(is_superuser=True, is_staff=True)
@@ -355,7 +355,7 @@ def test_report_page_update_permissions():
 
 @pytest.mark.django_db
 def test_report_page_notifications(client, curator):
-    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator.groups.add(PARTICIPANT_GROUPS.CURATOR_PROJECTS)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)

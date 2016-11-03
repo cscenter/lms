@@ -198,6 +198,10 @@ class LearningPermissionsMixin(object):
         return False
 
     @property
+    def is_curator_of_projects(self):
+        return False
+
+    @property
     def is_interviewer(self):
         return False
 

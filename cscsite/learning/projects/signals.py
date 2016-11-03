@@ -120,7 +120,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
             recipients = CSCUser.objects.filter(
                 is_superuser=True,
                 is_staff=True,
-                groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
+                groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS
             )
             # TODO: test database hitting
             project = report.project_student.project
@@ -162,13 +162,11 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         CSCUser = get_user_model()
         comment = instance
         curators = (CSCUser.objects
-            .filter(
-                is_superuser=True,
-                is_staff=True,
-                groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER
-            )
-            .exclude(pk=comment.author.pk)
-        )
+                    .filter(
+                        is_superuser=True,
+                        is_staff=True,
+                        groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS)
+                    .exclude(pk=comment.author.pk))
         # Make dict to avoid duplicates
         recipients = {c.pk: c for c in curators}
         student = comment.report.project_student.student
