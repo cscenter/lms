@@ -515,6 +515,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return self.is_superuser and self.is_staff
 
     @cached_property
+    def is_curator_of_projects(self):
+        return self.group_pks.CURATOR_PROJECTS in self._cs_group_pks
+
+    @cached_property
     def is_interviewer(self):
         return self.group_pks.INTERVIEWER in self._cs_group_pks
 

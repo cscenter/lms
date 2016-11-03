@@ -432,7 +432,7 @@ class ReportView(FormMixin, generic.DetailView):
         curators = (CSCUser.objects.filter(
             is_superuser=True,
             is_staff=True,
-            groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER))
+            groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS))
         report = (Report.objects
                   .select_related("project_student",
                                   "project_student__project",
@@ -754,6 +754,7 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         return response
 
     def send_email_notification(self):
+        """Email notification with final results and comments for student"""
         # FIXME: test db hitting
         context = {
             "project_name": self.object.project_student.project.name,

@@ -9,10 +9,15 @@ from hashids import Hashids
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
 # Some details here https://github.com/Anomareh/Hoep
-MARKDOWN_EXTENSIONS = h.EXT_FENCED_CODE | h.EXT_AUTOLINK | \
-             h.EXT_STRIKETHROUGH | h.EXT_TABLES | h.EXT_QUOTE | \
-             h.EXT_NO_INTRA_EMPHASIS | h.EXT_SPACE_HEADERS | \
-             h.EXT_MATH | h.EXT_MATH_EXPLICIT
+MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |
+                       h.EXT_AUTOLINK |
+                       h.EXT_STRIKETHROUGH |
+                       h.EXT_TABLES |
+                       h.EXT_QUOTE |
+                       h.EXT_NO_INTRA_EMPHASIS |
+                       h.EXT_SPACE_HEADERS |
+                       h.EXT_MATH |
+                       h.EXT_MATH_EXPLICIT)
 MARKDOWN_RENDER_FLAGS = 0
 markdown = h.Hoep(MARKDOWN_EXTENSIONS, MARKDOWN_RENDER_FLAGS)
 
