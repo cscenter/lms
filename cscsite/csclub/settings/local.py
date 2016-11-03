@@ -14,6 +14,8 @@ INSTALLED_APPS += ['fixture_media',
                    'template_timings_panel',
                    'rosetta']
 
+ALLOWED_HOSTS = ['.club.ru', '127.0.0.1', 'localhost']
+
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
     'debug_toolbar.panels.timer.TimerPanel',
