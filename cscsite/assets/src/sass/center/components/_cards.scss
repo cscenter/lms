@@ -46,6 +46,12 @@
     }
   }
 
+  .card-body {
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
   .card-body.card-padding-sm {
     padding: 15px;
   }

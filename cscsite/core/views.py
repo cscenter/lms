@@ -189,3 +189,7 @@ class ReportFileOutput(object):
         # TODO: replace with table view
         return HttpResponse("<html><body></body></html>",
                             content_type='text/html; charset=utf-8')
+
+
+class MarkdownHowToHelpView(generic.TemplateView):
+    template_name = "markdown_how_to.html"

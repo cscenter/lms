@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load markdown from core_tags %}
+
+{% block hightlight_styles %}
+<link href="{% static "css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
+{% endblock hightlight_styles %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+    <div class="container" id="markdown-how-to-page">
+        <div class="row">
+            <div class="col-xs-3">
+                <h5 class="text-uppercase">Разделы</h5>
+                <div class="list-group inverse">
+                    <a href="#examples" class="list-group-item">Markdown</a>
+                    <a href="#mathjax" class="list-group-item">Как оформлять формулы</a>
+                    <a href="#mistakes" class="list-group-item">Частые ошибки</a>
+                </div>
+            </div>
+            <div class="col-xs-9">
+                <ol class="breadcrumb gray">
+                    <li class="active">Памятка по написанию комментариев</li>
+                </ol>
+                <h2>Markdown</h2>
+<div class="nav-tabs-horizontal nav-tabs-inverse">
+    <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a data-toggle="tab" href="#code-1" aria-controls="applicant" role="tab" aria-expanded="true">Выделяем жирным</a>
+        </li>
+        <li role="presentation" class="">
+            <a data-toggle="tab" href="#result-1" aria-controls="result-1" role="tab" aria-expanded="false">Результат</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="code-1" role="tabpanel">
+            <pre>Как выделить слово **жирным**</pre>
+        </div>
+        <div class="tab-pane" id="result-1" role="tabpanel">
+{% markdown 1 "markdown_how_to2" %}
+Как выделить слово **жирным**
+{% endmarkdown %}
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
