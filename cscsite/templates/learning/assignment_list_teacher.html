@@ -12,7 +12,7 @@
 
 <div class="col-xs-3">
     <h5>СТАТУС</h5>
-    <div class="list-group">
+    <div class="list-group inverse">
       {% for code, name in filter_by_grades %}
           <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignments={{ query.assignments_qs }}"
              class="list-group-item{% if code == query.grades %} active{% endif %}">
@@ -21,7 +21,7 @@
     </div>
 
     <h5>ПОСЛЕДНИЙ КОММЕНТАРИЙ</h5>
-    <div class="list-group">
+    <div class="list-group inverse">
       {% for code, comment in filter_by_comments %}
           <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
              class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment }}</a>
@@ -30,7 +30,7 @@
 
     {% if course_offerings %}
         <h5>КУРС</h5>
-        <div class="list-group">
+        <div class="list-group inverse">
           {% for co in course_offerings %}
             <a href="{% url "assignment_list_teacher" %}?year={{ co.semester.year }}&term={{ co.semester.type }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
                data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}" title="{{ co.course.name }}">{{ co.course.name }}</a>
@@ -40,7 +40,7 @@
 
     {% if terms %}
         <h5>СЕМЕСТР</h5>
-        <div class="list-group">
+        <div class="list-group inverse">
           {% for term in terms %}
             <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&comment={{ query.comment }}"
                class="list-group-item{% if term.index == query.term_index %} active{% endif %}">{{ term }}</a>

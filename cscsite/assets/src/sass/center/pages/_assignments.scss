@@ -28,39 +28,6 @@
   position: relative;
   min-height:500px;
 
-
-  .list-group-item {
-    color: $color-gray-20;
-    background: $background-grey;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-    padding: 8px 0;
-    border-bottom: 1px solid $color-gray-90;
-    border-color: $color-gray-90!important;
-    white-space: nowrap;
-    overflow:hidden;
-    -ms-text-overflow: ellipsis;
-    text-overflow: ellipsis;
-
-    &:first-child {
-      border-top-width: 0;
-    }
-    &:last-child {
-      border-bottom-width: 0;
-    }
-
-
-    &:hover, &:focus {
-      color: $color-blue;
-    }
-  }
-
-  .list-group-item.active {
-    color: $color-blue!important;
-    font-weight: bold;
-  }
-
   h3 {
     display: inline-block;
     margin: 0;

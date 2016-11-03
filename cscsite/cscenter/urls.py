@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views
 from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
-from core.views import RobotsView, MarkdownRenderView
+from core.views import RobotsView, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView
 from htmlpages import views
@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
+    url(r'^markdown-how-to/$', MarkdownHowToHelpView.as_view(), name='markdown_how_to'),
 
     url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
         name="profile_update_image"),
