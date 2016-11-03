@@ -722,7 +722,7 @@ class StudentAssignment(TimeStampedModel):
             else:
                 return 'not_submitted'
         else:
-            if grade < grade_min:
+            if grade < grade_min or grade == 0:
                 return 'unsatisfactory'
             elif grade < grade_min + 0.4 * grade_range:
                 return 'pass'
