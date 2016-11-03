@@ -54,7 +54,8 @@ class ReportListViewMixin(object):
         current_term_index = get_term_index(current_year, term_type)
         queryset = (Project.objects
                     .select_related("semester")
-                    .filter(semester__index=current_term_index)
+                    .filter(semester__index=current_term_index,
+                            canceled=False)
                     .prefetch_related("students", "reviewers",
                                       "projectstudent_set__report",
                                       "projectstudent_set__student")
