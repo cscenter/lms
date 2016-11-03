@@ -9,7 +9,8 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
+from django.db.models import Case, BooleanField, Prefetch, Count, Value, When, \
+    IntegerField, Sum
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
     HttpResponsePermanentRedirect, HttpResponseRedirect
 
@@ -100,7 +101,15 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin,
 
 class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                             generic.ListView):
-    pass
+    def get_queryset(self):
+        qs = super(ReportListCuratorView, self).get_queryset()
+        return (qs
+                .annotate(reports_cnt=Sum(Case(
+                    When(projectstudent__report__isnull=False, then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )))
+                .order_by("-reports_cnt"))
 
 
 class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
