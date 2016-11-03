@@ -10,7 +10,7 @@ DEBUG = False
 for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 
-ALLOWED_HOSTS = ["compsciclub.ru", "www.compsciclub.ru", "*"]
+ALLOWED_HOSTS = [".compsciclub.ru"]
 
 MEDIA_ROOT = Path('/shared', 'media')
 
