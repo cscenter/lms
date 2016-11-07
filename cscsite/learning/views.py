@@ -1989,8 +1989,10 @@ class OnlineCoursesListView(generic.ListView):
         context["self_paced_courses"] = sorted(filter(
             lambda c: c.is_self_paced,
             context[self.context_object_name]), key=lambda c: c.name)
-        context["archive_courses"] = filter(lambda c: c.end and c.end <= now(),
-                                   context[self.context_object_name])
+        context["archive_courses"] = filter(
+            lambda c: c.end and c.end <= now() and not c.is_self_paced,
+            context[self.context_object_name]
+        )
         return context
 
     def get_queryset(self):
