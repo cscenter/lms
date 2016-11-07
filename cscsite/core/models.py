@@ -9,13 +9,12 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
-    "LaTeX+"
-    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>+"
-    "HTML is enabled")
+    "How to style text read <a href=\"/comment-the-right-way/\" "
+    "target=\"_blank\">here</a>. Partially HTML is enabled too.")
 LATEX_MARKDOWN_ENABLED = _(
-    "LaTeX+"
-    "<a href=\"http://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
-    " is enabled")
+    "How to style text read <a href=\"/comment-the-right-way/\" "
+    "target=\"_blank\">here</a>."
+)
 
 
 def related_spec_to_list(spec):
