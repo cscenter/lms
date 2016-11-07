@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-07 16:09+0300\n"
-"PO-Revision-Date: 2016-11-07 16:14+0230\n"
+"POT-Creation-Date: 2016-11-07 16:46+0300\n"
+"PO-Revision-Date: 2016-11-07 16:47+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -23,8 +23,6 @@ msgid "---------"
 msgstr ""
 
 #: cscsite/core/models.py:12
-#| msgid ""
-#| "How to style text read <a href=\"/comment-the-right-way/\">here</a>."
 msgid ""
 "How to style text read <a href=\"/comment-the-right-way/\" "
 "target=\"_blank\">here</a>. Partially HTML is enabled too."
@@ -34,8 +32,6 @@ msgstr ""
 "target=\"_blank\">по ссылке</a>."
 
 #: cscsite/core/models.py:15
-#| msgid ""
-#| "How to style text read <a href=\"/comment-the-right-way/\">here</a>."
 msgid ""
 "How to style text read <a href=\"/comment-the-right-way/\" "
 "target=\"_blank\">here</a>."
@@ -1096,7 +1092,6 @@ msgid "Project reviewer"
 msgstr "Проверяющий [Отчеты]"
 
 #: cscsite/learning/settings.py:29
-#| msgid "Student projects"
 msgid "Curator of projects"
 msgstr "Куратор проектов"
 
@@ -2160,6 +2155,12 @@ msgstr "Отзыв о центре"
 #: cscsite/users/tests/test_views.py:590 cscsite/users/tests/test_views.py:598
 msgid "Create reference"
 msgstr "Выдать справку"
+
+#: cscsite/templates/users/user_detail.html:147
+#| msgid "Cancel"
+msgctxt "Project"
+msgid "Canceled"
+msgstr "Отменен"
 
 #: cscsite/templates/users/user_detail.html:194
 msgid ".iCal calendar"
