@@ -144,7 +144,15 @@
                                 {% for ps in student_projects %}
                                     <li>
                                         <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a>
-                                        /{{ ps.get_final_grade_display|lower }}/<br>
+                                        /{% spaceless %}
+                                        {% if not ps.project.canceled %}
+                                            {{ ps.get_final_grade_display|lower }}
+                                        {% elif ps.final_grade == "not_graded" %}
+                                            {% trans "Canceled"|lower context "Project" %}
+                                        {% else %}
+                                            {{ ps.get_final_grade_display|lower }}
+                                        {% endif %}
+                                        {% endspaceless %}/<br>
                                     </li>
                                 {% endfor %}
                             </ul>
