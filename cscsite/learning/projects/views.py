@@ -264,11 +264,14 @@ class ProjectDetailView(generic.CreateView):
             # DoesNotExist is subclass of AttributeError
             pass
         except AttributeError as e:
-            # Is not student participant
+            # It is not student participant
             return HttpResponseForbidden()
-        # Prevent action if reporting period not started yet or stale
+        # Prevent action if reporting period not started yet or stale or
+        # student already has some grade
         if (not self.project.is_active() or
-                not self.project.report_period_started()):
+                not self.project.report_period_started() or
+                not project_student.can_send_report()):
+            # TODO: redirect with appropriate message?
             return HttpResponseForbidden()
         form_kwargs = self.get_form_kwargs()
         form_kwargs["project_student"] = project_student
@@ -296,10 +299,14 @@ class ProjectDetailView(generic.CreateView):
         # Permissions block
         user = self.request.user
         context["project"] = self.project
-        # Student participant should be already redirected to report page
-        # if his report exists
+        project_student = self.get_authenticated_project_student(self.project)
+        # Student participant should already have been redirected to
+        # report page if his report exists
         context["has_sending_report_permissions"] = (
-            self.project.is_active() and user in self.project.students.all())
+            self.project.is_active() and
+            user in self.project.students.all() and
+            project_student.can_send_report()
+        )
         context["you_enrolled"] = user in self.project.reviewers.all()
         context["has_enroll_permissions"] = (
             (user.is_project_reviewer or user.is_curator)
