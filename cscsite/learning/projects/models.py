@@ -59,6 +59,9 @@ class ProjectStudent(models.Model):
         return "{0} [{1}]".format(smart_text(self.project),
                                   smart_text(self.student))
 
+    def can_send_report(self):
+        return self.final_grade == ProjectStudent.GRADES.not_graded
+
 
 def project_presentation_files(self, filename):
     return os.path.join('projects',
@@ -164,7 +167,7 @@ class Project(TimeStampedModel):
         """Check project is from current term"""
         year, term_type = get_current_semester_pair()
         current_term_index = get_term_index(year, term_type)
-        return self.semester.index == current_term_index
+        return not self.canceled and self.semester.index == current_term_index
 
     def report_period_started(self):
         if not self.semester.report_starts_at:
