@@ -12,36 +12,133 @@
 {% block content %}
     <div class="container" id="markdown-how-to-page">
         <div class="row">
-            <div class="col-xs-3">
-                <h5 class="text-uppercase">Разделы</h5>
-                <div class="list-group inverse">
-                    <a href="#examples" class="list-group-item">Markdown</a>
-                    <a href="#mathjax" class="list-group-item">Как оформлять формулы</a>
-                    <a href="#mistakes" class="list-group-item">Частые ошибки</a>
-                </div>
-            </div>
             <div class="col-xs-9">
                 <ol class="breadcrumb gray">
                     <li class="active">Памятка по написанию комментариев</li>
                 </ol>
-                <h2>Markdown</h2>
+
+
 <div class="nav-tabs-horizontal nav-tabs-inverse">
     <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li role="presentation" class="active">
-            <a data-toggle="tab" href="#code-1" aria-controls="applicant" role="tab" aria-expanded="true">Выделяем жирным</a>
+            <a data-toggle="tab" href="#code-1" aria-controls="applicant" role="tab" aria-expanded="true">Что пишем</a>
         </li>
         <li role="presentation" class="">
-            <a data-toggle="tab" href="#result-1" aria-controls="result-1" role="tab" aria-expanded="false">Результат</a>
+            <a data-toggle="tab" href="#result-1" aria-controls="result-1" role="tab" aria-expanded="false">Что получаем</a>
         </li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id="code-1" role="tabpanel">
-            <pre>Как выделить слово **жирным**</pre>
+            <pre># Шпаргалка по Markdown
+
+В поле ввода поддерживается формат Markdown и $\LaTeX$.
+
+**жирный шрифт**
+
+*курсив*
+
+`моноширинный шрифт`
+
+
+Для разбиения на параграфы используется пустая строка:
+
+Параграф 1.
+Продолжение первого параграфа.
+
+Параграф 2.
+
+Поддерживаются списки
+
+  * Один.
+  * Два.
+    Продолжение пункта два.
+  * Три.
+
+Обратите внимание на пустую строку после списка.
+
+Можно использовать заголовки разных уровней:
+
+## Второй уровень
+
+### Третий уровень
+
+
+Формулы окружаются долларами $F_n$.
+Чтобы формула была на отдельной строке, её следует окружить двумя парами
+долларов: $$F_n = F_{n-1} + F_{n-2}$$
+
+# Шпаргалка по $\LaTeX$
+
+Индексы: $x_i, x^j, x_i^j, x_{i+1}$.
+
+Некоторые функции и символы: $\pi, e, \sin{x}, \log(\mathbf{V} + \mathbf{E})$.
+
+Дроби: $\frac{1}{2}, \binom{6}{4}$.
+
+Суммы: $\sum_{i=0}^n i^2$.
+
+Произведение $f$, $o$ и $o$: $foo$.
+
+Переменная `foo`: $\mathtt{foo}$.</pre>
         </div>
         <div class="tab-pane" id="result-1" role="tabpanel">
+<div class="ubertext">
 {% markdown 1 "markdown_how_to2" %}
-Как выделить слово **жирным**
+# Шпаргалка по Markdown
+
+В поле ввода поддерживается формат Markdown и $\LaTeX$.
+
+**жирный шрифт**
+
+*курсив*
+
+`моноширинный шрифт`
+
+
+Для разбиения на параграфы используется пустая строка:
+
+Параграф 1.
+Продолжение первого параграфа.
+
+Параграф 2.
+
+Поддерживаются списки
+
+  * Один.
+  * Два.
+    Продолжение пункта два.
+  * Три.
+
+Обратите внимание на пустую строку после списка.
+
+Можно использовать заголовки разных уровней:
+
+## Второй уровень
+
+### Третий уровень
+
+
+Формулы окружаются долларами $F_n$.
+Чтобы формула была на отдельной строке, её следует окружить двумя парами
+долларов: $$F_n = F_{n-1} + F_{n-2}$$
+
+# Шпаргалка по $\LaTeX$
+
+Индексы: $x_i, x^j, x_i^j, x_{i+1}$.
+
+Некоторые функции и символы: $\pi, e, \sin{x}, \log(\mathbf{V} + \mathbf{E})$.
+
+Дроби: $\frac{1}{2}, \binom{6}{4}$.
+
+Суммы: $\sum_{i=0}^n i^2$.
+
+Произведение $f$, $o$ и $o$: $foo$.
+
+Переменная `foo`: $\mathtt{foo}$.
 {% endmarkdown %}
+</div>
+
+
         </div>
     </div>
 </div>
