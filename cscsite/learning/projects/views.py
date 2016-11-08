@@ -57,10 +57,13 @@ class ReportListViewMixin(object):
                     .select_related("semester")
                     .filter(semester__index=current_term_index,
                             canceled=False)
-                    .prefetch_related("students", "reviewers",
-                                      "projectstudent_set__report",
-                                      "projectstudent_set__student")
-                    .order_by("name", "pk"))
+                    .prefetch_related(
+                        Prefetch(
+                            "projectstudent_set",
+                            queryset=ProjectStudent.objects.select_related(
+                                "report", "student")
+                        )
+                    ))
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -74,7 +77,7 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin,
                              generic.ListView):
     def get_queryset(self):
         qs = super(ReportListReviewerView, self).get_queryset()
-        return qs.filter(reviewers=self.request.user)
+        return qs.filter(reviewers=self.request.user).order_by("name", "pk")
 
     def get_context_data(self, **kwargs):
         context = super(ReportListReviewerView, self).get_context_data(**kwargs)
@@ -101,15 +104,69 @@ class ReportListReviewerView(ProjectReviewerGroupOnlyMixin,
 
 class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                             generic.ListView):
-    def get_queryset(self):
-        qs = super(ReportListCuratorView, self).get_queryset()
-        return (qs
-                .annotate(reports_cnt=Sum(Case(
-                    When(projectstudent__report__isnull=False, then=Value(1)),
-                    default=Value(0),
-                    output_field=IntegerField()
-                )))
-                .order_by("-reports_cnt"))
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportListCuratorView, self).get_context_data(**kwargs)
+        projects = list(context[self.context_object_name])
+        projects.sort(key=self.cmp_projects)
+        context[self.context_object_name] = projects
+        return context
+
+    @staticmethod
+    def cmp_projects(project):
+        """
+        Немного сумасшедшая сортировка:
+        1. отправлены отчёты всех участников, проверка ещё не у всех
+        2. подведение итогов куратором у всех участников
+        3. отправлены не у всех
+        4. не отправлены у всех
+        5. на проверке у всех
+        6. у кого-то на подведении итогов, у кого-то на проверке
+        """
+        if not hasattr(project, "__cmp__num_order"):
+            reports_cnt = 0
+            participants_cnt = 0
+            any_has_sent_status = False
+            any_has_review_status = False
+            all_has_summary_status = True
+            all_has_review_status = True
+            for ps in project.projectstudent_set.all():
+                try:
+                    report = ps.report
+                    if report.status == Report.SENT:
+                        any_has_sent_status = True
+                    elif report.status != Report.SUMMARY:
+                        all_has_summary_status = False
+                    elif report.status != Report.REVIEW:
+                        all_has_review_status = False
+                    elif report.status == Report.REVIEW:
+                        any_has_review_status = True
+                    reports_cnt += 1
+                    participants_cnt += 1
+                except (AttributeError, Report.DoesNotExist):
+                    if ps.final_grade == ProjectStudent.GRADES.not_graded:
+                        participants_cnt += 1
+
+            all_sent_report = (participants_cnt == reports_cnt)
+            num_order = 0
+            if all_sent_report and any_has_sent_status:
+                num_order = 1
+            elif all_sent_report and all_has_summary_status:
+                num_order = 2
+            elif reports_cnt == 0:
+                # Subset of next condition, check in the first place
+                num_order = 4
+            elif not all_sent_report:
+                num_order = 3
+            elif all_sent_report and all_has_review_status:
+                num_order = 5
+            elif (all_sent_report and any_has_sent_status and
+                    any_has_review_status):
+                num_order = 6
+            project.__cmp__num_order = num_order
+        else:
+            num_order = project.__cmp__num_order
+        return num_order, project.name
 
 
 class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
