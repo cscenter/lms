@@ -23,7 +23,8 @@ urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
-    url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(), name='comment_the_right_way'),
+    url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
+        name='comment_the_right_way'),
 
     url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
         name="profile_update_image"),

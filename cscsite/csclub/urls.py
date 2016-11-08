@@ -9,7 +9,7 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
 
-from core.views import RobotsView
+from core.views import RobotsView, MarkdownHowToHelpView
 from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, UserReferenceCreateView, UserReferenceDetailView
@@ -24,6 +24,8 @@ admin.autodiscover()
 
 urlpatterns = solid_i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
+        name='comment_the_right_way'),
     course_patterns,
     course_offering_patterns,
 
