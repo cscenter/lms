@@ -122,6 +122,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
         4. не отправлены у всех
         5. на проверке у всех
         6. у кого-то на подведении итогов, у кого-то на проверке
+        (сейчас не строго, могут быть и другие статусы)
         """
         if not hasattr(project, "__cmp__num_order"):
             reports_cnt = 0
@@ -129,6 +130,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
             any_has_sent_status = False
             any_has_review_status = False
             all_has_summary_status = True
+            any_has_summary_status = False
             all_has_review_status = True
             for ps in project.projectstudent_set.all():
                 try:
@@ -137,6 +139,8 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                         any_has_sent_status = True
                     elif report.status != Report.SUMMARY:
                         all_has_summary_status = False
+                    elif report.status == Report.SUMMARY:
+                        any_has_summary_status = True
                     elif report.status != Report.REVIEW:
                         all_has_review_status = False
                     elif report.status == Report.REVIEW:
@@ -148,7 +152,6 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                         participants_cnt += 1
 
             all_sent_report = (participants_cnt == reports_cnt)
-            num_order = 0
             if all_sent_report and any_has_sent_status:
                 num_order = 1
             elif all_sent_report and all_has_summary_status:
@@ -160,9 +163,11 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                 num_order = 3
             elif all_sent_report and all_has_review_status:
                 num_order = 5
-            elif (all_sent_report and any_has_sent_status and
+            elif (all_sent_report and any_has_summary_status and
                     any_has_review_status):
                 num_order = 6
+            else:
+                num_order = 7
             project.__cmp__num_order = num_order
         else:
             num_order = project.__cmp__num_order
