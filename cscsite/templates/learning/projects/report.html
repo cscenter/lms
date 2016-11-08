@@ -190,6 +190,8 @@
             <h5>Название проекта</h5>
             <a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a>
         {% endif %}
+        <h5>Руководители</h5>
+        {{ project.supervisor }}
         {% if report.is_completed %}
             <h5>Суммарный балл за отчет</h5>
             {{ report.final_score }}
