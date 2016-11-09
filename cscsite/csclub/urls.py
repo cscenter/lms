@@ -24,8 +24,11 @@ admin.autodiscover()
 
 urlpatterns = solid_i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
+    # TODO: Remove this link as a stale in a while
     url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='comment_the_right_way'),
+    url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
+        name='commenting_the_right_way'),
     course_patterns,
     course_offering_patterns,
 
