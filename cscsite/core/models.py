@@ -9,10 +9,10 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
-    "How to style text read <a href=\"/comment-the-right-way/\" "
+    "How to style text read <a href=\"/commenting-the-right-way/\" "
     "target=\"_blank\">here</a>. Partially HTML is enabled too.")
 LATEX_MARKDOWN_ENABLED = _(
-    "How to style text read <a href=\"/comment-the-right-way/\" "
+    "How to style text read <a href=\"/commenting-the-right-way/\" "
     "target=\"_blank\">here</a>."
 )
 
