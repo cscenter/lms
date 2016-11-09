@@ -190,7 +190,6 @@ function processUberText(target) {
         // Clear old local storage cache
         fn.cleanLocalStorageEditorsFiles();
         fn.initUberEditors();
-        fn.profileSpecificCode();
         fn.courseClassSpecificCode();
         fn.admissionFormSpecificCode();
         // Depends on `editors` var, which populated in initUberEditor method
@@ -284,31 +283,6 @@ function processUberText(target) {
                     }
                 });
             });
-        },
-
-        profileSpecificCode: function () {
-            // TODO: move
-            // User info page
-            (function() {
-                var $btnGroup = $("div.assignment-list-control");
-                var $oldRows = $("#assignments-table .old");
-
-                $btnGroup
-                    .on("click", ".current-semester", function(e) {
-                        var $target = $(e.target);
-                        $btnGroup.find(".all").removeClass("active");
-                        $target.addClass("active");
-                        $oldRows.hide();
-
-                    })
-                    .on("click", ".all", function(e) {
-                        var $target = $(e.target);
-                        $btnGroup.find(".current-semester").removeClass("active");
-                        $target.addClass("active");
-                        $oldRows.show();
-
-                    });
-            })();
         },
 
         courseClassSpecificCode: function() {
