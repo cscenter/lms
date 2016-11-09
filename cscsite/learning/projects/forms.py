@@ -194,7 +194,7 @@ class ReportReviewForm(forms.ModelForm):
         # Append required data not represented in form fields
         self.instance.report = report
         self.instance.reviewer = reviewer
-        # Hide help text
+        # Hide label text
         for field in self.Meta.fields:
             if field.endswith("_note"):
                 self.fields[field].help_text = self.fields[field].label
@@ -269,8 +269,15 @@ class ReportCuratorAssessmentForm(forms.ModelForm):
         model = Report
         fields = (
             "score_activity",
+            "score_activity_note",
             "score_quality",
+            "score_quality_note",
         )
+
+        widgets = {
+            "score_activity_note": forms.Textarea(attrs={"rows": 3}),
+            "score_quality_note": forms.Textarea(attrs={"rows": 3}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(ReportCuratorAssessmentForm, self).__init__(*args, **kwargs)
@@ -287,3 +294,9 @@ class ReportCuratorAssessmentForm(forms.ModelForm):
                 "student_pk": self.instance.project_student.student_id
             }
         )
+
+        # Hide label text for notes
+        for field in self.Meta.fields:
+            if field.endswith("_note"):
+                self.fields[field].help_text = self.fields[field].label
+                self.fields[field].label = ""
