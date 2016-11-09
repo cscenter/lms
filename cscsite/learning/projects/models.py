@@ -310,7 +310,7 @@ class Report(ReviewCriteria):
         blank=True,
         null=True,
         upload_to=report_file_name)
-    # curators only criteria
+    # curators only below
     score_activity = models.PositiveSmallIntegerField(
         verbose_name=_("Student activity in cvs"),
         validators=[MaxValueValidator(1)],
@@ -318,6 +318,9 @@ class Report(ReviewCriteria):
         blank=True,
         null=True
     )
+    score_activity_note = models.TextField(
+        _("Note for criterion `score_activity`"),
+        blank=True, null=True)
     score_quality = models.PositiveSmallIntegerField(
         verbose_name=_("Report's quality"),
         validators=[MaxValueValidator(2)],
@@ -325,6 +328,9 @@ class Report(ReviewCriteria):
         blank=True,
         null=True
     )
+    score_quality_note = models.TextField(
+        _("Note for criterion `score_quality`"),
+        blank=True, null=True)
 
     @property
     def file_name(self):
