@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-09 13:58+0300\n"
-"PO-Revision-Date: 2016-11-11 16:46+0230\n"
+"POT-Creation-Date: 2016-11-11 17:32+0300\n"
+"PO-Revision-Date: 2016-11-11 17:35+0230\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,12 +20,9 @@ msgstr ""
 
 #: cscsite/core/filters.py:7
 msgid "---------"
-msgstr ""
+msgstr "---------"
 
 #: cscsite/core/models.py:12
-#| msgid ""
-#| "How to style text read <a href=\"/comment-the-right-way/\" "
-#| "target=\"_blank\">here</a>. Partially HTML is enabled too."
 msgid ""
 "How to style text read <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">here</a>. Partially HTML is enabled too."
@@ -35,9 +32,6 @@ msgstr ""
 "target=\"_blank\">по ссылке</a>."
 
 #: cscsite/core/models.py:15
-#| msgid ""
-#| "How to style text read <a href=\"/comment-the-right-way/\" "
-#| "target=\"_blank\">here</a>."
 msgid ""
 "How to style text read <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">here</a>."
@@ -1945,6 +1939,14 @@ msgstr "На текущий момент нет открытых онлайн-к
 #: cscsite/templates/learning/projects/project_detail.html:66
 msgid "Send report form"
 msgstr "Форма отправки отчета"
+
+#: cscsite/templates/learning/projects/reports.html:47
+#, python-format
+msgid "%(counter)s point"
+msgid_plural "%(counter)s points"
+msgstr[0] "%(counter)s балл"
+msgstr[1] "%(counter)s балла"
+msgstr[2] "%(counter)s баллов"
 
 #: cscsite/templates/learning/simple_delete_confirmation.html:15
 msgid "Are you sure you want to delete"
