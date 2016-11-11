@@ -137,20 +137,19 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                     report = ps.report
                     if report.status == Report.SENT:
                         any_has_sent_status = True
-                    elif report.status != Report.SUMMARY:
-                        all_has_summary_status = False
-                    elif report.status == Report.SUMMARY:
+                    if report.status == Report.SUMMARY:
                         any_has_summary_status = True
-                    elif report.status != Report.REVIEW:
-                        all_has_review_status = False
-                    elif report.status == Report.REVIEW:
+                    else:
+                        all_has_summary_status = False
+                    if report.status == Report.REVIEW:
                         any_has_review_status = True
+                    else:
+                        all_has_review_status = False
                     reports_cnt += 1
                     participants_cnt += 1
                 except (AttributeError, Report.DoesNotExist):
                     if ps.final_grade == ProjectStudent.GRADES.not_graded:
                         participants_cnt += 1
-
             all_sent_report = (participants_cnt == reports_cnt)
             if all_sent_report and any_has_sent_status:
                 num_order = 1
