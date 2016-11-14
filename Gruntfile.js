@@ -30,6 +30,7 @@ module.exports = function (grunt) {
                     '<%= JS_VENDOR %>/jquery.jgrowl.js',
                     '<%= JS_VENDOR %>/jquery.cookie.js',
                     '<%= JS_VENDOR %>/sweet-alerts/sweet-alert.min.js',
+                    '<%= JS_SRC %>/mathjax_config.js',
                     '<%= JS_SRC %>/main.js'
                 ],
                 dest: '<%= JS_RUNTIME %>/main.js'
