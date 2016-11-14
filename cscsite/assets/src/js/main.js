@@ -57,12 +57,14 @@ function initUberEditor(textarea) {
     editor.load();
 
     var previewer = editor.getElement("previewer");
+    var previewerIframe = editor.getElement("previewerIframe");
+    // Append MathJax Configuration
+    var iframe_window = previewerIframe.contentWindow || previewerIframe;
+    iframe_window.MathJax = window.MathJax;
+    // Append MathJax src file
     var mathjax = previewer.createElement('script');
     mathjax.type = 'text/javascript';
     mathjax.src = window.CSC.config.JS_SRC.MATHJAX;
-    previewer.head.appendChild(
-        // re-use config from the top-level document
-        $("script[type^='text/x-mathjax-config']").clone().get(0));
     previewer.body.appendChild(mathjax);
 
     editor.on('preview', function () {
