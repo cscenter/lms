@@ -60,7 +60,7 @@
             {% for comment in comments %}
             <li class="{% if comment.author == student %}student{% else %}reviewer{% endif %}">
               <div class="csc-well assignment-comment">
-                <h5 class="assignment">{{ comment.author }}</h5>
+                <h5 class="assignment">{{ comment.author.get_full_name }}</h5>
                 <div class="ubertext">
                   {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
                     {{ comment.text }}
