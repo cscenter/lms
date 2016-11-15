@@ -16,6 +16,7 @@ $unsaved-state-color: #dcf0ff;
   .header {
     position: relative;
     height: 40px;
+    margin: 0;
     visibility: hidden;
 
     .scroll {
@@ -83,6 +84,8 @@ $unsaved-state-color: #dcf0ff;
     .cell {
       border-right: 1px solid #fff;
       text-overflow: ellipsis;
+      white-space: nowrap;
+
     }
 
   }
