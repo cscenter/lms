@@ -23,6 +23,7 @@ from django.test import TestCase
 from django.utils.encoding import smart_text, force_text, force_str, smart_bytes
 from django.utils.translation import ugettext as _
 from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES
+from users.factories import TeacherCenterFactory, StudentFactory
 from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
@@ -1108,6 +1109,39 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student.save()
         self.assertEquals(200, self.client.get(url).status_code)
 
+    def test_failed_course(self):
+        """
+        Make sure student has access only to assignments which he passed if
+        he completed course with unsatisfactory grade
+        """
+        teacher = TeacherCenterFactory()
+        student = StudentFactory()
+        past_year = datetime.datetime.now().year - 3
+        past_semester = SemesterFactory.create(year=past_year)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
+                                   is_completed=True)
+        enrollment = EnrollmentFactory(student=student, course_offering=co,
+                                       grade=GRADES.unsatisfactory)
+        a = AssignmentFactory(course_offering=co)
+        self.doLogin(student)
+        s_a = StudentAssignment.objects.get(student=student, assignment=a)
+        assert s_a.grade is None
+        url = reverse("a_s_detail_student", args=[s_a.pk])
+        response = self.client.get(url)
+        assert response.status_code == 403
+        s_a.grade = 1
+        s_a.save()
+        response = self.client.get(url)
+        assert response.context["is_failed_completed_course"]
+        # Course completed, but not failed, user can see all assignments
+        s_a.grade = None
+        s_a.save()
+        enrollment.grade = GRADES.good
+        enrollment.save()
+        response = self.client.get(url)
+        assert not response.context["is_failed_completed_course"]
+        assert response.status_code == 200
+
     def test_assignment_contents(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create()
@@ -1687,12 +1721,10 @@ class TestCompletedCourseOfferingBehaviour(object):
         response = client.get(url)
         assert response.status_code == 200
 
-    def test_security_courseoffering_detail(self, client,
-                                            teacher_center_factory,
-                                            student_factory):
-        """Students can't see news from completed course, which they failed"""
-        teacher = teacher_center_factory()
-        student = student_factory()
+    def test_security_courseoffering_detail(self, client):
+        """Student can't watch news from completed course which they failed"""
+        teacher = TeacherCenterFactory()
+        student = StudentFactory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
         co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
