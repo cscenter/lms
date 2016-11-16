@@ -453,7 +453,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.append(self.group_pks.STUDENT_CLUB)
         return user_groups
 
-    # TODO: test method
     def enrolled_on_the_course(self, course_pk):
         return (
             (self.is_student or self.is_graduate) and

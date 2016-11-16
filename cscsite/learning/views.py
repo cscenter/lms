@@ -3,7 +3,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
-import io
 import itertools
 import logging
 import os
@@ -13,7 +12,6 @@ from collections import OrderedDict, defaultdict
 from itertools import chain
 
 import nbconvert
-import nbformat
 import unicodecsv as csv
 from annoying.exceptions import Redirect
 from django.http.response import JsonResponse
@@ -30,7 +28,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, Prefetch, When, Value, Case, \
-    IntegerField
+    IntegerField, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -513,7 +511,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                     queryset=CSCUser.objects.only(
                         "last_name", "first_name", "patronymic",
                         "photo", "photo_data", "gender",
-                        "comment"  # FIXME: investigate, why I need this one
+                        "comment"  # FIXME: investigate, why I need this
                     )
                 ),
             )
@@ -524,23 +522,20 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                    .get_context_data(*args, **kwargs))
         user = self.request.user
         co = self.object
-        is_enrolled = self.request.user.enrolled_on_the_course(co.pk)
-        context['is_enrolled'] = is_enrolled
-        is_actual_teacher = (self.request.user.is_authenticated() and
-                             self.request.user in co.teachers.all())
-        context['is_actual_teacher'] = is_actual_teacher
+        context['is_enrolled'] = user.enrolled_on_the_course(co.pk)
+        context['is_actual_teacher'] = (user.is_authenticated() and
+                                        user in co.teachers.all())
 
         context['assignments'] = self.get_assignments(context)
 
-        can_view_news = (
-            not context['is_failed_completed_course'] and
+        can_view_news = (not context['is_failed_completed_course'] and
             (user.is_authenticated() or
              self.request.site.domain == settings.CLUB_DOMAIN))
         if can_view_news:
             context["course_news"] = co.courseofferingnews_set.all()
         else:
             context["course_news"] = []
-        context["course_classes"] = self.get_classes()
+        context["course_classes"] = self.get_classes(co)
 
         # Not sure if it's the best place for this, but it's the simplest one
         if user.is_authenticated():
@@ -553,11 +548,11 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
 
         return context
 
-    def get_classes(self):
+    @staticmethod
+    def get_classes(course_offering):
         """Get course classes with attached materials"""
-        course_offering = self.object
         # Note: django-debug-toolbar shows duplicated queries if put
-        # query below inside `get_queryset` method, so I leave it here.
+        # query logic below inside `get_queryset` method, so I leave it here.
         course_classes = (
             course_offering.courseclass_set
             .select_related("venue")
@@ -614,36 +609,38 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                                 user.is_curator or context["is_actual_teacher"])
         if not can_view_assignments:
             return []
-        # TODO: Defer fields here?
-        assignments_qs = self.object.assignment_set.order_by('deadline_at',
-                                                             'title')
+        assignments_qs = (self.object.assignment_set
+                          .only("title", "course_offering_id")
+                          .order_by('deadline_at', 'title'))
         # Prefetch progress on assignments for authenticated student
-        # TODO: Сейчас это и так 2 запроса. 1 - на список всех заданий. 2- префетч. Кажется, легче будет реверснуть их местами?
-        user = self.request.user
         if context["is_enrolled"]:
             assignments_qs = assignments_qs.prefetch_related(
                 Prefetch(
                     "studentassignment_set",
-                    queryset=StudentAssignment.objects.filter(
-                        student=user).only("pk", "assignment_id"),
+                    queryset=(StudentAssignment.objects
+                              .filter(student=user)
+                              .only("pk", "assignment_id", "grade"))
                 )
             )
 
         assignments = assignments_qs.all()
-        for assignment in assignments:
+        for a in assignments:
+            to_details = None
             if context["is_actual_teacher"] or user.is_curator:
-                setattr(assignment, 'magic_link',
-                        reverse("assignment_detail_teacher",
-                                args=[assignment.pk]))
+                to_details = reverse("assignment_detail_teacher", args=[a.pk])
             elif context["is_enrolled"]:
-                a_s = assignment.studentassignment_set.first()
+                a_s = a.studentassignment_set.first()
                 if a_s is not None:
-                    setattr(assignment, 'magic_link',
-                            reverse("a_s_detail_student", args=[a_s.pk]))
+                    if context["is_failed_completed_course"]:
+                        # Show links to handed assignments only
+                        if a_s.grade is None:
+                            continue
+                    to_details = reverse("a_s_detail_student", args=[a_s.pk])
                 else:
                     logger.error("can't find StudentAssignment for "
                                  "student ID {0}, assignment ID {1}"
-                                 .format(user.pk, assignment.pk))
+                                 .format(user.pk, a.pk))
+            setattr(a, 'magic_link', to_details)
         return assignments
 
 
@@ -1265,8 +1262,7 @@ class StudentAssignmentDetailMixin(object):
     form_class = AssignmentCommentForm
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(StudentAssignmentDetailMixin, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         pk = self.kwargs.get('pk')
         a_s = get_object_or_404(
             StudentAssignment
@@ -1341,16 +1337,15 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
 
     def get(self, request, *args, **kwargs):
         try:
-            response = super(StudentAssignmentStudentDetailView, self).get(request, *args,
-                                                                           **kwargs)
+            response = super().get(request, *args, **kwargs)
         except Redirect as e:
             return HttpResponseRedirect(e.kwargs.get('url'))
         return response
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(StudentAssignmentStudentDetailView, self)
-                   .get_context_data(*args, **kwargs))
-        if context['is_failed_completed_course']:
+        context = super().get_context_data(*args, **kwargs)
+        a_s = context['a_s']
+        if context['is_failed_completed_course'] and a_s.grade is None:
             raise PermissionDenied
         return context
 

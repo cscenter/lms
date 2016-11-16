@@ -118,11 +118,13 @@ if settings.DEBUG:
     # these url in browser to see how these error pages look like.
     urlpatterns += [
         url(r'^400/$', bad_request,
-            kwargs={'exception': Exception("Page not Found")}),
+            kwargs={'exception': Exception("Bad request")}),
         url(r'^403/$', permission_denied,
-            kwargs={'exception': Exception("Page not Found")}),
+            kwargs={'exception': Exception("Forbidden"),
+                    'template_name': "errors/403.html"}),
         url(r'^404/$', page_not_found,
-            kwargs={'exception': Exception("Page not Found")}),
+            kwargs={'exception': Exception("Page not Found"),
+                    'template_name': "errors/404.html"}),
         url(r'^500/$', server_error,
             kwargs={'exception': Exception("Page not Found")}),
     ]
