@@ -421,7 +421,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             return photo_thumbnail_cropbox(self.photo_data)
         return ""
 
-
     # FIXME(Dmitry): this should use model_utils.fields#SplitField
     def get_short_note(self):
         """Returns only the first paragraph from the note."""
@@ -452,8 +451,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         if (center_student and self.group_pks.STUDENT_CLUB not in user_groups
                 and settings.SITE_ID == settings.CLUB_SITE_ID):
             user_groups.append(self.group_pks.STUDENT_CLUB)
-
         return user_groups
+
+    # TODO: test method
+    def enrolled_on_the_course(self, course_pk):
+        return (
+            (self.is_student or self.is_graduate) and
+            self.enrolled_on_set.filter(pk=course_pk).exists())
 
     @property
     def status_display(self):

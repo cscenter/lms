@@ -47,6 +47,7 @@ from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     StudentCenterAndVolunteerOnlyMixin
 from six import viewvalues
 
+from users.models import CSCUser
 from . import utils
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
@@ -468,42 +469,25 @@ class CourseUpdateView(CuratorOnlyMixin,
         return user.is_authenticated() and user.is_curator
 
 
-class GetCourseOfferingObjectMixin(object):
-    model = CourseOffering
-
-    def get_object(self):
-        try:
-            year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-            year = int(year)
-        except ValueError:
-            raise Http404
-
-        return get_object_or_404(
-            self.get_queryset()
-            .filter(semester__type=semester_type,
-                    semester__year=year,
-                    course__slug=self.kwargs['course_slug'])
-            .select_related('course',
-                            'semester')
-            .prefetch_related('teachers',
-                              'courseclass_set',
-                              'courseclass_set__venue',
-                              'courseclass_set__courseclassattachment_set',
-                              'courseofferingnews_set',
-                              'assignment_set'))
-
-
-class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
-                               FailedCourseContextMixin,
+class CourseOfferingDetailView(FailedCourseContextMixin,
                                generic.DetailView):
+    model = CourseOffering
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
     def get(self, request, *args, **kwargs):
+        # Validate GET-params
+        try:
+            year, _ = self.kwargs['semester_slug'].split("-", 1)
+            _ = int(year)
+        except ValueError:
+            return HttpResponseBadRequest()
+
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
+
+        # Move to club site if course was created before center establishment.
         co = context[self.context_object_name]
-        # Show club courses on center site since center foundation only
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,
                                    SEMESTER_TYPES.autumn)
@@ -512,61 +496,82 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
                     get_club_domain(co.city.code) + co.get_absolute_url())
         return self.render_to_response(context)
 
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.get_queryset())
+
     def get_queryset(self):
-        return self.model.custom.site_related(self.request)
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+        return (
+            CourseOffering.custom.site_related(self.request)
+            .filter(semester__type=semester_type,
+                    semester__year=year,
+                    course__slug=self.kwargs['course_slug'])
+            .select_related('course', 'semester')
+            .prefetch_related(
+                Prefetch(
+                    'teachers',
+                    queryset=CSCUser.objects.only(
+                        "last_name", "first_name", "patronymic",
+                        "photo", "photo_data", "gender",
+                        "comment"  # FIXME: investigate, why I need this one
+                    )
+                ),
+            )
+        )
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
                    .get_context_data(*args, **kwargs))
-        course_offering = co = context[self.context_object_name]
-        is_enrolled = (
-            (self.request.user.is_student or self.request.user.is_graduate) and
-            (self.request.user
-             .enrolled_on_set
-             .filter(pk=self.object.pk)
-             .exists()))
+        user = self.request.user
+        co = self.object
+        is_enrolled = self.request.user.enrolled_on_the_course(co.pk)
         context['is_enrolled'] = is_enrolled
-        context['enrollment_opened'] = course_offering.enrollment_opened()
-        if course_offering.is_capacity_limited():
-            context["enrollments_left"] = max(
-                0, co.capacity - co.enrollment_set.count())
         is_actual_teacher = (self.request.user.is_authenticated() and
-                             self.request.user in self.object.teachers.all())
+                             self.request.user in co.teachers.all())
         context['is_actual_teacher'] = is_actual_teacher
-        assignments = self.object.assignment_set.all().order_by('deadline_at', 'title')
-        for assignment in assignments:
-            if is_actual_teacher or \
-              (self.request.user.is_authenticated() and
-               self.request.user.is_curator):
-                setattr(assignment, 'magic_link',
-                        reverse("assignment_detail_teacher",
-                                args=[assignment.pk]))
-            elif is_enrolled:
-                try:
-                    a_s = (StudentAssignment.objects
-                           .filter(assignment=assignment,
-                                   student=self.request.user)
-                           .get())
-                    setattr(assignment, 'magic_link',
-                            reverse("a_s_detail_student", args=[a_s.pk]))
-                except ObjectDoesNotExist:
-                    logger.error("can't find StudentAssignment for "
-                                 "student ID {0}, assignment ID {1}"
-                                 .format(self.request.user.pk, assignment.pk))
-        context['assignments'] = assignments
-        context['can_view_assignments'] = (
-            self.request.user.is_student or
-            self.request.user.is_graduate or
-            context['is_actual_teacher'] or
-            self.request.user.is_curator)
-        context['can_view_news'] = not context['is_failed_completed_course'] and (
-                                   self.request.user.is_authenticated() or
-                                   self.request.site.domain == settings.CLUB_DOMAIN)
 
-        course_classes = list(self.object.courseclass_set.all())
+        context['assignments'] = self.get_assignments(context)
+
+        can_view_news = (
+            not context['is_failed_completed_course'] and
+            (user.is_authenticated() or
+             self.request.site.domain == settings.CLUB_DOMAIN))
+        if can_view_news:
+            context["course_news"] = co.courseofferingnews_set.all()
+        else:
+            context["course_news"] = []
+        context["course_classes"] = self.get_classes()
+
+        # Not sure if it's the best place for this, but it's the simplest one
+        if user.is_authenticated():
+            cache = get_unread_notifications_cache()
+            if self.object in cache.courseoffering_news:
+                (CourseOfferingNewsNotification.unread
+                 .filter(course_offering_news__course_offering=self.object,
+                         user=self.request.user)
+                 .update(is_unread=False))
+
+        return context
+
+    def get_classes(self):
+        """Get course classes with attached materials"""
+        course_offering = self.object
+        # Note: django-debug-toolbar shows duplicated queries if put
+        # query below inside `get_queryset` method, so I leave it here.
+        course_classes = (
+            course_offering.courseclass_set
+            .select_related("venue")
+            .prefetch_related(
+                # Optimize query by changing default order
+                Prefetch(
+                    'courseclassattachment_set',
+                    queryset=(CourseClassAttachment.objects
+                              .order_by("pk"))
+                ))
+            .order_by("date", "starts_at")
+        )
         for cc in course_classes:
-            class_url = reverse('class_detail', args=[co.course.slug,
-                                                      co.semester.slug, cc.pk])
+            class_url = cc.get_absolute_url()
             materials = []
             if cc.slides:
                 materials.append({'url': class_url + "#slides",
@@ -595,28 +600,77 @@ class CourseOfferingDetailView(GetCourseOfferingObjectMixin,
             materials_str = materials_str or _("No")
 
             setattr(cc, 'materials_str', materials_str)
+        return course_classes
 
-        # Not sure if it's the best place for this, but it's the simplest one
-        if self.request.user.is_authenticated():
-            cache = get_unread_notifications_cache()
-            if self.object in cache.courseoffering_news:
-                (CourseOfferingNewsNotification.unread
-                 .filter(course_offering_news__course_offering=self.object,
-                         user=self.request.user)
-                 .update(is_unread=False))
+    def get_assignments(self, context):
+        """
+        Build text-only list of course assignments or with links based on user
+        enrollment.
+        If course completed and student was enrolled on it - show links to
+        passed assignments only.
+        """
+        user = self.request.user
+        can_view_assignments = (user.is_student or user.is_graduate or
+                                user.is_curator or context["is_actual_teacher"])
+        if not can_view_assignments:
+            return []
+        # TODO: Defer fields here?
+        assignments_qs = self.object.assignment_set.order_by('deadline_at',
+                                                             'title')
+        # Prefetch progress on assignments for authenticated student
+        # TODO: Сейчас это и так 2 запроса. 1 - на список всех заданий. 2- префетч. Кажется, легче будет реверснуть их местами?
+        user = self.request.user
+        if context["is_enrolled"]:
+            assignments_qs = assignments_qs.prefetch_related(
+                Prefetch(
+                    "studentassignment_set",
+                    queryset=StudentAssignment.objects.filter(
+                        student=user).only("pk", "assignment_id"),
+                )
+            )
 
-        return context
+        assignments = assignments_qs.all()
+        for assignment in assignments:
+            if context["is_actual_teacher"] or user.is_curator:
+                setattr(assignment, 'magic_link',
+                        reverse("assignment_detail_teacher",
+                                args=[assignment.pk]))
+            elif context["is_enrolled"]:
+                a_s = assignment.studentassignment_set.first()
+                if a_s is not None:
+                    setattr(assignment, 'magic_link',
+                            reverse("a_s_detail_student", args=[a_s.pk]))
+                else:
+                    logger.error("can't find StudentAssignment for "
+                                 "student ID {0}, assignment ID {1}"
+                                 .format(user.pk, assignment.pk))
+        return assignments
 
 
 class CourseOfferingEditDescrView(TeacherOnlyMixin,
                                   ProtectedFormMixin,
-                                  GetCourseOfferingObjectMixin,
                                   generic.UpdateView):
+    model = CourseOffering
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingEditDescrForm
 
+    def get_object(self, queryset=None):
+        try:
+            year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+            year = int(year)
+        except ValueError:
+            raise Http404
+
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        return get_object_or_404(
+            queryset.filter(semester__type=semester_type,
+                            semester__year=year,
+                            course__slug=self.kwargs['course_slug']))
+
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or (user in obj.teachers.all())
+        return user.is_curator or user in obj.teachers.all()
 
     def get_queryset(self):
         return self.model.custom.site_related(self.request)
@@ -699,11 +753,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
         if course_offering.is_capacity_limited():
-            # FIXME: move to model?
-            places_left = max(
-                0, course_offering.capacity -
-                   course_offering.enrollment_set.count())
-            if not places_left:
+            if not course_offering.places_left:
                 msg = _("No places available, sorry")
                 messages.error(self.request, msg, extra_tags='timeout')
                 return HttpResponseRedirect(course_offering.get_absolute_url())

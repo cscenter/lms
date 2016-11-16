@@ -387,10 +387,10 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
 class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
     def test_basic_get(self):
         co = CourseOfferingFactory.create()
-        self.assertEqual(
-            200, self.client.get(co.get_absolute_url()).status_code)
+        assert 200 == self.client.get(co.get_absolute_url()).status_code
         url = reverse('course_offering_detail', args=["space-odyssey", "2010"])
-        self.assertEqual(404, self.client.get(url).status_code)
+        # Can't parse `semester_slug`
+        self.assertEqual(400, self.client.get(url).status_code)
 
     def test_course_user_relations(self):
         """
