@@ -208,3 +208,6 @@ class LearningPermissionsMixin(object):
     @property
     def is_project_reviewer(self):
         return False
+
+    def enrolled_on_the_course(self, *args, **kwargs):
+        return False

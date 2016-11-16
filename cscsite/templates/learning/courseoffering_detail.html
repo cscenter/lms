@@ -70,14 +70,14 @@
                 {% else %}
                     {% if course_offering.is_capacity_limited %}
                         <div class="places-available">
-                             {%if enrollments_left > 0 %}
-                                {% trans "Places available" %}: {{ enrollments_left }}
-                            {% elif course_offering.is_capacity_limited %}
+                             {% if course_offering.places_left > 0 %}
+                                {% trans "Places available" %}: {{ course_offering.places_left }}
+                            {% else %}
                                 {% trans "No places available" %}
                             {% endif %}
                         </div>
                     {% endif %}
-                    {% if not course_offering.is_capacity_limited or enrollments_left > 0 %}
+                    {% if not course_offering.is_capacity_limited or course_offering.places_left > 0 %}
                     <form method="post"
                           action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
                         {% csrf_token %}
@@ -121,7 +121,7 @@
     </div>
   </div>
 
-  {% if course_offering.courseclass_set.all %}
+  {% if course_classes %}
   <div class="row">
     <div class="col-xs-12">
       <h3>{% trans "Classes" %}</h3>
@@ -135,7 +135,7 @@
           <th></th>
           <th style="max-width: 160px;">{% trans "Materials" %}</th>
         </thead>
-        {% for class in course_offering.courseclass_set.all reversed %}
+        {% for class in course_classes %}
         <tr>
           <td>{{ class.date|date:"d.m.Y" }}</td>
           <td class="nobreak">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
@@ -166,7 +166,7 @@
   </div>
   {% endif %}
 
-    {% if can_view_assignments and course_offering.assignment_set.all %}
+    {% if assignments %}
         <div class="row">
             <div class="col-xs-12">
                 <h3>{% trans "Assignments" %}</h3>
@@ -174,9 +174,7 @@
                     {% for assignment in assignments %}
                         <li>
                             {% if not is_failed_completed_course and assignment.magic_link %}
-                                <a href="{{ assignment.magic_link }}">
-                                    {{ assignment.title }}
-                                </a>
+                                <a href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
                             {% else %}
                                 {{ assignment.title }}
                             {% endif %}
@@ -187,27 +185,27 @@
         </div>
     {% endif %}
 
-  {% if can_view_news and course_offering.courseofferingnews_set.all %}
-  <div class="row">
-    <div class="col-xs-12">
-      <h3>{% trans "News" %}</h3>
-      {% for news in course_offering.courseofferingnews_set.all %}
-      <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
-      <div class="ubertext shorten">
-        {% markdown 3600 "co_news_text" news.pk news.modified %}
-          {{ news.text }}
-        {% endmarkdown %}
-      </div>
-      <p class="news-metainfo">
-        {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-        <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
-        <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
-        {% endif %}
-      </p>
-      {% endfor %}
+    {% if course_news %}
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>{% trans "News" %}</h3>
+            {% for news in course_news %}
+                <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
+                <div class="ubertext shorten">
+                {% markdown 3600 "co_news_text" news.pk news.modified %}
+                  {{ news.text }}
+                {% endmarkdown %}
+                </div>
+                <p class="news-metainfo">
+                    {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+                    <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+                    <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        </div>
     </div>
-  </div>
-  {% endif %}
+    {% endif %}
 
 </div>
 {% endblock content %}
