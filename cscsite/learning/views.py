@@ -643,7 +643,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                     # Hide link if student didn't try to solve assignment
                     # in completed course. No comments => no attempt
                     if (context["is_failed_completed_course"] and
-                            not a_s.student_comments_cnt):
+                            not a_s.student_comments_cnt and a_s.grade is None):
                         continue
                     to_details = reverse("a_s_detail_student", args=[a_s.pk])
                 else:
@@ -1363,7 +1363,7 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
                 if c.author == self.request.user:
                     has_comments = True
                     break
-            if not has_comments:
+            if not has_comments and sa.grade is None:
                 raise PermissionDenied
         return context
 

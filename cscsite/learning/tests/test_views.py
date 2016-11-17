@@ -1152,7 +1152,20 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         enrollment.save()
         response = self.client.get(url)
         assert response.status_code == 403
-        AssignmentCommentFactory.create(student_assignment=s_a, author=student)
+        ac = AssignmentCommentFactory.create(student_assignment=s_a,
+                                             author=student)
+        response = self.client.get(url)
+        assert response.status_code == 200
+        # Ok, next case - completed course failed, no comments but has grade
+        ac.delete()
+        s_a.grade = 1
+        s_a.save()
+        response = self.client.get(url)
+        assert response.status_code == 200
+        # The same if student not expelled
+        student.status = STUDENT_STATUS.will_graduate
+        student.save()
+        self.doLogin(student)
         response = self.client.get(url)
         assert response.status_code == 200
 
