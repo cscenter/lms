@@ -11,7 +11,7 @@ class ParticipantOnlyMixin(UserPassesTestMixin):
     def test_func(self, user):
         return (user.is_authenticated() and
                (user.is_teacher or user.is_student or user.is_curator or
-                user.is_graduate))
+                user.is_graduate or user.is_expelled))
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):
@@ -85,6 +85,7 @@ class FailedCourseContextMixin(object):
             return context
 
         if co.is_completed:
+            # TODO: optimize query
             enrollment = Enrollment.objects.filter(student=user,
                                                    course_offering=co).first()
             if enrollment and enrollment.grade in (

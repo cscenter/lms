@@ -606,7 +606,9 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         """
         user = self.request.user
         can_view_assignments = (user.is_student or user.is_graduate or
-                                user.is_curator or context["is_actual_teacher"])
+                                user.is_curator or
+                                context["is_actual_teacher"] or
+                                context['is_enrolled'])
         if not can_view_assignments:
             return []
         assignments_qs = (self.object.assignment_set
@@ -1331,7 +1333,7 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
                                          generic.CreateView):
     """
     ParticipantOnlyMixin here for 2 reasons - we should redirect teachers
-    to there own view and show submissions to graduates
+    to there own view and show submissions to graduates and expelled students
     """
     user_type = 'student'
 
@@ -1344,8 +1346,8 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        a_s = context['a_s']
-        if context['is_failed_completed_course'] and a_s.grade is None:
+        sa = context['a_s']
+        if context['is_failed_completed_course'] and sa.grade is None:
             raise PermissionDenied
         return context
 

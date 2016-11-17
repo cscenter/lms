@@ -22,7 +22,8 @@ from django.test.utils import override_settings
 from django.test import TestCase
 from django.utils.encoding import smart_text, force_text, force_str, smart_bytes
 from django.utils.translation import ugettext as _
-from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES
+from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES, \
+    STUDENT_STATUS
 from users.factories import TeacherCenterFactory, StudentFactory
 from ..utils import get_current_semester_pair
 from ..factories import *
@@ -1141,6 +1142,16 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(url)
         assert not response.context["is_failed_completed_course"]
         assert response.status_code == 200
+        # The same behavior should be for expelled student
+        student.status = STUDENT_STATUS.expelled
+        student.save()
+        self.doLogin(student)
+        response = self.client.get(url)
+        assert response.status_code == 200
+        enrollment.grade = GRADES.unsatisfactory
+        enrollment.save()
+        response = self.client.get(url)
+        assert response.status_code == 403
 
     def test_assignment_contents(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
