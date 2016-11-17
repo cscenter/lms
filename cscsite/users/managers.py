@@ -29,9 +29,9 @@ class CSCUserQuerySet(query.QuerySet):
         filters = filters or {}
         if "groups__in" not in filters:
             filters["groups__in"] = [
-                CSCUser.group_pks.STUDENT_CENTER,
-                CSCUser.group_pks.GRADUATE_CENTER,
-                CSCUser.group_pks.VOLUNTEER
+                CSCUser.group.STUDENT_CENTER,
+                CSCUser.group.GRADUATE_CENTER,
+                CSCUser.group.VOLUNTEER
             ]
         q = self.filter(**filters)
 

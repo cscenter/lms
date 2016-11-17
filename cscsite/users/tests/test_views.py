@@ -46,17 +46,17 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Not so actual for prod db, but we still should check it.
         """
         with translation.override('en'):
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CENTER],
+            self.assertEqual(CSCUser.group[CSCUser.group.STUDENT_CENTER],
                              Group.objects.get(pk=1).name)
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CENTER],
+            self.assertEqual(CSCUser.group[CSCUser.group.TEACHER_CENTER],
                              Group.objects.get(pk=2).name)
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.GRADUATE_CENTER],
+            self.assertEqual(CSCUser.group[CSCUser.group.GRADUATE_CENTER],
                              Group.objects.get(pk=3).name)
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.VOLUNTEER],
+            self.assertEqual(CSCUser.group[CSCUser.group.VOLUNTEER],
                              Group.objects.get(pk=4).name)
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.STUDENT_CLUB],
+            self.assertEqual(CSCUser.group[CSCUser.group.STUDENT_CLUB],
                              Group.objects.get(pk=5).name)
-            self.assertEqual(CSCUser.group_pks[CSCUser.group_pks.TEACHER_CLUB],
+            self.assertEqual(CSCUser.group[CSCUser.group.TEACHER_CLUB],
                              Group.objects.get(pk=6).name)
 
     def test_student_should_have_enrollment_year(self):
@@ -68,7 +68,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = UserFactory()
         user_data = model_to_dict(user)
         user_data.update({
-            'groups': [user.group_pks.STUDENT_CENTER],
+            'groups': [user.group.STUDENT_CENTER],
         })
         form = CSCUserChangeForm(user_data, instance=user)
         self.assertFalse(form.is_valid())
@@ -86,7 +86,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = UserFactory()
         user_data = model_to_dict(user)
         user_data.update({
-            'groups': [user.group_pks.GRADUATE_CENTER],
+            'groups': [user.group.GRADUATE_CENTER],
         })
         form = CSCUserChangeForm(user_data, instance=user)
         self.assertFalse(form.is_valid())
@@ -140,20 +140,20 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="bar")
         user.save()
-        user.groups = [user.group_pks.STUDENT_CENTER]
+        user.groups = [user.group.STUDENT_CENTER]
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baz")
         user.save()
-        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
+        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baq")
         user.save()
-        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER,
-                       user.group_pks.GRADUATE_CENTER]
+        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
+                       user.group.GRADUATE_CENTER]
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
@@ -195,13 +195,13 @@ class UserTests(MyUtilitiesMixin, TestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         assertLoginRedirect(url)
-        user.groups = [user.group_pks.STUDENT_CENTER]
+        user.groups = [user.group.STUDENT_CENTER]
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('assignment_list_teacher'))
         assertLoginRedirect(url)
-        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
+        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
         # Teacher has no course offering and gets 404
@@ -258,7 +258,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
-        user.groups = [user.group_pks.TEACHER_CENTER]
+        user.groups = [user.group.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
@@ -301,7 +301,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
-        user.groups = [user.group_pks.GRADUATE_CENTER]
+        user.groups = [user.group.GRADUATE_CENTER]
         user.graduation_year = 2014
         user.save()
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -331,7 +331,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         Students should have "shad courses" in profile page
         """
-        user = UserFactory(groups=[CSCUser.group_pks.STUDENT_CENTER],
+        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER],
                            enrollment_year='2013')
         sc = SHADCourseRecordFactory(student=user)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
@@ -504,7 +504,7 @@ def test_login_restrictions(client, settings):
 class ICalTests(MyUtilitiesMixin, TestCase):
     def test_classes(self):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
+        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
         user.save()
         fname = 'csc_classes.ics'
         # Empty calendar
@@ -532,7 +532,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
 
     def test_assignments(self):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.group_pks.STUDENT_CENTER, user.group_pks.TEACHER_CENTER]
+        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
         user.save()
         fname = 'csc_assignments.ics'
         # Empty calendar
@@ -644,7 +644,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = UserFactory.create(groups=[CSCUser.group_pks.STUDENT_CENTER])
+        student = UserFactory.create(groups=[CSCUser.group.STUDENT_CENTER])
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
@@ -679,7 +679,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_club_student_login_on_cscenter_site(self):
         student = UserFactory.create(is_superuser=False, is_staff=False,
-            groups=[CSCUser.group_pks.STUDENT_CLUB])
+                                     groups=[CSCUser.group.STUDENT_CLUB])
         self.doLogin(student)
         login_data = {
             'username': student.username,
@@ -690,7 +690,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.groups = [CSCUser.group_pks.STUDENT_CENTER]
+        student.groups = [CSCUser.group.STUDENT_CENTER]
         student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

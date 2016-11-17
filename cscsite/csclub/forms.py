@@ -27,6 +27,6 @@ class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
             user.save()
         # Note: It's ok save user here, even commit=False
         user.save()
-        group = Group.objects.get(pk=CSCUser.group_pks.STUDENT_CLUB)
+        group = Group.objects.get(pk=CSCUser.group.STUDENT_CLUB)
         user.groups.add(group)
         return user

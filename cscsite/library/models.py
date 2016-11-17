@@ -19,7 +19,7 @@ class Borrow(models.Model):
         # XXX: Can generate duplicates here if related user has both groups
         # It's unlikely due to admin form validation, but possible in theory
         limit_choices_to={'groups__in': [
-            CSCUser.group_pks.STUDENT_CENTER, CSCUser.group_pks.VOLUNTEER]},
+            CSCUser.group.STUDENT_CENTER, CSCUser.group.VOLUNTEER]},
         related_name="borrows", verbose_name=_("Borrow|student"))
     borrowed_on = models.DateField(_("Borrow|borrowed on"))
 

@@ -412,7 +412,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
                                                email=applicant.email,
                                                password=random_password)
 
-        user.groups.add(CSCUser.group_pks.STUDENT_CENTER)
+        user.groups.add(CSCUser.group.STUDENT_CENTER)
         # Sync application form info and user profile info
         # FIXME: some shit with naming, fix before next campaign
         user.patronymic = applicant.last_name

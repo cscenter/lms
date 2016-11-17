@@ -50,7 +50,7 @@ class IndexView(generic.TemplateView):
         testimonials = cache.get('index_page_testimonials')
         if testimonials is None:
             s = (CSCUser.objects
-                 .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+                 .filter(groups=CSCUser.group.GRADUATE_CENTER)
                  .exclude(csc_review='').exclude(photo='')
                  .order_by('?')
                  .first())
@@ -121,7 +121,7 @@ class TestimonialsListView(generic.ListView):
 
     def get_queryset(self):
         return (CSCUser.objects
-                .filter(groups=CSCUser.group_pks.GRADUATE_CENTER)
+                .filter(groups=CSCUser.group.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
                 .prefetch_related("study_programs")
                 .order_by("-graduation_year", "last_name"))
@@ -134,7 +134,7 @@ class TeachersView(generic.ListView):
     def get_queryset(self):
         user_model = get_user_model()
         qs = (user_model.objects
-              .filter(groups=user_model.group_pks.TEACHER_CENTER,
+              .filter(groups=user_model.group.TEACHER_CENTER,
                       courseofferingteacher__roles=CourseOfferingTeacher.roles.lecturer)
               .distinct())
         return qs
@@ -173,7 +173,7 @@ class AlumniView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        graduate_pk = user_model.group_pks.GRADUATE_CENTER
+        graduate_pk = user_model.group.GRADUATE_CENTER
         params = {
             "groups__pk": graduate_pk
         }
@@ -206,7 +206,7 @@ class AlumniByYearView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        graduate_pk = user_model.group_pks.GRADUATE_CENTER
+        graduate_pk = user_model.group.GRADUATE_CENTER
         params = {
             "groups__pk": graduate_pk,
         }
@@ -222,7 +222,7 @@ class AlumniByYearView(generic.ListView):
         if testimonials is None:
             s = (CSCUser.objects
                  .filter(
-                    groups=CSCUser.group_pks.GRADUATE_CENTER,
+                    groups=CSCUser.group.GRADUATE_CENTER,
                     graduation_year=self.filter_by_year,
                  )
                  .exclude(csc_review='').exclude(photo='')

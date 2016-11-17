@@ -212,7 +212,7 @@ class CSCUserStatusLog(models.Model):
 class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     # FIXME: replace `groups__name` with groups__pk in learning.signals
-    group_pks = PARTICIPANT_GROUPS
+    group = PARTICIPANT_GROUPS
 
     STATUS = STUDENT_STATUS
 
@@ -419,16 +419,16 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         # Restrict access for expelled students
         if self.is_expelled:
             user_groups = user_groups.difference({
-                self.group_pks.STUDENT_CENTER,
-                self.group_pks.VOLUNTEER
+                self.group.STUDENT_CENTER,
+                self.group.VOLUNTEER
             })
         # Add club group on club site to center students
-        center_student = (self.group_pks.STUDENT_CENTER in user_groups or
-                          self.group_pks.VOLUNTEER in user_groups or
-                          self.group_pks.GRADUATE_CENTER in user_groups)
-        if (center_student and self.group_pks.STUDENT_CLUB not in user_groups
+        center_student = (self.group.STUDENT_CENTER in user_groups or
+                          self.group.VOLUNTEER in user_groups or
+                          self.group.GRADUATE_CENTER in user_groups)
+        if (center_student and self.group.STUDENT_CLUB not in user_groups
                 and settings.SITE_ID == settings.CLUB_SITE_ID):
-            user_groups.add(self.group_pks.STUDENT_CLUB)
+            user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
     def enrolled_on_the_course(self, course_pk):
@@ -463,19 +463,19 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     # Note: Don't forget about `LearningPermissionsMixin` used for unauth user
     @cached_property
     def is_student_center(self):
-        return self.group_pks.STUDENT_CENTER in self._cached_groups
+        return self.group.STUDENT_CENTER in self._cached_groups
 
     @cached_property
     def is_student_club(self):
-        return self.group_pks.STUDENT_CLUB in self._cached_groups
+        return self.group.STUDENT_CLUB in self._cached_groups
 
     @cached_property
     def is_teacher_club(self):
-        return self.group_pks.TEACHER_CLUB in self._cached_groups
+        return self.group.TEACHER_CLUB in self._cached_groups
 
     @cached_property
     def is_teacher_center(self):
-        return self.group_pks.TEACHER_CENTER in self._cached_groups
+        return self.group.TEACHER_CENTER in self._cached_groups
 
     @cached_property
     def is_teacher(self):
@@ -483,17 +483,17 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @cached_property
     def is_graduate(self):
-        return self.group_pks.GRADUATE_CENTER in self._cached_groups
+        return self.group.GRADUATE_CENTER in self._cached_groups
 
     @cached_property
     def is_volunteer(self):
-        return self.group_pks.VOLUNTEER in self._cached_groups
+        return self.group.VOLUNTEER in self._cached_groups
 
     @cached_property
     def is_master(self):
         """Studying for a masters degree"""
         # TODO: rename, too much honor
-        return self.group_pks.MASTERS_DEGREE in self._cached_groups
+        return self.group.MASTERS_DEGREE in self._cached_groups
 
     @cached_property
     def is_curator(self):
@@ -501,15 +501,15 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @cached_property
     def is_curator_of_projects(self):
-        return self.group_pks.CURATOR_PROJECTS in self._cached_groups
+        return self.group.CURATOR_PROJECTS in self._cached_groups
 
     @cached_property
     def is_interviewer(self):
-        return self.group_pks.INTERVIEWER in self._cached_groups
+        return self.group.INTERVIEWER in self._cached_groups
 
     @cached_property
     def is_project_reviewer(self):
-        return self.group_pks.PROJECT_REVIEWER in self._cached_groups
+        return self.group.PROJECT_REVIEWER in self._cached_groups
 
 
 @python_2_unicode_compatible
