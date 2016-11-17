@@ -77,8 +77,9 @@ django-import-export==0.4.5
 tablib==0.11.2
 
 # Redis-based task manager
-django-rq==0.9.4
 rq-scheduler==0.7.0
+# XXX: Double check before update package below due to layman pushing to this repo
+django-rq==0.9.4
 
 # ipython notebook
 jupyter>=1.0
