@@ -36,7 +36,7 @@
         {% if user_type == 'student' %}
         <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.assignment.title }} <br>
-        <small>{{ a_s.assignment.course_offering }}</small>
+            <a class="small" href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
         {% else %}
         <a href="{% url 'assignment_detail_teacher' a_s.assignment.pk %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.student.get_short_name }} <br>

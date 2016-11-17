@@ -619,9 +619,16 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             assignments_qs = assignments_qs.prefetch_related(
                 Prefetch(
                     "studentassignment_set",
-                    queryset=(StudentAssignment.objects
-                              .filter(student=user)
-                              .only("pk", "assignment_id", "grade"))
+                    queryset=(
+                        StudentAssignment.objects
+                        .filter(student=user)
+                        .only("pk", "assignment_id", "grade")
+                        .annotate(student_comments_cnt=Count(Case(
+                            When(assignmentcomment__author_id=user.pk,
+                                 then=Value(1)),
+                            output_field=IntegerField())))
+                        .order_by("pk")  # optimize by setting order
+                    )
                 )
             )
 
@@ -633,10 +640,11 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             elif context["is_enrolled"]:
                 a_s = a.studentassignment_set.first()
                 if a_s is not None:
-                    if context["is_failed_completed_course"]:
-                        # Show links to handed assignments only
-                        if a_s.grade is None:
-                            continue
+                    # Hide link if student didn't try to solve assignment
+                    # in completed course. No comments => no attempt
+                    if (context["is_failed_completed_course"] and
+                            not a_s.student_comments_cnt):
+                        continue
                     to_details = reverse("a_s_detail_student", args=[a_s.pk])
                 else:
                     logger.error("can't find StudentAssignment for "
@@ -1347,8 +1355,16 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         sa = context['a_s']
-        if context['is_failed_completed_course'] and sa.grade is None:
-            raise PermissionDenied
+        if context['is_failed_completed_course']:
+            # When student fail course, deny access if he hasn't submissions
+            # TODO: move logic to context to avoid additional loop over comments
+            has_comments = False
+            for c in context['comments']:
+                if c.author == self.request.user:
+                    has_comments = True
+                    break
+            if not has_comments:
+                raise PermissionDenied
         return context
 
     def _additional_permissions_check(self, *args, **kwargs):
@@ -1383,7 +1399,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
                                   .assignment
                                   .course_offering
                                   .teachers.all()))
-        if (not is_actual_teacher and not self.request.user.is_curator):
+        if not is_actual_teacher and not self.request.user.is_curator:
             raise PermissionDenied
         context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
