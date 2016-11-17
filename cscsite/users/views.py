@@ -182,7 +182,7 @@ class UserDetailView(generic.DetailView):
         u = self.request.user
         # On center site show club students only to teachers and curators
         if self.request.site.domain != settings.CLUB_DOMAIN:
-            if (list(context["user_object"]._cs_group_pks) == [
+            if (list(context["user_object"]._cached_groups) == [
                 CSCUser.group_pks.STUDENT_CLUB]
                     and not(u.is_teacher or u.is_curator)):
                 raise Http404

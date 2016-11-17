@@ -49,7 +49,7 @@ def csc_menu(context, menu_name, root_id=False):
     # Flattened to tree
     menu_tree = []
     user = context['request'].user
-    user_groups = set(user._cs_group_pks)
+    user_groups = set(user._cached_groups)
     for item in flattened:
         if not has_permissions(item, user, user_groups):
             continue

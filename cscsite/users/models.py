@@ -410,26 +410,25 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     # TODO: think how to add declension method with ru/en support
 
     @cached_property
-    def _cs_group_pks(self):
-        # TODO: refactor with set
+    def _cached_groups(self):
         try:
-            user_groups = self._prefetched_objects_cache['groups']
-            user_groups = [group.pk for group in user_groups]
+            gs = self._prefetched_objects_cache['groups']
+            user_groups = set(g.pk for g in gs)
         except (AttributeError, KeyError):
-            user_groups = list(self.groups.values_list("pk", flat=True))
-
+            user_groups = set(self.groups.values_list("pk", flat=True))
+        # Restrict access for expelled students
+        if self.is_expelled:
+            user_groups = user_groups.difference({
+                self.group_pks.STUDENT_CENTER,
+                self.group_pks.VOLUNTEER
+            })
+        # Add club group on club site to center students
         center_student = (self.group_pks.STUDENT_CENTER in user_groups or
                           self.group_pks.VOLUNTEER in user_groups or
                           self.group_pks.GRADUATE_CENTER in user_groups)
-        # Restrict access for expelled students
-        if self.is_expelled:
-            user_groups = [pk for pk in user_groups
-                           if pk != self.group_pks.STUDENT_CENTER and
-                              pk != self.group_pks.VOLUNTEER]
-        # Add club group on csclub site to center students
         if (center_student and self.group_pks.STUDENT_CLUB not in user_groups
                 and settings.SITE_ID == settings.CLUB_SITE_ID):
-            user_groups.append(self.group_pks.STUDENT_CLUB)
+            user_groups.add(self.group_pks.STUDENT_CLUB)
         return user_groups
 
     def enrolled_on_the_course(self, course_pk):
@@ -464,19 +463,19 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     # Note: Don't forget about `LearningPermissionsMixin` used for unauth user
     @cached_property
     def is_student_center(self):
-        return self.group_pks.STUDENT_CENTER in self._cs_group_pks
+        return self.group_pks.STUDENT_CENTER in self._cached_groups
 
     @cached_property
     def is_student_club(self):
-        return self.group_pks.STUDENT_CLUB in self._cs_group_pks
+        return self.group_pks.STUDENT_CLUB in self._cached_groups
 
     @cached_property
     def is_teacher_club(self):
-        return self.group_pks.TEACHER_CLUB in self._cs_group_pks
+        return self.group_pks.TEACHER_CLUB in self._cached_groups
 
     @cached_property
     def is_teacher_center(self):
-        return self.group_pks.TEACHER_CENTER in self._cs_group_pks
+        return self.group_pks.TEACHER_CENTER in self._cached_groups
 
     @cached_property
     def is_teacher(self):
@@ -484,17 +483,17 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @cached_property
     def is_graduate(self):
-        return self.group_pks.GRADUATE_CENTER in self._cs_group_pks
+        return self.group_pks.GRADUATE_CENTER in self._cached_groups
 
     @cached_property
     def is_volunteer(self):
-        return self.group_pks.VOLUNTEER in self._cs_group_pks
+        return self.group_pks.VOLUNTEER in self._cached_groups
 
     @cached_property
     def is_master(self):
         """Studying for a masters degree"""
         # TODO: rename, too much honor
-        return self.group_pks.MASTERS_DEGREE in self._cs_group_pks
+        return self.group_pks.MASTERS_DEGREE in self._cached_groups
 
     @cached_property
     def is_curator(self):
@@ -502,15 +501,15 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @cached_property
     def is_curator_of_projects(self):
-        return self.group_pks.CURATOR_PROJECTS in self._cs_group_pks
+        return self.group_pks.CURATOR_PROJECTS in self._cached_groups
 
     @cached_property
     def is_interviewer(self):
-        return self.group_pks.INTERVIEWER in self._cs_group_pks
+        return self.group_pks.INTERVIEWER in self._cached_groups
 
     @cached_property
     def is_project_reviewer(self):
-        return self.group_pks.PROJECT_REVIEWER in self._cs_group_pks
+        return self.group_pks.PROJECT_REVIEWER in self._cached_groups
 
 
 @python_2_unicode_compatible
