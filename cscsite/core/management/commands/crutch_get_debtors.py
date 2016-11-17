@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         students = (CSCUser.objects
             .filter(
-                groups__in=[CSCUser.group_pks.STUDENT_CENTER],
+                groups__in=[CSCUser.group.STUDENT_CENTER],
                 enrollment_year__isnull=False,
                 graduation_year__isnull=True
             )

@@ -337,8 +337,8 @@ class ProgressReportForSemester(ProgressReport):
         return CSCUser.objects.students_info(
             filters={
                 "groups__in": [
-                    CSCUser.group_pks.STUDENT_CENTER,
-                    CSCUser.group_pks.VOLUNTEER
+                    CSCUser.group.STUDENT_CENTER,
+                    CSCUser.group.VOLUNTEER
                 ],
             },
             exclude={

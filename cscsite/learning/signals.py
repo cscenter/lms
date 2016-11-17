@@ -57,11 +57,10 @@ def create_assignment_comment_notification(sender, instance, created,
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     s_a = instance.student_assignment
     if instance.author.pk == s_a.student.pk:
-        is_about_passed = not ((s_a.assignmentcomment_set
-                                .exclude(pk=instance.pk)
-                                .filter(author__groups__name='Student [CENTER]')
-                                .exists()) and
-                               s_a.assignment.is_online)
+        is_about_passed = not (s_a.assignment.is_online and (
+            s_a.assignmentcomment_set.exclude(pk=instance.pk)
+                .filter(author__groups=instance.author.group.STUDENT_CENTER)
+                .exists()))
 
         teachers = instance.student_assignment.assignment.notify_teachers.all()
         # this loop can be optimized using bulk_create at the expence of

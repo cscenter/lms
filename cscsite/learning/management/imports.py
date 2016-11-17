@@ -108,8 +108,8 @@ class ImportGradesByStepicID(ImportGrades):
         try:
             user = user_model.objects.get(
                 stepic_id=stepic_id,
-                groups__in=[user_model.group_pks.STUDENT_CENTER,
-                            user_model.group_pks.VOLUNTEER])
+                groups__in=[user_model.group.STUDENT_CENTER,
+                            user_model.group.VOLUNTEER])
             return user
         except ObjectDoesNotExist:
             msg = _("No user with stepic ID {}").format(stepic_id)
@@ -165,8 +165,8 @@ class ImportGradesByYandexLogin(ImportGrades):
             user = user_model.objects.get(
                 yandex_id__iexact=yandex_id,
                 groups__in=[
-                    user_model.group_pks.STUDENT_CENTER,
-                    user_model.group_pks.VOLUNTEER])
+                    user_model.group.STUDENT_CENTER,
+                    user_model.group.VOLUNTEER])
             return user
         except ObjectDoesNotExist:
             msg = _("No user with Yandex ID {}").format(yandex_id)

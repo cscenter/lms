@@ -100,7 +100,7 @@ class TeachersView(generic.ListView):
             .distinct()
             .values_list("teachers__pk", flat=True))
         return (user_model.objects
-                .filter(groups=user_model.group_pks.TEACHER_CLUB,
+                .filter(groups=user_model.group.TEACHER_CLUB,
                         courseofferingteacher__teacher_id__in=lecturers)
                 .distinct)
 

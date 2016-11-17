@@ -19,7 +19,6 @@ from .import_export import SHADCourseRecordResource, CSCUserRecordResource
 
 
 class CSCUserCreationForm(UserCreationForm):
-    # FIXME (Sergey Zh): Guess this Meta class has no effect?
     class Meta:
         model = CSCUser
         fields = ('username',)
@@ -33,7 +32,7 @@ class CSCUserCreationForm(UserCreationForm):
             self._meta.model._default_manager.get(username=username)
         except self._meta.model.DoesNotExist:
             return username
-        raise ValidationError(self.Meta.error_messages["duplicate_username"])
+        raise ValidationError(self._meta.error_messages["duplicate_username"])
 
 
 class CSCUserChangeForm(UserChangeForm):
@@ -46,29 +45,29 @@ class CSCUserChangeForm(UserChangeForm):
         cleaned_data = super(CSCUserChangeForm, self).clean()
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = [x.pk for x in cleaned_data.get('groups', [])]
-        if self.instance.group_pks.STUDENT_CENTER in groups \
+        if self.instance.group.STUDENT_CENTER in groups \
            and enrollment_year is None:
             self.add_error('enrollment_year', ValidationError(
                 _("CSCUser|enrollment year should be provided for students")))
 
-        if self.instance.group_pks.VOLUNTEER in groups \
+        if self.instance.group.VOLUNTEER in groups \
            and enrollment_year is None:
             self.add_error('enrollment_year', ValidationError(
                 _("CSCUser|enrollment year should be provided for volunteers")))
 
         graduation_year = cleaned_data.get('graduation_year')
-        if self.instance.group_pks.GRADUATE_CENTER in groups \
+        if self.instance.group.GRADUATE_CENTER in groups \
            and graduation_year is None:
             self.add_error('graduation_year', ValidationError(
                 _("CSCUser|graduation year should be provided for graduates")))
 
-        if self.instance.group_pks.VOLUNTEER in groups \
-                and self.instance.group_pks.STUDENT_CENTER in groups:
+        if self.instance.group.VOLUNTEER in groups \
+                and self.instance.group.STUDENT_CENTER in groups:
             self.add_error('groups', ValidationError(
                 _("User can't be simultaneously in volunteer and student group")))
 
-        if self.instance.group_pks.GRADUATE_CENTER in groups \
-                and self.instance.group_pks.STUDENT_CENTER in groups:
+        if self.instance.group.GRADUATE_CENTER in groups \
+                and self.instance.group.STUDENT_CENTER in groups:
             self.add_error('groups', ValidationError(
                 _("User can't be simultaneously in graduate and student group")))
 

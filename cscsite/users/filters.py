@@ -18,10 +18,10 @@ class ListFilter(django_filters.Filter):
 
 
 class CSCUserFilter(django_filters.FilterSet):
-    FILTERING_GROUPS = [CSCUser.group_pks.VOLUNTEER,
-                        CSCUser.group_pks.STUDENT_CENTER,
-                        CSCUser.group_pks.GRADUATE_CENTER,
-                        CSCUser.group_pks.MASTERS_DEGREE]
+    FILTERING_GROUPS = [CSCUser.group.VOLUNTEER,
+                        CSCUser.group.STUDENT_CENTER,
+                        CSCUser.group.GRADUATE_CENTER,
+                        CSCUser.group.MASTERS_DEGREE]
 
     ENROLLMENTS_CNT_LIMIT = 12
 
@@ -60,7 +60,7 @@ class CSCUserFilter(django_filters.FilterSet):
                 self.empty_query = True
             groups = self.FILTERING_GROUPS[:]
             if "status" in self.data and "studying" in self.data["status"]:
-                groups.remove(CSCUser.group_pks.GRADUATE_CENTER)
+                groups.remove(CSCUser.group.GRADUATE_CENTER)
             self.data.setlist("groups", groups)
 
     def cnt_enrollments_filter(self, queryset, value):

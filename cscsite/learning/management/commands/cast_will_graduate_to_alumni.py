@@ -16,14 +16,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         will_graduate_list = CSCUser.objects.filter(groups__in=[
-            CSCUser.group_pks.STUDENT_CENTER,
-            CSCUser.group_pks.VOLUNTEER,
+            CSCUser.group.STUDENT_CENTER,
+            CSCUser.group.VOLUNTEER,
         ], status=STUDENT_STATUS.will_graduate)
 
         for user in will_graduate_list:
-            user.groups.remove(CSCUser.group_pks.STUDENT_CENTER)
-            user.groups.remove(CSCUser.group_pks.VOLUNTEER)
-            user.groups.add(CSCUser.group_pks.GRADUATE_CENTER)
+            user.groups.remove(CSCUser.group.STUDENT_CENTER)
+            user.groups.remove(CSCUser.group.VOLUNTEER)
+            user.groups.add(CSCUser.group.GRADUATE_CENTER)
             user.graduation_year = now().year
             user.status = ""
             user.save()

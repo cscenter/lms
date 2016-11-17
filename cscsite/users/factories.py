@@ -81,7 +81,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Online course %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group_pks.STUDENT_CENTER])
+                                 groups=[CSCUser.group.STUDENT_CENTER])
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):
@@ -91,7 +91,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group_pks.STUDENT_CENTER])
+                                 groups=[CSCUser.group.STUDENT_CENTER])
     grade = factory.Iterator(list(x[0] for x in GRADES))
     semester = factory.SubFactory('learning.factories.SemesterFactory')
 
@@ -103,4 +103,4 @@ class CSCUserReferenceFactory(factory.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group_pks.STUDENT_CENTER])
+                                 groups=[CSCUser.group.STUDENT_CENTER])

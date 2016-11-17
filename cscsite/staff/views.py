@@ -61,7 +61,7 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
                                        .order_by('enrollment_year')
                                        .distinct())
         context['groups'] = CSCUserFilter.FILTERING_GROUPS
-        context['groups'] = {gid: CSCUser.group_pks[gid] for gid in
+        context['groups'] = {gid: CSCUser.group[gid] for gid in
                              context["groups"]}
         context['status'] = CSCUser.STATUS
         context["status"] = {sid: name for sid, name in context["status"]}
@@ -235,8 +235,8 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
             # TODO: make redirect
             enrollment_year = year
         qs = (CSCUser.objects.filter(
-            groups__in=[CSCUser.group_pks.STUDENT_CENTER,
-                        CSCUser.group_pks.VOLUNTEER],
+            groups__in=[CSCUser.group.STUDENT_CENTER,
+                        CSCUser.group.VOLUNTEER],
             enrollment_year=enrollment_year).distinct())
         if "print" in self.request.GET:
             qs = qs.exclude(status=CSCUser.STATUS.expelled)
