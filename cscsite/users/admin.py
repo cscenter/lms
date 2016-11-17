@@ -125,7 +125,9 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def save_model(self, request, obj, form, change):
-        obj.save(edit_author=request.user)
+        if "comment" in form.changed_data:
+            obj.comment_last_author = request.user
+        super(CSCUserAdmin, self).save_model(request, obj, form, change)
 
 
 class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
