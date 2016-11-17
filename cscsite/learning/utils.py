@@ -154,7 +154,7 @@ def co_from_kwargs(kwargs):
 
 class LearningPermissionsMixin(object):
     @property
-    def _cs_group_pks(self):
+    def _cached_groups(self):
         return []
 
     @property
