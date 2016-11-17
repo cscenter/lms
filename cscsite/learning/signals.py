@@ -51,7 +51,10 @@ def create_deadline_change_notification(sender, instance, created,
 
 def create_assignment_comment_notification(sender, instance, created,
                                            *args, **kwargs):
-    """Send notification to teachers if student leave a comment, otherwise to student"""
+    """
+    Send notification to teachers if student leave a comment,
+    otherwise to student
+    """
     if not created:
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
