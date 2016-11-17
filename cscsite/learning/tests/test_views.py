@@ -1130,13 +1130,13 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         url = reverse("a_s_detail_student", args=[s_a.pk])
         response = self.client.get(url)
         assert response.status_code == 403
-        s_a.grade = 1
-        s_a.save()
+        # Student discussed the assignment, so has access
+        ac = AssignmentCommentFactory.create(student_assignment=s_a,
+                                             author=student)
         response = self.client.get(url)
         assert response.context["is_failed_completed_course"]
         # Course completed, but not failed, user can see all assignments
-        s_a.grade = None
-        s_a.save()
+        ac.delete()
         enrollment.grade = GRADES.good
         enrollment.save()
         response = self.client.get(url)
@@ -1152,6 +1152,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         enrollment.save()
         response = self.client.get(url)
         assert response.status_code == 403
+        AssignmentCommentFactory.create(student_assignment=s_a, author=student)
+        response = self.client.get(url)
+        assert response.status_code == 200
 
     def test_assignment_contents(self):
         student = UserFactory.create(groups=['Student [CENTER]'])

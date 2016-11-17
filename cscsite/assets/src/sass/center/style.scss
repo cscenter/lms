@@ -346,8 +346,10 @@ html {
   text-align: center;
 }
 
-h2 small a {
-  color: #999;
+h2 {
+  small a {
+    color: $color-gray-48;
+  }
 }
 
 .h2-and-buttons {
