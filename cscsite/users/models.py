@@ -380,8 +380,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return full_name or self.username
 
     def get_short_name(self):
-        return (smart_text(" ".join([self.first_name,
-                                     self.last_name]).strip())
+        return (smart_text(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
     def get_abbreviated_name(self):
@@ -389,7 +388,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         sign = "."
         # By the decree of Alexander, added additional whitespace for club site
         if settings.SITE_ID == 2:
-            sign += " "
+            sign = ". "
         abbrev_name = smart_text(str(sign)
                                  .join(part for part in parts if part)
                                  .strip())
@@ -423,7 +422,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                           self.group_pks.VOLUNTEER in user_groups or
                           self.group_pks.GRADUATE_CENTER in user_groups)
         # Restrict access for expelled students
-        if self.status == self.STATUS.expelled:
+        if self.is_expelled:
             user_groups = [pk for pk in user_groups
                            if pk != self.group_pks.STUDENT_CENTER and
                               pk != self.group_pks.VOLUNTEER]
@@ -434,9 +433,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return user_groups
 
     def enrolled_on_the_course(self, course_pk):
-        return (
-            (self.is_student or self.is_graduate) and
-            self.enrolled_on_set.filter(pk=course_pk).exists())
+        return ((self.is_student or self.is_graduate or self.is_expelled) and
+                self.enrolled_on_set.filter(pk=course_pk).exists())
+
+    @property
+    def is_expelled(self):
+        """We remove student group from expelled users on login action"""
+        return self.status == STUDENT_STATUS.expelled
 
     @property
     def status_display(self):
