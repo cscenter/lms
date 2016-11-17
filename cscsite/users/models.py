@@ -238,8 +238,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     )
     gender = models.CharField(_("Gender"), max_length=1, choices=GENDER_CHOICES)
 
-    _original_comment = None
-
     modified = AutoLastModifiedField(_('modified'))
 
     patronymic = models.CharField(
@@ -355,30 +353,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
-    def __init__(self, *args, **kwargs):
-        super(CSCUser, self).__init__(*args, **kwargs)
-        # TODO: No need to prefetch this field if it's marked as deffered
-        # TODO: Django 1.9 migration: check get_deferred_fields() method
-        self._original_comment = self.comment
-
     def save(self, **kwargs):
         if self.email and not self.yandex_id:
             username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
-
-        if self.comment != self._original_comment:
-            author = kwargs.get('edit_author')
-            if author is None:
-                logger.warning("edit_author is not provided, kwargs {}"
-                               .format(kwargs))
-            else:
-                self.comment_last_author = author
-        if 'edit_author' in kwargs:
-            del kwargs['edit_author']
-
         super(CSCUser, self).save(**kwargs)
-        self._original_comment = self.comment
 
     def __str__(self):
         return smart_text(self.get_full_name(True))
