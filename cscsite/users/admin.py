@@ -21,6 +21,7 @@ from .import_export import SHADCourseRecordResource, CSCUserRecordResource
 class CSCUserCreationForm(UserCreationForm):
     class Meta:
         model = CSCUser
+        # FIXME: Ok, it's really don't work.
         fields = ('username',)
         error_messages = {
             'duplicate_username': _("Username must be unique"),
@@ -111,16 +112,19 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
         (None, {'fields': ('username', 'email', 'password')}),
         (_('Personal info'), {'fields': ['last_name', 'first_name',
                                          'patronymic', 'gender',
-                                         'photo', 'note', 'enrollment_year',
-                                         'graduation_year',
+                                         'photo', 'note',
                                          'csc_review']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions']}),
-        (_('External services'), {'fields': ['yandex_id', 'stepic_id']}),
+        (_('External services'), {'fields': ['yandex_id', 'stepic_id',
+                                             'github_id']}),
         (_('Student info record'),
-         {'fields': ['status', 'status_changed_at', 'study_programs', 'university',
-                     'workplace', 'uni_year_at_enrollment', 'phone',
-                     'comment', 'comment_changed_at', 'comment_last_author']}),
+         {'fields': ['status', 'status_changed_at', 'enrollment_year',
+                     'graduation_year', 'curriculum_year', 'study_programs',
+                     'university', 'workplace', 'uni_year_at_enrollment',
+                     'phone']}),
+        (_("Curator's note"),
+         {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def save_model(self, request, obj, form, change):
