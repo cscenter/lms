@@ -266,6 +266,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         blank=True,
         validators=[MinValueValidator(1990)],
         null=True)
+    curriculum_year = models.PositiveSmallIntegerField(
+        _("CSCUser|Curriculum year"),
+        validators=[MinValueValidator(2000)],
+        blank=True,
+        null=True)
     yandex_id = models.CharField(
         _("Yandex ID"),
         max_length=80,
