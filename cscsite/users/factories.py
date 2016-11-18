@@ -43,6 +43,13 @@ class UserFactory(factory.DjangoModelFactory):
         self.save()
         self.raw_password = raw_password
 
+    @factory.post_generation
+    def curriculum_year(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if not extracted and self.enrollment_year:
+            self.curriculum_year = self.enrollment_year
+
 
 class CuratorFactory(UserFactory):
     is_superuser = True

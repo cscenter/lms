@@ -1,7 +1,7 @@
 (function ($, _) {
     "use strict";
 
-    var enrollmentYears = {};
+    var curriculumYears = {};
     var groups = {};
     var status = {};
     var qstr = "";
@@ -16,7 +16,7 @@
                     flatStatuses,
                     flatEnrollmentsCount;
 
-                flatYears = _.chain(enrollmentYears)
+                flatYears = _.chain(curriculumYears)
                     .pairs()
                     .filter(function (x) {
                         return x[1]
@@ -57,7 +57,7 @@
                     url: ajaxURI,
                     data: {
                         name: qstr,
-                        enrollment_year: flatYears,
+                        curriculum_year: flatYears,
                         groups: flatGroups,
                         status: flatStatuses,
                         cnt_enrollments: flatEnrollmentsCount,
@@ -85,9 +85,9 @@
             };
             query = _.debounce(query, 200);
 
-            $('.user-search [name="enrollment_year_cb"]')
+            $('.user-search [name="curriculum_year_cb"]')
                 .each(function (idx, obj) {
-                    enrollmentYears[$(obj).val()] = false;
+                    curriculumYears[$(obj).val()] = false;
                 });
 
             $('.user-search')
@@ -95,8 +95,8 @@
                     qstr = $(this).val();
                     query();
                 })
-                .on('change', '[name="enrollment_year_cb"]', function (e) {
-                    enrollmentYears[$(this).val()] = this.checked;
+                .on('change', '[name="curriculum_year_cb"]', function (e) {
+                    curriculumYears[$(this).val()] = this.checked;
                     query();
                 })
                 .on('change', '[name="group"]', function (e) {

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-18 16:00+0300\n"
-"PO-Revision-Date: 2016-11-18 16:01+0230\n"
+"POT-Creation-Date: 2016-11-18 16:25+0300\n"
+"PO-Revision-Date: 2016-11-18 16:25+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2065,9 +2065,9 @@ msgstr "Поиск студентов"
 msgid "Name, full or partial"
 msgstr "Имя, целиком или часть"
 
-#: cscsite/templates/staff/student_search.html:27 cscsite/users/models.py:260
-msgid "CSCUser|enrollment year"
-msgstr "Год поступления"
+#: cscsite/templates/staff/student_search.html:27 cscsite/users/models.py:270
+msgid "CSCUser|Curriculum year"
+msgstr "Год программы обучения"
 
 #: cscsite/templates/staff/student_search.html:39
 msgid "Groups"
@@ -2214,14 +2214,19 @@ msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
 #: cscsite/templates/users/user_detail.html:385
+#| msgid "CSCUser|Curriculum year"
+msgid "Curriculum year"
+msgstr "Год программы обучения"
+
+#: cscsite/templates/users/user_detail.html:388
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: cscsite/templates/users/user_detail.html:401 cscsite/users/models.py:350
+#: cscsite/templates/users/user_detail.html:404 cscsite/users/models.py:350
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/templates/users/user_detail.html:410
+#: cscsite/templates/users/user_detail.html:413
 #: cscsite/users/tests/test_views.py:613 cscsite/users/tests/test_views.py:618
 msgid "Student references"
 msgstr "Справки студента"
@@ -2265,7 +2270,6 @@ msgid "External services"
 msgstr "Внешние сервисы"
 
 #: cscsite/users/admin.py:126
-#| msgid "Curator of projects"
 msgid "Curator's note"
 msgstr "Заметка куратора"
 
@@ -2386,14 +2390,13 @@ msgstr "Фото"
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
+#: cscsite/users/models.py:260
+msgid "CSCUser|enrollment year"
+msgstr "Год поступления"
+
 #: cscsite/users/models.py:265
 msgid "CSCUser|graduation year"
 msgstr "Год выпуска"
-
-#: cscsite/users/models.py:270
-#| msgid "CSCUser|enrollment year"
-msgid "CSCUser|Curriculum year"
-msgstr "Год программы обучения"
 
 #: cscsite/users/models.py:275
 msgid "Yandex ID"

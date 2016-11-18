@@ -382,6 +382,9 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>{% trans "Curriculum year" %}:</td>
+                            <td>{{ user_object.curriculum_year|default:'—' }}</td>
+                        <tr>
                             <td>{% trans "StudentInfo|Study program" %}:</td>
                             <td>
                                 {% with sps=user_object.study_programs.all %}

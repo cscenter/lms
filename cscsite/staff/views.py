@@ -54,11 +54,11 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StudentSearchView, self).get_context_data(**kwargs)
         context['json_api_uri'] = reverse('staff:student_search_json')
-        context['enrollment_years'] = (CSCUser.objects
-                                       .values_list('enrollment_year',
+        context['curriculum_years'] = (CSCUser.objects
+                                       .values_list('curriculum_year',
                                                     flat=True)
-                                       .filter(enrollment_year__isnull=False)
-                                       .order_by('enrollment_year')
+                                       .filter(curriculum_year__isnull=False)
+                                       .order_by('curriculum_year')
                                        .distinct())
         context['groups'] = CSCUserFilter.FILTERING_GROUPS
         context['groups'] = {gid: CSCUser.group[gid] for gid in
