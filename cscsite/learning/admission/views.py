@@ -418,7 +418,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         user.patronymic = applicant.last_name
         user.first_name = applicant.first_name
         user.last_name = applicant.second_name
-        user.enrollment_year = now().year
+        user.enrollment_year = user.curriculum_year = now().year
         # Looks like the same fields below
         user.yandex_id = applicant.yandex_id
         # For github left part after github.com/ only
