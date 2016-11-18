@@ -24,11 +24,11 @@
                  autofocus autocomplete="off">
         </div>
         <div class="form-group">
-          <label>{% trans "CSCUser|enrollment year" %}</label><br>
+          <label>{% trans "CSCUser|Curriculum year" %}</label><br>
           <div class="btn-group btn-group-sm" data-toggle="buttons">
-            {% for year in enrollment_years %}
+            {% for year in curriculum_years %}
               <label class="btn btn-default">
-                <input type="checkbox" name="enrollment_year_cb"
+                <input type="checkbox" name="curriculum_year_cb"
                        value="{{ year }}"
                        autocomplete="off">{{ year }}
               </label>

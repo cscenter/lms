@@ -38,33 +38,33 @@ def test_student_search(client, curator):
     response = client.get(SEARCH_URL)
     assert response.status_code == 200
     assert response.json()["total"] == 0
-    response = client.get("{}?{}".format(SEARCH_URL, "enrollment_year=2011"))
+    response = client.get("{}?{}".format(SEARCH_URL, "curriculum_year=2011"))
     # Club users not included
     assert response.json()["total"] == 3
     # 2011 & 2012 years
     response = client.get("{}?{}".format(SEARCH_URL,
-                                         "enrollment_year=2011%2C2012"))
+                                         "curriculum_year=2011%2C2012"))
     assert response.json()["total"] == 4
     # Now test groups filter
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.MASTERS_DEGREE)
+        "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.MASTERS_DEGREE)
     ))
     assert response.json()["total"] == 0
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.STUDENT_CENTER)
+        "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.STUDENT_CENTER)
     ))
     assert response.json()["total"] == 2
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}".format(PARTICIPANT_GROUPS.VOLUNTEER)
+        "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.VOLUNTEER)
     ))
     assert response.json()["total"] == 1
     assert response.json()["users"][0]["first_name"] == volunteer.first_name
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}&groups={}".format(
+        "curriculum_year=2011&groups={}&groups={}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER
         )
@@ -74,7 +74,7 @@ def test_student_search(client, curator):
     volunteer.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}&groups={}&status={}".format(
+        "curriculum_year=2011&groups={}&groups={}&status={}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled
@@ -85,7 +85,7 @@ def test_student_search(client, curator):
     student.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}&groups={}&status={},{}".format(
+        "curriculum_year=2011&groups={}&groups={}&status={},{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,
@@ -95,7 +95,7 @@ def test_student_search(client, curator):
     assert response.json()["total"] == 2
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}&groups={}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={}&groups={}&status={},{}&{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,
@@ -107,7 +107,7 @@ def test_student_search(client, curator):
     # Check multi values still works for cnt_enrollments
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "enrollment_year=2011&groups={}&groups={}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={}&groups={}&status={},{}&{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,

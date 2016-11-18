@@ -30,7 +30,7 @@ class CSCUserFilter(django_filters.FilterSet):
     name = django_filters.MethodFilter(action='name_filter')
     cnt_enrollments = django_filters.MethodFilter(action='cnt_enrollments_filter')
     # FIXME: replace with range?
-    enrollment_year = ListFilter(name='enrollment_year')
+    curriculum_year = ListFilter(name='curriculum_year')
     status = django_filters.MethodFilter(action='status_filter')
     status_log = django_filters.MethodFilter(action='status_log_filter')
     # FIXME: set cscuserstatuslog__created_0 and cscuserstatuslog__created_1 EXAMPLE: 2015-01-01%208:00
@@ -38,7 +38,7 @@ class CSCUserFilter(django_filters.FilterSet):
 
     class Meta:
         model = CSCUser
-        fields = ["name", "enrollment_year", "groups", "status",
+        fields = ["name", "curriculum_year", "groups", "status",
                   "cnt_enrollments", "cscuserstatuslog__created"]
 
     def __init__(self, *args, **kwargs):
