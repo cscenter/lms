@@ -641,7 +641,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 a_s = a.studentassignment_set.first()
                 if a_s is not None:
                     # Hide link if student didn't try to solve assignment
-                    # in completed course. No comments => no attempt
+                    # in completed course. No comments and grade => no attempt
                     if (context["is_failed_completed_course"] and
                             not a_s.student_comments_cnt and a_s.grade is None):
                         continue
