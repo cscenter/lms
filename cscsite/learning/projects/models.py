@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import math
 
 from django.apps import apps
 from django.conf import settings
@@ -21,6 +22,17 @@ from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair, get_term_index
+
+
+# Calculate mean scores for these fields when review has been completed
+REVIEW_SCORE_FIELDS = [
+    "score_global_issue",
+    "score_usefulness",
+    "score_progress",
+    "score_problems",
+    "score_technologies",
+    "score_plans",
+]
 
 
 @python_2_unicode_compatible
@@ -376,11 +388,30 @@ class Report(ReviewCriteria):
     def is_completed(self):
         return self.status == self.COMPLETED
 
+    def calculate_mean_scores(self):
+        """Set mean values on score fields which been assessed by reviewers"""
+        scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
+        for review in self.review_set.all():
+            for field_name in REVIEW_SCORE_FIELDS:
+                total, count = scores[field_name]
+                if getattr(review, field_name) is not None:
+                    scores[field_name] = (
+                        total + getattr(review, field_name),
+                        count + 1
+                    )
+        for field_name in REVIEW_SCORE_FIELDS:
+            total, count = scores.get(field_name)
+            mean = math.ceil(total / count) if count else 0
+            setattr(self, field_name, mean)
+
     @property
     def final_score(self):
         """Sum of all criteria"""
         if not self.is_completed():
             return _("review not completed")
+        return self.calculate_final_score()
+
+    def calculate_final_score(self):
         return sum(
             getattr(self, field.name) for field in self._meta.get_fields()
             if isinstance(field, models.IntegerField) and
