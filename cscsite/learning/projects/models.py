@@ -34,6 +34,11 @@ REVIEW_SCORE_FIELDS = [
     "score_plans",
 ]
 
+CURATOR_SCORE_FIELDS = [
+    "score_quality",
+    "score_activity"
+]
+
 
 @python_2_unicode_compatible
 class ProjectStudent(models.Model):
@@ -412,6 +417,7 @@ class Report(ReviewCriteria):
         return self.calculate_final_score()
 
     def calculate_final_score(self):
+        """For preliminary assessment call calculate_mean_scores first"""
         return sum(
             getattr(self, field.name) for field in self._meta.get_fields()
             if isinstance(field, models.IntegerField) and

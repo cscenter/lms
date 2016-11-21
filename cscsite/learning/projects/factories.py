@@ -1,8 +1,9 @@
 import factory
-from factory.fuzzy import FuzzyInteger
+from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
 from learning.factories import SemesterFactory
-from learning.projects.models import Project, ProjectStudent, Report
+from learning.projects.models import Project, ProjectStudent, Report, Review, \
+    REVIEW_SCORE_FIELDS
 from users.factories import UserFactory
 
 
@@ -49,4 +50,22 @@ class ReportFactory(factory.DjangoModelFactory):
         model = Report
 
     project_student = factory.SubFactory(ProjectStudentFactory)
+    score_activity = FuzzyChoice([v for v, _ in Report.ACTIVITY])
+    score_quality = FuzzyChoice([v for v, _ in Report.QUALITY])
 
+
+class ReviewFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Review
+
+    report = factory.SubFactory(ReportFactory)
+    reviewer = factory.SubFactory(UserFactory)
+    score_global_issue = FuzzyChoice([v for v, _ in
+                                      Review.GLOBAL_ISSUE_CRITERION])
+    score_usefulness = FuzzyChoice([v for v, _ in
+                                    Review.USEFULNESS_CRITERION])
+    score_progress = FuzzyChoice([v for v, _ in Review.PROGRESS_CRITERION])
+    score_problems = FuzzyChoice([v for v, _ in Review.PROBLEMS_CRITERION])
+    score_technologies = FuzzyChoice([v for v, _ in
+                                      Review.TECHNOLOGIES_CRITERION])
+    score_plans = FuzzyChoice([v for v, _ in Review.PLANS_CRITERION])

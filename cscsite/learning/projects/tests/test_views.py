@@ -8,9 +8,8 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from learning.factories import SemesterFactory
-from learning.projects.factories import ProjectFactory, ReportFactory, \
-    ProjectStudentFactory
-from learning.projects.models import Report, ProjectStudent, Project
+from learning.projects.factories import ProjectFactory, ReportFactory
+from learning.projects.models import Report, ProjectStudent
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair
 from notifications.models import Notification
@@ -447,7 +446,7 @@ def test_report_page_summarize_notifications(client, curator):
     client.post(url, form)
     assert Notification.objects.count() == 1
     assert Notification.objects.all()[0].recipient == student1
-    # TODO: test mean values
+
 
 # TODO: проверить видимость форм, на уровне контекста, post-запросы
 # TODO: test notifications was read on target pages: new comment, new report
