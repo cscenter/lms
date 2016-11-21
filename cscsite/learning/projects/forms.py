@@ -1,10 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-import math
 from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Button, Div, HTML, Fieldset, Row, BaseInput
+from crispy_forms.layout import Layout, Submit, Div, HTML
 from django import forms
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -12,17 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from core import comment_persistence
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from core.views import ReadOnlyFieldsMixin
 from learning.projects.models import ReportComment, Review, Report
-
-REVIEW_SCORE_FIELDS = [
-    "score_global_issue",
-    "score_usefulness",
-    "score_progress",
-    "score_problems",
-    "score_technologies",
-    "score_plans",
-]
 
 
 class ReportForm(forms.ModelForm):
@@ -210,27 +198,29 @@ class ReportReviewForm(forms.ModelForm):
 class ReportSummarizeForm(forms.ModelForm):
     prefix = "report_summary_form"
 
-    complete = forms.BooleanField(
-        label=_("Complete"),
-        help_text=_("Check if you want to send results to student"),
-        required=False,
-    )
+    complete = forms.BooleanField(required=False)
 
     class Meta:
         model = Report
         fields = (
+            # "complete",
             "final_score_note",
-            "complete"
         )
 
     def __init__(self, *args, **kwargs):
         super(ReportSummarizeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
-        self.helper.layout.append(
+        self.helper.layout = Layout(
+            Div('final_score_note'),
             FormActions(
-                Submit(self.prefix, _('Save'))
+                Submit(self.prefix + "-complete", _('Complete')),
+                StrictButton(_("Save draft"),
+                             name=self.prefix,
+                             type="submit",
+                             css_class="btn-default"),
             )
         )
+
         self.helper.form_action = reverse_lazy(
             "projects:project_report_summarize",
             kwargs={
@@ -241,21 +231,8 @@ class ReportSummarizeForm(forms.ModelForm):
 
     def save(self, commit=True):
         if self.cleaned_data.get('complete', False):
-            # Calculate mean values for review score fields
-            scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
-            reviews = Review.objects.filter(report=self.instance).all()
-            for review in reviews:
-                for field_name in REVIEW_SCORE_FIELDS:
-                    total, count = scores[field_name]
-                    if getattr(review, field_name) is not None:
-                        scores[field_name] = (
-                            total + getattr(review, field_name),
-                            count + 1
-                        )
-            for field_name in REVIEW_SCORE_FIELDS:
-                total, count = scores.get(field_name)
-                mean = math.ceil(total / count) if count else 0
-                setattr(self.instance, field_name, mean)
+            # Calculate mean values for review score fields and set on instance
+            self.instance.calculate_mean_scores()
             self.instance.status = self._meta.model.COMPLETED
         instance = super(ReportSummarizeForm, self).save(commit)
         return instance

@@ -466,12 +466,16 @@ class ReportView(FormMixin, generic.DetailView):
         project_pk = self.kwargs.get("project_pk")
         student_pk = self.kwargs.get("student_pk")
         report = get_object_or_404(
-            Report.objects.filter(
+            Report.objects
+            .filter(
                 project_student__student=student_pk,
-                project_student__project=project_pk,
-            ).select_related("project_student",
-                             "project_student__project",
-                             "project_student__project__semester"))
+                project_student__project=project_pk)
+            .select_related(
+                "project_student",
+                "project_student__student",
+                "project_student__project",
+                "project_student__project__semester")
+        )
         return report
 
     def set_roles(self, report):
@@ -560,18 +564,19 @@ class ReportView(FormMixin, generic.DetailView):
         context = super(FormMixin, self).get_context_data(**kwargs)
         report = context[self.context_object_name]
         form_kwargs = {
-            "report": self.object,
+            "report": report,
             "author": self.request.user
         }
         if report.summarize_state() and self.request.user.is_curator:
+            report.calculate_mean_scores()
             context[ReportSummarizeForm.prefix] = ReportSummarizeForm(
-                instance=self.object)
+                instance=report)
         if ReportStatusForm.prefix not in context:
             context[ReportStatusForm.prefix] = ReportStatusForm(
-                instance=self.object)
+                instance=report)
         if ReportCuratorAssessmentForm.prefix not in context:
             context[ReportCuratorAssessmentForm.prefix] = \
-                ReportCuratorAssessmentForm(instance=self.object)
+                ReportCuratorAssessmentForm(instance=report)
         if ReportCommentForm.prefix not in context:
             context[ReportCommentForm.prefix] = ReportCommentForm(**form_kwargs)
         own_review = self.get_review_object(report)
