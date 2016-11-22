@@ -155,12 +155,11 @@
 
         {% if request.user.is_curator and report.summarize_state %}
             <div class="csc-well" id="report-summarize-form">
-                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подвести итоги</span>
-                &nbsp;(предварительная сумма {% blocktrans count counter=report_summary_form.instance.calculate_final_score trimmed %}
+                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подвести итоги&nbsp;({% blocktrans count counter=report_summary_form.instance.calculate_final_score trimmed %}
                                     {{ counter }} point
                                     {% plural %}
                                     {{ counter }} points
-                                {% endblocktrans %})
+                                {% endblocktrans %})</span>
                 {% crispy report_summary_form %}
             </div>
         {% elif report.is_completed  %}
