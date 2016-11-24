@@ -126,28 +126,33 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
         if not hasattr(project, "__cmp__num_order"):
             reports_cnt = 0
             participants_cnt = 0
+            # TODO: Ok, rewrite with Counter if 1 more variable should be added?
             any_has_sent_status = False
             any_has_review_status = False
             any_has_summary_status = False
             all_has_review_status = True
+            all_has_sent_or_review_status = True
             for ps in project.projectstudent_set.all():
                 try:
-                    report = ps.report
+                    report = ps.report  # Raise exception if no report
+                    reports_cnt += 1
                     if report.status == Report.SENT:
                         any_has_sent_status = True
                     elif report.status == Report.SUMMARY:
                         any_has_summary_status = True
+                        all_has_sent_or_review_status = False
                     elif report.status == Report.REVIEW:
                         any_has_review_status = True
                     else:
                         all_has_review_status = False
-                    reports_cnt += 1
+                        all_has_sent_or_review_status = False
                     participants_cnt += 1
                 except (AttributeError, Report.DoesNotExist):
                     if ps.final_grade == ProjectStudent.GRADES.not_graded:
                         participants_cnt += 1
             all_sent_report = (participants_cnt == reports_cnt)
-            if all_sent_report and any_has_sent_status:
+            if (all_sent_report and any_has_sent_status and
+                    all_has_sent_or_review_status):
                 num_order = 1
             elif all_sent_report and any_has_summary_status:
                 num_order = 2
@@ -165,6 +170,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
             project.__cmp__num_order = num_order
         else:
             num_order = project.__cmp__num_order
+        print(num_order, project.name)
         return num_order, project.name
 
 
