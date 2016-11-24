@@ -117,19 +117,17 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
         """
         Немного сумасшедшая сортировка:
         1. отправлены отчёты всех участников, проверка ещё не у всех
-        2. подведение итогов куратором у всех участников
+        2. подведение итогов куратором у кого-то из участников
         3. отправлены не у всех
         4. не отправлены у всех
         5. на проверке у всех
-        6. у кого-то на подведении итогов, у кого-то на проверке
-        (сейчас не строго, могут быть и другие статусы)
+        6. у кого-то на проверке
         """
         if not hasattr(project, "__cmp__num_order"):
             reports_cnt = 0
             participants_cnt = 0
             any_has_sent_status = False
             any_has_review_status = False
-            all_has_summary_status = True
             any_has_summary_status = False
             all_has_review_status = True
             for ps in project.projectstudent_set.all():
@@ -137,11 +135,9 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                     report = ps.report
                     if report.status == Report.SENT:
                         any_has_sent_status = True
-                    if report.status == Report.SUMMARY:
+                    elif report.status == Report.SUMMARY:
                         any_has_summary_status = True
-                    else:
-                        all_has_summary_status = False
-                    if report.status == Report.REVIEW:
+                    elif report.status == Report.REVIEW:
                         any_has_review_status = True
                     else:
                         all_has_review_status = False
@@ -153,7 +149,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
             all_sent_report = (participants_cnt == reports_cnt)
             if all_sent_report and any_has_sent_status:
                 num_order = 1
-            elif all_sent_report and all_has_summary_status:
+            elif all_sent_report and any_has_summary_status:
                 num_order = 2
             elif reports_cnt == 0:
                 # Subset of next condition, check in the first place
@@ -162,8 +158,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                 num_order = 3
             elif all_sent_report and all_has_review_status:
                 num_order = 5
-            elif (all_sent_report and any_has_summary_status and
-                    any_has_review_status):
+            elif all_sent_report and any_has_review_status:
                 num_order = 6
             else:
                 num_order = 7
