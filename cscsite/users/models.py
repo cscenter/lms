@@ -421,12 +421,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups = set(g.pk for g in gs)
         except (AttributeError, KeyError):
             user_groups = set(self.groups.values_list("pk", flat=True))
-        # Restrict access for expelled students
-        if self.is_expelled:
-            user_groups = user_groups.difference({
-                self.group.STUDENT_CENTER,
-                self.group.VOLUNTEER
-            })
         # Add club group on club site to center students
         center_student = (self.group.STUDENT_CENTER in user_groups or
                           self.group.VOLUNTEER in user_groups or
@@ -437,7 +431,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return user_groups
 
     def enrolled_on_the_course(self, course_pk):
-        return ((self.is_student or self.is_graduate or self.is_expelled) and
+        return ((self.is_student or self.is_graduate) and
                 self.enrolled_on_set.filter(pk=course_pk).exists())
 
     @property

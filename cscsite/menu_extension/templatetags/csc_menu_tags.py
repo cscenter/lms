@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 
 from treemenus.models import Menu, MenuItem
 
+from learning.settings import PARTICIPANT_GROUPS
 from .. import CSCMENU_CACHE
 
 register = template.Library()
@@ -75,6 +76,10 @@ def has_permissions(item, user, user_groups, **kwargs):
     """Check user has permissions for view menu item"""
     if len(item.groups_allowed) > 0:
         if not user_groups.intersection(item.groups_allowed):
+            return False
+        elif ((PARTICIPANT_GROUPS.STUDENT_CENTER in item.groups_allowed or
+                PARTICIPANT_GROUPS.VOLUNTEER in item.groups_allowed) and
+                user.is_expelled):
             return False
     if item.extension.unauthenticated and user.is_authenticated():
         return False

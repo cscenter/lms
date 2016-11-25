@@ -41,7 +41,7 @@
                 </div>
                 {% elif user_object.is_student %}
                 <div class="progress-info">
-                    {% trans "student"|title %}{% if user_object.enrollment_year %}, {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% endif %}
+                    {% trans "student"|title %}{% if user_object.enrollment_year %} {{ user_object.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if user_object.is_expelled %}, {{ user_object.get_status_display|lower }}{% endif %}
                 </div>
                 {% elif user_object.is_teacher %}
                 <div class="progress-info">

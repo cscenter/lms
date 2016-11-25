@@ -6,12 +6,12 @@ from learning.settings import FOUNDATION_YEAR
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):
+    """Used on assignment detail page"""
     raise_exception = False
 
     def test_func(self, user):
-        return (user.is_authenticated() and
-               (user.is_teacher or user.is_student or user.is_curator or
-                user.is_graduate or user.is_expelled))
+        return (user.is_teacher or user.is_curator or user.is_graduate or
+                user.is_student)
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):
@@ -43,15 +43,18 @@ class StudentOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):
+        is_active_student = user.is_student and not user.is_expelled
         return (user.is_authenticated() and
-                (user.is_student or user.is_curator))
+                (is_active_student or user.is_curator))
 
 
 class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):
-        return user.is_student_center or user.is_volunteer or user.is_curator
+        is_active_student = (user.is_student_center or
+                             user.is_volunteer) and not user.is_expelled
+        return is_active_student or user.is_curator
 
 
 class CuratorOnlyMixin(UserPassesTestMixin):

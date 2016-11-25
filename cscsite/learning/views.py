@@ -528,9 +528,11 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
 
         context['assignments'] = self.get_assignments(context)
 
-        can_view_news = (not context['is_failed_completed_course'] and
-            (user.is_authenticated() or
-             self.request.site.domain == settings.CLUB_DOMAIN))
+        is_club_site = self.request.site.domain == settings.CLUB_DOMAIN
+        can_view_news = (
+            not context['is_failed_completed_course'] and
+            ((user.is_authenticated() and not user.is_expelled) or is_club_site)
+        )
         if can_view_news:
             context["course_news"] = co.courseofferingnews_set.all()
         else:
