@@ -170,7 +170,6 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
             project.__cmp__num_order = num_order
         else:
             num_order = project.__cmp__num_order
-        print(num_order, project.name)
         return num_order, project.name
 
 
