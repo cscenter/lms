@@ -60,7 +60,7 @@
       </div>
     </div>
     <div class="col-xs-4">
-        {% if request.user.is_student and course_offering.enrollment_opened %}
+        {% if request.user.is_student and not request.user.is_expelled and course_offering.enrollment_opened %}
             <div class="enroll-block">
                 {% if is_enrolled %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"

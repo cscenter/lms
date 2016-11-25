@@ -209,5 +209,9 @@ class LearningPermissionsMixin(object):
     def is_project_reviewer(self):
         return False
 
+    @property
+    def is_expelled(self):
+        return False
+
     def enrolled_on_the_course(self, *args, **kwargs):
         return False

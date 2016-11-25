@@ -31,7 +31,10 @@ def test_cached_groups(settings):
     user.groups.add(PARTICIPANT_GROUPS.VOLUNTEER)
     # Invalidate property cache
     del user._cached_groups
-    assert set(user._cached_groups) == {PARTICIPANT_GROUPS.TEACHER_CENTER}
+    # Nothing change!
+    assert user._cached_groups == {PARTICIPANT_GROUPS.TEACHER_CENTER,
+                                   PARTICIPANT_GROUPS.STUDENT_CENTER,
+                                   PARTICIPANT_GROUPS.VOLUNTEER}
     # Add student club group for center students on club site
     user.groups.clear()
     del user._cached_groups
