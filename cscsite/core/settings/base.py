@@ -97,6 +97,9 @@ INSTALLED_APPS = [
     'learning.gallery.apps.GalleryConfig',
     'learning.projects.apps.ProjectsConfig',
     'notifications.apps.NotificationsConfig',
+    'rest_framework',
+    'api.apps.APIConfig',
+    'stats.apps.StatisticsConfig',
     'django_rq',
 ]
 
@@ -249,3 +252,12 @@ NOTIFICATION_TYPES = [
     "ASSIGNMENT_DEADLINE_UPDATED",
     "NEW_ASSIGNMENT_SUBMISSION_COMMENT",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
