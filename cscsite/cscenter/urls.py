@@ -20,6 +20,7 @@ from users.views import LoginView, LogoutView, TeacherDetailView, \
 admin.autodiscover()
 
 urlpatterns = [
+    url(r'^api/', include('api.urls')),
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),

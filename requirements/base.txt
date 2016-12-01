@@ -85,6 +85,8 @@ django-rq==0.9.4
 # ipython notebook
 jupyter>=1.0
 
+djangorestframework==3.5.3
+
 # Misc utils
 django-mptt==0.8.6
 django-bootstrap-pagination==1.6.2
