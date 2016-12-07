@@ -10,8 +10,7 @@
                 enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-body">
-
-
+                <div class="form-group">
                         <label for="csv-assignment-selected">1. {% trans "Select assignment" %}</label>
                         <select name="assignment" class="form-control" id="csv-assignment-selected">
                         {% for assignment_id, assignment in assignments.items %}
