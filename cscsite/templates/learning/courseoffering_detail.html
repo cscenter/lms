@@ -190,7 +190,7 @@
         <div class="col-xs-12">
             <h3>{% trans "News" %}</h3>
             {% for news in course_news %}
-                <h4><small>{{ news.created|date }}</small> {{ news.title }}</h4>
+                <h4 id="news-{{ news.pk }}"><a href="#news-{{ news.pk }}" class="small">{{ news.created|date }}</a> {{ news.title }}</h4>
                 <div class="ubertext shorten">
                 {% markdown 3600 "co_news_text" news.pk news.modified %}
                   {{ news.text }}
