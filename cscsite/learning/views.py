@@ -1992,21 +1992,20 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
 
 class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
     """Import students grades from stepic platform"""
-    def post(self, request, *args, **kwargs):
-        filter = dict(pk=self.kwargs.get('course_offering_pk'))
-        if not request.user.is_authenticated() or not request.user.is_curator:
-            filter['teachers__in'] = [request.user.pk]
-        co = get_object_or_404(CourseOffering, **filter)
+    def post(self, request, course_offering_pk, *args, **kwargs):
+        filters = {"pk": course_offering_pk}
+        if not request.user.is_curator:
+            filters['teachers__in'] = [request.user.pk]
+        co = get_object_or_404(CourseOffering, **filters)
         url = reverse('markssheet_teacher', args=[co.get_city(),
                                                   co.course.slug,
                                                   co.semester.year,
                                                   co.semester.type])
         form = MarksSheetTeacherImportGradesForm(
-            request.POST, request.FILES, c_slug = co.course.slug)
+            request.POST, request.FILES, course_id=co.course_id)
         if form.is_valid():
-            ImportGradesByStepicID(request,
-                                         form.cleaned_data[
-                                             'assignment']).process()
+            assignment = form.cleaned_data['assignment']
+            ImportGradesByStepicID(request, assignment).process()
         else:
             # TODO: provide better description
             messages.info(request, _('Invalid form.'))
@@ -2027,10 +2026,10 @@ class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
                             co.semester.year,
                             co.semester.type])
         form = MarksSheetTeacherImportGradesForm(
-            request.POST, request.FILES, c_slug = co.course.slug)
+            request.POST, request.FILES, course_id=co.course_id)
         if form.is_valid():
-            ImportGradesByYandexLogin(request,
-                                      form.cleaned_data['assignment']).process()
+            assignment = form.cleaned_data['assignment']
+            ImportGradesByYandexLogin(request, assignment).process()
         else:
             # TODO: provide better description
             messages.info(request, _('Invalid form.'))
