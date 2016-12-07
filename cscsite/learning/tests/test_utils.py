@@ -52,7 +52,7 @@ class UtilTests(TestCase):
                                 "{},{}\n".format(student.stepic_id,
                                                  expected_grade))
         request = MagicMock()
-        request.FILES = {'csvfile': BytesIO(csv_input)}
+        request.FILES = {'csv_file': BytesIO(csv_input)}
         ImportGradesByStepicID(request, assignment).process()
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)

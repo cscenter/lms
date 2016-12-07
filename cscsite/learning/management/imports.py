@@ -26,7 +26,7 @@ class ImportGrades(object):
 
         self.assignment = assignment
         self.request = request
-        file = request.FILES['csvfile']
+        file = request.FILES['csv_file']
         self.reader = unicodecsv.DictReader(iter(file))
         self.total = 0
         self.success = 0
@@ -104,41 +104,43 @@ class ImportGradesByStepicID(ImportGrades):
             raise ValidationError(msg, code='invalid_score_value')
         return stepic_id, score
 
-    def _get_user(self, stepic_id):
-        try:
-            user = user_model.objects.get(
-                stepic_id=stepic_id,
-                groups__in=[user_model.group.STUDENT_CENTER,
-                            user_model.group.VOLUNTEER])
-            return user
-        except ObjectDoesNotExist:
-            msg = _("No user with stepic ID {}").format(stepic_id)
+    def _get_user_id(self, stepic_id):
+        ids = (user_model.objects
+               .filter(
+                    stepic_id=stepic_id,
+                    groups__in=[user_model.group.STUDENT_CENTER,
+                                user_model.group.VOLUNTEER])
+               .values_list('id', flat=True)
+               .order_by())
+        if len(ids) == 0:
+            msg = _("User with stepic_id {} not found").format(stepic_id)
             logger.debug(msg)
-        except MultipleObjectsReturned:
-            msg = _("Multiple objects for user ID: {}".format(stepic_id))
+        elif len(ids) > 1:
+            msg = _("Multiple objects for stepic_id {}".format(stepic_id))
             logger.error(msg)
             messages.error(self.request, msg)
+        else:
+            return ids[0]
 
     def update_score(self, data):
         stepic_id, score = data
         assignment_id = self.assignment.pk
 
-        user = self._get_user(stepic_id)
-        if not user:
+        user_id = self._get_user_id(stepic_id)
+        if not user_id:
             return False
 
-        try:
-            a_s = (StudentAssignment.objects.get(assignment__pk=assignment_id,
-                                                 student=user))
-        except ObjectDoesNotExist:
-            msg = "User ID {} with stepic ID {} doesn't have an assignment " \
-                  "{}".format(user.pk, user.stepic_id, assignment_id)
+        updated = (StudentAssignment.objects
+                   .filter(assignment__id=assignment_id,
+                           student_id=user_id)
+                   .update(grade=score))
+        if not updated:
+            msg = "User with id={} and stepic_id={} doesn't have " \
+                  "an assignment {}".format(user_id, stepic_id, assignment_id)
             logger.debug(msg)
             return False
-        a_s.grade = score
-        a_s.save()
-        logger.debug("Wrote {} points for user {} on assignment {}"
-                     .format(score, user.pk, assignment_id))
+        logger.debug("Has written {} points for user_id={} on assignment_id={}"
+                     .format(score, user_id, assignment_id))
         return True
 
 
@@ -160,21 +162,23 @@ class ImportGradesByYandexLogin(ImportGrades):
             raise ValidationError(msg, code='invalid_score_value')
         return yandex_id, score
 
-    def _get_user(self, yandex_id):
-        try:
-            user = user_model.objects.get(
-                yandex_id__iexact=yandex_id,
-                groups__in=[
-                    user_model.group.STUDENT_CENTER,
-                    user_model.group.VOLUNTEER])
-            return user
-        except ObjectDoesNotExist:
-            msg = _("No user with Yandex ID {}").format(yandex_id)
+    def _get_user_id(self, yandex_id):
+        ids = (user_model.objects
+               .filter(
+                    yandex_id__iexact=yandex_id,
+                    groups__in=[user_model.group.STUDENT_CENTER,
+                                user_model.group.VOLUNTEER])
+               .values_list('id', flat=True)
+               .order_by())
+        if len(ids) == 0:
+            msg = _("User with yandex_id {} not found").format(yandex_id)
             logger.debug(msg)
-        except MultipleObjectsReturned:
-            msg = _("Multiple objects for Yandex ID: {}".format(yandex_id))
-            logger.debug(msg)
+        elif len(ids) > 1:
+            msg = _("Multiple objects for yandex_id {}".format(yandex_id))
+            logger.error(msg)
             messages.error(self.request, msg)
+        else:
+            return ids[0]
 
     def update_score(self, data):
         yandex_id, score = data
@@ -182,20 +186,19 @@ class ImportGradesByYandexLogin(ImportGrades):
 
         assignment_id = self.assignment.pk
 
-        user = self._get_user(yandex_id)
-        if not user:
+        user_id = self._get_user_id(yandex_id)
+        if not user_id:
             return False
 
-        try:
-            a_s = (StudentAssignment.objects.get(assignment__pk=assignment_id,
-                                                 student=user))
-        except ObjectDoesNotExist:
-            msg = "User ID {} with Yandex ID {} doesn't have an assignment " \
-                  "{}".format(user.pk, user.yandex_id, assignment_id)
+        updated = (StudentAssignment.objects
+                   .filter(assignment__id=assignment_id,
+                           student_id=user_id)
+                   .update(grade=score))
+        if not updated:
+            msg = "User with id={} and yandex_id={} doesn't have " \
+                  "an assignment {}".format(user_id, yandex_id, assignment_id)
             logger.debug(msg)
             return False
-        a_s.grade = score
-        a_s.save()
-        logger.debug("Wrote {} points for user {} on assignment {}"
-                     .format(score, user.pk, assignment_id))
+        logger.debug("Has written {} points for user_id={} on assignment_id={}"
+                     .format(score, user_id, assignment_id))
         return True

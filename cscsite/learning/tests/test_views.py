@@ -1623,9 +1623,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         # Import grades allowed only for particular course offering
         form_fields = {'assignment': assignments[0].pk}
         form = MarksSheetTeacherImportGradesForm(form_fields,
-                                                 c_slug=co.course.slug)
+                                                 course_id=co.course.pk)
         self.assertFalse(form.is_valid())
-        self.assertListEqual(list(form.errors.keys()), ['csvfile'])
+        self.assertListEqual(list(form.errors.keys()), ['csv_file'])
         # Teachers can import grades only for own CO
         teacher2 = UserFactory.create(groups=['Teacher [CENTER]'])
         self.doLogin(teacher2)
@@ -1636,12 +1636,11 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.doLogin(teacher)
         form = MarksSheetTeacherImportGradesForm(
             {'assignment': max((a.pk for a in assignments)) + 1},
-            c_slug=co.course.slug)
+            course_id=co.course.id)
         self.assertFalse(form.is_valid())
         self.assertIn('assignment', form.errors)
-        # Wrong course offering slug
-        form = MarksSheetTeacherImportGradesForm(form_fields,
-                                                 c_slug='THIS_SLUG_CANT_EXIST')
+        # Wrong course offering id
+        form = MarksSheetTeacherImportGradesForm(form_fields, course_id=-1)
         self.assertFalse(form.is_valid())
         self.assertIn('assignment', form.errors)
         # CO not found

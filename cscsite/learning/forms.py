@@ -390,17 +390,16 @@ class MarksSheetTeacherImportGradesForm(forms.Form):
     """
 
     def __init__(self, *args, **kwargs):
-        c_slug = kwargs['c_slug']
-        del(kwargs['c_slug'])
+        course_id = kwargs.pop('course_id')
         super(MarksSheetTeacherImportGradesForm, self).__init__(*args, **kwargs)
         self.fields['assignment'].queryset = \
-            Assignment.objects.filter(course_offering__course__slug=c_slug)
+            Assignment.objects.filter(course_offering__course_id=course_id)
 
     assignment = forms.ModelChoiceField(
-        queryset = Assignment.objects.all(),
+        queryset=Assignment.objects.all(),
         empty_label=None)
 
-    csvfile = forms.FileField(
+    csv_file = forms.FileField(
         label=_('Select csv file'),
         validators=[FileValidator(
             allowd_mimetypes=('text/csv', 'application/vnd.ms-excel')),
