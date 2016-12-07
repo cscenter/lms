@@ -90,17 +90,14 @@ class ImportGradesByStepicID(ImportGrades):
             stepic_id = int(stepic_id)
         except ValueError:
             msg = _("Can't convert user_id to int '{}'").format(stepic_id)
-            logger.debug(msg)
             raise ValidationError(msg, code='invalid_user_id')
         try:
             score = int(ceil(float(row["total"])))
         except ValueError:
             msg = _("Can't convert points for user '{}'").format(stepic_id)
-            logger.debug(msg)
             raise ValidationError(msg, code='invalid_score_value')
         if score > self.assignment.grade_max:
             msg = _("Score greater then max grade for user '{}'").format(stepic_id)
-            logger.debug(msg)
             raise ValidationError(msg, code='invalid_score_value')
         return stepic_id, score
 
@@ -154,11 +151,9 @@ class ImportGradesByYandexLogin(ImportGrades):
             score = int(ceil(float(row["total"])))
         except ValueError:
             msg = _("Can't convert points for user '{}'").format(yandex_id)
-            logger.debug(msg)
             raise ValidationError(msg, code='invalid_score_value')
         if score > self.assignment.grade_max:
             msg = _("Score greater then max grade for user '{}'").format(yandex_id)
-            logger.debug(msg)
             raise ValidationError(msg, code='invalid_score_value')
         return yandex_id, score
 
