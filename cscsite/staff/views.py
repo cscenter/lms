@@ -246,6 +246,18 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
+class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "staff/interviewer_faces.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(InterviewerFacesView, self).get_context_data(**kwargs)
+        qs = (CSCUser.objects
+              .filter(groups__in=[CSCUser.group.INTERVIEWER])
+              .distinct())
+        context['students'] = qs
+        return context
+
+
 # XXX: Not implemented
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']

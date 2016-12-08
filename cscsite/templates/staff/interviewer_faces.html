@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load staticfiles %}
+{% load userpreview from custom_thumbnail %}
+
+{% block content %}
+    <div class="container">
+        <div class="c-student-faces">
+        {% if students %}
+            {% for student in students %}
+                <div class="student">
+                    <a href="{{ student.get_absolute_url }}">
+                    {% userpreview student "150x150" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
+                        <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">пусто!</div>
+        {% endif %}
+        </div>
+    </div>
+{% endblock content %}
+
+{# TODO: customize scripts if neccessary #}
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}
