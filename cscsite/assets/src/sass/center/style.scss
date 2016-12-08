@@ -577,3 +577,13 @@ tr.unread {
     width: 20%;
   }
 }
+
+// Highlight targets. Used on course offering detail page right now.
+h4[id^="news-"] {
+  padding: 4px 0;
+
+  &:target {
+    // color - like on .unread
+    background: #E2F9FF;
+  }
+}
