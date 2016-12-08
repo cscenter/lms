@@ -11,7 +11,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
-from learning.admission.models import Campaign
+from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
 from learning.models import Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
@@ -251,8 +251,12 @@ class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(InterviewerFacesView, self).get_context_data(**kwargs)
+        users = (Interview.interviewers.through
+                 .objects.only("cscuser_id")
+                 .distinct()
+                 .values_list("cscuser_id", flat=True))
         qs = (CSCUser.objects
-              .filter(groups__in=[CSCUser.group.INTERVIEWER])
+              .filter(id__in=users.all())
               .distinct())
         context['students'] = qs
         return context
