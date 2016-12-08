@@ -7,8 +7,7 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
-    StudentFacesView
-
+    StudentFacesView, InterviewerFacesView
 urlpatterns = [
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^course-marks/$',
@@ -20,6 +19,9 @@ urlpatterns = [
     url(r'^student-search/$',
         StudentSearchView.as_view(),
         name='student_search'),
+    url(r'^faces/interviewers/$',
+        InterviewerFacesView.as_view(),
+        name='interviewer_faces'),
     url(r'^faces/$',
         StudentFacesView.as_view(),
         name='student_faces'),
@@ -66,4 +68,5 @@ urlpatterns = [
         TotalStatisticsView.as_view(),
         name='total_statistics_csv'),
 ]
+
 
