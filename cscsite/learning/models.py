@@ -613,7 +613,6 @@ class Assignment(TimeStampedModel, object):
         return self.deadline_at.strftime('%d.%m.%Y')
 
 
-
 def assignmentattach_upload_to(instance, filename):
     return ("assignment_{0}/attachments/{1}".format(
         instance.assignment_id, filename))
@@ -685,6 +684,10 @@ class StudentAssignment(TimeStampedModel):
         verbose_name=_("Is passed"),
         help_text=_("It's online and has comments"),
         default=False)
+    first_submission_at = models.DateTimeField(
+        _("Assignment|first_submission"),
+        null=True,
+        editable=False)
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("Last comment from"),
         help_text=_("0 - no comments yet, 1 - from student, 2 - from teacher"),
