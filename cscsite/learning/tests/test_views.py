@@ -1036,6 +1036,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
         self.assertEquals(3, len(resp.context['student_assignment_list']))
         # teacher has set a grade
+        a1_s2.refresh_from_db()  # update last_comment_from
         a1_s2.grade = 3
         a1_s2.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
@@ -1043,6 +1044,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
                                "?comment=student&grades=all")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
+        a1_s2.refresh_from_db()
         a_s1.grade = 3
         a_s1.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +

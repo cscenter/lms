@@ -274,30 +274,37 @@ class StudentAssignmentTests(TestCase):
         self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_teacher)
+        as_.refresh_from_db()
         self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
+        as_.refresh_from_db()
         self.assertTrue(as_.is_passed)
         # student comments first
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
+        as_.refresh_from_db()
         self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
+        as_.refresh_from_db()
         self.assertTrue(as_.is_passed)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
+        as_.refresh_from_db()
         self.assertTrue(as_.is_passed)
         # assignment is offline
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=False)
+        as_.refresh_from_db()
         self.assertFalse(as_.is_passed)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
+        as_.refresh_from_db()
         self.assertFalse(as_.is_passed)
 
     def test_student_assignment_state(self):
