@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import itertools
-from functools import lru_cache
 
 from django.apps import apps
 
@@ -30,6 +29,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
         #               StudentAssignment objects back one by one. It seems
         #               reasonable that 2*N INSERTs are better than bulk_create
         #               + N SELECTs + N INSERTs.
+        # bulk_create doesn't return pks, that's the main reason
         (AssignmentNotification(user=student,
                                 student_assignment=a_s,
                                 is_about_creation=True)
@@ -56,10 +56,13 @@ def create_deadline_change_notification(sender, instance, created,
 @receiver(post_save, sender=AssignmentComment)
 def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
     """
-    Notify teachers if student leave a comment, otherwise notify student.
-    Update StudentAssignment model:
+    * Notify teachers if student leave a comment, otherwise notify student.
+    * Update StudentAssignment model:
         1. Set `first_submission_at` if it's the first comment from the student.
         2. Set `last_comment_from` field
+        Note:
+            Can be essential for future signals but it doesn't update
+            model attributes.
     """
     if not created:
         return
@@ -92,12 +95,7 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
             AssignmentNotification(user_id=student_id, student_assignment=sa)
         )
     AssignmentNotification.objects.bulk_create(notifications)
-    result = sa.__class__.objects.filter(pk=sa.pk).update(**sa_update_dict)
-    # Can be essential for future signals and already useful in tests
-    # due to atomic transactional nature.
-    if result:
-        for attr, value in sa_update_dict.items():
-            setattr(sa, attr, value)
+    sa.__class__.objects.filter(pk=sa.pk).update(**sa_update_dict)
 
 
 def track_fields_post_init(sender, instance, **kwargs):

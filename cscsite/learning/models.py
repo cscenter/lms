@@ -741,7 +741,10 @@ class StudentAssignment(TimeStampedModel):
     # FIXME: rename
     @property
     def is_passed(self):
-        """We have submission from student"""
+        """
+        We have submission from student. Makes sense when assignment
+        can be passed through site.
+        """
         return self.first_submission_at is not None
 
     @property

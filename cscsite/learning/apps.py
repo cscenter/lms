@@ -9,6 +9,7 @@ class LearningConfig(AppConfig):
     verbose_name = _("Learning")
 
     def ready(self):
+        # TODO: Decorate all signals like assignment_comment_post_save
         from .signals import (create_student_assignments_for_new_assignment,
                               create_deadline_change_notification,
                               populate_assignments_for_new_enrolled_student,
@@ -16,6 +17,7 @@ class LearningConfig(AppConfig):
                               create_course_offering_news_notification,
                               track_fields_post_init,
                               add_upload_slides_job)
+        # TODO: Combine both signals in one callback
         post_save.connect(create_student_assignments_for_new_assignment,
                           sender=self.get_model('Assignment'))
         post_save.connect(create_deadline_change_notification,
