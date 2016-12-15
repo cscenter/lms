@@ -680,10 +680,6 @@ class StudentAssignment(TimeStampedModel):
     grade_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='grade')
-    is_passed = models.BooleanField(
-        verbose_name=_("Is passed"),
-        help_text=_("It's online and has comments"),
-        default=False)
     first_submission_at = models.DateTimeField(
         _("Assignment|first_submission"),
         null=True,
@@ -741,6 +737,12 @@ class StudentAssignment(TimeStampedModel):
                 return 'good'
             else:
                 return 'excellent'
+
+    # FIXME: rename
+    @property
+    def is_passed(self):
+        """We have submission from student"""
+        return self.first_submission_at is not None
 
     @property
     def state_display(self):

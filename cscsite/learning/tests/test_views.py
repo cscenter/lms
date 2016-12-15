@@ -1935,8 +1935,8 @@ def test_assignment_contents(client):
 
 @pytest.mark.django_db
 def test_studentassignment_last_comment_from(client,
-                                               student_center_factory,
-                                               teacher_center_factory):
+                                             student_center_factory,
+                                             teacher_center_factory):
     teacher = teacher_center_factory.create()
     student = student_center_factory.create()
     now_year, now_season = get_current_semester_pair()

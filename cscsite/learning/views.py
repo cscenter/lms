@@ -1407,16 +1407,16 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         context['is_actual_teacher'] = is_actual_teacher
         context['grade_form'] = AssignmentGradeForm(
             initial, grade_max=a_s.assignment.grade_max)
+        # TODO: Replace with 1 query
         base = (
             StudentAssignment.objects
             .filter(grade__isnull=True,
-                    is_passed=True,
+                    first_submission_at__isnull=False,
                     assignment__course_offering=co,
                     assignment__course_offering__teachers=self.request.user)
             .order_by('assignment__deadline_at',
                       'assignment__course_offering__course__name',
                       'pk'))
-        # TODO: Replace with 1 query
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
@@ -1749,7 +1749,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
                 .filter(assignment__course_offering=course_offering)
                 .values("pk",
                         "grade",
-                        "is_passed",
+                        "first_submission_at",
                         "assignment__pk",
                         "assignment__title",
                         "assignment__is_online",
@@ -1871,6 +1871,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
             assignment = assignments[assignment_id]
 
             state = None
+            # FIXME: duplicated logic from is_passed method!
+            a_s["is_passed"] = a_s["first_submission_at"] is not None
             if assignment["header"]["is_online"]:
                 state_value = StudentAssignment.calculate_state(
                     a_s["grade"],
@@ -1887,7 +1889,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
             assignment["students"][student_id] = {
                 "pk": a_s["pk"],
                 "grade": a_s["grade"] if a_s["grade"] is not None else "",
-                "is_passed": a_s["is_passed"],
+                "is_passed": a_s["is_passed"],  # FIXME: useless?
                 "state": state
             }
 
