@@ -24,7 +24,8 @@ from django.utils.encoding import smart_text, force_text, force_str, smart_bytes
 from django.utils.translation import ugettext as _
 from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES, \
     STUDENT_STATUS
-from users.factories import TeacherCenterFactory, StudentFactory
+from users.factories import TeacherCenterFactory, StudentFactory, \
+    StudentCenterFactory
 from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
@@ -1862,7 +1863,7 @@ class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
 
 @pytest.mark.django_db
 def test_enrollment(client, student_center_factory):
-    student = student_center_factory.create()
+    student = StudentCenterFactory.create()
     client.login(student)
     today = timezone.now()
     current_semester = SemesterFactory.create_current()
@@ -1900,7 +1901,7 @@ def test_enrollment(client, student_center_factory):
     # If course offering has limited capacity and we reach it - reject request
     co.capacity = 1
     co.save()
-    student2 = student_center_factory.create()
+    student2 = StudentCenterFactory.create()
     client.login(student2)
     form = {'course_offering_pk': co.pk}
     client.post(url, form, follow=True)
@@ -1934,11 +1935,10 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_studentassignment_last_comment_from(client,
-                                             student_center_factory,
-                                             teacher_center_factory):
-    teacher = teacher_center_factory.create()
-    student = student_center_factory.create()
+def test_studentassignment_last_comment_from(client):
+    """`last_comment_from` attribute is updated by signal"""
+    teacher = TeacherCenterFactory.create()
+    student = StudentCenterFactory.create()
     now_year, now_season = get_current_semester_pair()
     s = SemesterFactory.create(year=now_year, type=now_season)
     co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
@@ -1948,17 +1948,50 @@ def test_studentassignment_last_comment_from(client,
     # Nobody comments yet
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_NOBODY
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
+    sa.refresh_from_db()
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_STUDENT
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
+    sa.refresh_from_db()
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_TEACHER
+
+
+@pytest.mark.django_db
+def test_studentassignment_first_submission_at(curator):
+    """`first_submission_at` attribute is updated by signal"""
+    teacher = TeacherCenterFactory.create()
+    student = StudentCenterFactory.create()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    EnrollmentFactory.create(student=student, course_offering=co)
+    assignment = AssignmentFactory.create(course_offering=co)
+    sa = StudentAssignment.objects.get(assignment=assignment)
+    assert sa.first_submission_at is None
+    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
+    sa.refresh_from_db()
+    assert sa.first_submission_at is None
+    AssignmentCommentFactory.create(student_assignment=sa, author=curator)
+    sa.refresh_from_db()
+    assert sa.first_submission_at is None
+    AssignmentCommentFactory.create(student_assignment=sa, author=student)
+    sa.refresh_from_db()
+    assert sa.first_submission_at is not None
+    first_submission_at = sa.first_submission_at
+    # Make sure it doesn't changed
+    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
+    sa.refresh_from_db()
+    assert sa.first_submission_at == first_submission_at
+    # Second comment from student shouldn't change time
+    AssignmentCommentFactory.create(student_assignment=sa, author=student)
+    sa.refresh_from_db()
+    assert sa.first_submission_at == first_submission_at
+
 
 
 @pytest.mark.django_db
 def test_gradebook_recalculate_grading_type(client,
                                             student_center_factory,
                                             teacher_center_factory):
-    teacher = teacher_center_factory.create()
-    students = student_center_factory.create_batch(2)
+    teacher = TeacherCenterFactory.create()
+    students = StudentCenterFactory.create_batch(2)
     s = SemesterFactory.create_current()
     co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
     assert co.grading_type == GRADING_TYPES.default
