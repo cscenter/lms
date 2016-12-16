@@ -742,8 +742,8 @@ class StudentAssignment(TimeStampedModel):
     @property
     def is_passed(self):
         """
-        We have submission from student. Makes sense when assignment
-        can be passed through site.
+        Returns true if we have submission from student.
+        Makes sense only when assignment can be passed through site.
         """
         return self.first_submission_at is not None
 

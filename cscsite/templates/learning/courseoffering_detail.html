@@ -64,7 +64,7 @@
             <div class="enroll-block">
                 {% if is_enrolled %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
-                       class="btn btn-danger btn-block">
+                       class="btn btn-danger btn-block btn-wide">
                         {% trans "Unenroll from the course" %}
                     </a>
                 {% else %}
@@ -83,7 +83,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="course_offering_pk"
                                value="{{ course_offering.pk }}">
-                        <button type="submit" class="btn btn-primary btn-block">
+                        <button type="submit" class="btn btn-primary btn-block btn-wide">
                             {% trans "Enroll in the course" %}
                         </button>
                     </form>
@@ -111,7 +111,7 @@
             </ul>
             {% if course_offering.survey_url %}
                 {% if is_enrolled or user.is_curator %}
-                    <a class=" btn btn-default btn-block btn-success"
+                    <a class=" btn btn-default btn-block btn-wide btn-success"
                        href="{{ course_offering.survey_url }}"
                        target="_blank">{% trans "Start survey" %}</a>
                 {% endif %}

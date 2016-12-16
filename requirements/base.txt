@@ -86,6 +86,7 @@ django-rq==0.9.4
 jupyter>=1.0
 
 djangorestframework==3.5.3
+django-js-reverse==0.7.2
 
 # Misc utils
 django-mptt==0.8.6
