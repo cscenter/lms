@@ -35,6 +35,14 @@
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
 
+  - name: Collect urls for js integration
+    sudo_user: "{{ app_user }}"
+    django_manage:
+      command: "collectstatic_js_reverse"
+      app_path: "{{ site_src }}"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
   - name: Migrate DB
     sudo_user: "{{ app_user }}"
     django_manage:

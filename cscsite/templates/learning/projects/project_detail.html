@@ -114,7 +114,7 @@
                         {% if project.is_active and not you_enrolled %}
                             <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-block btn-primary">Следить за проектом</button>
+                                <button type="submit" class="btn btn-block btn-wide btn-primary">Следить за проектом</button>
                             </form>
                         {% elif project.is_active %}
                             <div class="you-enrolled">Вы подписаны на проект</div>

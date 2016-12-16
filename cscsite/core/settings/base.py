@@ -101,7 +101,13 @@ INSTALLED_APPS = [
     'api.apps.APIConfig',
     'stats.apps.StatisticsConfig',
     'django_rq',
+    'django_js_reverse',
 ]
+
+# django-js-reverse settings
+JS_REVERSE_JS_VAR_NAME = 'URLS'
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
+JS_REVERSE_OUTPUT_PATH = PROJECT_DIR.child("assets", "js", "urls")
 
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"

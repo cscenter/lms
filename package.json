@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack --progress --display-error-details --config webpack/common.config.js --watch",
-    "prod": "webpack --progress --config webpack/common.config.js"
+    "prod": "webpack --progress --config webpack/common.config.js",
+    "stats": "webpack --progress --config webpack/stats.config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -14,6 +15,7 @@
   "author": "",
   "dependencies": {
     "autoprefixer": "^6.5.3",
+    "moment": "^2.17.1",
     "node-sass": "^3.13.0",
     "postcss-loader": "^1.1.1",
     "react": "^15.4.1",
@@ -24,7 +26,8 @@
     "redux-thunk": "^2.1.0",
     "sass-loader": "^4.0.2",
     "webpack": "^1.13.3",
-    "webpack-merge": "^1.0.2"
+    "webpack-merge": "^1.0.2",
+    "d3": "^4.4.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
@@ -46,7 +49,6 @@
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-sass": "^1.2.0",
-    "jquery": "^3.1.1",
     "load-grunt-tasks": "^3.5.0",
     "redux-devtools": "^3.3.1",
     "redux-devtools-dock-monitor": "^1.1.1",

@@ -62,15 +62,6 @@ page[size="A4"] {
 }
 
 
-// Boostrap overrides for cscenter site
-.btn-danger, .btn-success, .btn-primary, .btn-warning {
-  &.btn-block {
-    padding: 10px 12px;
-    &.btn-sm {
-      padding: 8px 10px;
-    }
-  }
-}
 
 .modal-content {
   border-radius: 3px;

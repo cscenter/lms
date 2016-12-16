@@ -11,6 +11,7 @@ from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView
 from htmlpages import views
 from learning.views import UsefulListView
+from stats.views import StatsIndexView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
@@ -64,6 +65,8 @@ urlpatterns = [
         name='alumni_by_study_program'),
 
     url(r'^staff/', include("staff.urls")),
+
+    url(r'^stats/$', StatsIndexView.as_view(), name='stats_index'),
 
     url(r'^library/', include("library.urls")),
     url(r'^faq/$', QAListView.as_view(), name='faq'),

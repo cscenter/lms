@@ -1,4 +1,16 @@
-  // BTN OUTLINE
+.btn-danger, .btn-success, .btn-primary, .btn-warning {
+  &.btn-block {
+    &.btn-wide {
+      padding: 10px 12px;
+    }
+    &.btn-sm {
+      padding: 8px 10px;
+    }
+  }
+}
+
+
+// BTN OUTLINE
 .btn-outline.btn-default {
   color: $color-grey;
   background-color: transparent;
