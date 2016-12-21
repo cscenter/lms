@@ -4,7 +4,8 @@ from learning.projects.views import ProjectDetailView, \
     ProjectEnrollView, ReportView, ReportAttachmentDownloadView, \
     ReportUpdateStatusView, ReportCuratorSummarizeView, StudentProjectsView, \
     ReportCuratorAssessmentView, ProjectPrevNextView, ReportListReviewerView, \
-    CurrentTermProjectsView, ProjectListView, ReportListCuratorView
+    CurrentTermProjectsView, ProjectListView, ReportListCuratorView, \
+    ProjectResultsView
 
 app_name = 'projects'
 urlpatterns = [
@@ -22,6 +23,8 @@ urlpatterns = [
         url(r'^prev/(?P<project_id>\d+)/$',
             ProjectPrevNextView.as_view(direction="prev"),
             name='project_detail_prev'),
+        url(r'^(?P<pk>\d+)/results$', ProjectResultsView.as_view(),
+            name='project_results_update'),
         url(r'^next/(?P<project_id>\d+)/$',
             ProjectPrevNextView.as_view(direction="next"),
             name='project_detail_next'),
