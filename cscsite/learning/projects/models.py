@@ -79,6 +79,17 @@ class ProjectStudent(models.Model):
     def can_send_report(self):
         return self.final_grade == ProjectStudent.GRADES.not_graded
 
+    @property
+    def total_score(self):
+        acc = 0
+        for attr in [self.report.final_score, self.supervisor_grade,
+                     self.presentation_grade]:
+            try:
+                acc += int(attr)
+            except (TypeError, ValueError):
+                continue
+        return acc
+
 
 def project_presentation_files(self, filename):
     return os.path.join('projects',

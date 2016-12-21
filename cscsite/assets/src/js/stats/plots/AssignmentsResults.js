@@ -56,10 +56,8 @@ class AssignmentsPerformance {
             let counters = states.reduce(function (a, b) {
                     return a.set(b, 0);
                 }, new Map());
-            console.log(counters);
             assignment.assigned_to.forEach((student) => {
                 let state = this.states.get(student.state);
-                console.log(state, counters.has(state));
                 counters.set(state, counters.get(state) + 1);
             });
             rows.push(Array.from(counters, ([k, v]) => v));
@@ -99,9 +97,11 @@ class AssignmentsPerformance {
                 }
               }
             },
-            // legend: {
-            //     position: 'right'
-            // },
+            grid: {
+                y: {
+                    show: true
+                }
+            },
         });
     };
 }
