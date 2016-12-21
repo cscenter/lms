@@ -73,30 +73,52 @@
 
                 {% if request.user.is_curator %}
                     <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr class="active">
-                            <th>Участник</th>
-                            <th>Отчет</th>
-                            <th>През.</th>
-                            <th>Рук.</th>
-                            <th>Сумма</th>
-                            <th>Итог</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for ps in project.projectstudent_set.all %}
-                            <tr>
-                            <td>{{ ps.student }}</td>
-                            <td>{{ ps.report.final_score }}</td>
-                            <td>{{ ps.presentation_grade|default:"-" }}</td>
-                            <td>{{ ps.supervisor_grade|default:"-" }}</td>
-                            <td>{{ ps.total_score }}</td>
-                            <td>{{ ps.get_final_grade_display }}</td>
+                    <form action="{% url 'projects:project_results_update' project.pk %}" method="post">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr class="active">
+                                <th>Участник</th>
+                                <th>Отчет</th>
+                                <th>През.</th>
+                                <th>Рук.</th>
+                                <th>Сумма</th>
+                                <th>Итог</th>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6">
+                                        <button type="submit" class="btn btn-primary pull-right">Сохранить</button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% csrf_token %}
+                                {{ results_formset.management_form }}
+                                {% if results_formset.errors %}
+                                    <p class="errornote">{% if results_formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}</p>
+                                    {{ results_formset.non_form_errors }}
+                                {% endif %}
+                                {% for form in results_formset %}
+                                    {% with ps=form.instance %}
+                                    <tr>
+                                        <td>{{ ps.student }}</td>
+                                        <td>{{ ps.report.final_score }}</td>
+                                        <td>{{ ps.presentation_grade|default:"-" }}</td>
+                                        <td>{{ ps.supervisor_grade|default:"-" }}</td>
+                                        <td>{{ ps.total_score }}</td>
+                                        <td>
+                                            {{ form.final_grade }}
+                                            {% for hidden in form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
 
                     <h4>Отзывы руководителей <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
