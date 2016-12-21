@@ -7,6 +7,7 @@ import math
 
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -86,7 +87,7 @@ class ProjectStudent(models.Model):
                      self.presentation_grade]:
             try:
                 acc += int(attr)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, ObjectDoesNotExist):
                 continue
         return acc
 
