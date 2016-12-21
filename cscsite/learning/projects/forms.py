@@ -10,7 +10,20 @@ from django.utils.translation import ugettext_lazy as _
 from core import comment_persistence
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from learning.projects.models import ReportComment, Review, Report
+from learning.projects.models import ReportComment, Review, Report, \
+    ProjectStudent
+
+
+class StudentResultsModelForm(forms.ModelForm):
+    class Meta:
+        model = ProjectStudent
+        fields = ('student',
+                  # 'supervisor_grade',
+                  # 'presentation_grade',
+                  'final_grade')
+        widgets = {
+            "student": forms.HiddenInput(),
+        }
 
 
 class ReportForm(forms.ModelForm):

@@ -9,10 +9,10 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.db.models import Case, BooleanField, Prefetch, Count, Value, When, \
-    IntegerField, Sum
+from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
+from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
-    HttpResponsePermanentRedirect, HttpResponseRedirect
+    HttpResponseRedirect
 
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import FormMixin, BaseUpdateView
 from django_filters.views import BaseFilterView, FilterMixin
+from extra_views.formsets import BaseModelFormSetView
 
 from core import comment_persistence
 from core.utils import hashids
@@ -28,7 +29,7 @@ from learning.models import Semester
 from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
-    ReportCuratorAssessmentForm
+    ReportCuratorAssessmentForm, StudentResultsModelForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.settings import PARTICIPANT_GROUPS
@@ -44,6 +45,12 @@ logger = logging.getLogger(__name__)
 
 class RaiseRedirect(Exception):
     pass
+
+
+# Formset for student results
+ResultsFormSet = modelformset_factory(
+    ProjectStudent, form=StudentResultsModelForm, extra=0,
+)
 
 
 class ReportListViewMixin(object):
@@ -374,7 +381,34 @@ class ProjectDetailView(generic.CreateView):
             and self.project.is_active())
         context["can_view_report"] = user.is_curator or (
             user.is_project_reviewer and context["you_enrolled"])
+        context["results_formset"] = ResultsFormSet(
+            queryset=self.project.projectstudent_set.select_related("report",
+                                                                    "student"))
         return context
+
+
+class ProjectResultsView(CuratorOnlyMixin, BaseModelFormSetView):
+    """
+    XXX: Assumed only for valid POST-actions.
+    The probability of validation errors is about 0.0001%!
+    (Only if data was compromised)
+    """
+    http_method_names = ["post", "put"]
+    model = ProjectStudent
+    form_class = StudentResultsModelForm
+
+    def formset_invalid(self, formset):
+        msg = "<br>".join(" ".join(errors) for e in formset.errors
+                          for errors in e.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg)
+        url = reverse("projects:project_detail", args=[self.kwargs.get("pk")])
+        return HttpResponseRedirect(url)
+
+    def get_success_url(self):
+        messages.success(self.request, _("Данные успешно сохранены"),
+                         extra_tags='timeout')
+        return reverse("projects:project_detail",
+                       args=[self.kwargs.get("pk")])
 
 
 class ProjectPrevNextView(generic.RedirectView):
