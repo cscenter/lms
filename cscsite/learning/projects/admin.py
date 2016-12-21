@@ -8,6 +8,8 @@ from django.db.models import Q
 from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
+from import_export import resources, fields, widgets
+from import_export.admin import ExportMixin
 
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment
@@ -28,7 +30,7 @@ class ProjectStudentInline(admin.TabularInline):
     fields = ('student', 'get_report_score', 'supervisor_grade',
               'supervisor_review', 'presentation_grade', 'get_total_score',
               'final_grade')
-
+    
     def get_total_score(self, obj):
         return obj.total_score
     get_total_score.short_description = "Сумма"
@@ -52,7 +54,7 @@ class ProjectAdmin(admin.ModelAdmin):
     inlines = [ProjectStudentInline]
     readonly_fields = ["supervisor_presentation_slideshare_url",
                        "presentation_slideshare_url"]
-
+    
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "reviewers":
             kwargs["queryset"] = (
@@ -95,10 +97,44 @@ class ReviewAdmin(admin.ModelAdmin):
     get_project_name.short_description = _("Project")
 
 
-class ProjectStudentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'project', 'get_project_semester', 'final_grade']
+class ProjectStudentAdminRecordResource(resources.ModelResource):
+    semester = fields.Field(column_name='Семестр',
+                            attribute='project__semester')
+    project = fields.Field(column_name='Проект', attribute='project')
+    student = fields.Field(column_name='Студент', attribute='student')
+    total_score = fields.Field(column_name='Суммарный балл',
+                               attribute='total_score')
+    final_grade = fields.Field(column_name='Финальная оценка',
+                               attribute='get_final_grade_display')
+
+    class Meta:
+        model = ProjectStudent
+        skip_unchanged = True
+        fields = (
+            "semester",
+            "student",
+            "project",
+            "total_score",
+            "final_grade",
+        )
+
+
+class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = ProjectStudentAdminRecordResource
+    list_display = ['student', 'project', 'get_project_semester',
+                    'get_total_score', 'final_grade']
+    list_filter = ['project__semester']
     search_fields = ["project__name"]
     readonly_fields = ["report_link"]
+
+    def get_queryset(self, request):
+        qs = super(ProjectStudentAdmin, self).get_queryset(request)
+        return qs.select_related("report", "student", "project",
+                                 "project__semester")
+
+    def get_total_score(self, obj):
+        return obj.total_score
+    get_total_score.short_description = _("Сумма")
 
     def get_project_semester(self, obj):
         return obj.project.semester
