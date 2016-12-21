@@ -106,6 +106,12 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
                                attribute='total_score')
     final_grade = fields.Field(column_name='Финальная оценка',
                                attribute='get_final_grade_display')
+    report_score = fields.Field(column_name='Балл за отчет',
+                                attribute='report__final_score')
+    presentation_grade = fields.Field(column_name='Оценка за презентацию',
+                                      attribute='presentation_grade')
+    supervisor_grade = fields.Field(column_name='Оценка руководителя',
+                                    attribute='supervisor_grade')
 
     class Meta:
         model = ProjectStudent
@@ -116,6 +122,9 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
             "project",
             "total_score",
             "final_grade",
+            "report_score",
+            "presentation_grade",
+            "supervisor_grade",
         )
 
 
