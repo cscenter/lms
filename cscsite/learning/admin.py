@@ -147,8 +147,8 @@ class AssignmentAdmin(admin.ModelAdmin):
             try:
                 assignment_pk = request.resolver_match.args[0]
                 a = (Assignment.objects
-                        .prefetch_related("course_offering__courseofferingteacher_set")
-                        .get(pk=assignment_pk))
+                     .prefetch_related("course_offering__courseofferingteacher_set")
+                     .get(pk=assignment_pk))
                 teachers = [t.pk for t in a.course_offering.teachers.all()]
                 qs = qs.filter(teacher__in=teachers, course_offering=a.course_offering)
             except IndexError:

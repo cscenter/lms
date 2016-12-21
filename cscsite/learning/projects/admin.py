@@ -24,6 +24,18 @@ class ProjectStudentInline(admin.TabularInline):
     extra = 0
     min_num = 0
     show_change_link = True
+    readonly_fields = ["get_report_score", "get_total_score"]
+    fields = ('student', 'get_report_score', 'supervisor_grade',
+              'supervisor_review', 'presentation_grade', 'get_total_score',
+              'final_grade')
+
+    def get_total_score(self, obj):
+        return obj.total_score
+    get_total_score.short_description = "Сумма"
+
+    def get_report_score(self, obj):
+        return obj.report.final_score
+    get_report_score.short_description = "Отчет"
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
