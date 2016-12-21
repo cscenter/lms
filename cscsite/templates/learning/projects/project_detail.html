@@ -77,9 +77,10 @@
                         <thead>
                         <tr class="active">
                             <th>Участник</th>
-                            <th>Статус&nbsp;отчета</th>
-                            <th>Презентация</th>
-                            <th>Руководители</th>
+                            <th>Отчет</th>
+                            <th>През.</th>
+                            <th>Рук.</th>
+                            <th>Сумма</th>
                             <th>Итог</th>
                         </tr>
                         </thead>
@@ -87,9 +88,10 @@
                         {% for ps in project.projectstudent_set.all %}
                             <tr>
                             <td>{{ ps.student }}</td>
-                            <td>{% if ps.report %}{{ ps.report.final_score }}{% else %}-{% endif %}</td>
+                            <td>{{ ps.report.final_score }}</td>
                             <td>{{ ps.presentation_grade|default:"-" }}</td>
                             <td>{{ ps.supervisor_grade|default:"-" }}</td>
+                            <td>{{ ps.total_score }}</td>
                             <td>{{ ps.get_final_grade_display }}</td>
                             </tr>
                         {% endfor %}
