@@ -83,12 +83,15 @@ class ProjectStudent(models.Model):
     @property
     def total_score(self):
         acc = 0
-        for attr in [self.report.final_score, self.supervisor_grade,
-                     self.presentation_grade]:
+        for attr in (self.supervisor_grade, self.presentation_grade):
             try:
                 acc += int(attr)
-            except (TypeError, ValueError, ObjectDoesNotExist):
+            except (TypeError, ValueError):
                 continue
+        try:
+            acc += self.report.final_score
+        except ObjectDoesNotExist:
+            pass
         return acc
 
 
