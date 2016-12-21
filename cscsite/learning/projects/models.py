@@ -89,8 +89,8 @@ class ProjectStudent(models.Model):
             except (TypeError, ValueError):
                 continue
         try:
-            acc += self.report.final_score
-        except ObjectDoesNotExist:
+            acc += int(self.report.final_score)
+        except (TypeError, ValueError, ObjectDoesNotExist):
             pass
         return acc
 
