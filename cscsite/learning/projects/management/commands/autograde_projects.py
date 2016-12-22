@@ -43,8 +43,8 @@ class Command(BaseCommand):
             current_term.projects_grade_pass,
         ]
         if any(p is None for p in project_settings):
-            raise CommandError("Make sure you provide all necessary settings"
-                               " for provided term.")
+            raise CommandError("Make sure you provided all necessary settings"
+                               " for current term.")
         if max(*project_settings) != current_term.projects_grade_excellent:
             raise CommandError("Border for `excellent` grade must be "
                                "the highest.")
@@ -52,9 +52,10 @@ class Command(BaseCommand):
             raise CommandError("Border for `pass` grade must be the lowest.")
 
         students = (ProjectStudent.objects
-                    .select_related("report", "project__is_external")
+                    .select_related("report", "project")
                     .filter(project__semester_id=current_term.pk,
                             final_grade=GRADES.not_graded))
+        processed = 0
         for ps in students:
             total_score = ps.total_score
             is_external = ps.project.is_external
@@ -77,5 +78,8 @@ class Command(BaseCommand):
             if is_external and total_score >= current_term.projects_grade_pass:
                 final_grade = getattr(GRADES, "pass")
             # Update query
-            ProjectStudent.objects.filter(pk=ps.pk).update(
+            result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)
+            processed += result
+        self.stdout.write(str(processed))
+        return processed
