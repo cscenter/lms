@@ -5,11 +5,6 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 
-def recalculate_semester_indexes(apps, schema_editor):
-    from django.core.management import call_command
-    call_command('recalculate_semester_indexes')
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,5 +12,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(recalculate_semester_indexes),
     ]
