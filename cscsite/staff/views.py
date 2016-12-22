@@ -3,11 +3,16 @@
 from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict, defaultdict
+from io import StringIO
 
 from braces.views import JSONResponseMixin
+from django.contrib import messages
+from django.core.management import CommandError
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
@@ -328,3 +333,15 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
 
 
         return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
+
+
+def autograde_projects(request):
+    try:
+        # FIXME: Only Django 1.10 can return value from `call_command`
+        out = StringIO()
+        call_command('autograde_projects', stdout=out)
+        processed = int(out.getvalue())
+        messages.success(request, "Выставлено оценок: {}".format(processed))
+    except CommandError as e:
+        messages.error(request, str(e))
+    return HttpResponseRedirect(reverse("staff:exports"))
