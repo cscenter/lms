@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.http import HttpResponseRedirect
+from django.http.response import HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
@@ -336,6 +337,8 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
 
 
 def autograde_projects(request):
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
     try:
         # FIXME: Only Django 1.10 can return value from `call_command`
         out = StringIO()
