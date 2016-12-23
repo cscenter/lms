@@ -77,9 +77,6 @@ class ProjectStudent(models.Model):
         return "{0} [{1}]".format(smart_text(self.project),
                                   smart_text(self.student))
 
-    def can_send_report(self):
-        return self.final_grade == ProjectStudent.GRADES.not_graded
-
     @property
     def total_score(self):
         acc = 0
@@ -93,6 +90,21 @@ class ProjectStudent(models.Model):
         except (TypeError, ValueError, ObjectDoesNotExist):
             pass
         return acc
+
+    def can_send_report(self):
+        return self.final_grade == ProjectStudent.GRADES.not_graded
+
+    def final_grade_display(self):
+        """
+        For internal projects show 'Satisfactory' instead of 'Pass'.
+        May require additional query to db to get project instance
+        """
+        if (self.final_grade == getattr(GRADES, "pass") and
+                not self.project.is_external):
+            final_grade = _("Assignment|pass")
+        else:
+            final_grade = GRADES[self.final_grade]
+        return final_grade
 
 
 def project_presentation_files(self, filename):

@@ -33,7 +33,7 @@
                         </td>
                         <td>{{ ps.report.final_score|default:"-" }}</td>
                         <td>
-                            <span style="white-space: nowrap;" class="badge assignment-status {{ ps.final_grade|to_css }}">{{ ps.get_final_grade_display }}</span>
+                            <span style="white-space: nowrap;" class="badge assignment-status {{ ps.final_grade|to_css }}">{{ ps.final_grade_display }}</span>
                         </td>
                         <td>{{ project.semester }}</td>
                     </tr>
