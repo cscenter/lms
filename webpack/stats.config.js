@@ -2,12 +2,11 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-    // entry: ['babel-polyfill', "./cscsite/assets/src/js/stats/main"],
     entry: "./cscsite/assets/src/js/stats/main",
     resolve: {
-        modulesDirectories: [
-            "."
-        ],
+        // root: [
+        //     path.join(__dirname, "/../", "node_modules")
+        // ],
         // FIXME: no idea how to load it with webpack correctly
         alias: {
             moment: path.join(__dirname, "/../cscsite/assets/js/vendor/moment/moment.min.js")
@@ -43,5 +42,6 @@ module.exports = {
                 exclude: /node_modules/,
             }
         ]
-    }
+    },
+    debug: true
 };

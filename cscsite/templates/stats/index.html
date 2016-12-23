@@ -20,12 +20,21 @@
     <script type="text/javascript" src="{% static "js/vendor/c3.min.js" %}"></script>
     <script src="{% static 'js/urls/reverse.js' %}"></script>
     <script type="text/javascript" src="{% static "js/stats.bundle.js" %}"></script>
+
+    <script type="text/template" id="plot-filter-gender-template">
+    <label for="<%-filterId%>">Пол:</label>
+    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+        <option value="">-----</option>
+        <option value="M">Мужской</option>
+        <option value="F">Женский</option>
+    </select>
+    </script>
 {% endblock javascripts %}
 
 {% block content %}
 <div class="container" id="stats-page">
     <h1>Статистика</h1>
-    <form action="" method="GET">
+    <form action="" method="GET" id="courses-filter-form">
         <div class="row">
             <div class="col-xs-3 form-group">
                 <select class="form-control selectpicker" id="term-filter">
@@ -49,7 +58,7 @@
             </div>
             <div class="col-xs-2 form-group">
                 <div class="controls">
-                    <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">Пересчитать</button>
+                    <button disabled type="submit" name="update" value="Y" class="btn btn-primary btn-block">Пересчитать</button>
                 </div>
             </div>
         </div>
@@ -74,14 +83,8 @@
                 </div>
                 <div class="col-xs-2">
                     <div class="form-group">
-                        <label for="plot-assignments__gender">Пол:</label>
-                        <select class="form-control selectpicker" id="plot-assignments__gender" name="plot-assignments__gender">
-                            <option value="">-----</option>
-                            <option value="M">Мужской</option>
-                            <option value="F">Женский</option>
-                        </select>
                     </div>
-                    <div class=" form-group">
+                    <div class="form-group">
                         <label for="plot-assignments__year">Год обучения:</label>
                         <select class="form-control selectpicker" id="plot-assignments__year">
                             <option value="#">2014</option>
@@ -106,7 +109,28 @@
             <h5>Успеваемость</h5>
             <div class="row">
                 <div class="col-xs-10">
-                    <div id="plot-assignments-performance"></div>
+                    <div id="plot-assignments-results"></div>
+                </div>
+            </div>
+
+            <h5>Соотношение среднего балла с проходным</h5>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-assignments-score"></div>
+                </div>
+            </div>
+
+            <h3>Итоги</h3>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-enrollments-results"></div>
+                </div>
+            </div>
+
+{#            <h3>Активность преподавателей</h3>#}
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-enrollments-results"></div>
                 </div>
             </div>
         </div>

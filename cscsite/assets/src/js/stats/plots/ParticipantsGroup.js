@@ -14,7 +14,7 @@ class ParticipantsGroup {
         }
     };
 
-    constructor(id, course_session_id) {
+    constructor(id, options) {
         this.id = id;
         this.type = 'pie';
         // TODO: load from backend?
@@ -23,7 +23,6 @@ class ParticipantsGroup {
             4: this.i18n.ru.groups.VOLUNTEER,
             3: this.i18n.ru.groups.GRADUATE
         };
-        // FIXME: move to state?
         this.data = {};
         this.plot = c3.generate({
             bindto: this.id,
@@ -37,16 +36,20 @@ class ParticipantsGroup {
             data: {
                 type: this.type,
                 columns: []
-            },
-            // legend: {
-            //     position: 'right'
-            // }
+            }
         });
-
-        this.loadStats(course_session_id)
+        let promise = options.apiRequest ||
+                      this.getStats(options.course_session_id);
+        promise
+            .then(this.convertData)
             .then(this.render)
             .done(this.appendParticipantsInfo);
 
+    }
+
+    static getStats(course_session_id) {
+        let dataURL = URLS["api:stats_participants"](course_session_id);
+        return $.getJSON(dataURL);
     }
 
     appendParticipantsInfo = () => {
@@ -63,23 +66,11 @@ class ParticipantsGroup {
             .text(d => this.i18n.ru.total_participants + ': ' + d);
     };
 
-    loadStats(course_session_id) {
-        return this.getJSON(course_session_id)
-                   .then(this.convertData);
-    }
-
-    getJSON(course_session_id) {
-        let dataURL = URLS["api:stats_participants"](course_session_id);
-        return $.getJSON(dataURL);
-    }
-
     convertData = (jsonData) => {
         let data = Object.keys(this.groups).reduce(function(a, b) {
           a[b] = 0; return a;
         }, {});
-
-        // TODO: если у студента обе группы случайно? Это увеличит общее кол-во участников, что плохо
-        // TODO: если нет групп у студента?
+        // Inaccuracy if student have student and volunteer group or haven't both.
         jsonData.forEach(function (student) {
             student.groups.forEach(function (group) {
                 if (group in data) {
@@ -87,8 +78,8 @@ class ParticipantsGroup {
                 }
             });
         });
-        console.log(data);
         this.data = data;
+        // Prepare data for plot
         let columns = [];
         for (let key in data) {
             if (key != 3 || data[key] != 0) {
@@ -100,11 +91,9 @@ class ParticipantsGroup {
     };
 
     render = (columns) => {
-        this.type = 'pie';
         this.plot.load({
             type: this.type,
             columns: columns,
-            unload: true
         });
     };
 }

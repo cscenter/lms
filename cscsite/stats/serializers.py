@@ -51,7 +51,19 @@ class AssignmentsStatsSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(read_only=True)
     deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
+    grade_min = serializers.IntegerField(read_only=True)
     assigned_to = StudentAssignmentsSerializer(many=True, read_only=True)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+
+class EnrollmentsStatsSerializer(serializers.Serializer):
+    grade = serializers.CharField(read_only=True)
+    student = StudentSerializer(read_only=True)
 
     def create(self, validated_data):
         pass
