@@ -11,7 +11,8 @@ class ParticipantsYear {
         }
     };
 
-    constructor(id, course_session_id) {
+    constructor(id, options) {
+        console.log("ParticipantsYear options", options);
         this.id = id;
         this.type = 'pie';
         // FIXME: move to state
@@ -61,21 +62,19 @@ class ParticipantsYear {
                 d.callback();
             });
 
-        this.loadStats(course_session_id)
+        let promise = options.apiRequest ||
+                      this.getStats(options.course_session_id);
+        promise
+            .then(this.convertData)
             .done(this.renderPieChart);
     }
 
-    loadStats(course_session_id) {
-        return this.getJSON(course_session_id)
-                   .then(this.convertData.bind(this));
-    }
-
-    getJSON(course_session_id) {
+    static getStats(course_session_id) {
         let dataURL = URLS["api:stats_participants"](course_session_id);
         return $.getJSON(dataURL);
     }
 
-    convertData(jsonData) {
+    convertData = (jsonData) => {
         let data = {};
         jsonData.forEach(function (e) {
             if (!(e.curriculum_year in data)) {

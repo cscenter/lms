@@ -11,12 +11,12 @@ from rest_framework.response import Response
 
 from api.permissions import CuratorAccessPermission
 from learning.models import Course, Semester, CourseOffering, StudentAssignment, \
-    Assignment
+    Assignment, Enrollment
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from stats.serializers import ParticipantsStatsSerializer, \
-    AssignmentsStatsSerializer
+    AssignmentsStatsSerializer, EnrollmentsStatsSerializer
 from users.models import CSCUser
 
 
@@ -131,8 +131,28 @@ class AssignmentsStats(APIView):
             ))
                         # TODO: Сказать, что оставил только задания онлайн
                        .filter(course_offering_id=course_session_id,
-                               is_online=True)
-                       .order_by("created"))
+                               )
+                       .order_by("deadline_at"))
 
         serializer = AssignmentsStatsSerializer(assignments, many=True)
+        return Response(serializer.data)
+
+
+class EnrollmentsStats(APIView):
+    """
+    Aggregate stats about course offering assignment progress.
+    """
+    http_method_names = ['get']
+    permission_classes = [CuratorAccessPermission]
+
+    def get(self, request, course_session_id, format=None):
+        enrollments = (Enrollment
+                       .objects
+                       .only("pk", "grade", "student_id", "student__gender",
+                             "student__curriculum_year")
+                       .select_related("student")
+                       .filter(course_offering_id=course_session_id)
+                       .order_by())
+
+        serializer = EnrollmentsStatsSerializer(enrollments, many=True)
         return Response(serializer.data)

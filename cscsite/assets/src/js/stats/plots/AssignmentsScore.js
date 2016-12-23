@@ -1,34 +1,23 @@
 import * as d3 from "d3";
 // TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
 
-class AssignmentsResults {
+class AssignmentsScore {
     i18n = {
         lang: 'ru',
         ru: {
             no_assignments: "Заданий не найдено.",
-            // TODO: Load from backend?
-            grades: {
-                not_submitted: "Не отправлено",
-                not_checked: "Не проверено",
-                unsatisfactory: "Незачет",
-                pass: "Удовлетворительно",
-                good: "Хорошо",
-                excellent: "Отлично"
+            lines: {
+                pass: "Проходной балл",
+                mean: "Средний балл"
             }
         }
     };
 
     constructor(id, options) {
         this.id = id;
-        this.type = 'bar';
+        this.type = 'line';
         this.data = {};
         this.plot = undefined;
-
-        // Order is unspecified for Object, but I believe browsers sort
-        // it in a proper way
-        this.states = Object.keys(this.i18n.ru.grades).reduce((m, k) => {
-            return m.set(k, this.i18n.ru.grades[k]);
-        }, new Map());
 
         let promise = options.apiRequest ||
                       this.getStats(options.course_session_id);
@@ -43,28 +32,30 @@ class AssignmentsResults {
     }
 
     convertData = (jsonData) => {
-        console.log("performance ", jsonData);
-        let states = Array.from(this.states, ([k, v]) => v),
-            titles = [],
-            rows = [states];
+        console.log(jsonData);
+        let titles = [],
+            rows = [[this.i18n.ru.lines.pass, this.i18n.ru.lines.mean]];
 
         jsonData.forEach((assignment) => {
             titles.push(assignment.title);
-            let counters = states.reduce(function (a, b) {
-                    return a.set(b, 0);
-                }, new Map());
+            let sum = 0,
+                cnt = 0;
+            // Looks complicated to use Array.prototype.filter
             assignment.assigned_to.forEach((student) => {
-                let state = this.states.get(student.state);
-                counters.set(state, counters.get(state) + 1);
+                if (student.grade !== null) {
+                    sum += student.grade;
+                    cnt += 1;
+                }
             });
-            rows.push(Array.from(counters, ([k, v]) => v));
+            let mean = (cnt === 0) ? 0 : (sum / cnt).toFixed(1);
+            rows.push([assignment.grade_min, mean]);
         });
 
         this.data = {
-            titles: titles,  // assignment titles
+            titles: titles,
             rows: rows
         };
-        console.debug("performance data", this.data);
+        console.debug(this.data);
         return this.data;
     };
 
@@ -80,7 +71,7 @@ class AssignmentsResults {
             bindto: this.id,
             data: {
                 type: this.type,
-                rows: data.rows,
+                rows: data.rows
             },
             tooltip: {
                 format: {
@@ -94,6 +85,9 @@ class AssignmentsResults {
                 }
               }
             },
+            legend: {
+                position: 'right'
+            },
             grid: {
                 y: {
                     show: true
@@ -103,4 +97,4 @@ class AssignmentsResults {
     };
 }
 
-export default AssignmentsResults;
+export default AssignmentsScore;
