@@ -129,7 +129,7 @@ class AssignmentsDeadline {
                 }
             },
             color: {
-                pattern: ['#1f77b4', '#ff7f0e', '#ffbb78', '#2ca02c', '#d62728',  '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+                pattern: ['#d62728', '#9c27b0', '#ff7f0e', '#ffbb78', '#2ca02c', '#9467bd', '#c5b0d5', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
             },
             legend: {
                 position: 'right'

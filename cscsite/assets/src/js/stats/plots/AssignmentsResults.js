@@ -99,6 +99,9 @@ class AssignmentsResults {
                     show: true
                 }
             },
+            color: {
+                pattern: ['#7f7f7f', '#ffbb78', '#d62728', '#ff7f0e',  '#2ca02c', '#9c27b0',   '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+            },
         });
     };
 }
