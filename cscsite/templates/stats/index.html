@@ -22,12 +22,26 @@
     <script type="text/javascript" src="{% static "js/stats.bundle.js" %}"></script>
 
     <script type="text/template" id="plot-filter-gender-template">
-    <label for="<%-filterId%>">Пол:</label>
-    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
-        <option value="">-----</option>
-        <option value="M">Мужской</option>
-        <option value="F">Женский</option>
-    </select>
+        <label for="<%-filterId%>">Пол:</label>
+        <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+            <option value="">-----</option>
+            <option value="M">Мужской</option>
+            <option value="F">Женский</option>
+        </select>
+    </script>
+    <script type="text/template" id="plot-filter-curriculum_year-template">
+        <label for="<%-filterId%>">Год обучения:</label>
+        <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+            <option value="">-----</option>
+            <% items.forEach(function(item) { %>
+            <option value="<%-item%>"><%-item%></option>
+            <% }); %>
+        </select>
+    </script>
+    <script type="text/template" id="plot-filter-submit-button">
+        <div class="controls">
+            <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">Фильтровать</button>
+        </div>
     </script>
 {% endblock javascripts %}
 
@@ -82,20 +96,15 @@
                     <div id="plot-assignments-progress"></div>
                 </div>
                 <div class="col-xs-2">
-                    <div class="form-group">
-                    </div>
-                    <div class="form-group">
-                        <label for="plot-assignments__year">Год обучения:</label>
-                        <select class="form-control selectpicker" id="plot-assignments__year">
-                            <option value="#">2014</option>
-                            <option value="#">2015</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <div class="controls">
-                            <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">Фильтровать</button>
-                        </div>
-                    </div>
+{#                    <div class="form-group">#}
+{#                        <label for="plot-assignments__year">Год обучения:</label>#}
+{#                        <select class="form-control selectpicker" id="plot-assignments__year">#}
+{#                            <option value="#">2014</option>#}
+{#                            <option value="#">2015</option>#}
+{#                        </select>#}
+{#                    </div>#}
+{#                    <div class="form-group">#}
+{#                    </div>#}
                 </div>
             </div>
 

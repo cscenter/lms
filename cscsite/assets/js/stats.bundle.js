@@ -91,6 +91,10 @@
 	    },
 
 	    renderPlots: function renderPlots(courseSessionId) {
+	        // Prepare templates
+	        var filterGenderTpl = template(document.getElementById("plot-filter-gender-template").innerHTML),
+	            filterCurriculumYearTpl = template(document.getElementById("plot-filter-curriculum_year-template").innerHTML),
+	            filterSubmitButtonTpl = template(document.getElementById("plot-filter-submit-button").innerHTML);
 	        // Participants
 	        var options = {
 	            course_session_id: courseSessionId,
@@ -101,15 +105,16 @@
 	        // Assignments
 	        options = {
 	            course_session_id: courseSessionId,
-	            // FIXME: раздельно рендерить или глобально закешировать функции?
 	            templates: {
 	                filters: {
-	                    gender: template(document.getElementById("plot-filter-gender-template").innerHTML)
+	                    gender: filterGenderTpl,
+	                    curriculumYear: filterCurriculumYearTpl,
+	                    submitButton: filterSubmitButtonTpl
 	                }
 	            },
 	            apiRequest: _AssignmentsProgress2.default.getStats(courseSessionId)
 	        };
-	        new _AssignmentsProgress2.default('#plot-assignments-progress', options);
+	        new _AssignmentsProgress2.default('plot-assignments-progress', options);
 	        new _AssignmentsDeadline2.default('#plot-assignments-deadline', options);
 	        new _AssignmentsResults2.default('#plot-assignments-results', options);
 	        new _AssignmentsScore2.default('#plot-assignments-score', options);
@@ -440,6 +445,8 @@
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
@@ -460,64 +467,139 @@
 	            }
 	        };
 
-	        this.convertData = function (jsonData) {
+	        this.preCalculateState = function (rawJSON) {
 	            var titles = [],
-	                participants = [_this.i18n.ru.participants],
-	                passed = [_this.i18n.ru.passed];
-	            jsonData.forEach(function (assignment) {
-	                var _passed = 0,
-	                    _participants = 0,
-	                    assignments = assignment.assigned_to;
-	                assignments.forEach(function (student) {
-	                    _participants += 1;
-	                    _passed += student.sent;
-	                });
+	                curriculumYearChoices = new Set();
+	            rawJSON.forEach(function (assignment) {
 	                titles.push(assignment.title);
+	                assignment.assigned_to.forEach(function (sa) {
+	                    curriculumYearChoices.add(sa.student.curriculum_year);
+	                });
+	            });
+	            _this.state.titles = titles;
+	            _this.state.filters.curriculumYear.choices = curriculumYearChoices;
+	            return rawJSON;
+	        };
+
+	        this.matchFilter = function (_ref) {
+	            var value = _ref[0],
+	                stateAttrName = _ref[1];
+
+	            var stateAttr = _this.state.filters[stateAttrName],
+
+	            // stateAttr can be a value or Object with `value` attribute
+	            stateValue = stateAttr === Object(stateAttr) ? stateAttr.value : stateAttr;
+	            return stateValue == undefined || stateValue == "" || stateValue == value;
+	        };
+
+	        this.convertData = function (rawJSON) {
+	            var participants = [_this.i18n.ru.participants],
+	                passed = [_this.i18n.ru.passed];
+	            rawJSON.forEach(function (assignment) {
+	                var _passed = 0,
+	                    _participants = 0;
+	                assignment.assigned_to.forEach(function (sa) {
+	                    // Array of [dataValue, stateAttrName]
+	                    var filterPairs = [[sa.student.gender, "gender"], [sa.student.curriculum_year, "curriculumYear"]];
+	                    if (filterPairs.every(_this.matchFilter)) {
+	                        _participants += 1;
+	                        _passed += sa.sent;
+	                    }
+	                });
 	                participants.push(_participants);
 	                passed.push(_passed);
 	            });
 
-	            _this.data = [titles, participants, passed];
-	            console.debug(_this.data);
-	            return _this.data;
+	            _this.state.data = [participants, passed];
+	            return _this.state.data;
+	        };
+
+	        this.genderFilter = function () {
+	            var self = _this,
+	                filterId = _this.id + "-gender-filter";
+	            return {
+	                id: '#' + filterId,
+	                html: _this.templates.filters.gender({
+	                    filterId: filterId
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.state.filters.gender = this.value;
+	                    });
+	                }
+	            };
+	        };
+
+	        this.curriculumYearFilter = function (choices) {
+	            var self = _this,
+	                filterId = _this.id + "-curriculum-year-filter";
+	            return {
+	                id: '#' + filterId,
+	                html: _this.templates.filters.curriculumYear({
+	                    filterId: filterId,
+	                    items: choices
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.state.filters.curriculumYear.value = this.value;
+	                    });
+	                }
+	            };
+	        };
+
+	        this.getFilterData = function () {
+	            var data = [_this.genderFilter()];
+	            if (_this.state.filters.curriculumYear.choices.size > 0) {
+	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.state.filters.curriculumYear.choices))));
+	            }
+	            data.push({
+	                isSubmitButton: true,
+	                html: _this.templates.filters.submitButton()
+	            });
+	            return data;
 	        };
 
 	        this.renderFilters = function () {
-	            console.log("FILTERS. TEMP");
-	            console.log(_this.templates.filters.gender({ filterId: "test" }));
-	            var formData = [{}];
 	            // get .col-xs-10 node
-	            var plotWrapperNode = d3.select(_this.id).node().parentNode,
+	            var plotWrapperNode = d3.select('#' + _this.id).node().parentNode,
 
 	            // first, skip #text node between .col-xs-10 and .col-xs-2
 	            filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
-	            d3.select(filterWrapperNode).selectAll('div.form-group').data(formData).enter().append('div').attr('class', 'form-group').text(function (d) {
-	                return "This is a text for " + d;
+	            d3.select(filterWrapperNode).selectAll('div.form-group').data(_this.getFilterData()).enter().append('div').attr('class', 'form-group').html(function (d) {
+	                return d.html;
+	            }).each(function (d) {
+	                if (d.callback !== undefined) {
+	                    d.callback();
+	                }
+	            }).filter(function (d) {
+	                return d.isSubmitButton === true;
+	            }).on("click", function () {
+	                var filteredData = _this.convertData(_this.rawJSON);
+	                _this.plot.load({
+	                    type: _this.type,
+	                    columns: filteredData
+	                });
+	                return false;
 	            });
 	        };
 
 	        this.render = function (data) {
-	            // TODO: если нет заданий - не рисовать график
-
-	            var titles = data[0],
-	                columns = data.slice(1);
-
-	            if (!titles.length) {
-	                $(_this.id).html(_this.i18n.ru.no_assignments);
+	            console.log('STATE', _this.state);
+	            if (!_this.state.titles.length) {
+	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
 	            }
 
+	            var titles = _this.state.titles;
+
 	            // Let's generate here, a lot of troubles with c3.load method right now
-	            console.log(columns);
+	            console.log(data);
 	            _this.plot = c3.generate({
-	                bindto: _this.id,
+	                bindto: '#' + _this.id,
 	                data: {
 	                    type: _this.type,
-	                    columns: columns
+	                    columns: data
 	                },
-	                // legend: {
-	                //     position: 'right'
-	                // },
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
@@ -544,12 +626,27 @@
 
 	        this.id = id;
 	        this.type = 'line';
-	        this.data = {};
+	        this.rawJSON = {};
+	        this.state = {
+	            data: [], // filtered data
+	            titles: undefined, // assignment titles
+	            filters: {
+	                gender: undefined,
+	                curriculumYear: {
+	                    value: undefined,
+	                    choices: undefined
+	                }
+	            }
+	        };
 	        this.plot = undefined;
 	        this.templates = options.templates || {};
 
 	        var promise = options.apiRequest || this.getStats(options.course_session_id);
-	        promise.then(this.convertData).done(this.render).done(this.renderFilters);
+	        promise
+	        // Memorize raw JSON data for future conversions
+	        .then(function (rawJSON) {
+	            _this.rawJSON = rawJSON;return rawJSON;
+	        }).then(this.preCalculateState).then(this.convertData).done(this.render).done(this.renderFilters);
 	    }
 	    // FIXME: изучить как лучше передавать перевод. Кажется, что это должен быть отдельный сервис
 
@@ -558,6 +655,13 @@
 	        var dataURL = URLS["api:stats_assignments"](course_session_id);
 	        return $.getJSON(dataURL);
 	    };
+
+	    // Memorize assignments titles and collect filter values
+	    // We don't want to calculate this data every time on filter event
+
+
+	    // Recalculate data based on current filters state
+
 
 	    return AssignmentsProgress;
 	}();
