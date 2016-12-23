@@ -33,14 +33,7 @@ class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):
                     .filter(index__gte=term_start)
                     .order_by("-index"),
             key=lambda x: x.year)
-        terms = OrderedDict()
-        first_term = None
-        for group_name, group in terms_grouped:
-            group = list(group)
-            if group:
-                first_term = first_term or group[0]
-            terms[group_name] = group
-        context["terms"] = terms
+        context["terms"] = [(g_name, list(g)) for g_name, g in terms_grouped]
         # TODO: Если прикрутить REST API, то можно эту логику перенести
         # на клиент и сразу не грузить весь список курсов
         # Courses grouped by term
@@ -56,7 +49,8 @@ class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):
         try:
             course_session_id = int(course_session_id)
         except TypeError:
-            course_session_id = courses[first_term.pk][0]["pk"]
+            max_term_id = max(courses.keys())
+            course_session_id = courses[max_term_id][0]["pk"]
         term_id = None
         for group in courses.values():
             for co in group:
