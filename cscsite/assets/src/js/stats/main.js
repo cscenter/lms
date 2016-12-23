@@ -20,6 +20,13 @@ let fn = {
     },
 
     renderPlots: function (courseSessionId) {
+        // Prepare templates
+        let filterGenderTpl = template(document.getElementById(
+                "plot-filter-gender-template").innerHTML),
+            filterCurriculumYearTpl = template(document.getElementById(
+                "plot-filter-curriculum_year-template").innerHTML),
+            filterSubmitButtonTpl = template(document.getElementById(
+                "plot-filter-submit-button").innerHTML);
         // Participants
         let options = {
             course_session_id: courseSessionId,
@@ -30,15 +37,16 @@ let fn = {
         // Assignments
         options = {
             course_session_id: courseSessionId,
-            // FIXME: раздельно рендерить или глобально закешировать функции?
             templates: {
                 filters: {
-                    gender: template(document.getElementById("plot-filter-gender-template").innerHTML)
+                    gender: filterGenderTpl,
+                    curriculumYear: filterCurriculumYearTpl,
+                    submitButton: filterSubmitButtonTpl
                 }
             },
             apiRequest: AssignmentsProgress.getStats(courseSessionId)
         };
-        new AssignmentsProgress('#plot-assignments-progress', options);
+        new AssignmentsProgress('plot-assignments-progress', options);
         new AssignmentsDeadline('#plot-assignments-deadline', options);
         new AssignmentsResults('#plot-assignments-results', options);
         new AssignmentsScore('#plot-assignments-score', options);
