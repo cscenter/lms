@@ -97,13 +97,18 @@ class ProjectStudent(models.Model):
     def final_grade_display(self):
         """
         For internal projects show 'Satisfactory' instead of 'Pass'.
+        For projects earlier spring 2016 (exclusively) -
+        dont' override grade status name.
         May require additional query to db to get project instance
         """
+        final_grade = GRADES[self.final_grade]
+        # XXX: Assume projects with id greater than magic number -
+        # from terms >= spring 2016
+        MAGIC_PROJECT_ID = 357
         if (self.final_grade == getattr(GRADES, "pass") and
+                self.project_id > MAGIC_PROJECT_ID and
                 not self.project.is_external):
             final_grade = _("Assignment|pass")
-        else:
-            final_grade = GRADES[self.final_grade]
         return final_grade
 
 
