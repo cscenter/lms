@@ -146,7 +146,7 @@
                                         <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a>
                                         /{% spaceless %}
                                         {% if not ps.project.canceled %}
-                                            {{ ps.get_final_grade_display|lower }}
+                                            {{ ps.final_grade_display|lower }}
                                         {% elif ps.final_grade == "not_graded" %}
                                             {% trans "Canceled"|lower context "Project" %}
                                         {% else %}
