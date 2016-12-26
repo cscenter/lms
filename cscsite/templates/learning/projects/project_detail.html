@@ -104,8 +104,8 @@
                                     <tr>
                                         <td>{{ ps.student }}</td>
                                         <td>{{ ps.report.final_score }}</td>
-                                        <td>{{ ps.presentation_grade|default:"-" }}</td>
-                                        <td>{{ ps.supervisor_grade|default:"-" }}</td>
+                                        <td>{% if ps.presentation_grade != None %}{{ ps.presentation_grade }}{% else %}-{% endif %}</td>
+                                        <td>{% if ps.supervisor_grade != None %}{{ ps.supervisor_grade }}{% else %}-{% endif %}</td>
                                         <td>{{ ps.total_score }}</td>
                                         <td>
                                             {{ form.final_grade }}
