@@ -341,10 +341,8 @@ def autograde_projects(request):
         return HttpResponseForbidden()
     try:
         # FIXME: Only Django 1.10 can return value from `call_command`
-        out = StringIO()
-        call_command('autograde_projects', stdout=out)
-        processed = int(out.getvalue())
-        messages.success(request, "Выставлено оценок: {}".format(processed))
+        processed = call_command('autograde_projects')
+        messages.success(request, "Операция выполнена успешно.")
     except CommandError as e:
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))

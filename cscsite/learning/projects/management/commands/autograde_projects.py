@@ -81,5 +81,4 @@ class Command(BaseCommand):
             result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)
             processed += result
-        self.stdout.write(str(processed))
-        return processed
+        return str(processed)
