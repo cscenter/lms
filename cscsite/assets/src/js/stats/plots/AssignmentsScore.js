@@ -8,14 +8,15 @@ class AssignmentsScore {
             no_assignments: "Заданий не найдено.",
             lines: {
                 pass: "Проходной балл",
-                mean: "Средний балл"
+                mean: "Средний балл",
+                max: "Максимальный балл"
             }
         }
     };
 
     constructor(id, options) {
         this.id = id;
-        this.type = 'line';
+        this.type = 'bar';
         this.data = {};
         this.plot = undefined;
 
@@ -34,7 +35,8 @@ class AssignmentsScore {
     convertData = (jsonData) => {
         console.log(jsonData);
         let titles = [],
-            rows = [[this.i18n.ru.lines.pass, this.i18n.ru.lines.mean]];
+            rows = [[this.i18n.ru.lines.pass, this.i18n.ru.lines.mean,
+                this.i18n.ru.lines.max]];
 
         jsonData.forEach((assignment) => {
             titles.push(assignment.title);
@@ -48,7 +50,7 @@ class AssignmentsScore {
                 }
             });
             let mean = (cnt === 0) ? 0 : (sum / cnt).toFixed(1);
-            rows.push([assignment.grade_min, mean]);
+            rows.push([assignment.grade_min, mean, assignment.grade_max]);
         });
 
         this.data = {

@@ -17,15 +17,18 @@ class AssignmentsProgress {
         this.id = id;
         this.type = 'line';
         this.rawJSON = {};
+        this.props = {
+            choices: {
+                curriculumYear: undefined
+            }
+        };
         this.state = {
             data: [],  // filtered data
             titles: undefined,  // assignment titles
             filters: {
                 gender: undefined,
-                curriculumYear: {
-                    value: undefined,
-                    choices: undefined
-                }
+                isOnline: undefined,
+                curriculumYear: undefined
             }
         };
         this.plot = undefined;
@@ -36,7 +39,7 @@ class AssignmentsProgress {
         promise
             // Memorize raw JSON data for future conversions
             .then((rawJSON) => { this.rawJSON = rawJSON; return rawJSON })
-            .then(this.preCalculateState)
+            .then(this.calculateFilterProps)
             .then(this.convertData)
             .done(this.render)
             .done(this.renderFilters);
@@ -47,52 +50,51 @@ class AssignmentsProgress {
         return $.getJSON(dataURL);
     }
 
-    // Memorize assignments titles and collect filter values
+    // Collect filter values
     // We don't want to calculate this data every time on filter event
-    preCalculateState = (rawJSON) => {
-        let titles = [],
-            curriculumYearChoices = new Set();
+    calculateFilterProps = (rawJSON) => {
+        let curriculumYearChoices = new Set();
         rawJSON.forEach(function (assignment) {
-            titles.push(assignment.title);
             assignment.assigned_to.forEach(function(sa) {
                 curriculumYearChoices.add(sa.student.curriculum_year);
             });
         });
-        this.state.titles = titles;
-        this.state.filters.curriculumYear.choices = curriculumYearChoices;
+        this.props.choices.curriculumYear = curriculumYearChoices;
         return rawJSON;
     };
 
     matchFilter = ([value, stateAttrName]) => {
-        let stateAttr = this.state.filters[stateAttrName],
-            // stateAttr can be a value or Object with `value` attribute
-            stateValue = (stateAttr === Object(stateAttr)) ? stateAttr.value : stateAttr;
-        return stateValue == undefined || stateValue == ""
-               || stateValue == value;
+        let stateValue = this.state.filters[stateAttrName];
+        return stateValue === undefined || stateValue === ""
+               || stateValue === value;
     };
 
     // Recalculate data based on current filters state
     convertData = (rawJSON) => {
         let participants = [this.i18n.ru.participants],
-            passed = [this.i18n.ru.passed];
+            passed = [this.i18n.ru.passed],
+            titles = [];
         rawJSON.forEach((assignment) => {
-            let _passed = 0,
-                _participants = 0;
-            assignment.assigned_to.forEach((sa) => {
-                // Array of [dataValue, stateAttrName]
-                let filterPairs = [
-                    [sa.student.gender, "gender"],
-                    [sa.student.curriculum_year, "curriculumYear"],
-                ];
-                if (filterPairs.every(this.matchFilter)) {
-                   _participants += 1;
-                   _passed += sa.sent;
-                }
-            });
-            participants.push(_participants);
-            passed.push(_passed);
+            if (this.matchFilter([assignment.is_online, "isOnline"])) {
+                titles.push(assignment.title);
+                let _passed = 0,
+                    _participants = 0;
+                assignment.assigned_to.forEach((sa) => {
+                    // Array of [dataValue, stateAttrName]
+                    let filterPairs = [
+                        [sa.student.gender, "gender"],
+                        [sa.student.curriculum_year, "curriculumYear"],
+                    ];
+                    if (filterPairs.every(this.matchFilter)) {
+                       _participants += 1;
+                       _passed += sa.sent;
+                    }
+                });
+                participants.push(_participants);
+                passed.push(_passed);
+            }
         });
-
+        this.state.titles = titles;
         this.state.data = [participants, passed];
         return this.state.data;
     };
@@ -114,6 +116,24 @@ class AssignmentsProgress {
         };
     };
 
+    isOnlineFilter = () => {
+        let self = this,
+            filterId = this.id +  "-is-online-filter";
+        return {
+            id: '#' + filterId,
+            html: this.templates.filters.isOnline({
+                filterId: filterId
+            }),
+            callback: function() {
+                $(this.id).selectpicker('render')
+                .on('changed.bs.select', function () {
+                    self.state.filters.isOnline = (this.value === "") ?
+                        undefined : (this.value === "true");
+                });
+            }
+        };
+    };
+
     curriculumYearFilter = (choices) => {
         let self = this,
             filterId = this.id +  "-curriculum-year-filter";
@@ -126,17 +146,21 @@ class AssignmentsProgress {
             callback: function() {
                 $(this.id).selectpicker('render')
                 .on('changed.bs.select', function () {
-                    self.state.filters.curriculumYear.value = this.value;
+                    self.state.filters.curriculumYear =
+                        (this.value !== "") ? parseInt(this.value) : this.value;
                 });
             }
         };
     };
 
     getFilterData = () => {
-        let data = [this.genderFilter()];
-        if (this.state.filters.curriculumYear.choices.size > 0) {
+        let data = [
+            this.genderFilter(),
+            this.isOnlineFilter()
+        ];
+        if (this.props.choices.curriculumYear.size > 0) {
             data.push(this.curriculumYearFilter(
-                [...this.state.filters.curriculumYear.choices]));
+                [...this.props.choices.curriculumYear]));
         }
         data.push({
             isSubmitButton: true,
@@ -162,6 +186,7 @@ class AssignmentsProgress {
                     d.callback();
                 }
             })
+            // On last step, append filter button
             .filter(function(d) { return d.isSubmitButton === true })
             .on("click", () => {
                 let filteredData = this.convertData(this.rawJSON);
@@ -174,16 +199,14 @@ class AssignmentsProgress {
     };
 
     render = (data) => {
-        console.log('STATE', this.state);
         if (!this.state.titles.length) {
             $('#' + this.id).html(this.i18n.ru.no_assignments);
             return;
         }
 
-        let titles = this.state.titles;
+        let self = this;
 
         // Let's generate here, a lot of troubles with c3.load method right now
-        console.log(data);
         this.plot = c3.generate({
             bindto: '#' + this.id,
             data: {
@@ -193,7 +216,7 @@ class AssignmentsProgress {
             tooltip: {
                 format: {
                     title: function (d) {
-                        return titles[d].slice(0, 80);
+                        return self.state.titles[d].slice(0, 80);
                     },
                 }
             },
