@@ -23,6 +23,8 @@ let fn = {
         // Prepare templates
         let filterGenderTpl = template(document.getElementById(
                 "plot-filter-gender-template").innerHTML),
+            filterIsOnlineTpl = template(document.getElementById(
+                "plot-filter-is-online-template").innerHTML),
             filterCurriculumYearTpl = template(document.getElementById(
                 "plot-filter-curriculum_year-template").innerHTML),
             filterSubmitButtonTpl = template(document.getElementById(
@@ -41,6 +43,7 @@ let fn = {
                 filters: {
                     gender: filterGenderTpl,
                     curriculumYear: filterCurriculumYearTpl,
+                    isOnline: filterIsOnlineTpl,
                     submitButton: filterSubmitButtonTpl
                 }
             },

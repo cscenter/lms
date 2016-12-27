@@ -93,6 +93,7 @@
 	    renderPlots: function renderPlots(courseSessionId) {
 	        // Prepare templates
 	        var filterGenderTpl = template(document.getElementById("plot-filter-gender-template").innerHTML),
+	            filterIsOnlineTpl = template(document.getElementById("plot-filter-is-online-template").innerHTML),
 	            filterCurriculumYearTpl = template(document.getElementById("plot-filter-curriculum_year-template").innerHTML),
 	            filterSubmitButtonTpl = template(document.getElementById("plot-filter-submit-button").innerHTML);
 	        // Participants
@@ -109,6 +110,7 @@
 	                filters: {
 	                    gender: filterGenderTpl,
 	                    curriculumYear: filterCurriculumYearTpl,
+	                    isOnline: filterIsOnlineTpl,
 	                    submitButton: filterSubmitButtonTpl
 	                }
 	            },
@@ -467,17 +469,14 @@
 	            }
 	        };
 
-	        this.preCalculateState = function (rawJSON) {
-	            var titles = [],
-	                curriculumYearChoices = new Set();
+	        this.calculateFilterProps = function (rawJSON) {
+	            var curriculumYearChoices = new Set();
 	            rawJSON.forEach(function (assignment) {
-	                titles.push(assignment.title);
 	                assignment.assigned_to.forEach(function (sa) {
 	                    curriculumYearChoices.add(sa.student.curriculum_year);
 	                });
 	            });
-	            _this.state.titles = titles;
-	            _this.state.filters.curriculumYear.choices = curriculumYearChoices;
+	            _this.props.choices.curriculumYear = curriculumYearChoices;
 	            return rawJSON;
 	        };
 
@@ -485,31 +484,32 @@
 	            var value = _ref[0],
 	                stateAttrName = _ref[1];
 
-	            var stateAttr = _this.state.filters[stateAttrName],
-
-	            // stateAttr can be a value or Object with `value` attribute
-	            stateValue = stateAttr === Object(stateAttr) ? stateAttr.value : stateAttr;
-	            return stateValue == undefined || stateValue == "" || stateValue == value;
+	            var stateValue = _this.state.filters[stateAttrName];
+	            return stateValue === undefined || stateValue === "" || stateValue === value;
 	        };
 
 	        this.convertData = function (rawJSON) {
 	            var participants = [_this.i18n.ru.participants],
-	                passed = [_this.i18n.ru.passed];
+	                passed = [_this.i18n.ru.passed],
+	                titles = [];
 	            rawJSON.forEach(function (assignment) {
-	                var _passed = 0,
-	                    _participants = 0;
-	                assignment.assigned_to.forEach(function (sa) {
-	                    // Array of [dataValue, stateAttrName]
-	                    var filterPairs = [[sa.student.gender, "gender"], [sa.student.curriculum_year, "curriculumYear"]];
-	                    if (filterPairs.every(_this.matchFilter)) {
-	                        _participants += 1;
-	                        _passed += sa.sent;
-	                    }
-	                });
-	                participants.push(_participants);
-	                passed.push(_passed);
+	                if (_this.matchFilter([assignment.is_online, "isOnline"])) {
+	                    titles.push(assignment.title);
+	                    var _passed = 0,
+	                        _participants = 0;
+	                    assignment.assigned_to.forEach(function (sa) {
+	                        // Array of [dataValue, stateAttrName]
+	                        var filterPairs = [[sa.student.gender, "gender"], [sa.student.curriculum_year, "curriculumYear"]];
+	                        if (filterPairs.every(_this.matchFilter)) {
+	                            _participants += 1;
+	                            _passed += sa.sent;
+	                        }
+	                    });
+	                    participants.push(_participants);
+	                    passed.push(_passed);
+	                }
 	            });
-
+	            _this.state.titles = titles;
 	            _this.state.data = [participants, passed];
 	            return _this.state.data;
 	        };
@@ -530,6 +530,22 @@
 	            };
 	        };
 
+	        this.isOnlineFilter = function () {
+	            var self = _this,
+	                filterId = _this.id + "-is-online-filter";
+	            return {
+	                id: '#' + filterId,
+	                html: _this.templates.filters.isOnline({
+	                    filterId: filterId
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.state.filters.isOnline = this.value === "" ? undefined : this.value === "true";
+	                    });
+	                }
+	            };
+	        };
+
 	        this.curriculumYearFilter = function (choices) {
 	            var self = _this,
 	                filterId = _this.id + "-curriculum-year-filter";
@@ -541,16 +557,16 @@
 	                }),
 	                callback: function callback() {
 	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.state.filters.curriculumYear.value = this.value;
+	                        self.state.filters.curriculumYear = this.value !== "" ? parseInt(this.value) : this.value;
 	                    });
 	                }
 	            };
 	        };
 
 	        this.getFilterData = function () {
-	            var data = [_this.genderFilter()];
-	            if (_this.state.filters.curriculumYear.choices.size > 0) {
-	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.state.filters.curriculumYear.choices))));
+	            var data = [_this.genderFilter(), _this.isOnlineFilter()];
+	            if (_this.props.choices.curriculumYear.size > 0) {
+	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.props.choices.curriculumYear))));
 	            }
 	            data.push({
 	                isSubmitButton: true,
@@ -571,7 +587,9 @@
 	                if (d.callback !== undefined) {
 	                    d.callback();
 	                }
-	            }).filter(function (d) {
+	            })
+	            // On last step, append filter button
+	            .filter(function (d) {
 	                return d.isSubmitButton === true;
 	            }).on("click", function () {
 	                var filteredData = _this.convertData(_this.rawJSON);
@@ -584,16 +602,14 @@
 	        };
 
 	        this.render = function (data) {
-	            console.log('STATE', _this.state);
 	            if (!_this.state.titles.length) {
 	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
 	            }
 
-	            var titles = _this.state.titles;
+	            var self = _this;
 
 	            // Let's generate here, a lot of troubles with c3.load method right now
-	            console.log(data);
 	            _this.plot = c3.generate({
 	                bindto: '#' + _this.id,
 	                data: {
@@ -603,7 +619,7 @@
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
-	                            return titles[d].slice(0, 80);
+	                            return self.state.titles[d].slice(0, 80);
 	                        }
 	                    }
 	                },
@@ -627,15 +643,18 @@
 	        this.id = id;
 	        this.type = 'line';
 	        this.rawJSON = {};
+	        this.props = {
+	            choices: {
+	                curriculumYear: undefined
+	            }
+	        };
 	        this.state = {
 	            data: [], // filtered data
 	            titles: undefined, // assignment titles
 	            filters: {
 	                gender: undefined,
-	                curriculumYear: {
-	                    value: undefined,
-	                    choices: undefined
-	                }
+	                isOnline: undefined,
+	                curriculumYear: undefined
 	            }
 	        };
 	        this.plot = undefined;
@@ -646,7 +665,7 @@
 	        // Memorize raw JSON data for future conversions
 	        .then(function (rawJSON) {
 	            _this.rawJSON = rawJSON;return rawJSON;
-	        }).then(this.preCalculateState).then(this.convertData).done(this.render).done(this.renderFilters);
+	        }).then(this.calculateFilterProps).then(this.convertData).done(this.render).done(this.renderFilters);
 	    }
 	    // FIXME: изучить как лучше передавать перевод. Кажется, что это должен быть отдельный сервис
 
@@ -656,7 +675,7 @@
 	        return $.getJSON(dataURL);
 	    };
 
-	    // Memorize assignments titles and collect filter values
+	    // Collect filter values
 	    // We don't want to calculate this data every time on filter event
 
 
@@ -719,6 +738,8 @@
 	                titles = [],
 	                rows = [types];
 	            jsonData.forEach(function (assignment) {
+	                if (assignment.is_online === false) return;
+
 	                titles.push(assignment.title);
 	                var deadline = new Date(assignment.deadline_at),
 	                    counters = types.reduce(function (a, b) {
@@ -1985,7 +2006,8 @@
 	                no_assignments: "Заданий не найдено.",
 	                lines: {
 	                    pass: "Проходной балл",
-	                    mean: "Средний балл"
+	                    mean: "Средний балл",
+	                    max: "Максимальный балл"
 	                }
 	            }
 	        };
@@ -1993,7 +2015,7 @@
 	        this.convertData = function (jsonData) {
 	            console.log(jsonData);
 	            var titles = [],
-	                rows = [[_this.i18n.ru.lines.pass, _this.i18n.ru.lines.mean]];
+	                rows = [[_this.i18n.ru.lines.pass, _this.i18n.ru.lines.mean, _this.i18n.ru.lines.max]];
 
 	            jsonData.forEach(function (assignment) {
 	                titles.push(assignment.title);
@@ -2007,7 +2029,7 @@
 	                    }
 	                });
 	                var mean = cnt === 0 ? 0 : (sum / cnt).toFixed(1);
-	                rows.push([assignment.grade_min, mean]);
+	                rows.push([assignment.grade_min, mean, assignment.grade_max]);
 	            });
 
 	            _this.data = {
@@ -2060,7 +2082,7 @@
 	        };
 
 	        this.id = id;
-	        this.type = 'line';
+	        this.type = 'bar';
 	        this.data = {};
 	        this.plot = undefined;
 

@@ -75,6 +75,8 @@ class AssignmentsDeadline {
             titles = [],
             rows = [types];
         jsonData.forEach((assignment) => {
+            if (assignment.is_online === false) return;
+
             titles.push(assignment.title);
             let deadline = new Date(assignment.deadline_at),
                 counters = types.reduce(function (a, b) {
