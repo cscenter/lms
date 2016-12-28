@@ -5,18 +5,23 @@ class ParticipantsYear {
 
     i18n = {
         ru: {
-            diagram: "Диаграмма",
-            plot: "График",
+            pieChart: "Круговая",
+            barChart: "Гистограмма",
             students: ""
         }
     };
 
     constructor(id, options) {
-        console.log("ParticipantsYear options", options);
         this.id = id;
-        this.type = 'pie';
-        // FIXME: move to state
-        this.data = {};
+        this.state = {
+            data: {
+                type: void 0,
+                x : 'x',
+                unload: true,
+                columns: [],
+            },
+            groups: []
+        };
         this.plot = c3.generate({
             bindto: this.id,
             grid: {
@@ -25,42 +30,17 @@ class ParticipantsYear {
                 }
             },
             tooltip: {
+                grouped: false,
                 format: {
+                    title: () => "",
                     value: (value, ratio, id)  => {
-                        if (this.type == 'pie') {
-                            return value + '&nbsp;чел.';
-                        } else {
-                            return value;
-                        }
+                        return value + '&nbsp;чел.';
                     }
                 }
             },
-            data: {
-                type: this.type,
-                columns: []
-            },
-            // legend: {
-            //     position: 'right'
-            // }
+            data: this.state.data,
+            oninit: this.renderSwitchButtons
         });
-        // Switch plot type button
-        let buttons = [
-            {name: this.i18n.ru.diagram, callback: this.renderPieChart},
-            {name: this.i18n.ru.plot, callback: this.renderBarChart}
-        ];
-        // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
-        d3.select(this.id).insert('div', ":first-child")
-            .attr('class', 'btn-group pull-right')
-            .attr('role', 'group')
-            .attr('aria-label', 'Toggle')
-            .selectAll('button')
-            .data(buttons)
-            .enter().append('button').attr('class', 'btn btn-default')
-            .attr('data-id', id => id)
-            .text(d => d.name)
-            .on('click',  (d) => {
-                d.callback();
-            });
 
         let promise = options.apiRequest ||
                       this.getStats(options.course_session_id);
@@ -74,71 +54,71 @@ class ParticipantsYear {
         return $.getJSON(dataURL);
     }
 
-    convertData = (jsonData) => {
-        let data = {};
-        jsonData.forEach(function (e) {
-            if (!(e.curriculum_year in data)) {
-                data[e.curriculum_year] = 0;
-            }
-            data[e.curriculum_year] += 1;
+    /**
+     *  To use data without convertion both in `line` and `pie` chart we
+     *  need something like this:
+     *  columns: [
+     *       ['2013', 30, 0],
+     *       ['2014', 0, 90],
+     *       ['x', '2013', '2014'],
+     *   ],
+     * @returns {Array}
+     */
+    convertData = (rawJSON) => {
+        // year => {total students}
+        let data = new Map();
+        rawJSON.forEach(function (e) {
+            data.set(e.curriculum_year,
+                    (data.get(e.curriculum_year) || 0) + 1);
         });
-        this.data = data;
-        // FIXME: по-моему я это уже не юзаю!
-        let columns = [];
-        for (let key in data) {
-            columns.push([key, data[key]]);
-        }
-        return columns;
-    }
-
-    dataForPie() {
-        let columns = [];
-        for (let key in this.data) {
-            columns.push([key, this.data[key]]);
-        }
-        return columns;
-    }
-
-    dataForLine() {
-        let x = ['year'],
-            y = ['students'];
-        for (let key in this.data) {
-            x.push(key);
-            y.push(this.data[key]);
-        }
-        return [x, y];
-    }
-
-    loadData(columns) {
-
-    }
+        // Recreate to make sure we will iterate entries sorted by year
+        data = new Map([...data.entries()].sort());
+        let years = Array.from(data.keys(), e => e.toString());
+        this.state.groups = [years];
+        this.plot.groups(this.state.groups);
+        let columns = [
+            ['x'].concat(years)
+        ];
+        data.forEach((v, k) => {
+            let row = new Array(data.size + 1).fill(0);
+            row[0] = k.toString();
+            row[years.indexOf(row[0]) + 1] = v;
+            columns.push(row);
+        });
+        this.state.data.columns = columns;
+    };
 
     renderPieChart = () => {
-        this.type = 'pie';
-        this.plot.load({
-            type: this.type,
-            columns: this.dataForPie(),
-            unload: true
-        });
+        if (this.state.data.type == 'pie') { return; }
+        this.state.data.type = 'pie';
+        this.plot.load(this.state.data);
     };
 
     renderBarChart = () => {
-        if (this.type == 'bar') {
-            return;
-        }
-        this.type = 'bar';
-        this.plot.load({
-            type: this.type,
-            xs: { 'students': 'year'},
-            xFormat: '%Y',
-            x: 'year',
-            columns: this.dataForLine(),
-            names: {
-                students: this.i18n.ru.students
-            },
-            unload: true
-        });
-        this.plot.legend.hide();
+        if (this.state.data.type == 'bar') { return; }
+
+        this.state.data.type = 'bar';
+        this.plot.load(this.state.data);
+    };
+
+    renderSwitchButtons = () => {
+        let buttons = [
+            { name: this.i18n.ru.pieChart, callback: this.renderPieChart },
+            { name: this.i18n.ru.barChart, callback: this.renderBarChart },
+        ];
+        // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
+        d3.select(this.id)
+            .insert('div', ":first-child")
+            .attr('class', 'btn-group pull-right')
+            .attr('role', 'group')
+            .attr('aria-label', 'Toggle')
+            .selectAll('button')
+            .data(buttons)
+            .enter().append('button').attr('class', 'btn btn-default')
+            .text(d => d.name)
+            .on('click',  (d) => {
+                d.callback();
+            });
     };
 }
 
