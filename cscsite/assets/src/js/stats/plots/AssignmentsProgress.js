@@ -41,8 +41,7 @@ class AssignmentsProgress {
             .then((rawJSON) => { this.rawJSON = rawJSON; return rawJSON })
             .then(this.calculateFilterProps)
             .then(this.convertData)
-            .done(this.render)
-            .done(this.renderFilters);
+            .done(this.render);
     }
 
     static getStats(course_session_id) {
@@ -50,8 +49,12 @@ class AssignmentsProgress {
         return $.getJSON(dataURL);
     }
 
-    // Collect filter values
-    // We don't want to calculate this data every time on filter event
+    /**
+     * Collect filter choices. Don't want to calculate this data every
+     * time on filter event
+     * @param rawJSON
+     * @returns {*}
+     */
     calculateFilterProps = (rawJSON) => {
         let curriculumYearChoices = new Set();
         rawJSON.forEach(function (assignment) {
@@ -81,6 +84,7 @@ class AssignmentsProgress {
                     _participants = 0;
                 assignment.assigned_to.forEach((sa) => {
                     // Array of [dataValue, stateAttrName]
+                    // FIXME: надо куда-то перенести эти фильтры в настройки, чтобы не городить такой огород
                     let filterPairs = [
                         [sa.student.gender, "gender"],
                         [sa.student.curriculum_year, "curriculumYear"],
@@ -153,6 +157,11 @@ class AssignmentsProgress {
         };
     };
 
+    /**
+     * Collect for d3js filter elements data which will be appended right after
+     * plot. Each element must have `html` attribute and callback if necessary.
+     * @returns {[*,*]}
+     */
     getFilterData = () => {
         let data = [
             this.genderFilter(),
@@ -160,7 +169,7 @@ class AssignmentsProgress {
         ];
         if (this.props.choices.curriculumYear.size > 0) {
             data.push(this.curriculumYearFilter(
-                [...this.props.choices.curriculumYear]));
+                [...this.props.choices.curriculumYear].sort()));
         }
         data.push({
             isSubmitButton: true,
@@ -172,7 +181,8 @@ class AssignmentsProgress {
     renderFilters = () => {
         // get .col-xs-10 node
         let plotWrapperNode = d3.select('#' + this.id).node().parentNode,
-            // first, skip #text node between .col-xs-10 and .col-xs-2
+            // first `nextSibling` for skipping #text node between .col-xs-10
+            // and .col-xs-2
             filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
         d3.select(filterWrapperNode)
             .selectAll('div.form-group')
@@ -192,7 +202,9 @@ class AssignmentsProgress {
                 let filteredData = this.convertData(this.rawJSON);
                 this.plot.load({
                     type: this.type,
-                    columns: filteredData
+                    columns: filteredData,
+                    // Clean plot if no data, otherwise save transition
+                    unload: this.state.titles.length > 0 ? {} : true
                 });
                 return false;
             })
@@ -204,19 +216,21 @@ class AssignmentsProgress {
             return;
         }
 
-        let self = this;
-
-        // Let's generate here, a lot of troubles with c3.load method right now
         this.plot = c3.generate({
             bindto: '#' + this.id,
+            oninit: () => { this.renderFilters() },
             data: {
                 type: this.type,
                 columns: data
             },
             tooltip: {
                 format: {
-                    title: function (d) {
-                        return self.state.titles[d].slice(0, 80);
+                    title: (d) => {
+                        if (this.state.titles[d] !== void 0) {
+                            return this.state.titles[d].slice(0, 80);
+                        } else {
+                            return "";
+                        }
                     },
                 }
             },

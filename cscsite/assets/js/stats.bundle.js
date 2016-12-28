@@ -170,6 +170,8 @@
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
@@ -182,62 +184,72 @@
 
 	        this.i18n = {
 	            ru: {
-	                diagram: "Диаграмма",
-	                plot: "График",
+	                pieChart: "Круговая",
+	                barChart: "Гистограмма",
 	                students: ""
 	            }
 	        };
 
-	        this.convertData = function (jsonData) {
-	            var data = {};
-	            jsonData.forEach(function (e) {
-	                if (!(e.curriculum_year in data)) {
-	                    data[e.curriculum_year] = 0;
-	                }
-	                data[e.curriculum_year] += 1;
+	        this.convertData = function (rawJSON) {
+	            // year => {total students}
+	            var data = new Map();
+	            rawJSON.forEach(function (e) {
+	                data.set(e.curriculum_year, (data.get(e.curriculum_year) || 0) + 1);
 	            });
-	            _this.data = data;
-	            // FIXME: по-моему я это уже не юзаю!
-	            var columns = [];
-	            for (var key in data) {
-	                columns.push([key, data[key]]);
-	            }
-	            return columns;
+	            // Recreate to make sure we will iterate entries sorted by year
+	            data = new Map([].concat(_toConsumableArray(data.entries())).sort());
+	            var years = Array.from(data.keys(), function (e) {
+	                return e.toString();
+	            });
+	            _this.state.groups = [years];
+	            _this.plot.groups(_this.state.groups);
+	            var columns = [['x'].concat(years)];
+	            data.forEach(function (v, k) {
+	                var row = new Array(data.size + 1).fill(0);
+	                row[0] = k.toString();
+	                row[years.indexOf(row[0]) + 1] = v;
+	                columns.push(row);
+	            });
+	            _this.state.data.columns = columns;
 	        };
 
 	        this.renderPieChart = function () {
-	            _this.type = 'pie';
-	            _this.plot.load({
-	                type: _this.type,
-	                columns: _this.dataForPie(),
-	                unload: true
-	            });
+	            if (_this.state.data.type == 'pie') {
+	                return;
+	            }
+	            _this.state.data.type = 'pie';
+	            _this.plot.load(_this.state.data);
 	        };
 
 	        this.renderBarChart = function () {
-	            if (_this.type == 'bar') {
+	            if (_this.state.data.type == 'bar') {
 	                return;
 	            }
-	            _this.type = 'bar';
-	            _this.plot.load({
-	                type: _this.type,
-	                xs: { 'students': 'year' },
-	                xFormat: '%Y',
-	                x: 'year',
-	                columns: _this.dataForLine(),
-	                names: {
-	                    students: _this.i18n.ru.students
-	                },
-	                unload: true
-	            });
-	            _this.plot.legend.hide();
+
+	            _this.state.data.type = 'bar';
+	            _this.plot.load(_this.state.data);
 	        };
 
-	        console.log("ParticipantsYear options", options);
+	        this.renderSwitchButtons = function () {
+	            var buttons = [{ name: _this.i18n.ru.pieChart, callback: _this.renderPieChart }, { name: _this.i18n.ru.barChart, callback: _this.renderBarChart }];
+	            // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
+	            d3.select(_this.id).insert('div', ":first-child").attr('class', 'btn-group pull-right').attr('role', 'group').attr('aria-label', 'Toggle').selectAll('button').data(buttons).enter().append('button').attr('class', 'btn btn-default').text(function (d) {
+	                return d.name;
+	            }).on('click', function (d) {
+	                d.callback();
+	            });
+	        };
+
 	        this.id = id;
-	        this.type = 'pie';
-	        // FIXME: move to state
-	        this.data = {};
+	        this.state = {
+	            data: {
+	                type: void 0,
+	                x: 'x',
+	                unload: true,
+	                columns: []
+	            },
+	            groups: []
+	        };
 	        this.plot = c3.generate({
 	            bindto: this.id,
 	            grid: {
@@ -246,30 +258,18 @@
 	                }
 	            },
 	            tooltip: {
+	                grouped: false,
 	                format: {
+	                    title: function title() {
+	                        return "";
+	                    },
 	                    value: function value(_value, ratio, id) {
-	                        if (_this.type == 'pie') {
-	                            return _value + '&nbsp;чел.';
-	                        } else {
-	                            return _value;
-	                        }
+	                        return _value + '&nbsp;чел.';
 	                    }
 	                }
 	            },
-	            data: {
-	                type: this.type,
-	                columns: []
-	            }
-	        });
-	        // Switch plot type button
-	        var buttons = [{ name: this.i18n.ru.diagram, callback: this.renderPieChart }, { name: this.i18n.ru.plot, callback: this.renderBarChart }];
-	        // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
-	        d3.select(this.id).insert('div', ":first-child").attr('class', 'btn-group pull-right').attr('role', 'group').attr('aria-label', 'Toggle').selectAll('button').data(buttons).enter().append('button').attr('class', 'btn btn-default').attr('data-id', function (id) {
-	            return id;
-	        }).text(function (d) {
-	            return d.name;
-	        }).on('click', function (d) {
-	            d.callback();
+	            data: this.state.data,
+	            oninit: this.renderSwitchButtons
 	        });
 
 	        var promise = options.apiRequest || this.getStats(options.course_session_id);
@@ -281,25 +281,17 @@
 	        return $.getJSON(dataURL);
 	    };
 
-	    ParticipantsYear.prototype.dataForPie = function dataForPie() {
-	        var columns = [];
-	        for (var key in this.data) {
-	            columns.push([key, this.data[key]]);
-	        }
-	        return columns;
-	    };
+	    /**
+	     *  To use data without convertion both in `line` and `pie` chart we
+	     *  need something like this:
+	     *  columns: [
+	     *       ['2013', 30, 0],
+	     *       ['2014', 0, 90],
+	     *       ['x', '2013', '2014'],
+	     *   ],
+	     * @returns {Array}
+	     */
 
-	    ParticipantsYear.prototype.dataForLine = function dataForLine() {
-	        var x = ['year'],
-	            y = ['students'];
-	        for (var key in this.data) {
-	            x.push(key);
-	            y.push(this.data[key]);
-	        }
-	        return [x, y];
-	    };
-
-	    ParticipantsYear.prototype.loadData = function loadData(columns) {};
 
 	    return ParticipantsYear;
 	}();
@@ -499,6 +491,7 @@
 	                        _participants = 0;
 	                    assignment.assigned_to.forEach(function (sa) {
 	                        // Array of [dataValue, stateAttrName]
+	                        // FIXME: надо куда-то перенести эти фильтры в настройки, чтобы не городить такой огород
 	                        var filterPairs = [[sa.student.gender, "gender"], [sa.student.curriculum_year, "curriculumYear"]];
 	                        if (filterPairs.every(_this.matchFilter)) {
 	                            _participants += 1;
@@ -566,7 +559,7 @@
 	        this.getFilterData = function () {
 	            var data = [_this.genderFilter(), _this.isOnlineFilter()];
 	            if (_this.props.choices.curriculumYear.size > 0) {
-	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.props.choices.curriculumYear))));
+	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.props.choices.curriculumYear)).sort()));
 	            }
 	            data.push({
 	                isSubmitButton: true,
@@ -579,7 +572,8 @@
 	            // get .col-xs-10 node
 	            var plotWrapperNode = d3.select('#' + _this.id).node().parentNode,
 
-	            // first, skip #text node between .col-xs-10 and .col-xs-2
+	            // first `nextSibling` for skipping #text node between .col-xs-10
+	            // and .col-xs-2
 	            filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
 	            d3.select(filterWrapperNode).selectAll('div.form-group').data(_this.getFilterData()).enter().append('div').attr('class', 'form-group').html(function (d) {
 	                return d.html;
@@ -595,7 +589,9 @@
 	                var filteredData = _this.convertData(_this.rawJSON);
 	                _this.plot.load({
 	                    type: _this.type,
-	                    columns: filteredData
+	                    columns: filteredData,
+	                    // Clean plot if no data, otherwise save transition
+	                    unload: _this.state.titles.length > 0 ? {} : true
 	                });
 	                return false;
 	            });
@@ -607,11 +603,11 @@
 	                return;
 	            }
 
-	            var self = _this;
-
-	            // Let's generate here, a lot of troubles with c3.load method right now
 	            _this.plot = c3.generate({
 	                bindto: '#' + _this.id,
+	                oninit: function oninit() {
+	                    _this.renderFilters();
+	                },
 	                data: {
 	                    type: _this.type,
 	                    columns: data
@@ -619,7 +615,11 @@
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
-	                            return self.state.titles[d].slice(0, 80);
+	                            if (_this.state.titles[d] !== void 0) {
+	                                return _this.state.titles[d].slice(0, 80);
+	                            } else {
+	                                return "";
+	                            }
 	                        }
 	                    }
 	                },
@@ -665,7 +665,7 @@
 	        // Memorize raw JSON data for future conversions
 	        .then(function (rawJSON) {
 	            _this.rawJSON = rawJSON;return rawJSON;
-	        }).then(this.calculateFilterProps).then(this.convertData).done(this.render).done(this.renderFilters);
+	        }).then(this.calculateFilterProps).then(this.convertData).done(this.render);
 	    }
 	    // FIXME: изучить как лучше передавать перевод. Кажется, что это должен быть отдельный сервис
 
@@ -675,11 +675,22 @@
 	        return $.getJSON(dataURL);
 	    };
 
-	    // Collect filter values
-	    // We don't want to calculate this data every time on filter event
+	    /**
+	     * Collect filter choices. Don't want to calculate this data every
+	     * time on filter event
+	     * @param rawJSON
+	     * @returns {*}
+	     */
 
 
 	    // Recalculate data based on current filters state
+
+
+	    /**
+	     * Collect for d3js filter elements data which will be appended right after
+	     * plot. Each element must have `html` attribute and callback if necessary.
+	     * @returns {[*,*]}
+	     */
 
 
 	    return AssignmentsProgress;
