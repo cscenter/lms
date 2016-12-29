@@ -103,17 +103,7 @@
                 <div class="col-xs-10">
                     <div id="plot-assignments-progress"></div>
                 </div>
-                <div class="col-xs-2">
-{#                    <div class="form-group">#}
-{#                        <label for="plot-assignments__year">Год обучения:</label>#}
-{#                        <select class="form-control selectpicker" id="plot-assignments__year">#}
-{#                            <option value="#">2014</option>#}
-{#                            <option value="#">2015</option>#}
-{#                        </select>#}
-{#                    </div>#}
-{#                    <div class="form-group">#}
-{#                    </div>#}
-                </div>
+                <div class="col-xs-2"></div>
             </div>
             <div class="alert alert-warning" role="alert">
                 Сейчас график распределения по годам строится на основе таблицы "Записи на курсы".<br>
@@ -126,6 +116,12 @@
                 <div class="col-xs-10">
                     <div id="plot-assignments-deadline"></div>
                 </div>
+                <div class="col-xs-2"></div>
+            </div>
+            <div class="alert alert-danger" role="alert">
+                TODO (wtf): Бага в с3js. Если отключить что-то в легенде, то поменяется порядок.
+                Если после этого нажать "Фильтр", то порядок колбэков восстановится, а отображение (цвет и текст) нет!
+                Попробовать загружать через rows, может найду какой-нибудь workaround.
             </div>
 
             <h5>Успеваемость</h5>

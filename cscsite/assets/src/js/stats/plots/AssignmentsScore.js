@@ -21,7 +21,7 @@ class AssignmentsScore {
         this.plot = undefined;
 
         let promise = options.apiRequest ||
-                      this.getStats(options.course_session_id);
+                      this.constructor.getStats(options.course_session_id);
         promise
             .then(this.convertData)
             .done(this.render);
