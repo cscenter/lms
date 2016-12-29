@@ -1,9 +1,12 @@
 import * as d3 from "d3";
+import mix from '../MixinBuilder';
+import FilteredPlot from './FilteredPlot';
+import AssignmentsFilterMixin from './AssignmentsFilterMixin';
 // FIXME: remove moment.js?
 import * as moment from 'moment';
 // TODO: Also, used global c3, URLS, jQuery, moment.js. Investigate how to import them explicitly
 
-class AssignmentsDeadline {
+class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
     i18n = {
         lang: 'ru',
         ru: {
@@ -20,10 +23,18 @@ class AssignmentsDeadline {
     };
 
     constructor(id, options) {
+        super(id, options);
+        // Remove
         this.id = id;
         this.type = 'bar';
-        this.data = {};
+        this.rawJSON = {};
         this.plot = undefined;
+        this.templates = options.templates || {};
+
+        this.state = {
+            data: [],  // filtered data
+            titles: undefined,  // assignment titles
+        };
 
         // Order is unspecified for Object, but I believe browsers sort
         // it in a proper way
@@ -32,8 +43,11 @@ class AssignmentsDeadline {
         }, new Map());
 
         let promise = options.apiRequest ||
-                      this.getStats(options.course_session_id);
+                      this.constructor.getStats(options.course_session_id);
         promise
+            // Memorize raw JSON data for future conversions
+            .then((rawJSON) => { this.rawJSON = rawJSON; return rawJSON })
+            .then(this.calculateFilterProps)
             .then(this.convertData)
             .done(this.render);
     }
@@ -70,57 +84,55 @@ class AssignmentsDeadline {
     }
 
     convertData = (jsonData) => {
-        console.log(jsonData);
         let types = Array.from(this.types.values()),
             titles = [],
             rows = [types];
-        jsonData.forEach((assignment) => {
-            if (assignment.is_online === false) return;
-
-            titles.push(assignment.title);
-            let deadline = new Date(assignment.deadline_at),
-                counters = types.reduce(function (a, b) {
-                    return a.set(b, 0);
-                }, new Map());
-            assignment.assigned_to.forEach((student) => {
-                let type = this.toType(deadline, student.first_submission_at);
-                if (type !== undefined) {
-                    counters.set(type, counters.get(type) + 1);
-                } else {
-                    // console.debug("Unknown deadline type for: ", student);
-                }
-            });
-            rows.push(Array.from(counters, ([k, v]) => v));
+        jsonData
+            .filter((a) => a.is_online !== false)
+            .forEach((assignment) => {
+                titles.push(assignment.title);
+                let deadline = new Date(assignment.deadline_at);
+                let counters = types.reduce(function (a, b) {
+                        return a.set(b, 0);
+                    }, new Map());
+                assignment.assigned_to
+                    .filter((s) => this.matchFilters(s, "student_assignment"))
+                    .forEach((student) => {
+                        let type = this.toType(deadline, student.first_submission_at);
+                        if (type !== undefined) {
+                            counters.set(type, counters.get(type) + 1);
+                        } else {
+                            // console.debug("Unknown deadline type for: ", student);
+                        }
+                    });
+                rows.push(Array.from(counters, ([k, v]) => v));
         });
 
-        this.data = {
-            titles: titles,
-            rows: rows
-        };
-        console.debug(this.data);
-        return this.data;
+        this.state.titles = titles;
+        this.state.data = rows;
+        return this.state.data;
     };
 
     render = (data) => {
-        if (!data.titles.length) {
-            $(this.id).html(this.i18n.ru.no_assignments);
+        if (!this.state.titles.length) {
+            $('#' + this.id).html(this.i18n.ru.no_assignments);
             return;
         }
 
         // Let's generate here, a lot of troubles with c3.load method right now
-        console.log(data);
         this.plot = c3.generate({
-            bindto: this.id,
+            bindto: '#' + this.id,
+            oninit: () => { this.renderFilters() },
             data: {
                 type: this.type,
-                rows: data.rows,
+                rows: data,
                 groups: [
                     Array.from(this.types, ([k, v]) => v)
                 ]
             },
             tooltip: {
                 format: {
-                    title: function (d) { return data.titles[d]; },
+                    title: (d) => { return this.state.titles[d] },
                 }
             },
             axis: {
@@ -142,6 +154,51 @@ class AssignmentsDeadline {
                 }
             },
         });
+    };
+
+    /**
+     * Collect filter elements data which will be appended right after plot
+     * with d3js. Each element must have `html` attribute. Callback is optional.
+     * @returns {[*,*]}
+     */
+    getFilterFormData = () => {
+        let self = this;
+        let data = [
+            // Filter by student gender
+            {
+                id: `#${this.id}-gender-filter`,
+                html: this.templates.filters.gender({
+                    filterId: `${this.id}-gender-filter`
+                }),
+                callback: function () {
+                    $(this.id).selectpicker('render')
+                        .on('changed.bs.select', function () {
+                            self.filters.state["student.gender"] = this.value;
+                        });
+                }
+            },
+            // Filter by curriculum year
+            this.filterDataCurriculumYear(),  // can return null
+            // Submit button
+            {
+                isSubmitButton: true,
+                html: this.templates.filters.submitButton()
+            }
+        ];
+        return data.filter((e) => e);
+    };
+
+    submitButtonHandler = () => {
+        let filteredData = this.convertData(this.rawJSON);
+        this.plot.load({
+            type: this.type,
+            rows: filteredData,
+            // Clean plot if no data, otherwise save animation transition
+            // FIXME: убрать бы эту зависимость от state
+            // unload: this.state.titles.length > 0 ? {} : true
+        });
+        this.plot.groups([Array.from(this.types, ([k, v]) => v)]);
+        return false;
     };
 }
 

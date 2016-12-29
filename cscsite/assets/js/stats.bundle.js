@@ -117,7 +117,7 @@
 	            apiRequest: _AssignmentsProgress2.default.getStats(courseSessionId)
 	        };
 	        new _AssignmentsProgress2.default('plot-assignments-progress', options);
-	        new _AssignmentsDeadline2.default('#plot-assignments-deadline', options);
+	        new _AssignmentsDeadline2.default('plot-assignments-deadline', options);
 	        new _AssignmentsResults2.default('#plot-assignments-results', options);
 	        new _AssignmentsScore2.default('#plot-assignments-score', options);
 	        // Enrollments
@@ -272,7 +272,7 @@
 	            oninit: this.renderSwitchButtons
 	        });
 
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
+	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
 	        promise.then(this.convertData).done(this.renderPieChart);
 	    }
 
@@ -410,7 +410,7 @@
 	                columns: []
 	            }
 	        });
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
+	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
 	        promise.then(this.convertData).then(this.render).done(this.appendParticipantsInfo);
 	    }
 
@@ -429,7 +429,7 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($, c3) {"use strict";
+	/* WEBPACK VAR INJECTION */(function($, c3) {'use strict';
 
 	exports.__esModule = true;
 
@@ -437,21 +437,39 @@
 
 	var d3 = _interopRequireWildcard(_d);
 
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	var _MixinBuilder = __webpack_require__(17);
 
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	var _MixinBuilder2 = _interopRequireDefault(_MixinBuilder);
+
+	var _FilteredPlot = __webpack_require__(16);
+
+	var _FilteredPlot2 = _interopRequireDefault(_FilteredPlot);
+
+	var _AssignmentsFilterMixin = __webpack_require__(18);
+
+	var _AssignmentsFilterMixin2 = _interopRequireDefault(_AssignmentsFilterMixin);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
 
-	var AssignmentsProgress = function () {
-	    function AssignmentsProgress(id, options) {
-	        var _this = this;
+	var AssignmentsProgress = function (_mix$with) {
+	    _inherits(AssignmentsProgress, _mix$with);
 
+	    function AssignmentsProgress(id, options) {
 	        _classCallCheck(this, AssignmentsProgress);
 
-	        this.i18n = {
+	        var _this = _possibleConstructorReturn(this, _mix$with.call(this, id, options));
+
+	        _this.i18n = {
 	            lang: 'ru',
 	            ru: {
 	                titles: "Задания",
@@ -461,143 +479,70 @@
 	            }
 	        };
 
-	        this.calculateFilterProps = function (rawJSON) {
-	            var curriculumYearChoices = new Set();
-	            rawJSON.forEach(function (assignment) {
-	                assignment.assigned_to.forEach(function (sa) {
-	                    curriculumYearChoices.add(sa.student.curriculum_year);
-	                });
-	            });
-	            _this.props.choices.curriculumYear = curriculumYearChoices;
-	            return rawJSON;
-	        };
-
-	        this.matchFilter = function (_ref) {
-	            var value = _ref[0],
-	                stateAttrName = _ref[1];
-
-	            var stateValue = _this.state.filters[stateAttrName];
-	            return stateValue === undefined || stateValue === "" || stateValue === value;
-	        };
-
-	        this.convertData = function (rawJSON) {
+	        _this.convertData = function (rawJSON) {
 	            var participants = [_this.i18n.ru.participants],
 	                passed = [_this.i18n.ru.passed],
 	                titles = [];
-	            rawJSON.forEach(function (assignment) {
-	                if (_this.matchFilter([assignment.is_online, "isOnline"])) {
-	                    titles.push(assignment.title);
-	                    var _passed = 0,
-	                        _participants = 0;
-	                    assignment.assigned_to.forEach(function (sa) {
-	                        // Array of [dataValue, stateAttrName]
-	                        // FIXME: надо куда-то перенести эти фильтры в настройки, чтобы не городить такой огород
-	                        var filterPairs = [[sa.student.gender, "gender"], [sa.student.curriculum_year, "curriculumYear"]];
-	                        if (filterPairs.every(_this.matchFilter)) {
-	                            _participants += 1;
-	                            _passed += sa.sent;
-	                        }
-	                    });
-	                    participants.push(_participants);
-	                    passed.push(_passed);
-	                }
+	            rawJSON.filter(function (a) {
+	                return _this.matchFilters(a, "assignment");
+	            }).forEach(function (assignment) {
+	                titles.push(assignment.title);
+	                var _passed = 0,
+	                    _participants = 0;
+	                assignment.assigned_to.filter(function (sa) {
+	                    return _this.matchFilters(sa, "student_assignment");
+	                }).forEach(function (sa) {
+	                    _participants += 1;
+	                    _passed += sa.sent;
+	                });
+	                participants.push(_participants);
+	                passed.push(_passed);
 	            });
 	            _this.state.titles = titles;
 	            _this.state.data = [participants, passed];
 	            return _this.state.data;
 	        };
 
-	        this.genderFilter = function () {
-	            var self = _this,
-	                filterId = _this.id + "-gender-filter";
-	            return {
-	                id: '#' + filterId,
+	        _this.getFilterFormData = function () {
+	            var self = _this;
+	            var data = [
+	            // Filter by student gender
+	            {
+	                id: '#' + _this.id + '-gender-filter',
 	                html: _this.templates.filters.gender({
-	                    filterId: filterId
+	                    filterId: _this.id + '-gender-filter'
 	                }),
 	                callback: function callback() {
 	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.state.filters.gender = this.value;
+	                        self.filters.state["student.gender"] = this.value;
 	                    });
 	                }
-	            };
-	        };
-
-	        this.isOnlineFilter = function () {
-	            var self = _this,
-	                filterId = _this.id + "-is-online-filter";
-	            return {
-	                id: '#' + filterId,
+	            },
+	            // Filter by `is_online`
+	            {
+	                id: '#' + _this.id + '-is-online-filter',
 	                html: _this.templates.filters.isOnline({
-	                    filterId: filterId
+	                    filterId: _this.id + '-is-online-filter'
 	                }),
 	                callback: function callback() {
 	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.state.filters.isOnline = this.value === "" ? undefined : this.value === "true";
+	                        self.filters.state.is_online = this.value === "" ? undefined : this.value === "true";
 	                    });
 	                }
-	            };
-	        };
-
-	        this.curriculumYearFilter = function (choices) {
-	            var self = _this,
-	                filterId = _this.id + "-curriculum-year-filter";
-	            return {
-	                id: '#' + filterId,
-	                html: _this.templates.filters.curriculumYear({
-	                    filterId: filterId,
-	                    items: choices
-	                }),
-	                callback: function callback() {
-	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.state.filters.curriculumYear = this.value !== "" ? parseInt(this.value) : this.value;
-	                    });
-	                }
-	            };
-	        };
-
-	        this.getFilterData = function () {
-	            var data = [_this.genderFilter(), _this.isOnlineFilter()];
-	            if (_this.props.choices.curriculumYear.size > 0) {
-	                data.push(_this.curriculumYearFilter([].concat(_toConsumableArray(_this.props.choices.curriculumYear)).sort()));
-	            }
-	            data.push({
+	            },
+	            // Filter by curriculum year
+	            _this.filterDataCurriculumYear(), // can return null
+	            // Submit button
+	            {
 	                isSubmitButton: true,
 	                html: _this.templates.filters.submitButton()
-	            });
-	            return data;
-	        };
-
-	        this.renderFilters = function () {
-	            // get .col-xs-10 node
-	            var plotWrapperNode = d3.select('#' + _this.id).node().parentNode,
-
-	            // first `nextSibling` for skipping #text node between .col-xs-10
-	            // and .col-xs-2
-	            filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
-	            d3.select(filterWrapperNode).selectAll('div.form-group').data(_this.getFilterData()).enter().append('div').attr('class', 'form-group').html(function (d) {
-	                return d.html;
-	            }).each(function (d) {
-	                if (d.callback !== undefined) {
-	                    d.callback();
-	                }
-	            })
-	            // On last step, append filter button
-	            .filter(function (d) {
-	                return d.isSubmitButton === true;
-	            }).on("click", function () {
-	                var filteredData = _this.convertData(_this.rawJSON);
-	                _this.plot.load({
-	                    type: _this.type,
-	                    columns: filteredData,
-	                    // Clean plot if no data, otherwise save transition
-	                    unload: _this.state.titles.length > 0 ? {} : true
-	                });
-	                return false;
+	            }];
+	            return data.filter(function (e) {
+	                return e;
 	            });
 	        };
 
-	        this.render = function (data) {
+	        _this.render = function (data) {
 	            if (!_this.state.titles.length) {
 	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
@@ -640,34 +585,24 @@
 	            });
 	        };
 
-	        this.id = id;
-	        this.type = 'line';
-	        this.rawJSON = {};
-	        this.props = {
-	            choices: {
-	                curriculumYear: undefined
-	            }
-	        };
-	        this.state = {
-	            data: [], // filtered data
-	            titles: undefined, // assignment titles
-	            filters: {
-	                gender: undefined,
-	                isOnline: undefined,
-	                curriculumYear: undefined
-	            }
-	        };
-	        this.plot = undefined;
-	        this.templates = options.templates || {};
+	        _this.id = id;
+	        _this.type = 'line';
+	        _this.rawJSON = {};
+	        _this.templates = options.templates || {};
 
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
+	        _this.state = {
+	            data: [], // filtered data
+	            titles: undefined };
+	        _this.plot = undefined;
+	        var promise = options.apiRequest || _this.constructor.getStats(options.course_session_id);
 	        promise
 	        // Memorize raw JSON data for future conversions
 	        .then(function (rawJSON) {
 	            _this.rawJSON = rawJSON;return rawJSON;
-	        }).then(this.calculateFilterProps).then(this.convertData).done(this.render);
+	        }).then(_this.calculateFilterProps).then(_this.convertData).done(_this.render);
+	        return _this;
 	    }
-	    // FIXME: изучить как лучше передавать перевод. Кажется, что это должен быть отдельный сервис
+	    // Сейчас это попадает в AssignmentsProgress.prototype
 
 
 	    AssignmentsProgress.getStats = function getStats(course_session_id) {
@@ -675,26 +610,18 @@
 	        return $.getJSON(dataURL);
 	    };
 
-	    /**
-	     * Collect filter choices. Don't want to calculate this data every
-	     * time on filter event
-	     * @param rawJSON
-	     * @returns {*}
-	     */
-
-
 	    // Recalculate data based on current filters state
 
 
 	    /**
-	     * Collect for d3js filter elements data which will be appended right after
-	     * plot. Each element must have `html` attribute and callback if necessary.
+	     * Collect filter elements data which will be appended right after plot
+	     * with d3js. Each element must have `html` attribute. Callback is optional.
 	     * @returns {[*,*]}
 	     */
 
 
 	    return AssignmentsProgress;
-	}();
+	}((0, _MixinBuilder2.default)(_FilteredPlot2.default).with(_AssignmentsFilterMixin2.default));
 
 	exports.default = AssignmentsProgress;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(3)))
@@ -711,25 +638,46 @@
 
 	var d3 = _interopRequireWildcard(_d);
 
+	var _MixinBuilder = __webpack_require__(17);
+
+	var _MixinBuilder2 = _interopRequireDefault(_MixinBuilder);
+
+	var _FilteredPlot = __webpack_require__(16);
+
+	var _FilteredPlot2 = _interopRequireDefault(_FilteredPlot);
+
+	var _AssignmentsFilterMixin = __webpack_require__(18);
+
+	var _AssignmentsFilterMixin2 = _interopRequireDefault(_AssignmentsFilterMixin);
+
 	var _moment = __webpack_require__(8);
 
 	var moment = _interopRequireWildcard(_moment);
 
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	// FIXME: remove moment.js?
 
 
 	// TODO: Also, used global c3, URLS, jQuery, moment.js. Investigate how to import them explicitly
 
-	var AssignmentsDeadline = function () {
-	    function AssignmentsDeadline(id, options) {
-	        var _this = this;
+	var AssignmentsDeadline = function (_mix$with) {
+	    _inherits(AssignmentsDeadline, _mix$with);
 
+	    function AssignmentsDeadline(id, options) {
 	        _classCallCheck(this, AssignmentsDeadline);
 
-	        this.i18n = {
+	        // Remove
+	        var _this = _possibleConstructorReturn(this, _mix$with.call(this, id, options));
+
+	        _this.i18n = {
 	            lang: 'ru',
 	            ru: {
 	                no_assignments: "Заданий не найдено.",
@@ -743,20 +691,21 @@
 	            }
 	        };
 
-	        this.convertData = function (jsonData) {
-	            console.log(jsonData);
+	        _this.convertData = function (jsonData) {
 	            var types = Array.from(_this.types.values()),
 	                titles = [],
 	                rows = [types];
-	            jsonData.forEach(function (assignment) {
-	                if (assignment.is_online === false) return;
-
+	            jsonData.filter(function (a) {
+	                return a.is_online !== false;
+	            }).forEach(function (assignment) {
 	                titles.push(assignment.title);
-	                var deadline = new Date(assignment.deadline_at),
-	                    counters = types.reduce(function (a, b) {
+	                var deadline = new Date(assignment.deadline_at);
+	                var counters = types.reduce(function (a, b) {
 	                    return a.set(b, 0);
 	                }, new Map());
-	                assignment.assigned_to.forEach(function (student) {
+	                assignment.assigned_to.filter(function (s) {
+	                    return _this.matchFilters(s, "student_assignment");
+	                }).forEach(function (student) {
 	                    var type = _this.toType(deadline, student.first_submission_at);
 	                    if (type !== undefined) {
 	                        counters.set(type, counters.get(type) + 1);
@@ -771,27 +720,26 @@
 	                }));
 	            });
 
-	            _this.data = {
-	                titles: titles,
-	                rows: rows
-	            };
-	            console.debug(_this.data);
-	            return _this.data;
+	            _this.state.titles = titles;
+	            _this.state.data = rows;
+	            return _this.state.data;
 	        };
 
-	        this.render = function (data) {
-	            if (!data.titles.length) {
-	                $(_this.id).html(_this.i18n.ru.no_assignments);
+	        _this.render = function (data) {
+	            if (!_this.state.titles.length) {
+	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
 	            }
 
 	            // Let's generate here, a lot of troubles with c3.load method right now
-	            console.log(data);
 	            _this.plot = c3.generate({
-	                bindto: _this.id,
+	                bindto: '#' + _this.id,
+	                oninit: function oninit() {
+	                    _this.renderFilters();
+	                },
 	                data: {
 	                    type: _this.type,
-	                    rows: data.rows,
+	                    rows: data,
 	                    groups: [Array.from(_this.types, function (_ref2) {
 	                        var k = _ref2[0],
 	                            v = _ref2[1];
@@ -801,7 +749,7 @@
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
-	                            return data.titles[d];
+	                            return _this.state.titles[d];
 	                        }
 	                    }
 	                },
@@ -828,19 +776,70 @@
 	            });
 	        };
 
-	        this.id = id;
-	        this.type = 'bar';
-	        this.data = {};
-	        this.plot = undefined;
+	        _this.getFilterFormData = function () {
+	            var self = _this;
+	            var data = [
+	            // Filter by student gender
+	            {
+	                id: '#' + _this.id + '-gender-filter',
+	                html: _this.templates.filters.gender({
+	                    filterId: _this.id + '-gender-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state["student.gender"] = this.value;
+	                    });
+	                }
+	            },
+	            // Filter by curriculum year
+	            _this.filterDataCurriculumYear(), // can return null
+	            // Submit button
+	            {
+	                isSubmitButton: true,
+	                html: _this.templates.filters.submitButton()
+	            }];
+	            return data.filter(function (e) {
+	                return e;
+	            });
+	        };
+
+	        _this.submitButtonHandler = function () {
+	            var filteredData = _this.convertData(_this.rawJSON);
+	            _this.plot.load({
+	                type: _this.type,
+	                rows: filteredData
+	            });
+	            _this.plot.groups([Array.from(_this.types, function (_ref3) {
+	                var k = _ref3[0],
+	                    v = _ref3[1];
+	                return v;
+	            })]);
+	            return false;
+	        };
+
+	        _this.id = id;
+	        _this.type = 'bar';
+	        _this.rawJSON = {};
+	        _this.plot = undefined;
+	        _this.templates = options.templates || {};
+
+	        _this.state = {
+	            data: [], // filtered data
+	            titles: undefined };
 
 	        // Order is unspecified for Object, but I believe browsers sort
 	        // it in a proper way
-	        this.types = Object.keys(this.i18n.ru.types).reduce(function (m, k) {
+	        _this.types = Object.keys(_this.i18n.ru.types).reduce(function (m, k) {
 	            return m.set(k, _this.i18n.ru.types[k]);
 	        }, new Map());
 
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
-	        promise.then(this.convertData).done(this.render);
+	        var promise = options.apiRequest || _this.constructor.getStats(options.course_session_id);
+	        promise
+	        // Memorize raw JSON data for future conversions
+	        .then(function (rawJSON) {
+	            _this.rawJSON = rawJSON;return rawJSON;
+	        }).then(_this.calculateFilterProps).then(_this.convertData).done(_this.render);
+	        return _this;
 	    }
 
 	    AssignmentsDeadline.getStats = function getStats(course_session_id) {
@@ -876,8 +875,15 @@
 	        }
 	    };
 
+	    /**
+	     * Collect filter elements data which will be appended right after plot
+	     * with d3js. Each element must have `html` attribute. Callback is optional.
+	     * @returns {[*,*]}
+	     */
+
+
 	    return AssignmentsDeadline;
-	}();
+	}((0, _MixinBuilder2.default)(_FilteredPlot2.default).with(_AssignmentsFilterMixin2.default));
 
 	exports.default = AssignmentsDeadline;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(3)))
@@ -1972,7 +1978,7 @@
 	            return m.set(k, _this.i18n.ru.grades[k]);
 	        }, new Map());
 
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
+	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
 	        promise.then(this.convertData).done(this.render);
 	    }
 
@@ -2097,7 +2103,7 @@
 	        this.data = {};
 	        this.plot = undefined;
 
-	        var promise = options.apiRequest || this.getStats(options.course_session_id);
+	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
 	        promise.then(this.convertData).done(this.render);
 	    }
 
@@ -3674,6 +3680,240 @@
 	module.exports = templateSettings;
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function($) {"use strict";
+
+	exports.__esModule = true;
+
+	var _d = __webpack_require__(4);
+
+	var d3 = _interopRequireWildcard(_d);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var FilteredPlot = function () {
+	    function FilteredPlot(id, options) {
+	        var _this = this;
+
+	        _classCallCheck(this, FilteredPlot);
+
+	        this.matchFilter = function (value, stateAttrName) {
+	            var stateValue = _this.filters.state[stateAttrName];
+	            return stateValue === void 0 || stateValue === "" || stateValue === value;
+	        };
+
+	        this.renderFilters = function () {
+	            var data = _this.getFilterFormData();
+	            if (!data.length) {
+	                return;
+	            }
+	            // .col-xs-10 node
+	            var plotWrapperNode = d3.select('#' + _this.id).node().parentNode,
+
+	            // first `nextSibling` used for skipping #text node
+	            // between .col-xs-10 and .col-xs-2
+	            filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
+	            d3.select(filterWrapperNode).selectAll('div.form-group').data(data).enter().append('div').attr('class', 'form-group').html(function (d) {
+	                return d.html;
+	            }).each(function (d) {
+	                if (d.callback !== undefined) {
+	                    d.callback();
+	                }
+	            })
+	            // On last step, append filter button
+	            .filter(function (d) {
+	                return d.isSubmitButton === true;
+	            }).on("click", _this.submitButtonHandler);
+	        };
+
+	        this.submitButtonHandler = function () {
+	            var filteredData = _this.convertData(_this.rawJSON);
+	            _this.plot.load({
+	                type: _this.type,
+	                columns: filteredData,
+	                // Clean plot if no data, otherwise save animation transition
+	                // FIXME: убрать бы эту зависимость от state
+	                unload: _this.state.titles.length > 0 ? {} : true
+	            });
+	            return false;
+	        };
+
+	        this.getFilterFormData = function () {
+	            return [];
+	        };
+
+	        this.filterDataCurriculumYear = function () {
+	            if (_this.filters.choices.curriculumYear.size == 0) {
+	                return;
+	            }
+	            var choices = [].concat(_toConsumableArray(_this.filters.choices.curriculumYear)).sort();
+	            var filterId = _this.id + "-curriculum-year-filter";
+	            var self = _this;
+	            return {
+	                id: '#' + filterId,
+	                html: _this.templates.filters.curriculumYear({
+	                    filterId: filterId,
+	                    items: choices
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state["student.curriculum_year"] = this.value !== "" ? parseInt(this.value) : this.value;
+	                    });
+	                }
+	            };
+	        };
+	    }
+	    // TODO: добавить проверку, что есть this.templates.filters.curriculumYear
+
+
+	    /**
+	     * For each filter `f` from `this.filters.props[name]` get filter
+	     * state from `this.state.filters` and make sure `obj.f` match state value.
+	     * @param obj Object to compare values with filters state
+	     * @param name Filters collection name in dot-notation
+	     * @returns {bool}
+	     */
+
+
+	    FilteredPlot.prototype.matchFilters = function matchFilters(obj, name) {
+	        var _this2 = this;
+
+	        return this.filters.props[name].reduce(function (a, b) {
+	            var obj_value = b.split('.').reduce(function (a, b) {
+	                return a[b];
+	            }, obj);
+	            return a && _this2.matchFilter(obj_value, b);
+	        }, true);
+	    };
+
+	    /**
+	     * Collect filter elements data which will be appended right after plot
+	     * with d3js. Each element must have `html` attribute. Callback is optional.
+	     * @returns {[*,*]}
+	     */
+
+
+	    return FilteredPlot;
+	}();
+
+	exports.default = FilteredPlot;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	// http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
+
+	var mix = function mix(superclass) {
+	  return new MixinBuilder(superclass);
+	};
+
+	var MixinBuilder = function () {
+	  function MixinBuilder(superclass) {
+	    _classCallCheck(this, MixinBuilder);
+
+	    this.superclass = superclass;
+	  }
+
+	  MixinBuilder.prototype.with = function _with() {
+	    for (var _len = arguments.length, mixins = Array(_len), _key = 0; _key < _len; _key++) {
+	      mixins[_key] = arguments[_key];
+	    }
+
+	    return mixins.reduce(function (c, mixin) {
+	      return mixin(c);
+	    }, this.superclass);
+	  };
+
+	  return MixinBuilder;
+	}();
+
+	exports.default = mix;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var AssignmentsFilterMixin = function AssignmentsFilterMixin(superclass) {
+	    return function (_superclass) {
+	        _inherits(_class2, _superclass);
+
+	        function _class2(id, options) {
+	            _classCallCheck(this, _class2);
+
+	            var _this = _possibleConstructorReturn(this, _superclass.call(this, id, options));
+
+	            _this.calculateFilterProps = function (rawJSON) {
+	                var curriculumYearChoices = new Set();
+	                rawJSON.forEach(function (assignment) {
+	                    assignment.assigned_to.forEach(function (sa) {
+	                        curriculumYearChoices.add(sa.student.curriculum_year);
+	                    });
+	                });
+	                _this.filters.choices.curriculumYear = curriculumYearChoices;
+	                return rawJSON;
+	            };
+
+	            _this.filters = {
+	                // Attributes in dot-notation which should be compared
+	                // with filters state. See `matchFilters` for details.
+	                props: {
+	                    // Attribute name must repeat object structure from rawJSON.
+	                    assignment: ["is_online"],
+	                    student_assignment: ["student.gender", "student.curriculum_year"]
+	                },
+	                choices: {
+	                    curriculumYear: undefined
+	                },
+	                // path in dot-notation from the top-level of JSON object.
+	                state: {
+	                    // TODO: replace dot-notation with nested structure?
+	                    'student.gender': undefined,
+	                    is_online: undefined,
+	                    'student.curriculum_year': undefined
+	                }
+	            };
+	            return _this;
+	        }
+
+	        /**
+	         * Collect filter choices. Don't want to calculate this data every
+	         * time on filter event
+	         * @param rawJSON
+	         * @returns {*}
+	         */
+
+
+	        return _class2;
+	    }(superclass);
+	};
+
+	exports.default = AssignmentsFilterMixin;
 
 /***/ }
 /******/ ]);
