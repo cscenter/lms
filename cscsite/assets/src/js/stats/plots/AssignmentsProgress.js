@@ -68,6 +68,45 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
         return this.state.data;
     };
 
+    render = (data) => {
+        if (!this.state.titles.length) {
+            $('#' + this.id).html(this.i18n.ru.no_assignments);
+            return;
+        }
+
+        this.plot = c3.generate({
+            bindto: '#' + this.id,
+            oninit: () => { this.renderFilters() },
+            data: {
+                type: this.type,
+                columns: data
+            },
+            tooltip: {
+                format: {
+                    title: (d) => {
+                        if (this.state.titles[d] !== void 0) {
+                            return this.state.titles[d].slice(0, 80);
+                        } else {
+                            return "";
+                        }
+                    },
+                }
+            },
+            axis: {
+              x: {
+                tick: {
+                  format: function (x) { return x + 1; }
+                }
+              }
+            },
+            grid: {
+                y: {
+                    show: true
+                }
+            }
+        });
+    };
+
     /**
      * Collect filter elements data which will be appended right after plot
      * with d3js. Each element must have `html` attribute. Callback is optional.
@@ -112,45 +151,6 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             }
         ];
         return data.filter((e) => e);
-    };
-
-    render = (data) => {
-        if (!this.state.titles.length) {
-            $('#' + this.id).html(this.i18n.ru.no_assignments);
-            return;
-        }
-
-        this.plot = c3.generate({
-            bindto: '#' + this.id,
-            oninit: () => { this.renderFilters() },
-            data: {
-                type: this.type,
-                columns: data
-            },
-            tooltip: {
-                format: {
-                    title: (d) => {
-                        if (this.state.titles[d] !== void 0) {
-                            return this.state.titles[d].slice(0, 80);
-                        } else {
-                            return "";
-                        }
-                    },
-                }
-            },
-            axis: {
-              x: {
-                tick: {
-                  format: function (x) { return x + 1; }
-                }
-              }
-            },
-            grid: {
-                y: {
-                    show: true
-                }
-            }
-        });
     };
 }
 

@@ -1,7 +1,10 @@
 import * as d3 from "d3";
+import mix from '../MixinBuilder';
+import FilteredPlot from './FilteredPlot';
+import AssignmentsFilterMixin from './AssignmentsFilterMixin';
 // TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
 
-class AssignmentsScore {
+class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
     i18n = {
         lang: 'ru',
         ru: {
@@ -15,14 +18,24 @@ class AssignmentsScore {
     };
 
     constructor(id, options) {
+        super(id, options);
         this.id = id;
         this.type = 'bar';
-        this.data = {};
+        this.rawJSON = {};
         this.plot = undefined;
+        this.templates = options.templates || {};
+
+        this.state = {
+            data: [],  // filtered data
+            titles: undefined,  // assignment titles
+        };
 
         let promise = options.apiRequest ||
                       this.constructor.getStats(options.course_session_id);
         promise
+            // Memorize raw JSON data for future conversions
+            .then((rawJSON) => { this.rawJSON = rawJSON; return rawJSON })
+            .then(this.calculateFilterProps)
             .then(this.convertData)
             .done(this.render);
     }
@@ -32,52 +45,52 @@ class AssignmentsScore {
         return $.getJSON(dataURL);
     }
 
-    convertData = (jsonData) => {
-        console.log(jsonData);
+    convertData = (rawJSON) => {
         let titles = [],
             rows = [[this.i18n.ru.lines.pass, this.i18n.ru.lines.mean,
                 this.i18n.ru.lines.max]];
 
-        jsonData.forEach((assignment) => {
-            titles.push(assignment.title);
-            let sum = 0,
-                cnt = 0;
-            // Looks complicated to use Array.prototype.filter
-            assignment.assigned_to.forEach((student) => {
-                if (student.grade !== null) {
-                    sum += student.grade;
-                    cnt += 1;
-                }
-            });
-            let mean = (cnt === 0) ? 0 : (sum / cnt).toFixed(1);
-            rows.push([assignment.grade_min, mean, assignment.grade_max]);
+        rawJSON
+            .filter((a) => this.matchFilters(a, "assignment"))
+            .forEach((assignment) => {
+                titles.push(assignment.title);
+                let sum = 0,
+                    cnt = 0;
+                assignment.assigned_to
+                    .filter((sa) => this.matchFilters(sa, "student_assignment"))
+                    .forEach((student) => {
+                        if (student.grade !== null) {
+                            sum += student.grade;
+                            cnt += 1;
+                        }
+                });
+                let mean = (cnt === 0) ? 0 : (sum / cnt).toFixed(1);
+                rows.push([assignment.grade_min, mean, assignment.grade_max]);
         });
 
-        this.data = {
-            titles: titles,
-            rows: rows
-        };
-        console.debug(this.data);
-        return this.data;
+        this.state.titles = titles;
+        this.state.data = rows;
+        return this.state.data;
     };
 
     render = (data) => {
-        if (!data.titles.length) {
-            $(this.id).html(this.i18n.ru.no_assignments);
+        if (!this.state.titles.length) {
+            $('#' + this.id).html(this.i18n.ru.no_assignments);
             return;
         }
 
         // Let's generate here, a lot of troubles with c3.load method right now
         console.log(data);
         this.plot = c3.generate({
-            bindto: this.id,
+            bindto: '#' + this.id,
+            oninit: () => { this.renderFilters() },
             data: {
                 type: this.type,
-                rows: data.rows
+                rows: data
             },
             tooltip: {
                 format: {
-                    title: function (d) { return data.titles[d]; },
+                    title: (d) => this.state.titles[d],
                 }
             },
             axis: {
@@ -96,6 +109,64 @@ class AssignmentsScore {
                 }
             },
         });
+    };
+
+    /**
+     * Collect filter elements data which will be appended right after plot
+     * with d3js. Each element must have `html` attribute. Callback is optional.
+     * @returns {[*,*]}
+     */
+    getFilterFormData = () => {
+        let self = this;
+        let data = [
+            // Filter by student gender
+            {
+                id: `#${this.id}-gender-filter`,
+                html: this.templates.filters.gender({
+                    filterId: `${this.id}-gender-filter`
+                }),
+                callback: function () {
+                    $(this.id).selectpicker('render')
+                        .on('changed.bs.select', function () {
+                            self.filters.state["student.gender"] = this.value;
+                        });
+                }
+            },
+            // Filter by `is_online`
+            {
+                id: `#${this.id}-is-online-filter`,
+                html: this.templates.filters.isOnline({
+                    filterId: `${this.id}-is-online-filter`,
+                }),
+                callback: function () {
+                    $(this.id).selectpicker('render')
+                        .on('changed.bs.select', function () {
+                            self.filters.state.is_online = (this.value === "") ?
+                                undefined : (this.value === "true");
+                        });
+                }
+            },
+            // Filter by curriculum year
+            this.filterDataCurriculumYear(),  // can return null
+            // Submit button
+            {
+                isSubmitButton: true,
+                html: this.templates.filters.submitButton()
+            }
+        ];
+        return data.filter((e) => e);
+    };
+
+    submitButtonHandler = () => {
+        let filteredData = this.convertData(this.rawJSON);
+        this.plot.load({
+            type: this.type,
+            rows: filteredData,
+            // Clean plot if no data, otherwise save animation transition
+            // FIXME: убрать бы эту зависимость от state
+            unload: this.state.titles.length > 0 ? {} : true
+        });
+        return false;
     };
 }
 

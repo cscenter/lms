@@ -118,8 +118,8 @@
 	        };
 	        new _AssignmentsProgress2.default('plot-assignments-progress', options);
 	        new _AssignmentsDeadline2.default('plot-assignments-deadline', options);
-	        new _AssignmentsResults2.default('#plot-assignments-results', options);
-	        new _AssignmentsScore2.default('#plot-assignments-score', options);
+	        new _AssignmentsResults2.default('plot-assignments-results', options);
+	        new _AssignmentsScore2.default('plot-assignments-score', options);
 	        // Enrollments
 	        new _EnrollmentsResults2.default('#plot-enrollments-results', courseSessionId);
 	    },
@@ -503,45 +503,6 @@
 	            return _this.state.data;
 	        };
 
-	        _this.getFilterFormData = function () {
-	            var self = _this;
-	            var data = [
-	            // Filter by student gender
-	            {
-	                id: '#' + _this.id + '-gender-filter',
-	                html: _this.templates.filters.gender({
-	                    filterId: _this.id + '-gender-filter'
-	                }),
-	                callback: function callback() {
-	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.filters.state["student.gender"] = this.value;
-	                    });
-	                }
-	            },
-	            // Filter by `is_online`
-	            {
-	                id: '#' + _this.id + '-is-online-filter',
-	                html: _this.templates.filters.isOnline({
-	                    filterId: _this.id + '-is-online-filter'
-	                }),
-	                callback: function callback() {
-	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
-	                        self.filters.state.is_online = this.value === "" ? undefined : this.value === "true";
-	                    });
-	                }
-	            },
-	            // Filter by curriculum year
-	            _this.filterDataCurriculumYear(), // can return null
-	            // Submit button
-	            {
-	                isSubmitButton: true,
-	                html: _this.templates.filters.submitButton()
-	            }];
-	            return data.filter(function (e) {
-	                return e;
-	            });
-	        };
-
 	        _this.render = function (data) {
 	            if (!_this.state.titles.length) {
 	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
@@ -582,6 +543,45 @@
 	                        show: true
 	                    }
 	                }
+	            });
+	        };
+
+	        _this.getFilterFormData = function () {
+	            var self = _this;
+	            var data = [
+	            // Filter by student gender
+	            {
+	                id: '#' + _this.id + '-gender-filter',
+	                html: _this.templates.filters.gender({
+	                    filterId: _this.id + '-gender-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state["student.gender"] = this.value;
+	                    });
+	                }
+	            },
+	            // Filter by `is_online`
+	            {
+	                id: '#' + _this.id + '-is-online-filter',
+	                html: _this.templates.filters.isOnline({
+	                    filterId: _this.id + '-is-online-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state.is_online = this.value === "" ? undefined : this.value === "true";
+	                    });
+	                }
+	            },
+	            // Filter by curriculum year
+	            _this.filterDataCurriculumYear(), // can return null
+	            // Submit button
+	            {
+	                isSubmitButton: true,
+	                html: _this.templates.filters.submitButton()
+	            }];
+	            return data.filter(function (e) {
+	                return e;
 	            });
 	        };
 
@@ -807,13 +807,13 @@
 	            var filteredData = _this.convertData(_this.rawJSON);
 	            _this.plot.load({
 	                type: _this.type,
-	                rows: filteredData
+	                rows: filteredData,
+	                // Clean plot if no data, otherwise save animation transition
+	                // FIXME: убрать бы эту зависимость от state
+	                unload: _this.state.titles.length > 0 ? {} : true
 	            });
-	            _this.plot.groups([Array.from(_this.types, function (_ref3) {
-	                var k = _ref3[0],
-	                    v = _ref3[1];
-	                return v;
-	            })]);
+	            // FIXME: попробовать убрать Array.from везде. Но надо искать баг в самой c3.js
+	            // this.plot.groups([Array.from(this.types, ([k, v]) => v)]);
 	            return false;
 	        };
 
@@ -1856,7 +1856,7 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($, c3) {"use strict";
+	/* WEBPACK VAR INJECTION */(function($, c3) {'use strict';
 
 	exports.__esModule = true;
 
@@ -1864,19 +1864,39 @@
 
 	var d3 = _interopRequireWildcard(_d);
 
+	var _MixinBuilder = __webpack_require__(17);
+
+	var _MixinBuilder2 = _interopRequireDefault(_MixinBuilder);
+
+	var _FilteredPlot = __webpack_require__(16);
+
+	var _FilteredPlot2 = _interopRequireDefault(_FilteredPlot);
+
+	var _AssignmentsFilterMixin = __webpack_require__(18);
+
+	var _AssignmentsFilterMixin2 = _interopRequireDefault(_AssignmentsFilterMixin);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
 
-	var AssignmentsResults = function () {
-	    function AssignmentsResults(id, options) {
-	        var _this = this;
+	var AssignmentsResults = function (_mix$with) {
+	    _inherits(AssignmentsResults, _mix$with);
 
+	    function AssignmentsResults(id, options) {
 	        _classCallCheck(this, AssignmentsResults);
 
-	        this.i18n = {
+	        var _this = _possibleConstructorReturn(this, _mix$with.call(this, id, options));
+
+	        _this.i18n = {
 	            lang: 'ru',
 	            ru: {
 	                no_assignments: "Заданий не найдено.",
@@ -1892,8 +1912,7 @@
 	            }
 	        };
 
-	        this.convertData = function (jsonData) {
-	            console.log("performance ", jsonData);
+	        _this.convertData = function (rawJSON) {
 	            var states = Array.from(_this.states, function (_ref) {
 	                var k = _ref[0],
 	                    v = _ref[1];
@@ -1902,12 +1921,16 @@
 	                titles = [],
 	                rows = [states];
 
-	            jsonData.forEach(function (assignment) {
+	            rawJSON.filter(function (a) {
+	                return _this.matchFilters(a, "assignment");
+	            }).forEach(function (assignment) {
 	                titles.push(assignment.title);
 	                var counters = states.reduce(function (a, b) {
 	                    return a.set(b, 0);
 	                }, new Map());
-	                assignment.assigned_to.forEach(function (student) {
+	                assignment.assigned_to.filter(function (sa) {
+	                    return _this.matchFilters(sa, "student_assignment");
+	                }).forEach(function (student) {
 	                    var state = _this.states.get(student.state);
 	                    counters.set(state, counters.get(state) + 1);
 	                });
@@ -1918,32 +1941,32 @@
 	                }));
 	            });
 
-	            _this.data = {
-	                titles: titles, // assignment titles
-	                rows: rows
-	            };
-	            console.debug("performance data", _this.data);
-	            return _this.data;
+	            _this.state.titles = titles;
+	            _this.state.data = rows;
+	            return _this.state.data;
 	        };
 
-	        this.render = function (data) {
-	            if (!data.titles.length) {
-	                $(_this.id).html(_this.i18n.ru.no_assignments);
+	        _this.render = function (data) {
+	            if (!_this.state.titles.length) {
+	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
 	            }
 
 	            // Let's generate here, a lot of troubles with c3.load method right now
 	            console.log(data);
 	            _this.plot = c3.generate({
-	                bindto: _this.id,
+	                bindto: '#' + _this.id,
+	                oninit: function oninit() {
+	                    _this.renderFilters();
+	                },
 	                data: {
 	                    type: _this.type,
-	                    rows: data.rows
+	                    rows: data
 	                },
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
-	                            return data.titles[d];
+	                            return _this.state.titles[d];
 	                        }
 	                    }
 	                },
@@ -1967,19 +1990,81 @@
 	            });
 	        };
 
-	        this.id = id;
-	        this.type = 'bar';
-	        this.data = {};
-	        this.plot = undefined;
+	        _this.getFilterFormData = function () {
+	            var self = _this;
+	            var data = [
+	            // Filter by student gender
+	            {
+	                id: '#' + _this.id + '-gender-filter',
+	                html: _this.templates.filters.gender({
+	                    filterId: _this.id + '-gender-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state["student.gender"] = this.value;
+	                    });
+	                }
+	            },
+	            // Filter by `is_online`
+	            {
+	                id: '#' + _this.id + '-is-online-filter',
+	                html: _this.templates.filters.isOnline({
+	                    filterId: _this.id + '-is-online-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state.is_online = this.value === "" ? undefined : this.value === "true";
+	                    });
+	                }
+	            },
+	            // Filter by curriculum year
+	            _this.filterDataCurriculumYear(), // can return null
+	            // Submit button
+	            {
+	                isSubmitButton: true,
+	                html: _this.templates.filters.submitButton()
+	            }];
+	            return data.filter(function (e) {
+	                return e;
+	            });
+	        };
+
+	        _this.submitButtonHandler = function () {
+	            var filteredData = _this.convertData(_this.rawJSON);
+	            _this.plot.load({
+	                type: _this.type,
+	                rows: filteredData,
+	                // Clean plot if no data, otherwise save animation transition
+	                // FIXME: убрать бы эту зависимость от state
+	                unload: _this.state.titles.length > 0 ? {} : true
+	            });
+	            return false;
+	        };
+
+	        _this.id = id;
+	        _this.type = 'bar';
+	        _this.rawJSON = {};
+	        _this.plot = undefined;
+	        _this.templates = options.templates || {};
+
+	        _this.state = {
+	            data: [], // filtered data
+	            titles: undefined };
 
 	        // Order is unspecified for Object, but I believe browsers sort
 	        // it in a proper way
-	        this.states = Object.keys(this.i18n.ru.grades).reduce(function (m, k) {
+	        // TODO: rename?
+	        _this.states = Object.keys(_this.i18n.ru.grades).reduce(function (m, k) {
 	            return m.set(k, _this.i18n.ru.grades[k]);
 	        }, new Map());
 
-	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
-	        promise.then(this.convertData).done(this.render);
+	        var promise = options.apiRequest || _this.constructor.getStats(options.course_session_id);
+	        promise
+	        // Memorize raw JSON data for future conversions
+	        .then(function (rawJSON) {
+	            _this.rawJSON = rawJSON;return rawJSON;
+	        }).then(_this.calculateFilterProps).then(_this.convertData).done(_this.render);
+	        return _this;
 	    }
 
 	    AssignmentsResults.getStats = function getStats(course_session_id) {
@@ -1987,8 +2072,15 @@
 	        return $.getJSON(dataURL);
 	    };
 
+	    /**
+	     * Collect filter elements data which will be appended right after plot
+	     * with d3js. Each element must have `html` attribute. Callback is optional.
+	     * @returns {[*,*]}
+	     */
+
+
 	    return AssignmentsResults;
-	}();
+	}((0, _MixinBuilder2.default)(_FilteredPlot2.default).with(_AssignmentsFilterMixin2.default));
 
 	exports.default = AssignmentsResults;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(3)))
@@ -1997,7 +2089,7 @@
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($, c3) {"use strict";
+	/* WEBPACK VAR INJECTION */(function($, c3) {'use strict';
 
 	exports.__esModule = true;
 
@@ -2005,19 +2097,39 @@
 
 	var d3 = _interopRequireWildcard(_d);
 
+	var _MixinBuilder = __webpack_require__(17);
+
+	var _MixinBuilder2 = _interopRequireDefault(_MixinBuilder);
+
+	var _FilteredPlot = __webpack_require__(16);
+
+	var _FilteredPlot2 = _interopRequireDefault(_FilteredPlot);
+
+	var _AssignmentsFilterMixin = __webpack_require__(18);
+
+	var _AssignmentsFilterMixin2 = _interopRequireDefault(_AssignmentsFilterMixin);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
 
-	var AssignmentsScore = function () {
-	    function AssignmentsScore(id, options) {
-	        var _this = this;
+	var AssignmentsScore = function (_mix$with) {
+	    _inherits(AssignmentsScore, _mix$with);
 
+	    function AssignmentsScore(id, options) {
 	        _classCallCheck(this, AssignmentsScore);
 
-	        this.i18n = {
+	        var _this = _possibleConstructorReturn(this, _mix$with.call(this, id, options));
+
+	        _this.i18n = {
 	            lang: 'ru',
 	            ru: {
 	                no_assignments: "Заданий не найдено.",
@@ -2029,17 +2141,19 @@
 	            }
 	        };
 
-	        this.convertData = function (jsonData) {
-	            console.log(jsonData);
+	        _this.convertData = function (rawJSON) {
 	            var titles = [],
 	                rows = [[_this.i18n.ru.lines.pass, _this.i18n.ru.lines.mean, _this.i18n.ru.lines.max]];
 
-	            jsonData.forEach(function (assignment) {
+	            rawJSON.filter(function (a) {
+	                return _this.matchFilters(a, "assignment");
+	            }).forEach(function (assignment) {
 	                titles.push(assignment.title);
 	                var sum = 0,
 	                    cnt = 0;
-	                // Looks complicated to use Array.prototype.filter
-	                assignment.assigned_to.forEach(function (student) {
+	                assignment.assigned_to.filter(function (sa) {
+	                    return _this.matchFilters(sa, "student_assignment");
+	                }).forEach(function (student) {
 	                    if (student.grade !== null) {
 	                        sum += student.grade;
 	                        cnt += 1;
@@ -2049,32 +2163,32 @@
 	                rows.push([assignment.grade_min, mean, assignment.grade_max]);
 	            });
 
-	            _this.data = {
-	                titles: titles,
-	                rows: rows
-	            };
-	            console.debug(_this.data);
-	            return _this.data;
+	            _this.state.titles = titles;
+	            _this.state.data = rows;
+	            return _this.state.data;
 	        };
 
-	        this.render = function (data) {
-	            if (!data.titles.length) {
-	                $(_this.id).html(_this.i18n.ru.no_assignments);
+	        _this.render = function (data) {
+	            if (!_this.state.titles.length) {
+	                $('#' + _this.id).html(_this.i18n.ru.no_assignments);
 	                return;
 	            }
 
 	            // Let's generate here, a lot of troubles with c3.load method right now
 	            console.log(data);
 	            _this.plot = c3.generate({
-	                bindto: _this.id,
+	                bindto: '#' + _this.id,
+	                oninit: function oninit() {
+	                    _this.renderFilters();
+	                },
 	                data: {
 	                    type: _this.type,
-	                    rows: data.rows
+	                    rows: data
 	                },
 	                tooltip: {
 	                    format: {
 	                        title: function title(d) {
-	                            return data.titles[d];
+	                            return _this.state.titles[d];
 	                        }
 	                    }
 	                },
@@ -2098,13 +2212,74 @@
 	            });
 	        };
 
-	        this.id = id;
-	        this.type = 'bar';
-	        this.data = {};
-	        this.plot = undefined;
+	        _this.getFilterFormData = function () {
+	            var self = _this;
+	            var data = [
+	            // Filter by student gender
+	            {
+	                id: '#' + _this.id + '-gender-filter',
+	                html: _this.templates.filters.gender({
+	                    filterId: _this.id + '-gender-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state["student.gender"] = this.value;
+	                    });
+	                }
+	            },
+	            // Filter by `is_online`
+	            {
+	                id: '#' + _this.id + '-is-online-filter',
+	                html: _this.templates.filters.isOnline({
+	                    filterId: _this.id + '-is-online-filter'
+	                }),
+	                callback: function callback() {
+	                    $(this.id).selectpicker('render').on('changed.bs.select', function () {
+	                        self.filters.state.is_online = this.value === "" ? undefined : this.value === "true";
+	                    });
+	                }
+	            },
+	            // Filter by curriculum year
+	            _this.filterDataCurriculumYear(), // can return null
+	            // Submit button
+	            {
+	                isSubmitButton: true,
+	                html: _this.templates.filters.submitButton()
+	            }];
+	            return data.filter(function (e) {
+	                return e;
+	            });
+	        };
 
-	        var promise = options.apiRequest || this.constructor.getStats(options.course_session_id);
-	        promise.then(this.convertData).done(this.render);
+	        _this.submitButtonHandler = function () {
+	            var filteredData = _this.convertData(_this.rawJSON);
+	            _this.plot.load({
+	                type: _this.type,
+	                rows: filteredData,
+	                // Clean plot if no data, otherwise save animation transition
+	                // FIXME: убрать бы эту зависимость от state
+	                unload: _this.state.titles.length > 0 ? {} : true
+	            });
+	            return false;
+	        };
+
+	        _this.id = id;
+	        _this.type = 'bar';
+	        _this.rawJSON = {};
+	        _this.plot = undefined;
+	        _this.templates = options.templates || {};
+
+	        _this.state = {
+	            data: [], // filtered data
+	            titles: undefined };
+
+	        var promise = options.apiRequest || _this.constructor.getStats(options.course_session_id);
+	        promise
+	        // Memorize raw JSON data for future conversions
+	        .then(function (rawJSON) {
+	            _this.rawJSON = rawJSON;return rawJSON;
+	        }).then(_this.calculateFilterProps).then(_this.convertData).done(_this.render);
+	        return _this;
 	    }
 
 	    AssignmentsScore.getStats = function getStats(course_session_id) {
@@ -2112,8 +2287,15 @@
 	        return $.getJSON(dataURL);
 	    };
 
+	    /**
+	     * Collect filter elements data which will be appended right after plot
+	     * with d3js. Each element must have `html` attribute. Callback is optional.
+	     * @returns {[*,*]}
+	     */
+
+
 	    return AssignmentsScore;
-	}();
+	}((0, _MixinBuilder2.default)(_FilteredPlot2.default).with(_AssignmentsFilterMixin2.default));
 
 	exports.default = AssignmentsScore;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(3)))
@@ -3771,7 +3953,7 @@
 	            };
 	        };
 	    }
-	    // TODO: добавить проверку, что есть this.templates.filters.curriculumYear
+	    // TODO: добавить проверку, что есть this.templates.filters.curriculumYear?
 
 
 	    /**
@@ -3904,7 +4086,7 @@
 	        /**
 	         * Collect filter choices. Don't want to calculate this data every
 	         * time on filter event
-	         * @param rawJSON
+	         * @param rawJSON JSON from REST API call
 	         * @returns {*}
 	         */
 

@@ -51,8 +51,8 @@ let fn = {
         };
         new AssignmentsProgress('plot-assignments-progress', options);
         new AssignmentsDeadline('plot-assignments-deadline', options);
-        new AssignmentsResults('#plot-assignments-results', options);
-        new AssignmentsScore('#plot-assignments-score', options);
+        new AssignmentsResults('plot-assignments-results', options);
+        new AssignmentsScore('plot-assignments-score', options);
         // Enrollments
         new EnrollmentsResults('#plot-enrollments-results',
             courseSessionId);
