@@ -30,7 +30,7 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
     /**
      * Collect filter choices. Don't want to calculate this data every
      * time on filter event
-     * @param rawJSON
+     * @param rawJSON JSON from REST API call
      * @returns {*}
      */
     calculateFilterProps = (rawJSON) => {

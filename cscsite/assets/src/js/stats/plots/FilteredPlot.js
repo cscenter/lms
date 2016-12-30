@@ -3,7 +3,7 @@ import * as d3 from "d3";
 class FilteredPlot {
 
     constructor(id, options) {
-        // TODO: добавить проверку, что есть this.templates.filters.curriculumYear
+        // TODO: добавить проверку, что есть this.templates.filters.curriculumYear?
     }
 
     /**

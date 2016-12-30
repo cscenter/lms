@@ -195,9 +195,10 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             rows: filteredData,
             // Clean plot if no data, otherwise save animation transition
             // FIXME: убрать бы эту зависимость от state
-            // unload: this.state.titles.length > 0 ? {} : true
+            unload: this.state.titles.length > 0 ? {} : true
         });
-        this.plot.groups([Array.from(this.types, ([k, v]) => v)]);
+        // FIXME: попробовать убрать Array.from везде. Но надо искать баг в самой c3.js
+        // this.plot.groups([Array.from(this.types, ([k, v]) => v)]);
         return false;
     };
 }
