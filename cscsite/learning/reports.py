@@ -331,6 +331,9 @@ class ProgressReportForSemester(ProgressReport):
     Exported data contains club and center courses if target term already
     passed and additionally shad- and online-courses if target term is current.
     """
+
+    UNSUCCESSFUL_GRADES = [GRADES.not_graded, GRADES.unsatisfactory]
+
     @staticmethod
     def get_queryset(**kwargs):
         assert "term" in kwargs
@@ -345,7 +348,7 @@ class ProgressReportForSemester(ProgressReport):
                 "status": STUDENT_STATUS.expelled
             },
             semester=kwargs["term"],
-            exclude_grades=[GRADES.unsatisfactory]
+            exclude_grades=[]
         )
 
     def before_process_row(self, student):
@@ -353,6 +356,7 @@ class ProgressReportForSemester(ProgressReport):
         student.success_eq_target_semester = 0
         student.success_lt_target_semester = 0
         # Shad courses specific attributes
+        student.shad_eq_target_semester = 0
         student.success_shad_eq_target_semester = 0
         student.success_shad_lt_target_semester = 0
 
@@ -360,13 +364,14 @@ class ProgressReportForSemester(ProgressReport):
         if not student.shads:
             return
         shads = []
-        # Note: failed shad courses rejected on query level
         for shad in student.shads:
             if shad.semester == self.target_semester:
-                if shad.grade != GRADES.not_graded:
+                student.shad_eq_target_semester += 1
+                if shad.grade not in self.UNSUCCESSFUL_GRADES:
                     student.success_shad_eq_target_semester += 1
+                # Show shad enrollments for target term only
                 shads.append(shad)
-            elif shad.grade != GRADES.not_graded:
+            elif shad.grade not in self.UNSUCCESSFUL_GRADES:
                 student.success_shad_lt_target_semester += 1
         student.shads = shads
 
@@ -376,16 +381,14 @@ class ProgressReportForSemester(ProgressReport):
         For target term skip `not graded` enrollments if target semester
         already passed.
         """
-        # Note: Failed courses rejected on query level.
-        assert enrollment.grade != GRADES.unsatisfactory
         if enrollment.course_offering.semester == self.target_semester:
             student.enrollments_eq_target_semester += 1
-            if enrollment.grade != GRADES.not_graded:
+            if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
                 student.success_eq_target_semester += 1
         else:
-            if enrollment.grade != GRADES.not_graded:
+            if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
                 student.success_lt_target_semester += 1
-            # Hide enrollments from terms less than target semester
+            # Show enrollments for target term only
             return True
         return False
 
@@ -415,7 +418,8 @@ class ProgressReportForSemester(ProgressReport):
             self.target_semester,
             'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' %
             self.target_semester,
-            'Записей на курсы за семестр "%s"' % self.target_semester
+            'Записей на курсы (Центр/Клуб/ШАД) за семестр "%s"' %
+            self.target_semester
         ]
 
     def _append_courses_headers(self, headers):
@@ -442,6 +446,10 @@ class ProgressReportForSemester(ProgressReport):
         success_total_eq_target_semester = (
             student.success_eq_target_semester +
             student.success_shad_eq_target_semester)
+        enrollments_eq_target_semester = (
+            student.enrollments_eq_target_semester +
+            student.shad_eq_target_semester
+        )
         row = [
             student.last_name,
             student.first_name,
@@ -464,7 +472,7 @@ class ProgressReportForSemester(ProgressReport):
             self.request.build_absolute_uri(student.get_absolute_url()),
             success_total_lt_target_semester,
             success_total_eq_target_semester,
-            student.enrollments_eq_target_semester
+            enrollments_eq_target_semester
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
