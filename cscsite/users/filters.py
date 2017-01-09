@@ -5,7 +5,7 @@ from django.db.models import Count, Case, When, Q, Value, F
 from django.http import QueryDict
 
 from learning.models import Enrollment
-from users.models import CSCUser
+from users.models import CSCUser, SHADCourseRecord
 
 
 class ListFilter(django_filters.Filter):
@@ -74,13 +74,20 @@ class CSCUserFilter(django_filters.FilterSet):
 
         queryset = queryset.annotate(
             courses_cnt=
+            # Remove unsuccessful grades, then distinctly count by pk
             Count(Case(
                 When(Q(enrollment__grade=Enrollment.GRADES.not_graded) |
                      Q(enrollment__grade=Enrollment.GRADES.unsatisfactory),
                      then=Value(None)),
                 default=F("enrollment")
             ), distinct=True) +
-            Count("shadcourserecord", distinct=True) +
+            Count(Case(
+                When(Q(shadcourserecord__grade=SHADCourseRecord.GRADES.not_graded) |
+                     Q(shadcourserecord__grade=SHADCourseRecord.GRADES.unsatisfactory),
+                     then=Value(None)),
+                default=F("shadcourserecord")
+            ), distinct=True) +
+            # No need to filter online courses by grade
             Count("onlinecourserecord", distinct=True)
         )
 
