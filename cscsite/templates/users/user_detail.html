@@ -102,7 +102,7 @@
                             {% endfor %}
                         </li>
                         <li class="list-group-item"><b>Успешно сдано курсов всего</b>:{{ total_successfully_passed }} (учитываются курсы Клуба/Центра/ШАД/Онлайн)</li>
-                    <li class="list-group-item"><b>Записей в этом семестре</b>: {{ enrollments_in_current_term }} (на курсы клуба или центра)</li>
+                    <li class="list-group-item"><b>Записей в этом семестре</b>: {{ enrollments_in_current_term }} (на курсы Клуба/Центра/ШАД)</li>
                     <li class="list-group-item">
                         <b>Ссылка на анкету</b>:{% if user_object.applicant %}
                             <a target="_blank" href="{% url "admission_applicant_detail" user_object.applicant.pk %}">#{{ user_object.applicant.pk }}</a>
@@ -128,7 +128,7 @@
                                 {% endfor %}
                                 {% for shad in user_object.shadcourserecord_set.all %}
                                     <li>
-                                        {{ shad.name }} (ШАД) - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
+                                        {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
                                     </li>
                                     {% empty %}
                                     {% if user.is_curator %}<li>Нет зачтённых ШАД-курсов</li>{% endif %}

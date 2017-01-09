@@ -7,6 +7,7 @@ from collections import OrderedDict
 from loginas.utils import restore_original_login
 
 from learning.reports import ProgressReport
+from users.models import SHADCourseRecord
 
 try:
     import json
@@ -130,11 +131,11 @@ class TeacherDetailView(generic.DetailView):
         co_queryset = (CourseOffering.custom.site_related(self.request)
                        .select_related('semester', 'course'))
         return (auth.get_user_model()._default_manager
-                .all()
-                .prefetch_related(
-                    Prefetch('teaching_set',
-                             queryset=co_queryset.all(),
-                             to_attr='course_offerings')))
+            .all()
+            .prefetch_related(
+            Prefetch('teaching_set',
+                     queryset=co_queryset.all(),
+                     to_attr='course_offerings')))
 
     def get_context_data(self, **kwargs):
         context = super(TeacherDetailView, self).get_context_data(**kwargs)
@@ -161,7 +162,10 @@ class UserDetailView(generic.DetailView):
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
-            'shadcourserecord_set',
+            Prefetch('shadcourserecord_set',
+                     queryset=(SHADCourseRecord
+                               .objects
+                               .select_related("semester"))),
             Prefetch('enrollment_set', queryset=enrollment_queryset)
         ]
         select_list = []
@@ -183,8 +187,8 @@ class UserDetailView(generic.DetailView):
         # On center site show club students only to teachers and curators
         if self.request.site.domain != settings.CLUB_DOMAIN:
             if (list(context["user_object"]._cached_groups) == [
-                CSCUser.group.STUDENT_CLUB]
-                    and not(u.is_teacher or u.is_curator)):
+                    CSCUser.group.STUDENT_CLUB] and not (
+                    u.is_teacher or u.is_curator)):
                 raise Http404
 
         context['is_editing_allowed'] = (u == self.object or u.is_curator)
@@ -202,7 +206,8 @@ class UserDetailView(generic.DetailView):
                        'assignment__course_offering__semester']
             a_ss = (StudentAssignment.objects
                     .filter(student=self.object)
-                    .filter(assignment__course_offering__semester_id=context['current_semester'].id)
+                    .filter(assignment__course_offering__semester_id=context[
+                'current_semester'].id)
                     .order_by('assignment__course_offering__course__name',
                               'assignment__deadline_at',
                               'assignment__title')
@@ -242,9 +247,12 @@ class UserDetailView(generic.DetailView):
                 sum(1 for c in student.shadcourserecord_set.all() if
                     ProgressReport.is_positive_grade(c)) +
                 len(student.onlinecourserecord_set.all()))
-            context['enrollments_in_current_term'] = sum(
-                1 for e in student.enrollment_set.all() if
-                e.course_offering.semester == context['current_semester'])
+            context['enrollments_in_current_term'] = (
+                sum(1 for e in student.enrollment_set.all() if
+                    e.course_offering.semester == context['current_semester']) +
+                sum(1 for с in student.shadcourserecord_set.all() if
+                    с.semester == context['current_semester'])
+            )
             student.enrollment_set.all()
         return context
 
@@ -255,7 +263,8 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
-        return obj.pk == user.pk or (user.is_authenticated() and user.is_curator)
+        return obj.pk == user.pk or (
+        user.is_authenticated() and user.is_curator)
 
 
 class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
@@ -385,12 +394,12 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
                       'course_offering__course']
         teacher_ccs = (
             CourseClass.objects
-            .filter(course_offering__teachers=user)
-            .select_related(*cc_related))
+                .filter(course_offering__teachers=user)
+                .select_related(*cc_related))
         student_ccs = (
             CourseClass.objects
-            .filter(course_offering__enrolled_students=user)
-            .select_related(*cc_related))
+                .filter(course_offering__enrolled_students=user)
+                .select_related(*cc_related))
 
         tz = timezone.get_current_timezone()
 
@@ -455,12 +464,12 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
 
         student_a_ss = (
             StudentAssignment.objects
-            .filter(student=user,
-                    assignment__deadline_at__gt=timezone.now())
-            .select_related('assignment',
-                            'assignment__course_offering',
-                            'assignment__course_offering__course',
-                            'assignment__course_offering__semester'))
+                .filter(student=user,
+                        assignment__deadline_at__gt=timezone.now())
+                .select_related('assignment',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester'))
         # NOTE(Dmitry): this is hacky, but it's better to handle this here
         #               than downstream
         student_as = []
@@ -472,11 +481,11 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
 
         teacher_as = list(
             Assignment.objects
-            .filter(course_offering__teachers=user,
-                   deadline_at__gt=timezone.now())
-            .select_related('course_offering',
-                            'course_offering__course',
-                            'course_offering__semester'))
+                .filter(course_offering__teachers=user,
+                        deadline_at__gt=timezone.now())
+                .select_related('course_offering',
+                                'course_offering__course',
+                                'course_offering__semester'))
         # NOTE(Dmitry): hacky again to be consistent
         for a in teacher_as:
             url = reverse('assignment_detail_teacher', args=[a.pk])
@@ -543,7 +552,7 @@ class ICalEventsView(ICalView):
 
         if len(nces) > 0:
             max_date = max(e.date for e in nces)
-            max_dt = (tz.localize(datetime.combine(max_date, time(0,0,0)))
+            max_dt = (tz.localize(datetime.combine(max_date, time(0, 0, 0)))
                       + relativedelta(years=1))
         else:
             max_dt = context['max_dt']
