@@ -5,6 +5,7 @@
 {% load staticfiles %}
 {% load markdown from core_tags %}
 {% load userpreview from custom_thumbnail %}
+{% block title %}{{ user_object.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Center{% endblock title %}
 
 {% block content %}
     <div id="profile">
