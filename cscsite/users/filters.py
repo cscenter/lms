@@ -79,7 +79,7 @@ class CSCUserFilter(django_filters.FilterSet):
                 When(Q(enrollment__grade=Enrollment.GRADES.not_graded) |
                      Q(enrollment__grade=Enrollment.GRADES.unsatisfactory),
                      then=Value(None)),
-                default=F("enrollment")
+                default=F("enrollment__course_offering__course_id")
             ), distinct=True) +
             Count(Case(
                 When(Q(shadcourserecord__grade=SHADCourseRecord.GRADES.not_graded) |
