@@ -378,8 +378,6 @@ class ProgressReportForSemester(ProgressReport):
     def skip_enrollment(self, enrollment, student):
         """
         Count stats for enrollments from passed terms and skip them.
-        For target term skip `not graded` enrollments if target semester
-        already passed.
         """
         if enrollment.course_offering.semester == self.target_semester:
             student.enrollments_eq_target_semester += 1
