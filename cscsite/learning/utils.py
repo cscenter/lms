@@ -7,7 +7,7 @@ from django.http import Http404
 from django.utils import timezone
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
-    SPRING_TERM_START
+    SPRING_TERM_START, GRADES
 
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
@@ -102,6 +102,24 @@ def get_term_by_index(term_index):
             term = t
     assert not isinstance(term, int)
     return year, term
+
+
+def get_grade_index(grade):
+    """
+    Returns grade index for easier grades comparison.
+    Assume unsatisfactory > not_graded.
+    """
+    if grade == GRADES.not_graded:
+        return 0
+    elif grade == GRADES.unsatisfactory:
+        return 1
+    elif grade == getattr(GRADES, "pass"):
+        return 2
+    elif grade == GRADES.good:
+        return 3
+    elif grade == GRADES.excellent:
+        return 4
+    raise ValueError("Unknown grade type")
 
 
 def split_list(iterable, predicate):

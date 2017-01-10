@@ -159,15 +159,18 @@ class ReportFileOutput(object):
         workbook = Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet()
 
-        format_bold = workbook.add_format({'bold': True})
-        for index, header in enumerate(self.headers):
-            worksheet.write(0, index, header, format_bold)
+        format = workbook.add_format()
 
+        format.set_bold()
+        for index, header in enumerate(self.headers):
+            worksheet.write(0, index, header, format)
+
+        format.set_bold(False)
         for row_index, raw_row in enumerate(self.data, start=1):
             row = self.export_row(raw_row)
             for col_index, value in enumerate(row):
                 value = "" if value is None else force_text(value)
-                worksheet.write(row_index, col_index, force_text(value))
+                worksheet.write(row_index, col_index, force_text(value), format)
 
         workbook.close()
         output.seek(0)
