@@ -47,6 +47,7 @@ class UserFactory(factory.DjangoModelFactory):
     def curriculum_year(self, create, extracted, **kwargs):
         if not create:
             return
+        self.curriculum_year = extracted
         if not extracted and self.enrollment_year:
             self.curriculum_year = self.enrollment_year
 
