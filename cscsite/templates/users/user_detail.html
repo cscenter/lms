@@ -102,7 +102,7 @@
                                 {% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп
                             {% endfor %}
                         </li>
-                        <li class="list-group-item"><b>Успешно сдано курсов всего</b>: {{ total_successfully_passed }} (учитываются курсы Клуба/Центра/ШАД/Онлайн)</li>
+                        <li class="list-group-item"><b>Успешно сдано курсов всего</b>: {{ total_successfully_passed_courses }} (учитываются курсы Клуба/Центра/ШАД/Онлайн)</li>
                     <li class="list-group-item"><b>Записей в этом семестре</b>: {{ enrollments_in_current_term }} (на курсы Клуба/Центра/ШАД)</li>
                     <li class="list-group-item">
                         <b>Ссылка на анкету</b>:{% if user_object.applicant %}
