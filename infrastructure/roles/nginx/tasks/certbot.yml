@@ -1,0 +1,47 @@
+---
+
+- name: Download certbot
+  get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
+
+- name: Site dir path
+  set_fact:
+    site_root: "/home/{{ cscenter_user }}/site/repo"
+
+- name: LetsEncrypt Certbot directory exists
+  file:
+    path: "{{ site_root }}/.well-known/acme-challenge"
+    state: directory
+    recurse: yes
+    owner: "{{ cscenter_user }}"
+    group: "{{ cscenter_user }}"
+
+- name: Certificates and keys will be installed to directory
+  debug:
+    msg: "{{ certbot_config_dir }}"
+
+- name: Install certbot and generate cert
+  command: >
+    {{ certbot_script }} certonly --webroot
+    --noninteractive --agree-tos
+    --email {{ certbot_admin_email }}
+    -w {{ site_root }}
+    -d {{ certbot_domains|join(' -d ') }}
+  args:
+    creates: "{{ certbot_config_dir }}"
+
+- name: Ensure Nginx is started
+  service: name=nginx state=started
+  when: nginx_status.stat.exists
+
+- name: Ensure a cron job to auto-renew the cert exists
+  cron:
+    name: "daily auto renew cert"
+    special_time: daily
+    job: >
+      {{ certbot_script }} certonly --webroot
+      --noninteractive --agree-tos --quiet
+      --email {{ certbot_admin_email }}
+      -w {{ site_root }}
+      -d {{ certbot_domains|join(' -d ') }}
+    state: present
+  when: certbot_auto_renew

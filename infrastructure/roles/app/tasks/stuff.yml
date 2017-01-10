@@ -5,7 +5,7 @@
     repo: https://github.com/robbyrussell/oh-my-zsh.git
     dest: "/home/{{ item }}/.oh-my-zsh"
   with_items:
-    - "{{ root_user }}"
+    - "{{ aws_ec2_root_user }}"
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"
 
@@ -15,13 +15,13 @@
     dest: "/home/{{ item }}/.zshrc"
     owner: "{{ item }}"
   with_items:
-    - "{{ root_user }}"
+    - "{{ aws_ec2_root_user }}"
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"
 
 - name: set zsh as default shell
   user: name="{{ item }}" shell=/bin/zsh
   with_items:
-    - "{{ root_user }}"
+    - "{{ aws_ec2_root_user }}"
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"

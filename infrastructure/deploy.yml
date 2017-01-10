@@ -28,7 +28,8 @@
     become_user: "{{ app_user }}"
 
   - name: Collectstatic
-    sudo_user: "{{ app_user }}"
+    become: yes
+    become_user: "{{ app_user }}"
     django_manage:
       command: "collectstatic"
       app_path: "{{ site_src }}"
@@ -36,7 +37,8 @@
       virtualenv: "{{ venv_dir }}"
 
   - name: Migrate DB
-    sudo_user: "{{ app_user }}"
+    become: yes
+    become_user: "{{ app_user }}"
     django_manage:
       command: "migrate"
       app_path: "{{ site_src }}"

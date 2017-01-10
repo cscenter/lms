@@ -10,10 +10,10 @@
     - name: ipython
       version: "4.0.0"
     - name: virtualenv
-      version: "15.0.2"
-# FIXME: need manual test, psycopg2 installed in venv also
-#    - name: psycopg2
-#      version: "2.6.1"
+      version: "15.1.0"
+# Psycopg used by db.yml to make sure user exists
+    - name: psycopg2
+      version: "2.6.1"
 
 - name: install global Python stuff
   pip:

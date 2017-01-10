@@ -1,23 +1,23 @@
 ---
-- name: create dir for nginx crypto stuff
-  file: path=/etc/nginx/crypto state=directory
+- name: Create dir for nginx crypto stuff
+  file:
+    path: "{{ nginx_tls_path }}"
+    state: directory
+  tags:
+    - tls
 
-- name: ensure all nginx crypto material is present
+- name: Ensure all nginx crypto material is present
   copy:
     src: "{{ item.from }}"
-    dest: "/etc/nginx/crypto/{{ item.to }}"
+    dest: "{{ nginx_tls_path }}/{{ item.to }}"
     mode: 0400
   with_items:
-    - from: cscweb_tls_intermediate_bundle.crt
-      to: intermediate_bundle.crt
-    - from: cscweb_tls_server_bundle.crt
-      to: server_bundle.crt
-    - from: cscweb_tls_server_decrypted_key.crt
-      to: server_key.crt
     - from: cscweb_tls_dhparam.pem
       to: dhparam.pem
+  tags:
+    - tls
 
-- name: copy nginx config
+- name: Copy nginx config
   template:
     src: "{{ item }}.conf.tmpl"
     dest: "/etc/nginx/sites-available/{{ item }}.conf"
@@ -25,11 +25,11 @@
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"
 
-- name: remove default nginx config
+- name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
 
-- name: symlink nginx config
+- name: Symlink nginx config
   file:
     src: "/etc/nginx/sites-available/{{ item }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
@@ -38,3 +38,15 @@
   with_items:
     - "{{ cscenter_user }}"
     - "{{ csclub_user }}"
+
+- name: Nginx status
+  stat: path=/etc/init.d/nginx
+  register: nginx_status
+  tags:
+    - tls
+
+- name: Configure https connection
+  include: certbot.yml
+  when: nginx_status.stat.exists
+  tags:
+    - tls

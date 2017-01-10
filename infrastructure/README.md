@@ -1,5 +1,7 @@
 
 # TODO (critical):
+* separated playbook for cronjobs
+* move nginx dependencies to role
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * `apt-get install ntpd` with servers in /etc/ntp.conf
@@ -138,6 +140,7 @@ Note: Бэкап делается bd и media. У сайта клуба и це�
 TODO:
 * Test app write in log
 * Restore dbbackup
+* Make certbot optional? And add to csclub site too.
 
 ## How to replace instance
 1. `ansible-playbook -i hosts provision.yml`

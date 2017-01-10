@@ -1,0 +1,16 @@
+---
+
+nginx_tls_path: /etc/nginx/crypto
+certbot_script: /opt/certbot-auto
+certbot_auto_renew: yes
+certbot_admin_email: admin@example.com
+certbot_domain: localhost
+# Main domain plus additional domains
+certbot_domains:
+  - "{{ certbot_domain }}"
+  - "www.{{ certbot_domain }}"
+# The 'certbot' will automatically generate files for us.
+certbot_config_dir: "/etc/letsencrypt/live/{{ certbot_domain }}"
+certbot_cert_filename: fullchain.pem
+certbot_privkey_filename: privkey.pem
+certbot_trusted_chain_filename: chain.pem
