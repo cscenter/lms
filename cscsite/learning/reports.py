@@ -10,6 +10,7 @@ from collections import OrderedDict, defaultdict
 
 from core.views import ReportFileOutput
 from learning.settings import GRADES, STUDENT_STATUS
+from learning.utils import get_grade_index
 from users.models import CSCUser
 
 
@@ -48,18 +49,30 @@ class ProgressReport(ReportFileOutput):
                 if self.skip_enrollment(e, s):
                     continue
                 courses_headers[
-                    e.course_offering.course.id] = e.course_offering.course.name
+                    e.course_offering.course_id] = e.course_offering.course.name
                 teachers = [t.get_full_name() for t in
                             e.course_offering.teachers.all()]
                 if honest_grade_system:
                     grade = e.grade_honest
                 else:
                     grade = e.grade_display
-                student_courses[e.course_offering.course.id] = {
-                    "grade": e.grade,
-                    "grade_repr": grade.lower(),
-                    "teachers": ", ".join(teachers)
-                }
+                if e.course_offering.course_id in student_courses:
+                    # Store the highest grade
+                    # TODO: add test
+                    record = student_courses[e.course_offering.course_id]
+                    new_grade_index = get_grade_index(e.grade)
+                    if new_grade_index > get_grade_index(record["grade"]):
+                        student_courses[e.course_offering.course_id] = {
+                            "grade": e.grade,
+                            "grade_repr": grade.lower(),
+                            "teachers": ", ".join(teachers)
+                        }
+                else:
+                    student_courses[e.course_offering.course_id] = {
+                        "grade": e.grade,
+                        "grade_repr": grade.lower(),
+                        "teachers": ", ".join(teachers)
+                    }
             s.courses = student_courses
 
             self.after_process_row(s)
@@ -299,7 +312,7 @@ class ProgressReportFull(ProgressReport):
             student.email,
             student.phone,
             student.university,
-            student.uni_year_at_enrollment,
+            student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.graduation_year,
             student.yandex_id,
@@ -353,17 +366,28 @@ class ProgressReportForSemester(ProgressReport):
 
     def before_process_row(self, student):
         student.enrollments_eq_target_semester = 0
+        # During one term student can't enroll on 1 course twice, but for
+        # previous terms we should consider this situation and count only
+        # unique course ids
         student.success_eq_target_semester = 0
-        student.success_lt_target_semester = 0
+        student.success_lt_target_semester = set()
         # Shad courses specific attributes
         student.shad_eq_target_semester = 0
         student.success_shad_eq_target_semester = 0
         student.success_shad_lt_target_semester = 0
 
     def after_process_row(self, student):
+        """
+        Convert `success_lt_target_semester` to int repr.
+        Collect statistics for shad courses.
+        """
+        student.success_lt_target_semester = len(
+            student.success_lt_target_semester)
         if not student.shads:
             return
         shads = []
+        # During one term student can't enroll on 1 course twice, for
+        # previous terms we assume they can't do that.
         for shad in student.shads:
             if shad.semester == self.target_semester:
                 student.shad_eq_target_semester += 1
@@ -385,7 +409,9 @@ class ProgressReportForSemester(ProgressReport):
                 student.success_eq_target_semester += 1
         else:
             if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
-                student.success_lt_target_semester += 1
+                student.success_lt_target_semester.add(
+                    enrollment.course_offering.course_id
+                )
             # Show enrollments for target term only
             return True
         return False
@@ -457,7 +483,7 @@ class ProgressReportForSemester(ProgressReport):
             student.email,
             student.phone,
             student.university,
-            student.uni_year_at_enrollment,
+            student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.graduation_year,
             student.yandex_id,
