@@ -72,7 +72,7 @@ SEMESTER_TYPES = getattr(settings, 'SEMESTER_TYPES',
 # don't know what will happen if we change this when there are models in DB
 AUTUMN_TERM_START = '1 sep'
 # XXX: spring semester must be later than 1 jan
-SPRING_TERM_START = '10 jan'
+SPRING_TERM_START = '20 jan'
 SUMMER_TERM_START = '1 jul'
 
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after semester starts, in days
