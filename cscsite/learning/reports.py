@@ -58,7 +58,7 @@ class ProgressReport(ReportFileOutput):
                     grade = e.grade_display
                 if e.course_offering.course_id in student_courses:
                     # Store the highest grade
-                    # TODO: add test
+                    # TODO: add tests
                     record = student_courses[e.course_offering.course_id]
                     new_grade_index = get_grade_index(e.grade)
                     if new_grade_index > get_grade_index(record["grade"]):
@@ -201,9 +201,15 @@ class ProgressReport(ReportFileOutput):
 class ProgressReportForDiplomas(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
-        return CSCUser.objects.students_info(filters={
-            "status": CSCUser.STATUS.will_graduate
-        })
+        """
+        Explicitly exclude rows with bad grades (or without) on query level.
+        """
+        return CSCUser.objects.students_info(
+            filters={
+                "status": CSCUser.STATUS.will_graduate
+            },
+            exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
+        )
 
     @property
     def static_headers(self):
