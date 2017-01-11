@@ -207,6 +207,13 @@ $header-lvl1-bg:                 #4F86A0;
         }
     }
 
+    .divider {
+        margin: 6px 0;
+        &:hover {
+            background-color: $color-gray-90;
+        }
+    }
+
     .dropdown-menu {
         border-radius: 2px;
     }
