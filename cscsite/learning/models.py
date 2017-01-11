@@ -224,6 +224,10 @@ class CourseOffering(TimeStampedModel):
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
                     "will be replaced by course description"),
         blank=True)
+    reviews = models.TextField(
+        _("Course reviews"),
+        null=True,
+        blank=True)
     survey_url = models.URLField(_("Survey URL"), blank=True,
                                  help_text=_("Link to Survey"))
     is_published_in_video = models.BooleanField(
