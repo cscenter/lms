@@ -7,31 +7,7 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        {% trans "Assignments" %}
-      </h2>
-      <div class="btn-toolbar">
-        {% if user.is_teacher and user.is_student %}
-        <div class="btn-group">
-          <a href="{% url 'assignment_list_student' %}"
-             role="button"
-             class="btn btn-default
-                    {% if user_type == 'student' %}
-                    active
-                    {% endif %}">
-            {% trans "Learning" %}
-          </a>
-          <a href="{% url 'assignment_list_teacher' %}"
-             role="button"
-             class="btn btn-default
-                    {% if user_type == 'teacher' %}
-                    active
-                    {% endif %}">
-            {% trans "Teaching" %}
-          </a>
-        </div>
-        {% endif %}
-      </div>
+      <h2>{% trans "Assignments" %}</h2>
       <hr>
     </div>
   </div>
