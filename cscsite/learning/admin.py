@@ -19,7 +19,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    CourseOfferingTeacher, InternationalSchool, Useful
+    CourseOfferingTeacher, InternationalSchool, Useful, Internship
 
 
 class RelatedSpecMixin(object):
@@ -235,6 +235,12 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
+class InternshipAdmin(admin.ModelAdmin):
+    list_filter = ['site']
+    list_display = ['question', 'sort']
+    exclude = ["site"]
+
+
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
@@ -251,3 +257,4 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
+admin.site.register(Internship, InternshipAdmin)

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-11 19:02+0300\n"
-"PO-Revision-Date: 2017-01-11 19:02+0230\n"
+"POT-Creation-Date: 2017-01-12 14:04+0300\n"
+"PO-Revision-Date: 2017-01-12 14:05+0230\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -74,12 +74,13 @@ msgid "Category name"
 msgstr "Название категории"
 
 #: cscsite/core/models.py:67 cscsite/core/models.py:83
-#: cscsite/learning/models.py:1094 cscsite/staff/models.py:17
+#: cscsite/learning/models.py:1094 cscsite/learning/models.py:1111
+#: cscsite/staff/models.py:17
 msgid "Sort order"
 msgstr "Сортировка"
 
 #: cscsite/core/models.py:68 cscsite/core/models.py:84
-#: cscsite/learning/models.py:1095
+#: cscsite/learning/models.py:1095 cscsite/learning/models.py:1112
 msgid "Site"
 msgstr "Сайт"
 
@@ -92,12 +93,12 @@ msgid "FAQ categories"
 msgstr "Разделы для FAQ"
 
 #: cscsite/core/models.py:81 cscsite/learning/models.py:1092
-#: cscsite/staff/models.py:15
+#: cscsite/learning/models.py:1109 cscsite/staff/models.py:15
 msgid "Question"
 msgstr "Вопрос"
 
 #: cscsite/core/models.py:82 cscsite/learning/models.py:1093
-#: cscsite/staff/models.py:16
+#: cscsite/learning/models.py:1110 cscsite/staff/models.py:16
 msgid "Answer"
 msgstr "Ответ"
 
@@ -590,7 +591,6 @@ msgstr ""
 "на описание курса"
 
 #: cscsite/learning/models.py:228
-#| msgid "Course readings"
 msgid "Course reviews"
 msgstr "Отзывы о прошедшем курсе"
 
@@ -1092,6 +1092,14 @@ msgstr "Международные школы"
 #: cscsite/learning/models.py:1100 cscsite/learning/models.py:1101
 msgid "Useful"
 msgstr "Полезное"
+
+#: cscsite/learning/models.py:1117
+msgid "Internship"
+msgstr "Стажировка"
+
+#: cscsite/learning/models.py:1118
+msgid "Internships"
+msgstr "Стажировки"
 
 #: cscsite/learning/settings.py:20
 msgid "Student [CENTER]"

@@ -60,7 +60,7 @@ from .models import Course, CourseClass, CourseOffering, Venue, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool, Useful
+    OnlineCourse, InternationalSchool, Useful, Internship
 
 logger = logging.getLogger(__name__)
 
@@ -2134,3 +2134,13 @@ class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
+
+
+class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/internships.html"
+
+    def get_queryset(self):
+        return (Internship.objects
+                .filter(site=settings.CENTER_SITE_ID)
+                .order_by("sort"))
