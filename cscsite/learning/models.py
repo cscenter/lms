@@ -1102,3 +1102,20 @@ class Useful(models.Model):
 
     def __str__(self):
         return smart_text(self.question)
+
+
+@python_2_unicode_compatible
+class Internship(models.Model):
+    question = models.CharField(_("Question"), max_length=255)
+    answer = models.TextField(_("Answer"))
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
+    site = models.ForeignKey(Site, verbose_name=_("Site"),
+                             default=settings.CENTER_SITE_ID)
+
+    class Meta:
+        ordering = ["sort"]
+        verbose_name = _("Internship")
+        verbose_name_plural = _("Internships")
+
+    def __str__(self):
+        return smart_text(self.question)

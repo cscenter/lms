@@ -10,7 +10,7 @@ from core.views import RobotsView, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView
 from htmlpages import views
-from learning.views import UsefulListView
+from learning.views import UsefulListView, InternshipListView
 from stats.views import StatsIndexView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
@@ -35,6 +35,8 @@ urlpatterns = [
         name="profile_update_image"),
 
     url(r'^learning/useful/$', UsefulListView.as_view(), name='learning_useful'),
+    url(r'^learning/internships/$', InternshipListView.as_view(),
+        name='learning_internships'),
 
 
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
