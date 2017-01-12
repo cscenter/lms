@@ -17,9 +17,11 @@
                            href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
                     </div>
                     <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
+                        <div class="panel-body">
                         {% markdown 3600 "internships_answers" qa.pk qa.modified %}
                             {{ qa.answer }}
                         {% endmarkdown %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
