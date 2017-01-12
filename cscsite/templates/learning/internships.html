@@ -2,10 +2,12 @@
 {% load i18n %}
 {% load staticfiles %}
 {% block body_class %} gray{% endblock body_class %}
+{% load markdown from core_tags %}
 {% block title %}Стажировки{% endblock title %}
+
 {% block content %}
     <div id="questions-wrapper">
-        <h2 class="center-header">Стажировки</h2>
+        <h2 class="center-header">Стажировки и Школы</h2>
         {% if faq %}
         <div class="panel-group panel-group-continuous" id="questions">
             {% for qa in faq %}
@@ -15,13 +17,15 @@
                            href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
                     </div>
                     <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
-                        <div class="panel-body">{{ qa.answer|safe }}</div>
+                        {% markdown 3600 "internships_answers" qa.pk qa.modified %}
+                            {{ qa.answer }}
+                        {% endmarkdown %}
                     </div>
                 </div>
             {% endfor %}
         </div>
         {% else %}
-            <div class="alert alert-info text-center">Здесь появится информация об интересных стажировках, которые рекомендуют организаторы CS центра.</div>
+            <div class="alert alert-info text-center">Здесь появится информация об интересных стажировках и школах, которые рекомендуют организаторы CS центра.</div>
         {% endif %}
     </div>
 {% endblock content %}
