@@ -1105,7 +1105,7 @@ class Useful(models.Model):
 
 
 @python_2_unicode_compatible
-class Internship(models.Model):
+class Internship(TimeStampedModel):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
