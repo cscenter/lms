@@ -6,6 +6,7 @@
 {% block content %}
     <div id="questions-wrapper">
         <h2 class="center-header">Стажировки</h2>
+        {% if faq %}
         <div class="panel-group panel-group-continuous" id="questions">
             {% for qa in faq %}
                 <div class="panel">
@@ -19,6 +20,9 @@
                 </div>
             {% endfor %}
         </div>
+        {% else %}
+            <div class="alert alert-info text-center">Здесь появится информация об интересных стажировках, которые рекомендуют организаторы CS центра.</div>
+        {% endif %}
     </div>
 {% endblock content %}
 
