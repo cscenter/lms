@@ -189,7 +189,7 @@ h4.no-top-margin {
 }
 
 .container {
-  width: $min-width !important;
+  width: $min-width;
 
   &.container-responsive {
     width: 90% !important;
