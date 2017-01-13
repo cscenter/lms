@@ -15,6 +15,7 @@
 @import "components/buttons";
 @import "components/widgets";
 @import "components/tabs";
+@import "components/toolbars";
 @import "components/panels";
 @import "components/pagination";
 @import "components/loading";
@@ -61,6 +62,10 @@ page[size="A4"] {
   line-height: 18pt;
 }
 
+
+.bg-gray {
+  background-color: $background-grey;
+}
 
 
 .modal-content {
@@ -113,63 +118,6 @@ input.form-control[type=file] {
   height: auto;
 }
 
-// Panel group
-.panel-group {
-  .panel-heading {
-    position: relative;
-    padding: 0;
-    border-bottom: 0;
-
-    + .panel-collapse .panel-body {
-      border-top-color: rgba(0, 0, 0, 0);
-    }
-  }
-
-
-  .panel-title {
-    position: relative;
-    padding: 15px 30px;
-
-    &:after, &:before {
-      position: absolute;
-      top: 18px;
-      right: 30px;
-      font: normal normal normal 14px/1 FontAwesome;
-      @include transition(none);
-    }
-
-    &:focus, &:hover {
-      text-decoration: none;
-    }
-  }
-
-  .panel-body {
-    padding: 15px 30px;
-  }
-
-
-}
-
-.panel-group-continuous {
-  .panel {
-    border-radius: 0;
-
-    + .panel {
-      margin-top: 0;
-      border-top: 1px solid #e4eaec;
-    }
-
-    &:first-child {
-      border-radius: 4px 4px 0 0;
-    }
-
-    &:last-child {
-      border-radius: 0 0 4px 4px;
-    }
-  }
-}
-
-
 blockquote {
   font-size: 14px;
 }
@@ -188,12 +136,20 @@ h4.no-top-margin {
   margin-top: 0px !important;
 }
 
+// Container modifications
 .container {
   width: $min-width;
-
-  &.container-responsive {
+}
+.container-wide {
     width: 90% !important;
     min-width: $min-width;
+}
+.container-responsive {
+  min-width: $min-width;
+}
+@media (min-width: $container-large-desktop) {
+  .container-responsive {
+    width: $container-large-desktop;
   }
 }
 
@@ -570,11 +526,10 @@ tr.unread {
 }
 
 // Highlight targets. Used on course offering detail page right now.
-h4[id^="news-"] {
-  padding: 4px 0;
-
+div[id^="news-"] {
   &:target {
     // color - like on .unread
-    background: #E2F9FF;
+    background: $state-info-bg;
+    box-shadow: none;
   }
 }

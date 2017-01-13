@@ -1,0 +1,14 @@
+.o-buttons-vertical {
+  margin-bottom: 20px;
+
+  .btn {
+    padding: 14px 10px;
+  }
+
+  &.gray {
+    .btn {
+      color: $color-gray-20;
+      border-color: lighten($color-gray-60, 30%);
+    }
+  }
+}
