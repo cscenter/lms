@@ -4,41 +4,14 @@
 {% load markdown from core_tags %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>
-        {{ course_offering.course.name }}
-        <small>{{ course_offering.semester }}</small>
-      </h2>
-      <div class="btn-toolbar">
-        {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-        <div class="btn-group">
-          <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary btn-outline" role="button">
-            {% trans "Add assignment" %}
-          </a>
-        </div>
-        <div class="btn-group">
-          <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary btn-outline" role="button">
-            {% trans "Add news" %}
-          </a>
-        </div>
-        <div class="btn-group">
-          <a href="{% url 'course_class_add' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary btn-outline">{% trans 'Add class' %}</a>
-        </div>
-        <div class="btn-group">
-          <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary btn-outline" role="button">
-            {% trans "Edit description" %}
-          </a>
-        </div>
-        {% endif %}
-      </div>
-      <hr>
-    </div>
-  </div>
+<div class="container container-responsive">
   <div class="row">
     <div class="col-xs-8">
+      <h2 style="margin-top: 0; font-weight: normal;">
+{#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
+        {{ course_offering.course.name }}<br>
+        <small>{{ course_offering.semester }}</small>
+      </h2>
       {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
         <div id="enroll-now">
               {% blocktrans %}
@@ -47,6 +20,7 @@
               {% endblocktrans %}
         </div>
       {% endif %}
+        <hr>
       <div class="ubertext">
         {% if course_offering.description %}
           {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
@@ -59,12 +33,24 @@
         {% endif %}
       </div>
     </div>
-    <div class="col-xs-4">
+    <div class="col-xs-4" style="padding-top: 5px;">
+        {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+            <div class="o-buttons-vertical">
+              <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}"
+                 class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
+              <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}"
+                 class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
+              <a href="{% url 'course_class_add' course_offering.course.slug course_offering.semester.slug %}"
+                 class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
+              <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}"
+                 class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
+            </div>
+        {% endif %}
         {% if request.user.is_student and not request.user.is_expelled and course_offering.enrollment_opened %}
             <div class="enroll-block">
                 {% if is_enrolled %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
-                       class="btn btn-danger btn-block btn-wide">
+                       class="btn btn-danger btn-block btn-announcement">
                         {% trans "Unenroll from the course" %}
                     </a>
                 {% else %}
@@ -83,7 +69,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="course_offering_pk"
                                value="{{ course_offering.pk }}">
-                        <button type="submit" class="btn btn-primary btn-block btn-wide">
+                        <button type="submit" class="btn btn-primary btn-block btn-announcement">
                             {% trans "Enroll in the course" %}
                         </button>
                     </form>
@@ -92,7 +78,7 @@
             </div>
         {% endif %}
         <div class="o-users-vlist-with-photo">
-            <h4>{% trans "Teachers" %}:</h4>
+            <h4 class="text-uppercase">{% trans "Teachers" %}:</h4>
             <ul class="list-unstyled">
                 {% for teacher in course_offering.teachers.all %}
                     <li>
@@ -111,7 +97,7 @@
             </ul>
             {% if course_offering.survey_url %}
                 {% if is_enrolled or user.is_curator %}
-                    <a class=" btn btn-default btn-block btn-wide btn-success"
+                    <a class=" btn btn-default btn-block btn-announcement btn-success"
                        href="{{ course_offering.survey_url }}"
                        target="_blank">{% trans "Start survey" %}</a>
                 {% endif %}
@@ -124,7 +110,7 @@
   {% if course_classes %}
   <div class="row">
     <div class="col-xs-12">
-      <h3>{% trans "Classes" %}</h3>
+      <h3 class="text-uppercase">{% trans "Classes" %}</h3>
 
       <table class="table timetable" width="100%">
         <thead>
@@ -169,7 +155,7 @@
     {% if assignments %}
         <div class="row">
             <div class="col-xs-12">
-                <h3>{% trans "Assignments" %}</h3>
+                <h3 class="text-uppercase">{% trans "Assignments" %}</h3>
                 <ul>
                     {% for assignment in assignments %}
                         <li>
@@ -187,21 +173,26 @@
 
     {% if course_news %}
     <div class="row">
-        <div class="col-xs-12">
-            <h3>{% trans "News" %}</h3>
+        <div class="col-xs-8">
+            <h3 class="text-uppercase">{% trans "News" %}</h3>
             {% for news in course_news %}
-                <h4 id="news-{{ news.pk }}"><a href="#news-{{ news.pk }}" class="small">{{ news.created|date }}</a> {{ news.title }}</h4>
-                <div class="ubertext shorten">
-                {% markdown 3600 "co_news_text" news.pk news.modified %}
-                  {{ news.text }}
-                {% endmarkdown %}
-                </div>
-                <p class="news-metainfo">
+                <div class="panel bg-gray" id="news-{{ news.pk }}">
+                    <div class="panel-body">
+                        <h4><span class="small">{{ news.created|date }}</span> {{ news.title }}</h4>
+                        <div class="ubertext shorten">
+                        {% markdown 3600 "co_news_text" news.pk news.modified %}
+                          {{ news.text }}
+                        {% endmarkdown %}
+                        </div>
+                    </div>
                     {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-                    <a href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
-                    <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                        <div class="panel-footer text-right">
+                            <a style="padding-right: 5px;" href="#news-{{ news.pk }}">поделиться</a>
+                            <a style="padding-right: 5px;" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+                            <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                        </div>
                     {% endif %}
-                </p>
+                </div>
             {% endfor %}
         </div>
     </div>

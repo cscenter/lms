@@ -1,5 +1,4 @@
 // CLUB main styles
-
 @import "variables";
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
@@ -13,14 +12,19 @@
 @import "../center/pages/student_submission_comments";
 @import "../center/components/buttons";
 @import "../center/components/labels";
+@import "../center/components/toolbars";
 @import "../center/components/page_aside";
 @import "../center/components/loading";
 @import "../center/components/cropper";
 @import "../center/components/lists";
+@import "../center/components/panels";
 @import "../center/components/breadcrumbs";
 @import "../center/components/upload_photo";
 @import "top_menu.scss";
 
+.bg-gray {
+  background-color: $background-grey;
+}
 
 // index page
 .font-bigger {
@@ -41,14 +45,13 @@ table {
     padding: 0;
   }
   .list-group-item {
-    padding: 8px!important;
+    padding: 8px !important;
   }
 }
 
 .tab-content {
   padding: 10px 0;
 }
-
 
 // course offering detail page
 .enroll-block {
@@ -57,8 +60,8 @@ table {
 
 #index-notice {
   @extend .bg-info;
-   text-align: center; 
-   font-size: 13px;
+  text-align: center;
+  font-size: 13px;
 }
 
 // profile overrides
@@ -73,7 +76,7 @@ table {
       bottom: 0;
       width: 100%;
       background: #000;
-      background: rgba(29,32,34,.7);
+      background: rgba(29, 32, 34, .7);
 
       a {
         display: block;
@@ -102,35 +105,36 @@ table {
 
 .banner {
 
-    min-width: $min-width;
-    min-height: 180px;
-    padding-top: 19%;
-    max-height: 360px;
-    margin: -60px 0 20px;
-    position: relative;
+  min-width: $min-width;
+  min-height: 180px;
+  padding-top: 19%;
+  max-height: 360px;
+  margin: -60px 0 20px;
+  position: relative;
 
-    #copyright {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
+  #copyright {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+    font-size: 10px;
+
+    a {
       color: #fff;
-      font-size: 10px;
-
-      a {
-        color: #fff;
-      }
     }
+  }
 
-    &._ru-spb {
-        background: url(../../img/club/banner_spbw.jpg) top center no-repeat;
-        background-size: 100%;
-    }
+  &._ru-spb {
+    background: url(../../img/club/banner_spbw.jpg) top center no-repeat;
+    background-size: 100%;
+  }
 
-    &._ru-kzn {
-        background: url(../../img/club/banner_kazan.jpg) top center no-repeat;
-        background-size: 100%;
-    }
+  &._ru-kzn {
+    background: url(../../img/club/banner_kazan.jpg) top center no-repeat;
+    background-size: 100%;
+  }
 }
+
 // index page ends
 
 // international schools page
@@ -143,7 +147,6 @@ table {
     }
   }
 }
-
 
 // Course offering page
 #enroll-now {
@@ -179,9 +182,8 @@ h4.no-top-margin {
 }
 
 .container {
-    min-width: $min-width !important;
+  min-width: $min-width !important;
 }
-
 
 body {
   margin-bottom: 90px;
@@ -218,18 +220,18 @@ html {
     }
 
     i {
-        vertical-align: middle;
+      vertical-align: middle;
 
-        &.fa-twitter {
-          position: relative;
-          top: 2px;
-        }
+      &.fa-twitter {
+        position: relative;
+        top: 2px;
+      }
 
-        &.fa-google {
-          position: relative;
-          top: 4px;
-          left: -4px;
-        }
+      &.fa-google {
+        position: relative;
+        top: 4px;
+        left: -4px;
+      }
     }
   }
 }
@@ -276,7 +278,7 @@ html {
   padding-left: 0px;
 }
 
-.index-news>li {
+.index-news > li {
   position: relative;
   list-style: none;
 }
@@ -379,7 +381,9 @@ h2 small a {
   border-radius: 0px !important;
 }
 
-.badge.lecture, .badge.seminar { width: 6em; }
+.badge.lecture, .badge.seminar {
+  width: 6em;
+}
 
 .csc-well {
   background-color: #F1F1F1;
@@ -397,22 +401,22 @@ h5.assignment {
 }
 
 .assignment-comment {
-    .metainfo {
-      color: #999;
+  .metainfo {
+    color: #999;
 
-      &.first {
-        color: #888;
-        font-weight: bold;
-      }
+    &.first {
+      color: #888;
+      font-weight: bold;
     }
+  }
 
-    .metainfo-holder {
-      min-height: 20px;
-    }
+  .metainfo-holder {
+    min-height: 20px;
+  }
 
-    hr {
-      border-color: #CFCFCF;
-    }
+  hr {
+    border-color: #CFCFCF;
+  }
 }
 
 .comment-list {
@@ -474,21 +478,27 @@ h5.assignment {
   font-weight: normal;
   border-radius: 5px;
 }
+
 .assignment-status.not-checked {
   background-color: #F9F9F9;
 }
+
 .assignment-status.being-checked {
   background-color: #E9E9E9;
 }
+
 .assignment-status.unsatisfactory {
   background-color: #FF6B78;
 }
+
 .assignment-status.pass {
   background-color: #F39700;
 }
+
 .assignment-status.good {
   background-color: #FAEB7D;
 }
+
 .assignment-status.excellent {
   background-color: $color-green;
 }
@@ -496,9 +506,11 @@ h5.assignment {
 .assignment-date.tomorrow {
   color: #FF6B78;
 }
+
 .assignment-date.today {
   color: #FF6B78;
 }
+
 .assignment-date.day-after-tomorrow {
   color: #F39700;
 }
@@ -511,18 +523,24 @@ tr.unread {
   margin-bottom: 0px !important;
 }
 
-#course-list > li:first-child { padding-left: 5px !important; }
+#course-list > li:first-child {
+  padding-left: 5px !important;
+}
 
-.semester-course-list ul { padding-left: 15px; }
+.semester-course-list ul {
+  padding-left: 15px;
+}
+
 // Course offerings page
 .places-available {
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: 500;
-  @extend  .bg-info;
+  @extend .bg-info;
   text-align: center;
   padding: 10px;
 }
+
 .course-offering-profs {
   ul {
 
@@ -594,7 +612,6 @@ tr.unread {
   font-size: 0.75em;
 }
 
-
 .ubertext {
   overflow: hidden;
 
@@ -612,7 +629,6 @@ tr.unread {
     @extend .table-striped;
   }
 }
-
 
 // Teachers list
 .teachers-list {
@@ -638,5 +654,15 @@ tr.unread {
 
       margin-left: 110px;
     }
+  }
+}
+
+
+// news page
+div[id^="news-"] {
+  &:target {
+    // color - like on .unread
+    background: $state-info-bg;
+    box-shadow: none;
   }
 }
