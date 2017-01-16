@@ -3,13 +3,15 @@
 {% load thumbnail %}
 {% load markdown from core_tags %}
 
+{% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
+
 {% block content %}
 <div class="container container-responsive">
   <div class="row">
     <div class="col-xs-8">
       <h2 style="margin-top: 0; font-weight: normal;">
 {#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
-        {{ course_offering.course.name }}<br>
+        {{ course_offering.course.name }} {% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
         <small>{{ course_offering.semester }}</small>
       </h2>
       {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -21,7 +23,7 @@
         </div>
       {% endif %}
         <hr>
-      <div class="ubertext">
+      <div class="ubertext course-description">
         {% if course_offering.description %}
           {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
             {{ course_offering.description }}
@@ -33,7 +35,7 @@
         {% endif %}
       </div>
     </div>
-    <div class="col-xs-4" style="padding-top: 5px;">
+    <div class="col-xs-4 __pt10">
         {% if user.is_curator or user.is_teacher and is_actual_teacher %}
             <div class="o-buttons-vertical">
               <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}"
@@ -73,6 +75,9 @@
                             {% trans "Enroll in the course" %}
                         </button>
                     </form>
+                        {% if course_reviews %}
+                        <a href="#course-reviews" class="btn btn-default btn-block btn-announcement" style="margin-top: 5px;">Почитать отзывы</a>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </div>
@@ -102,7 +107,6 @@
                        target="_blank">{% trans "Start survey" %}</a>
                 {% endif %}
             {% endif %}
-
         </div>
     </div>
   </div>
@@ -187,8 +191,8 @@
                     </div>
                     {% if user.is_curator or user.is_teacher and is_actual_teacher %}
                         <div class="panel-footer text-right">
-                            <a style="padding-right: 5px;" href="#news-{{ news.pk }}">поделиться</a>
-                            <a style="padding-right: 5px;" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+{#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
+                            <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
                             <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
                         </div>
                     {% endif %}
@@ -196,6 +200,26 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
+
+    {% if course_reviews %}
+        <div class="row">
+            <div class="col-xs-8">
+                <h3 id="course-reviews" class="text-uppercase">Отзывы</h3>
+                {% for co in course_reviews %}
+                    <div class="card">
+                        <div class="card-header ch-alt m-b-20">
+                            <h2>{{ co.semester }}</h2>
+                        </div>
+                        <div class="card-body card-padding">
+                          {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
+                            {{ co.reviews }}
+                          {% endmarkdown %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     {% endif %}
 
 </div>
