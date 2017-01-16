@@ -26,6 +26,9 @@ $table-border-color: $color-gray-90;
 
 $btn-primary-bg:  $color-blue;
 $btn-primary-border:  $btn-primary-bg;
+$btn-info-bg: $state-info-bg;
+$btn-info-color: lighten($color-gray-20, 10%);
+$btn-info-border: darken($state-info-bg, 5%);
 
 $brand-success: $color-green;
 $brand-danger: #d9534f;

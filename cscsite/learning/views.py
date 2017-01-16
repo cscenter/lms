@@ -21,7 +21,8 @@ from core import comment_persistence
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, get_club_domain, render_markdown
 from core.views import ProtectedFormMixin, LoginRequiredMixin
-from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, ValidateWeekMixin
+from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
+    ValidateWeekMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -54,7 +55,8 @@ from .forms import CourseOfferingPKForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, GradeBookFormFactory, \
     AssignmentModalCommentForm
-from .management.imports import ImportGradesByStepicID, ImportGradesByYandexLogin
+from .management.imports import ImportGradesByStepicID, \
+    ImportGradesByYandexLogin
 from .models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
     StudentAssignment, AssignmentComment, \
@@ -211,18 +213,18 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
                                   next_month_date)
 
         q = (CourseClass.objects
-                .filter(Q(date__month=month,
-                          date__year=year)
-                        | Q(date__month=prev_month_date.month,
-                            date__year=prev_month_date.year)
-                        | Q(date__month=next_month_date.month,
-                            date__year=next_month_date.year))
-                .filter(course_offering__city__pk=self.request.city_code)
-                .order_by('date', 'starts_at')
-                .select_related('venue',
-                                'course_offering',
-                                'course_offering__course',
-                                'course_offering__semester'))
+             .filter(Q(date__month=month,
+                       date__year=year)
+                     | Q(date__month=prev_month_date.month,
+                         date__year=prev_month_date.year)
+                     | Q(date__month=next_month_date.month,
+                         date__year=next_month_date.year))
+             .filter(course_offering__city__pk=self.request.city_code)
+             .order_by('date', 'starts_at')
+             .select_related('venue',
+                             'course_offering',
+                             'course_offering__course',
+                             'course_offering__semester'))
         if self.request.site.domain == settings.CLUB_DOMAIN:
             q = q.filter(course_offering__is_open=True)
         return q
@@ -245,9 +247,10 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
             def club_filter_co(course_class):
                 co = course_class.course_offering
                 if (co.semester.type != SEMESTER_TYPES.summer or
-                        co.pk in summer_enrollments):
+                            co.pk in summer_enrollments):
                     return True
                 return False
+
             context["object_list"] = filter(club_filter_co,
                                             context["object_list"])
 
@@ -309,24 +312,24 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         co_queryset = (CourseOffering.custom.site_related(self.request)
-            .select_related('course')
-            .prefetch_related('teachers')
-            .order_by('course__name'))
+                       .select_related('course')
+                       .prefetch_related('teachers')
+                       .order_by('course__name'))
         q = (self.model.objects.prefetch_related(
-                Prefetch(
-                    'courseoffering_set',
-                    queryset=co_queryset,
-                    to_attr='courseofferings'
-                ),
-            )
+            Prefetch(
+                'courseoffering_set',
+                queryset=co_queryset,
+                to_attr='courseofferings'
+            ),
+        )
         )
         # Courses in CS Center started at 2011 year
         if self.request.site.domain != settings.CLUB_DOMAIN:
             q = (q.filter(year__gte=2011)
                 .exclude(type=Case(
-                    When(year=2011, then=Value(Semester.TYPES.spring)),
-                    default=Value(""))
-                ))
+                When(year=2011, then=Value(Semester.TYPES.spring)),
+                default=Value(""))
+            ))
         return q
 
     def get_context_data(self, **kwargs):
@@ -346,8 +349,8 @@ class CoursesListView(generic.ListView):
         # Hide empty pairs
         context["semester_list"] = [
             (a, s) for s, a in utils.grouper(semester_list, 2) if \
-                (a and a.courseofferings) or (s and s.courseofferings)
-        ]
+            (a and a.courseofferings) or (s and s.courseofferings)
+            ]
 
         return context
 
@@ -436,7 +439,7 @@ class CourseVideoListView(generic.ListView):
         full = context[self.context_object_name]
         chunks = []
         for i in range(0, len(full), 3):
-            chunks.append(full[i:i+3])
+            chunks.append(full[i:i + 3])
         context['course_list_chunks'] = chunks
         return context
 
@@ -501,11 +504,11 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         return (
             CourseOffering.custom.site_related(self.request)
-            .filter(semester__type=semester_type,
-                    semester__year=year,
-                    course__slug=self.kwargs['course_slug'])
-            .select_related('course', 'semester')
-            .prefetch_related(
+                .filter(semester__type=semester_type,
+                        semester__year=year,
+                        course__slug=self.kwargs['course_slug'])
+                .select_related('course', 'semester')
+                .prefetch_related(
                 Prefetch(
                     'teachers',
                     queryset=CSCUser.objects.only(
@@ -538,6 +541,15 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         else:
             context["course_news"] = []
         context["course_classes"] = self.get_classes(co)
+        context["course_reviews"] = co.enrollment_opened() and (
+            CourseOffering.objects
+                .defer("description")
+                .select_related("semester")
+                .filter(course=co.course_id,
+                        semester__index__lt=co.semester.index)
+                .exclude(reviews__isnull=True)
+                .order_by("-semester__index")
+                .all())
 
         # Not sure if it's the best place for this, but it's the simplest one
         if user.is_authenticated():
@@ -557,15 +569,15 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         # query logic below inside `get_queryset` method, so I leave it here.
         course_classes = (
             course_offering.courseclass_set
-            .select_related("venue")
-            .prefetch_related(
+                .select_related("venue")
+                .prefetch_related(
                 # Optimize query by changing default order
                 Prefetch(
                     'courseclassattachment_set',
                     queryset=(CourseClassAttachment.objects
                               .order_by("pk"))
                 ))
-            .order_by("date", "starts_at")
+                .order_by("date", "starts_at")
         )
         for cc in course_classes:
             class_url = cc.get_absolute_url()
@@ -592,7 +604,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             materials_str = ", ".join(",&nbsp;"
                                       .join(("<a href={url}>{name}</a>"
                                              .format(**x))
-                                            for x in materials[i:i+2])
+                                            for x in materials[i:i + 2])
                                       for i in range(0, len(materials), 2))
             materials_str = materials_str or _("No")
 
@@ -623,13 +635,13 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                     "studentassignment_set",
                     queryset=(
                         StudentAssignment.objects
-                        .filter(student=user)
-                        .only("pk", "assignment_id", "grade")
-                        .annotate(student_comments_cnt=Count(Case(
+                            .filter(student=user)
+                            .only("pk", "assignment_id", "grade")
+                            .annotate(student_comments_cnt=Count(Case(
                             When(assignmentcomment__author_id=user.pk,
                                  then=Value(1)),
                             output_field=IntegerField())))
-                        .order_by("pk")  # optimize by setting order
+                            .order_by("pk")  # optimize by setting order
                     )
                 )
             )
@@ -709,9 +721,9 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         self._course_offering = get_object_or_404(
             CourseOffering.objects
-            .filter(semester__type=semester_type,
-                    semester__year=year,
-                    course__slug=self.kwargs['course_slug']))
+                .filter(semester__type=semester_type,
+                        semester__year=year,
+                        course__slug=self.kwargs['course_slug']))
         return (user.is_authenticated() and user.is_curator) or \
                (user in self._course_offering.teachers.all())
 
@@ -759,7 +771,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
         if self.request.site.domain == settings.CLUB_DOMAIN and \
-           not course_offering.is_open:
+                not course_offering.is_open:
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
         if course_offering.is_capacity_limited():
@@ -789,8 +801,8 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
         course_offering = get_object_or_404(
             CourseOffering.objects
                 .filter(semester__type=semester_type,
-                    semester__year=year,
-                    course__slug=self.kwargs['course_slug'])
+                        semester__year=year,
+                        course__slug=self.kwargs['course_slug'])
                 .select_related("semester"))
         self._course_offering = course_offering
         enrollment = get_object_or_404(
@@ -1022,8 +1034,8 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
         self.current_semester = current_semester
         return (self.model.objects
                 .filter(
-                    student=self.request.user,
-                    assignment__course_offering__semester=current_semester)
+            student=self.request.user,
+            assignment__course_offering__semester=current_semester)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
@@ -1041,10 +1053,12 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
         # Get student enrollments from current term and then related co's
         actual_co = (Enrollment.objects.filter(
             course_offering__semester=self.current_semester,
-            student=self.request.user).values_list("course_offering", flat=True))
+            student=self.request.user).values_list("course_offering",
+                                                   flat=True))
         open_, archive = utils.split_list(
             context['assignment_list'],
-            lambda a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
+            lambda
+                a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
@@ -1139,10 +1153,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         # Set assignments filter
         self.assignments = list(
             Assignment.objects
-            .filter(notify_teachers__teacher=self.request.user,
-                    course_offering=co)
-            .only("pk", "deadline_at", "title", "course_offering_id")
-            .order_by("-deadline_at"))
+                .filter(notify_teachers__teacher=self.request.user,
+                        course_offering=co)
+                .only("pk", "deadline_at", "title", "course_offering_id")
+                .order_by("-deadline_at"))
         filter_assignments = self.prepare_queryset_filter_assignments(
             self.assignments)
         filters["assignment__in"] = filter_assignments
@@ -1187,10 +1201,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             self.model.objects
                 .filter(**filters)
                 .annotate(deadline_passed=Case(
-                    When(assignment__deadline_at__gte=today, then=Value(0)),
-                    default=Value('1'),
-                    output_field=IntegerField(),
-                ))
+                When(assignment__deadline_at__gte=today, then=Value(0)),
+                default=Value('1'),
+                output_field=IntegerField(),
+            ))
                 .order_by('deadline_passed',
                           'assignment__deadline_at',
                           'assignment__pk')
@@ -1221,7 +1235,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         context["filter_by_grades"] = self.filter_by_grades
         context["filter_by_comments"] = self.filter_by_comments
         # Url for assignment filter
-        self.query["form_url"] = "{}?year={}&term={}&course={}&grades={}&comment={}&assignments=".format(
+        self.query[
+            "form_url"] = "{}?year={}&term={}&course={}&grades={}&comment={}&assignments=".format(
             reverse("assignment_list_teacher"),
             self.query["year"],
             self.query["term"],
@@ -1255,7 +1270,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                                   .course_offering
                                   .teachers.all()))
         if not is_actual_teacher and (not self.request.user.is_authenticated()
-           or not self.request.user.is_curator):
+                                      or not self.request.user.is_curator):
             raise PermissionDenied
         context['a_s_list'] = \
             (StudentAssignment.objects
@@ -1279,15 +1294,15 @@ class StudentAssignmentDetailMixin(object):
         pk = self.kwargs.get('pk')
         a_s = get_object_or_404(
             StudentAssignment
-            .objects
-            .filter(pk=pk)
-            .select_related('assignment',
-                            'student',
-                            'assignment__course_offering',
-                            'assignment__course_offering__course',
-                            'assignment__course_offering__semester')
-            .prefetch_related('assignment__course_offering__teachers',
-                              'assignment__assignmentattachment_set'))
+                .objects
+                .filter(pk=pk)
+                .select_related('assignment',
+                                'student',
+                                'assignment__course_offering',
+                                'assignment__course_offering__course',
+                                'assignment__course_offering__semester')
+                .prefetch_related('assignment__course_offering__teachers',
+                                  'assignment__assignmentattachment_set'))
 
         # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
@@ -1301,12 +1316,12 @@ class StudentAssignmentDetailMixin(object):
         context['user_type'] = self.user_type
 
         comments = (AssignmentComment.objects.filter(student_assignment=a_s)
-                                             .order_by('created')
-                                             .select_related('author'))
+                    .order_by('created')
+                    .select_related('author'))
         first_comment_after_deadline = None
         for c in comments:
             if (first_comment_after_deadline is None and
-                    c.created >= a_s.assignment.deadline_at):
+                        c.created >= a_s.assignment.deadline_at):
                 first_comment_after_deadline = c.pk
         # Dynamically replace label
         if (not comments and context['user_type'] == 'student' and
@@ -1410,13 +1425,13 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         # TODO: Replace with 1 query
         base = (
             StudentAssignment.objects
-            .filter(grade__isnull=True,
-                    first_submission_at__isnull=False,
-                    assignment__course_offering=co,
-                    assignment__course_offering__teachers=self.request.user)
-            .order_by('assignment__deadline_at',
-                      'assignment__course_offering__course__name',
-                      'pk'))
+                .filter(grade__isnull=True,
+                        first_submission_at__isnull=False,
+                        assignment__course_offering=co,
+                        assignment__course_offering__teachers=self.request.user)
+                .order_by('assignment__deadline_at',
+                          'assignment__course_offering__course__name',
+                          'pk'))
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
@@ -1524,7 +1539,6 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin,
                            generic.CreateView):
-
     def save_instance(self, form):
         super(AssignmentCreateView, self).save_instance(form)
         # Populate notification receivers
@@ -1569,7 +1583,7 @@ class AssignmentCommentUpdateView(generic.UpdateView):
                 raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
-        self.object =  self.get_object()
+        self.object = self.get_object()
         self.check_permissions(self.object)
         return super(BaseUpdateView, self).get(request, *args, **kwargs)
 
@@ -1642,15 +1656,15 @@ class GradebookDispatchView(generic.ListView):
         if term_type == Semester.TYPES.autumn:
             semester_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
         return (self.model.objects
-                .filter(index__lte=semester_index)
-                .exclude(type=Semester.TYPES.summer)
-                .prefetch_related(
-                    Prefetch(
-                        "courseoffering_set",
-                        queryset=self.get_co_queryset(),
-                        to_attr="courseofferings"
-                    )
-                ))
+            .filter(index__lte=semester_index)
+            .exclude(type=Semester.TYPES.summer)
+            .prefetch_related(
+            Prefetch(
+                "courseoffering_set",
+                queryset=self.get_co_queryset(),
+                to_attr="courseofferings"
+            )
+        ))
 
 
 class GradebookCuratorDispatchView(CuratorOnlyMixin, GradebookDispatchView):
@@ -1778,7 +1792,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
 
     def get_initial(self):
         return (GradeBookFormFactory
-                .transform_to_initial(self.student_assignments, self.enrollment_list))
+                .transform_to_initial(self.student_assignments,
+                                      self.enrollment_list))
 
     def get_success_url(self):
         co = self.course_offering
@@ -1818,8 +1833,8 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
     def recalculate_grading_type(self):
         """Update grading type for binded course offering if needed"""
         es = (Enrollment.objects
-                        .filter(course_offering=self.course_offering)
-                        .values_list("grade", flat=True))
+              .filter(course_offering=self.course_offering)
+              .values_list("grade", flat=True))
         grading_type = GRADING_TYPES.default
         if not any(filter(lambda g: g in [GRADES.good, GRADES.excellent], es)):
             grading_type = GRADING_TYPES.binary
@@ -1994,6 +2009,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
 
 class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
     """Import students grades from stepic platform"""
+
     def post(self, request, course_offering_pk, *args, **kwargs):
         filters = {"pk": course_offering_pk}
         if not request.user.is_curator:
@@ -2016,6 +2032,7 @@ class MarksSheetTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
 
 class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
     """Import students grades by yandex login"""
+
     def post(self, request, *args, **kwargs):
         filter = dict(pk=self.kwargs.get('course_offering_pk'))
         if not request.user.is_authenticated() or not request.user.is_curator:
@@ -2076,7 +2093,6 @@ class InternationalSchoolsListView(generic.ListView):
 
 
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
-
     def get(self, request, *args, **kwargs):
         try:
             attachment_type, pk = hashids.decode(kwargs['sid'])
@@ -2133,7 +2149,8 @@ class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
     template_name = "useful.html"
 
     def get_queryset(self):
-        return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
+        return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by(
+            "sort")
 
 
 class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):

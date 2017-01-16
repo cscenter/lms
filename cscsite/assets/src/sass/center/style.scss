@@ -533,3 +533,26 @@ div[id^="news-"] {
     box-shadow: none;
   }
 }
+.course-description {
+  h1, h2, h3, h4, h5 {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+// it's a quick fix, stupid classes, I know. Refactor if you see it
+.__pt10 {
+  padding-top: 10px;
+}
+.__pr5 {
+  padding-right: 5px;
+}
+
+
+// application page
+.form-application-newsletter {
+  margin-bottom: 10px;
+  .btn {
+    border-radius: 4px;
+  }
+}
