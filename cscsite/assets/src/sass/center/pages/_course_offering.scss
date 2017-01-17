@@ -1,0 +1,40 @@
+// Highlight targets. Used on course offering detail page right now.
+div[id^="news-"] {
+  &:target {
+    // color - like on .unread
+    background: $state-info-bg;
+    box-shadow: none;
+  }
+}
+.course-description {
+  h1, h2, h3, h4, h5 {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+// it's a quick fix, stupid classes, I know. Refactor if you see it
+.__pt10 {
+  padding-top: 10px;
+}
+.__pr5 {
+  padding-right: 5px;
+}
+
+.news-metainfo {
+  color: #AAA;
+  text-align: right;
+}
+
+.course-title {
+  //font-weight: 400;
+}
+
+.course-main-title {
+  margin-top: 0;
+  font-weight: normal;
+
+  small {
+    font-size: 75%;
+  }
+}
