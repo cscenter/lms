@@ -20,7 +20,6 @@ MIDDLEWARE_CLASSES = [
     'users.backends.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.notifications.UnreadNotificationsCacheMiddleware',
 ]
 INSTALLED_APPS += [
