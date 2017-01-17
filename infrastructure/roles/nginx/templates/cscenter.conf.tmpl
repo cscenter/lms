@@ -93,7 +93,13 @@ server {
 
     # Django
     location / {
+        set $frame_options '';
+        if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
+            set $frame_options 'SAMEORIGIN';
+        }
+        add_header X-Frame-Options $frame_options;
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
+
         gzip on;
         # Serve 30x statuses with nginx
         uwsgi_intercept_errors on;
