@@ -25,12 +25,10 @@ urlpatterns = [
     url(r'^api/', include('api.urls')),
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
-    # Replace `/pages/questions/` with more appropriate url
+    # Redirect from old url `/pages/questions/` to more appropriate
     url(r'^pages/questions/$',
-        RedirectView.as_view(pattern_name='enrollment_program',
+        RedirectView.as_view(url='/enrollment/program/',
                              permanent=True)),
-    url(r'^enrollment/program/$', views.flatpage,
-        kwargs={"url": '/pages/questions/'}, name='enrollment_program'),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
     # TODO: Remove this link as a stale in a while
     url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
