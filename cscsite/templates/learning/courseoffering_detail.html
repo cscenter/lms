@@ -2,7 +2,6 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
-
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
 {% block content %}
@@ -95,6 +94,7 @@
             </div>
         {% endif %}
         <div class="o-users-vlist-with-photo">
+            <h4 class="course-title">{% trans "Teachers" %}</h4>
             <ul class="list-unstyled">
                 {% for teacher in course_offering.teachers.all %}
                     <li>
