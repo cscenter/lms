@@ -2,18 +2,30 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
+{% load userpreview from custom_thumbnail %}
+
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
 {% block content %}
-<div class="container">
+<div class="container" id="course-offering-detail-page">
   <div class="row">
-    <div class="col-xs-8">
+    <div class="col-xs-9">
       <h2 class="course-main-title">
     {#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
         {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
           <small>{{ course_offering.semester }}</small>
       </h2>
-      <hr>
+        <ul class="nav nav-tabs material __course-detail-page" role="tablist">
+            <li class="active">
+                <a href="#about-course" id="about-course">О курсе</a>
+            </li>
+            {% if user.is_student or user.is_curator %}
+                {% if course_reviews %}<li><a href="#course_reviews">Отзывы</a></li>{% endif %}
+            {% endif %}
+            {% if course_classes %}<li><a href="#course-classes">{% trans "Classes" %}</a></li>{% endif %}
+            {% if assignments %}<li><a href="#course-assignments">{% trans "Assignments" %}</a></li>{% endif %}
+            {% if course_news %}<li><a href="#course-news">{% trans "News" %}</a></li>{% endif %}
+        </ul>
       {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
         <div id="enroll-now">
               {% blocktrans %}
@@ -48,8 +60,82 @@
             </div>
         {% endif %}
     {% endif %}
+
+ {% if course_classes %}
+      <h3 class="course-title" id="course-classes">{% trans "Classes" %}</h3>
+      <table class="table timetable" width="100%">
+        <thead>
+          <th class="nobreak">{% trans "Date and time" %}</th>
+          <th style="width: 100%;">{% trans "Class|Name" %}</th>
+          <th style="min-width: 140px;">{% trans "Venue|short" %}</th>
+          <th style="max-width: 160px;">{% trans "Materials" %}</th>
+        </thead>
+        {% for class in course_classes %}
+        <tr>
+            <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
+          <td>
+            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
+              {{ class.name }}</a>, {% if class.type == 'lecture'%}<span class=" lecture">{% trans 'Lecture'|lower %}</span>
+            {% else %}<span class=" seminar">{% trans 'Seminar'|lower %}</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'venue_detail' class.venue.pk %}">
+              {{ class.venue }}
+            </a>
+          </td>
+          <td>
+            {{ class.materials_str|safe }}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+  {% endif %}
+
+    {% if assignments %}
+        <h3 class="course-title" id="course-assignments">{% trans "Assignments" %}</h3>
+        <ul>
+            {% for assignment in assignments %}
+                <li>
+                    {% if assignment.magic_link %}
+                        <a href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
+                    {% else %}
+                        {{ assignment.title }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if course_news %}
+        <h3 class="course-title" id="course-news">{% trans "News" %}</h3>
+        {% for news in course_news %}
+            <div class="panel bg-gray" id="news-{{ news.pk }}">
+                <div class="panel-body">
+                    <h4><span class="small">{{ news.created|date }}</span> {{ news.title }}</h4>
+                    <div class="ubertext shorten">
+                    {% markdown 3600 "co_news_text" news.pk news.modified %}
+                      {{ news.text }}
+                    {% endmarkdown %}
+                    </div>
+                </div>
+                {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+                    <div class="panel-footer text-right">
+{#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
+                        <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+                        <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+
     </div>
-    <div class="col-xs-4 __pt10">
+
+
+
+    <div class="col-xs-3">
         {% if user.is_curator or user.is_teacher and is_actual_teacher %}
             <div class="o-buttons-vertical">
               <a href="{% url 'assignment_add' course_offering.course.slug course_offering.semester.slug %}"
@@ -93,125 +179,32 @@
                 {% endif %}
             </div>
         {% endif %}
-        <div class="o-users-vlist-with-photo">
-            <h4 class="course-title">{% trans "Teachers" %}</h4>
+        {% if course_offering.survey_url %}
+            {% if is_enrolled or user.is_curator %}
+                <a class=" btn btn-default btn-block btn-announcement btn-success survey-btn"
+                   href="{{ course_offering.survey_url }}"
+                   target="_blank">{% trans "Start survey" %}</a>
+            {% endif %}
+        {% endif %}
+        <div class="o-users-vlist">
             <ul class="list-unstyled">
                 {% for teacher in course_offering.teachers.all %}
                     <li>
                         <a href="{% url 'teacher_detail' teacher.pk %}">
                             {% if teacher.photo %}
-                                {% thumbnail teacher.photo "60x60" crop="center top" cropbox=teacher.photo_thumbnail_cropbox as im %}
-                                    <img src="{{ im.url }}"
-                                         width="{{ im.width }}"
-                                         height="{{ im.height }}">
-                                {% endthumbnail %}
+                                {% userpreview teacher "170x238" as im %}
+                                    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"><br>
+                                    {% empty %}
+                                {% enduserpreview %}
                             {% endif %}
                             {{ teacher.get_full_name }}
                         </a>
                     </li>
                 {% endfor %}
             </ul>
-            {% if course_offering.survey_url %}
-                {% if is_enrolled or user.is_curator %}
-                    <a class=" btn btn-default btn-block btn-announcement btn-success"
-                       href="{{ course_offering.survey_url }}"
-                       target="_blank">{% trans "Start survey" %}</a>
-                {% endif %}
-            {% endif %}
         </div>
     </div>
   </div>
-
-  {% if course_classes %}
-  <div class="row">
-    <div class="col-xs-12">
-      <h3 class="course-title">{% trans "Classes" %}</h3>
-
-      <table class="table timetable" width="100%">
-        <thead>
-          <th>{% trans "Date" %}</th>
-          <th>{% trans "Time" %}</th>
-          <th style="width: 100%;">{% trans "Class|Name" %}</th>
-          <th style="min-width: 200px;">{% trans "Venue|short" %}</th>
-          <th></th>
-          <th style="max-width: 160px;">{% trans "Materials" %}</th>
-        </thead>
-        {% for class in course_classes %}
-        <tr>
-          <td>{{ class.date|date:"d.m.Y" }}</td>
-          <td class="nobreak">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
-          <td>
-            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
-              {{ class.name }}
-            </a>
-          </td>
-          <td>
-            <a href="{% url 'venue_detail' class.venue.pk %}">
-              {{ class.venue }}
-            </a>
-          </td>
-          <td>
-            {% if class.type == 'lecture'%}
-            <span class="badge lecture">{% trans 'Lecture' %}</span>
-            {% else %}
-            <span class="badge seminar">{% trans 'Seminar' %}</span>
-            {% endif %}
-          </td>
-          <td>
-            {{ class.materials_str|safe }}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
-  {% endif %}
-
-    {% if assignments %}
-        <div class="row">
-            <div class="col-xs-12">
-                <h3 class="course-title">{% trans "Assignments" %}</h3>
-                <ul>
-                    {% for assignment in assignments %}
-                        <li>
-                            {% if assignment.magic_link %}
-                                <a href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
-                            {% else %}
-                                {{ assignment.title }}
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    {% endif %}
-
-    {% if course_news %}
-    <div class="row">
-        <div class="col-xs-9">
-            <h3 class="course-title">{% trans "News" %}</h3>
-            {% for news in course_news %}
-                <div class="panel bg-gray" id="news-{{ news.pk }}">
-                    <div class="panel-body">
-                        <h4><span class="small">{{ news.created|date }}</span> {{ news.title }}</h4>
-                        <div class="ubertext shorten">
-                        {% markdown 3600 "co_news_text" news.pk news.modified %}
-                          {{ news.text }}
-                        {% endmarkdown %}
-                        </div>
-                    </div>
-                    {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-                        <div class="panel-footer text-right">
-{#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
-                            <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
-                            <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
 
 </div>
 {% endblock content %}

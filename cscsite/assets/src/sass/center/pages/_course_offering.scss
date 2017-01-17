@@ -38,3 +38,63 @@ div[id^="news-"] {
     font-size: 75%;
   }
 }
+
+.o-users-vlist {
+
+  li {
+    padding-bottom: 10px;
+    @extend .clearfix;
+
+    a {
+      padding: 10px;
+      text-align: center;
+      font-weight: 300;
+      font-size: 16px;
+      display: block;
+      line-height: 22px;
+
+      img {
+        margin: 0 0 8px;
+      }
+
+
+      &:hover {
+        //background: $background-grey;
+      }
+    }
+  }
+}
+
+.enroll-block {
+  margin-bottom: 5px;
+}
+
+.survey-btn {
+  margin-bottom: 5px;
+}
+
+.o-buttons-vertical {
+  margin-bottom: 5px;
+
+  .btn {
+    padding: 12px 10px;
+  }
+
+  &.gray {
+    .btn {
+      color: $color-gray-20;
+      border-color: lighten($color-gray-60, 30%);
+    }
+  }
+}
+
+
+#course-offering-detail-page {
+  .nav-tabs {
+    margin-bottom: 20px;
+
+    li:first-child a {
+      padding: 10px 0;
+    }
+  }
+}
