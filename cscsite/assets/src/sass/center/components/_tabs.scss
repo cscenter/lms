@@ -89,13 +89,41 @@
     }
 
     > li.active > a {
-      color: $color-blue !important;
+      color: $color-blue;
       border-bottom: 2px solid $color-blue;
       background-color: #fff;
 
       &:hover, &:active, &:focus {
         border: 0;
         border-bottom: 2px solid $color-blue;
+      }
+    }
+  }
+
+  &.square {
+    margin: 20px 0;
+    border-bottom: 1px solid $color-gray-90;
+    padding-bottom: 1px;
+
+    a {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 0;
+      border-radius: 0;
+      color: $color-blue;
+
+      &:hover {
+        background: $background-grey;
+      }
+    }
+
+    li.active {
+
+      a {
+        border: 0;
+        background: $color-gray-90;
+        //background: $background-grey;
+        color: $color-gray-20;
       }
     }
   }

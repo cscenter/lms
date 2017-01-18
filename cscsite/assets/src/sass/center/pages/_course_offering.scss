@@ -31,11 +31,13 @@ div[id^="news-"] {
 }
 
 .course-main-title {
-  margin-top: 0;
+  margin: 0;
   font-weight: normal;
 
   small {
+    display: block;
     font-size: 75%;
+    margin: 8px 0 14px 0;
   }
 }
 
@@ -87,13 +89,21 @@ div[id^="news-"] {
   }
 }
 
+#course-news {
+  h4 {
+    margin: 0;
+  }
+  .date {
+    margin: 10px 0;
+    font-size: 16px;
+    color: $color-gray-48;
+  }
+}
 
-#course-offering-detail-page {
-  .nav-tabs {
-    margin-bottom: 20px;
-
-    li:first-child a {
-      padding: 10px 0;
-    }
+#course-assignments {
+  .list-group-item {
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 16px;
   }
 }
