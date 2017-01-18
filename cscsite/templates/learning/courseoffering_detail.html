@@ -11,9 +11,8 @@
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
-            {#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
             {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{{ course_offering.semester }}</small>
+              <small>{{ course_offering.semester }} <a href="{% url 'course_detail' course_offering.course.slug %}">все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
