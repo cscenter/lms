@@ -6,13 +6,28 @@
 
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
+{% block javascripts %}
+<script type="text/javascript">
+    $(function() {
+      var hash = window.location.hash;
+      if (hash && hash !== 'about-course') {
+          $('ul.nav-tabs.square a[href="' + hash + '"]').tab('show');
+      }
+
+      $('.nav-tabs.square a').click(function (e) {
+        window.location.hash = this.hash;
+      });
+    });
+</script>
+{% endblock javascripts %}
+
 {% block content %}
 <div class="container" id="course-offering-detail-page">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
             {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{{ course_offering.semester }} <a href="{% url 'course_detail' course_offering.course.slug %}">все семестры</a></small>
+              <small>{{ course_offering.semester }}, <a href="{% url 'course_detail' course_offering.course.slug %}">посмотреть все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -235,8 +250,5 @@
     </div>
   </div>
 
-    <script>
-
-    </script>
 </div>
 {% endblock content %}
