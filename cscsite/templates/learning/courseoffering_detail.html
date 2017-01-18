@@ -6,21 +6,6 @@
 
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
-{% block javascripts %}
-<script type="text/javascript">
-    $(function() {
-      var hash = window.location.hash;
-      if (hash && hash !== 'about-course') {
-          $('ul.nav-tabs.square a[href="' + hash + '"]').tab('show');
-      }
-
-      $('.nav-tabs.square a').click(function (e) {
-        window.location.hash = this.hash;
-      });
-    });
-</script>
-{% endblock javascripts %}
-
 {% block content %}
 <div class="container" id="course-offering-detail-page">
     <div class="row">
