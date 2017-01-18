@@ -70,7 +70,7 @@
                     {% if course_reviews %}
                         <div class="tab-pane" role="tabpanel" id="course-reviews">
                             {% for co in course_reviews %}
-                                <h4>{{ co.semester }}</h4>
+                                <h4>{{ co.semester|title }}</h4>
                                   {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
                                     {{ co.reviews }}
                                   {% endmarkdown %}
