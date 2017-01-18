@@ -21,6 +21,7 @@ from core import comment_persistence
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, get_club_domain, render_markdown
 from core.views import ProtectedFormMixin, LoginRequiredMixin
+from learning.models import CourseOfferingTeacher
 from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
     ValidateWeekMixin
 from dateutil.relativedelta import relativedelta
@@ -483,7 +484,6 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             _ = int(year)
         except ValueError:
             return HttpResponseBadRequest()
-
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
 
@@ -509,16 +509,15 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                         course__slug=self.kwargs['course_slug'])
                 .select_related('course', 'semester')
                 .prefetch_related(
-                Prefetch(
-                    'teachers',
-                    queryset=CSCUser.objects.only(
-                        "last_name", "first_name", "patronymic",
-                        "photo", "photo_data", "gender",
-                        "comment"  # FIXME: investigate, why I need this
-                    )
-                ),
-            )
-        )
+                    Prefetch(
+                        'courseofferingteacher_set',
+                        queryset=(CourseOfferingTeacher
+                                  .objects
+                                  .select_related("teacher")
+                                  .prefetch_related("teacher__groups")),
+                        to_attr='course_teachers'
+                    ),
+                ))
 
     def get_context_data(self, *args, **kwargs):
         context = (super(CourseOfferingDetailView, self)
@@ -526,8 +525,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         user = self.request.user
         co = self.object
         context['is_enrolled'] = user.enrolled_on_the_course(co.pk)
-        context['is_actual_teacher'] = (user.is_authenticated() and
-                                        user in co.teachers.all())
+        context['is_actual_teacher'] = (
+            user.pk in (co.teacher_id for co in co.course_teachers))
 
         context['assignments'] = self.get_assignments(context)
 
@@ -536,10 +535,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             not context['is_failed_completed_course'] and
             ((user.is_authenticated() and not user.is_expelled) or is_club_site)
         )
-        if can_view_news:
-            context["course_news"] = co.courseofferingnews_set.all()
-        else:
-            context["course_news"] = []
+        context["course_news"] = (can_view_news and
+                                  co.courseofferingnews_set.all())
         context["course_classes"] = self.get_classes(co)
         context["course_reviews"] = co.enrollment_opened() and (
             CourseOffering.objects
@@ -550,6 +547,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 .exclude(reviews__isnull=True)
                 .order_by("-semester__index")
                 .all())
+        context["course_teachers"] = CourseOfferingTeacher.grouped(
+            co.course_teachers)
 
         # Not sure if it's the best place for this, but it's the simplest one
         if user.is_authenticated():

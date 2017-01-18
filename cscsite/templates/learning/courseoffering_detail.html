@@ -81,7 +81,7 @@
                 {% endif %}
                 {% if course_classes %}
                     <div class="tab-pane" role="tabpanel" id="course-classes">
-                      <table class="table timetable table-striped" width="100%">
+                      <table class="table timetable" width="100%">
                         <thead>
                           <th class="nobreak">{% trans "Date and time" %}</th>
                           <th style="width: 100%;">{% trans "Class|Name" %}</th>
@@ -202,7 +202,8 @@
         {% endif %}
         <div class="o-users-vlist">
             <ul class="list-unstyled">
-                {% for teacher in course_offering.teachers.all %}
+                {% for course_teacher in course_teachers.lecturers %}
+                    {% with teacher=course_teacher.teacher %}
                     <li>
                         <a href="{% url 'teacher_detail' teacher.pk %}">
                             {% if teacher.photo %}
@@ -214,9 +215,24 @@
                             {{ teacher.get_full_name }}
                         </a>
                     </li>
+                    {% endwith %}
                 {% endfor %}
             </ul>
         </div>
+        {% if course_teachers.others %}
+            <div class="o-users-vlist">
+                <h4 class="text-center">{% if course_offering.is_ongoing %}Помогают{% else %}Помогали{% endif %} с заданиями</h4>
+                <ul class="list-unstyled">
+                    {% for course_teacher in course_teachers.others %}
+                        {% with teacher=course_teacher.teacher %}
+                        <li>
+                            <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a>
+                        </li>
+                        {% endwith %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </div>
   </div>
 
