@@ -8,131 +8,146 @@
 
 {% block content %}
 <div class="container" id="course-offering-detail-page">
-  <div class="row">
-    <div class="col-xs-9">
-      <h2 class="course-main-title">
-    {#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
-        {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-          <small>{{ course_offering.semester }}</small>
-      </h2>
-        <ul class="nav nav-tabs material __course-detail-page" role="tablist">
-            <li class="active">
-                <a href="#about-course" id="about-course">О курсе</a>
-            </li>
-            {% if user.is_student or user.is_curator %}
-                {% if course_reviews %}<li><a href="#course_reviews">Отзывы</a></li>{% endif %}
-            {% endif %}
-            {% if course_classes %}<li><a href="#course-classes">{% trans "Classes" %}</a></li>{% endif %}
-            {% if assignments %}<li><a href="#course-assignments">{% trans "Assignments" %}</a></li>{% endif %}
-            {% if course_news %}<li><a href="#course-news">{% trans "News" %}</a></li>{% endif %}
-        </ul>
-      {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
-        <div id="enroll-now">
-              {% blocktrans %}
-                Enroll in the course to get notifications and to be able to submit home assignments.<br>
-                <a class="btn btn-success" href="/register/">Register to enroll now</a> <a class="btn btn-success" href="/login/">Login</a>
-              {% endblocktrans %}
-        </div>
-      {% endif %}
-      <div class="ubertext course-description">
-        {% if course_offering.description %}
-          {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
-            {{ course_offering.description }}
-          {% endmarkdown %}
-        {% else %}
-          {% markdown 3600 "course" course_offering.course.pk course_offering.course.modified %}
-            {{ course_offering.course.description }}
-          {% endmarkdown %}
-        {% endif %}
-      </div>
-    {% if user.is_curator or user.is_student %}
-        {% if course_reviews %}
-            <div class="row">
-                <div class="col-xs-12">
-                    <h3 id="course-reviews" class="course-title">Отзывы</h3>
-                    {% for co in course_reviews %}
-                        <h4>{{ co.semester }}</h4>
-                          {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
-                            {{ co.reviews }}
-                          {% endmarkdown %}
-                    {% endfor %}
+    <div class="row">
+        <div class="col-xs-9">
+            <h2 class="course-main-title">
+            {#        <a href="{% url 'course_detail' course_offering.course.slug %}"><span class="fa fa-angle-left"></span></a>#}
+            {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+              <small>{{ course_offering.semester }}</small>
+            </h2>
+
+            {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
+                <div id="enroll-now">
+                      {% blocktrans %}
+                        Enroll in the course to get notifications and to be able to submit home assignments.<br>
+                        <a class="btn btn-success" href="/register/">Register to enroll now</a> <a class="btn btn-success" href="/login/">Login</a>
+                      {% endblocktrans %}
                 </div>
-            </div>
-        {% endif %}
-    {% endif %}
+            {% endif %}
 
- {% if course_classes %}
-      <h3 class="course-title" id="course-classes">{% trans "Classes" %}</h3>
-      <table class="table timetable" width="100%">
-        <thead>
-          <th class="nobreak">{% trans "Date and time" %}</th>
-          <th style="width: 100%;">{% trans "Class|Name" %}</th>
-          <th style="min-width: 140px;">{% trans "Venue|short" %}</th>
-          <th style="max-width: 160px;">{% trans "Materials" %}</th>
-        </thead>
-        {% for class in course_classes %}
-        <tr>
-            <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
-          <td>
-            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
-              {{ class.name }}</a><span class="text-muted">, {% if class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
-          </td>
-          <td>
-            <a href="{% url 'venue_detail' class.venue.pk %}">
-              {{ class.venue }}
-            </a>
-          </td>
-          <td>
-            {{ class.materials_str|safe }}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-  {% endif %}
-
-    {% if assignments %}
-        <h3 class="course-title" id="course-assignments">{% trans "Assignments" %}</h3>
-        <ul>
-            {% for assignment in assignments %}
-                <li>
-                    {% if assignment.magic_link %}
-                        <a href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
-                    {% else %}
-                        {{ assignment.title }}
-                    {% endif %}
+            <ul class="nav nav-tabs square" role="tablist">
+                <li class="active" role="presentation">
+                    <a role="tab" data-toggle="tab" aria-expanded="true" aria-controls="about-course" href="#about-course">О курсе</a>
                 </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+                {% if user.is_student or user.is_curator %}
+                    {% if course_reviews %}
+                        <li role="presentation">
+                            <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-reviews" href="#course-reviews">Отзывы</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+                {% if course_classes %}
+                    <li role="presentation">
+                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-classes" href="#course-classes">{% trans "Classes" %}</a>
+                    </li>
+                {% endif %}
+                {% if assignments %}
+                    <li role="presentation">
+                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-assignments" href="#course-assignments">{% trans "Assignments" %}</a>
+                    </li>
+                {% endif %}
+                {% if course_news %}
+                    <li role="presentation">
+                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-news" href="#course-news">{% trans "News" %}</a>
+                    </li>
+                {% endif %}
+            </ul>
 
-    {% if course_news %}
-        <h3 class="course-title" id="course-news">{% trans "News" %}</h3>
-        {% for news in course_news %}
-            <div class="panel bg-gray" id="news-{{ news.pk }}">
-                <div class="panel-body">
-                    <h4><span class="small">{{ news.created|date }}</span> {{ news.title }}</h4>
-                    <div class="ubertext shorten">
-                    {% markdown 3600 "co_news_text" news.pk news.modified %}
-                      {{ news.text }}
-                    {% endmarkdown %}
+            <div class="tab-content">
+                <div class="tab-pane active" role="tabpanel" id="about-course">
+                    <div class="ubertext course-description">
+                    {% if course_offering.description %}
+                      {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
+                        {{ course_offering.description }}
+                      {% endmarkdown %}
+                    {% else %}
+                      {% markdown 3600 "course" course_offering.course.pk course_offering.course.modified %}
+                        {{ course_offering.course.description }}
+                      {% endmarkdown %}
+                    {% endif %}
                     </div>
                 </div>
-                {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-                    <div class="panel-footer text-right">
-{#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
-                        <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
-                        <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                {% if user.is_curator or user.is_student %}
+                    {% if course_reviews %}
+                        <div class="tab-pane" role="tabpanel" id="course-reviews">
+                            {% for co in course_reviews %}
+                                <h4>{{ co.semester }}</h4>
+                                  {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
+                                    {{ co.reviews }}
+                                  {% endmarkdown %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+                {% if course_classes %}
+                    <div class="tab-pane" role="tabpanel" id="course-classes">
+                      <table class="table timetable table-striped" width="100%">
+                        <thead>
+                          <th class="nobreak">{% trans "Date and time" %}</th>
+                          <th style="width: 100%;">{% trans "Class|Name" %}</th>
+                          <th style="min-width: 140px;">{% trans "Venue|short" %}</th>
+                          <th style="max-width: 160px;">{% trans "Materials" %}</th>
+                        </thead>
+                        {% for class in course_classes %}
+                        <tr>
+                            <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
+                          <td>
+                            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
+                              {{ class.name }}</a><span class="text-muted">, {% if class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
+                          </td>
+                          <td>
+                            <a href="{% url 'venue_detail' class.venue.pk %}">
+                              {{ class.venue }}
+                            </a>
+                          </td>
+                          <td>
+                            {{ class.materials_str|safe }}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </table>
+                    </div>
+                {% endif %}
+                {% if assignments %}
+                    <div class="tab-pane" role="tabpanel" id="course-assignments">
+                    <div class="list-group inverse">
+                        {% for assignment in assignments %}
+                                {% if assignment.magic_link %}
+                                    <a class="list-group-item" href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
+                                {% else %}
+                                    <div class="list-group-item">{{ assignment.title }}</div>
+                                {% endif %}
+                        {% endfor %}
+                    </div>
+                    </div>
+                {% endif %}
+                {% if course_news %}
+                    <div class="tab-pane" role="tabpanel" id="course-news">
+{#                    <h3 class="course-title" id="course-news">{% trans "News" %}</h3>#}
+                    {% for news in course_news %}
+                        <div class="panel bg-gray" id="news-{{ news.pk }}">
+                            <div class="panel-body">
+                                <h4>{{ news.title }}</h4>
+                                <div class="date">{{ news.created|date:"d E Y" }}</div>
+                                <div class="ubertext shorten">
+                                {% markdown 3600 "co_news_text" news.pk news.modified %}
+                                  {{ news.text }}
+                                {% endmarkdown %}
+                                </div>
+                            </div>
+                            {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+                                <div class="panel-footer text-right">
+            {#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
+                                    <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+                                    <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                     </div>
                 {% endif %}
             </div>
-        {% endfor %}
-    {% endif %}
-
-
-
     </div>
-
-
 
     <div class="col-xs-3">
         {% if user.is_curator or user.is_teacher and is_actual_teacher %}
