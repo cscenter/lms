@@ -344,6 +344,27 @@ class CourseOfferingTeacher(models.Model):
         return "{0} [{1}]".format(smart_text(self.teacher),
                                   smart_text(self.course_offering_id))
 
+    @property
+    def is_lecturer(self):
+        return bool(self.roles.lecturer)
+
+    @staticmethod
+    def grouped(course_teachers):
+        """
+        A bit complicated to implement this logic on query level without
+        ORM hacking.
+        """
+        # TODO: replace with sql logic after drop sqlite compability at all
+        ts = {'lecturers': [], 'others': []}
+
+        def __cmp__(ct):
+            return -ct.is_lecturer, ct.teacher.last_name
+
+        for t in sorted(course_teachers, key=__cmp__):
+            slot = ts['lecturers'] if t.is_lecturer else ts['others']
+            slot.append(t)
+        return ts
+
 
 @python_2_unicode_compatible
 class CourseOfferingNews(TimeStampedModel):
