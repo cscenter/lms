@@ -122,12 +122,11 @@
                 {% endif %}
                 {% if course_news %}
                     <div class="tab-pane" role="tabpanel" id="course-news">
-{#                    <h3 class="course-title" id="course-news">{% trans "News" %}</h3>#}
                     {% for news in course_news %}
                         <div class="panel bg-gray" id="news-{{ news.pk }}">
                             <div class="panel-body">
-                                <h4>{{ news.title }}</h4>
                                 <div class="date">{{ news.created|date:"d E Y" }}</div>
+                                <h4>{{ news.title }}</h4>
                                 <div class="ubertext shorten">
                                 {% markdown 3600 "co_news_text" news.pk news.modified %}
                                   {{ news.text }}
