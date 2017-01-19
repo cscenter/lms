@@ -1315,12 +1315,14 @@ class StudentAssignmentDetailMixin(object):
         context['user_type'] = self.user_type
 
         comments = (AssignmentComment.objects.filter(student_assignment=a_s)
-                    .order_by('created')
-                    .select_related('author'))
+                    .select_related('author')
+                    .order_by('created'))
         first_comment_after_deadline = None
+        assignment_deadline = (a_s.assignment.deadline_at +
+                               datetime.timedelta(minutes=1))
         for c in comments:
-            if (first_comment_after_deadline is None and
-                        c.created >= a_s.assignment.deadline_at):
+            if first_comment_after_deadline is None \
+                    and c.created >= assignment_deadline:
                 first_comment_after_deadline = c.pk
         # Dynamically replace label
         if (not comments and context['user_type'] == 'student' and
