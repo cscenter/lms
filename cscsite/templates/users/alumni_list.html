@@ -9,7 +9,7 @@
     {% regroup object_list by graduation_year as alumni_list %}
     <div id="graduates">
         <div class="graduates-list-filter">
-            <ul class="nav nav-tabs material" role="tablist">
+            <ul class="nav nav-tabs square" role="tablist">
                 <li {% if not selected_study_program %}class="active"{% endif %}>
                     <a href="{{ base_url }}">{% trans "All areas" %}</a>
                     {% for study_program in study_programs %}
