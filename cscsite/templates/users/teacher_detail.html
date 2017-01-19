@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
-{% load thumbnail %}
+{% load userpreview from custom_thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
@@ -37,7 +37,7 @@
           <thead>
             <tr class="active">
               <th>Курс</th>
-              <th>Дата</th>
+              <th>Семестр</th>
             </tr>
           </thead>
             {% for course_offering in teacher.course_offerings %}
@@ -53,15 +53,15 @@
 </div>
 <div class="col-xs-3 profile-sidebar">
     <div class="thumbnail text-center">
-    {% if teacher.photo %}
-        {% thumbnail teacher.photo "150x150" crop="center" as im %}
-        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-        {% endthumbnail %}
-    {% else %}
-        <img src="{% static 'img/center/brain.jpg' %}">
-    {% endif %}
+        {% userpreview teacher "170x238" as im %}
+            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+        {% empty %}
+            <img src="{% static 'img/center/brain.jpg' %}">
+        {% enduserpreview %}
     </div>
-    {% if user.is_curator %}<i class="fa fa-user-secret" aria-hidden="true"></i> <a href="{% url "user_detail" teacher.pk %}">Смотреть профиль </a>{% endif %}
+    {% if user.is_curator %}
+        <a class="btn btn-default btn-block" href="{% url "user_detail" teacher.pk %}"><i class="fa fa-user-secret" aria-hidden="true"></i> Профиль </a>
+    {% endif %}
 </div>
 </div>
 </div>
