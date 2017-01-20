@@ -539,6 +539,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 .filter(course=co.course_id,
                         semester__index__lt=co.semester.index)
                 .exclude(reviews__isnull=True)
+                .exclude(reviews__exact='')
                 .order_by("-semester__index")
                 .all())
         context["course_teachers"] = CourseOfferingTeacher.grouped(
@@ -619,7 +620,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         if not can_view_assignments:
             return []
         assignments_qs = (self.object.assignment_set
-                          .only("title", "course_offering_id")
+                          .only("title", "course_offering_id", "is_online",
+                                "deadline_at")
                           .order_by('deadline_at', 'title'))
         # Prefetch progress on assignments for authenticated student
         if context["is_enrolled"]:
