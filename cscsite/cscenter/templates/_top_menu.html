@@ -5,7 +5,7 @@
 {% csc_menu "compscicenter" as menu %}
 {% load userpreview from custom_thumbnail %}
 
-<div class="header {% for menu_item in menu.tree %}{% if menu_item.id in menu.active_items and not menu_item.children %}__bigger-margin{% endif %}{% endfor %}">
+<div class="header">
 <div class="menu lvl1">
     <div class="container">
         <div class="col-xs-11">
