@@ -50,6 +50,11 @@
           <li>Добавить новое занятие</li>
         </ol>
         {% endif %}
+        {% if form.instance.course_offering.is_completed %}
+            <div class="alert alert-block alert-warning">
+                Курс завершён. Только кураторы могут изменить занятие.
+            </div>
+        {% endif %}
       {% crispy form form.helper %}
     </div>
   </div>

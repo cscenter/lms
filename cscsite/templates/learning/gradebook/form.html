@@ -18,7 +18,7 @@
         {% else %}
         <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
         {% endif %}
-        {% trans "Marks sheet" %}<br><small>{{ course_offering }}</small>
+          {% trans "Marks sheet" %}<br><a class="small" href="{{ course_offering.get_absolute_url }}">{{ course_offering }}</a>
       </h2>
       <div class="btn-toolbar">
         <div class="btn-group">
@@ -27,7 +27,7 @@
         <div class="btn-group">
           <a href="{% url 'markssheet_teacher_csv' course_offering.get_city course_offering.course.slug course_offering.semester.slug %}"
              target="_blank"
-             class="btn btn-default marks-sheet-csv-link" role="button"><i class="fa fa-download"></i></a>
+             class="btn btn-default marks-sheet-csv-link" role="button"><i class="fa fa-download"></i> Сохранить .csv</a>
         </div>
         <div class="btn-group">
           <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
@@ -38,8 +38,7 @@
         </div>
         <div class="btn-group">
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-              {% trans "Courses" %}
-              <span class="caret"></span>
+              Все ведомости<span class="caret"></span>
             </button>
             <ul class="dropdown-menu pull-right scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
               {% regroup course_offering_list by semester as co_by_semester %}

@@ -532,32 +532,6 @@ tr.unread {
   padding-left: 15px;
 }
 
-// Course offerings page
-.places-available {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: 500;
-  @extend .bg-info;
-  text-align: center;
-  padding: 10px;
-}
-
-.course-offering-profs {
-  ul {
-
-    li {
-      padding-bottom: 10px;
-      @extend .clearfix;
-
-      img {
-        float: left;
-        margin-right: 10px;
-      }
-    }
-
-  }
-}
-
 .input-grade {
   width: 100px !important;
 }

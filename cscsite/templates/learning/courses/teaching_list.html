@@ -1,35 +1,26 @@
 {% extends "base.html" %}
 {% load i18n %}
-
+{# TODO: нужно убрать деление на семестр и архив целиком, сейчас отдельные if для этого, куча лишнего кода дублирующегося.#}
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        {% trans "Courses" %}
-      </h2>
-      <hr>
-    </div>
-  </div>
-  {% if course_list_ongoing %}
-  <div class="row">
+  {% if course_list %}
     <div class="col-xs-12">
-      <h3>{% trans "Ongoing|plural" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th></th>
-          <th width="30%">
-            {% trans "Professors" %}
-          </th>
+          <th>Курс</th>
+          <th>{% trans "Semester" %}</th>
+          <th width="30%">{% trans "Professors" %}</th>
           <th width="15%"></th>
         </thead>
-        {% for course_offering in course_list_ongoing %}
+        {% for course_offering in course_list %}
         <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
             <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
               {{ course_offering.course.name }}
             </a>
           </td>
+            <td>{{ course_offering.semester }}</td>
           <td>
             <ul class="list-unstyled">
             {% for teacher in course_offering.teachers.all %}
@@ -38,7 +29,7 @@
             </ul>
           </td>
           <td>
-            <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-primary" role="button">
+            <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-link" role="button">
               {% trans "Add news" %}
             </a>
           </td>
@@ -46,48 +37,9 @@
         {% endfor %}
       </table>
     </div>
-  </div>
-  {% endif %}
-  {% if course_list_archive %}
-  <div class="row">
-    <div class="col-xs-12">
-      <h3>{% trans "Archive" %}</h3>
-      <table class="table" width="100%">
-        <thead>
-          <th>{% trans "Course Offerings" %}</th>
-          <th width="15%">{% trans "Semester" %}</th>
-          <th width="20%"></th>
-        </thead>
-        {% for course_offering in course_list_archive %}
-        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
-          <td>
-              <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-              {{ course_offering.course.name }}
-            </a>
-          </td>
-          <td>{{ course_offering.semester }}</td>
-          <td>
-            <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}">
-              {% trans "Add news" %}
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
-  {% endif %}
-</div>
-{% if not course_list_ongoing and not course_list_archive and not course_list_available %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-3"></div>
-    <div class="col-xs-6 center-aligned">
+      {% else %}
       <h4>{% trans "No courses yet" %}</h4>
-    </div>
-    <div class="col-xs-3">
-    </div>
+    {% endif %}
   </div>
 </div>
-{% endif %}
 {% endblock content %}
