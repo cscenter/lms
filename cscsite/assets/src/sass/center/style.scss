@@ -420,24 +420,9 @@ tr.unread {
   padding: 0 4px 0 15px;
 }
 
-
-// FIXME: move to separate file
-.places-available {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: 500;
-  @extend  .bg-info;
-  text-align: center;
-  padding: 10px;
-}
-
 .input-grade {
   width: 100px !important;
 }
-//
-//.form-group div.controls {
-//  margin-right: 1%;
-//}
 
 .nobreak {
   white-space: nowrap;
@@ -460,8 +445,8 @@ tr.unread {
 
 .video-bg {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   width: 250px;
   height: 150px;
   opacity: 0.45;

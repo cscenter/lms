@@ -8,11 +8,6 @@
   <div class="row">
     <div class="col-xs-12">
     {% for autumn_spring in semester_list %}
-      {% if forloop.first %}
-        <h3 class="content-title">{% trans "Ongoing|plural" %}</h3>
-      {% elif forloop.counter == 2 %}
-        <h3 class="content-title">{% trans "Archive" %}</h3>
-      {% endif %}
 
       <table class="table table-stripped">
         <tr>

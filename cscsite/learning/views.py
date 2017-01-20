@@ -365,18 +365,9 @@ class CourseTeacherListView(TeacherOnlyMixin,
     def get_queryset(self):
         return (self.model.objects
                 .filter(teachers=self.request.user)
-                .order_by('-semester__year', '-semester__type', 'course__name')
                 .select_related('course', 'semester')
-                .prefetch_related('teachers'))
-
-    def get_context_data(self, **kwargs):
-        context = (super(CourseTeacherListView, self)
-                   .get_context_data(**kwargs))
-        ongoing, archive = utils.split_list(context['course_list'],
-                                            lambda course: course.is_ongoing)
-        context['course_list_ongoing'] = ongoing
-        context['course_list_archive'] = archive
-        return context
+                .prefetch_related('teachers')
+                .order_by('-semester__year', '-semester__type', 'course__name'))
 
 
 class CourseStudentListView(StudentOnlyMixin,
@@ -386,10 +377,10 @@ class CourseStudentListView(StudentOnlyMixin,
     template_name = "learning/courses/learning_my_courses.html"
 
     def get_context_data(self, **kwargs):
-        year, semester_type = utils.get_current_semester_pair()
+        current_year, current_term_type = utils.get_current_semester_pair()
         available = (CourseOffering.custom.site_related(self.request)
-                     .filter(semester__type=semester_type,
-                             semester__year=year)
+                     .filter(semester__type=current_term_type,
+                             semester__year=current_year)
                      .exclude(enrolled_students=self.request.user)
                      .order_by('semester__year', '-semester__type',
                                'course__name')
@@ -397,7 +388,7 @@ class CourseStudentListView(StudentOnlyMixin,
                      .prefetch_related('teachers'))
         # Show summer courses in available on center site only
         if (settings.SITE_ID != settings.CENTER_SITE_ID and
-                    semester_type == SEMESTER_TYPES.summer):
+                    current_term_type == SEMESTER_TYPES.summer):
             available = [c for c in available
                          if c.semester.type != SEMESTER_TYPES.summer]
 
@@ -413,12 +404,15 @@ class CourseStudentListView(StudentOnlyMixin,
                        .prefetch_related('course_offering__teachers'))
         ongoing, archive = utils.split_list(
             enrolled_on,
-            lambda e: (e.course_offering.semester.year == year
-                       and e.course_offering.semester.type == semester_type))
+            lambda e: (e.course_offering.semester.year == current_year
+                       and e.course_offering.semester.type == current_term_type))
         context = {
             "course_list_available": available,
             "enrollments_ongoing": ongoing,
-            "enrollments_archive": archive
+            "enrollments_archive": archive,
+            # FIXME: what about custom template tag for this?
+            "current_term": "{} {}".format(SEMESTER_TYPES[current_term_type],
+                                           current_year).capitalize()
         }
         return context
 
@@ -918,13 +912,6 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def form_valid(self, form):
         assert self._course_offering is not None
-        # FIXME: Think how to move this logic into form.
-        # TODO: Move to get_form_class? Show this error ASAP
-        # Can't add course classes after course already completed.
-        if self._course_offering.is_completed:
-            form.add_error(None, "Sorry, course already completed. "
-                                 "You can't update or add classes")
-            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
         self.object = form.save(commit=False)
         self.object.course_offering = self._course_offering
         self.object.save()
@@ -958,6 +945,13 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin,
                          extra_tags='timeout')
         return super(CourseClassCreateView, self).get_success_url()
 
+    def form_valid(self, form):
+        if self._course_offering.is_completed:
+            form.add_error(None, "Вы не можете создать новое занятие, т.к. "
+                                 "курс завершён.")
+            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
+        return super(CourseClassCreateView, self).form_valid(form)
+
 
 class CourseClassUpdateView(CourseClassCreateUpdateMixin,
                             generic.UpdateView):
@@ -966,6 +960,14 @@ class CourseClassUpdateView(CourseClassCreateUpdateMixin,
         messages.success(self.request, msg % self.object.name,
                          extra_tags='timeout')
         return super(CourseClassUpdateView, self).get_success_url()
+
+    def form_valid(self, form):
+        if (self._course_offering.is_completed and
+                not self.request.user.is_curator):
+            form.add_error(None, "Данные не были сохранены. Обратитесь к "
+                                 "куратору для обновления данных.")
+            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
+        return super(CourseClassUpdateView, self).form_valid(form)
 
 
 class CourseClassAttachmentDeleteView(TeacherOnlyMixin,

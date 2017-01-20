@@ -8,18 +8,17 @@
     <div class="nav-tabs-inverse">
         <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
             <li class="active" role="presentation">
-                <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{% trans "Current semester" %}</a>
+                <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{{ current_term }}</a>
             </li>
             {% if enrollments_archive %}
             <li role="presentation">
-                <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">{% trans "Archive" %}</a>
+                <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">Пройденные курсы</a>
             </li>
             {% endif %}
         </ul>
         <div class="tab-content">
         {% if enrollments_ongoing or course_list_available %}
           <div class="tab-pane active" id="current" role="tabpanel">
-              <h3>{% trans "Courses" %}</h3>
 
           <table class="table" width="100%">
             <thead>
@@ -80,7 +79,6 @@
 
       {% if enrollments_archive %}
           <div class="tab-pane" id="archive" role="tabpanel">
-          <h3>{% trans "Archive" %}</h3>
           <table class="table _archive" width="100%">
             <thead>
               <th></th>
