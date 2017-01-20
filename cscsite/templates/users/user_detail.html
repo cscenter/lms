@@ -52,16 +52,17 @@
         </header>
 
         <div class="profile-additional-info">
-            {% if user_object.note.strip %}<div class="about-me">
-                <h4>{% trans "About me" %}</h4>
-                <div class="ubertext">
-                    {% markdown 3600 "user_note" user_object.pk user_object.modified %}
-                        {{ user_object.note }}
-                    {% endmarkdown %}
-                </div></div>{% elif user_object.pk == user.pk or user.is_curator %}<div class="about-me">
-                <h4>{% trans "About me" %}</h4>
-                <div class="ubertext"><p><em>Информация не указана.</em></p></div>
-            </div>{% endif %}
+            {% if user_object.note.strip %}
+                <div class="about-me">
+                    <div class="ubertext">
+                        {% markdown 3600 "user_note" user_object.pk user_object.modified %}
+                            {{ user_object.note }}
+                        {% endmarkdown %}
+                    </div>
+                </div>
+            {% elif user_object.pk == user.pk or user.is_curator %}
+                <div class="about-me"></div>
+            {% endif %}
             {% if user_object.csc_review %}
                 <div class="review">
                     <h4>{% trans "Review of Computer Science Center" %}</h4>
@@ -88,11 +89,11 @@
             {% endif %}
         </div>
 
-        <div class="profile-content" {% if user_object.note.strip or user_object.csc_review.strip %}style="margin-top: -90px;"{% endif %}>
+        <div class="profile-content">
 
             {% if has_curator_permissions %}
                 <div class="panel panel-default">
-                    <div class="panel-heading">Информация для куратора</div>
+                    <div class="panel-heading panel-title">Информация для куратора</div>
                     <ul class="list-group">
                         <li class="list-group-item"><b>Статус</b>:
                             {{ user_object.get_status_display|default:"—" }}
@@ -181,8 +182,9 @@
 
                 {% endif %}
                 {% if user_object.is_teacher %}
-                    <li>{% trans "teacher"|title %}
-                        {% if user_object.teaching_set.all %}:{% endif %}
+                    <li>
+                        {% if user_object.teaching_set.all %}
+                        <h4>Преподаватель курсов:</h4>
                         <ul class="">
                             {% for courseoffering in user_object.teaching_set.all %}
                                 <li>
@@ -192,6 +194,7 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                        {% endif %}
                     </li>
                 {% endif %}
             </ul>

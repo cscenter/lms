@@ -51,33 +51,39 @@ header {
   }
 
   h2 {
-    margin: 0 0 10px 0;
+    margin: 0 0 14px 0;
   }
 
   .progress-info {
+    font-size: 16px;
   }
 }
 
 .profile-additional-info {
   background: #f8f8f8;
-  top: -120px;
+  top: -102px;
   position: relative;
-  padding: 30px 10px 0 0;
+  padding: 30px 10px 30px 0;
   min-height: 102px;
   overflow: hidden;
 
   .about-me, .review {
     @extend .container;
-    margin-bottom: 10px;
-    padding: 0 0 0 225px;
+    padding: 0 0 0 220px;
 
     h4 {
       margin-top: 0;
     }
   }
+  .review {
+    .ubertext :last-child {
+      margin-bottom: 0;
+    }
+  }
 
   .nav-tabs-inverse {
-    padding: 0 0 0 215px;
+    padding: 30px 0 0 220px;
+    margin-bottom: -30px;
     @extend .container;
 
     .nav-tabs {
@@ -101,7 +107,7 @@ header {
 
 .profile-content {
   @extend .container;
-  margin-top: -70px;
+  margin-top: -80px;
 
   table.calc {
     input[type=text] {
