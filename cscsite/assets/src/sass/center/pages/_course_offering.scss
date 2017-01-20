@@ -132,12 +132,11 @@ div[id^="news-"] {
     }
 
   }
-  .table > thead > tr > th:first-child {
-    width: 114px;
-    white-space: nowrap;
-  }
 }
-#course-classes {
+#course-classes, #course-assignments {
+  .table > thead > tr > th {
+    padding: 0 8px 5px 8px;
+  }
   .table > thead > tr > th:first-child {
     width: 114px;
     white-space: nowrap;
