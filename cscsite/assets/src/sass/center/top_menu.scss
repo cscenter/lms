@@ -1,9 +1,13 @@
 $header-lvl1-bg:                 #4F86A0;
 
 .header {
-    margin: 0 0 28px 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    margin: 0 0 28px 0;
+
+    &.__bigger-margin {
+        margin-bottom: 38px;
+    }
 
     .logo-cell {
         position: relative;

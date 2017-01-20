@@ -5,14 +5,12 @@
 {% csc_menu "compscicenter" as menu %}
 {% load userpreview from custom_thumbnail %}
 
-<div class="header">
+<div class="header {% for menu_item in menu.tree %}{% if menu_item.id in menu.active_items and not menu_item.children %}__bigger-margin{% endif %}{% endfor %}">
 <div class="menu lvl1">
     <div class="container">
         <div class="col-xs-11">
             <div class="logo-cell">
-                <a href="{% url 'index' %}">
-                <div class="logo-container"><img src="{% static "img/center/logo.png" %}" alt="Computer Science Center"></div>
-                </a>
+                <a class="logo-container" href="{% url 'index' %}"><img src="{% static "img/center/logo.png" %}" alt="Computer Science Center"></a>
             </div>
             <ul>
                 {% for menu_item in menu.tree %}
@@ -31,7 +29,6 @@
                         {% empty %}
                         <img src="{% if user.gender == "F" %}{% static "img/csc_girl_head.svg" %}{% else %}{% static "img/csc_boy_head.svg" %}{% endif %}" class="_empty">
                     {% enduserpreview %}
-
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
@@ -44,9 +41,7 @@
                   </ul>
                 </div>
             {% else %}
-            <a href="{% url 'login' %}">
-              {% trans "Login" %}
-            </a>
+                <a href="{% url 'login' %}">{% trans "Login" %}</a>
             {% endif %}
         </div>
     </div>
