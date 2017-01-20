@@ -82,10 +82,12 @@
                     <div class="tab-pane" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
                         <thead>
+                        <tr class="bg-gray">
                           <th class="nobreak">{% trans "Date and time" %}</th>
-                          <th style="width: 100%;">{% trans "Class|Name" %}</th>
+                          <th>{% trans "Class|Name" %}</th>
                           <th style="min-width: 140px;">{% trans "Venue|short" %}</th>
-                          <th style="max-width: 160px;">{% trans "Materials" %}</th>
+                          <th style="width: 160px;">{% trans "Materials" %}</th>
+                        </tr>
                         </thead>
                         {% for class in course_classes %}
                         <tr>
@@ -109,15 +111,33 @@
                 {% endif %}
                 {% if assignments %}
                     <div class="tab-pane" role="tabpanel" id="course-assignments">
-                    <div class="list-group inverse">
+                        <table class="table timetable">
+                        <thead>
+                            <tr class="bg-gray">
+                              <th>{% trans "Deadline" %}</th>
+                              <th>{% trans "Title" %}</th>
+                              <th style="width: 160px;">Через сайт</th>
+                            </tr>
+                        </thead>
                         {% for assignment in assignments %}
-                                {% if assignment.magic_link %}
-                                    <a class="list-group-item" href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
-                                {% else %}
-                                    <div class="list-group-item">{{ assignment.title }}</div>
-                                {% endif %}
+                            <tr>
+                                <td>
+                                    <div class="assignment-deadline">
+                                        {{ assignment.deadline_at|date:"d E" }}<br>
+                                        <span class="text-muted">{{ assignment.deadline_at|time:"H:i" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if assignment.magic_link %}
+                                        <a  href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
+                                    {% else %}
+                                        <div>{{ assignment.title }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
+                            </tr>
                         {% endfor %}
-                    </div>
+                      </table>
                     </div>
                 {% endif %}
                 {% if course_news %}
