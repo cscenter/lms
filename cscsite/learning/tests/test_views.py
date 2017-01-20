@@ -283,29 +283,6 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
     url_name = 'course_list_teacher'
     groups_allowed = ['Teacher [CENTER]']
 
-    def test_teacher_course_list(self):
-        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        other_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        self.doLogin(teacher)
-        resp = self.client.get(reverse(self.url_name))
-        self.assertEqual(0, len(resp.context['course_list_ongoing']))
-        self.assertEqual(0, len(resp.context['course_list_archive']))
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        CourseOfferingFactory.create_batch(
-            3, teachers=[teacher], semester=s)
-        CourseOfferingFactory.create_batch(
-            2, teachers=[teacher, other_teacher], semester=s)
-        CourseOfferingFactory.create_batch(
-            4, teachers=[other_teacher], semester=s)
-        CourseOfferingFactory.create(teachers=[teacher],
-                                     semester__year=now_year-1)
-        resp = self.client.get(reverse(self.url_name))
-        teacher_url = reverse('teacher_detail', args=[teacher.pk])
-        self.assertContains(resp, teacher_url, count=5)
-        self.assertEqual(5, len(resp.context['course_list_ongoing']))
-        self.assertEqual(1, len(resp.context['course_list_archive']))
-
 
 class CourseListStudentTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
