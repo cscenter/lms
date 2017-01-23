@@ -61,6 +61,10 @@ $header-lvl1-bg:                 #4F86A0;
 
         a {
             color: #fff;
+
+            .fa-angle-down {
+                min-width:11px;
+            }
         }
 
         li {
