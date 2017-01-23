@@ -29,7 +29,11 @@ div[id^="news-"] {
 }
 
 .course-main-title {
-  margin: 0 0 30px 0;
+  margin: 0;
+
+  a {
+    color: $color-gray-20;
+  }
 
   small {
     display: block;
