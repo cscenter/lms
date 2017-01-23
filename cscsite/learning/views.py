@@ -545,8 +545,11 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 .exclude(reviews__exact='')
                 .order_by("-semester__index")
                 .all())
-        context["course_teachers"] = CourseOfferingTeacher.grouped(
-            co.course_teachers)
+        course_teachers = CourseOfferingTeacher.grouped(co.course_teachers)
+        context["course_teachers"] = course_teachers
+        # Collect teachers contacts
+        context["contacts"] = [ct for g in course_teachers.values() for ct in g
+                               if len(ct.teacher.private_contacts.strip()) > 0]
 
         # Not sure if it's the best place for this, but it's the simplest one
         if user.is_authenticated():
