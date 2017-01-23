@@ -628,6 +628,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         assignments_qs = (self.object.assignment_set
                           .only("title", "course_offering_id", "is_online",
                                 "deadline_at")
+                          .prefetch_related("assignmentattachment_set")
                           .order_by('deadline_at', 'title'))
         # Prefetch progress on assignments for authenticated student
         if context["is_enrolled"]:
