@@ -19,7 +19,7 @@
     {% if has_curator_permissions %}
         <br><br>
         <div class="panel panel-default">
-            <div class="panel-heading">Информация для куратора</div>
+            <div class="panel-heading panel-title">Информация для куратора</div>
             <ul class="list-group">
                 <li class="list-group-item"><b>Статус</b>: {{ user_object.get_status_display|default:"—" }}</li>
                 <li class="list-group-item"><b>Группы</b>: {% for group in user_object.groups.all %}{% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп{% endfor %}</li>
