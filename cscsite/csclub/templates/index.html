@@ -54,11 +54,16 @@
               {% endfor %}
           </tbody>
         </table>
+  {% endif %}
   {% if LANGUAGE_CODE == 'ru' %}
       <div class="font-bigger">
       Если вы не нашли интересный курс выше, смотрите видеозаписи прошлых лет (раздел <a href="/courses/">Курсы</a>) или онлайн-курсы <a href="https://compscicenter.ru/online/">Computer Science центра</a>.
+      {% if request.city_code == 'RU SPB' %}
+          Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href="https://compscicenter.ru/">Computer Science центре</a>.
+      {% else %}
+          Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href="https://yandexdataschool.ru/">Школе анализа данных Яндекса</a>.
+      {% endif %}
       </div>
-  {% endif %}
   {% endif %}
 </div>
 {% endblock content %}
