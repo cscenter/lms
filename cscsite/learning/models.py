@@ -681,6 +681,11 @@ class AssignmentAttachment(TimeStampedModel, object):
     def file_name(self):
         return os.path.basename(self.attachment.name)
 
+    @property
+    def file_ext(self):
+        _, ext = os.path.splitext(self.attachment.name)
+        return ext
+
     def file_url(self):
         return reverse(
             "assignment_attachments_download",
