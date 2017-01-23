@@ -23,17 +23,8 @@ div[id^="news-"] {
   text-align: right;
 }
 
-.course-semester {
-  font-size: 16px;
-  color: $color-gray-48;
-}
-
 .course-main-title {
-  margin: 0;
-
-  a {
-    color: $color-gray-20;
-  }
+  margin: 0 0 30px 0;
 
   small {
     display: block;
@@ -81,7 +72,7 @@ div[id^="news-"] {
 }
 
 .o-buttons-vertical {
-  margin: 4px 0 5px 0;
+  margin: 10px 0 5px 0;
 
   .btn {
     padding: 12px 10px;
