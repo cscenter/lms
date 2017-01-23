@@ -14,9 +14,6 @@ div[id^="news-"] {
   }
 }
 // it's a quick fix, stupid classes, I know. Refactor if you see it
-.__pt10 {
-  padding-top: 10px;
-}
 .__pr5 {
   padding-right: 5px;
 }
@@ -26,8 +23,9 @@ div[id^="news-"] {
   text-align: right;
 }
 
-.course-title {
-  //font-weight: 400;
+.course-semester {
+  font-size: 16px;
+  color: $color-gray-48;
 }
 
 .course-main-title {
@@ -79,7 +77,7 @@ div[id^="news-"] {
 }
 
 .o-buttons-vertical {
-  margin: 10px 0 5px 0;
+  margin: 4px 0 5px 0;
 
   .btn {
     padding: 12px 10px;
@@ -133,12 +131,23 @@ div[id^="news-"] {
 
   }
 }
-#course-classes, #course-assignments {
-  .table > thead > tr > th {
-    padding: 0 8px 5px 8px;
+
+#teacher-contacts, #course-reviews {
+  h4:first-child {
+    margin-top: 0;
   }
+}
+
+#course-classes, #course-assignments {
+  margin-top: -15px;
+
   .table > thead > tr > th:first-child {
     width: 114px;
     white-space: nowrap;
+  }
+
+  .table > tbody > tr > td:first-child,
+  .table > thead > tr > th:first-child {
+    padding-left: 0;
   }
 }
