@@ -189,7 +189,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
 
     def noncourse_events(self, request, month, year, prev_month_date,
                          next_month_date):
-        if request.site.domain == settings.CLUB_DOMAIN:
+        if settings.SITE_ID == settings.CLUB_SITE_ID:
             return NonCourseEvent.objects.none()
         return (NonCourseEvent.objects
                 .filter(Q(date__month=month, date__year=year) |
@@ -204,6 +204,9 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         today = now().date()
         year = int(self.request.GET.get('year', today.year))
         month = int(self.request.GET.get('month', today.month))
+        return self._get_queryset(year, month)
+
+    def _get_queryset(self, year, month):
         self._month_date = datetime.date(year=year, month=month, day=1)
         prev_month_date = self._month_date + relativedelta(months=-1)
         next_month_date = self._month_date + relativedelta(months=+1)
@@ -226,7 +229,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
                              'course_offering',
                              'course_offering__course',
                              'course_offering__semester'))
-        if self.request.site.domain == settings.CLUB_DOMAIN:
+        if settings.SITE_ID == settings.CLUB_SITE_ID:
             q = q.filter(course_offering__is_open=True)
         return q
 

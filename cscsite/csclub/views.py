@@ -42,6 +42,12 @@ class AsyncEmailRegistrationView(RegistrationView):
 class CalendarClubScheduleView(CalendarMixin, generic.ListView):
     user_type = 'public_full'
 
+    def get_queryset(self):
+        qs = super(CalendarClubScheduleView, self).get_queryset()
+        # Additionally check that we have classes in this month
+        # Note: assume we never show up non-class events on club schedule
+        return qs
+
 
 class IndexView(generic.TemplateView):
     template_name = "index.html"
