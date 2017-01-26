@@ -24,13 +24,6 @@
       }
     }
 
-    .btn-default, .btn-warning, .btn-success {
-      &.btn-block {
-        padding: 10px;
-      }
-
-    }
-
     td {
       padding: 10px;
       font-size: 13px;
@@ -39,9 +32,7 @@
       .badge {
         font-weight: normal;
         white-space: nowrap;
-        position: relative;
-        bottom: 2px;
-
+        vertical-align: baseline;
       }
 
       a {
