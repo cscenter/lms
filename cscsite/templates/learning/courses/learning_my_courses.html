@@ -30,7 +30,6 @@
             <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
                 <td>
                 <a href="{{ e.course_offering.get_absolute_url }}" class="title">{{ e.course_offering.course.name }}</a> &nbsp;
-                {% if request.site.domain == "compscicenter.ru" and e.course_offering.is_open %} <span class="label csclub">Курс CS клуба</span>{% endif %}
                   <span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span><br>
               {% trans "Professors" %}:
                 {% for teacher in e.course_offering.teachers.all %}
@@ -52,7 +51,7 @@
             <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
               <td>
                 <a class="title" href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
-                  {{ course_offering.course.name }}</a><br>
+                  {{ course_offering.course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}&nbsp;&nbsp;<span class="label csclub">Курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
                 {% for teacher in course_offering.teachers.all %}
                 <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
