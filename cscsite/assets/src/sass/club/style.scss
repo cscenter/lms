@@ -610,10 +610,6 @@ tr.unread {
 
   margin-bottom: 20px;
 
-  h1 {
-    margin-bottom: 40px;
-  }
-
   .col-xs-6 {
     img {
       float: left;
@@ -640,4 +636,9 @@ div[id^="news-"] {
     background: $state-info-bg;
     box-shadow: none;
   }
+}
+
+h1.page-header {
+  border: none;
+  margin: 0 0 20px;
 }
