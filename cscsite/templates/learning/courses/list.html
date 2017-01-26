@@ -7,10 +7,10 @@
   {% if semester_list %}
   <div class="row">
     <div class="col-xs-12">
+        {% if request.site.domain == "compsciclub.ru" %}<h1 class="page-header">{% trans "Courses" %}</h1>{% endif %}
     {% for autumn_spring in semester_list %}
       {% if forloop.counter == 2 %}
       {% endif %}
-
       <table class="table table-stripped">
         <tr>
         {% for semester in autumn_spring %}
