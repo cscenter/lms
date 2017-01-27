@@ -1144,7 +1144,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         if not teacher_course_offerings:
             logger.warning("Teacher {} has no course sessions".format(
                 self.request.user))
-            raise Http404
+            messages.info(self.request,
+                          _("You were redirected from Assignments due to "
+                            "empty course list."),
+                          extra_tags='timeout')
+            raise Redirect(to=reverse("course_list_teacher"))
         # Collect terms for filter view
         all_terms = set(c.semester for c in teacher_course_offerings)
         self.terms = sorted(all_terms, key=lambda t: -t.index)
@@ -1375,13 +1379,6 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
     """
     user_type = 'student'
 
-    def get(self, request, *args, **kwargs):
-        try:
-            response = super().get(request, *args, **kwargs)
-        except Redirect as e:
-            return HttpResponseRedirect(e.kwargs.get('url'))
-        return response
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         sa = context['a_s']
@@ -1401,12 +1398,12 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
         a_s = kwargs.get("a_s")
         user = self.request.user
         if user in a_s.assignment.course_offering.teachers.all():
-            raise Redirect(url=reverse("a_s_detail_teacher", args=[a_s.pk]))
+            raise Redirect(to=reverse("a_s_detail_teacher", args=[a_s.pk]))
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way
         if not a_s.student == user and not user.is_curator:
-            raise Redirect(url="{}?next={}".format(settings.LOGIN_URL,
-                                                   self.request.get_full_path()))
+            raise Redirect(to="{}?next={}".format(settings.LOGIN_URL,
+                                                  self.request.get_full_path()))
 
     def get_success_url(self):
         pk = self.kwargs.get('pk')

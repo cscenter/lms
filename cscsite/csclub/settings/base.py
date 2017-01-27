@@ -23,6 +23,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.notifications.UnreadNotificationsCacheMiddleware',
     'core.middleware.CurrentCityMiddleware',
+    'annoying.middlewares.RedirectMiddleware',
 ]
 
 INSTALLED_APPS += [

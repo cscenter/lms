@@ -21,6 +21,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'core.notifications.UnreadNotificationsCacheMiddleware',
+    'annoying.middlewares.RedirectMiddleware',
 ]
 INSTALLED_APPS += [
     'learning.admission.apps.AdmissionConfig',
