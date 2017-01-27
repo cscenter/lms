@@ -92,15 +92,10 @@ header {
       height: 42px;
 
       li {
-        @include border-top-radius(4px);
-        background: #eee;
-        margin: 0 8px 0 0;
-
+        &.dark {
+          background: #eee;
+        }
       }
-    }
-
-    a {
-      margin: 0;
     }
   }
 }
