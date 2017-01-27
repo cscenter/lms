@@ -204,8 +204,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
-        # Teacher has no course offering and gets 404
-        self.assertEqual(resp.status_code, 404)
+        # Teacher has no course offering and redirects to courses list
+        self.assertEqual(resp.status_code, 302)
         # Now he has one
         CourseOfferingFactory.create(teachers=[user])
         resp = self.client.get(reverse('assignment_list_teacher'))

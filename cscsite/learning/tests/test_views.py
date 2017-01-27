@@ -914,7 +914,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
 
     def test_group_security(self):
         """Custom logic instead of GroupSecurityCheckMixin.
-        Teacher can get 404 if no CO yet"""
+        Teacher can get 302 if no CO yet"""
         self.assertLoginRedirect(reverse(self.url_name))
         for groups in [[], ['Teacher [CENTER]'], ['Student [CENTER]'],
                        ['Graduate']]:
@@ -928,7 +928,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
-        self.assertStatusCode(404, self.url_name)
+        self.assertStatusCode(302, self.url_name)
 
     def test_list(self):
         # Default filter for grade - `no_grade`
@@ -941,9 +941,9 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         co_other = CourseOfferingFactory.create(semester=s)
         AssignmentFactory.create_batch(2, course_offering=co_other)
         self.doLogin(teacher)
-        # no course offerings yet, return 404
+        # no course offerings yet, return 302
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
-        self.assertEquals(404, resp.status_code)
+        self.assertEquals(302, resp.status_code)
         # Create co, assignments and enroll students
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
         for student in students:
