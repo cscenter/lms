@@ -53,7 +53,10 @@ class LoginForm(AuthenticationForm):
             user_groups = set(g.pk for g in user.groups.all())
             if not user_groups.intersection(GROUPS_HAS_ACCESS_TO_CENTER):
                 is_valid = False
-                self.add_error(None, ValidationError(_("Users of CS-club can't login on CS-center site")))
+                no_access_msg = _("You haven't enough access rights to login "
+                                  "on this site. Contact curators if you think "
+                                  "this is wrong.")
+                self.add_error(None, ValidationError(no_access_msg))
         return is_valid
 
 
