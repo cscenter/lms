@@ -693,6 +693,16 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
                             semester__year=year,
                             course__slug=self.kwargs['course_slug']))
 
+    def get_initial(self):
+        """Keep in mind that `initial` overrides values from model dict"""
+        initial = super(CourseOfferingEditDescrView, self).get_initial()
+        # Note: In edit view we always have an object
+        if not self.object.description_ru:
+            initial["description_ru"] = self.object.course.description_ru
+        if not self.object.description_en:
+            initial["description_en"] = self.object.course.description_en
+        return initial
+
     def is_form_allowed(self, user, obj):
         return user.is_curator or user in obj.teachers.all()
 
