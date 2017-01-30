@@ -2026,3 +2026,7 @@ def test_gradebook_recalculate_grading_type(client,
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") not in response.content
     assert smart_bytes("/satisfactory/") in response.content
+
+
+# TODO: Написать тест, который проверяет, что по-умолчанию в форму
+# редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
