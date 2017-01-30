@@ -41,11 +41,10 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
                     'EN',
                     'description_en',
                 ),
+                template='crispy_forms/square_tabs.html'
             ),
             CANCEL_SAVE_PAIR)
         super(CourseOfferingEditDescrForm, self).__init__(*args, **kwargs)
-
-        self.fields['description_ru'].required = True
 
     class Meta:
         model = CourseOffering
