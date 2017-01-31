@@ -15,12 +15,15 @@ server {
 
     ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
     ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
+    # Fetch OCSP records from URL in ssl_certificate and cache them
+    ssl_stapling on;
+    ssl_stapling_verify on;
 
     return 301 https://compscicenter.ru$request_uri;
 }
 
 server {
-    listen 443 ssl;
+    listen 443 ssl default_server;
     # TODO: remove underscore? Why it is here?
     server_name compscicenter.ru _;
     charset utf-8;
@@ -31,8 +34,8 @@ server {
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
     ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
     ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
-    ssl_session_timeout 5m;
-    ssl_session_cache shared:SSL:50m;
+    ssl_session_timeout 10m;
+    ssl_session_cache shared:SSL:10m;
 
     # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
     ssl_dhparam /etc/nginx/crypto/dhparam.pem;
