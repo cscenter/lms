@@ -175,6 +175,9 @@ class LearningPermissionsMixin(object):
     def _cached_groups(self):
         return []
 
+    def get_cached_groups(self):
+        return set()
+
     @property
     def is_student_center(self):
         return False
@@ -185,6 +188,10 @@ class LearningPermissionsMixin(object):
 
     @property
     def is_student(self):
+        return False
+
+    @property
+    def is_active_student(self):
         return False
 
     @property

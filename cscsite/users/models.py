@@ -430,6 +430,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
+    def get_cached_groups(self):
+        return self._cached_groups
+
     def enrolled_on_the_course(self, course_pk):
         return ((self.is_student or self.is_graduate) and
                 self.enrolled_on_set.filter(pk=course_pk).exists())
@@ -467,6 +470,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     @cached_property
     def is_student_club(self):
         return self.group.STUDENT_CLUB in self._cached_groups
+
+    @cached_property
+    def is_active_student(self):
+        if settings.SITE_ID == settings.CLUB_SITE_ID:
+            return self.is_student_club
+        return self.is_student and not self.is_expelled
 
     @cached_property
     def is_teacher_club(self):
