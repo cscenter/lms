@@ -73,11 +73,10 @@ class LoginView(generic.FormView):
         redirect_to = self.request.GET.get(self.redirect_field_name)
 
         if not redirect_to:
-            user_groups = list(
-                self.request.user.groups.values_list("id", flat=True))
-            if user_groups == [CSCUser.group.STUDENT_CENTER]:
+            user_groups = self.request.user.get_cached_groups()
+            if user_groups == {CSCUser.group.STUDENT_CENTER}:
                 redirect_to = reverse(LEARNING_BASE)
-            elif user_groups == [CSCUser.group.TEACHER_CENTER]:
+            elif user_groups == {CSCUser.group.TEACHER_CENTER}:
                 redirect_to = reverse(TEACHING_BASE)
 
         if not is_safe_url(redirect_to, self.request.get_host()):

@@ -474,6 +474,9 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
+    TABS = [
+    ]
+
     def get(self, request, *args, **kwargs):
         # Validate GET-params
         try:
@@ -550,7 +553,6 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         # Collect teachers contacts
         context["contacts"] = [ct for g in course_teachers.values() for ct in g
                                if len(ct.teacher.private_contacts.strip()) > 0]
-
         # Not sure if it's the best place for this, but it's the simplest one
         if user.is_authenticated():
             cache = get_unread_notifications_cache()
@@ -559,6 +561,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                  .filter(course_offering_news__course_offering=self.object,
                          user=self.request.user)
                  .update(is_unread=False))
+        # Select active tab
+
 
         return context
 

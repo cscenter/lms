@@ -1,4 +1,5 @@
 from braces.views import UserPassesTestMixin
+from django.conf import settings
 from django.utils.timezone import now
 
 from learning.models import Enrollment
@@ -43,9 +44,7 @@ class StudentOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
     def test_func(self, user):
-        is_active_student = user.is_student and not user.is_expelled
-        return (user.is_authenticated() and
-                (is_active_student or user.is_curator))
+        return user.is_active_student or user.is_curator
 
 
 class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):

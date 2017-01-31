@@ -50,7 +50,7 @@ def csc_menu(context, menu_name, root_id=False):
     # Flattened to tree
     menu_tree = []
     user = context['request'].user
-    user_groups = set(user._cached_groups)
+    user_groups = user.get_cached_groups()
     for item in flattened:
         if not has_permissions(item, user, user_groups):
             continue
@@ -77,9 +77,7 @@ def has_permissions(item, user, user_groups, **kwargs):
     if len(item.groups_allowed) > 0:
         if not user_groups.intersection(item.groups_allowed):
             return False
-        elif ((PARTICIPANT_GROUPS.STUDENT_CENTER in item.groups_allowed or
-                PARTICIPANT_GROUPS.VOLUNTEER in item.groups_allowed) and
-                user.is_expelled):
+        elif not user.is_active_student:
             return False
     if item.extension.unauthenticated and user.is_authenticated():
         return False
