@@ -77,7 +77,7 @@ def has_permissions(item, user, user_groups, **kwargs):
     if len(item.groups_allowed) > 0:
         if not user_groups.intersection(item.groups_allowed):
             return False
-        elif not user.is_active_student:
+        elif user.is_student and not user.is_active_student:
             return False
     if item.extension.unauthenticated and user.is_authenticated():
         return False
