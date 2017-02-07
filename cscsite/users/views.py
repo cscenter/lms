@@ -433,7 +433,10 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
                    .format(cc.pk, cc_type))
             url = "http://{}{}".format(self.request.META['HTTP_HOST'],
                                        cc.get_absolute_url())
-            description = "{} ({})".format(cc.description, url)
+            if cc.description.strip():
+                description = "{} ({})".format(cc.description, url)
+            else:
+                description = url
             cats = 'CSC,CLASS,{}'.format(cc_type.upper())
             dtstart = tz.localize(datetime.combine(cc.date, cc.starts_at))
             dtend = tz.localize(datetime.combine(cc.date, cc.ends_at))
@@ -571,7 +574,10 @@ class ICalEventsView(ICalView):
             uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
             url = "http://{}{}".format(self.request.META['HTTP_HOST'],
                                        nce.get_absolute_url())
-            description = "{} ({})".format(nce.name, url)
+            if nce.name.strip():
+                description = "{} ({})".format(nce.name, url)
+            else:
+                description = url
             dtstart = tz.localize(datetime.combine(nce.date, nce.starts_at))
             dtend = tz.localize(datetime.combine(nce.date, nce.ends_at))
 
