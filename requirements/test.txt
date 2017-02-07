@@ -1,6 +1,6 @@
 -r base.txt
 
-colour-runner==0.0.4
+colour-runner==0.0.5
 
 pylint-django==0.7.2
 
@@ -12,25 +12,25 @@ testfixtures==4.13.3
 django-debug-toolbar-template-timings==0.7
 
 # Shell+
-django-extensions==1.7.4
+django-extensions==1.7.6
 
 
 ### Python 3.5 support
 
 mock==2.0.0
-coverage==4.2
+coverage==4.3.4
 
 # Nice tracebacks
-Werkzeug==0.11.11
+Werkzeug==0.11.15
 
 # Debug
 django-debug-toolbar==1.6
 
 
 django-coverage==1.2.4
-ipdb==0.10.1
+ipdb==0.10.2
 
-pytest==3.0.5
+pytest==3.0.6
 pytest-django==3.1.2
 pytest-cov==2.4.0
 pytest-xdist==1.15.0

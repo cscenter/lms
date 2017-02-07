@@ -27,10 +27,10 @@ django-floppyforms==1.7.0
 django-crispy-forms==1.6.1
 
 # Models
-django-model-utils==2.6
+django-model-utils==2.6.1
 
 # Html parsing
-beautifulsoup4==4.5.1
+beautifulsoup4==4.5.3
 
 # Translation utils
 django-rosetta==0.7.12
@@ -42,10 +42,10 @@ django-ses==0.8.1
 
 # Amazon services
 boto==2.45.0
-boto3==1.4.2
+boto3==1.4.4
 
 # Excel 2010 support
-xlsxwriter==0.9.4
+xlsxwriter==0.9.6
 
 # External services
 # Note: Need hand check after updating.
@@ -69,7 +69,7 @@ django-flat-theme==1.1.4
 micawber==0.3.3
 
 # Db and media backup
-django-storages==1.5.1
+django-storages==1.5.2
 django-dbbackup==3.1.3
 
 # Import/Export
@@ -82,30 +82,31 @@ rq-scheduler==0.7.0
 django-rq==0.9.4
 
 # ipython notebook
+# nbconvert==5.1.1
 jupyter>=1.0
 
 djangorestframework==3.5.3
-django-js-reverse==0.7.2
+django-js-reverse==0.7.3
 
 # Misc utils
-django-mptt==0.8.6
+django-mptt==0.8.7
 django-bootstrap-pagination==1.6.2
 # django-bitfield==1.8.0
 # Fork with fixed Django 1.9 & 1.10 warnings
 git+https://github.com/goodmase/django-bitfield.git@cde12bbe093dc1c71b006ac383e3c4d5b5f7defb
 django-filter==0.15.3
-hashids==1.1.0
-django-recaptcha==1.2.0
+hashids==1.2.0
+django-recaptcha==1.2.1
 django-registration-redux==1.4
 django-fixture-media==0.1.4
 django-annoying==0.10.3
 django-bootstrap3==7.1.0
 django-extra-views==0.8.0
 # Generic, reusable mixins
-django-braces==1.10.0
+django-braces==1.11.0
 django-sitemetrics==0.6.1
-django-taggit==0.20.2
-icalendar==3.9.1
+django-taggit==0.22.0
+icalendar==3.11.2
 python-dateutil==2.5.3
 sqlparse==0.2.2
 django-pipeline==1.6.10
