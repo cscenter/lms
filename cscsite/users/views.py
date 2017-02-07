@@ -332,8 +332,8 @@ class ICalView(generic.base.View):
         cal = Calendar()
         timezone_comp = create_timezone(context['tz'],
                                         context['min_dt'], context['max_dt'])
-        cal.add('prodid', ("-//Computer Science Center Calendar"
-                           "//compscicenter.ru//"))
+        cal.add('prodid', "-//{} Calendar//{}//".format(
+            self.request.site.name, self.request.site.domain))
         cal.add('version', '2.0')
         cal.add_component(timezone_comp)
         cal.add('X-WR-CALNAME', vText(context['calname']))
@@ -416,9 +416,9 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
                         'max_dt': max_dt,
                         'user': user,
                         'calname': "Занятия CSC",
-                        'caldesc': ("Календарь занятий Computer "
-                                    "Science Center ({})"
-                                    .format(user.get_full_name())),
+                        'caldesc': "Календарь занятий "
+                                   "{} ({})".format(self.request.site.name,
+                                                    user.get_full_name()),
                         'teacher_ccs': teacher_ccs,
                         'student_ccs': student_ccs})
         return context
@@ -500,9 +500,10 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
         context.update({'max_dt': max_dt,
                         'user': user,
                         'calname': "Задания CSC",
-                        'caldesc': ("Календарь сроков выполнения заданий "
-                                    "Computer Science Center ({})"
-                                    .format(user.get_full_name())),
+                        'caldesc': "Календарь сроков "
+                                   "выполнения заданий "
+                                   "{} ({})".format(self.request.site.name,
+                                                    user.get_full_name()),
                         'student_as': student_as,
                         'teacher_as': teacher_as})
         return context
@@ -514,8 +515,8 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
                      zip(repeat('learning'), context['student_as']))
         events = []
         for a_type, a in data:
-            uid = ("assignments-{}-{}-{}@compscicenter.ru"
-                   .format(user.pk, a.pk, a_type))
+            uid = "assignments-{}-{}-{}@{}".format(user.pk, a.pk, a_type,
+                                                   self.request.site.domain)
             summary = "{} ({})".format(a.title, a.course_offering.course.name)
             url = "http://{}{}".format(self.request.META['HTTP_HOST'],
                                        a.hacky_url)
@@ -559,7 +560,7 @@ class ICalEventsView(ICalView):
         context.update({'max_dt': max_dt,
                         'calname': "События CSC",
                         'caldesc': ("Календарь общих событий "
-                                    "Computer Science Center"),
+                                    "{}".format(self.request.site.name)),
                         'nces': nces})
         return context
 
