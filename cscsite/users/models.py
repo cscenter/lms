@@ -285,7 +285,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         _("Github ID"),
         max_length=80,
         validators=[RegexValidator(
-            regex="^[a-zA-Z0-9](?-[a-zA-Z0-9])*[a-zA-Z0-9]$")],
+            regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*[a-zA-Z0-9]$")],
         blank=True)
     stepic_id = models.PositiveIntegerField(
         _("Stepic ID"),
