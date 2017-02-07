@@ -110,7 +110,8 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_queryset(self):
         return (Applicant.objects
-                .select_related("exam", "online_test", "campaign")
+                .select_related("exam", "online_test", "campaign",
+                                "campaign__city")
                 .prefetch_related("interviews")
                 .annotate(exam_result_null=Coalesce('exam__score', Value(-1)))
                 .order_by("-exam_result_null", "-exam__score",
@@ -420,15 +421,15 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         user.last_name = applicant.second_name
         user.enrollment_year = user.curriculum_year = now().year
         # Looks like the same fields below
-        user.yandex_id = applicant.yandex_id
+        user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
         # For github left part after github.com/ only
-
-        user.github_id = applicant.github_id.split("github.com/",
-                                                   maxsplit=1)[-1]
+        if applicant.github_id:
+            user.github_id = applicant.github_id.split("github.com/",
+                                                       maxsplit=1)[-1]
         user.stepic_id = applicant.stepic_id
         user.university = applicant.university
         user.phone = applicant.phone
-        user.workplace = applicant.workplace
+        user.workplace = applicant.workplace if applicant.workplace else ""
         user.uni_year_at_enrollment = applicant.course_to_numeric()
         user.save()
         # Link applicant and user

@@ -12,6 +12,11 @@ from learning.admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest
 
 
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ['year', 'city']
+    list_filter = ['city']
+
+
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
@@ -30,7 +35,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign",)
+                         .select_related("campaign", "campaign__city")
                          .order_by("second_name"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -54,7 +59,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign",)
+                         .select_related("campaign", "campaign__city")
                          .order_by("second_name"))
         return (super(ExamAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -69,10 +74,29 @@ class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
                      'first_name', 'second_name', 'email']
     readonly_fields = ['yandex_id_normalize']
 
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == 'campaign':
+            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class InterviewAssignmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'campaign']
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == 'campaign':
+            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class ContestAdmin(admin.ModelAdmin):
     list_display = ['contest_id', 'campaign']
     list_filter = ['campaign']
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == 'campaign':
+            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class InterviewAdmin(admin.ModelAdmin):
@@ -83,7 +107,7 @@ class InterviewAdmin(admin.ModelAdmin):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign",)
+                         .select_related("campaign", "campaign__city")
                          .order_by("second_name"))
         return (super(InterviewAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -98,7 +122,8 @@ class InterviewCommentAdmin(admin.ModelAdmin):
         if db_field.name == 'interview':
             kwargs['queryset'] = (
                 Interview.objects.select_related("applicant",
-                                                 "applicant__campaign", ))
+                                                 "applicant__campaign",
+                                                 "applicant__campaign__city",))
         return (super(InterviewCommentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
@@ -118,11 +143,11 @@ class InterviewCommentAdmin(admin.ModelAdmin):
     get_interviewer.short_description = _("Interviewer")
 
 
-admin.site.register(Campaign)
+admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantRecordResourceAdmin)
 admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interview, InterviewAdmin)
-admin.site.register(InterviewAssignment)
+admin.site.register(InterviewAssignment, InterviewAssignmentAdmin)
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Comment, InterviewCommentAdmin)

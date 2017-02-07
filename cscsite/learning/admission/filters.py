@@ -17,7 +17,9 @@ from learning.admission.models import Applicant, Interview, Campaign
 class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
-        queryset=Campaign.objects.order_by("-year").all())
+        queryset=(Campaign.objects
+                  .select_related("city")
+                  .order_by("-city__name", "-year").all()))
     second_name = django_filters.CharFilter(lookup_type='icontains',
                                             label=_("Second name"))
 
