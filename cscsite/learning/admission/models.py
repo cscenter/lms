@@ -13,14 +13,24 @@ from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 
-from learning.settings import PARTICIPANT_GROUPS
+from core.models import City
+from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
+from learning.utils import get_current_semester_pair
+
+
+def current_year():
+    year, _ = get_current_semester_pair()
+    return year
 
 
 @python_2_unicode_compatible
 class Campaign(models.Model):
-    name = models.CharField(_("Campaign|Campaign_name"), max_length=140)
-    code = models.CharField(_("Campaign|Code"), max_length=140,
-                            help_text=_("Campaign year"))
+    year = models.PositiveSmallIntegerField(
+        _("Campaign|Year"),
+        validators=[MinValueValidator(CENTER_FOUNDATION_YEAR)],
+        default=current_year)
+    city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE,
+                             verbose_name=_("City"))
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
@@ -37,6 +47,10 @@ class Campaign(models.Model):
 
     def __str__(self):
         return smart_text(self.name)
+
+    @property
+    def name(self):
+        return _("Campaign {}").format(self.year)
 
 
 @python_2_unicode_compatible
@@ -210,7 +224,7 @@ class Applicant(TimeStampedModel):
     def __str__(self):
         if self.campaign_id:
             return smart_text(
-                "{} [{}]".format(self.get_full_name(), self.campaign.code))
+                "{} [{}]".format(self.get_full_name(), self.campaign_id))
         else:
             return smart_text(self.get_full_name())
 
