@@ -74,7 +74,7 @@ class UserProfileForm(forms.ModelForm):
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
 
-        club_fields = ['first_name', 'last_name', 'patronymic', 'email']
+        club_fields = ['first_name', 'last_name', 'patronymic']
         if kwargs['instance'].is_student_club and \
            not kwargs['instance'].is_student_center:
             show_fields = club_fields + show_fields
