@@ -20,7 +20,7 @@ class CampaignFactory(factory.DjangoModelFactory):
     class Meta:
         model = Campaign
 
-    name = factory.Sequence(lambda n: "Campaign%03d" % n)
+
     year = factory.Iterator(count(start=2015))
     online_test_max_score = FuzzyInteger(30, 40)
     online_test_passing_score = FuzzyInteger(20, 25)

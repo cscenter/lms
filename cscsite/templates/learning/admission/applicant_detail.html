@@ -5,7 +5,7 @@
 {% load static %}
 {% load markdown from core_tags %}
 
-{% block title %} Анкета {{ applicant.campaign.code }} - {{ applicant.get_full_name }}{% endblock title %}
+{% block title %} Анкета {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -71,7 +71,7 @@
             </div>
         {% endif %}
     </div>
-    <div class="additional-info">{{ applicant.campaign }}<br>Статус: {{ applicant.get_status_display|default_if_none:"<не указан>" }}</div>
+    <div class="additional-info">Набор: {{ applicant.campaign }}<br>Статус: {{ applicant.get_status_display|default_if_none:"<не указан>" }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li role="presentation" class="active">
@@ -133,7 +133,7 @@
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
             {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign.name }})</a><br>
+                <a target="_blank" href="{% url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign }})</a><br>
             {% empty %}
                 Похожие анкеты не найдены.
             {% endfor %}

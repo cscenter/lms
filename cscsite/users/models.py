@@ -271,6 +271,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
+    # FIXME: why not null? The same for github_id
     yandex_id = models.CharField(
         _("Yandex ID"),
         max_length=80,

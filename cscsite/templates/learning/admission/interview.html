@@ -6,7 +6,7 @@
 {% load markdown from core_tags %}
 {% load floatdot from core_tags %}
 
-{% block title %} {{ applicant.campaign.code }} - {{ applicant.get_full_name }}{% endblock title %}
+{% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -146,7 +146,7 @@
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
             {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign.name }})</a><br>
+                <a target="_blank" href="{% url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign }})</a><br>
             {% empty %}
                 Похожие анкеты не найдены.
             {% endfor %}

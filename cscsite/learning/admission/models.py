@@ -46,11 +46,7 @@ class Campaign(models.Model):
         verbose_name_plural = _("Campaigns")
 
     def __str__(self):
-        return smart_text(self.name)
-
-    @property
-    def name(self):
-        return _("Campaign {}").format(self.year)
+        return smart_text(_("{}, {}").format(self.city.name, self.year))
 
 
 @python_2_unicode_compatible
@@ -224,7 +220,7 @@ class Applicant(TimeStampedModel):
     def __str__(self):
         if self.campaign_id:
             return smart_text(
-                "{} [{}]".format(self.get_full_name(), self.campaign_id))
+                "{} [{}]".format(self.get_full_name(), self.campaign))
         else:
             return smart_text(self.get_full_name())
 
