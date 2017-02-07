@@ -97,8 +97,6 @@ urlpatterns += [
     url(r'^users/(?P<pk>\d+)/csc_assignments.ics',
         ICalAssignmentsView.as_view(),
         name='user_ical_assignments'),
-    url(r'^csc_events.ics', ICalEventsView.as_view(),
-        name='ical_events'),
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
 
