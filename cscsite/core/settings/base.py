@@ -8,13 +8,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 from enum import IntEnum
+from pathlib import Path
 
-from unipath import Path
+PROJECT_DIR = Path(__file__).parents[2]
+ROOT_DIR = PROJECT_DIR.parent
 
-PROJECT_DIR = Path(__file__).ancestor(3)
-ROOT_DIR = PROJECT_DIR.ancestor(1)
-
-MEDIA_ROOT = PROJECT_DIR.child("media")
+MEDIA_ROOT = str(PROJECT_DIR / "media")
 MEDIA_URL = "/media/"
 
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
@@ -34,7 +33,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            PROJECT_DIR.child("templates"),
+            str(PROJECT_DIR / "templates"),
         ],
         'OPTIONS': {
             'loaders': [
@@ -102,12 +101,13 @@ INSTALLED_APPS = [
     'stats.apps.StatisticsConfig',
     'django_rq',
     'django_js_reverse',
+    'webpack_loader',
 ]
 
 # django-js-reverse settings
 JS_REVERSE_JS_VAR_NAME = 'URLS'
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
-JS_REVERSE_OUTPUT_PATH = PROJECT_DIR.child("assets", "js", "urls")
+JS_REVERSE_OUTPUT_PATH = str(PROJECT_DIR / "assets" / "js" / "urls")
 
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
@@ -156,7 +156,7 @@ LANGUAGES = [
 USE_I18N = True
 USE_L10N = True
 LOCALE_PATHS = [
-    Path(PROJECT_DIR, "core", "locale"),
+    str(PROJECT_DIR / "core" / "locale"),
 ]
 
 TIME_ZONE = 'Europe/Moscow'
@@ -193,9 +193,9 @@ DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = PROJECT_DIR.child("static")
+STATIC_ROOT = str(PROJECT_DIR / "static")
 STATICFILES_DIRS = [
-    PROJECT_DIR.child("assets"),
+    str(PROJECT_DIR / "assets"),
 ]
 
 # See django-pipeline for details
@@ -267,3 +267,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
+
+# WEBPACK_LOADER = {
+#     'DEFAULT': {
+#         'BUNDLE_DIR_NAME': 'bundles/',
+#         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+#     }
+# }
