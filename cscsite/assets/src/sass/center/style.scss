@@ -55,8 +55,7 @@ page[size="A4"] {
   height: 296mm; /* smthg wrong with 297mm */
   padding: 2cm 2cm 2cm 2cm;
   display: block;
-  margin: 0 auto;
-  margin-bottom: 0.5cm;
+  margin: 0 auto 0.5cm auto;
   font: 12pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
   box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
   position: relative;
@@ -152,20 +151,6 @@ h4.no-top-margin {
   .container-responsive {
     width: $container-large-desktop;
   }
-}
-
-.logo-cell {
-  position: relative;
-  margin-left: 15px;
-  margin-right: 10px;
-  width: 80px;
-  float: left;
-  height: 40px;
-}
-
-.logo-container {
-  position: absolute;
-  z-index: 1000;
 }
 
 body {

@@ -46,6 +46,10 @@ $header-lvl1-bg:                 #4F86A0;
                 font-weight: normal;
             }
         }
+
+        &.__narrow li {
+            padding: 0 4px;
+        }
     }
 
     .menu.lvl1 {
