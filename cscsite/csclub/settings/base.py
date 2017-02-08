@@ -2,10 +2,9 @@
 CS club app specific settings
 """
 
-from unipath import Path
 from core.settings.base import *
 
-BASE_DIR = Path(__file__).ancestor(2)
+BASE_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
 ROOT_URLCONF = 'csclub.urls'
@@ -38,11 +37,11 @@ SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
 # https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS = [
-    Path(BASE_DIR, "locale"),
+    str(BASE_DIR / "locale"),
 ] + LOCALE_PATHS
 
 # Template overrides
-TEMPLATES[0]['DIRS'] = [BASE_DIR.child("templates")] + TEMPLATES[0]['DIRS']
+TEMPLATES[0]['DIRS'] = [str(BASE_DIR / "templates")] + TEMPLATES[0]['DIRS']
 TEMPLATES[0]['OPTIONS']['context_processors'] += (
     'core.context_processors.cities',
 )
@@ -56,7 +55,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compsciclub.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = Path(BASE_DIR, "newrelic.ini")
+NEWRELIC_CONF = str(BASE_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 # Registration and Recaptcha settings

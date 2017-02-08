@@ -10,7 +10,7 @@ for template in TEMPLATES:
 
 ALLOWED_HOSTS = [".compscicenter.ru"]
 
-MEDIA_ROOT = Path('/shared', 'media')
+MEDIA_ROOT = str(Path('/shared', 'media'))
 
 # Logging-related stuff
 RAVEN_CONFIG = {

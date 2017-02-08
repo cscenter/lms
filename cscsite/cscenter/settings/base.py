@@ -2,14 +2,13 @@
 CS center app specific settings
 """
 
-from unipath import Path
 from core.settings.base import *
 
 SITE_ID = 1
 ROOT_URLCONF = 'cscenter.urls'
 WSGI_APPLICATION = 'cscenter.wsgi.application'
 
-BASE_DIR = Path(__file__).ancestor(2)
+BASE_DIR = Path(__file__).parents[1]
 
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -30,16 +29,15 @@ INSTALLED_APPS += [
 ]
 
 # Add site specific templates
-TEMPLATES[0]['DIRS'] += [BASE_DIR.child("templates")]
+TEMPLATES[0]['DIRS'] += [str(BASE_DIR / "templates")]
 
 # FIXME: Remove after Django 1.8.4 would been released?
 # https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS += [
-    Path(BASE_DIR, "locale"),
-    Path(PROJECT_DIR, "learning", "projects", "locale"),
-    Path(PROJECT_DIR, "learning", "admission", "locale"),
+    str(BASE_DIR / "locale"),
+    str(PROJECT_DIR / "learning" / "projects" / "locale"),
+    str(PROJECT_DIR / "learning" / "admission" / "locale"),
 ]
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'
 
@@ -49,7 +47,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = Path(BASE_DIR, "newrelic.ini")
+NEWRELIC_CONF = str(BASE_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 

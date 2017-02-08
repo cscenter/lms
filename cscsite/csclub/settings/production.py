@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import
 
-from unipath import Path
-
 from .base import *
 
 DEBUG = False
@@ -12,7 +10,7 @@ for template in TEMPLATES:
 
 ALLOWED_HOSTS = [".compsciclub.ru"]
 
-MEDIA_ROOT = Path('/shared', 'media')
+MEDIA_ROOT = str(Path('/shared', 'media'))
 
 # Logging-related stuff
 RAVEN_CONFIG = {

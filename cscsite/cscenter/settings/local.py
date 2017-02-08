@@ -31,7 +31,7 @@ DEBUG_TOOLBAR_PANELS = [
     # 'djdt_flamegraph.FlamegraphPanel',
 ]
 
-FLAMES_DIR = PROJECT_DIR.parent.child("flame_graph")
+FLAMES_DIR = PROJECT_DIR.parent / "flame_graph"
 
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
