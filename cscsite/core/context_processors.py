@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import ImproperlyConfigured
+from core.models import City
 
 CITY_LIST = {"CACHE": []}
 
 
 def cities(request):
-    from core.models import City
     if not CITY_LIST["CACHE"]:
         protocol = request.scheme + '://'
         CITY_LIST["CACHE"] = City.objects.all()
