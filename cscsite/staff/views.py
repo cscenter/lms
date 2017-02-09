@@ -84,7 +84,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         context["current_term"] = {"year": year, "type": term}
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
         context["prev_term"] = {"year": prev_term_year, "type": prev_term}
-        context["campaigns"] = Campaign.objects.order_by("-name").all()
+        context["campaigns"] = Campaign.objects.order_by("-city__name", "-year")
         return context
     template_name = "staff/exports.html"
 

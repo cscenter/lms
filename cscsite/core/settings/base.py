@@ -268,9 +268,9 @@ REST_FRAMEWORK = {
     ),
 }
 
-# WEBPACK_LOADER = {
-#     'DEFAULT': {
-#         'BUNDLE_DIR_NAME': 'bundles/',
-#         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-#     }
-# }
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'js/dist/',  # relative to STATIC_URL
+        'STATS_FILE': str(ROOT_DIR / "webpack" / "webpack-stats.json"),
+    }
+}
