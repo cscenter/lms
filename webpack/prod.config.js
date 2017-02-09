@@ -1,15 +1,8 @@
 const webpack = require('webpack');
-// const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
-    // devtool: 'source-map', // No need for dev tool in production
-
-    entry: {
-        vendor: []
-    },
-
-    module: {
-        loaders: [],
+    output: {
+        filename: '[name]-[chunkhash].js',
     },
 
     plugins: [
@@ -19,7 +12,6 @@ module.exports = {
             },
             '__DEVELOPMENT__': false
         }),
-        // new ExtractTextPlugin('styles/[name].[contenthash].css'),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({

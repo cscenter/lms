@@ -1,15 +1,11 @@
+const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    devtool: 'source-map', // 'cheap-module-eval-source-map',
+    devtool: "cheap-eval-source-map",
 
-    entry: {
-        vendor: [
-        ]
-    },
-
-    module: {
-        loaders: [],
+    output: {
+        publicPath: 'http://localhost:8081/static/',
     },
 
     plugins: [
@@ -21,4 +17,9 @@ module.exports = {
         }),
         new webpack.optimize.OccurrenceOrderPlugin()
     ],
+
+      devServer: {
+        contentBase: path.resolve(__dirname, '../cscsite/assets/js/dist'),
+          port: 8081,
+      },
 };

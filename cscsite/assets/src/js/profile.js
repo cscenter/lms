@@ -1,4 +1,6 @@
- (function ($, _, profileAppInit) {
+import Cookies from 'js-cookie';
+
+(function ($, _, profileAppInit) {
     "use strict";
 
 
@@ -35,7 +37,7 @@
         url: '/profile-update-image/',
         data: {"user_id": profileAppInit.user_id},
         headers: {
-            'X-CSRFToken': $.cookie('csrftoken')
+            'X-CSRFToken': Cookies.get('csrftoken')
         }
     };
 

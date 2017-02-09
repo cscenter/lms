@@ -1,82 +1,93 @@
 const path = require('path');
-const autoprefixer = require('autoprefixer');
-// const postcssImport = require('postcss-import');
-const merge = require('webpack-merge');
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-
+const BundleTracker = require('webpack-bundle-tracker');
+const merge = require('webpack-merge');  // merge webpack configs
+const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
 
 const development = require('./dev.config');
 const production = require('./prod.config');
 
-require('babel-polyfill').default;
+// require('babel-polyfill').default; FIXME: wtf?
 
 const TARGET = process.env.npm_lifecycle_event;
+process.env.BABEL_ENV = TARGET;
+
+const __assetsdir = path.join(__dirname, '../cscsite/assets');
 
 const PATHS = {
-    app: path.join(__dirname, '../client/'),
-    build: path.join(__dirname, '../client/dist'),
+    common: path.join(__assetsdir, '/src/js/main.js'),
+    profile: path.join(__assetsdir, '/src/js/profile.js'),
+    dist: path.join(__assetsdir, '/js/dist'),
 };
 
 const VENDOR = [
     // 'history',
-    'babel-polyfill',
-    'react',
-    'react-dom',
-    'react-redux',
+    // 'babel-polyfill',
+    // 'react',
+    // 'react-dom',
+    // 'react-redux',
     // 'react-router',
-    'react-mixin',
+    // 'react-mixin',
     // 'classnames',
-    'redux',
+    // 'redux',
     // 'react-router-redux',
-    'jquery',
+    // 'jquery',
+    // 'bootstrap-sass',
 ];
 
-process.env.BABEL_ENV = TARGET;
-
 const common = {
+    context: path.resolve(__dirname, ".."),
+
     entry: {
-        app: PATHS.app,
-        vendor: VENDOR,
+        main: PATHS.common,
+        profile: PATHS.profile,
+        // vendor: VENDOR,
     },
 
     output: {
-        filename: '[name].[hash].js',
-        path: PATHS.build,
-        publicPath: '/static'
+        filename: '[name]-[hash].js',
+        path: PATHS.dist,
+    },
+
+    externals: {
+        jquery: 'jQuery',
+        // Note: EpicEditor is an old dead shit without correct support.
+        EpicEditor: 'EpicEditor'
     },
 
     plugins: [
-        // new HtmlWebpackPlugin({
-        //     template: path.join(__dirname, '../src/static/index.html'),
-        //     hash: true,
-        //     filename: 'index.html',
-        //     inject: 'body'
+        new BundleTracker({filename: './webpack/webpack-stats.json'}),
+        // TODO: Prevent autoload jquery for now
+        // new webpack.ProvidePlugin({
+        //     '$': 'jquery',
+        //     'jQuery': 'jquery',
+        //     'window.jQuery': 'jquery'
         // }),
-        new webpack.ProvidePlugin({
-            '$': 'jquery',
-            'jQuery': 'jquery',
-            'window.jQuery': 'jquery'
-        }),
         // extract all common modules to vendor so we can load multiple apps in one page
-        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.[hash].js' }),
-        new CleanWebpackPlugin([PATHS.build], {
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+        }),
+        new CleanWebpackPlugin([PATHS.dist], {
+            verbose: true,
             root: process.cwd()
         })
     ],
 
     resolve: {
-        extensions: ['', '.jsx', '.js', '.json'],
-        modulesDirectories: ['node_modules', PATHS.app],
+        extensions: ['.jsx', '.js'],
+        modules: [
+            path.join(__assetsdir, '/src/js'),
+            'node_modules',
+        ],
     },
 
     module: {
+        // noParse: [/bootstrap-sweetalert/],
         loaders: [
             {
                 test: /\.js$/,
                 loaders: ['babel-loader'],
-                exclude: /node_modules/,
+                exclude: '/node_modules/',
             }
         ]
     },
@@ -97,10 +108,10 @@ const common = {
     // },
 };
 
-if (TARGET === 'dev' || !TARGET) {
-    module.exports = merge(development, common);
+if (['dev', 'start'].includes(TARGET) || !TARGET) {
+    module.exports = merge(common, development);
 }
 
 if (TARGET === 'prod' || !TARGET) {
-    module.exports = merge(production, common);
+    module.exports = merge(common, production);
 }

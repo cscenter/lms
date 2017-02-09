@@ -1,3 +1,11 @@
+import Cookies from 'js-cookie';
+import 'bootstrap-sass';
+import $ from 'jquery';
+import md5 from "blueimp-md5";
+import "jgrowl/jquery.jgrowl.js";
+import swal from "bootstrap-sweetalert";
+import "mathjax_config";
+
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -201,7 +209,7 @@ function processUberText(target) {
     var fn = {
         configureCSRFAjax: function () {
             // Append csrf token on ajax POST requests
-            var token = $.cookie('csrftoken');
+            var token = Cookies.get('csrftoken');
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -262,7 +270,7 @@ function processUberText(target) {
                         editor.remove(filename);
                     } else if (CSC.config.localStorage.hashes) {
                         var text = editor.exportFile(filename).replace(/\s+/g, '');
-                        var hash = CryptoJS.MD5(text).toString();
+                        var hash = md5(text).toString();
                         if (hash in CSC.config.localStorage.hashes) {
                             editor.remove(filename);
                         }

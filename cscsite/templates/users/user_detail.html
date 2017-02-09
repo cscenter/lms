@@ -3,21 +3,26 @@
 {% load thumbnail %}
 {% load core_tags %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 {% load markdown from core_tags %}
 {% load userpreview from custom_thumbnail %}
 {% block title %}{{ user_object.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Center{% endblock title %}
 
+
 {% block javascripts %}
     {#  Initial data  #}
     <script type="text/javascript">
+        {# TODO: How to preload this staff with webpack? #}
         var profileAppInit = {{ initial|safe }};
         profileAppInit["preload"] = [
             "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
             "{% static "js/vendor/cropper.js" %}"
         ];
     </script>
-    <script type="text/javascript" src="{% static "js/profile.js" %}"></script>
+
+    {% render_bundle 'profile' %}
 {% endblock javascripts %}
+
 
 {% block content %}
     <div id="profile">

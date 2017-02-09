@@ -43,5 +43,4 @@ module.exports = {
             }
         ]
     },
-    debug: true
 };

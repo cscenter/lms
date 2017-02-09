@@ -4,6 +4,20 @@
 {% load core_tags %}
 {% load staticfiles %}
 {% load markdown from core_tags %}
+{% load render_bundle from webpack_loader %}
+
+
+{% block javascripts %}
+    {#  Initial data  #}
+    <script type="text/javascript">
+        var profileAppInit = {{ initial|safe }};
+        profileAppInit["preload"] = [
+            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
+            "{% static "js/vendor/cropper.js" %}"
+        ];
+    </script>
+    {% render_bundle 'profile' %}
+{% endblock javascripts %}
 
 {% block content %}
 <div class="container">
@@ -392,15 +406,3 @@
 </div>
     {% include "users/_user_detail_upload_photo.html" %}
 {% endblock content %}
-
-{% block javascripts %}
-    {#  Initial data  #}
-    <script type="text/javascript">
-        var profileAppInit = {{ initial|safe }};
-        profileAppInit["preload"] = [
-            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
-            "{% static "js/vendor/cropper.js" %}"
-        ];
-    </script>
-    <script type="text/javascript" src="{% static "js/profile.js" %}"></script>
-{% endblock javascripts %}
