@@ -12,7 +12,6 @@ module.exports = {
             },
             '__DEVELOPMENT__': false
         }),
-        new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
