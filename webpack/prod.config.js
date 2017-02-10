@@ -1,8 +1,10 @@
 const webpack = require('webpack');
+const WebpackChunkHash = require('webpack-chunk-hash');
 
 module.exports = {
     output: {
         filename: '[name]-[chunkhash].js',
+        chunkFilename: '[name]-[chunkhash].js',
     },
 
     plugins: [
@@ -18,5 +20,9 @@ module.exports = {
                 warnings: false
             }
         }),
+        // Need this plugin for deterministic hashing
+        // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
+        new webpack.HashedModuleIdsPlugin(),
+        new WebpackChunkHash(),
     ],
 };
