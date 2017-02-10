@@ -16,7 +16,7 @@
             "{% static "js/vendor/cropper.js" %}"
         ];
     </script>
-    {% render_bundle 'profile' %}
+    {% render_bundle 'profile' 'js' attrs='defer' %}
 {% endblock javascripts %}
 
 {% block content %}
