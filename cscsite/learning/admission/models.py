@@ -304,6 +304,7 @@ class Test(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="online_test")
     details = JSONField(
+        verbose_name=_("Details"),
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
         null=True,
@@ -338,6 +339,7 @@ class Exam(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="exam")
     details = JSONField(
+        verbose_name=_("Details"),
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
         null=True
