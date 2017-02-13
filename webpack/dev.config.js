@@ -15,7 +15,6 @@ module.exports = {
             },
             '__DEVELOPMENT__': true
         }),
-        new webpack.optimize.OccurrenceOrderPlugin()
     ],
 
       devServer: {
