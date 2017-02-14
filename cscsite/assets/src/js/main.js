@@ -5,12 +5,14 @@ import md5 from "blueimp-md5";
 import "jgrowl/jquery.jgrowl.js";
 import swal from "bootstrap-sweetalert";
 import "mathjax_config";
+import {escape as _escape} from "lodash/escape";
+import {unescape as _unescape} from "lodash/unescape";
 
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
-;
+
 function getLocalStorageKey(textarea) {
     return (window.location.pathname.replace(/\//g, "_")
     + "_" + textarea.name);
@@ -80,7 +82,7 @@ function initUberEditor(textarea) {
             = editor.getElement('previewerIframe').contentDocument;
         var target = $("#epiceditor-preview", contentDocument).get(0);
 
-        var text = _.unescape(target.innerHTML);
+        var text = _unescape(target.innerHTML);
         if (text.length > 0) {
             $.ajax({
                 method: "POST",
@@ -177,13 +179,13 @@ function processUberText(target) {
             // unescape (&amp; first, then &lt;) and escape again
             // Note: It can be unpredictable if you want show "&amp;lt;"
             var t = block.innerHTML;
-            block.innerHTML = _.escape(_.unescape(_.unescape(t)));
+            block.innerHTML = _escape(_unescape(_unescape(t)));
             hljs.highlightBlock(block);
         });
     }]);
 }
 
-(function ($, CSC, _) {
+(function ($, CSC) {
     "use strict";
 
     var ends_at_touched = false;
@@ -261,18 +263,18 @@ function processUberText(target) {
         cleanLocalStorageEditorsFiles: function () {
             // eliminate old and persisted epiceditor "files"
             if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
-                var editor = new EpicEditor();
-                var files = editor.getFiles(null, true);
-                _.each(files, function (meta, filename, m) {
-                    var hoursOld = (((new Date()) - (new Date(meta.modified)))
-                    / (1000 * 60 * 60));
+                const editor = new EpicEditor();
+                const files = editor.getFiles(null, true);
+                Object.keys(files).forEach((fileKey) => {
+                    let f = files[fileKey];
+                    const hoursOld = (((new Date()) - (new Date(f.modified))) / (1000 * 60 * 60));
                     if (hoursOld > 24) {
-                        editor.remove(filename);
+                        editor.remove(fileKey);
                     } else if (CSC.config.localStorage.hashes) {
-                        var text = editor.exportFile(filename).replace(/\s+/g, '');
-                        var hash = md5(text).toString();
+                        let text = editor.exportFile(fileKey).replace(/\s+/g, '');
+                        let hash = md5(text).toString();
                         if (hash in CSC.config.localStorage.hashes) {
-                            editor.remove(filename);
+                            editor.remove(fileKey);
                         }
                     }
                 });
@@ -353,4 +355,4 @@ function processUberText(target) {
             }
         }
     };
-})(jQuery, CSC, _);
+})(jQuery, CSC);

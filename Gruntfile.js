@@ -22,27 +22,10 @@ module.exports = function (grunt) {
             }
         },
         concat: {
-            main: {
-                src: [
-                    '<%= JS_VENDOR %>/md5.js',
-                    '<%= JS_DEST %>/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js',
-                    '<%= JS_VENDOR %>/bootstrap.min.js',
-                    '<%= JS_VENDOR %>/jquery.jgrowl.js',
-                    '<%= JS_VENDOR %>/jquery.cookie.js',
-                    '<%= JS_VENDOR %>/sweet-alerts/sweet-alert.min.js',
-                    '<%= JS_SRC %>/mathjax_config.js',
-                    '<%= JS_SRC %>/main.js'
-                ],
-                dest: '<%= JS_RUNTIME %>/main.js'
-            },
             interview: {
                 src: ['<%= JS_VENDOR %>/jquery.barrating.min.js',
                       '<%= JS_SRC %>/interview.js'],
                 dest: '<%= JS_RUNTIME %>/interview.js'
-            },
-            profile: {
-                src: ['<%= JS_SRC %>/profile.js'],
-                dest: '<%= JS_RUNTIME %>/profile.js'
             },
             profile_edit: {
                 src: ['<%= JS_SRC %>/profile_edit.js'],
@@ -115,9 +98,6 @@ module.exports = function (grunt) {
         },
         // TODO: Make this task more generic after all src js will be moved to src folder
         uglify: {
-            main: {
-                files: {'<%= JS_DEST %>/main.js': ['<%= JS_RUNTIME %>/main.js']}
-            },
             alumni: {
                 files: {
                     '<%= JS_DEST %>/alumni.js': ['<%= JS_RUNTIME %>/alumni.js']
@@ -126,11 +106,6 @@ module.exports = function (grunt) {
             interview: {
                 files: {
                     '<%= JS_DEST %>/interview.js': ['<%= JS_RUNTIME %>/interview.js']
-                }
-            },
-            profile: {
-                files: {
-                    '<%= JS_DEST %>/profile.js': ['<%= JS_RUNTIME %>/profile.js']
                 }
             },
             profile_edit: {

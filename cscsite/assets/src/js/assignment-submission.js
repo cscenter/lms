@@ -1,4 +1,4 @@
-(function ($, _) {
+(function ($) {
     "use strict";
 
     var sidebar = $("#o-sidebar");
@@ -101,4 +101,4 @@
         fn.Launch();
     });
 
-})(jQuery, _);
+})(jQuery);
