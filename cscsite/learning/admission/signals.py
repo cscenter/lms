@@ -3,31 +3,32 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
-from django.apps import apps
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.timezone import now
 
+from learning.admission.models import Applicant, Interview, Comment
 
-def post_save_interview(sender, instance, created,
-                        *args, **kwargs):
+
+@receiver(post_save, sender=Interview)
+def post_save_interview(sender, instance, created, *args, **kwargs):
     """Set appropriate applicant status based on interview status."""
-    Applicant = apps.get_model('admission', 'Applicant')
-    Interview = apps.get_model('admission', 'Interview')
     interview = instance
-    # FIXME: move to constants?
-    APPLICANT_FINAL_STATUSES = (Applicant.ACCEPT,
-                                Applicant.VOLUNTEER,
-                                Applicant.ACCEPT_IF,
-                                Applicant.REJECTED_BY_INTERVIEW,
-                                Applicant.THEY_REFUSED)
+    APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
+                              Applicant.VOLUNTEER,
+                              Applicant.ACCEPT_IF,
+                              Applicant.REJECTED_BY_INTERVIEW,
+                              Applicant.THEY_REFUSED)
     today_start = datetime.datetime.combine(now(), datetime.time.min)
-    # Set applicant status to `INTERVIEW_SCHEDULED` if interview created
-    # with active status and current applicant status not in final state
+    # Set applicant status to `INTERVIEW_SCHEDULED` if interview has been
+    # created with active status and current applicant status not in final state
     if created and interview.status in [Interview.APPROVAL, Interview.WAITING]:
-        if interview.applicant.status not in APPLICANT_FINAL_STATUSES:
+        if interview.applicant.status not in APPLICANT_FINAL_STATES:
             interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
     elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        # If we deactivate interview and no active or completed interviews for
-        # applicant, revert applicant status to `INTERVIEW_TOBE_SCHEDULED`
+        # When trying to deactivate interview, check that applicant hasn't
+        # other active or completed interviews, if so,
+        # revert applicant status to `INTERVIEW_TOBE_SCHEDULED`
         has_positive_interviews = (
             Interview.objects
             .filter(applicant=interview.applicant,
@@ -40,6 +41,7 @@ def post_save_interview(sender, instance, created,
     interview.applicant.save()
 
 
+@receiver(post_save, sender=Comment)
 def post_save_interview_comment(sender, instance, created,
                                 *args, **kwargs):
     """
@@ -49,15 +51,14 @@ def post_save_interview_comment(sender, instance, created,
     """
     if not created:
         return
-    Applicant = apps.get_model('admission', 'Applicant')
-    Interview = apps.get_model('admission', 'Interview')
-    Comment = apps.get_model('admission', 'Comment')
-    interviewers = instance.interview.interviewers.all()
-    comments_cnt = Comment.objects.filter(interview=instance.interview).count()
+    comment = instance
+    interview = comment.interview
+    interviewers = interview.interviewers.all()
+    comments_cnt = Comment.objects.filter(interview=interview).count()
     if len(interviewers) == comments_cnt:
-        instance.interview.status = Interview.COMPLETED
-        instance.interview.save()
-        instance.interview.applicant.status = Applicant.INTERVIEW_COMPLETED
-        instance.interview.applicant.save()
-    if instance.interviewer not in interviewers and instance.interviewer.is_curator:
-        instance.interview.interviewers.add(instance.interviewer)
+        interview.status = Interview.COMPLETED
+        interview.save()
+        interview.applicant.status = Applicant.INTERVIEW_COMPLETED
+        interview.applicant.save()
+    if comment.interviewer not in interviewers and comment.interviewer.is_curator:
+        interview.interviewers.add(comment.interviewer)

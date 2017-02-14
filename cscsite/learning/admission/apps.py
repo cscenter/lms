@@ -1,9 +1,5 @@
 from django.apps import AppConfig
-from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
-
-from .signals import post_save_interview, \
-    post_save_interview_comment
 
 
 class AdmissionConfig(AppConfig):
@@ -11,7 +7,4 @@ class AdmissionConfig(AppConfig):
     verbose_name = _("Admission")
 
     def ready(self):
-        post_save.connect(post_save_interview,
-                          sender=self.get_model('Interview'))
-        post_save.connect(post_save_interview_comment,
-                          sender=self.get_model('Comment'))
+        from .signals import (post_save_interview, post_save_interview_comment)
