@@ -110,7 +110,9 @@ class Applicant(TimeStampedModel):
     yandex_id_normalize = models.CharField(
         _("Yandex ID normalisation"),
         max_length=80,
-        help_text=_("Applicant|yandex_id_normalization"))
+        help_text=_("Applicant|yandex_id_normalization"),
+        null=True,
+        blank=True)
     github_id = models.CharField(
         _("Github ID"),
         max_length=255,
@@ -208,7 +210,8 @@ class Applicant(TimeStampedModel):
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def clean(self):
-        self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
+        if self.yandex_id:
+            self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
     @classmethod
     def get_name_by_status_code(cls, code):
