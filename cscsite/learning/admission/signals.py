@@ -7,7 +7,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
-from learning.admission.models import Applicant, Interview, Comment
+from learning.admission.models import Applicant, Interview, Comment, Campaign
+
+
+@receiver(post_save, sender=Campaign)
+def post_save_campaign(sender, instance, created, *args, **kwargs):
+    """Make sure we have only one active campaign for a city in a moment."""
+    campaign = instance
+    # OK to update on each model change
+    if campaign.current:
+        (Campaign.objects
+         .filter(city=campaign.city)
+         .exclude(pk=campaign.pk)
+         .update(current=False))
 
 
 @receiver(post_save, sender=Interview)
