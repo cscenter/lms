@@ -7,4 +7,6 @@ class AdmissionConfig(AppConfig):
     verbose_name = _("Admission")
 
     def ready(self):
-        from .signals import (post_save_interview, post_save_interview_comment)
+        from .signals import (post_save_campaign,
+                              post_save_interview,
+                              post_save_interview_comment)
