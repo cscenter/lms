@@ -82,7 +82,6 @@ const common = {
     },
 
     module: {
-        // noParse: [/bootstrap-sweetalert/],
         rules: [
             {
                 test: /\.js$/,

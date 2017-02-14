@@ -13,10 +13,9 @@
     {#  Initial data  #}
     <script type="text/javascript">
         {# TODO: How to preload this staff with webpack? #}
-        var profileAppInit = {{ initial|safe }};
+        let profileAppInit = {{ initial|safe }};
         profileAppInit["preload"] = [
-            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
-            "{% static "js/vendor/cropper.js" %}"
+            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
     </script>
 
