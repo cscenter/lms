@@ -81,8 +81,7 @@ rq-scheduler==0.7.0
 django-rq==0.9.4
 
 # ipython notebook
-# nbconvert==5.1.1
-jupyter>=1.0
+nbconvert==5.1.1
 
 djangorestframework==3.5.3
 django-js-reverse==0.7.3

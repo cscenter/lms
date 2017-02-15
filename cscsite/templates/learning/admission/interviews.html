@@ -5,23 +5,22 @@
 {% load bootstrap_pagination %}
 {% load static %}
 {% load floatdot from core_tags %}
+{% load render_bundle from webpack_loader %}
 
 {% block body_class %} gray{% endblock body_class %}
 
 {% block stylesheets %}
     <link href="{% static "css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
 {% endblock stylesheets %}
 
 {% block javascripts %}
-    <script type="text/javascript">
+    {% render_bundle 'forms' 'js' attrs='defer' %}
+
+    <script type="text/javascript" defer>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         });
-    </script>
-    {# TODO: Can't add js without pain in Meta class of django form. Rewrite with django-sekizai after investigation    #}
-    <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
-    <script type="text/javascript">
         $(function () {
             $('#id_date').datetimepicker({
                 locale: 'ru',
@@ -57,7 +56,9 @@
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Собеседования текущего набора / {{ paginator.count }}</h3>
+          <h3 class="panel-title">
+              {{ selected_campaign }} / {{ paginator.count }}
+          </h3>
           <ul class="panel-info">
               {% if today %}
                 <li>

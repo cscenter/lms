@@ -93,7 +93,7 @@ class UserProfileForm(forms.ModelForm):
         model = CSCUser
         fields = ['phone', 'note', 'yandex_id', 'github_id',
                   'stepic_id', 'csc_review', 'private_contacts',
-                  'first_name', 'last_name', 'patronymic', 'email']
+                  'first_name', 'last_name', 'patronymic']
         widgets = {
             'note': Ubereditor,
             'csc_review': Ubereditor,

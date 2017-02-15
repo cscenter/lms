@@ -15,9 +15,9 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin, ContextMixin
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
@@ -25,7 +25,8 @@ from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
 from extra_views.formsets import BaseModelFormSetView
 
-from learning.admission.filters import ApplicantFilter, InterviewsFilter
+from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
+    InterviewsCuratorFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
     InterviewForm, ApplicantStatusForm,  \
     InterviewResultsModelForm
@@ -179,9 +180,13 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
 class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'interviews'
     model = Interview
-    filterset_class = InterviewsFilter
     paginate_by = 50
     template_name = "learning/admission/interviews.html"
+
+    def get_filterset_class(self):
+        if self.request.user.is_curator:
+            return InterviewsCuratorFilter
+        return InterviewsFilter
 
     def get_context_data(self, **kwargs):
         context = super(InterviewListView, self).get_context_data(**kwargs)
@@ -190,22 +195,38 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             date__date=now(),
             status=Interview.WAITING).count()
         context["filter"] = self.filterset
+        # Get name for selected campaign
+        context["selected_campaign"] = _("Current campaign")
+        if "campaign" in self.filterset.form.declared_fields:
+            context["selected_campaign"] = _("All campaigns")
+            for campaign_id, name in self.filterset.form.declared_fields["campaign"].choices:
+                try:
+                    if campaign_id == int(self.filterset.data.get("campaign")):
+                        context["selected_campaign"] = name
+                except (ValueError, TypeError):
+                    pass
         return context
 
     def get_queryset(self):
-        try:
-            campaign_current = Campaign.objects.get(current=True)
-        except Campaign.DoesNotExist:
-            messages.error(self.request, "Нет активных кампаний по набору!")
-            return Interview.objects.none()
         q = (Interview.objects
-             .filter(applicant__campaign=campaign_current)
              .select_related("applicant")
              .prefetch_related("interviewers")
              .annotate(average=Avg('comments__score'))
              .order_by("date", "pk"))
+        # Show current campaigns only by default
         if not self.request.user.is_curator:
-            q = q.filter(interviewers=self.request.user)
+            try:
+                current_campaigns = list(Campaign.objects
+                                         .filter(current=True)
+                                         .values_list("pk", flat=True))
+            except Campaign.DoesNotExist:
+                messages.error(self.request, "Нет активных кампаний по набору.")
+                return Interview.objects.none()
+            q = (q.filter(applicant__campaign_id__in=current_campaigns)
+                  .filter(interviewers=self.request.user))
+        elif not self.request.GET.get("campaign", False):
+            # TODO: Determine default campaign and redirect
+            pass
         return q
 
 
@@ -352,7 +373,9 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     def get_queryset(self):
         """Sort data by average interview score"""
         if self.campaign is None:
-            self.campaign = Campaign.objects.get(current=True)
+            city_code = "RU {}".format(self.kwargs["city_slug"].upper())
+            self.campaign = Campaign.objects.get(current=True,
+                                                 city__code=city_code)
         return (Applicant.objects
             # TODO: Carefully restrict by status also to optimize query
             .filter(campaign=self.campaign)

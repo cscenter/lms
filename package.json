@@ -14,7 +14,11 @@
     "url": "git+https://github.com/cscenter/site.git"
   },
   "author": "",
-  "dependencies": {},
+  "dependencies": {
+    "bootstrap-select": "^1.12.2",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.46",
+    "tempusdominus-core": "^5.0.0-alpha2"
+  },
   "devDependencies": {
     "autoprefixer": "^6.5.3",
     "babel-core": "^6.22.1",

@@ -17,6 +17,7 @@ const __assetsdir = path.join(__dirname, '../cscsite/assets');
 const PATHS = {
     common: path.join(__assetsdir, '/src/js/main.js'),
     profile: path.join(__assetsdir, '/src/js/profile.js'),
+    forms: path.join(__assetsdir, '/src/js/forms.js'),
     dist: path.join(__assetsdir, '/js/dist'),
 };
 
@@ -41,6 +42,7 @@ const common = {
     entry: {
         main: PATHS.common,
         profile: PATHS.profile,
+        forms: PATHS.forms,
         // vendor: VENDOR,
     },
 
@@ -79,6 +81,9 @@ const common = {
             path.join(__assetsdir, '/src/js'),
             'node_modules',
         ],
+        alias: {
+
+        }
     },
 
     module: {
