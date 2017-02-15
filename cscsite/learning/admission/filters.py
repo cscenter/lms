@@ -6,7 +6,7 @@ import datetime
 import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Row
+from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -64,7 +64,7 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
         return super(InterviewStatusFilter, self).filter(qs, value)
 
 
-class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     status = InterviewStatusFilter(choices=Interview.STATUSES, label=_("Status"),
                                    help_text="")
     date = django_filters.MethodFilter(action='filter_by_date', label=_("Date"),
@@ -72,7 +72,6 @@ class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
 
     class Meta:
         model = Interview
-        fields = ['status', 'date']
 
     def filter_by_date(self, queryset, value):
         try:
@@ -88,7 +87,7 @@ class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     def form(self):
         if not hasattr(self, '_form'):
             today = now().date()
-            self._form = super(InterviewsFilter, self).form
+            self._form = super().form
             self._form.fields["status"].initial = InterviewStatusFilter.AGREED
             self._form.fields["date"].initial = today.strftime("%d.%m.%Y")
             self._form.helper = FormHelper(self._form)
@@ -99,6 +98,43 @@ class InterviewsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
                     Div('status', css_class="col-xs-6"),
                     Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
                         css_class="col-xs-6"),
+                ),
+                Row(
+                    FormActions(Div(Submit('', _('Filter')),
+                                    css_class="col-xs-4"))
+                )
+            )
+        return self._form
+
+
+class InterviewsFilter(InterviewsBaseFilter):
+    class Meta(InterviewsBaseFilter.Meta):
+        fields = ['status', 'date']
+
+
+class InterviewsCuratorFilter(InterviewsBaseFilter):
+    campaign = django_filters.ModelChoiceFilter(
+        name="applicant__campaign",
+        label=_("Campaign"),
+        queryset=(Campaign.objects
+                  .select_related("city")
+                  .order_by("-city__name", "-year").all()),
+        help_text="")
+
+    class Meta(InterviewsBaseFilter.Meta):
+        fields = ['campaign', 'status', 'date']
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super(InterviewsCuratorFilter, self).form
+            self._form.helper.layout = Layout(
+                Row(
+                    Div(Field('campaign'),
+                        css_class="col-xs-4"),
+                    Div('status', css_class="col-xs-4"),
+                    Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
+                        css_class="col-xs-4"),
                 ),
                 Row(
                     FormActions(Div(Submit('', _('Filter')),
