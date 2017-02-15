@@ -10,10 +10,9 @@
 {% block javascripts %}
     {#  Initial data  #}
     <script type="text/javascript">
-        var profileAppInit = {{ initial|safe }};
-        profileAppInit["preload"] = [
-            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}",
-            "{% static "js/vendor/cropper.js" %}"
+        window.profileAppInit = {{ initial|safe }};
+        window.profileAppInit["preload"] = [
+            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
     </script>
     {% render_bundle 'profile' 'js' attrs='defer' %}

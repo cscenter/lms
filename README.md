@@ -21,3 +21,8 @@ Section | Description
     psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
     psql -h localhost cscdb csc < /path/to/dump.sql
     ./manage.py changepassword admin
+
+
+#### TODO:
+    * lodash es6
+    * moment.js locales?
