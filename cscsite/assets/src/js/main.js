@@ -5,8 +5,8 @@ import md5 from "blueimp-md5";
 import "jgrowl/jquery.jgrowl.js";
 import swal from "bootstrap-sweetalert";
 import "mathjax_config";
-import {escape as _escape} from "lodash/escape";
-import {unescape as _unescape} from "lodash/unescape";
+let _escape = require("lodash/escape");
+let _unescape = require("lodash/unescape");
 
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
