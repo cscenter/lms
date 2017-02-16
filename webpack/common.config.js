@@ -18,6 +18,7 @@ const PATHS = {
     common: path.join(__assetsdir, '/src/js/main.js'),
     profile: path.join(__assetsdir, '/src/js/profile.js'),
     forms: path.join(__assetsdir, '/src/js/forms.js'),
+    learning: path.join(__assetsdir, '/src/js/learning/index.js'),
     dist: path.join(__assetsdir, '/js/dist'),
 };
 
@@ -34,6 +35,7 @@ const VENDOR = [
     // 'react-router-redux',
     // 'jquery',
     // 'bootstrap-sass',
+    path.join(__assetsdir, '/src/js/editor.js'),
 ];
 
 const common = {
@@ -43,7 +45,8 @@ const common = {
         main: PATHS.common,
         profile: PATHS.profile,
         forms: PATHS.forms,
-        // vendor: VENDOR,
+        learning: PATHS.learning,
+        vendor: VENDOR,
     },
 
     output: {

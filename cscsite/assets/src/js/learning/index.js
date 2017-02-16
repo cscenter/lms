@@ -1,3 +1,4 @@
+import UberEditor from "../editor";
 (function ($) {
     "use strict";
 
@@ -24,7 +25,7 @@
             // Show EpicEditor when modal shown
             modalFormWrapper.on('shown.bs.modal', function (event) {
                 var textarea = $(event.target).find('textarea').get(0);
-                editor = initUberEditor(textarea);
+                editor = UberEditor.init(textarea);
                 modalFormWrapper.css('opacity', '1');
 
             });
@@ -37,7 +38,7 @@
                     $('.inner', modalFormWrapper).html(data);
                     modalFormWrapper.modal('toggle');
                 }).error(function (data) {
-                    if (data.status == 403) {
+                    if (data.status === 403) {
                         $.jGrowl('Доступ запрещён. Вероятно, время редактирования комментария истекло.',
                         { position: 'bottom-right', theme: 'error' });
                         $this.remove();
@@ -65,7 +66,7 @@
                     });
                     var textElement = $('.ubertext', target);
                     textElement.html(json.html);
-                    processUberText(textElement.get(0));
+                    UberEditor.render(textElement.get(0));
                     $.jGrowl('Комментарий успешно сохранён.',
                         { position: 'bottom-right'});
                 } else {

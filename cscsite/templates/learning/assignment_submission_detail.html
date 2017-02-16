@@ -5,7 +5,7 @@
 {% load core_tags %}
 {% load staticfiles %}
 {% load markdown from core_tags %}
-
+{% load render_bundle from webpack_loader %}
 
 {% block javascripts %}
     {% if is_actual_teacher or request.user.is_curator %}
@@ -20,7 +20,7 @@
         });
         </script>
     {% endif %}
-    <script type="text/javascript" src="{% static "js/assignment-submission.js" %}"></script>
+    {% render_bundle 'learning' 'js' attrs='defer' %}
 {% endblock javascripts %}
 
 

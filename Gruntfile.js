@@ -27,10 +27,6 @@ module.exports = function (grunt) {
                       '<%= JS_SRC %>/interview.js'],
                 dest: '<%= JS_RUNTIME %>/interview.js'
             },
-            profile_edit: {
-                src: ['<%= JS_SRC %>/profile_edit.js'],
-                dest: '<%= JS_RUNTIME %>/profile_edit.js'
-            },
             staff_student_search: {
                 src: ['<%= JS_SRC %>/staff/student_search.js'],
                 dest: '<%= JS_RUNTIME %>/student_search.js'
@@ -106,11 +102,6 @@ module.exports = function (grunt) {
             interview: {
                 files: {
                     '<%= JS_DEST %>/interview.js': ['<%= JS_RUNTIME %>/interview.js']
-                }
-            },
-            profile_edit: {
-                files: {
-                    '<%= JS_DEST %>/profile_edit.js': ['<%= JS_RUNTIME %>/profile_edit.js']
                 }
             },
             staff_student_search: {
