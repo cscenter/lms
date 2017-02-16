@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}Пересечение студентов{% endblock title %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
+    <script type="text/javascript" defer>
+        $('select.form-control').selectpicker({
+            maxOptions: 2,
+            iconBase: 'fa',
+            tickIcon: 'fa-check'
+        });
+    </script>
+{% endblock javascripts %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="card">
+                <h4 class="card-header ch-alt m-b-20">{{ current_term }}</h4>
+                <div class="panel-body">
+                    <div class="row">
+                        <form action="">
+                            <div class="col-xs-10">
+                                <select class="form-control" name="course_offerings[]" multiple size="2" style="display: none;">
+                                    {% for co in course_offerings %}
+                                        <option value="{{ co.pk }}"
+                                                {% if co.pk in query.course_offerings %}selected="selected"{% endif %}>{{ co.course.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-xs6">
+                                <button value="submit" class="btn btn-primary">Показать</button>
+                            </div>
+                        </form>
+                    </div>
+                    <hr>
+                    <p class="text-muted">Найдено пересечений: {{ intersection|length }}</p>
+                    <div class="row">
+                    {% for co in results %}
+                        <div class="col-xs-6">
+                            <h4>{{ co.course.name }}</h4>
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="row">
+                    {% for co in results %}
+                        <div class="col-xs-6">
+                            {% if co.enrolled_students.all %}
+                                <ul class="list-group list-group-dividered">
+                                    {% for student in co.enrolled_students.all %}
+                                        <li class="list-group-item {% if student.pk in intersection %}text-danger{% endif %}">{{ student }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
