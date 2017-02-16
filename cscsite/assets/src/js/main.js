@@ -5,185 +5,8 @@ import md5 from "blueimp-md5";
 import "jgrowl/jquery.jgrowl.js";
 import swal from "bootstrap-sweetalert";
 import "mathjax_config";
-let _escape = require("lodash/escape");
-let _unescape = require("lodash/unescape");
-
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-
-function getLocalStorageKey(textarea) {
-    return (window.location.pathname.replace(/\//g, "_")
-    + "_" + textarea.name);
-}
-
-function initUberEditor(textarea) {
-    var $textarea = $(textarea),
-        $container = $("<div/>").insertAfter($textarea),
-        autoSaveEnabled = $textarea.data('local-persist') == true,
-        themeEditor = '/themes/editor/epic-light.css',
-        buttonFullscreen = true;
-    $container.css('border', '1px solid #f2f2f2');
-    if ($textarea.data('button-fullscreen') !== undefined) {
-        buttonFullscreen = $textarea.data('button-fullscreen');
-    }
-
-    $textarea.hide();
-    $textarea.removeProp("required");
-    var shouldFocus = $textarea.prop("autofocus");
-
-    var opts = {
-        container: $container[0],
-        textarea: $textarea[0],
-        parser: null,
-        focusOnLoad: shouldFocus,
-        basePath: "/static/js/vendor/EpicEditor-v0.2.2",
-        clientSideStorage: autoSaveEnabled,
-        autogrow: {minHeight: 200},
-        button: {bar: "show", fullscreen: buttonFullscreen},
-        theme: {
-            base: '/themes/base/epiceditor.css',
-            editor: themeEditor
-        }
-    };
-
-    if (autoSaveEnabled) {
-        if (textarea.name === undefined) {
-            console.error("Missing attr `name` for textarea. " +
-                "Text restore will be buggy.")
-        }
-        // Presume textarea name is unique for page!
-        var filename = getLocalStorageKey(textarea);
-        opts['file'] = {
-            name: filename,
-            defaultContent: "",
-            autoSave: 200
-        };
-    }
-
-    var editor = new EpicEditor(opts);
-
-    editor.load();
-
-    var previewer = editor.getElement("previewer");
-    var previewerIframe = editor.getElement("previewerIframe");
-    // Append MathJax Configuration
-    var iframe_window = previewerIframe.contentWindow || previewerIframe;
-    iframe_window.MathJax = window.MathJax;
-    // Append MathJax src file
-    var mathjax = previewer.createElement('script');
-    mathjax.type = 'text/javascript';
-    mathjax.src = window.CSC.config.JS_SRC.MATHJAX;
-    previewer.body.appendChild(mathjax);
-
-    editor.on('preview', function () {
-        var contentDocument
-            = editor.getElement('previewerIframe').contentDocument;
-        var target = $("#epiceditor-preview", contentDocument).get(0);
-
-        var text = _unescape(target.innerHTML);
-        if (text.length > 0) {
-            $.ajax({
-                method: "POST",
-                url: "/tools/markdown/preview/",
-                traditional: true,
-                data: {text: text},
-                dataType: "json"
-            })
-            .done(function (data) {
-                if (data.status == 'OK') {
-                    target.innerHTML = data.text;
-                    editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Queue(function () {
-                        editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Typeset(target, function() {
-                            $(target).find("pre").addClass("hljs");
-                            if (!editor.is('fullscreen')) {
-                                var height = Math.max(
-                                    $(target).height() + 20,
-                                    editor.settings.autogrow.minHeight
-                                );
-                                $container.height(height);
-                            }
-                            editor.reflow();
-
-                            });
-                    });
-                }
-            }).error(function (data) {
-                var text;
-                if (data.status == 403) {
-                    // csrf token wrong?
-                    text = 'Action forbidden';
-                } else {
-                    text = "Unknown error. Please, save results of your work first, then try to reload page.";
-                }
-                swal({
-                    title: "Error",
-                    text: text,
-                    type: "error"
-                });
-            });
-
-        }
-
-    });
-
-    // Restore label behavior
-    $('label[for=id_' + textarea.name + ']').click(function() {
-        editor.focus();
-    });
-    // Try to fix contenteditable focus problem in Chrome
-    $(editor.getElement("editor")).click(function() {
-        editor.focus();
-    });
-
-    // How often people use this button?
-    editor.on('fullscreenenter', function () {
-        if (yaCounter25844420 !== undefined) {
-            yaCounter25844420.reachGoal('MARKDOWN_PREVIEW_FULLSCREEN');
-        }
-    });
-
-    editor.on('edit', function () {
-        if (!editor.is('fullscreen')) {
-            var height = Math.max(
-                $(editor.getElement('editor').body).height() + 20,
-                editor.settings.autogrow.minHeight
-            );
-            $container.height(height);
-        }
-        editor.reflow();
-    });
-
-    // Ctrl+Enter to send form
-    // Submit button value won't be attached to form data, be aware
-    // if your form process logic depends on prefix, for example
-    if ($textarea[0].dataset.quicksend == 'true') {
-        var editorBody = editor.getElement('editor').body;
-        // FIXME: use .on here
-        editorBody.addEventListener('keydown', function (e) {
-            if (e.keyCode == 13 && (e.metaKey || e.ctrlKey)) {
-                $textarea.closest("form").submit();
-            }
-        });
-    }
-    return editor;
-}
-
-function processUberText(target) {
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub, target, function () {
-        var $target = $(target);
-        $target.find("pre").addClass("hljs").find('code').each(function (i, block) {
-            // Some teachers uses escape entities inside code block
-            // To prevent &amp;lt; instead of "&lt;", lets double
-            // unescape (&amp; first, then &lt;) and escape again
-            // Note: It can be unpredictable if you want show "&amp;lt;"
-            var t = block.innerHTML;
-            block.innerHTML = _escape(_unescape(_unescape(t)));
-            hljs.highlightBlock(block);
-        });
-    }]);
-}
+import UberEditor from "./editor";
+import {csrfSafeMethod} from './utils';
 
 (function ($, CSC) {
     "use strict";
@@ -198,8 +21,8 @@ function processUberText(target) {
 
     $(document).ready(function () {
         fn.configureCSRFAjax();
-        fn.loadMathJaxAndHightlightJS();
-        // Clear old local storage cache
+        fn.renderText();
+        // Clean stale local storage cache
         fn.cleanLocalStorageEditorsFiles();
         fn.initUberEditors();
         fn.courseClassSpecificCode();
@@ -208,10 +31,10 @@ function processUberText(target) {
         fn.reflowEditorOnTabToggle();
     });
 
-    var fn = {
+    const fn = {
         configureCSRFAjax: function () {
-            // Append csrf token on ajax POST requests
-            var token = Cookies.get('csrftoken');
+            // Append csrf token on ajax POST requests made with jQuery
+            const token = Cookies.get('csrftoken');
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -221,45 +44,27 @@ function processUberText(target) {
             });
         },
 
-        loadMathJaxAndHightlightJS: function () {
+        renderText: function () {
             // Note: MathJax and hljs loads for each iframe separately
             if ($ubertexts.length > 0) {
-                var scripts = [CSC.config.JS_SRC.MATHJAX,
-                               CSC.config.JS_SRC.HIGHLIGHTJS],
-                    deferred = $.Deferred(),
-                    chained = deferred;
-                $.each(scripts, function(i, url) {
-                     chained = chained.then(function() {
-                         return $.ajax({
-                             url: url,
-                             dataType: "script",
-                             cache: true,
-                         });
-                     });
+                UberEditor.preload(function () {
+                    // Configure highlight js
+                    hljs.configure({tabReplace: '    '});
+                    // Render Latex and highlight code
+                    $ubertexts.each(function (i, target) {
+                        UberEditor.render(target);
+                    });
                 });
-                chained.done(function() {
-                    fn.initMathJaxAndHightlightJS();
-                });
-                deferred.resolve();
             }
-        },
-
-        initMathJaxAndHightlightJS: function () {
-            // Configure hljs
-            hljs.configure({tabReplace: '    '});
-
-            $ubertexts.each(function (i, target) {
-                processUberText(target);
-            });
         },
 
         initUberEditors: function () {
             $ubereditors.each(function (i, textarea) {
-                var editor = initUberEditor(textarea);
+                const editor = UberEditor.init(textarea);
                 CSC.config.uberEditors.push(editor);
             });
         },
-
+        // TODO: move logic to new editor module
         cleanLocalStorageEditorsFiles: function () {
             // eliminate old and persisted epiceditor "files"
             if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
@@ -280,7 +85,7 @@ function processUberText(target) {
                 });
             }
         },
-
+        // TODO: move logic to new editor module
         reflowEditorOnTabToggle: function () {
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var activeTab = $($(e.target).attr('href'));

@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 const template = require('lodash.template');
 import Cropper from 'cropperjs';
 import $ from 'jquery';
-// profileAppInit - global dependency.
+// profileAppInit - global dependency :<
 let profileAppInit = window.profileAppInit;
 // TODO: How to resolve FileAPI dependency?
 
