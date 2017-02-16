@@ -10,16 +10,17 @@ from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views import generic
+from django.utils.translation import ugettext_lazy as _
 
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
-from learning.models import Semester
+from learning.models import Semester, CourseOffering
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
@@ -265,6 +266,48 @@ class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
               .filter(id__in=users.all())
               .distinct())
         context['students'] = qs
+        return context
+
+
+class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "staff/courses_intersection.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year, term = get_current_semester_pair()
+        current_term_index = get_term_index(year, term)
+        context['course_offerings'] = (
+            CourseOffering.objects
+            .filter(semester__index=current_term_index)
+            .select_related("course"))
+        # Get participants
+        course_offerings = self.request.GET.getlist('course_offerings[]', [])
+        course_offerings = [int(t) for t in course_offerings if t]
+        results = list(
+            CourseOffering.objects
+                .filter(pk__in=course_offerings)
+                .select_related("course")
+                .prefetch_related(
+                    Prefetch(
+                        "enrolled_students",
+                        queryset=CSCUser.objects.only("pk",
+                                                      "username",
+                                                      "first_name",
+                                                      "last_name",
+                                                      "patronymic"),
+                    )
+                ))
+        if len(results) > 1:
+            first_course, second_course = (
+                {s.pk for s in co.enrolled_students.all()} for co in results)
+            context["intersection"] = first_course.intersection(second_course)
+        else:
+            context["intersection"] = set()
+        context["current_term"] = "{} {}".format(_(term), year)
+        context["results"] = results
+        context["query"] = {
+            "course_offerings": course_offerings
+        }
         return context
 
 
