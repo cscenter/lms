@@ -148,7 +148,7 @@ class Command(BaseCommand):
                        'assignment_link':
                            base_url + reverse('assignment_detail_teacher',
                                               args=[a_s.assignment.pk]),
-                       'a_s_created': notification.created,
+                       'notification_created': notification.created,
                        'assignment_name': smart_text(a_s.assignment),
                        'assignment_text': smart_text(a_s.assignment.text),
                        'student_name': smart_text(a_s.student),
