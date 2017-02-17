@@ -148,18 +148,12 @@ class Command(BaseCommand):
                        'assignment_link':
                            base_url + reverse('assignment_detail_teacher',
                                               args=[a_s.assignment.pk]),
-                       'a_s_created':
-                       a_s.created,
-                       'assignment_name':
-                       smart_text(a_s.assignment),
-                       'assignment_text':
-                       smart_text(a_s.assignment.text),
-                       'student_name':
-                       smart_text(a_s.student),
-                       'deadline_at':
-                       a_s.assignment.deadline_at,
-                       'course_name':
-                       smart_text(a_s.assignment.course_offering.course)}
+                       'a_s_created': notification.created,
+                       'assignment_name': smart_text(a_s.assignment),
+                       'assignment_text': smart_text(a_s.assignment.text),
+                       'student_name': smart_text(a_s.student),
+                       'deadline_at': a_s.assignment.deadline_at,
+                       'course_name': smart_text(a_s.assignment.course_offering.course)}
             if notification.is_about_creation:
                 name = 'new_assignment'
             elif notification.is_about_deadline:
