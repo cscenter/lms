@@ -53,8 +53,9 @@
                         //     type: "success"
                         // }, function(){ window.location.reload(); }
                         // );
+                        // FIXME: Убрать перезагрузку?
                         $.jGrowl(
-                            "Комментарий успешно сохранён. Страница будет перезагружена (TODO: перезагрузка будет убрана в ближайшее время)",
+                            "Комментарий успешно сохранён. Страница будет перезагружена",
                             { position: 'bottom-right' }
                         );
                         setTimeout(function() {window.location.reload();}, 500);
