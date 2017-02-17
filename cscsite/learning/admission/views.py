@@ -19,12 +19,15 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
-from django.views.generic.base import TemplateResponseMixin, ContextMixin
+from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
+    RedirectView
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
 from extra_views.formsets import BaseModelFormSetView
 
+from core.settings.base import DEFAULT_CITY_CODE
+from core.utils import to_unlocode
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
@@ -322,6 +325,15 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         return super(InterviewDetailView, self).form_invalid(form)
 
 
+class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        """Based on user settings, get preferred page adress and redirect"""
+        _, city_slug = DEFAULT_CITY_CODE.split(sep=" ")
+        return reverse("admission_interview_results_by_city", kwargs={
+            "city_slug": city_slug.lower()
+        })
+
+
 class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     """
     We can have multiple interviews for applicant
@@ -329,7 +341,6 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     # TODO: Think about pagination for model formsets in the future.
     context_object_name = 'interviews'
     template_name = "learning/admission/interview_results.html"
-    campaign = None
     model = Applicant
     form_class = InterviewResultsModelForm
 
@@ -337,7 +348,6 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         # XXX: To avoid double query to DB, skip ModelFormSetView action
         context = ContextMixin.get_context_data(self, **kwargs)
         stats = Counter()
-
         for form in context["formset"].forms:
             # Select the highest interview score to sort by
             applicant = form.instance
@@ -358,9 +368,10 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
 
         context["formset"].forms.sort(key=cpm_interview_best_score,
                                       reverse=True)
-        context["campaign"] = self.campaign
         context["stats"] = [(Applicant.get_name_by_status_code(s), cnt) for
                             s, cnt in stats.items()]
+        context["active_campaigns"] = self.active_campaigns
+        context["selected_campaign"] = self.selected_campaign
         return context
 
     def get_factory_kwargs(self):
@@ -372,13 +383,9 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
 
     def get_queryset(self):
         """Sort data by average interview score"""
-        if self.campaign is None:
-            city_code = "RU {}".format(self.kwargs["city_slug"].upper())
-            self.campaign = Campaign.objects.get(current=True,
-                                                 city__code=city_code)
         return (Applicant.objects
             # TODO: Carefully restrict by status also to optimize query
-            .filter(campaign=self.campaign)
+            .filter(campaign=self.selected_campaign)
             .select_related("exam", "online_test")
             .annotate(has_interviews=Count("interviews__pk"))
             .filter(has_interviews__gt=0)
@@ -391,13 +398,20 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
             )
         )
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
+        # It's irrelevant to POST action, but not a big deal
+        self.active_campaigns = (Campaign.objects
+                                 .filter(current=True)
+                                 .select_related("city"))
         try:
-            self.object_list = self.get_queryset()
-        except Campaign.DoesNotExist:
-            messages.error(self.request, "Нет активных кампаний по набору")
+            city_code = to_unlocode(self.kwargs["city_slug"])
+            self.selected_campaign = next(c for c in self.active_campaigns
+                                          if c.city.code == city_code)
+        except StopIteration:
+            messages.error(self.request,
+                           "Активная кампания по набору не найдена")
             return HttpResponseRedirect(reverse("admission_applicants"))
-        return super(BaseModelFormSetView, self).get(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):

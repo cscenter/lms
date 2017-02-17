@@ -4,73 +4,82 @@
 {% load crispy_forms_tags %}
 {% load floatdot from core_tags %}
 
+{% block title %}Результаты набора {{ selected_campaign.city.iata }} - CSC{% endblock title %}
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
 <div class="interview-results-page">
-
-    <div class="page-content">
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 class="panel-title">Результаты набора {{ campaign }} / {{ formset.total_form_count }}</h3>
-        </div>
-
-        <div class="panel-body">
-            <b>Cтатистика</b>:
-            <ul>
-            {% for status, cnt in stats %}
-                <li>{{ status }} - {{ cnt }}</li>
+    <ol class="breadcrumb projects">
+      <li class="active">Текущие наборы</li>
+    </ol>
+    <div class="nav-tabs-horizontal nav-tabs-inverse">
+        <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
+            {% for campaign in active_campaigns %}
+                <li role="presentation" {% if selected_campaign.city.code == campaign.city.code %} class="active"{% endif %}>
+                    <a href="{% url "admission_interview_results_by_city" campaign.city.iata %}">{{ campaign }}</a>
+                </li>
             {% endfor %}
-            </ul>
-        <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
-        {{ formset.management_form }}
-        {% if formset.errors %}
-            <p class="errornote">
-            {% if formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
-            </p>
-            {{ formset.non_form_errors }}
-        {% endif %}
-
-          <table class="table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Поступающий</th>
-                <th>Тест</th>
-                <th>Экзамен</th>
-                <th>Интервью</th>
-                <th>Итог</th>
-              </tr>
-            </thead>
-
-            <tbody>
-                {% for form in formset %}
-                    {% with applicant=form.instance interview=form.instance.interview %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td class="applicant">
-                            <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
-                            {{ applicant.university }}
-                        </td>
-                        <td>{{ applicant.online_test.score|default:"-" }}/{{ campaign.online_test_max_score }}</td>
-                        <td>{{ applicant.exam.score|default:"-" }}/{{ campaign.exam_max_score }}</td>
-                        <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
-                        <td>
-                            {{ form.status }}
-                            {{ form.status.errors }}
-                            {% for hidden in form.hidden_fields %}
-                                {{ hidden }}
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    {% endwith %}
+        </ul>
+        <div class="tab-content">
+            {% if formset|length > 0 %}
+                <b>Cтатистика</b>
+                <ul class="list-unstyled">
+                    <li>Всего: {{ formset.total_form_count }}</li>
+                {% for status, cnt in stats %}
+                    <li>{{ status }}: {{ cnt }}</li>
                 {% endfor %}
-            </tbody>
-          </table>
-            <button type="submit" class="btn btn-primary btn-outline">Сохранить</button>
-        </form>
+                </ul>
+
+                <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+                {{ formset.management_form }}
+                {% if formset.errors %}
+                    <p class="errornote">
+                    {% if formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+                    </p>
+                    {{ formset.non_form_errors }}
+                {% endif %}
+
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Поступающий</th>
+                        <th>Тест</th>
+                        <th>Экзамен</th>
+                        <th>Интервью</th>
+                        <th>Итог</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                            {% with applicant=form.instance interview=form.instance.interview %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td class="applicant">
+                                    <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
+                                    {{ applicant.university }}
+                                </td>
+                                <td>{{ applicant.online_test.score|default:"-" }}/{{ selected_campaign.online_test_max_score }}</td>
+                                <td>{{ applicant.exam.score|default:"-" }}/{{ selected_campaign.exam_max_score }}</td>
+                                <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
+                                <td>
+                                    {{ form.status }}
+                                    {{ form.status.errors }}
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                  </table>
+                    <button type="submit" class="btn btn-primary btn-outline">Сохранить</button>
+                </form>
+            {% else %}
+                Для выбранного набора нет анкет поступающих.
+            {% endif %}
         </div>
-      </div>
     </div>
   </div>
 {% endblock content %}

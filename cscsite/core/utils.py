@@ -40,10 +40,14 @@ def render_markdown(text):
                         attributes=MARKDOWN_ALLOWED_ATTRS)
 
 
-def get_club_domain(code = None):
+def get_club_domain(code=None):
     protocol = "http://"
     prefix = "kzn." if code == "RU KZN" else ""
     return protocol + prefix + settings.CLUB_DOMAIN
+
+
+def to_unlocode(city_slug, city_country='RU'):
+    return "{} {}".format(city_country, city_slug.upper())
 
 
 class SQLFormatter(logging.Formatter):

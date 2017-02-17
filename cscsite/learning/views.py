@@ -1229,10 +1229,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             self.model.objects
                 .filter(**filters)
                 .annotate(deadline_passed=Case(
-                When(assignment__deadline_at__gte=today, then=Value(0)),
-                default=Value('1'),
-                output_field=IntegerField(),
-            ))
+                    When(assignment__deadline_at__gte=today, then=Value(0)),
+                    default=Value('1'),
+                    output_field=IntegerField(),
+                ))
                 .order_by('deadline_passed',
                           'assignment__deadline_at',
                           'assignment__pk')

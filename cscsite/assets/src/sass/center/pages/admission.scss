@@ -51,6 +51,9 @@
 }
 
 .admission-list-page, .admission-interview-page {
+  .panel-title {
+    padding: 10px 10px 0 10px;
+  }
   .panel-body {
     td:last-child {
       font-size: 16px;
@@ -241,12 +244,6 @@
       margin: 0;
     }
 
-    .breadcrumb {
-      background: inherit;
-      padding: 8px 0 0;
-      margin: 0;
-    }
-
     .page-header-actions {
         position: absolute;
         right: 0px;
@@ -336,7 +333,7 @@
     display: none!important;
   }
   .admission-interview-page {
-    .page-header {
+    .page-header, .additional-info {
       display: none;
     }
     .date {
