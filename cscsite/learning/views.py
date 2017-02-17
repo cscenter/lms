@@ -1096,11 +1096,10 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
     context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
-    filter_grades_empty = "no"
     filter_by_grades = (
-        (filter_grades_empty, _("Without grades")),
+        ("all", _("All")),  # Default
+        ("no", _("Without grades")),
         ("yes", _("With grades")),
-        ("all", _("All"))
     )
     filter_by_comments = (
         ("any", _("No matter")),
@@ -1189,11 +1188,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             self.assignments)
         filters["assignment__in"] = filter_assignments
         # Set grade filter
-        filter_grade = self.request.GET.get("grades", self.filter_grades_empty)
+        filter_grade = self.request.GET.get("grades", "all")
         # FIXME: validate GET-params in separated method? and redirect here?
         if filter_grade not in (k for k, v in self.filter_by_grades):
-            filter_grade = self.filter_grades_empty
-        if filter_grade == self.filter_grades_empty:
+            filter_grade = "all"
+        if filter_grade == "no":
             filters["grade__isnull"] = True
         elif filter_grade == "yes":
             filters["grade__isnull"] = False
@@ -1226,32 +1225,26 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         filters = self.prepare_queryset_filters()
         today = now()
         base_qs = (
-            self.model.objects
-                .filter(**filters)
-                .annotate(deadline_passed=Case(
-                    When(assignment__deadline_at__gte=today, then=Value(0)),
-                    default=Value('1'),
-                    output_field=IntegerField(),
-                ))
-                .order_by('deadline_passed',
-                          'assignment__deadline_at',
-                          'assignment__pk')
-                .select_related('assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__course',
-                                'assignment__course_offering__semester',
-                                'student')
-                # Hide fat fields
-                .defer("assignment__text",
-                       "student__university",
-                       # Note: Can't hide `student_comment`.
-                       # See details in CSCUser.__init__() method
-                       "assignment__course_offering__description",
-                       "assignment__course_offering__description_ru",
-                       "assignment__course_offering__description_en",
-                       "assignment__course_offering__course__description",
-                       "assignment__course_offering__course__description_ru",
-                       "assignment__course_offering__course__description_en", ))
+            StudentAssignment.objects
+            .filter(**filters)
+            .order_by('assignment__deadline_at',
+                      'last_comment_from')
+            .select_related('assignment',
+                            'assignment__course_offering',
+                            'assignment__course_offering__course',
+                            'assignment__course_offering__semester',
+                            'student')
+            # Hide fat fields
+            .defer("assignment__text",
+                   "student__university",
+                   # Note: Can't hide `student_comment`.
+                   # See details in CSCUser.__init__() method
+                   "assignment__course_offering__description",
+                   "assignment__course_offering__description_ru",
+                   "assignment__course_offering__description_en",
+                   "assignment__course_offering__course__description",
+                   "assignment__course_offering__course__description_ru",
+                   "assignment__course_offering__course__description_en", ))
         return base_qs
 
     def get_context_data(self, **kwargs):

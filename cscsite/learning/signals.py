@@ -8,6 +8,7 @@ import django_rq
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification
 from learning.tasks import (maybe_upload_slides_yandex,
@@ -70,7 +71,7 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
     comment = instance
     sa = comment.student_assignment
     notifications = []
-    sa_update_dict = {}
+    sa_update_dict = {"modified": now()}
     if comment.author_id == sa.student_id:
         other_comments = (sa.assignmentcomment_set
                           .filter(author_id=comment.author_id)
