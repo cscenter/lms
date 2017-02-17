@@ -13,17 +13,9 @@
 {% block content %}
 <div class="admission-interview-page">
     <div class="page-header">
-        <h3 class="page-title">{{ applicant.get_full_name }}</h3>
-        <ol class="breadcrumb">
-            <li><a href="{% url "admission_interviews" %}">Список собеседований</a></li>
-            <li class="active">{{ applicant.get_full_name }}</li>
-        </ol>
-        {% if request.user.is_curator %}
-            <div class="page-header-actions">
-                <a class="edit-interview-btn"
-                   href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-cog"></i></a>
-            </div>
-        {% endif %}
+        <h2 class="page-title">{{ applicant.get_full_name }}{% if request.user.is_curator %}
+            <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
+        {% endif %}</h2>
     </div>
     <div class="date">Дата собеседования: {{ interview.date }}</div>
     <div class="additional-info">Статус: {{ interview.get_status_display|default_if_none:"<не указан>" }}</div>

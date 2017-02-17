@@ -12,7 +12,7 @@
             <div class="logo-cell">
                 <a class="logo-container" href="{% url 'index' %}"><img src="{% static "img/center/logo.svg" %}" alt="Computer Science Center"></a>
             </div>
-            <ul{% if menu.tree|length > 7 %} class="__narrow"{% endif %}>
+            <ul{% if menu.tree|length > 8 %} class="__narrow"{% endif %}>
                 {% for menu_item in menu.tree %}
                     <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
                         <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>

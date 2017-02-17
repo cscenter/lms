@@ -199,7 +199,6 @@ ul.panel-actions {
       margin-top: -7px;
       right: 30px;
       font: normal normal normal 14px/1 FontAwesome;
-      @include transition(none);
     }
 
     &:focus, &:hover {
