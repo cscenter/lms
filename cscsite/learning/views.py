@@ -1228,7 +1228,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
             StudentAssignment.objects
             .filter(**filters)
             .order_by('assignment__deadline_at',
-                      'last_comment_from')
+                      'modified')
             .select_related('assignment',
                             'assignment__course_offering',
                             'assignment__course_offering__course',
