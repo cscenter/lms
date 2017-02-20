@@ -26,7 +26,7 @@ from icalendar import Calendar, Event
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import SemesterFactory, \
     CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
-    AssignmentFactory, NonCourseEventFactory, CourseFactory, StudyProgramFactory
+    AssignmentFactory, NonCourseEventFactory, CourseFactory, AreaOfStudyFactory
 from learning.tests.mixins import MyUtilitiesMixin
 
 from users.admin import CSCUserCreationForm, CSCUserChangeForm
@@ -420,22 +420,22 @@ def test_alumni(client,
     response = client.get(url_list_all)
     assert student_center.last_name not in force_text(response.content)
     assert graduated.last_name in force_text(response.content)
-    url = reverse('alumni_by_study_program', args=["-"])
+    url = reverse('alumni_by_area_of_study', args=["-"])
     response = client.get(url)
     assert response.status_code == 404
-    st1 = StudyProgramFactory.create()
-    st2 = StudyProgramFactory.create()
-    url = reverse('alumni_by_study_program', args=[st1.code])
+    st1 = AreaOfStudyFactory.create()
+    st2 = AreaOfStudyFactory.create()
+    url = reverse('alumni_by_area_of_study', args=[st1.code])
     response = client.get(url)
-    assert "study_programs" in response.context
-    assert len(response.context["study_programs"]) == 2
-    graduated.study_programs.add(st1.code)
-    url = reverse('alumni_by_study_program', args=[st1.code])
+    assert "areas_of_study" in response.context
+    assert len(response.context["areas_of_study"]) == 2
+    graduated.areas_of_study.add(st1.code)
+    url = reverse('alumni_by_area_of_study', args=[st1.code])
     response = client.get(url)
     assert graduated.last_name in force_text(response.content)
     response = client.get(url_list_all)
     assert graduated.last_name in force_text(response.content)
-    url = reverse('alumni_by_study_program', args=[st2.code])
+    url = reverse('alumni_by_area_of_study', args=[st2.code])
     response = client.get(url)
     assert graduated.last_name not in force_text(response.content)
 

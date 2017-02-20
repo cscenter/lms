@@ -345,9 +345,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         monitor='status',
         log_class=CSCUserStatusLog)
 
-    study_programs = models.ManyToManyField(
-        'learning.StudyProgram',
-        verbose_name=_("StudentInfo|Study programs"),
+    areas_of_study = models.ManyToManyField(
+        'learning.AreaOfStudy',
+        verbose_name=_("StudentInfo|Areas of study"),
         blank=True)
     workplace = models.CharField(
         _("Workplace"),

@@ -172,7 +172,7 @@ class UserDetailView(generic.DetailView):
             prefetch_list += ['borrows',
                               'borrows__book',
                               'onlinecourserecord_set',
-                              'study_programs',
+                              'areas_of_study',
                               'cscuserreference_set']
             select_list += ['comment_last_author']
         return (auth.get_user_model()._default_manager

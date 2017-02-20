@@ -101,7 +101,7 @@ class CSCUserQuerySet(query.QuerySet):
                     to_attr='projects_through'
                 ),
                 Prefetch(
-                    'study_programs',
+                    'areas_of_study',
                 ),
                 Prefetch(
                     'shadcourserecord_set',

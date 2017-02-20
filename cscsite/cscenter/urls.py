@@ -68,8 +68,8 @@ urlpatterns = [
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^2016/$', AlumniByYearView.as_view(filter_by_year=2016),
         name='alumni_2016'),
-    url(r'^alumni/(?P<study_program_code>[-\w]+)/$', AlumniView.as_view(),
-        name='alumni_by_study_program'),
+    url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', AlumniView.as_view(),
+        name='alumni_by_area_of_study'),
 
     url(r'^staff/', include("staff.urls")),
 

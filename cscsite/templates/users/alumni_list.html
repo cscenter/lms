@@ -10,12 +10,12 @@
     <div id="graduates">
         <div class="graduates-list-filter">
             <ul class="nav nav-tabs square" role="tablist">
-                <li {% if not selected_study_program %}class="active"{% endif %}>
+                <li {% if not selected_area_of_study %}class="active"{% endif %}>
                     <a href="{{ base_url }}">{% trans "All areas" %}</a>
-                    {% for study_program in study_programs %}
-                        <li{% if study_program.code == selected_study_program %}
+                    {% for area in areas_of_study %}
+                        <li{% if area.code == selected_area_of_study %}
                             class="active"{% endif %}>
-                        <a href="{{ base_url }}{{ study_program.code }}/">{{ study_program }}</a>
+                        <a href="{{ base_url }}{{ area.code }}/">{{ area }}</a>
                     {% endfor %}
             </ul>
         </div>
