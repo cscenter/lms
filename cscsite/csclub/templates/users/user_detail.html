@@ -317,7 +317,7 @@
         <tr>
           <td>{% trans "StudentInfo|Study program" %}:</td>
           <td>
-            {% with sps=user_object.study_programs.all %}
+            {% with sps=user_object.areas_of_study.all %}
             {% if sps %}
             <ul class="list-unstyled">
               {% for sp in sps %}

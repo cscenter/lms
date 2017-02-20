@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 15:40+0300\n"
-"PO-Revision-Date: 2017-02-15 15:44+0230\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2017-02-20 19:12+0300\n"
+"PO-Revision-Date: 2017-02-20 19:13+0230\n"
+"Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -88,7 +88,7 @@ msgstr "Год набора"
 
 #: cscsite/learning/admission/models.py:33
 msgid "City"
-msgstr ""
+msgstr "Город"
 
 #: cscsite/learning/admission/models.py:35
 msgid "Campaign|Test_max_score"
@@ -107,7 +107,7 @@ msgid "Campaign|Exam_passing_score"
 msgstr "Проходной балл по экзамену"
 
 #: cscsite/learning/admission/models.py:42
-#: cscsite/learning/admission/views.py:199
+#: cscsite/learning/admission/views.py:202
 msgid "Current campaign"
 msgstr "Текущий набор"
 
@@ -510,8 +510,7 @@ msgstr "Комментарий"
 msgid "Comments"
 msgstr "Комментарии к собеседованию"
 
-#: cscsite/learning/admission/views.py:201
-#| msgid "Campaigns"
+#: cscsite/learning/admission/views.py:204
 msgid "All campaigns"
 msgstr "Все наборы"
 

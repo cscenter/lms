@@ -120,7 +120,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
                                              'github_id']}),
         (_('Student info record'),
          {'fields': ['status', 'status_changed_at', 'enrollment_year',
-                     'graduation_year', 'curriculum_year', 'study_programs',
+                     'graduation_year', 'curriculum_year', 'areas_of_study',
                      'university', 'workplace', 'uni_year_at_enrollment',
                      'phone']}),
         (_("Curator's note"),

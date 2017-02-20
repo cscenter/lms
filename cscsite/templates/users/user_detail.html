@@ -52,8 +52,8 @@
                     {% with u=user_object %}
                     С сентября {{ u.enrollment_year }} года по июнь {{ u.graduation_year }} года<br>
                         {% if u.gender == 'F' %}прошла{% else %}прошёл{% endif %}
-                        обучение по направлени{{ u.study_programs.all|pluralize:"ю,ям" }}
-                        {% for program in u.study_programs.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
+                        обучение по направлени{{ u.areas_of_study.all|pluralize:"ю,ям" }}
+                        {% for program in u.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
                     {% endwith %}
                 </div>
                 {% elif user_object.is_student %}
@@ -238,7 +238,7 @@
                             <tr>
                                 <td>{% trans "StudentInfo|Study program" %}:</td>
                                 <td>
-                                    {% with sps=user_object.study_programs.all %}
+                                    {% with sps=user_object.areas_of_study.all %}
                                         {% if sps %}
                                             <ul class="list-unstyled">
                                                 {% for sp in sps %}

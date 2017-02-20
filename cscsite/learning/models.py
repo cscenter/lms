@@ -1041,14 +1041,14 @@ class NonCourseEvent(TimeStampedModel):
 
 
 @python_2_unicode_compatible
-class StudyProgram(models.Model):
+class AreaOfStudy(models.Model):
     code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
-    name = models.CharField(_("StudyProgram|Name"), max_length=255)
+    name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
 
     class Meta:
         ordering = ["name"]
-        verbose_name = _("Study program")
-        verbose_name_plural = _("Study programs")
+        verbose_name = _("Area of study")
+        verbose_name_plural = _("Areas of study")
 
     def __str__(self):
         return smart_text(self.name)

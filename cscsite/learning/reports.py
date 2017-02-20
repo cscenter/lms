@@ -238,7 +238,7 @@ class ProgressReportForDiplomas(ProgressReport):
             student.first_name,
             student.patronymic,
             student.university,
-            " и ".join(s.name for s in student.study_programs.all()),
+            " и ".join(s.name for s in student.areas_of_study.all()),
             total_success_passed
         ]
         self._export_row_append_courses(row, student)
@@ -324,7 +324,7 @@ class ProgressReportFull(ProgressReport):
             student.curriculum_year,
             student.graduation_year,
             student.yandex_id,
-            " и ".join(s.name for s in student.study_programs.all()),
+            " и ".join(s.name for s in student.areas_of_study.all()),
             student.status_display,
             '',  # FIXME: error in student.status_changed_at field
             student.comment,
@@ -497,7 +497,7 @@ class ProgressReportForSemester(ProgressReport):
             student.curriculum_year,
             student.graduation_year,
             student.yandex_id,
-            " и ".join(s.name for s in student.study_programs.all()),
+            " и ".join(s.name for s in student.areas_of_study.all()),
             student.status_display,
             '',  # FIXME: error with student.status_changed_at
             student.comment,

@@ -17,7 +17,7 @@ from django.views import generic
 
 from core.models import Faq
 from learning.models import Semester, CourseOffering, CourseOfferingTeacher, \
-    OnlineCourse, StudyProgram
+    OnlineCourse, AreaOfStudy
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_current_semester_pair, get_term_index, \
     get_term_index_academic
@@ -123,7 +123,7 @@ class TestimonialsListView(generic.ListView):
         return (CSCUser.objects
                 .filter(groups=CSCUser.group.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
-                .prefetch_related("study_programs")
+                .prefetch_related("areas_of_study")
                 .order_by("-graduation_year", "last_name"))
 
 
@@ -159,14 +159,14 @@ class TeachersView(generic.ListView):
 # TODO: Rewrite filter by study programs with js and 1 additional db query?
 class AlumniView(generic.ListView):
     filter_by_year = None
-    study_programs = None
+    areas_of_study = None
     template_name = "users/alumni_list.html"
 
     def get(self, request, *args, **kwargs):
         # Validate query params
-        code = self.kwargs.get("study_program_code", False)
-        self.study_programs = StudyProgram.objects.all()
-        if code and code not in (s.code for s in self.study_programs):
+        code = self.kwargs.get("area_of_study_code", False)
+        self.areas_of_study = AreaOfStudy.objects.all()
+        if code and code not in (s.code for s in self.areas_of_study):
             # TODO: redirect to alumni/ page
             raise Http404
         return super(AlumniView, self).get(request, *args, **kwargs)
@@ -179,18 +179,18 @@ class AlumniView(generic.ListView):
         }
         if self.filter_by_year is not None:
             params["graduation_year"] = self.filter_by_year
-        code = self.kwargs.get("study_program_code", False)
+        code = self.kwargs.get("area_of_study_code", False)
         if code:
-            params["study_programs"] = code
+            params["areas_of_study"] = code
         return (user_model.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
         context = super(AlumniView, self).get_context_data(**kwargs)
-        code = self.kwargs.get("study_program_code", False)
-        context["selected_study_program"] = code
-        context["study_programs"] = self.study_programs
+        code = self.kwargs.get("area_of_study_code", False)
+        context["selected_area_of_study"] = code
+        context["areas_of_study"] = self.areas_of_study
         if self.filter_by_year:
             context["base_url"] = reverse(
                 "alumni_{}".format(self.filter_by_year))
@@ -226,7 +226,7 @@ class AlumniByYearView(generic.ListView):
                     graduation_year=self.filter_by_year,
                  )
                  .exclude(csc_review='').exclude(photo='')
-                 .prefetch_related("study_programs"))
+                 .prefetch_related("areas_of_study"))
             testimonials = s[:]
             cache.set('alumni_2016_testimonials', testimonials, 3600)
         context['testimonials'] = self.testimonials_random(testimonials)

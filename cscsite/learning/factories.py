@@ -11,7 +11,7 @@ from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, StudyProgram
+    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
 from .utils import get_current_semester_pair
@@ -104,11 +104,11 @@ class VenueFactory(factory.DjangoModelFactory):
     description = "This is a special venue for tests"
 
 
-class StudyProgramFactory(factory.DjangoModelFactory):
+class AreaOfStudyFactory(factory.DjangoModelFactory):
     class Meta:
-        model = StudyProgram
+        model = AreaOfStudy
 
-    name = factory.Sequence(lambda n: "Study program %03d" % n)
+    name = factory.Sequence(lambda n: "Study area %03d" % n)
     code = factory.Sequence(lambda n: "p%01d" % n)
 
 
