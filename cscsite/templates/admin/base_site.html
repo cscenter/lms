@@ -1,6 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% load i18n %}
+{% load admin_reorder %}
 {% load render_bundle from webpack_loader %}
 {% load staticfiles %}
 
@@ -37,6 +38,7 @@
 {% endblock %}
 
 {% block branding %}
+{% admin_reorder %}
 <h1 id="site-name">{% trans 'Django administration' %}</h1>
 {% endblock %}
 

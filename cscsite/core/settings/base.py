@@ -274,3 +274,8 @@ WEBPACK_LOADER = {
         'STATS_FILE': str(ROOT_DIR / "webpack" / "webpack-stats.json"),
     }
 }
+
+
+ADMIN_REORDER = [
+    ('learning', ["AreaOfStudy", "StudyProgram", "StudyProgramCourse"])
+]

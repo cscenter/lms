@@ -19,7 +19,8 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy
+    CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
+    StudyProgram, StudyProgramCourse
 
 
 class RelatedSpecMixin(object):
@@ -32,6 +33,27 @@ class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+
+
+class StudyProgramCourseInline(admin.TabularInline):
+    model = StudyProgramCourse
+    extra = 0
+    ordering = ["group"]
+
+
+class StudyProgramAdmin(admin.ModelAdmin):
+    list_filter = ["city", "year"]
+    list_display = ["name", "city", "year"]
+    inlines = [StudyProgramCourseInline]
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
+
+
+class StudyProgramCourseAdmin(admin.ModelAdmin):
+    list_filter = ["study_program"]
+    ordering = ["group"]
+    list_display = ["study_program", "group"]
 
 
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
@@ -248,6 +270,8 @@ class InternshipAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
+admin.site.register(StudyProgram, StudyProgramAdmin)
+admin.site.register(StudyProgramCourse, StudyProgramCourseAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
