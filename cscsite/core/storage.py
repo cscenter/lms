@@ -4,4 +4,4 @@ from pipeline.storage import GZIPMixin
 
 
 class PipelineCachedGZIPedStorage(GZIPMixin, CachedStaticFilesStorage):
-    pass
+    gzip_patterns = ("css/*.css", "js/*.js")
