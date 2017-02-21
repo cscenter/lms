@@ -17,4 +17,4 @@ class CourseOfferingTranslationOptions(TranslationOptions):
 
 @register(AreaOfStudy)
 class AreaOfStudyTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ('name', 'description')

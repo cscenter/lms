@@ -1,15 +1,39 @@
 {% extends "admin/base.html" %}
 
 {% load i18n %}
+{% load render_bundle from webpack_loader %}
 {% load staticfiles %}
 
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 
 {% block extrahead %}
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script src="{% static "js/vendor/jquery-1.11.3.min.js" %}"><\/script>')</script>
+    <script type="text/javascript" src="{% static "js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js" %}"></script>
+
     <script type="text/javascript" src="//cdn.ravenjs.com/3.10.0/raven.min.js"></script>
     <script type="text/javascript" src="{% static "js/raven_conf.js" %}"></script>
-    {% include "mathjax_config.html" %}
+
+    <script>
+      // Global Configuration
+      window.CSC = {
+          config: {
+              JS_SRC: {
+                MATHJAX: "//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
+                HIGHLIGHTJS: "{% static "js/vendor/highlight.pack.js" %}",
+              },
+              // Used to reflow editor on tab toggle event
+              uberEditors: [],
+              localStorage: {
+                  // Map from hash to dummy value (effectively a set)
+                  hashes: []
+              }
+          }
+      }
+    </script>
+
+    {% render_bundle 'vendor' 'js' attrs='defer' %}
+    {% render_bundle 'main' 'js' attrs='defer' %}
 {% endblock %}
 
 {% block branding %}
@@ -21,15 +45,8 @@
 
 {% block footer %}
     <div id="footer"></div>
-    {#    TODO: It's hacky to include the whole main.js. Separate ubertexteditor logic from main.js first, then refactor #}
     <style type="text/css">
     .sweet-overlay, .sweet-alert {
         display: none;}
     </style>
-    {#  Ubereditor dependencies  #}
-    <script type="text/javascript" src="//yastatic.net/underscore/1.6.0/underscore-min.js"></script>
-    <script type="text/javascript">
-        var HIGHLIGHTJS_SRC = "{% static "js/vendor/highlight.pack.js" %}";
-    </script>
-    <script type="text/javascript" src="{% static "js/main.js" %}"></script>
 {% endblock %}
