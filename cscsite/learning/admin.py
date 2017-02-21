@@ -19,13 +19,19 @@ from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    CourseOfferingTeacher, InternationalSchool, Useful, Internship
+    CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy
 
 
 class RelatedSpecMixin(object):
     def get_queryset(self, request):
         qs = super(RelatedSpecMixin, self).get_queryset(request)
         return apply_related_spec(qs, self.related_spec)
+
+
+class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
 
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
@@ -241,6 +247,7 @@ class InternshipAdmin(admin.ModelAdmin):
     exclude = ["site"]
 
 
+admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)

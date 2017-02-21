@@ -1044,6 +1044,9 @@ class NonCourseEvent(TimeStampedModel):
 class AreaOfStudy(models.Model):
     code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
+    description = models.TextField(
+        _("AreaOfStudy|description"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
 
     class Meta:
         ordering = ["name"]
