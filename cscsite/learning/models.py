@@ -1057,6 +1057,45 @@ class AreaOfStudy(models.Model):
         return smart_text(self.name)
 
 
+class StudyProgram(models.Model):
+    name = models.CharField(_("StudyProgram|Name"), max_length=255)
+    year = models.PositiveSmallIntegerField(
+        _("Year"), validators=[MinValueValidator(1990)])
+    city = models.ForeignKey(City,
+                             verbose_name=_("City"),
+                             default=settings.DEFAULT_CITY_CODE)
+    area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"))
+    description = models.TextField(
+        _("StudyProgram|description"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+
+    class Meta:
+        verbose_name = _("Study Program")
+        verbose_name_plural = _("Study Programs")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
+class StudyProgramCourse(models.Model):
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course"),
+        on_delete=models.PROTECT)
+    study_program = models.ForeignKey(
+        StudyProgram,
+        verbose_name=_("Study Program"),
+        on_delete=models.PROTECT)
+    group = models.PositiveSmallIntegerField(_("Group"))
+
+    class Meta:
+        verbose_name = _("Study Program Course")
+        verbose_name_plural = _("Study Program Courses")
+
+    def __str__(self):
+        return smart_text("#{}".format(self.pk))
+
+
 @python_2_unicode_compatible
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)
