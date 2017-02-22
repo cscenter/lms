@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
+from dal import autocomplete
 from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -20,7 +21,7 @@ from .models import Course, Semester, CourseOffering, Venue, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
     CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
-    StudyProgram, StudyProgramCourse
+    StudyProgram, StudyProgramCourseGroup
 
 
 class RelatedSpecMixin(object):
@@ -35,16 +36,18 @@ class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):
     }
 
 
-class StudyProgramCourseInline(admin.TabularInline):
-    model = StudyProgramCourse
+class StudyProgramCourseGroupInline(admin.TabularInline):
+    model = StudyProgramCourseGroup
     extra = 0
-    ordering = ["group"]
+    formfield_overrides = {
+        db_models.ManyToManyField: {'widget': autocomplete.Select2Multiple()}
+    }
 
 
 class StudyProgramAdmin(admin.ModelAdmin):
     list_filter = ["city", "year"]
     list_display = ["area", "city", "year"]
-    inlines = [StudyProgramCourseInline]
+    inlines = [StudyProgramCourseGroupInline]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }

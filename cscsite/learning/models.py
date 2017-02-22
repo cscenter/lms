@@ -1073,25 +1073,20 @@ class StudyProgram(models.Model):
         verbose_name_plural = _("Study Programs")
 
 
-class StudyProgramCourse(models.Model):
-    course = models.ForeignKey(
+class StudyProgramCourseGroup(models.Model):
+    courses = models.ManyToManyField(
         Course,
-        verbose_name=_("Course"),
-        on_delete=models.PROTECT)
+        verbose_name=_("StudyProgramCourseGroup|courses"),
+        related_name='study_programs',
+        help_text=_("Courses will be grouped with boolean OR"))
     study_program = models.ForeignKey(
         StudyProgram,
         verbose_name=_("Study Program"),
         on_delete=models.PROTECT)
-    group = models.PositiveSmallIntegerField(
-        _("Group"), help_text=_("Courses within the same group are combined "
-                                "using the boolean OR."))
 
     class Meta:
         verbose_name = _("Study Program Course")
         verbose_name_plural = _("Study Program Courses")
-
-    def __str__(self):
-        return smart_text(_("Group {}").format(self.group))
 
 
 @python_2_unicode_compatible

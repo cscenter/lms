@@ -59,7 +59,9 @@ TEMPLATES = [
 
 INSTALLED_APPS = [
     # 'flat',
-    'modeltranslation', # insert before admin
+    'modeltranslation',  # insert before admin
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
