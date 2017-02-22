@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-02-22 15:02+0300\n"
-"PO-Revision-Date: 2017-02-22 15:03+0230\n"
+"PO-Revision-Date: 2017-02-22 15:14+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1061,7 +1061,7 @@ msgstr "Курс учебной программы"
 
 #: cscsite/learning/models.py:1109
 msgid "Study Program Courses"
-msgstr "Обязательные курсы учебной программы"
+msgstr "Обязательные курсы (1 на каждую группу)"
 
 #: cscsite/learning/models.py:1112
 msgid "Group {}"
