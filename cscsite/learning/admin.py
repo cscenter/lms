@@ -43,6 +43,13 @@ class StudyProgramCourseGroupInline(admin.TabularInline):
         db_models.ManyToManyField: {'widget': autocomplete.Select2Multiple()}
     }
 
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        form = formset.form
+        form.base_fields['courses'].widget.can_add_related = False
+        form.base_fields['courses'].widget.can_change_related = False
+        return formset
+
 
 class StudyProgramAdmin(admin.ModelAdmin):
     list_filter = ["city", "year"]
