@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-22 15:02+0300\n"
-"PO-Revision-Date: 2017-02-22 15:14+0230\n"
+"POT-Creation-Date: 2017-02-22 17:41+0300\n"
+"PO-Revision-Date: 2017-02-22 17:41+0230\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -61,7 +61,7 @@ msgstr ""
 msgid "City name"
 msgstr "Название города"
 
-#: cscsite/core/models.py:57 cscsite/learning/models.py:1070
+#: cscsite/core/models.py:57 cscsite/learning/models.py:1064
 msgid "City"
 msgstr "Город"
 
@@ -74,13 +74,13 @@ msgid "Category name"
 msgstr "Название категории"
 
 #: cscsite/core/models.py:73 cscsite/core/models.py:89
-#: cscsite/learning/models.py:1178 cscsite/learning/models.py:1195
+#: cscsite/learning/models.py:1155 cscsite/learning/models.py:1172
 #: cscsite/staff/models.py:17
 msgid "Sort order"
 msgstr "Сортировка"
 
 #: cscsite/core/models.py:74 cscsite/core/models.py:90
-#: cscsite/learning/models.py:1179 cscsite/learning/models.py:1196
+#: cscsite/learning/models.py:1156 cscsite/learning/models.py:1173
 msgid "Site"
 msgstr "Сайт"
 
@@ -92,13 +92,13 @@ msgstr "Раздел для FAQ"
 msgid "FAQ categories"
 msgstr "Разделы для FAQ"
 
-#: cscsite/core/models.py:87 cscsite/learning/models.py:1176
-#: cscsite/learning/models.py:1193 cscsite/staff/models.py:15
+#: cscsite/core/models.py:87 cscsite/learning/models.py:1153
+#: cscsite/learning/models.py:1170 cscsite/staff/models.py:15
 msgid "Question"
 msgstr "Вопрос"
 
-#: cscsite/core/models.py:88 cscsite/learning/models.py:1177
-#: cscsite/learning/models.py:1194 cscsite/staff/models.py:16
+#: cscsite/core/models.py:88 cscsite/learning/models.py:1154
+#: cscsite/learning/models.py:1171 cscsite/staff/models.py:16
 msgid "Answer"
 msgstr "Ответ"
 
@@ -149,7 +149,7 @@ msgstr ""
 "Размер файла %(size)s недопустим. Максимальный размер файла "
 "%(allowed_size)s."
 
-#: cscsite/learning/admin.py:142
+#: cscsite/learning/admin.py:141
 msgid ""
 "Assignment|Please, double check teachers list. Some of them not related to "
 "selected course offering"
@@ -185,7 +185,7 @@ msgid "Text"
 msgstr "Текст"
 
 #: cscsite/learning/forms.py:84 cscsite/learning/models.py:46
-#: cscsite/learning/models.py:1117 cscsite/users/models.py:532
+#: cscsite/learning/models.py:1094 cscsite/users/models.py:532
 #: cscsite/users/models.py:550
 msgid "Course|name"
 msgstr "Название"
@@ -475,7 +475,6 @@ msgstr ""
 "test.com/news/<b>some-news</b>/"
 
 #: cscsite/learning/models.py:60 cscsite/learning/models.py:202
-#: cscsite/learning/models.py:1097
 #: cscsite/templates/learning/assignment_list_student.html:19
 #: cscsite/templates/learning/assignment_list_student.html:75
 #: cscsite/templates/learning/timetable_student.html:44
@@ -488,7 +487,7 @@ msgstr "Курс"
 msgid "Courses"
 msgstr "Курсы"
 
-#: cscsite/learning/models.py:75 cscsite/learning/models.py:1068
+#: cscsite/learning/models.py:75 cscsite/learning/models.py:1062
 msgid "Year"
 msgstr "Год"
 
@@ -1021,131 +1020,119 @@ msgstr "Направление обучения"
 msgid "Areas of study"
 msgstr "Направления обучения"
 
-#: cscsite/learning/models.py:1062
-msgid "StudyProgram|Name"
-msgstr "Учебная программа"
-
-#: cscsite/learning/models.py:1065
-msgid "Leave blank to populate with '&lt;Area&gt;, &lt;City&gt; &lt;Year&gt;'"
-msgstr ""
-"Оставьте пустым, чтобы заполнить по шаблону '&lt;Направление&gt;, "
-"&lt;Город&gt; &lt;Год&gt;'"
-
-#: cscsite/learning/models.py:1072
+#: cscsite/learning/models.py:1066
 msgid "Area of Study"
 msgstr "Направление обучения"
 
-#: cscsite/learning/models.py:1074
+#: cscsite/learning/models.py:1068
 msgid "StudyProgram|description"
 msgstr "Доп. описание"
 
-#: cscsite/learning/models.py:1078 cscsite/learning/models.py:1101
+#: cscsite/learning/models.py:1072 cscsite/learning/models.py:1084
 msgid "Study Program"
 msgstr "Учебная программа"
 
-#: cscsite/learning/models.py:1079
+#: cscsite/learning/models.py:1073
 msgid "Study Programs"
 msgstr "Учебные программы"
 
-#: cscsite/learning/models.py:1104
-msgid "Group"
-msgstr "Группа"
+#: cscsite/learning/models.py:1079
+msgid "StudyProgramCourseGroup|courses"
+msgstr "Курсы"
 
-#: cscsite/learning/models.py:1104
-msgid "Courses within the same group are combined using the boolean OR."
-msgstr "Курсы в рамках одной группы объединяются логическим ИЛИ."
+#: cscsite/learning/models.py:1081
+#| msgid ""
+#| "Courses within the same group are combined using the boolean OR."
+msgid "Courses will be grouped with boolean OR"
+msgstr "Курсы объединяются логическим ИЛИ."
 
-#: cscsite/learning/models.py:1108
+#: cscsite/learning/models.py:1088
 msgid "Study Program Course"
 msgstr "Курс учебной программы"
 
-#: cscsite/learning/models.py:1109
+#: cscsite/learning/models.py:1089
 msgid "Study Program Courses"
-msgstr "Обязательные курсы (1 на каждую группу)"
+msgstr "Обязательные курсы"
 
-#: cscsite/learning/models.py:1112
-msgid "Group {}"
-msgstr "Группа {}"
-
-#: cscsite/learning/models.py:1119
+#: cscsite/learning/models.py:1096
 msgid "Online Course|teachers"
 msgstr "Преподаватели"
 
-#: cscsite/learning/models.py:1122
+#: cscsite/learning/models.py:1099
 msgid "Online Course|description"
 msgstr "Описание онлайн-курса"
 
-#: cscsite/learning/models.py:1125
+#: cscsite/learning/models.py:1102
 msgid "Online Course|Link"
 msgstr "Ссылка на курс"
 
-#: cscsite/learning/models.py:1127
+#: cscsite/learning/models.py:1104
 msgid "Online Course|photo"
 msgstr "Фото"
 
-#: cscsite/learning/models.py:1131
+#: cscsite/learning/models.py:1108
 msgid "Collaboration with AY"
 msgstr "Совместно с АУ"
 
-#: cscsite/learning/models.py:1134
+#: cscsite/learning/models.py:1111
 #: cscsite/templates/learning/_onlinecourse_list__row.html:11
 msgid "Without deadlines"
 msgstr "Без дедлайнов"
 
-#: cscsite/learning/models.py:1140
+#: cscsite/learning/models.py:1117
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: cscsite/learning/models.py:1141
+#: cscsite/learning/models.py:1118
 #: cscsite/templates/users/user_detail.html:362
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscsite/learning/models.py:1152
+#: cscsite/learning/models.py:1129
 msgid "InternationalSchool|name"
 msgstr "Название международной школы"
 
-#: cscsite/learning/models.py:1154
+#: cscsite/learning/models.py:1131
 msgid "InternationalSchool|Link"
 msgstr "Ссылка на подробную информацию"
 
-#: cscsite/learning/models.py:1155
+#: cscsite/learning/models.py:1132
 msgid "InternationalSchool|place"
 msgstr "Место проведения"
 
-#: cscsite/learning/models.py:1156
+#: cscsite/learning/models.py:1133
 msgid "InternationalSchool|Deadline"
 msgstr "Крайний срок подачи заявок"
 
-#: cscsite/learning/models.py:1157
+#: cscsite/learning/models.py:1134
 msgid "InternationalSchool|Start"
 msgstr "Начало обучения"
 
-#: cscsite/learning/models.py:1158
+#: cscsite/learning/models.py:1135
 msgid "InternationalSchool|End"
 msgstr "Окончание обучения"
 
-#: cscsite/learning/models.py:1161
+#: cscsite/learning/models.py:1138
 msgid "InternationalSchool|Grants"
 msgstr "Гранты"
 
-#: cscsite/learning/models.py:1167
+#: cscsite/learning/models.py:1144
 msgid "International school"
 msgstr "Международная школа"
 
-#: cscsite/learning/models.py:1168
+#: cscsite/learning/models.py:1145
 msgid "International schools"
 msgstr "Международные школы"
 
-#: cscsite/learning/models.py:1184 cscsite/learning/models.py:1185
+#: cscsite/learning/models.py:1161 cscsite/learning/models.py:1162
 msgid "Useful"
 msgstr "Полезное"
 
-#: cscsite/learning/models.py:1201
+#: cscsite/learning/models.py:1178
 msgid "Internship"
 msgstr "Стажировка"
 
-#: cscsite/learning/models.py:1202
+#: cscsite/learning/models.py:1179
 msgid "Internships"
 msgstr "Стажировки"
 
@@ -2568,6 +2555,20 @@ msgstr "Справка пользователя"
 #: cscsite/users/models.py:588
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "StudyProgram|Name"
+#~ msgstr "Учебная программа"
+
+#~ msgid "Leave blank to populate with '&lt;Area&gt;, &lt;City&gt; &lt;Year&gt;'"
+#~ msgstr ""
+#~ "Оставьте пустым, чтобы заполнить по шаблону '&lt;Направление&gt;, "
+#~ "&lt;Город&gt; &lt;Год&gt;'"
+
+#~ msgid "Group"
+#~ msgstr "Группа"
+
+#~ msgid "Group {}"
+#~ msgstr "Группа {}"
 
 #~ msgid "StudentInfo|Study programs"
 #~ msgstr "Учебные программы"
