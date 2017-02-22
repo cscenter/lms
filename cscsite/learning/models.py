@@ -1086,7 +1086,9 @@ class StudyProgramCourse(models.Model):
         StudyProgram,
         verbose_name=_("Study Program"),
         on_delete=models.PROTECT)
-    group = models.PositiveSmallIntegerField(_("Group"))
+    group = models.PositiveSmallIntegerField(
+        _("Group"), help_text=_("Courses within the same group are combined "
+                                "using the boolean OR."))
 
     class Meta:
         verbose_name = _("Study Program Course")
