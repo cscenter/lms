@@ -1058,7 +1058,6 @@ class AreaOfStudy(models.Model):
 
 
 class StudyProgram(models.Model):
-    name = models.CharField(_("StudyProgram|Name"), max_length=255)
     year = models.PositiveSmallIntegerField(
         _("Year"), validators=[MinValueValidator(1990)])
     city = models.ForeignKey(City,
@@ -1072,9 +1071,6 @@ class StudyProgram(models.Model):
     class Meta:
         verbose_name = _("Study Program")
         verbose_name_plural = _("Study Programs")
-
-    def __str__(self):
-        return smart_text(self.name)
 
 
 class StudyProgramCourse(models.Model):
@@ -1095,7 +1091,7 @@ class StudyProgramCourse(models.Model):
         verbose_name_plural = _("Study Program Courses")
 
     def __str__(self):
-        return smart_text("#{}".format(self.pk))
+        return smart_text(_("Group {}").format(self.group))
 
 
 @python_2_unicode_compatible

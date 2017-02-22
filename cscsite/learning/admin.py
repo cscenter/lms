@@ -43,7 +43,7 @@ class StudyProgramCourseInline(admin.TabularInline):
 
 class StudyProgramAdmin(admin.ModelAdmin):
     list_filter = ["city", "year"]
-    list_display = ["name", "city", "year"]
+    list_display = ["area", "city", "year"]
     inlines = [StudyProgramCourseInline]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
