@@ -87,6 +87,7 @@ djangorestframework==3.5.3
 django-js-reverse==0.7.3
 
 # Misc utils
+django-autocomplete-light==3.2.1
 django-mptt==0.8.7
 django-bootstrap-pagination==1.6.2
 # django-bitfield==1.8.0
