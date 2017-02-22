@@ -50,12 +50,6 @@ class StudyProgramAdmin(admin.ModelAdmin):
     }
 
 
-class StudyProgramCourseAdmin(admin.ModelAdmin):
-    list_filter = ["study_program"]
-    ordering = ["group"]
-    list_display = ["study_program", "group"]
-
-
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['name_ru', 'name_en']
     formfield_overrides = {
@@ -271,7 +265,6 @@ class InternshipAdmin(admin.ModelAdmin):
 
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
 admin.site.register(StudyProgram, StudyProgramAdmin)
-admin.site.register(StudyProgramCourse, StudyProgramCourseAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
