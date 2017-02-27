@@ -128,3 +128,19 @@ class Faq(models.Model):
 
     def __str__(self):
         return smart_text(self.question)
+
+
+class University(models.Model):
+    name = models.CharField(_("University"),
+                            max_length=255,
+                            help_text=_("Perhaps also the faculty."))
+    city = models.ForeignKey(City,
+                             verbose_name=_("City"),
+                             default=settings.DEFAULT_CITY_CODE)
+
+    class Meta:
+        verbose_name = _("University")
+        verbose_name_plural = _("Universities")
+
+    def __str__(self):
+        return smart_text(self.name)

@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, NoReverseMatch
-from django.db import models
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_text
@@ -12,8 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from sitemetrics.models import Keycode
 from modeltranslation.admin import TranslationAdmin
 
-from .forms import Ubereditor
-from .models import City, Faq, FaqCategory
+from .models import City, Faq, FaqCategory, University
 
 # Remove groups app from django admin
 admin.site.unregister(Group)
@@ -90,17 +88,21 @@ class WiderLabelsMixin(object):
     class Media:
         css = {'all': ["css/admin-wider-fields.css"]}
 
+
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
+
 
 class FaqCategoryAdmin(admin.ModelAdmin):
     list_filter = ['site']
     list_display = ['name', 'sort']
 
+
 class FaqAdmin(admin.ModelAdmin):
     list_filter = ['site']
     list_display = ['question', 'sort']
 
+admin.site.register(University)
 admin.site.register(City, CityAdmin)
 
 admin.site.register(Faq, FaqAdmin)
