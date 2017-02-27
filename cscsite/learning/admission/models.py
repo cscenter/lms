@@ -13,7 +13,7 @@ from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 
-from core.models import City
+from core.models import City, University
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair
 
@@ -120,10 +120,21 @@ class Applicant(TimeStampedModel):
         null=True,
         blank=True)
 
-    university = models.CharField(
+    university = models.ForeignKey(
+        University,
+        verbose_name=_("Applicant|University"),
+        on_delete=models.PROTECT,
+        related_name="applicants")
+    university2 = models.CharField(
         _("University"),
         help_text=_("Applicant|university"),
         max_length=255)
+    university_other = models.CharField(
+        _("University (Other)"),
+        help_text=_("Applicant|university_other"),
+        max_length=255,
+        null=True,
+        blank=True)
     faculty = models.TextField(
         _("Faculty"),
         help_text=_("Applicant|faculty"))

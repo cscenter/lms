@@ -89,6 +89,11 @@ class WiderLabelsMixin(object):
         css = {'all': ["css/admin-wider-fields.css"]}
 
 
+class UniversityAdmin(admin.ModelAdmin):
+    list_display = ['name', 'city']
+    list_filter = ['city']
+
+
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
@@ -102,7 +107,7 @@ class FaqAdmin(admin.ModelAdmin):
     list_filter = ['site']
     list_display = ['question', 'sort']
 
-admin.site.register(University)
+admin.site.register(University, UniversityAdmin)
 admin.site.register(City, CityAdmin)
 
 admin.site.register(Faq, FaqAdmin)
