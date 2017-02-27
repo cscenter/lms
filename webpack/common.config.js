@@ -39,7 +39,7 @@ const VENDOR = [
 ];
 
 const common = {
-    context: path.resolve(__dirname, ".."),
+    context: __assetsdir,
 
     entry: {
         main: PATHS.common,
@@ -62,6 +62,7 @@ const common = {
 
     plugins: [
         new BundleTracker({filename: './webpack/webpack-stats.json'}),
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         // TODO: Prevent autoload jquery for now
         // new webpack.ProvidePlugin({
         //     '$': 'jquery',

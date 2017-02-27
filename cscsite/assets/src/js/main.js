@@ -106,28 +106,37 @@ const fn = {
     // Move to `learning` bundle if necessary
     courseOfferingTabs: function() {
         let course_offering = $('#course-offering-detail-page').data('id');
+        let activeTab = $('#course-offering-detail-page__tablist li.active:first a:first');
+        if (activeTab.data("target") === '#course-news') {
+            fn.markNewsAsRead(course_offering, activeTab.get(0));
+        }
         $('#course-offering-detail-page__tablist').on('click', 'a', function(e) {
             e.preventDefault();
             $(this).tab('show');
             const targetTab = $(this).data("target");
             if (targetTab === '#course-news') {
-                const hasUnread = $(this).data('has-unread');
-                if (hasUnread) {
-                    $.ajax({
-                        // TODO: Pass url in data attr?
-                        url: "/notifications/course-offerings/news/",
-                        method: "POST",
-                        data: { co: course_offering }
-                    }).done((data) => {
-                        if (data.updated) {
-                            $(this).text(this.firstChild.nodeValue.trim());
-                        }
-                        // Prevent additional requests
-                        $(this).data("has-unread", false);
-                    });
-                }
+                fn.markNewsAsRead(course_offering, this);
             }
         });
+        // TODO: Additional logic if entry tab is `news`
+    },
+
+    markNewsAsRead: function (course_offering, tab) {
+        let $tab = $(tab);
+        if ($tab.data('has-unread')) {
+            $.ajax({
+                // TODO: Pass url in data attr?
+                url: "/notifications/course-offerings/news/",
+                method: "POST",
+                data: {co: course_offering}
+            }).done((data) => {
+                if (data.updated) {
+                    $tab.text(tab.firstChild.nodeValue.trim());
+                }
+                // Prevent additional requests
+                $tab.data("has-unread", false);
+            });
+        }
     },
 
     courseClassSpecificCode: function() {
