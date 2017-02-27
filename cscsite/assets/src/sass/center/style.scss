@@ -14,6 +14,7 @@
 @import "components/input-daterange";
 @import "components/buttons";
 @import "components/widgets";
+@import "components/badges";
 @import "components/tabs";
 @import "components/toolbars";
 @import "components/panels";
@@ -298,14 +299,6 @@ h2 {
 
 .btn {
   border-radius: 0;
-}
-
-.badge {
-  border-radius: 0px !important;
-}
-
-.badge.lecture, .badge.seminar {
-  width: 6em;
 }
 
 

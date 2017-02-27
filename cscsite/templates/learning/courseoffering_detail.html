@@ -7,7 +7,7 @@
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
 {% block content %}
-<div class="container" id="course-offering-detail-page">
+<div class="container" id="course-offering-detail-page" data-id="{{ course_offering.pk }}">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
@@ -24,43 +24,26 @@
                 </div>
             {% endif %}
 
-            <ul class="nav nav-tabs square" role="tablist">
-                <li class="active" role="presentation">
-                    <a role="tab" data-toggle="tab" aria-expanded="true" aria-controls="about-course" href="#about-course">О курсе</a>
-                </li>
-                {% if is_enrolled or user.is_curator %}
-                    {% if contacts %}
-                        <li role="presentation">
-                            <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-contacts" href="#course-contacts">{% trans "Contacts" %}</a>
+            <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
+                {% for tab in tabs.values %}
+                    {% if tab.show %}
+                        <li role="presentation" {% if tab.target == entry_tab %}class="active"{% endif %}>
+                            <a role="tab"
+                               aria-expanded="{% if tab.target == entry_tab %}true{% else %}false{% endif %}"
+                               aria-controls="course-{{ tab.target }}"
+                               data-target="#course-{{ tab.target }}"
+                               data-has-unread="{% if tab.badge %}true{% else %}false{% endif %}"
+                               href="{{ course_offering.get_absolute_url }}?tab={{ tab.target }}">
+                                {{ tab.name }}{% if tab.badge %} <span class="badge badge-success">{{ tab.badge }}</span>{% endif %}
+                            </a>
                         </li>
                     {% endif %}
-                {% endif %}
-                {% if user.is_student or user.is_curator %}
-                    {% if course_reviews %}
-                        <li role="presentation">
-                            <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-reviews" href="#course-reviews">Отзывы</a>
-                        </li>
-                    {% endif %}
-                {% endif %}
-                {% if course_classes %}
-                    <li role="presentation">
-                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-classes" href="#course-classes">{% trans "Classes" %}</a>
-                    </li>
-                {% endif %}
-                {% if assignments %}
-                    <li role="presentation">
-                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-assignments" href="#course-assignments">{% trans "Assignments" %}</a>
-                    </li>
-                {% endif %}
-                {% if course_news %}
-                    <li role="presentation">
-                        <a role="tab" data-toggle="tab" aria-expanded="false" aria-controls="course-news" href="#course-news">{% trans "News" %}</a>
-                    </li>
-                {% endif %}
+                {% endfor %}
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane active" role="tabpanel" id="about-course">
+                {% with tab=tabs.about %}
+                <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-about">
                     <div class="ubertext course-description">
                     {% if course_offering.description %}
                       {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
@@ -73,33 +56,38 @@
                     {% endif %}
                     </div>
                 </div>
-                {% if is_enrolled or user.is_curator %}
-                    {% if contacts %}
-                        <div class="tab-pane" role="tabpanel" id="course-contacts">
-                        {% for course_teacher in contacts %}
-                            {% with user_object=course_teacher.teacher %}
-                                <h4>{{ user_object.get_full_name }}</h4>
-                                {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
-                                {{ user_object.private_contacts }}{% endmarkdown %}
-                            {% endwith %}
+                {% endwith %}
+
+                {% with tab=tabs.contacts %}
+                {% if tab.show %}
+                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-contacts">
+                    {% for course_teacher in contacts %}
+                        {% with user_object=course_teacher.teacher %}
+                            <h4>{{ user_object.get_full_name }}</h4>
+                            {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
+                            {{ user_object.private_contacts }}{% endmarkdown %}
+                        {% endwith %}
+                    {% endfor %}
+                    </div>
+                {% endif %}
+                {% endwith %}
+
+                {% with tab=tabs.reviews %}
+                {% if tab.show %}
+                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-reviews">
+                        {% for co in course_reviews %}
+                            <h4>{{ co.semester|title }}</h4>
+                              {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
+                                {{ co.reviews }}
+                              {% endmarkdown %}
                         {% endfor %}
-                        </div>
-                    {% endif %}
+                    </div>
                 {% endif %}
-                {% if user.is_curator or user.is_student %}
-                    {% if course_reviews %}
-                        <div class="tab-pane" role="tabpanel" id="course-reviews">
-                            {% for co in course_reviews %}
-                                <h4>{{ co.semester|title }}</h4>
-                                  {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
-                                    {{ co.reviews }}
-                                  {% endmarkdown %}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endif %}
-                {% if course_classes %}
-                    <div class="tab-pane" role="tabpanel" id="course-classes">
+                {% endwith %}
+
+                {% with tab=tabs.classes %}
+                {% if tab.show %}
+                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
                         <thead>
                         <tr>
@@ -109,7 +97,7 @@
                           <th style="width: 110px;">{% trans "Materials" %}</th>
                         </tr>
                         </thead>
-                        {% for class in course_classes %}
+                        {% for class in classes %}
                         <tr>
                             <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
                           <td>
@@ -129,8 +117,11 @@
                       </table>
                     </div>
                 {% endif %}
-                {% if assignments %}
-                    <div class="tab-pane" role="tabpanel" id="course-assignments">
+                {% endwith %}
+
+                {% with tab=tabs.assignments %}
+                {% if tab.show %}
+                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-assignments">
                         <table class="table timetable">
                         <thead>
                             <tr>
@@ -168,8 +159,12 @@
                       </table>
                     </div>
                 {% endif %}
-                {% if course_news %}
-                    <div class="tab-pane" role="tabpanel" id="course-news">
+                {% endwith %}
+
+                {% with tab=tabs.news %}
+                {% if tab.show %}
+                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-news">
+                    {% with course_news=news %}
                     {% for news in course_news %}
                         <div class="panel bg-gray" id="news-{{ news.pk }}">
                             <div class="panel-body">
@@ -190,8 +185,10 @@
                             {% endif %}
                         </div>
                     {% endfor %}
+                    {% endwith %}
                     </div>
                 {% endif %}
+                {% endwith %}
             </div>
     </div>
 
@@ -242,7 +239,7 @@
     {% endif %}
         <div class="o-users-vlist">
             <ul class="list-unstyled">
-                {% for course_teacher in course_teachers.lecturers %}
+                {% for course_teacher in teachers.lecturers %}
                     {% with teacher=course_teacher.teacher %}
                     <li>
                         <a href="{% url 'teacher_detail' teacher.pk %}">
@@ -259,11 +256,11 @@
                 {% endfor %}
             </ul>
         </div>
-        {% if course_teachers.others %}
+        {% if teachers.others %}
             <div class="o-users-vlist">
                 <h4 class="text-center">{% if course_offering.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями</h4>
                 <ul class="list-unstyled">
-                    {% for course_teacher in course_teachers.others %}
+                    {% for course_teacher in teachers.others %}
                         {% with teacher=course_teacher.teacher %}
                         <li>
                             <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a>
