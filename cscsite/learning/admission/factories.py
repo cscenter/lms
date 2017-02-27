@@ -10,6 +10,7 @@ from factory.fuzzy import FuzzyInteger
 
 from django.utils import timezone
 
+from core.factories import UniversityFactory
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment
 from learning.settings import PARTICIPANT_GROUPS
@@ -19,7 +20,6 @@ from users.factories import UserFactory
 class CampaignFactory(factory.DjangoModelFactory):
     class Meta:
         model = Campaign
-
 
     year = factory.Iterator(count(start=2015))
     online_test_max_score = FuzzyInteger(30, 40)
@@ -39,6 +39,7 @@ class ApplicantFactory(factory.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
     uuid = factory.LazyFunction(uuid.uuid4)
+    university = factory.SubFactory(UniversityFactory)
 
 
 class ContestFactory(factory.DjangoModelFactory):

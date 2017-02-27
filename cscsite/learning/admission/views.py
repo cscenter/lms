@@ -114,7 +114,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_queryset(self):
         return (Applicant.objects
-                .select_related("exam", "online_test", "campaign",
+                .select_related("exam", "online_test", "campaign", "university",
                                 "campaign__city")
                 .prefetch_related("interviews")
                 .annotate(exam_result_null=Coalesce('exam__score', Value(-1)))
@@ -131,7 +131,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
     def get_queryset(self):
         applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
         return (Applicant.objects
-                .select_related("exam", "online_test", "campaign")
+                .select_related("exam", "online_test", "campaign",
+                                "campaign__city")
                 .get(pk=applicant_id))
 
     def get_context_data(self, **kwargs):
@@ -386,7 +387,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         return (Applicant.objects
             # TODO: Carefully restrict by status also to optimize query
             .filter(campaign=self.selected_campaign)
-            .select_related("exam", "online_test")
+            .select_related("exam", "online_test", "university")
             .annotate(has_interviews=Count("interviews__pk"))
             .filter(has_interviews__gt=0)
             .prefetch_related(
