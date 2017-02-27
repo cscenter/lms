@@ -13,7 +13,7 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.admin import WiderLabelsMixin
 from core.forms import AdminRichTextAreaWidget
-from core.models import apply_related_spec
+from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 from .models import Course, Semester, CourseOffering, Venue, \
@@ -22,12 +22,6 @@ from .models import Course, Semester, CourseOffering, Venue, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
     CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
-
-
-class RelatedSpecMixin(object):
-    def get_queryset(self, request):
-        qs = super(RelatedSpecMixin, self).get_queryset(request)
-        return apply_related_spec(qs, self.related_spec)
 
 
 class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):

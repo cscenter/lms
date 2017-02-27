@@ -41,6 +41,32 @@ def apply_related_spec(qs, related_spec):
     return qs
 
 
+class RelatedSpecMixin(object):
+    """
+    Extend base queryset with additional values for `select_related` and  
+    `prefetch_related`. 
+
+    Don't forget to add `related_spec` attribute.
+    Example:
+        ExampleModelAdmin(admin.ModelAdmin):
+            related_spec = {'select': [
+                                ('assignment',
+                                [('course_offering', ['semester', 'course'])]),
+                               'student']}
+
+        `related_spec` will be translated to:
+
+            .select_related('assignment', 
+                            'assignment__course_offering', 
+                            'assignment__course_offering__semester', 
+                            'assignment__course_offering__course', 
+                            'student')
+    """
+    def get_queryset(self, request):
+        qs = super(RelatedSpecMixin, self).get_queryset(request)
+        return apply_related_spec(qs, self.related_spec)
+
+
 @python_2_unicode_compatible
 class City(models.Model):
     # Note: Now `CurrentCityMiddleware` hardcoded to cities from Russia.
