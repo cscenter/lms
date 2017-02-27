@@ -351,6 +351,8 @@ class CourseOfferingTeacher(models.Model):
     @staticmethod
     def grouped(course_teachers):
         """
+        Group teachers by role.
+
         A bit complicated to implement this logic on query level without
         ORM hacking.
         """

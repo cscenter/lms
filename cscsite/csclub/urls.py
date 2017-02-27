@@ -82,6 +82,8 @@ urlpatterns += [
         MarkdownRenderView.as_view(),
         name='render_markdown'),
 
+    url(r'^notifications/', include("notifications.urls")),
+
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
 

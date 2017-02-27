@@ -8,7 +8,7 @@ import logging
 import os
 import posixpath
 from calendar import Calendar
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 from itertools import chain
 
 import nbconvert
@@ -21,6 +21,7 @@ from core import comment_persistence
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, get_club_domain, render_markdown
 from core.views import ProtectedFormMixin, LoginRequiredMixin
+from core.widgets import TabbedPane, Tab
 from learning.models import CourseOfferingTeacher
 from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
     ValidateWeekMixin
@@ -35,7 +36,7 @@ from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
@@ -474,9 +475,6 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
 
-    TABS = [
-    ]
-
     def get(self, request, *args, **kwargs):
         # Validate GET-params
         try:
@@ -487,7 +485,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         self.object = self.get_object()
         context = self.get_context_data(object=self.object)
 
-        # Move to club site if course was created before center establishment.
+        # Redirect to club if course was created before center establishment.
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,
@@ -520,24 +518,22 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 ))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseOfferingDetailView, self)
-                   .get_context_data(*args, **kwargs))
-        user = self.request.user
+        context = super().get_context_data(*args, **kwargs)
         co = self.object
+        user = self.request.user
         context['is_enrolled'] = user.enrolled_on_the_course(co.pk)
         context['is_actual_teacher'] = (
             user.pk in (co.teacher_id for co in co.course_teachers))
 
         context['assignments'] = self.get_assignments(context)
 
-        is_club_site = self.request.site.domain == settings.CLUB_DOMAIN
+        is_club_site = settings.SITE_ID == settings.CLUB_SITE_ID
         can_view_news = (
             not context['is_failed_completed_course'] and
             ((user.is_authenticated() and not user.is_expelled) or is_club_site)
         )
-        context["course_news"] = (can_view_news and
-                                  co.courseofferingnews_set.all())
-        context["course_classes"] = self.get_classes(co)
+        context["news"] = can_view_news and co.courseofferingnews_set.all()
+        context["classes"] = self.get_classes(co)
         context["course_reviews"] = co.enrollment_opened() and (
             CourseOffering.objects
                 .defer("description")
@@ -549,22 +545,46 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 .order_by("-semester__index")
                 .all())
         course_teachers = CourseOfferingTeacher.grouped(co.course_teachers)
-        context["course_teachers"] = course_teachers
+        context["teachers"] = course_teachers
         # Collect teachers contacts
         context["contacts"] = [ct for g in course_teachers.values() for ct in g
                                if len(ct.teacher.private_contacts.strip()) > 0]
-        # Not sure if it's the best place for this, but it's the simplest one
-        if user.is_authenticated():
-            cache = get_unread_notifications_cache()
-            if self.object in cache.courseoffering_news:
-                (CourseOfferingNewsNotification.unread
-                 .filter(course_offering_news__course_offering=self.object,
-                         user=self.request.user)
-                 .update(is_unread=False))
-        # Select active tab
-
-
+        context["tabs"] = self.make_tabbed_pane(context)
+        context["entry_tab"] = self.get_entry_tab(context["tabs"])
         return context
+
+    def get_entry_tab(self, tabs, default="about"):
+        entry_tab = self.request.GET.get('tab', default)
+        if entry_tab not in tabs:
+            entry_tab = default
+        return entry_tab
+
+    def make_tabbed_pane(self, c):
+        pane = TabbedPane()
+        u = self.request.user
+        co = self.object
+        news_badge = c.get("is_enrolled") and c.get("news") and (
+            CourseOfferingNewsNotification
+                .unread
+                .filter(course_offering_news__course_offering=co, user=u)
+                .count())
+        tabs = [
+            Tab("about", pgettext_lazy("course-tab", "About"),
+                True),
+            Tab("contacts", pgettext_lazy("course-tab", "Contacts"),
+                (c.get('is_enrolled') or u.is_curator) and c.get('contacts')),
+            Tab("reviews", pgettext_lazy("course-tab", "Reviews"),
+                (u.is_student or u.is_curator) and c.get('course_reviews')),
+            Tab("classes", pgettext_lazy("course-tab", "Classes"),
+                c.get('classes')),
+            Tab("assignments", pgettext_lazy("course-tab", "Assignments"),
+                c.get('assignments')),
+            Tab("news", pgettext_lazy("course-tab", "News"),
+                c.get("news"), news_badge)
+        ]
+        for t in tabs:
+            pane.add(t)
+        return pane
 
     @staticmethod
     def get_classes(course_offering):
@@ -575,12 +595,12 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             course_offering.courseclass_set
                 .select_related("venue")
                 .prefetch_related(
-                # Optimize query by changing default order
-                Prefetch(
-                    'courseclassattachment_set',
-                    queryset=(CourseClassAttachment.objects
-                              .order_by("pk"))
-                ))
+                    # Optimize query by changing default order
+                    Prefetch(
+                        'courseclassattachment_set',
+                        queryset=(CourseClassAttachment.objects
+                                  .order_by("pk"))
+                    ))
                 .order_by("date", "starts_at")
         )
         for cc in course_classes:

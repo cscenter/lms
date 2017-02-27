@@ -29,6 +29,7 @@ $(document).ready(function () {
     fn.admissionFormSpecificCode();
     // Depends on `editors` var, which populated in initUberEditor method
     fn.reflowEditorOnTabToggle();
+    fn.courseOfferingTabs();
 });
 
 const fn = {
@@ -99,6 +100,33 @@ const fn = {
                     editor.reflow();
                 }
             });
+        });
+    },
+
+    // Move to `learning` bundle if necessary
+    courseOfferingTabs: function() {
+        let course_offering = $('#course-offering-detail-page').data('id');
+        $('#course-offering-detail-page__tablist').on('click', 'a', function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+            const targetTab = $(this).data("target");
+            if (targetTab === '#course-news') {
+                const hasUnread = $(this).data('has-unread');
+                if (hasUnread) {
+                    $.ajax({
+                        // TODO: Pass url in data attr?
+                        url: "/notifications/course-offerings/news/",
+                        method: "POST",
+                        data: { co: course_offering }
+                    }).done((data) => {
+                        if (data.updated) {
+                            $(this).text(this.firstChild.nodeValue.trim());
+                        }
+                        // Prevent additional requests
+                        $(this).data("has-unread", false);
+                    });
+                }
+            }
         });
     },
 

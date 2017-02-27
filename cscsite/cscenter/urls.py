@@ -71,6 +71,7 @@ urlpatterns = [
     url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', AlumniView.as_view(),
         name='alumni_by_area_of_study'),
 
+    url(r'^notifications/', include("notifications.urls")),
     url(r'^staff/', include("staff.urls")),
 
     url(r'^stats/$', StatsIndexView.as_view(), name='stats_index'),
