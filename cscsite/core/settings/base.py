@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'crispy_forms',
     'floppyforms',
+    'formtools',
     'bootstrap3',
     'taggit',
     'sitemetrics',

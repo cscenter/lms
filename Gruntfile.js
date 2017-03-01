@@ -81,6 +81,10 @@ module.exports = function (grunt) {
                 ],
                 dest: '<%= JS_DEST %>/diplomas.js'
             },
+            application: {
+                src: ['<%= JS_SRC %>/application.js'],
+                dest: '<%= JS_DEST %>/application.js'
+            },
             projects_report: {
                 src: [
                     '<%= JS_SRC %>/center/projects_report.js'
