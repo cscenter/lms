@@ -3,9 +3,17 @@ from django.conf.urls import include, url
 from learning.admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
     ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateUserView, \
-    InterviewResultsDispatchView
+    InterviewResultsDispatchView, ApplicantRequestWizardView
+
 
 urlpatterns = [
+    url(r'^enrollment/2016/(?P<step>.+)/$',
+        ApplicantRequestWizardView.as_view(url_name='admission_application_step'),
+        name='admission_application_step'),
+    url(r'^enrollment/2016/$',
+        ApplicantRequestWizardView.as_view(url_name='admission_application_step'),
+        kwargs={"step": "step1"},
+        name='admission_application'),
     url(r'^admission/', include([
         url(r'^applicants/$', ApplicantListView.as_view(), name='admission_applicants'),
         url(r'^applicants/(?P<pk>\d+)/$', ApplicantDetailView.as_view(), name='admission_applicant_detail'),

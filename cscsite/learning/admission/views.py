@@ -24,20 +24,81 @@ from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
-from extra_views.formsets import BaseModelFormSetView
+from formtools.wizard.views import NamedUrlCookieWizardView
 
 from core.settings.base import DEFAULT_CITY_CODE
 from core.utils import to_unlocode
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter
-from learning.admission.forms import InterviewCommentForm, ApplicantForm, \
+from learning.admission.forms import InterviewCommentForm, ApplicantReadOnlyForm, \
     InterviewForm, ApplicantStatusForm,  \
-    InterviewResultsModelForm
+    InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
+    ApplicationInNskForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
 from learning.admission.utils import get_best_interview
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
+
+
+class ApplicantRequestWizardView(NamedUrlCookieWizardView):
+    done_step_name = 'finished'
+    form_list = [
+        ('2017', ApplicationFormStep1),
+        ('spb', ApplicationInSpbForm),
+        ('ovb', ApplicationInNskForm),
+    ]
+    initial_dict = {
+        'spb': {'has_job': 'Нет'},
+        'ovb': {'has_job': 'Нет'},
+    }
+
+    def done(self, form_list, **kwargs):
+        cleaned_data = {}
+        for form in form_list:
+            cleaned_data.update(form.cleaned_data)
+        # TODO: надо убедиться, что все is_bound? cleaned и т.д.?
+        cleaned_data['where_did_you_learn'] = ",".join(cleaned_data['where_did_you_learn'])
+        cleaned_data['preferred_study_programs'] = ",".join(cleaned_data['preferred_study_programs'])
+        # TODO: обнулить место работы и должность, если has_job == 'Нет'; Заменить 'Нет' на что-то более англицкое?
+        city_code = to_unlocode(cleaned_data['city'])
+        # TODO: Может перестраховаться и выбирать текущий город? <-- ДА
+        # TODO: нормализация yandex_id
+        # FIXME: валидация github login
+        # FIXME: Направления обучения - указать коды или строки всё-таки?
+        campaign = (Campaign.objects
+                    .filter(current=True, city__code=city_code)
+                    .first())
+        if not campaign:
+            messages.error(self.request,
+                           "Нет активной кампании для выбранного города!")
+            return HttpResponseRedirect(reverse("admission_application"))
+        cleaned_data['campaign'] = campaign
+        del cleaned_data['city']
+        applicant = Applicant(**cleaned_data)
+        applicant.save()
+        return HttpResponseRedirect('/done/')
+
+    @staticmethod
+    def show_spb_form(wizard):
+        cleaned_data = wizard.get_cleaned_data_for_step('2017')
+        return cleaned_data and cleaned_data['city'] == 'spb'
+
+    @staticmethod
+    def show_nsk_form(wizard):
+        cleaned_data = wizard.get_cleaned_data_for_step('2017')
+        return cleaned_data and cleaned_data['city'] == 'ovb'
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        context['step1_data'] = self.storage.get_step_data('2017')
+        return context
+
+
+ApplicantRequestWizardView.condition_dict = {
+    'spb': ApplicantRequestWizardView.show_spb_form,
+    'ovb': ApplicantRequestWizardView.show_nsk_form,
+}
 
 
 class ApplicantContextMixin(object):
@@ -49,7 +110,7 @@ class ApplicantContextMixin(object):
                      .select_related("exam", "campaign", "online_test")
                      .filter(pk=applicant_id))
         context["applicant"] = applicant
-        context["applicant_form"] = ApplicantForm(instance=applicant)
+        context["applicant_form"] = ApplicantReadOnlyForm(instance=applicant)
         context["campaign"] = applicant.campaign
         contest_ids = []
         try:

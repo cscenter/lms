@@ -15,6 +15,7 @@
 @import "components/buttons";
 @import "components/widgets";
 @import "components/badges";
+@import "components/wizards";
 @import "components/tabs";
 @import "components/toolbars";
 @import "components/panels";
@@ -49,6 +50,18 @@
 @import "pages/staff";
 @import "pages/course_offering";
 
+
+.asteriskField {
+  color: $color-red;
+}
+.form-control {
+  box-shadow: none;
+  padding: 8px 12px;
+
+  &:focus {
+    box-shadow: none;
+  }
+}
 
 page[size="A4"] {
   background: white;
