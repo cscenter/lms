@@ -1,25 +1,25 @@
-from collections import Counter
-
 import datetime
 
 import django_rq
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.cache import caches
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse, Http404
-from django.utils.timezone import now
+from django.http.response import HttpResponseNotAllowed, HttpResponseForbidden
+from django.utils.timezone import now, get_current_timezone
 from django.views import generic
 # TODO: (XXX) Dont' forget to remove it after old.* termination.
 from django.views.decorators.csrf import requires_csrf_token
 from django.shortcuts import redirect
+from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 
 from csclub import tasks
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
-from learning.settings import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair
 from learning.views import CalendarMixin
 
@@ -141,3 +141,67 @@ class TeacherDetailView(generic.DetailView):
 @requires_csrf_token
 def custom_page_not_found(request, exception, template_name='404.html'):
     return redirect('http://old.compsciclub.ru' + request.path)
+
+
+class ClubClassesFeed(ICalFeed):
+    title = "Занятия CS клуба"
+    description = """Календарь занятий."""
+    product_id = "-//compsciclub.ru//Computer Science Club//"
+    timezone = 'Europe/Moscow'
+    file_name = "classes.ics"
+
+    # TODO: move this logic to nginx?
+    def __call__(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseForbidden()
+        cache_key = self.get_cache_key(*args, **kwargs)
+        response = caches['default'].get(cache_key)
+        if response is None:
+            response = super().__call__(request, *args, **kwargs)
+            caches['default'].set(cache_key, response, 60 * 60)
+        return response
+
+    def get_cache_key(self, *args, **kwargs):
+        return "%s-%s" % (self.__class__.__name__.lower(),
+                          '/'.join("%s,%s" % (key, val) for key, val in
+                                   kwargs.items()))
+
+    def items(self):
+        return (CourseClass.objects
+                .filter(course_offering__is_open=True)
+                .select_related('venue',
+                                'course_offering',
+                                'course_offering__semester',
+                                'course_offering__course'))
+
+    def item_guid(self, item):
+        return "courseclasses-{}@compsciclub.ru".format(item.pk)
+
+    def item_title(self, item):
+        return item.name
+
+    def item_description(self, item):
+        if item.description.strip():
+            return "{} ({})".format(item.description, self.item_link(item))
+        else:
+            return item.get_type_display()
+
+    def item_link(self, item):
+        return item.get_absolute_url()
+
+    def item_start_datetime(self, item):
+        tz = get_current_timezone()
+        return tz.localize(datetime.datetime.combine(item.date, item.starts_at))
+
+    def item_end_datetime(self, item):
+        tz = get_current_timezone()
+        return tz.localize(datetime.datetime.combine(item.date, item.ends_at))
+
+    def item_created(self, item):
+        return item.created
+
+    def item_updateddate(self, item):
+        return item.modified
+
+    def item_location(self, item):
+        return item.venue.address
