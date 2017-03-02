@@ -18,7 +18,7 @@ from learning.urls import course_patterns, course_offering_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView
 from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
-    TeacherDetailView, AsyncEmailRegistrationView
+    TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed
 
 admin.autodiscover()
 
@@ -37,6 +37,8 @@ urlpatterns = solid_i18n_patterns(
     # Schedule
     url(r"^schedule/$", CalendarClubScheduleView.as_view(),
         name="public_schedule"),
+    url(r"^schedule/classes.ics$", ClubClassesFeed(),
+        name="public_schedule_classes_ics"),
     # Registration
     url(r'^register/$', AsyncEmailRegistrationView.as_view(),
         name='registration_register'),
