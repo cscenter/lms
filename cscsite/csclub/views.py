@@ -150,10 +150,7 @@ class ClubClassesFeed(ICalFeed):
     timezone = 'Europe/Moscow'
     file_name = "classes.ics"
 
-    # TODO: move this logic to nginx?
     def __call__(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponseForbidden()
         cache_key = self.get_cache_key(*args, **kwargs)
         response = caches['default'].get(cache_key)
         if response is None:
