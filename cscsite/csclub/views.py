@@ -168,7 +168,8 @@ class ClubClassesFeed(ICalFeed):
 
     def items(self):
         return (CourseClass.objects
-                .filter(course_offering__is_open=True)
+                .filter(course_offering__is_open=True,
+                        course_offering__city__code="RU SPB")
                 .select_related('venue',
                                 'course_offering',
                                 'course_offering__semester',
