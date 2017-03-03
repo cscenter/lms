@@ -17,9 +17,14 @@
 
 
 {% block content %}
-    <div class="container">
-    <div class="panel">
-        <div class="panel-body">
+    <div class="container" id="application-form">
+    <div class="card">
+        {% if wizard.steps.current == 'spb' %}
+            <div class="card-header"><h2>Анкета для Санкт-Петербурга</h2></div>
+        {% elif wizard.steps.current == 'ovb' %}
+            <div class="card-header"><h2>Анкета для Новосибирска</h2></div>
+        {% endif %}
+        <div class="card-body card-padding">
 {#           <div class="progress">#}
 {#             <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5" style="width: 20%;">#}
 {#               Шаг {{ wizard.steps.step1 }} из {{ wizard.steps.count }}#}
@@ -49,11 +54,7 @@
 {#                  </div>#}
 {#                </div>#}
 {#              </div>#}
-        {% if wizard.steps.current == 'spb' %}
-            Город поступления: Санкт-Петербург
-        {% elif wizard.steps.current == 'nsk' %}
-            Город поступления: Новосибирск
-        {% endif %}
+
 
             <div class="row">
                 {{ view.step1 }}
@@ -70,10 +71,16 @@
                     {% crispy wizard.form %}
                 {% endif %}
                 </table>
+
+                {% if wizard.steps.current == 'spb' or wizard.steps.current == 'ovb' %}
+                    <p class="margin-top-10">Нажимая <b>«Подать заявку»</b>, вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приёмной кампании.</p>
+                {% endif %}
+
                 {% if wizard.steps.prev %}
                 <button name="wizard_goto_step" type="submit" class="btn btn-default" value="{{ wizard.steps.prev }}">Предыдущий шаг</button>
                 {% endif %}
-                {% if wizard.steps.current == 'spb' or wizard.steps.current == 'nsk' %}
+
+                {% if wizard.steps.current == 'spb' or wizard.steps.current == 'ovb' %}
                     <input type="submit" class="btn btn-primary" value="Подать заявку"/>
                 {% else %}
                     <input type="submit" class="btn btn-default" value="Следующий шаг"/>

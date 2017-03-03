@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block title %}Анкета на поступление - CSC{% endblock title %}
+
+{% block content %}
+    <div class="container" id="application-form">
+    <div class="card">
+        <div class="card-body card-padding">
+                <h3 class="margin-top-0">Заявка зарегистрирована</h3>
+                Спасибо за интерес к обучению в CS центре.<br>
+                В ближайшее время вам придёт письмо с дальнейшими инструкциями и ссылкой на тест для поступающих.<br>
+                Если в течение суток письмо не пришло, поищите его в спаме, и, если там нет, напишите на
+                <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a> о своей проблеме. Не забудьте указать свои ФИО и email.
+        </div>
+    </div>
+
+    </div>
+{% endblock %}

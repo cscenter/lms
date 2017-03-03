@@ -113,3 +113,11 @@ NEWRELIC_ENV = 'production'
 
 AWS_SES_ACCESS_KEY_ID = 'AKIAJZ44WHPOEURR4TZA'
 AWS_SES_SECRET_ACCESS_KEY = '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'
+
+POST_OFFICE = {
+    'BACKENDS': {
+        'ses': 'django_ses.SESBackend',
+        'BATCH_SIZE': 10,
+        'LOG_LEVEL': 1
+    }
+}

@@ -9,11 +9,13 @@ from crispy_forms.layout import Layout, Div, Submit, Field, Row, Fieldset, \
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.core.validators import RegexValidator
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
 from core.forms import Ubereditor
+from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant
 from users.models import CSCUser
@@ -34,26 +36,42 @@ class ApplicationFormStep1(forms.ModelForm):
         widget=forms.RadioSelect(),
         choices=(
             ("spb", _("St Petersburg")),
-            ("nsk", _("Novosibirsk")),
+            ("ovb", _("Novosibirsk")),
         ),
         label='Выберите город, в котором вы живёте и куда хотите поступить',
         help_text='С 2017 года CS центр есть не только в Санкт-Петербурге, '
                   'но и в Новосибирске.'
     )
+    yandex_id = forms.CharField(
+        label='Укажите свой логин на Яндексе',
+        help_text=('Например, ваша почта на Яндексе — '
+                   '"my.name@yandex.ru", тогда ваш логин — это '
+                   '"my.name". Укажите в этом поле именно его.'))
+    github_id = forms.CharField(
+        label='Укажите свой логин на GitHub, если есть',
+        max_length=80,
+        validators=[RegexValidator(
+            regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*[a-zA-Z0-9]$")],
+        required=False,
+        help_text='Если ссылка на ваш профиль на GitHub выглядит вот '
+                  'так: https://github.com/XXXX, то логин — это XXXX')
 
     class Meta:
         model = Applicant
         fields = ("city", "second_name", "first_name", "last_name", "email",
-                  "phone")
+                  "phone", "yandex_id", "stepic_id", "github_id",)
+        labels = {
+            'email': 'Адрес электронной почты',
+            'stepic_id': 'Укажите свой ID на Stepik.org, если есть',
+        }
         help_texts = {
             'email': 'На всех этапах приёмной кампании основной способ '
                      'связи с поступающими — электронная почта. Укажите '
                      'тот email, по которому мы быстрее всего сможем с '
                      'вами связаться.',
-            'phone': ''
-        }
-        labels = {
-            'email': 'Адрес электронной почты'
+            'phone': '',
+            'stepic_id': 'Если ссылка на ваш профиль на Stepik выглядит вот '
+                         'так: https://stepik.org/users/XXXX, то ID — это XXXX',
         }
 
     def __init__(self, *args, **kwargs):
@@ -68,21 +86,25 @@ class ApplicationFormStep1(forms.ModelForm):
             Row(
                 Div(PrependedText('email', '@'), css_class='col-xs-8'),
                 Div('phone', css_class='col-xs-4')
-            )
+            ),
+            Row(
+                Div('yandex_id', css_class='col-xs-12'),
+            ),
+            Row(
+                Div('stepic_id', css_class='col-xs-6'),
+                Div('github_id', css_class='col-xs-6'),
+            ),
+            Row(
+            ),
 
         )
         super().__init__(*args, **kwargs)
 
 
-class ApplicationInSpbForm(forms.ModelForm):
+class ApplicationFormStep2(forms.ModelForm):
     has_job = forms.ChoiceField(
         label='Вы сейчас работаете?',
-        choices=(("Нет", "Нет"), ("Да", "Да")))
-    yandex_id = forms.CharField(
-        label='Укажите свой логин на Яндексе',
-        help_text=('Например, ваша почта на Яндексе — '
-                   '"my.name@yandex.ru", тогда ваш логин — это '
-                   '"my.name". Укажите в этом поле именно его.'))
+        choices=(("no", "Нет"), ("yes", "Да")))
     course = forms.ChoiceField(label='Курс, на котором вы учитесь',
                                choices=COURSES)
     where_did_you_learn = forms.MultipleChoiceField(
@@ -91,6 +113,164 @@ class ApplicationInSpbForm(forms.ModelForm):
                   'источников больше одного',
         choices=WHERE_DID_YOU_LEARN,
         widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = Applicant
+        fields = ("university", "university_other",
+                  "faculty", "course", "has_job", "workplace", "position",
+                  "experience",  "preferred_study_programs",
+                  "preferred_study_programs_dm_note",
+                  "preferred_study_programs_cs_note",
+                  "preferred_study_programs_se_note",
+                  "where_did_you_learn", "where_did_you_learn_other",
+                  "motivation", "your_future_plans",
+                  "additional_info")
+        labels = {
+            'university_other': 'Название университета',
+            'faculty': 'Факультет, специальность или кафедра',
+            'experience': 'Расскажите о своём опыте программирования и '
+                          'исследований',
+            'preferred_study_programs_dm_note': 'Почему вам интересен анализ '
+                                                'данных? Какие повседневные '
+                                                'задачи решаются с помощью '
+                                                'анализа данных?',
+            'preferred_study_programs_se_note': 'В разработке какого приложения,'
+                                                ' которым вы пользуетесь каждый '
+                                                'день, вы хотели бы принять '
+                                                'участие? Почему? Каких знаний '
+                                                'вам для этого не хватает?',
+            'motivation': 'Почему вы хотите учиться в CS центре?',
+            'your_future_plans': 'Чем вы планируете заниматься после '
+                                 'окончания обучения?',
+            'additional_info': 'Напишите любую дополнительную информацию о '
+                               'себе, которую хотите указать',
+
+
+        }
+        help_texts = {
+            'university_other': 'Заполните, если в поле слева указали "Другое".',
+            'faculty': '',
+            'workplace': '',
+            'position': '',
+            'experience': 'Напишите здесь о том, что вы делаете на работе, '
+                          'и о своей нынешней дипломной или курсовой работе. '
+                          'Здесь стоит рассказать о студенческих проектах, '
+                          'в которых вы участвовали, или о небольших личных '
+                          'проектах, которые вы делаете дома, для своего '
+                          'удовольствия.',
+            'preferred_study_programs_dm_note': '',
+            'preferred_study_programs_se_note': '',
+            'where_did_you_learn': 'Вы можете выбрать несколько вариантов '
+                                   'ответа, если источников больше одного.',
+            'motivation': '',
+            'your_future_plans': '',
+            'additional_info': ''
+        }
+        widgets = {
+            'faculty': forms.TextInput(),
+            'experience': forms.Textarea(attrs={"rows": 6}),
+            'preferred_study_programs_dm_note': forms.Textarea(attrs={"rows": 6}),
+            'preferred_study_programs_cs_note': forms.Textarea(attrs={"rows": 6}),
+            'preferred_study_programs_se_note': forms.Textarea(attrs={"rows": 6}),
+            'motivation': forms.Textarea(attrs={"rows": 6}),
+            'your_future_plans': forms.Textarea(attrs={"rows": 6}),
+            'additional_info': forms.Textarea(attrs={"rows": 6}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        if not self.CITY_CODE:
+            raise ValueError("Provide city code prefix")
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Row(
+                Div('university', css_class='col-xs-6'),
+                Div('university_other', css_class='col-xs-6'),
+            ),
+            Row(
+                Div('faculty', css_class='col-xs-6'),
+                Div('course', css_class='col-xs-6'),
+                css_class='margin-bottom-15',
+            ),
+            Row(
+                Div('has_job', css_class='col-xs-4'),
+                Div('workplace', css_class='col-xs-4'),
+                Div('position', css_class='col-xs-4'),
+                css_class='margin-bottom-15',
+            ),
+            Row(
+                Div('experience', css_class='col-xs-12'),
+                css_class='margin-bottom-15'
+            ),
+            Row(
+                Div('preferred_study_programs', css_class='col-xs-12'),
+                Div('preferred_study_programs_dm_note', css_class='col-xs-12'),
+                Div('preferred_study_programs_cs_note', css_class='col-xs-12'),
+                Div('preferred_study_programs_se_note', css_class='col-xs-12'),
+                css_class='margin-bottom-15',
+                css_id="study-programs-row"
+            ),
+            Row(
+                Div('where_did_you_learn', css_class='col-xs-12'),
+                Div('where_did_you_learn_other', css_class='col-xs-12'),
+                css_id="where-did-you-learn-row"
+            ),
+        )
+        super().__init__(*args, **kwargs)
+        # Tricky part. We should retrieve row with `preferred_study_programs`
+        # id and hide other optional related fields if necessary
+        areas_of_study_fieldset = next((f for f in self.helper.layout.fields
+                                        if f.css_id == "study-programs-row"),
+                                       None)
+        # Hide some fields if they are not necessary at the moment
+        if not self.is_bound:
+            self.fields['university_other'].disabled = True
+            for row in areas_of_study_fieldset:
+                if 'preferred_study_programs' not in row:
+                    row.css_class += ' hidden'
+        else:
+            target = self.CITY_CODE + "-preferred_study_programs"
+            selected_areas = self.data.getlist(target)
+            for row in areas_of_study_fieldset:
+                if 'preferred_study_programs' in row:
+                    continue
+                selected = False
+                for area in selected_areas:
+                    input_name = "preferred_study_programs_{}_note".format(area)
+                    if input_name in row:
+                        selected = True
+                        break
+                if not selected:
+                    row.css_class += ' hidden'
+
+        # University other visibility
+        target = self.CITY_CODE + "-university"
+        if (target not in self.data or
+                self.data[target] != str(self.UNIVERSITY_OTHER_ID)):
+            self.fields['university_other'].disabled = True
+        # Has job visibility
+        target = self.CITY_CODE + "-has_job"
+        if target not in self.data or self.data[target] == 'no':
+            self.fields['workplace'].disabled = True
+            self.fields['position'].disabled = True
+        # Where did you learn
+        target = self.CITY_CODE + "-where_did_you_learn"
+        if target not in self.data or "other" not in self.data.getlist(target):
+            fieldset = next((f for f in self.helper.layout.fields
+                             if f.css_id == "where-did-you-learn-row"), None)
+            if fieldset:
+                for row in fieldset:
+                    if 'where_did_you_learn' not in row:
+                        row.css_class += ' hidden'
+
+
+class ApplicationInSpbForm(ApplicationFormStep2):
+    CITY_CODE = "spb"
+    UNIVERSITY_OTHER_ID = 10
+    university = forms.ModelChoiceField(
+        label='Университет (и иногда факультет)',
+        queryset=University.objects.filter(city__code="RU SPB"),
+        help_text='В котором вы учитесь или который закончили'
     )
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из трёх вам интересны в CS центре?',
@@ -107,87 +287,15 @@ class ApplicationInSpbForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple
     )
 
-    class Meta:
-        model = Applicant
-        fields = ("university", "university_other",
-                  "faculty", "course", "has_job", "workplace", "position",
-                  "experience", "yandex_id", "stepic_id", "github_id",
-                  "preferred_study_programs", "where_did_you_learn",
-                  "motivation", "your_future_plans",
-                  "additional_info")
-        labels = {
-            'university': 'Университет (и иногда факультет)',
-            'university_other': 'Название университета',
-            'faculty': 'Факультет, специальность или кафедра',
-            'experience': 'Расскажите о своём опыте программирования и '
-                          'исследований',
-            'stepic_id': 'Укажите свой ID на Stepik.org, если есть',
-            'github_id': 'Укажите свой логин на GitHub, если есть',
-            'motivation': 'Почему вы хотите учиться в CS центре?',
-            'your_future_plans': 'Чем вы планируете заниматься после '
-                                 'окончания обучения?',
-            'additional_info': 'Напишите любую дополнительную информацию о '
-                               'себе, которую хотите указать',
 
-
-        }
-        help_texts = {
-            'university': 'В котором вы учитесь или который закончили',
-            'university_other': 'Заполните, если в поле слева указали "Другое".',
-            'faculty': '',
-            'experience': 'Напишите здесь о том, что вы делаете на работе, '
-                          'и о своей нынешней дипломной или курсовой работе. '
-                          'Здесь стоит рассказать о студенческих проектах, '
-                          'в которых вы участвовали, или о небольших личных '
-                          'проектах, которые вы делаете дома, для своего '
-                          'удовольствия.',
-
-            'stepic_id': 'Если ссылка на ваш профиль на Stepik выглядит вот '
-                         'так: https://stepik.org/users/XXXX, то ID — это XXXX',
-            'github_id': 'Если ссылка на ваш профиль на GitHub выглядит вот '
-                         'так: https://github.com/XXXX, то логин — это XXXX',
-            'workplace': '',
-            'position': '',
-            'where_did_you_learn': 'Вы можете выбрать несколько вариантов '
-                                   'ответа, если источников больше одного.',
-            'motivation': '',
-            'your_future_plans': '',
-            'additional_info': ''
-        }
-        widgets = {
-            'faculty': forms.TextInput(),
-            'motivation': forms.Textarea(attrs={"rows": 6}),
-            'your_future_plans': forms.Textarea(attrs={"rows": 6}),
-            'additional_info': forms.Textarea(attrs={"rows": 6}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Row(
-                Div('university', css_class='col-xs-6'),
-                Div('university_other', css_class='col-xs-6'),
-            ),
-            Row(
-                Div('faculty', css_class='col-xs-6'),
-                Div('course', css_class='col-xs-6')
-            ),
-            Row(
-                Div('has_job', css_class='col-xs-4'),
-                Div('workplace', css_class='col-xs-4'),
-                Div('position', css_class='col-xs-4'),
-            ),
-        )
-        super().__init__(*args, **kwargs)
-        # Hide some fields if they are not necessary at the moment
-        if not self.is_bound:
-            self.fields['university_other'].disabled = True
-        if 'spb-has_job' not in self.data or self.data['spb-has_job'] == 'Нет':
-            self.fields['workplace'].disabled = True
-            self.fields['position'].disabled = True
-
-
-class ApplicationInNskForm(forms.ModelForm):
+class ApplicationInNskForm(ApplicationFormStep2):
+    CITY_CODE = "ovb"
+    UNIVERSITY_OTHER_ID = 14
+    university = forms.ModelChoiceField(
+        label='Университет (и иногда факультет)',
+        queryset=University.objects.filter(city__code="RU OVB"),
+        help_text='В котором вы учитесь или который закончили'
+    )
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из двух вам интересны в CS центре?',
         choices=(
@@ -201,9 +309,6 @@ class ApplicationInNskForm(forms.ModelForm):
                   'интересными.',
         widget=forms.CheckboxSelectMultiple
     )
-
-    class Meta(ApplicationInSpbForm.Meta):
-        fields = ("university", "stepic_id", "yandex_id", "github_id",)
 
 
 class InterviewForm(forms.ModelForm):

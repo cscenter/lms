@@ -1,7 +1,6 @@
 #student-submission-comments {
   label[for=id_text] {
     font-size: 18px;
-    margin: 10px 0;
     font-weight: 500;
   }
 }
@@ -18,10 +17,14 @@
   min-height: 20px;
   padding: 19px;
   margin-bottom: 20px;
-}
 
-.csc-well blockquote {
-  border-left-color: #CFCFCF;
+  blockquote {
+    border-left-color: #CFCFCF;
+  }
+
+  > :last-child, > :last-child > :last-child {
+    margin-bottom: 0;
+  }
 }
 
 h5.assignment {
