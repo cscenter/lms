@@ -7,15 +7,15 @@ from learning.admission.views import InterviewListView, InterviewDetailView, \
     ApplicationCompleteView
 
 urlpatterns = [
-    url(r'^enrollment_test/complete/$',
+    url(r'^enrollment/test/complete/$',
         ApplicationCompleteView.as_view(),
         name='admission_application_complete'),
-    url(r'^enrollment_test/(?P<step>.+)/$',
+    url(r'^enrollment/test/(?P<step>.+)/$',
         ApplicantRequestWizardView.as_view(
             url_name='admission_application_step',
             done_step_name='finished',),
         name='admission_application_step'),
-    url(r'^enrollment_test/$',
+    url(r'^enrollment/test/$',
         ApplicantRequestWizardView.as_view(
             url_name='admission_application_step',
             done_step_name='finished',),
