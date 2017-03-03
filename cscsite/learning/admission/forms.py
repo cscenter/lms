@@ -292,7 +292,7 @@ class ApplicationInNskForm(ApplicationFormStep2):
     CITY_CODE = "ovb"
     UNIVERSITY_OTHER_ID = 14
     university = forms.ModelChoiceField(
-        label='Университет (и иногда факультет)',
+        label='Университет',
         queryset=University.objects.filter(city__code="RU OVB"),
         help_text='В котором вы учитесь или который закончили'
     )
