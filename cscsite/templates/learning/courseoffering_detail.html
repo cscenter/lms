@@ -34,7 +34,7 @@
                                data-target="#course-{{ tab.target }}"
                                data-has-unread="{% if tab.badge %}true{% else %}false{% endif %}"
                                href="{{ course_offering.get_absolute_url }}?tab={{ tab.target }}">
-                                {{ tab.name }}{% if tab.badge %} <span class="badge badge-success">{{ tab.badge }}</span>{% endif %}
+                                {{ tab.name }}{% if tab.badge %} <span class="badge badge-success">+{{ tab.badge }}</span>{% endif %}
                             </a>
                         </li>
                     {% endif %}

@@ -30,6 +30,7 @@
 @import "components/hr";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
+@import "pages/application";
 @import "pages/login";
 @import "pages/online_courses_page.scss";
 @import "pages/orgs";
@@ -62,6 +63,7 @@
     box-shadow: none;
   }
 }
+
 
 page[size="A4"] {
   background: white;

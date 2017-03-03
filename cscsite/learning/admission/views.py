@@ -24,9 +24,10 @@ from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
 from django.views.generic.edit import BaseUpdateView, BaseCreateView
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
-from formtools.wizard.views import NamedUrlCookieWizardView
+from formtools.wizard.views import NamedUrlCookieWizardView, \
+    NamedUrlSessionWizardView
 
-from core.settings.base import DEFAULT_CITY_CODE
+from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import to_unlocode
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter
@@ -39,12 +40,13 @@ from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
 from learning.admission.utils import get_best_interview
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
+from .tasks import application_form_send_email
 
 
-class ApplicantRequestWizardView(NamedUrlCookieWizardView):
-    done_step_name = 'finished'
+class ApplicantRequestWizardView(NamedUrlSessionWizardView):
+    template_name = "learning/admission/application.html"
     form_list = [
-        ('2017', ApplicationFormStep1),
+        ('welcome', ApplicationFormStep1),
         ('spb', ApplicationInSpbForm),
         ('ovb', ApplicationInNskForm),
     ]
@@ -57,17 +59,17 @@ class ApplicantRequestWizardView(NamedUrlCookieWizardView):
         cleaned_data = {}
         for form in form_list:
             cleaned_data.update(form.cleaned_data)
-        # TODO: надо убедиться, что все is_bound? cleaned и т.д.?
-        cleaned_data['where_did_you_learn'] = ",".join(cleaned_data['where_did_you_learn'])
-        cleaned_data['preferred_study_programs'] = ",".join(cleaned_data['preferred_study_programs'])
-        # TODO: обнулить место работы и должность, если has_job == 'Нет'; Заменить 'Нет' на что-то более англицкое?
+        cleaned_data['where_did_you_learn'] = ",".join(
+            cleaned_data['where_did_you_learn'])
+        cleaned_data['preferred_study_programs'] = ",".join(
+            cleaned_data['preferred_study_programs'])
+        if cleaned_data['has_job'] == 'no':
+            del cleaned_data['workplace']
+            del cleaned_data['position']
         city_code = to_unlocode(cleaned_data['city'])
-        # TODO: Может перестраховаться и выбирать текущий город? <-- ДА
-        # TODO: нормализация yandex_id
-        # FIXME: валидация github login
-        # FIXME: Направления обучения - указать коды или строки всё-таки?
+        today = now()
         campaign = (Campaign.objects
-                    .filter(current=True, city__code=city_code)
+                    .filter(year=today.year, city__code=city_code)
                     .first())
         if not campaign:
             messages.error(self.request,
@@ -76,22 +78,27 @@ class ApplicantRequestWizardView(NamedUrlCookieWizardView):
         cleaned_data['campaign'] = campaign
         del cleaned_data['city']
         applicant = Applicant(**cleaned_data)
+        applicant.clean()
         applicant.save()
-        return HttpResponseRedirect('/done/')
+        if applicant.pk:
+            application_form_send_email.delay(applicant.pk, LANGUAGE_CODE)
+        else:
+            print("SOMETHING WRONG?")
+        return HttpResponseRedirect(reverse("admission_application_complete"))
 
     @staticmethod
     def show_spb_form(wizard):
-        cleaned_data = wizard.get_cleaned_data_for_step('2017')
+        cleaned_data = wizard.get_cleaned_data_for_step('welcome')
         return cleaned_data and cleaned_data['city'] == 'spb'
 
     @staticmethod
     def show_nsk_form(wizard):
-        cleaned_data = wizard.get_cleaned_data_for_step('2017')
+        cleaned_data = wizard.get_cleaned_data_for_step('welcome')
         return cleaned_data and cleaned_data['city'] == 'ovb'
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
-        context['step1_data'] = self.storage.get_step_data('2017')
+        context['step1_data'] = self.storage.get_step_data('welcome')
         return context
 
 
@@ -99,6 +106,10 @@ ApplicantRequestWizardView.condition_dict = {
     'spb': ApplicantRequestWizardView.show_spb_form,
     'ovb': ApplicantRequestWizardView.show_nsk_form,
 }
+
+
+class ApplicationCompleteView(generic.TemplateView):
+    template_name = "learning/admission/application_done.html"
 
 
 class ApplicantContextMixin(object):

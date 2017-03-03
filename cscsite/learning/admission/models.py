@@ -185,9 +185,29 @@ class Applicant(TimeStampedModel):
         _("Study program"),
         help_text=_("Applicant|study_program"),
         max_length=255)
+    preferred_study_programs_dm_note = models.TextField(
+        _("Study program (DM note)"),
+        help_text=_("Applicant|study_program_dm"),
+        null=True,
+        blank=True)
+    preferred_study_programs_se_note = models.TextField(
+        _("Study program (SE note)"),
+        help_text=_("Applicant|study_program_se"),
+        null=True,
+        blank=True)
+    preferred_study_programs_cs_note = models.TextField(
+        _("Study program (CS note)"),
+        help_text=_("Applicant|study_program_cs"),
+        null=True,
+        blank=True)
     where_did_you_learn = models.TextField(
         _("Where did you learn?"),
         help_text=_("Applicant|where_did_you_learn_about_cs_center"))
+    where_did_you_learn_other = models.CharField(
+        _("Where did you learn? (other)"),
+        max_length=255,
+        null=True,
+        blank=True)
     your_future_plans = models.TextField(
         _("Future plans"),
         help_text=_("Applicant|future_plans"),
