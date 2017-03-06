@@ -6,18 +6,19 @@ import random
 
 from collections import Counter
 
+import itertools
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
 from django.http import Http404
 from django.utils.timezone import now
 from django.views import generic
 
 from core.models import Faq
 from learning.models import Semester, CourseOffering, CourseOfferingTeacher, \
-    OnlineCourse, AreaOfStudy
+    OnlineCourse, AreaOfStudy, StudyProgram, StudyProgramCourseGroup
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_current_semester_pair, get_term_index, \
     get_term_index_academic
@@ -239,3 +240,34 @@ class AlumniByYearView(generic.ListView):
                                 min(len(testimonials), 5))
         for index in indexes:
             yield testimonials[index]
+
+
+class SyllabusView(generic.TemplateView):
+    template_name = "syllabus.html"
+    CACHE_KEY = 'syllabus_program'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = now()
+        syllabus = (StudyProgram.objects
+                    .filter(year=2016)
+                    .select_related("area")
+                    .prefetch_related(
+                        Prefetch(
+                            'course_groups',
+                            queryset=(StudyProgramCourseGroup
+                                      .objects
+                                      .prefetch_related("courses")),
+                        ))
+                    .order_by("city_id"))
+        context["programs"] = self.group_programs_by_city(syllabus)
+        # TODO: validate entry city
+        context["selected_city"] = self.request.GET.get('city', 'spb')
+        return context
+
+    def group_programs_by_city(self, syllabus):
+        grouped = {}
+        for city_iata, g in itertools.groupby(syllabus,
+                                              key=lambda sp: sp.city.iata):
+            grouped[city_iata] = list(g)
+        return grouped

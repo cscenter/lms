@@ -9,7 +9,7 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import RobotsView, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
-    TeachersView, AlumniView, AlumniByYearView, TeamView
+    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView
 from htmlpages import views
 from learning.views import UsefulListView, InternshipListView
 from stats.views import StatsIndexView
@@ -30,6 +30,7 @@ urlpatterns = [
         RedirectView.as_view(url='/enrollment/program/',
                              permanent=True)),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
+    url(r'^syllabus/test/$', SyllabusView.as_view(), name='syllabus'),
     # TODO: Remove this link as a stale in a while
     url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='comment_the_right_way'),

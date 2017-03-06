@@ -12,11 +12,17 @@
 
   .card-header {
     position: relative;
+
+    &.card-header-sm {
+      padding: 20px 15px!important;
+    }
+
     h2 {
       margin: 0;
       line-height: 100%;
       font-size: 16px;
       font-weight: 400;
+
       small {
         display: block;
         margin-top: 8px;
@@ -24,21 +30,25 @@
         line-height: 160%;
       }
     }
+
     &.ch-alt:not([class*="bgm-"]) {
       background-color: $background-grey;
     }
+
     &[class*="bgm-"] h2 {
       color: #fff;
       small {
         color: #fff;
       }
     }
+
     .actions {
       position: absolute;
       right: 10px;
       z-index: 2;
       top: 15px;
     }
+
     .btn-float {
       right: 25px;
       bottom: -23px;
