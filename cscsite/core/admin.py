@@ -90,7 +90,8 @@ class WiderLabelsMixin(object):
 
 
 class UniversityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'city']
+    list_editable = ['sort']
+    list_display = ['name', 'city', 'sort']
     list_filter = ['city']
 
 

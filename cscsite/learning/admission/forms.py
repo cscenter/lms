@@ -127,7 +127,7 @@ class ApplicationFormStep2(forms.ModelForm):
                   "motivation", "your_future_plans",
                   "additional_info")
         labels = {
-            'university_other': 'Название университета',
+            'university_other': 'Введите название университета',
             'faculty': 'Факультет, специальность или кафедра',
             'experience': 'Расскажите о своём опыте программирования и '
                           'исследований',
@@ -149,7 +149,7 @@ class ApplicationFormStep2(forms.ModelForm):
 
         }
         help_texts = {
-            'university_other': 'Заполните, если в поле слева указали "Другое".',
+            'university_other': '',
             'faculty': '',
             'workplace': '',
             'position': '',
@@ -184,12 +184,18 @@ class ApplicationFormStep2(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
-                Div('university', css_class='col-xs-6'),
-                Div('university_other', css_class='col-xs-6'),
+                Div("university", css_class='col-xs-8'),
             ),
             Row(
-                Div('faculty', css_class='col-xs-6'),
-                Div('course', css_class='col-xs-6'),
+                Div('university_other', css_class='col-xs-8'),
+                css_class='margin-bottom-15',
+                css_id='university-other-row',
+            ),
+            Row(
+                Div('faculty', css_class='col-xs-8'),
+            ),
+            Row(
+                Div('course', css_class='col-xs-8'),
                 css_class='margin-bottom-15',
             ),
             Row(
@@ -213,6 +219,7 @@ class ApplicationFormStep2(forms.ModelForm):
             Row(
                 Div('where_did_you_learn', css_class='col-xs-12'),
                 Div('where_did_you_learn_other', css_class='col-xs-12'),
+                css_class='margin-bottom-15',
                 css_id="where-did-you-learn-row"
             ),
         )
@@ -224,7 +231,6 @@ class ApplicationFormStep2(forms.ModelForm):
                                        None)
         # Hide some fields if they are not necessary at the moment
         if not self.is_bound:
-            self.fields['university_other'].disabled = True
             for row in areas_of_study_fieldset:
                 if 'preferred_study_programs' not in row:
                     row.css_class += ' hidden'
@@ -247,7 +253,10 @@ class ApplicationFormStep2(forms.ModelForm):
         target = self.CITY_CODE + "-university"
         if (target not in self.data or
                 self.data[target] != str(self.UNIVERSITY_OTHER_ID)):
-            self.fields['university_other'].disabled = True
+            fieldset = next((f for f in self.helper.layout.fields
+                             if f.css_id == "university-other-row"), None)
+            if fieldset:
+                fieldset.css_class += ' hidden'
         # Has job visibility
         target = self.CITY_CODE + "-has_job"
         if target not in self.data or self.data[target] == 'no':
@@ -268,9 +277,10 @@ class ApplicationInSpbForm(ApplicationFormStep2):
     CITY_CODE = "spb"
     UNIVERSITY_OTHER_ID = 10
     university = forms.ModelChoiceField(
-        label='Университет (и иногда факультет)',
-        queryset=University.objects.filter(city__code="RU SPB"),
-        help_text='В котором вы учитесь или который закончили'
+        label='Университет (и иногда факультет), в котором вы учитесь или '
+              'который закончили',
+        queryset=University.objects.filter(city__code="RU SPB").order_by("sort"),
+        help_text=''
     )
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из трёх вам интересны в CS центре?',
@@ -292,9 +302,9 @@ class ApplicationInNskForm(ApplicationFormStep2):
     CITY_CODE = "ovb"
     UNIVERSITY_OTHER_ID = 14
     university = forms.ModelChoiceField(
-        label='Университет',
-        queryset=University.objects.filter(city__code="RU OVB"),
-        help_text='В котором вы учитесь или который закончили'
+        label='Университет, в котором вы учитесь или который закончили',
+        queryset=University.objects.filter(city__code="RU OVB").order_by("sort"),
+        help_text=''
     )
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из двух вам интересны в CS центре?',

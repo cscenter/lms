@@ -134,6 +134,9 @@ class University(models.Model):
     name = models.CharField(_("University"),
                             max_length=255,
                             help_text=_("Perhaps also the faculty."))
+    abbr = models.CharField(_("University abbreviation"), max_length=100,
+                            blank=True, null=True)
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     city = models.ForeignKey(City,
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)

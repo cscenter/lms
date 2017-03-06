@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -11,7 +12,15 @@
 {{ wizard.form.media }}
 {% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+{% endblock stylesheets %}
+
 {% block javascripts %}
+     {% render_bundle 'forms' 'js'  %}
+    <script type="text/javascript" >
+        $('select.select').selectpicker();
+    </script>
     <script type="text/javascript" src="{% static "js/application.js" %}"></script>
 {% endblock javascripts %}
 

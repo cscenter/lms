@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-27 17:27+0300\n"
-"PO-Revision-Date: 2017-02-27 17:28+0230\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2017-03-06 13:25+0300\n"
+"PO-Revision-Date: 2017-03-06 13:26+0230\n"
+"Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,7 +61,7 @@ msgstr ""
 msgid "City name"
 msgstr "Название города"
 
-#: cscsite/core/models.py:83 cscsite/core/models.py:138
+#: cscsite/core/models.py:83 cscsite/core/models.py:141
 #: cscsite/learning/models.py:1066
 msgid "City"
 msgstr "Город"
@@ -75,8 +75,8 @@ msgid "Category name"
 msgstr "Название категории"
 
 #: cscsite/core/models.py:99 cscsite/core/models.py:115
-#: cscsite/learning/models.py:1157 cscsite/learning/models.py:1174
-#: cscsite/staff/models.py:17
+#: cscsite/core/models.py:139 cscsite/learning/models.py:1157
+#: cscsite/learning/models.py:1174 cscsite/staff/models.py:17
 msgid "Sort order"
 msgstr "Сортировка"
 
@@ -115,7 +115,7 @@ msgstr "FAQ"
 msgid "Questions&Answers"
 msgstr "FAQ"
 
-#: cscsite/core/models.py:134 cscsite/core/models.py:142
+#: cscsite/core/models.py:134 cscsite/core/models.py:145
 #: cscsite/templates/users/user_detail.html:190 cscsite/users/models.py:306
 msgid "University"
 msgstr "Университет"
@@ -124,8 +124,12 @@ msgstr "Университет"
 msgid "Perhaps also the faculty."
 msgstr "Университет и иногда факультет"
 
-#: cscsite/core/models.py:143
+#: cscsite/core/models.py:137
 #| msgid "University"
+msgid "University abbreviation"
+msgstr "Аббревиатура (если есть)"
+
+#: cscsite/core/models.py:146
 msgid "Universities"
 msgstr "Университеты"
 
@@ -456,10 +460,9 @@ msgstr ""
 "Текущая оценка для пользователя '{}' больше максимально возможного значения"
 
 #: cscsite/learning/management/imports.py:113
-#, fuzzy
 #| msgid "No user with stepic ID {}"
 msgid "User with stepic_id {} not found"
-msgstr "Пользователь со Stepic ID {} не найден"
+msgstr "Пользователь со Stepik ID {} не найден"
 
 #: cscsite/learning/management/imports.py:116
 #, fuzzy
