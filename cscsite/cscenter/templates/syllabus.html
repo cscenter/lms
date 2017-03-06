@@ -39,7 +39,7 @@
                                     {% for course_groups in program.course_groups.all %}
                                         <li>
                                             {% for course in course_groups.courses.all %}
-                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last and forloop.first != forloop.last %} / {% endif %}
+                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %} / {% endif %}
                                             {% endfor %}
                                         </li>
                                     {% endfor %}
