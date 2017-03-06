@@ -248,9 +248,8 @@ class SyllabusView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        today = now()
         syllabus = (StudyProgram.objects
-                    .filter(year=2016)
+                    .filter(year=2017)
                     .select_related("area")
                     .prefetch_related(
                         Prefetch(

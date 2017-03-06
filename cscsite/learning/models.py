@@ -1070,7 +1070,8 @@ class StudyProgram(models.Model):
     area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"))
     description = models.TextField(
         _("StudyProgram|description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
+        blank=True, null=True)
 
     class Meta:
         verbose_name = _("Study Program")
