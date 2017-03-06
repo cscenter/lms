@@ -9,7 +9,7 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-xs-7">
+            <div class="col-xs-8">
                 <h2 class="content-title">Направления и базовые курсы</h2>
 
                 <ul class="nav nav-tabs square" role="tablist">
@@ -33,9 +33,9 @@
                         <div class="tab-pane {% if selected_city == city_iata %}active{% endif %}"
                              role="tabpanel" id="program-{{ city_iata }}">
                             {% for program in syllabus_by_city %}
-                                <h3>{{ program.area.name_ru }} / {{ program.area.name_en }}/</h3>
+                                <h3>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h3>
                                 <p>{{ program.area.description }}</p>
-                                <ul class="list-unstyled">
+                                <ul style="list-style-type: square;">
                                     {% for course_groups in program.course_groups.all %}
                                         <li>
                                             {% for course in course_groups.courses.all %}
@@ -49,9 +49,11 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="col-xs-5">
+            <div class="col-xs-4">
                 <div class="card">
-                    <div class="card-header ch-alt"><h2>Программа</h2></div>
+                    <div class="card-header ch-alt">
+                        <h3>Программа</h3>
+                    </div>
                     <div class="card-body card-padding">
                         <p>
                             Программа обучения составлена на основе опыта лучших зарубежных вузов в области IT. Учащиеся могут освоить такие разделы Computer Science, которые обычно не входят в программу российских университетов. Курсы читают ведущие преподаватели вузов, и практикующие программисты — сотрудники <a href="http://www.yandex.ru/">Яндекса</a>, <a href="http://jetbrains.ru/">JetBrains</a> и др.
@@ -60,10 +62,12 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header ch-alt"><h2>Правила обучения</h2></div>
+                    <div class="card-header ch-alt">
+                        <h3>Правила обучения</h3>
+                    </div>
                     <div class="card-body card-padding">
                         <p>В течение двух или трёх лет учёбы в CS центре
-                        студенты сдают двенадцать курсов и проходят три семестра <a href="/pages/projects">практики или исследовательской работы</a>.
+                            студенты сдают двенадцать курсов и проходят три семестра <a href="/pages/projects#practice">практики</a> или <a href="/pages/projects#research">научно-исследовательской работы</a>.
                         </p>
                         <p>Какие именно курсы сдавать в новом семестре,
                         студенты решают сами, опираясь на свои интересы.
@@ -74,7 +78,9 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header ch-alt m-b-20"><h2>Направления</h2></div>
+                    <div class="card-header ch-alt">
+                        <h3>Направления</h3>
+                    </div>
                     <div class="card-body card-padding">
                         <p>CS центр предлагает студентам выпуститься с одного
                         из трёх направлений: </p>

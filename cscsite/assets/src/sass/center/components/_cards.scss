@@ -17,8 +17,11 @@
       padding: 20px 15px!important;
     }
 
-    h2 {
+    h1, h2, h3, h4, h5 {
       margin: 0;
+    }
+
+    h2 {
       line-height: 100%;
       font-size: 16px;
       font-weight: 400;
@@ -94,7 +97,7 @@
         padding: 18px;
       }
       &.ch-alt {
-        padding: 18px 18px 28px;
+        padding: 18px;
       }
     }
   }
