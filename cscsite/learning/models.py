@@ -1079,11 +1079,11 @@ class StudyProgramCourseGroup(models.Model):
     courses = models.ManyToManyField(
         Course,
         verbose_name=_("StudyProgramCourseGroup|courses"),
-        related_name='study_programs',
         help_text=_("Courses will be grouped with boolean OR"))
     study_program = models.ForeignKey(
         StudyProgram,
         verbose_name=_("Study Program"),
+        related_name='course_groups',
         on_delete=models.PROTECT)
 
     class Meta:
