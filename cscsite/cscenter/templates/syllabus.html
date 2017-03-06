@@ -14,12 +14,16 @@
 
                 <ul class="nav nav-tabs square" role="tablist">
                     <li role="presentation" {% if selected_city == 'spb' %}class="active"{% endif %}>
-                        <a role="tab" aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
+                        <a data-toggle="tab" role="tab"
+                           aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
+                           aria-controls="program-spb" data-target="#program-spb"
                            href="{% url "syllabus" %}">Санкт-Петербург</a>
                     </li>
 
                     <li role="presentation" {% if selected_city == 'ovb' %}class="active"{% endif %}>
-                        <a role="tab" aria-expanded="false" aria-controls="program-ovb" data-target="#program-ovb"
+                        <a data-toggle="tab" role="tab"
+                           aria-expanded="{% if selected_city == 'ovb' %}true{% else %}false{% endif %}"
+                           aria-controls="program-ovb" data-target="#program-ovb"
                            href="{% url "syllabus" %}?city=ovb">Новосибирск</a>
                     </li>
                 </ul>
