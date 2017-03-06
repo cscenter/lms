@@ -1062,6 +1062,8 @@ class AreaOfStudy(models.Model):
 class StudyProgram(models.Model):
     year = models.PositiveSmallIntegerField(
         _("Year"), validators=[MinValueValidator(1990)])
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True,
+                                    help_text=_("StudyProgram|sort"))
     city = models.ForeignKey(City,
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)
