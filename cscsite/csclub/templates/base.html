@@ -116,8 +116,8 @@
     <script type="text/javascript" src="//cdn.ravenjs.com/3.10.0/raven.min.js"></script>
     <script type="text/javascript" src="{% static "js/raven_conf.js" %}"></script>
 
-    {% render_bundle 'vendor' 'js' attrs='defer' %}
-    {% render_bundle 'main' 'js' attrs='defer' %}
+    {% render_bundle 'vendor' 'js' %}
+    {% render_bundle 'main' 'js' %}
 
     {% if messages %}
       <script type="text/javascript">

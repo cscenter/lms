@@ -15,8 +15,13 @@
             $('select[name$="-university"]').change(function () {
                 var universityID = parseInt(this.value);
                 var disabled = (universityID !== 10 && universityID !== 14);
-                $('input[name$="-university_other"]').prop('disabled', disabled);
-
+                if (disabled) {
+                    $('#university-other-row').addClass('hidden');
+                } else {
+                    $('#university-other-row')
+                        .removeClass('hidden')
+                        .find('input').focus();
+                }
             });
         },
 
