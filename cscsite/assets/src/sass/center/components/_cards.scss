@@ -14,7 +14,7 @@
     position: relative;
 
     &.card-header-sm {
-      padding: 20px 15px!important;
+      padding: 18px;
     }
 
     h1, h2, h3, h4, h5 {
@@ -66,7 +66,7 @@
   }
 
   .card-body.card-padding-sm {
-    padding: 15px;
+    padding: 18px;
   }
 }
 
@@ -80,10 +80,16 @@
       &:not(.ch-alt) {
         padding: 23px 25px;
       }
+
+      &.card-header-sm {
+        padding: 18px;
+      }
+
       &.ch-alt {
         padding: 23px 26px;
       }
     }
+
     .card-body.card-padding {
       padding: 23px 26px;
     }
