@@ -17,7 +17,6 @@ class CurrentCityMiddleware(object):
                 current = sub_domain[0].lower()
             else:
                 current = None
-
             for city in cities(request)['CITY_LIST']:
                 if city.code == current:
                     request.city_code = current
