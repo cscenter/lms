@@ -30,6 +30,7 @@
 @import "components/hr";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
+@import "pages/courses";
 @import "pages/application";
 @import "pages/login";
 @import "pages/online_courses_page.scss";
@@ -405,13 +406,7 @@ tr.unread {
 
 
 
-#course-list > li:first-child {
-  padding-left: 5px !important;
-}
 
-.semester-course-list ul {
-  padding: 0 4px 0 15px;
-}
 
 .input-grade {
   width: 100px !important;
