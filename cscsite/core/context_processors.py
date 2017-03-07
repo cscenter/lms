@@ -12,9 +12,9 @@ def cities(request):
         CITY_LIST["CACHE"] = City.objects.all()
         for city in CITY_LIST["CACHE"]:
             city.url = request.get_host()
-            sub_domain = city.code if city.code != 'spb' else ''
-            city.url = "{}{}.{}/".format(protocol, sub_domain,
-                                         request.site.domain, '/')
+            sub_domain = city.code + "." if city.code != 'spb' else ''
+            city.url = "{}{}{}/".format(protocol, sub_domain,
+                                        request.site.domain, '/')
     return dict(CITY_LIST=CITY_LIST["CACHE"])
 
 from core.signals import *
