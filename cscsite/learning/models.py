@@ -1059,11 +1059,9 @@ class AreaOfStudy(models.Model):
         return smart_text(self.name)
 
 
-class StudyProgram(models.Model):
+class StudyProgram(TimeStampedModel):
     year = models.PositiveSmallIntegerField(
         _("Year"), validators=[MinValueValidator(1990)])
-    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True,
-                                    help_text=_("StudyProgram|sort"))
     city = models.ForeignKey(City,
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)

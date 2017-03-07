@@ -35,6 +35,7 @@
                             {% for program in syllabus_by_city %}
                                 <h3>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h3>
                                 <p>{{ program.area.description }}</p>
+                                {% if program.course_groups.all %}
                                 <ul style="list-style-type: square;">
                                     {% for course_groups in program.course_groups.all %}
                                         <li>
@@ -44,6 +45,12 @@
                                         </li>
                                     {% endfor %}
                                 </ul>
+                                {% endif %}
+                                  <div class="ubertext">
+                                    {% markdown 3600 "study_program_description" program.pk program.modified %}
+                                      {{ program.description }}
+                                    {% endmarkdown %}
+                                  </div>
                             {% endfor %}
                         </div>
                     {% endfor %}

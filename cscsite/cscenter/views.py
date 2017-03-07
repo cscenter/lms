@@ -258,7 +258,7 @@ class SyllabusView(generic.TemplateView):
                                       .objects
                                       .prefetch_related("courses")),
                         ))
-                    .order_by("city_id", "sort"))
+                    .order_by("city_id", "area__name_ru"))
         context["programs"] = self.group_programs_by_city(syllabus)
         # TODO: validate entry city
         context["selected_city"] = self.request.GET.get('city', 'spb')
