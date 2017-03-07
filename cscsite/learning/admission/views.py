@@ -401,9 +401,8 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         """Based on user settings, get preferred page adress and redirect"""
-        _, city_slug = DEFAULT_CITY_CODE.split(sep=" ")
         return reverse("admission_interview_results_by_city", kwargs={
-            "city_slug": city_slug.lower()
+            "city_slug": DEFAULT_CITY_CODE
         })
 
 

@@ -84,12 +84,6 @@ class City(models.Model):
     def __str__(self):
         return smart_text(self.name)
 
-    @property
-    def iata(self):
-        """UN/LOCODE consists of country code + IATA"""
-        iata = self.code.split(sep=" ")[-1]
-        return iata.lower()
-
 
 @python_2_unicode_compatible
 class FaqCategory(models.Model):
