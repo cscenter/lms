@@ -11,7 +11,7 @@
     {% for autumn_spring in semester_list %}
       {% if forloop.counter == 2 %}
       {% endif %}
-      <table class="table table-stripped">
+      <table class="table table-stripped __courses">
         <tr>
         {% for semester in autumn_spring %}
           <th width="50%">{% if semester %}{{ semester|title }}{% endif %}</th>
@@ -24,8 +24,8 @@
             {% for course_offering in semester.courseofferings %}
               <li>
                 <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
-                ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
-                {% if request.site.domain == "compscicenter.ru" and course_offering.is_open %} <span class="label label-outline label-primary label-sm">Курс CS клуба</span>{% endif %}
+                ({% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+                {% if request.site.domain == "compscicenter.ru" and course_offering.is_open %} <span class="csclub-label" title="Курс CS клуба"></span>{% endif %}
               </li>
             {% endfor %}
             </ul>
