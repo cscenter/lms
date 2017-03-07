@@ -42,7 +42,7 @@ def render_markdown(text):
 
 def get_club_domain(code=None):
     protocol = "http://"
-    prefix = "kzn." if code == "RU KZN" else ""
+    prefix = "kzn." if code == "kzn" else ""
     return protocol + prefix + settings.CLUB_DOMAIN
 
 

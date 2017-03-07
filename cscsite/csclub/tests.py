@@ -26,7 +26,7 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
                                        is_open=True,
                                        city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="RU KZN")
+                                          city="kzn")
         resp = self.client.get(reverse('course_list'))
         self.assertNotContains(resp, co_center.course.name)
         self.assertContains(resp, co_spb.course.name)
@@ -43,7 +43,7 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
                                        is_open=True,
                                        city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="RU KZN")
+                                          city="kzn")
         resp = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(resp.context['course_list_available']), 1)
 
