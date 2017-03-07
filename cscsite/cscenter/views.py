@@ -266,7 +266,7 @@ class SyllabusView(generic.TemplateView):
 
     def group_programs_by_city(self, syllabus):
         grouped = {}
-        for city_iata, g in itertools.groupby(syllabus,
-                                              key=lambda sp: sp.city.iata):
-            grouped[city_iata] = list(g)
+        for city_id, g in itertools.groupby(syllabus,
+                                            key=lambda sp: sp.city_id):
+            grouped[city_id] = list(g)
         return grouped

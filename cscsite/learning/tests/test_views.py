@@ -333,7 +333,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(response, c.description)
         # Course offerings not repeated, used set to compare
         assert {c.pk for c in response.context['offerings']} == {co1.pk, co2.pk}
-        co2.city_id = "RU KZN"
+        co2.city_id = "kzn"
         co2.save()
         response = self.client.get(c.get_absolute_url())
         if settings.SITE_ID == settings.CENTER_SITE_ID:
@@ -549,7 +549,7 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(semester=current_semester,
                                           city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                              city="RU KZN")
+                                              city="kzn")
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
         if current_semester.type != Semester.TYPES.summer:
@@ -564,7 +564,7 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(semester=current_semester,
                                           city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="RU KZN")
+                                          city="kzn")
         resp = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(resp.context['course_list_available']), 1)
 

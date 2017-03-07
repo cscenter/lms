@@ -1781,7 +1781,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
         if not self.request.user.is_curator:
             co_queryset = co_queryset.filter(teachers=self.request.user)
         # TODO: add tests
-        city_code = "RU {}".format(self.kwargs['city'].upper())
+        city_code = self.kwargs['city'].lower()
         co_queryset = co_queryset.filter(city=city_code)
         try:
             course_offering = (co_queryset
@@ -1978,7 +1978,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             base_qs = CourseOffering.objects.filter(teachers=request.user)
 
         # TODO: add tests
-        city_code = "RU {}".format(self.kwargs['city'].upper())
+        city_code = self.kwargs['city'].lower()
         base_qs = base_qs.filter(city=city_code)
 
         try:

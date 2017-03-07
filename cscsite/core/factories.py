@@ -8,7 +8,7 @@ class CityFactory(factory.DjangoModelFactory):
     class Meta:
         model = City
 
-    code = factory.Sequence(lambda n: "RU %02d" % n)
+    code = factory.Sequence(lambda n: "%03d" % n)
     name = factory.Sequence(lambda n: "City name %03d" % n)
 
 

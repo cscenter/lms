@@ -9,5 +9,5 @@ from core.context_processors import CITY_LIST
 
 @receiver(models.signals.post_save, sender=City)
 @receiver(models.signals.post_delete, sender=City)
-def city_cache_clear_after_save(sender, created, instance, **kwargs):
+def city_cache_clear_after_save(sender, *args, **kwargs):
     CITY_LIST["CACHE"] = []

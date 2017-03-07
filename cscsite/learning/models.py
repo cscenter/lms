@@ -266,7 +266,7 @@ class CourseOffering(TimeStampedModel):
                                                        self.semester.slug])
 
     def get_city(self):
-        return "".join(self.city_id.split(" ")[1:]).lower()
+        return self.city_id
 
     def has_unread(self):
         cache = get_unread_notifications_cache()

@@ -48,11 +48,11 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
     form_list = [
         ('welcome', ApplicationFormStep1),
         ('spb', ApplicationInSpbForm),
-        ('ovb', ApplicationInNskForm),
+        ('nsk', ApplicationInNskForm),
     ]
     initial_dict = {
         'spb': {'has_job': 'Нет'},
-        'ovb': {'has_job': 'Нет'},
+        'nsk': {'has_job': 'Нет'},
     }
 
     def done(self, form_list, **kwargs):
@@ -94,7 +94,7 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
     @staticmethod
     def show_nsk_form(wizard):
         cleaned_data = wizard.get_cleaned_data_for_step('welcome')
-        return cleaned_data and cleaned_data['city'] == 'ovb'
+        return cleaned_data and cleaned_data['city'] == 'nsk'
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
@@ -104,7 +104,7 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
 
 ApplicantRequestWizardView.condition_dict = {
     'spb': ApplicantRequestWizardView.show_spb_form,
-    'ovb': ApplicantRequestWizardView.show_nsk_form,
+    'nsk': ApplicantRequestWizardView.show_nsk_form,
 }
 
 

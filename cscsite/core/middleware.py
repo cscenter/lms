@@ -14,7 +14,7 @@ class CurrentCityMiddleware(object):
         else:
             sub_domain = request.get_host().rsplit('.', 2)[:-2]
             if sub_domain:
-                current = "RU {}".format(sub_domain[0].upper())
+                current = sub_domain[0].upper()
             else:
                 current = None
 

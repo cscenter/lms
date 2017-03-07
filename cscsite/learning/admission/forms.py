@@ -36,7 +36,7 @@ class ApplicationFormStep1(forms.ModelForm):
         widget=forms.RadioSelect(),
         choices=(
             ("spb", _("St Petersburg")),
-            ("ovb", _("Novosibirsk")),
+            ("nsk", _("Novosibirsk")),
         ),
         label='Выберите город, в котором вы живёте и куда хотите поступить',
         help_text='С 2017 года CS центр есть не только в Санкт-Петербурге, '
@@ -279,7 +279,7 @@ class ApplicationInSpbForm(ApplicationFormStep2):
     university = forms.ModelChoiceField(
         label='Университет (и иногда факультет), в котором вы учитесь или '
               'который закончили',
-        queryset=University.objects.filter(city__code="RU SPB").order_by("sort"),
+        queryset=University.objects.filter(city__code=CITY_CODE).order_by("sort"),
         help_text=''
     )
     preferred_study_programs = forms.MultipleChoiceField(
@@ -299,11 +299,11 @@ class ApplicationInSpbForm(ApplicationFormStep2):
 
 
 class ApplicationInNskForm(ApplicationFormStep2):
-    CITY_CODE = "ovb"
+    CITY_CODE = "nsk"
     UNIVERSITY_OTHER_ID = 14
     university = forms.ModelChoiceField(
         label='Университет, в котором вы учитесь или который закончили',
-        queryset=University.objects.filter(city__code="RU OVB").order_by("sort"),
+        queryset=University.objects.filter(city__code=CITY_CODE).order_by("sort"),
         help_text=''
     )
     preferred_study_programs = forms.MultipleChoiceField(

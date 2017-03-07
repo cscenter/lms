@@ -14,17 +14,17 @@
 
                 <ul class="nav nav-tabs square" role="tablist">
                     <li role="presentation" {% if selected_city == 'spb' %}class="active"{% endif %}>
-                        <a data-toggle="tab" role="tab"
+                        <a data-toggle="tab" data-target="#program-spb"
                            aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
-                           aria-controls="program-spb" data-target="#program-spb"
+                           aria-controls="program-spb"
                            href="{% url "syllabus" %}">Санкт-Петербург</a>
                     </li>
 
-                    <li role="presentation" {% if selected_city == 'ovb' %}class="active"{% endif %}>
-                        <a data-toggle="tab" role="tab"
-                           aria-expanded="{% if selected_city == 'ovb' %}true{% else %}false{% endif %}"
-                           aria-controls="program-ovb" data-target="#program-ovb"
-                           href="{% url "syllabus" %}?city=ovb">Новосибирск</a>
+                    <li role="presentation" {% if selected_city == 'nsk' %}class="active"{% endif %}>
+                        <a data-toggle="tab" data-target="#program-nsk"
+                           aria-expanded="{% if selected_city == 'nsk' %}true{% else %}false{% endif %}"
+                           aria-controls="program-nsk"
+                           href="{% url "syllabus" %}?city=nsk">Новосибирск</a>
                     </li>
                 </ul>
 
@@ -90,9 +90,9 @@
                         <p>CS центр предлагает студентам выпуститься с одного
                         из трёх направлений: </p>
                         <ul>
-                        <li>Computer Science*,</li>
-                        <li>Data Mining, </li>
-                        <li>Software Engineering.</li>
+                            <li>Computer Science<span class="text-danger">*</span>,</li>
+                            <li>Data Mining,</li>
+                            <li>Software Engineering.</li>
                         </ul>
                         <p>
 
@@ -101,7 +101,7 @@
                         на выпуск.
 
                         </p>
-                        <small>* Направление Computer Science представлено только в Санкт-Петербурге.</small>
+                        <small><span class="text-danger">*</span>Направление Computer Science представлено только в Санкт-Петербурге.</small>
                     </div>
                 </div>
             </div>
