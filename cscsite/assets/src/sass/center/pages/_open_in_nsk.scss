@@ -45,4 +45,11 @@
     border-color: $header-lvl1-bg;
     border-width: 2px;
   }
+  input[type=submit] {
+    background: $header-lvl1-bg;
+    padding: 0 25px;
+    height: 48px;
+    width: 100%;
+    margin-top: 26px;
+  }
 }

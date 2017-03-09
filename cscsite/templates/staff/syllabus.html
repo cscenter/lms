@@ -33,7 +33,7 @@
                         <div class="tab-pane {% if selected_city == city_iata %}active{% endif %}"
                              role="tabpanel" id="program-{{ city_iata }}">
                             {% for program in syllabus_by_city %}
-                                <h3>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h3>
+                                <h4>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h4>
                                 <p>{{ program.area.description }}</p>
                                 {% if program.course_groups.all %}
                                 <ul style="list-style-type: square;">
