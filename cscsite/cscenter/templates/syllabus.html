@@ -8,73 +8,86 @@
 
 {% block content %}
     <div class="container" id="syllabus-page">
-        <p>Центр предлагает двух- или трехгодичные очные вечерние курсы с возможностью получения дипломов по трём направлениям: Computer Science (современная информатика), Data Mining (анализ данных), Software Engineering (разработка программного обеспечения). Условия успешного обучения на каждом из направлений можно найти <a href="#rules">в блоке внизу страницы</a>.</p>
-        <p>Программа обучения составлена на основе опыта лучших зарубежных вузов в области IT. Учащиеся могут освоить такие разделы Computer Science, которые обычно не входят в программу российских университетов. Курсы читают ведущие преподаватели вузов Санкт-Петербурга и Москвы, а также опытные и практикующие эксперты – сотрудники <a href="http://www.yandex.ru/">Яндекса</a>, <a href="http://jetbrains.ru/">JetBrains</a> и др. Обязательной частью обучения является <a href="/pages/projects">практика или исследовательская работа</a>.</p>
+        <div class="row">
+            <div class="col-xs-8">
+                <h2 class="content-title">Направления и базовые курсы</h2>
 
-        <ul class="nav nav-tabs square" role="tablist">
-            <li role="presentation"
-                {% if selected_city == 'spb' %}class="active"{% endif %}>
-                <a data-target="#program-spb"
-                   aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
-                   aria-controls="program-spb"
-                   href="{% url "syllabus" %}">Санкт-Петербург</a>
-            </li>
+                CS центр предлагает студентам выпуститься с одного из трёх направлений: Computer Science<span class="text-danger">*</span>,
+                Data Mining, Software Engineering. Каждое направление предлагает список базовых курсов, пройдя которые, студент может претендовать на выпуск.<br>
+                <small><span class="text-danger">*</span>Направление Computer Science представлено только в Санкт-Петербурге.</small>
 
-            <li role="presentation"
-                {% if selected_city == 'nsk' %}class="active"{% endif %}>
-                <a data-target="#program-nsk"
-                   aria-expanded="{% if selected_city == 'nsk' %}true{% else %}false{% endif %}"
-                   aria-controls="program-nsk"
-                   href="{% url "syllabus" %}?city=nsk">Новосибирск</a>
-            </li>
-        </ul>
+                <ul class="nav nav-tabs square" role="tablist">
+                    <li role="presentation" {% if selected_city == 'spb' %}class="active"{% endif %}>
+                        <a data-target="#program-spb"
+                           aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
+                           aria-controls="program-spb"
+                           href="{% url "syllabus" %}">Санкт-Петербург</a>
+                    </li>
 
-        <div id="rules">
+                    <li role="presentation" {% if selected_city == 'nsk' %}class="active"{% endif %}>
+                        <a data-target="#program-nsk"
+                           aria-expanded="{% if selected_city == 'nsk' %}true{% else %}false{% endif %}"
+                           aria-controls="program-nsk"
+                           href="{% url "syllabus" %}?city=nsk">Новосибирск</a>
+                    </li>
+                </ul>
 
-            <div class="tab-content">
-                {% for city_iata, syllabus_by_city in programs.items %}
-                    <div class="tab-pane {% if selected_city == city_iata %}active{% endif %}"
-                         role="tabpanel" id="program-{{ city_iata }}">
-                        <div class="row">
-                        {% for program in syllabus_by_city %}
-                            <div class="col-xs-4">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading"><h4 class="panel-title">{{ program.area.name_ru }}</h4></div>
-                                    <div class="panel-body" style="min-height:200px">
-                                        <p>{{ program.area.description }}</p>
-                                    </div>
-                                    {% if program.course_groups.all %}
-                                    <ul class="list-group">
-                                        <li class="list-group-item"><b>Для получения диплома необходимо сдать обязательные курсы:</b>
+                <div class="tab-content">
+                    {% for city_iata, syllabus_by_city in programs.items %}
+                        <div class="tab-pane {% if selected_city == city_iata %}active{% endif %}"
+                             role="tabpanel" id="program-{{ city_iata }}">
+                            {% for program in syllabus_by_city %}
+                                <h3>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h3>
+                                <p>{{ program.area.description }}</p>
+                                {% if program.course_groups.all %}
+                                <ul style="list-style-type: square;">
+                                    {% for course_groups in program.course_groups.all %}
+                                        <li>
+                                            {% for course in course_groups.courses.all %}
+                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %} или {% endif %}
+                                            {% endfor %}
                                         </li>
-                                        {% for course_groups in program.course_groups.all %}
-                                            <li class="list-group-item">
-                                                {% for course in course_groups.courses.all %}
-                                                    <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %} или {% endif %}
-                                                {% endfor %}
-                                            </li>
-                                        {% endfor %}
-                                        {% if program.description %}
-                                        <li class="list-group-item">
-                                            <div class="ubertext">
-                                                {% markdown 3600 "study_program_description" program.pk program.modified %}
-                                                    {{ program.description }}
-                                                {% endmarkdown %}
-                                            </div>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                  <div class="ubertext">
+                                    {% markdown 3600 "study_program_description" program.pk program.modified %}
+                                      {{ program.description }}
+                                    {% endmarkdown %}
+                                  </div>
+                            {% endfor %}
                         </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <div class="card">
+                    <div class="card-header card-header-sm bg-gray">
+                        <h2>Программа</h2>
                     </div>
-                {% endfor %}
+                    <div class="card-body card-padding-sm">
+                        <p>Программа обучения составлена на основе опыта лучших зарубежных вузов в области IT. Учащиеся могут освоить такие разделы Computer Science, которые обычно не входят в программу российских университетов. Курсы читают ведущие преподаватели вузов, и практикующие программисты — сотрудники <a href="http://www.yandex.ru/">Яндекса</a>, <a href="http://jetbrains.ru/">JetBrains</a> и др.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header card-header-sm bg-gray">
+                        <h2>Правила обучения</h2>
+                    </div>
+                    <div class="card-body card-padding-sm">
+                        <p>В течение двух или трёх лет учёбы в CS центре
+                            студенты сдают двенадцать курсов и проходят три семестра <a href="/pages/projects#practice">практики</a> или <a href="/pages/projects#research">научно-исследовательской работы</a>.
+                        </p>
+                        <p>Какие именно курсы сдавать в новом семестре,
+                        студенты решают сами, опираясь на свои интересы.
+                        Делать осмысленный выбор им помогают кураторы и
+                        наличие обязательных курсов направлений.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
 {% endblock content %}
 
 {% block javascripts %}
