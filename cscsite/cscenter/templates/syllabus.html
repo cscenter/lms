@@ -7,21 +7,21 @@
 {% block title %}Программы подготовки в Computer Science Center{% endblock title %}
 
 {% block content %}
-    <div class="container">
+    <div class="container" id="syllabus-page">
         <div class="row">
             <div class="col-xs-8">
                 <h2 class="content-title">Направления и базовые курсы</h2>
 
                 <ul class="nav nav-tabs square" role="tablist">
                     <li role="presentation" {% if selected_city == 'spb' %}class="active"{% endif %}>
-                        <a data-toggle="tab" data-target="#program-spb"
+                        <a data-target="#program-spb"
                            aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
                            aria-controls="program-spb"
                            href="{% url "syllabus" %}">Санкт-Петербург</a>
                     </li>
 
                     <li role="presentation" {% if selected_city == 'nsk' %}class="active"{% endif %}>
-                        <a data-toggle="tab" data-target="#program-nsk"
+                        <a data-target="#program-nsk"
                            aria-expanded="{% if selected_city == 'nsk' %}true{% else %}false{% endif %}"
                            aria-controls="program-nsk"
                            href="{% url "syllabus" %}?city=nsk">Новосибирск</a>

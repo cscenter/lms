@@ -35,6 +35,7 @@
     "blueimp-md5": "^2.6.0",
     "bootstrap-sass": "^3.3.7",
     "bootstrap-sweetalert": "^1.0.1",
+    "chunk-manifest-webpack-plugin": "^1.0.0",
     "clean-webpack-plugin": "^0.1.14",
     "cropperjs": "^1.0.0-beta.1",
     "d3": "^4.4.0",

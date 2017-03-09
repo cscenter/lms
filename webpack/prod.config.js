@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const ChunkManifestPlugin = require("chunk-manifest-webpack-plugin");
 const WebpackChunkHash = require('webpack-chunk-hash');
 
 module.exports = {
@@ -23,5 +24,10 @@ module.exports = {
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
         new webpack.HashedModuleIdsPlugin(),
         new WebpackChunkHash(),
+        // TODO: Lets wait until inlining manifest JSON support in django-webpack-loader
+        // new ChunkManifestPlugin({
+        //     filename: "chunk-manifest.json",
+        //     manifestVariable: "webpackManifest"
+        // })
     ],
 };
