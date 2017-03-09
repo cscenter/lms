@@ -9,7 +9,7 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import RobotsView, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
-    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView
+    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, OpenNskView
 from htmlpages import views
 from learning.views import UsefulListView, InternshipListView
 from stats.views import StatsIndexView
@@ -22,6 +22,7 @@ from users.views import LoginView, LogoutView, TeacherDetailView, \
 admin.autodiscover()
 
 urlpatterns = [
+    url(r'^open-nsk/$', OpenNskView.as_view(), name='open_nsk'),
     url(r'^api/', include('api.urls')),
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),

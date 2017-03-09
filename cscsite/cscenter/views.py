@@ -244,7 +244,6 @@ class AlumniByYearView(generic.ListView):
 
 class SyllabusView(generic.TemplateView):
     template_name = "syllabus.html"
-    CACHE_KEY = 'syllabus_program'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -270,3 +269,7 @@ class SyllabusView(generic.TemplateView):
                                             key=lambda sp: sp.city_id):
             grouped[city_id] = list(g)
         return grouped
+
+
+class OpenNskView(generic.TemplateView):
+    template_name = "open_nsk.html"

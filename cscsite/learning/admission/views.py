@@ -43,6 +43,7 @@ from users.models import CSCUser
 from .tasks import application_form_send_email
 
 
+# Note: Not useful without Yandex.Contest REST API support :<
 class ApplicantRequestWizardView(NamedUrlSessionWizardView):
     template_name = "learning/admission/application.html"
     form_list = [

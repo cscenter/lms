@@ -393,7 +393,7 @@ def autograde_projects(request):
     return HttpResponseRedirect(reverse("staff:exports"))
 
 
-class SyllabusView(generic.TemplateView):
+class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/syllabus.html"
 
     def get_context_data(self, **kwargs):
