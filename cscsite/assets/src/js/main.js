@@ -26,10 +26,11 @@ $(document).ready(function () {
     fn.cleanLocalStorageEditorsFiles();
     fn.initUberEditors();
     fn.courseClassSpecificCode();
-    fn.admissionFormSpecificCode();
     // Depends on `editors` var, which populated in initUberEditor method
     fn.reflowEditorOnTabToggle();
+    fn.admissionFormSpecificCode();
     fn.courseOfferingTabs();
+    fn.syllabusTabs();
 });
 
 const fn = {
@@ -195,5 +196,13 @@ const fn = {
                 try{i=JSON.parse(i)}catch(a){}i&&i["iframe-height"]&&$(".forms-iframe").css("height",i["iframe-height"])
             });
         }
+    },
+
+    syllabusTabs: function () {
+        $('#syllabus-page').on('click', '.nav-tabs a', function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+        $(' ')
     }
 };
