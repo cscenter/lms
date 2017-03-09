@@ -8,9 +8,10 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
-    CourseParticipantsIntersectionView
+    CourseParticipantsIntersectionView, SyllabusView
 
 urlpatterns = [
+    url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^course-marks/$',
         GradebookCuratorDispatchView.as_view(),

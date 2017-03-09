@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from collections import OrderedDict, defaultdict
 from io import StringIO
 
+import itertools
 from braces.views import JSONResponseMixin
 from django.contrib import messages
 from django.core.management import CommandError
@@ -20,7 +21,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
-from learning.models import Semester, CourseOffering
+from learning.models import Semester, CourseOffering, StudyProgram, \
+    StudyProgramCourseGroup
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
@@ -389,3 +391,32 @@ def autograde_projects(request):
     except CommandError as e:
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))
+
+
+class SyllabusView(generic.TemplateView):
+    template_name = "staff/syllabus.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        syllabus = (StudyProgram.objects
+                    .filter(year=2017)
+                    .select_related("area")
+                    .prefetch_related(
+                        Prefetch(
+                            'course_groups',
+                            queryset=(StudyProgramCourseGroup
+                                      .objects
+                                      .prefetch_related("courses")),
+                        ))
+                    .order_by("city_id", "area__name_ru"))
+        context["programs"] = self.group_programs_by_city(syllabus)
+        # TODO: validate entry city
+        context["selected_city"] = self.request.GET.get('city', 'spb')
+        return context
+
+    def group_programs_by_city(self, syllabus):
+        grouped = {}
+        for city_id, g in itertools.groupby(syllabus,
+                                            key=lambda sp: sp.city_id):
+            grouped[city_id] = list(g)
+        return grouped
