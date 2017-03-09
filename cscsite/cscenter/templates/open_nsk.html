@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load markdown from core_tags %}
+{% load staticfiles %}
+
+{% block title %}Открытие в Новосибирске{% endblock title %}
+
+{% block content %}
+    <div class="container" id="open-nsk">
+        <div class="row">
+           <div class="col-xs-12">
+               <h1 class="margin-top-0" style="font-weight: 400;">Открытие CS центра в Новосибирске</h1>
+               <h3 class="__underlined">История</h3>
+               <div>
+                    <img src="{% static "img/center/open_nsk/history.svg" %}" alt="" width="120" height="110" align="left" class="_icon-history">
+                    <p>Computer Science Center появился в Санкт-Петербурге в 2011 году по инициативе
+                    Школы анализа данных (ШАД) Яндекса, компании JetBrains и Computer Science клуба.
+                    ШАД существует с 2007 года в виде очных вечерних и заочных двухлетних курсов,
+                    а направление анализа данных в CS центре рассматривается как филиал Школы
+                        в Санкт-Петербурге.</p>
+               </div>
+               <div class="clearfix"></div>
+
+               <div>
+                <img src="{% static "img/center/open_nsk/csc.svg" %}" alt="" align="right" width="140" height="140" class="_icon-csc">
+               <p style="padding-top: 30px;">В 2013 году в Новосибирске прошёл первый набор на очное обучение в ШАД. С тех
+                   пор в филиале Школы появились свои выпускники, курсы и преподаватели.</p>
+                   <p>Этой весной компании Яндекс и JetBrains открывают CS центр в Новосибирске, и новосибирский филиал ШАДа становится направлением анализа данных в CS центре.</p>
+               </div>
+               <div class="clearfix"></div>
+
+               <h3 class="__underlined">Чему и как учат</h3>
+               <div>
+                   <img src="{% static "img/center/open_nsk/courses.svg" %}" alt="" width="120" height="132" align="left" class="_icon-courses">
+                   <p>CS центр в Новосибирске предлагает пройти обучение по одному из двух направлений:<br>
+                       — анализ данных,<br>
+                       — разработка программного обеспечения.</p>
+                        <p>Каждое направление предлагает набор базовых курсов, пройдя которые, студенты могут
+                        претендовать на выпуск. Все остальные курсы можно выбирать на своё усмотрение,
+                        руководствуясь собственными интересами и советами кураторов.</p>
+               </div>
+               <div class="clearfix"></div>
+               <div>
+                   <img src="{% static "img/center/open_nsk/projects.svg" %}" alt="" width="110" height="90" align="right" class="_icon-projects">
+                   <p>Обязательная часть обучения в CS центре — семестровая практика. Студенты проходят
+                    практику под руководством сотрудников Яндекса или JetBrains, применяя полученные
+                    теоретические знания на практике и готовясь использовать их в работе. Руководители
+                    предлагают темы проектов, которые интересны им самим, поэтому выбор тем большой:
+                    от компиляторов до разработки инструментов машинного обучения.</p>
+               </div>
+               <div class="clearfix"></div>
+               <div class="text-center">
+                   <img src="{% static "img/center/open_nsk/rules.svg" %}" alt="" style="margin: 30px 0" width="700">
+               </div>
+
+               <h3 class="__underlined">Как поступить?</h3>
+               <div>
+                   <img src="{% static "img/center/open_nsk/application.svg" %}" alt="" width="110" align="left" class="_icon-application">
+                   <p>Начните с заявки на сайте и онлайн-тестирования. Пожалуйста, подойдите к заполнению анкеты ответственно:<br>
+                    — убедитесь, что верно выбрали город, в который хотите поступить,<br>
+                    — не пропускайте поля для развёрнутого ответа,<br>
+                    — перед отправкой проверьте свою контактную информацию, особенно email — это основной способ связи в процессе приёмной кампании.</p>
+                    <p>Подробнее о приёмной кампании читайте в соседнем разделе на сайте.</p>
+               </div>
+
+               <h3 id="open-day" class="__underlined">День открытых дверей</h3>
+               <div>
+                    <p>Приходите лично задать вопросы организаторам CS центра в Новосибирске и представителям компаний
+                    Яндекса и JetBrains. В программе лекции, кофе-брейки и презентация Центра, на которой вы сможете
+                        лично задать все интересующие вопросы. Не забудьте зарегистрироваться в форме ниже.</p>
+                   <div class="row">
+                       <div class="col-xs-10">
+                   <div class="row margin-bottom-20 margin-top-20">
+                       <div class="col-xs-2">
+                           <img src="{% static "img/center/open_nsk/1500.svg" %}" alt="" width="65">
+                       </div>
+                       <div class="col-xs-10">
+                           <div class="margin-top-10">
+                               <b>Что-то зажигательное про машинное обучение, Иван Ямщиков (Яндекс)</b><br>
+                               Больше описания лекции, а даже если его и нет, то ничего страшного
+                           </div>
+                       </div>
+                   </div>
+                   <div class="row margin-bottom-20">
+                       <div class="col-xs-2">
+                           <img src="{% static "img/center/open_nsk/1645.svg" %}" alt="" width="65">
+                       </div>
+                       <div class="col-xs-10">
+                           <div class="margin-top-10">
+                               <b>Что-то зажигательное про машинное обучение, Иван Ямщиков (Яндекс)</b><br>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="row margin-bottom-20">
+                       <div class="col-xs-2">
+                           <img src="{% static "img/center/open_nsk/1830.svg" %}" alt="" width="65">
+                       </div>
+                       <div class="col-xs-10">
+                           <div class="margin-top-10">
+                               <b>Что-то зажигательное про машинное обучение, Иван Ямщиков (Яндекс)</b><br>
+                               Больше описания лекции, а даже если его и нет, то ничего страшного
+                           </div>
+                       </div>
+                   </div>
+
+                       </div>
+                   </div>
+               </div>
+
+               <h3 id="registration" class="__underlined">Регистрация на День открытых дверей</h3>
+
+                <form action="" method="post" id="open-nsk-form">
+                   <div class="row">
+                       <div class="col-xs-3">
+                            <div class="form-group">
+                                <label for="sirname">Фамилия</label>
+                                <input type="text" class="form-control" id="sirname" name="sirname" required>
+                            </div>
+                       </div>
+                       <div class="col-xs-3">
+                            <div class="form-group">
+                                <label for="first_name">Имя</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                       </div>
+                       <div class="col-xs-3">
+                            <div class="form-group">
+                                <label for="last_name">Отчество</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                       </div>
+                       <div class="col-xs-3">
+                           <div class="form-group">
+                               <input type="submit" value="Отправить" class="btn btn-primary">
+                           </div>
+                       </div>
+                   </div>
+                   <div class="row">
+                       <div class="col-xs-3"><label for="source">Откуда вы узнали о мероприятии?</label></div>
+                       <div class="col-xs-6">
+                           <div class="form-group">
+                               <input type="text" class="form-control" id="source" name="source" required>
+                           </div>
+                       </div>
+                   </div>
+               </form>
+
+               <h3 class="__underlined">У меня остались вопросы</h3>
+               <img src="{% static "img/center/open_nsk/mail.svg" %}" alt="" width="110"  align="right" class="_icon-mail">
+<p>Если у вас остались вопросы, а День открытых дверей уже прошёл или попасть
+не получается, попробуйте найти ответы в FAQ или на страницах на сайте:<br>
+— страница программы,<br>
+— список всех курсов,<br>
+— преподаватели,<br>
+— отзывы выпускников CS центра в Санкт-Петербурге,<br>
+— организаторы,<br>
+— история,<br>
+— поступление.</p>
+
+А после напишите нам на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a> — мы вам обязательно ответим.
+           </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function() {
+
+    var $form = $("#open-nsk-form");
+
+    $form.on("submit", function (event) {
+        var $inputs = $form.find("input, select, button, textarea");
+
+        // Serialize the data in the form
+        var serializedData = $form.serialize();
+        // Let's disable the inputs for the duration of the Ajax request.
+        // Note: we disable elements AFTER the form data has been serialized.
+        // Disabled form elements will not be serialized.
+        $inputs.prop("disabled", true);
+
+        // Fire off the request to /form.php
+        $.ajax({
+            url: "https://script.google.com/macros/s/AKfycbxBX79qf-TlRHTIEKjoR0feHW2ziAswE_KkhqspfMLLfoLdQRue/exec",
+            type: "post",
+            data: serializedData
+        })
+        .done(function (response, textStatus, jqXHR) {
+            if (response.result === 'success') {
+                $("#open-nsk-form").replaceWith("Спасибо, регистрация пройдена!")
+            }
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            // Log the error to the console
+            $.jGrowl('Что-то пошло не так. Попробуйте повторить отправку или свяжитесь с кураторами.',
+                        { position: 'bottom-right', theme: 'error' });
+        })
+            .always(function () {
+            // Reenable the inputs
+            $inputs.prop("disabled", false);
+        });
+
+        // Prevent default posting of form
+        event.preventDefault();
+    });
+
+});
+
+    </script>
+{% endblock javascripts %}
