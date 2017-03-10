@@ -44,6 +44,10 @@
     padding: 22px;
     border-color: $header-lvl1-bg;
     border-width: 2px;
+
+    &.user-error {
+      border-color: #ed1c24;
+    }
   }
   input[type=submit] {
     background: $header-lvl1-bg;
