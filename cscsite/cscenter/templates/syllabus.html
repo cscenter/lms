@@ -44,7 +44,7 @@
                                     {% for course_groups in program.course_groups.all %}
                                         <li>
                                             {% for course in course_groups.courses.all %}
-                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %} или {% endif %}
+                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %}, или {% endif %}
                                             {% endfor %}
                                         </li>
                                     {% endfor %}
