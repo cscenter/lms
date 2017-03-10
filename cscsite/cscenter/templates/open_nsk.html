@@ -173,45 +173,51 @@
 {% endblock content %}
 
 {% block javascripts %}
+    <script type="text/javascript" src="{% static "js/vendor/validator.min.js" %}"></script>
     <script>
         $(document).ready(function() {
 
     var $form = $("#open-nsk-form");
 
-    $form.on("submit", function (event) {
-        var $inputs = $form.find("input, select, button, textarea");
+    $form.validator().on('submit', function (e) {
+      if (e.isDefaultPrevented()) {
+        // handle the invalid form...
+      } else {
+            var $inputs = $form.find("input, select, button, textarea");
 
-        // Serialize the data in the form
-        var serializedData = $form.serialize();
-        // Let's disable the inputs for the duration of the Ajax request.
-        // Note: we disable elements AFTER the form data has been serialized.
-        // Disabled form elements will not be serialized.
-        $inputs.prop("disabled", true);
+            // Serialize the data in the form
+            var serializedData = $form.serialize();
+            // Let's disable the inputs for the duration of the Ajax request.
+            // Note: we disable elements AFTER the form data has been serialized.
+            // Disabled form elements will not be serialized.
+            $inputs.prop("disabled", true);
 
-        // Fire off the request to /form.php
-        $.ajax({
-            url: "https://script.google.com/macros/s/AKfycbxBX79qf-TlRHTIEKjoR0feHW2ziAswE_KkhqspfMLLfoLdQRue/exec",
-            type: "post",
-            data: serializedData
-        })
-        .done(function (response, textStatus, jqXHR) {
-            if (response.result === 'success') {
-                $("#open-nsk-form").replaceWith("Спасибо, регистрация пройдена!")
-            }
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-            // Log the error to the console
-            $.jGrowl('Что-то пошло не так. Попробуйте повторить отправку или свяжитесь с кураторами.',
-                        { position: 'bottom-right', theme: 'error' });
-        })
-            .always(function () {
-            // Reenable the inputs
-            $inputs.prop("disabled", false);
-        });
+            // Fire off the request to /form.php
+            $.ajax({
+                url: "https://script.google.com/macros/s/AKfycbxBX79qf-TlRHTIEKjoR0feHW2ziAswE_KkhqspfMLLfoLdQRue/exec",
+                type: "post",
+                data: serializedData
+            })
+            .done(function (response, textStatus, jqXHR) {
+                if (response.result === 'success') {
+                    $("#open-nsk-form").replaceWith("Спасибо, регистрация пройдена!")
+                }
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                // Log the error to the console
+                $.jGrowl('Что-то пошло не так. Попробуйте повторить отправку или свяжитесь с кураторами.',
+                            { position: 'bottom-right', theme: 'error' });
+            })
+                .always(function () {
+                // Reenable the inputs
+                $inputs.prop("disabled", false);
+            });
 
-        // Prevent default posting of form
-        event.preventDefault();
+            // Prevent default posting of form
+            event.preventDefault();
+      }
     });
+
 
 });
 
