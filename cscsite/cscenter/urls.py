@@ -31,7 +31,7 @@ urlpatterns = [
         RedirectView.as_view(url='/enrollment/program/',
                              permanent=True)),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
-    url(r'^syllabus/test/$', SyllabusView.as_view(), name='syllabus'),
+    url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
     # TODO: Remove this link as a stale in a while
     url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='comment_the_right_way'),
