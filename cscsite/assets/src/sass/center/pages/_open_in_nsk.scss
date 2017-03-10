@@ -40,8 +40,10 @@
     font-weight:normal;
   }
   input {
+    font-size: 14px;
+    height: auto;
     border-radius: 0;
-    padding: 22px;
+    padding: 12px 22px;
     border-color: $header-lvl1-bg;
     border-width: 2px;
 
