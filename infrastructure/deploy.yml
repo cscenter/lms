@@ -68,32 +68,32 @@
     become_user: "{{ app_user }}"
     when: requirements_concated_md5 != requirements_md5
 
-#  - name: Collectstatic
-#    become: yes
-#    become_user: "{{ app_user }}"
-#    django_manage:
-#      command: "collectstatic --noinput --ignore=src --ignore=_builds"
-#      app_path: "{{ site_src }}"
-#      settings: "{{ app_user }}.settings.production"
-#      virtualenv: "{{ venv_dir }}"
-#
-#  - name: Migrate DB
-#    become: yes
-#    become_user: "{{ app_user }}"
-#    django_manage:
-#      command: "migrate"
-#      app_path: "{{ site_src }}"
-#      settings: "{{ app_user }}.settings.production"
-#      virtualenv: "{{ venv_dir }}"
-#
-#  - name: Touch config file to reload uwsgi
-#    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
-#    become: yes
-#    become_method: sudo
-#
-#  - name: Gracefully kill rq workers to reload their state
-#    become: yes
-#    become_method: sudo
-#    shell: "supervisorctl signal SIGTERM rqworkers:"
+  - name: Collectstatic
+    become: yes
+    become_user: "{{ app_user }}"
+    django_manage:
+      command: "collectstatic --noinput --ignore=src --ignore=_builds"
+      app_path: "{{ site_src }}"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
+  - name: Migrate DB
+    become: yes
+    become_user: "{{ app_user }}"
+    django_manage:
+      command: "migrate"
+      app_path: "{{ site_src }}"
+      settings: "{{ app_user }}.settings.production"
+      virtualenv: "{{ venv_dir }}"
+
+  - name: Touch config file to reload uwsgi
+    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
+    become: yes
+    become_method: sudo
+
+  - name: Gracefully kill rq workers to reload their state
+    become: yes
+    become_method: sudo
+    shell: "supervisorctl signal SIGTERM rqworkers:"
 
 
