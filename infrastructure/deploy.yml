@@ -2,7 +2,7 @@
 - name: Start deployment
   hosts: "{{ aws_ec2_host_new }}"
   user: ubuntu
-  sudo: True
+#  sudo: True
   vars_files:
     - vars/aws.yml
 
@@ -16,43 +16,77 @@
     set_fact:
       site_src: "/home/{{ app_user }}/site/repo"
       venv_dir: "/home/{{ app_user }}/site/env"
+      requirements_prev_md5_file: ".requirements_prev_deploy_md5"
+      # Default value if file didn't fetched from remote server
+      requirements_md5: ""
 
   - name: Get stuff from git
     git: repo=git@github.com:cscenter/site.git dest={{ site_src }}
     become: yes
     become_user: "{{ app_user }}"
 
-  - name: Install requirements
+  - name: Get requirements.txt stats
+    stat:
+      path: "{{ site_src }}/requirements.txt"
+    register: requirements_stat
+
+  - name: Try to fetch file with requirements.txt md5 hash from previous deploy
+    fetch:
+      src: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
+      dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
+      flat: yes
+      fail_on_missing: no
+    register: requirements_prev_md5
+
+  - name: Get stats for fetched file
+    local_action: stat path="tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
+    register: local_md5_file
+
+  - name: Try to read requirements.txt md5 value from previous deploy
+    set_fact:
+      requirements_md5: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}') }}"
+    when: local_md5_file.stat.exists == True
+
+  - name: Install requirements if file was changed from previous deploy
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
     become_user: "{{ app_user }}"
+    when: requirements_stat.stat.md5 != requirements_md5
 
-  - name: Collectstatic
+  - name: Update requirements.txt md5 hash
+    copy:
+      content: "{{ requirements_stat.stat.md5 }}"
+      dest: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
     become: yes
     become_user: "{{ app_user }}"
-    django_manage:
-      command: "collectstatic --noinput --ignore=src --ignore=_builds"
-      app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.production"
-      virtualenv: "{{ venv_dir }}"
+    when: requirements_stat.stat.md5 != requirements_md5
 
-  - name: Migrate DB
-    become: yes
-    become_user: "{{ app_user }}"
-    django_manage:
-      command: "migrate"
-      app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.production"
-      virtualenv: "{{ venv_dir }}"
-
-  - name: Touch config file to reload uwsgi
-    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
-    become: yes
-    become_method: sudo
-
-  - name: Gracefully kill rq workers to reload their state
-    become: yes
-    become_method: sudo
-    shell: "supervisorctl signal SIGTERM rqworkers:"
+#  - name: Collectstatic
+#    become: yes
+#    become_user: "{{ app_user }}"
+#    django_manage:
+#      command: "collectstatic --noinput --ignore=src --ignore=_builds"
+#      app_path: "{{ site_src }}"
+#      settings: "{{ app_user }}.settings.production"
+#      virtualenv: "{{ venv_dir }}"
+#
+#  - name: Migrate DB
+#    become: yes
+#    become_user: "{{ app_user }}"
+#    django_manage:
+#      command: "migrate"
+#      app_path: "{{ site_src }}"
+#      settings: "{{ app_user }}.settings.production"
+#      virtualenv: "{{ venv_dir }}"
+#
+#  - name: Touch config file to reload uwsgi
+#    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
+#    become: yes
+#    become_method: sudo
+#
+#  - name: Gracefully kill rq workers to reload their state
+#    become: yes
+#    become_method: sudo
+#    shell: "supervisorctl signal SIGTERM rqworkers:"
 
 
