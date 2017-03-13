@@ -25,12 +25,19 @@
     become: yes
     become_user: "{{ app_user }}"
 
-  - name: Get requirements.txt stats
+  - name: Get file stats for production requirements.txt
     stat:
-      path: "{{ site_src }}/requirements.txt"
+      path: "{{ site_src }}/requirements/{{ item }}.txt"
     register: requirements_stat
+    with_items:
+      - "base"
+      - "production"
 
-  - name: Try to fetch file with requirements.txt md5 hash from previous deploy
+  - name: Concat md5 from previous step
+    set_fact:
+      requirements_concated_md5: "{{ requirements_stat.results | map(attribute='stat.md5') | join('') }}"
+
+  - name: Try to fetch file with md5 hash value from previous deploy
     fetch:
       src: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
       dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
@@ -42,24 +49,24 @@
     local_action: stat path="tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
     register: local_md5_file
 
-  - name: Try to read requirements.txt md5 value from previous deploy
+  - name: Try to read requirements md5 value from previous deploy
     set_fact:
       requirements_md5: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}') }}"
     when: local_md5_file.stat.exists == True
 
-  - name: Install requirements if file was changed from previous deploy
+  - name: Install requirements if files was changed from previous deploy
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
     become_user: "{{ app_user }}"
-    when: requirements_stat.stat.md5 != requirements_md5
+    when: requirements_concated_md5 != requirements_md5
 
-  - name: Update requirements.txt md5 hash
+  - name: Update requirements.txt files summary md5 value
     copy:
-      content: "{{ requirements_stat.stat.md5 }}"
+      content: "{{ requirements_concated_md5 }}"
       dest: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
     become: yes
     become_user: "{{ app_user }}"
-    when: requirements_stat.stat.md5 != requirements_md5
+    when: requirements_concated_md5 != requirements_md5
 
 #  - name: Collectstatic
 #    become: yes
