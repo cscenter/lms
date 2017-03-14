@@ -18,9 +18,11 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument('--campaign_id', type=int,
+        parser.add_argument(
+            '--campaign_id',
+            type=int,
             dest='campaign_id',
-            help='Search applicants by specified campaign id')
+            help='Search applicants by campaign id')
 
     def handle(self, *args, **options):
         campaign_id = options["campaign_id"]
@@ -29,6 +31,6 @@ class Command(BaseCommand):
 
         for a in Applicant.objects.filter(campaign_id=campaign_id).all():
             try:
-                online_test = Test.objects.get(applicant=a)
+                _ = Test.objects.get(applicant=a)
             except Test.DoesNotExist:
                 Test.objects.create(applicant=a, score=0)

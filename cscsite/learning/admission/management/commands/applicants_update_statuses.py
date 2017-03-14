@@ -8,6 +8,7 @@ from django.db.models import Q
 from learning.admission.models import Applicant, Test
 
 
+# FIXME: So... When I should use this file?!1
 class Command(BaseCommand):
     help = (
         "Recalculate applicant statuses for selected campaign."

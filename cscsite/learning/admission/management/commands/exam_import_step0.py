@@ -8,8 +8,12 @@ from django.core.management import BaseCommand
 
 class Command(BaseCommand):
     help = (
-        """ Run this file to solve problem with inconsistent data before import exam results.
+        """ 
+        Run this file to solve problem with inconsistent data before import 
+        exam results.
 
+        XXX: Формат файла с результатами ручной проверки может меняться из года
+        в год, надо быть внимательным!
         Проблема следующая: есть задания, которые проверяются вручную
         За эти задания могут поставить произвольный балл от 0 до max
         Но в файле с результатами контеста всегда стоит max балл за задания
@@ -67,7 +71,7 @@ class Command(BaseCommand):
         for row in dataset:
             if not len(row):
                 continue
-            # search username in additioanal csv and get related row
+            # search username in additional csv and get related row
             username_col_index = dataset.headers.index("user_name")
             username = row[username_col_index]
 
