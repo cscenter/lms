@@ -25,4 +25,3 @@ Section | Description
 
 #### TODO:
     * lodash es6
-    * moment.js locales?
