@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
-import tablib
-from itertools import chain
-
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Count
 
-from learning.admission.import_export import ApplicantRecordResource
 from learning.admission.models import Applicant
 
 
@@ -21,18 +15,20 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--campaign_id', type=int,
-            dest='campaign_id',
-            help='Search applicant profile by specified campaign id')
+                            dest='campaign_id',
+                            help='Search applicant profile by campaign id')
 
         parser.add_argument('--lookup',
-            dest='lookup_field',
-            choices=self.lookup_fields,
-            default="yandex_id",
-            help='Lookup for applicant instance by specified field and `campaign`')
+                            dest='lookup_field',
+                            choices=self.lookup_fields,
+                            default="yandex_id",
+                            help='Lookup for applicant instance by '
+                                 'specified field and `campaign`')
 
         parser.add_argument('--resolve',
-            action="store_true",
-            help='Auto resolve duplicates: save last added record, delete others')
+                            action="store_true",
+                            help='Auto resolve duplicates: save last added '
+                                 'record, delete others')
 
     def handle(self, *args, **options):
         campaign_id = options["campaign_id"]
