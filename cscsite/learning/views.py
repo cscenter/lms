@@ -2174,6 +2174,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                 return response
 
         del response['Content-Type']
+        # Content-Disposition doesn't have appropriate non-ascii symbols support
         response['Content-Disposition'] = "attachment; filename={}".format(
             file_name)
         response['X-Accel-Redirect'] = file_url
