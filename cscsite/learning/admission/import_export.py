@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, absolute_import
 
+import uuid
 from collections import OrderedDict
 
 from django.utils.encoding import smart_text, force_text
@@ -23,15 +24,8 @@ class JsonFieldWidget(widgets.Widget):
 class ApplicantRecordResource(resources.ModelResource):
     class Meta:
         model = Applicant
-        import_id_fields = ['uuid']
+        import_id_fields = ['uuid']  # Get existing models by this field
         skip_unchanged = True
-        # TODO: In staff/ already implemented custom solution, remove this code
-        # FIXME: Too slow, looking for another solution
-        online_test_fields = ["online_test__" + f.name for f in
-                              Test._meta.fields if f.name != 'id']
-        exam_fields = ["exam__" + f.name for f in
-                       Exam._meta.fields if f.name != 'id']
-        fields = [f.name for f in Applicant._meta.fields] + online_test_fields + exam_fields
 
     def import_field(self, field, obj, data):
         if field.attribute and field.column_name in data:
@@ -43,7 +37,7 @@ class ApplicantRecordResource(resources.ModelResource):
                 data[field.column_name] = ""
             field.save(obj, data)
 
-    def before_save_instance(self, instance, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run):
         """Invoke clean method to normalize yandex_id"""
         instance.clean()
 

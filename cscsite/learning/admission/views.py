@@ -67,7 +67,7 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
         if cleaned_data['has_job'] == 'no':
             del cleaned_data['workplace']
             del cleaned_data['position']
-        city_code = to_unlocode(cleaned_data['city'])
+        city_code = cleaned_data['city']
         today = now()
         campaign = (Campaign.objects
                     .filter(year=today.year, city__code=city_code)
@@ -119,7 +119,8 @@ class ApplicantContextMixin(object):
         context = {}
         applicant = get_object_or_404(
             Applicant.objects
-                     .select_related("exam", "campaign", "online_test")
+                     .select_related("exam", "campaign", "online_test",
+                                     "university")
                      .filter(pk=applicant_id))
         context["applicant"] = applicant
         context["applicant_form"] = ApplicantReadOnlyForm(instance=applicant)
@@ -477,7 +478,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
                                  .filter(current=True)
                                  .select_related("city"))
         try:
-            city_code = to_unlocode(self.kwargs["city_slug"])
+            city_code = self.kwargs["city_slug"]
             self.selected_campaign = next(c for c in self.active_campaigns
                                           if c.city.code == city_code)
         except StopIteration:
