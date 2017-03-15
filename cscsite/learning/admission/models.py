@@ -16,6 +16,7 @@ from model_utils.models import TimeStampedModel
 from core.models import City, University
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair
+from users.models import CSCUser
 
 
 def current_year():
@@ -140,6 +141,7 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|faculty"))
     course = models.CharField(
         _("Course"),
+        choices=CSCUser.COURSES,
         help_text=_("Applicant|course"),
         max_length=355)
     graduate_work = models.TextField(
@@ -203,6 +205,8 @@ class Applicant(TimeStampedModel):
     where_did_you_learn = models.TextField(
         _("Where did you learn?"),
         help_text=_("Applicant|where_did_you_learn_about_cs_center"))
+    # Note: If in next year where_did_you_learn will stay TextField, remove
+    # field below (merge there values on form level)
     where_did_you_learn_other = models.CharField(
         _("Where did you learn? (other)"),
         max_length=255,
