@@ -51,11 +51,11 @@ class DetailsApplicantImportMixin(object):
                         header="details")
 
         if "applicant" not in data.headers:
-            data.append_col(self.row_attach_applicant(data.headers),
+            data.append_col(self.get_applicant_for_row(data.headers),
                             header="applicant")
-        # Optionally save contest id for debug purpose
-        # Note: Should implicitly override `yandex_contest_id` field
+        # Optionally save contest id
         if self.contest_id:
+            del data['yandex_contest_id']
             data.append_col(lambda r: self.contest_id,
                             header="yandex_contest_id")
 
@@ -63,7 +63,9 @@ class DetailsApplicantImportMixin(object):
         if field.attribute and field.column_name in data:
             if data[field.column_name] == "None":
                 data[field.column_name] = ""
-            # Note: skip save method for `applicant` with null value. Later we skip this row.
+            # Note: skip save method for `applicant` with null value.
+            # Later we skip this row.
+            # FIXME: This logic should be relocated.
             if field.column_name == "applicant" and not data[field.column_name]:
                 return
             field.save(obj, data)
@@ -74,6 +76,7 @@ class DetailsApplicantImportMixin(object):
             return True
         # Skip results with zero score and empty `details`.
         # It means applicant don't even try to pass this contest
+        # We already should have zero score in DB, so skip.
         if not instance.score and not any(instance.details.values()):
             return True
         # Otherwise, save lowest score
@@ -93,13 +96,13 @@ class DetailsApplicantImportMixin(object):
 
         return wrapper
 
-    def row_attach_applicant(self, headers):
-        """Get applicant id by `lookup` field and campaign id"""
+    def get_applicant_for_row(self, headers):
+        """Get applicant id by `lookup` field value within provided campaigns"""
         lookup_field = self.lookup_field
-        campaign_id = self.campaign_id
+        campaign_ids = self.campaign_ids
 
         def wrapper(row):
-            qs = Applicant.objects.filter(campaign_id=campaign_id)
+            qs = Applicant.objects.filter(campaign_id__in=campaign_ids)
             index = headers.index(lookup_field)
             if not row[index]:
                 print("Empty {}. Skip".format(lookup_field))
@@ -108,10 +111,11 @@ class DetailsApplicantImportMixin(object):
                 row[index] = row[index].lower().replace("-", ".")
                 qs = qs.filter(yandex_id_normalize=row[index])
             else:
+                # TODO: make it more generic
                 qs = qs.filter(stepic_id=row[index])
             cnt = qs.count()
             if cnt > 1:
-                print("Duplicates for {}={}. Skip".format(
+                print("Duplicates for {} = {}. Skip".format(
                     lookup_field, row[index]))
                 return ""
             elif cnt == 0:
@@ -130,7 +134,7 @@ class DetailsApplicantImportMixin(object):
 
         return wrapper
 
-    def before_save_instance(self, instance, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run):
         # Set default values if not specified
         if not instance.score:
             instance.score = 0
@@ -150,7 +154,7 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
     def __init__(self, **kwargs):
         self.lookup_field = kwargs.get("lookup_field", "")
         self.allowed_fields = kwargs.get("allowed_fields", False)
-        self.campaign_id = kwargs.get("campaign_id", False)
+        self.campaign_ids = kwargs.get("campaign_ids", False)
         self.passing_score = kwargs.get("passing_score", False)
         self.contest_id = kwargs.get("contest_id", False)
 
@@ -159,7 +163,7 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
         import_id_fields = ['applicant']
         skip_unchanged = True
 
-    def after_save_instance(self, instance, dry_run):
+    def after_save_instance(self, instance, using_transactions, dry_run):
         """Update applicant status if passing_score provided and instance score
         lower than passing_score
         """
@@ -187,13 +191,13 @@ class ExamRecordResource(DetailsApplicantImportMixin,
     def __init__(self, **kwargs):
         self.lookup_field = kwargs.get("lookup_field", "")
         self.allowed_fields = kwargs.get("allowed_fields", False)
-        self.campaign_id = kwargs.get("campaign_id", False)
+        self.campaign_ids = kwargs.get("campaign_ids", False)
         self.passing_score = kwargs.get("passing_score", False)
         self.contest_id = kwargs.get("contest_id", False)
 
     def get_or_init_instance(self, instance_loader, row):
         if "applicant" not in row:
-            return (self.init_instance(row), True)
+            return self.init_instance(row), True
         return super(ExamRecordResource, self).get_or_init_instance(
             instance_loader, row)
 
@@ -213,7 +217,7 @@ class ExamRecordResource(DetailsApplicantImportMixin,
         return super(DetailsApplicantImportMixin, self).skip_row(instance,
                                                                  original)
 
-    def after_save_instance(self, instance, dry_run):
+    def after_save_instance(self, instance, using_transactions, dry_run):
         """Update applicant status if score lower than passing_score"""
         if self.passing_score and instance.score < self.passing_score:
             instance.applicant.status = Applicant.REJECTED_BY_EXAM

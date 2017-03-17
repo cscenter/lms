@@ -15,10 +15,10 @@ class Command(BaseCommand):
         Try to find already existed exam record by `lookup` field
         and campaign_id and update record. Otherwise fail.
         Note: This command doesn't create records.
-            Run `online_exam_init` first to create empty records.
+            Run `exam_import_step1` first to create empty records.
 
         Example:
-        ./manage.py online_exam_import_results ~/2444.csv --campaign_id=2 --lookup=yandex_id
+        ./manage.py exam_import_step2 ~/2444.csv --campaign_ids=1,2,3
         """
     )
     # Other fields go to dynamically created `details` field
@@ -27,25 +27,23 @@ class Command(BaseCommand):
     lookup_fields = ["yandex_id", "stepic_id"]
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            'csv', metavar='CSV',
-            help='path to csv with data')
+        parser.add_argument('csv', metavar='CSV',
+                            help='path to csv with data')
 
-        parser.add_argument(
-            '--campaign_id', type=int,
-            dest='campaign_id',
-            help='Search applicant profile by specified campaign id')
+        parser.add_argument('--campaign_ids', type=str,
+                            dest='campaign_ids',
+                            help='Comma separated campaign ids')
 
         parser.add_argument(
             '--lookup',
             dest='lookup_field',
             choices=self.lookup_fields,
             default="yandex_id",
-            help='Lookup for applicant instance by specified '
-                 'field and `campaign`')
+            help='Lookup attribute which store unique applicant identifier '
+                 'in provided campaigns')
 
         parser.add_argument(
-            '--skip',
+            '--save',
             action="store_true",
             help='Skip dry mode and import data to DB')
 
@@ -62,9 +60,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         csv_path = options["csv"]
         lookup_field = options["lookup_field"]
-        campaign_id = options["campaign_id"]
-        if not campaign_id:
-            raise CommandError("Campaign ID not specified")
+        campaign_ids = self.clean_campaigns(options)
         passing_score = options["passing_score"]
         dry_run = not options["skip"]
         contest_id = options["contest_id"]
@@ -77,7 +73,7 @@ class Command(BaseCommand):
             online_exam_resource = ExamRecordResource(
                 lookup_field=lookup_field,
                 allowed_fields=self.allowed_fields,
-                campaign_id=campaign_id,
+                campaign_id=campaign_ids,
                 passing_score=passing_score,
                 contest_id=contest_id)
             result = online_exam_resource.import_data(data, dry_run=dry_run)
@@ -86,6 +82,17 @@ class Command(BaseCommand):
                 print("Dry run completed")
             else:
                 print("Done")
+
+    @staticmethod
+    def clean_campaigns(options):
+        if not options["campaign_ids"]:
+            raise CommandError("Campaign ID's not specified")
+        campaign_ids = options["campaign_ids"].split(",")
+        try:
+            campaign_ids = [int(cid) for cid in campaign_ids]
+        except (TypeError, ValueError):
+            raise CommandError("Campaign ID's are not comma separated integers")
+        return campaign_ids
 
     @staticmethod
     def handle_errors(result):

@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+import tablib
+
+from django.core.management import BaseCommand, CommandError
+
+from learning.admission.import_export import OnlineTestRecordResource
+from ._utils import CurrentCampaignsMixin, HandleErrorsMixin
+
+
+class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
+    help = (
+        """Import results for online test. Run in dry mode by default.
+
+        Try to find already existed online test results first by `lookup` field 
+        (should be unique within current campaigns)
+        and update record if score is less than previous.
+
+        Note: Don't forget manually remove applicant duplicates first
+            to avoid errors on `attach_applicant` action.
+        Note: This command creates online test result record only for
+            yandex login registered in our database.
+            Run `online_test_step0` first to create empty records for
+            all applicants, even with buggy yandex login.
+
+        Example:
+            ./manage.py online_test_step1 ./results.csv
+        """
+    )
+    # Values from columns not specified in `allowed_fields` placed to
+    # `details` JSON field
+    allowed_fields = [
+        'created',
+        'yandex_id',
+        'stepic_id',
+        'score',
+        'yandex_contest_id',
+        'user_name'
+    ]
+    lookup_fields = ["yandex_id", "stepic_id"]
+
+    def add_arguments(self, parser):
+        parser.add_argument('csv', metavar='CSV',
+                            help='Path to csv with results')
+        parser.add_argument(
+            '--lookup',
+            dest='lookup_field',
+            choices=self.lookup_fields,
+            default="yandex_id",
+            help='Lookup attribute which store unique applicant identifier '
+                 'within current campaigns')
+        parser.add_argument(
+            '--save',
+            action="store_true",
+            help='Skip dry mode and save imported data to DB if no errors')
+        parser.add_argument(
+            '--passing_score', type=int,
+            help='You can pass value to set `rejected by online test` '
+                 'status for applicants below passing score (exc)')
+        parser.add_argument(
+            '--contest_id', type=int,
+            help='Save contest_id for debug purpose. '
+                 'Overrides `yandex_contest_id` field from source csv file')
+
+    def handle(self, *args, **options):
+        csv_path = options["csv"]
+        lookup_field = options["lookup_field"]
+        passing_score = options["passing_score"]
+        dry_run = not options["skip"]
+        contest_id = options["contest_id"]
+        campaign_ids = self.get_current_campaign_ids()
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            self.stdout.write("Canceled")
+            return
+
+        with open(csv_path, "rb") as f:
+            data = tablib.Dataset().load(f.read())
+            online_test_resource = OnlineTestRecordResource(
+                lookup_field=lookup_field,
+                allowed_fields=self.allowed_fields,
+                campaign_ids=campaign_ids,
+                passing_score=passing_score,
+                contest_id=contest_id)
+            result = online_test_resource.import_data(data, dry_run=dry_run)
+            self.handle_errors(result)
+            print("Done")
+
+
