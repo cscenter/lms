@@ -12,10 +12,12 @@ from core.models import University
 from learning.admission.models import Applicant, Campaign
 from users.models import CSCUser
 
+from ._utils import HandleErrorsMixin
+
 logger = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
+class Command(HandleErrorsMixin, BaseCommand):
     help = """
     Import applicants from yandex `feedback.csv`. Dry run by default.
     
@@ -41,15 +43,6 @@ class Command(BaseCommand):
                                                 collect_failed_rows=False)
         self.handle_errors(result)
         logger.debug("Import successfully finished.")
-
-    @staticmethod
-    def handle_errors(result):
-        if result.has_errors():
-            for error in result.base_errors:
-                logger.debug(error)
-            for line, errors in result.row_errors():
-                for error in errors:
-                    logger.debug("Line {} - {}".format(line + 1, error.error))
 
 
 class ApplicantImportResource(resources.ModelResource):
@@ -121,9 +114,11 @@ class ApplicantImportResource(resources.ModelResource):
 
         # Attach current campaigns
         today = now()
-        self.current_campaigns = {}
+        self.current_campaigns_by_city = {}
+        self.current_campaign_ids = set()
         for campaign in Campaign.objects.filter(year=today.year).all():
-            self.current_campaigns[campaign.city_id] = campaign
+            self.current_campaigns_by_city[campaign.city_id] = campaign
+            self.current_campaign_ids.add(campaign.pk)
 
         # Cache universities
         universities = University.objects.only("pk", "city_id", "name").values()
@@ -142,8 +137,11 @@ class ApplicantImportResource(resources.ModelResource):
         elif row['city'] == 'Новосибирск':
             city_code = 'nsk'
         else:
-            raise ValueError("Unknown city name")
-        other_cities = [c for c in self.current_campaigns if c != city_code]
+            city_code = row['city']
+        if city_code not in self.current_campaigns_by_city:
+            raise ValueError("Campaign for city {} not found".format(city_code))
+        other_cities = [c for c in self.current_campaigns_by_city
+                        if c != city_code]
         to_remove = []
         to_replace = []
         for f in row:
@@ -172,7 +170,7 @@ class ApplicantImportResource(resources.ModelResource):
         # set them without additional query to DB. To do so, we should customize
         # FK widget `clean` method or directly set values in `import_obj` call.
         self.custom_fields = {}
-        self.custom_fields["campaign_id"] = self.current_campaigns[city_code].pk
+        self.custom_fields["campaign_id"] = self.current_campaigns_by_city[city_code].pk
         del row['city']
         # Replace `university` name with university id
         # Throw an error if university names in csv not synced with DB values
@@ -195,6 +193,23 @@ class ApplicantImportResource(resources.ModelResource):
         if other_str in row['where_did_you_learn']:
             row['where_did_you_learn'] = row['where_did_you_learn'].replace(
                 other_str, 'другое')
+
+    def skip_row(self, instance, original):
+        """
+        Ok, uuid in theory can make a collision. 
+        Let's check it little bit to be more sure.
+        """
+        if not original.pk:
+            return False
+        if original.campaign_id not in self.current_campaign_ids:
+            # Collision with prev campaign. It can be really hurtful.
+            logger.warning("uuid {} collision. skip".format(original.uuid))
+            return True
+        if original.email != instance.email:
+            # We have a collision inside current admission campaign. Imposibru!
+            logger.error("{} uuid collision!".format(instance.uuid))
+            return True
+        return super().skip_row(instance, original)
 
     def import_obj(self, obj, data, dry_run):
         super(ApplicantImportResource, self).import_obj(obj, data, dry_run)

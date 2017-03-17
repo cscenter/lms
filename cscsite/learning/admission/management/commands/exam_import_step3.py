@@ -8,7 +8,7 @@ from django.db.models import Q
 from learning.admission.models import Applicant, Test
 
 
-# FIXME: So... When I should use this file?!1
+# FIXME: Здесь надо быть внимательным. Можно ли похерить результаты для какой-либо кампании, если запустить раньше времени?
 class Command(BaseCommand):
     help = (
         "Recalculate applicant statuses for selected campaign."
