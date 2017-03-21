@@ -54,7 +54,7 @@
       requirements_md5: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}') }}"
     when: local_md5_file.stat.exists == True
 
-  - name: Install requirements if files was changed from previous deploy
+  - name: Install requirements if they were changed from previous deploy
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
     become_user: "{{ app_user }}"
