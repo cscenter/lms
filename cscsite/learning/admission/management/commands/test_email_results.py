@@ -5,20 +5,20 @@ from __future__ import absolute_import, unicode_literals
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.timezone import now
 from post_office import mail
-from post_office.models import EmailTemplate
+from post_office.models import EmailTemplate, Email
 from post_office.utils import get_email_template
 
-from ._utils import CurrentCampaignsMixin
+from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
 from learning.admission.models import Test, Applicant
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     # TODO: scheduled time support?
     # TODO: priority level support?
     TEMPLATE_REGEXP = "admission-{year}-{city_code}-test-{type}"
     help = """
-    Generate mailing list with online test results based on passing score
-    
+    Generate mailing list with online test results based on passing score.
+
     Template string for email templates:
         {}
         type: [success|fail]
@@ -38,6 +38,8 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
         self.validate_templates(campaigns)
 
+        total = 0
+        generated = 0
         for campaign in campaigns:
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk)
@@ -47,7 +49,11 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                                   "email"))
 
             for a in applicants:
-                score = int(a["online_test__score"])
+                total += 1
+                if a["online_test__score"] is None:
+                    score = 0
+                else:
+                    score = int(a["online_test__score"])
                 score_str = str(score) + " балл" + self.pluralize(score)
                 context = {
                     'SCORE': score_str,
@@ -57,49 +63,27 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                     template_type = "fail"
                 else:
                     template_type = "success"
+                    assert a["exam__yandex_contest_id"] is not None
                     context['LINK'] = "https://contest.yandex.ru/contest/{}/".format(a["exam__yandex_contest_id"])
-                mail.send(
-                    [a["email"]],
-                    sender='info@compscicenter.ru',
-                    template=self.get_template_name(campaign, template_type),
-                    context=context,
-                    # Render on delivery, we have no really big amount of
-                    # emails to save CPU time
-                    render_on_delivery=True,
-                    backend='ses',
-                )
+                recipients = [a["email"]]
+                template_name = self.get_template_name(campaign, template_type)
+                template = get_email_template(template_name)
+                if not Email.objects.filter(to=recipients,
+                                            template=template).exists():
+                    mail.send(
+                        recipients,
+                        sender='info@compscicenter.ru',
+                        template=template,
+                        context=context,
+                        # Render on delivery, we have no really big amount of
+                        # emails to think about saving CPU time
+                        render_on_delivery=True,
+                        backend='ses',
+                    )
+                    generated += 1
+        self.stdout.write("Processed applicants: {}".format(total))
+        self.stdout.write("Generated emails: {}".format(generated))
         self.stdout.write("Done")
-
-    def get_template_name(self, campaign, type):
-        today = now()
-        year = today.year
-        return self.TEMPLATE_REGEXP.format(
-            year=year,
-            city_code=campaign.city_id,
-            type=type
-        )
-
-    def validate_templates(self, campaigns):
-        # For each campaign check email template exists and
-        # passing score for test results non zero
-        qs = EmailTemplate.objects.get_queryset()
-        for campaign in campaigns:
-            if not campaign.online_test_passing_score:
-                raise CommandError("Passing score for campaign '{}'"
-                                   " must be non zero".format(campaign))
-            try:
-                template_name = self.get_template_name(campaign, "success")
-                # Use post office method for caching purpose
-                get_email_template(template_name)
-            except EmailTemplate.DoesNotExist:
-                raise CommandError("Email template {} "
-                                   "not found".format(template_name))
-            try:
-                template_name = self.get_template_name(campaign, "fail")
-                get_email_template(template_name)
-            except EmailTemplate.DoesNotExist:
-                raise CommandError("Email template {} "
-                                   "not found".format(template_name))
 
     # shitty code
     @staticmethod

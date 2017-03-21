@@ -35,11 +35,13 @@ class Campaign(models.Model):
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
-        _("Campaign|Test_passing_score"))
+        _("Campaign|Test_passing_score"),
+        help_text=_("Campaign|Test_passing_score-help"))
     exam_max_score = models.SmallIntegerField(
         _("Campaign|Exam_max_score"))
     exam_passing_score = models.SmallIntegerField(
-        _("Campaign|Exam_passing_score"))
+        _("Campaign|Exam_passing_score"),
+        help_text=_("Campaign|Exam_passing_score-help"))
     current = models.BooleanField(_("Current campaign"), default=False)
 
     class Meta:

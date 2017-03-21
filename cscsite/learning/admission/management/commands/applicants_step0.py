@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import logging
 
 import tablib
@@ -34,7 +35,9 @@ class Command(HandleErrorsMixin, BaseCommand):
     def handle(self, *args, **options):
         csv_path = options["csv"]
         dry_run = not options["save"]
-        data = tablib.Dataset().load(open(csv_path).read())
+        if dry_run:
+            self.stdout.write("Dry run mode ON.")
+        data = tablib.Dataset().load(open(csv_path, "r").read())
         if 'uuid' not in data.headers:
             raise CommandError("Add `uuid` column to prevent data duplication")
         applicant_resource = ApplicantImportResource()
@@ -69,14 +72,14 @@ class ApplicantImportResource(resources.ModelResource):
             "Вы сейчас работаете?": "has_job",
             "Место работы": "workplace",
             "Должность": "position",
-            "Расскажите о своём опыте программирования и исследований": "experience",
+            "Расскажите о своём опыте программирования": "experience",
             "Укажите свой логин на Яндексе": "yandex_id",
             "Укажите свой ID на Stepik.org, если есть": "stepic_id",
             "Оставьте ссылку на свой аккаунт на GitHub, если есть": "github_id",
             "Какие направления обучения из трёх вам интересны в CS центре?": "spb_preferred_study_programs",
             "Какие направления обучения из двух вам интересны в CS центре?": "nsk_preferred_study_programs",
             "Почему вам интересен анализ данных? Какие повседневные задачи решаются с помощью анализа данных?": "preferred_study_programs_dm_note",
-            "Какие области Computer Science вам интересно было бы изучить?": "preferred_study_programs_cs_note",
+            "Какие области Computer Science вам интересно было бы изучить? Какие области вы уже изучали самостоятельно (по книгам, открытым курсам или онлайн-курсам)? Рассматриваете ли вариант поступления в аспирантуру?": "preferred_study_programs_cs_note",
             "Приложите текст вашей курсовой или дипломной работы, если хотите": "admin_note",
             "В разработке какого приложения, которым вы пользуетесь каждый день, вы хотели бы принять участие? Почему? Каких знаний вам для этого не хватает?": "preferred_study_programs_se_note",
             "Откуда вы узнали о CS центре?": "where_did_you_learn",
@@ -121,14 +124,13 @@ class ApplicantImportResource(resources.ModelResource):
             self.current_campaign_ids.add(campaign.pk)
 
         # Cache universities
-        universities = University.objects.only("pk", "city_id", "name").values()
+        universities = University.objects.all()
         # For each city we have special university record `Другое`.
         self.universities_others = {}
         for u in universities:
-            if u['name'] == 'Другое':
-                self.universities_others[u['city_id']] = u['id']
-
-        self.universities = {u["name"]: u["id"] for u in universities}
+            if u.name == 'Другое':
+                self.universities_others[u.city_id] = u
+        self.universities = {u.name: u for u in universities}
 
     def before_import_row(self, row, **kwargs):
         """Remove unrelated data and clean"""
@@ -167,18 +169,20 @@ class ApplicantImportResource(resources.ModelResource):
         row['course'] = self.course_values[row['course']]
 
         # FK values for campaign and university already validated, but we can't
-        # set them without additional query to DB. To do so, we should customize
-        # FK widget `clean` method or directly set values in `import_obj` call.
+        # set them without additional query to DB. Also, `Diff` class required
+        # object instead of int. To overcome this we set values after
+        # instance initialization, see `after_import_instance`.
         self.custom_fields = {}
-        self.custom_fields["campaign_id"] = self.current_campaigns_by_city[city_code].pk
+        self.custom_fields["campaign"] = self.current_campaigns_by_city[city_code]
         del row['city']
         # Replace `university` name with university id
         # Throw an error if university names in csv not synced with DB values
         if row['university'] == 'Другое':
-            university_id = self.universities_others[city_code]
+            university = self.universities_others[city_code]
         else:
-            university_id = self.universities[row['university']]
-        self.custom_fields["university_id"] = university_id
+            university = self.universities[row['university']]
+        self.custom_fields["university"] = university
+        # Remove to skip additional queries
         del row['university']
         # Partially clean yandex_id, it should help in many cases
         if '@yandex.ru' in row['yandex_id'] or '@ya.ru' in row['yandex_id']:
@@ -211,13 +215,9 @@ class ApplicantImportResource(resources.ModelResource):
             return True
         return super().skip_row(instance, original)
 
-    def import_obj(self, obj, data, dry_run):
-        super(ApplicantImportResource, self).import_obj(obj, data, dry_run)
+    def after_import_instance(self, instance, new, **kwargs):
+        """Called exactly after get_or_init_instance."""
         for attr_name, value in self.custom_fields.items():
-            setattr(obj, attr_name, value)
-
-    def before_save_instance(self, instance, using_transactions, dry_run):
-        """Invoke clean method to normalize yandex_id"""
+            setattr(instance, attr_name, value)
+        # Invoke clean method to normalize yandex_id
         instance.clean()
-
-

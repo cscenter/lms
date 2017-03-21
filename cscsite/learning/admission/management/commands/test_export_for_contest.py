@@ -19,7 +19,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("***{}***".format(campaign))
             passing_score = campaign.online_test_passing_score
             if not passing_score:
-                self.stdout.write("Zero passing score! Skip campaign")
+                self.stdout.write("Zero passing score. Skip campaign")
                 continue
 
             applicants = (Applicant.objects
