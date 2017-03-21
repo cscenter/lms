@@ -14,10 +14,10 @@ from learning.admission.models import Applicant, Test, Exam
 
 class JsonFieldWidget(widgets.Widget):
     # TODO: Maybe should check str type here and parse it to dict
-    def clean(self, value):
+    def clean(self, value, row=None, *args, **kwargs):
         return super(JsonFieldWidget, self).clean(value)
 
-    def render(self, value):
+    def render(self, value, obj=None):
         return "\n".join("{}: {}".format(k, v) for k, v in value.items())
 
 
@@ -43,7 +43,7 @@ class ApplicantRecordResource(resources.ModelResource):
 
 
 class DetailsApplicantImportMixin(object):
-    def before_import(self, data, dry_run, **kwargs):
+    def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
             print("Column `details` will be ignored")
             del data["details"]
@@ -55,45 +55,27 @@ class DetailsApplicantImportMixin(object):
                             header="applicant")
         # Optionally save contest id
         if self.contest_id:
-            del data['yandex_contest_id']
+            try:
+                del data['yandex_contest_id']
+            except KeyError:
+                pass
             data.append_col(lambda r: self.contest_id,
                             header="yandex_contest_id")
 
-    def import_field(self, field, obj, data):
-        if field.attribute and field.column_name in data:
-            if data[field.column_name] == "None":
-                data[field.column_name] = ""
-            # Note: skip save method for `applicant` with null value.
-            # Later we skip this row.
-            # FIXME: This logic should be relocated.
-            if field.column_name == "applicant" and not data[field.column_name]:
-                return
-            field.save(obj, data)
-
-    def skip_row(self, instance, original):
-        # We can't find applicant by lookup field, so skip record
-        if not hasattr(instance, "applicant"):
-            return True
-        # Skip results with zero score and empty `details`.
-        # It means applicant don't even try to pass this contest
-        # We already should have zero score in DB, so skip.
-        if not instance.score and not any(instance.details.values()):
-            return True
-        # Otherwise, save lowest score
-        if original.pk and original.score < instance.score:
-            return True
-        return super(DetailsApplicantImportMixin, self).skip_row(instance, original)
+    def before_import_row(self, row, **kwargs):
+        for k, v in row.items():
+            if v == "None":
+                row[k] = ""
+        super().before_import_row(row, **kwargs)
 
     def row_collect_details(self, headers):
         """Collect data for `details` column"""
-
         def wrapper(row):
             details = OrderedDict()
             for i, h in enumerate(headers):
-                if h not in self.allowed_fields:
+                if h not in self.separated_fields:
                     details[h] = row[i]
             return details
-
         return wrapper
 
     def get_applicant_for_row(self, headers):
@@ -111,7 +93,6 @@ class DetailsApplicantImportMixin(object):
                 row[index] = row[index].lower().replace("-", ".")
                 qs = qs.filter(yandex_id_normalize=row[index])
             else:
-                # TODO: make it more generic
                 qs = qs.filter(stepic_id=row[index])
             cnt = qs.count()
             if cnt > 1:
@@ -119,25 +100,24 @@ class DetailsApplicantImportMixin(object):
                     lookup_field, row[index]))
                 return ""
             elif cnt == 0:
-                try:
-                    user_name_index = headers.index("user_name")
-                    user_name = row[user_name_index]
-                except ValueError:
-                    user_name = "-"
                 score_index = headers.index("score")
-                print("No applicant for {} = {}; user_name = {}; "
-                      "score = {}; contest = {}".format(
-                    lookup_field, row[index], user_name, row[score_index],
-                    self.contest_id))
+                print("No applicant for {} = {}; score = {}; "
+                      "contest = {}".format(lookup_field, row[index],
+                                            row[score_index], self.contest_id))
                 return ""
             return qs.get().pk
 
         return wrapper
 
-    def before_save_instance(self, instance, using_transactions, dry_run):
-        # Set default values if not specified
-        if not instance.score:
-            instance.score = 0
+    def import_field(self, field, obj, data):
+        """Don't assign null value for applicant because this field is required, 
+        later we skip rows without applicant value"""
+        if (field.attribute and
+                field.column_name in data and
+                field.column_name == "applicant" and
+                not data["applicant"]):
+            return
+        super().import_field(field, obj, data)
 
 
 class OnlineTestRecordResource(DetailsApplicantImportMixin,
@@ -145,31 +125,37 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
     details = fields.Field(column_name='details',
                            attribute='details',
                            widget=JsonFieldWidget())
-    # Note: Should return __str__ representation of applicant attribute
-    fio = fields.Field(column_name='fio',
-                       attribute='applicant')
+    # Note: It returns __str__ representation of `applicant` attribute
+    fio = fields.Field(column_name='fio', attribute='applicant')
     yandex_login = fields.Field(column_name='yandex_login',
                                 attribute='applicant__yandex_id')
-
-    def __init__(self, **kwargs):
-        self.lookup_field = kwargs.get("lookup_field", "")
-        self.allowed_fields = kwargs.get("allowed_fields", False)
-        self.campaign_ids = kwargs.get("campaign_ids", False)
-        self.passing_score = kwargs.get("passing_score", False)
-        self.contest_id = kwargs.get("contest_id", False)
 
     class Meta:
         model = Test
         import_id_fields = ['applicant']
         skip_unchanged = True
 
-    def after_save_instance(self, instance, using_transactions, dry_run):
-        """Update applicant status if passing_score provided and instance score
-        lower than passing_score
-        """
-        if self.passing_score and instance.score < self.passing_score:
-            instance.applicant.status = Applicant.REJECTED_BY_TEST
-            instance.applicant.save()
+    def __init__(self, **kwargs):
+        self.lookup_field = kwargs.get("lookup_field", "")
+        self.separated_fields = kwargs.get("separated_fields", False)
+        self.campaign_ids = kwargs.get("campaign_ids", False)
+        self.contest_id = kwargs.get("contest_id", False)
+
+    def skip_row(self, instance, original):
+        # We didn't find applicant, skip record
+        if not hasattr(instance, "applicant") or not instance.applicant:
+            return True
+        # Create record if new
+        if not instance.pk:
+            return False
+        # Leave the lowest score
+        if original.score and instance.score:
+            return instance.score > original.score
+        # Skip results with empty `details`.
+        # It means applicant don't even try to pass this contest
+        if not any(instance.details.values()):
+            return True
+        return super().skip_row(instance, original)
 
 
 class ExamRecordResource(DetailsApplicantImportMixin,
@@ -177,48 +163,28 @@ class ExamRecordResource(DetailsApplicantImportMixin,
     details = fields.Field(column_name='details',
                            attribute='details',
                            widget=JsonFieldWidget())
-    # Note: Should return __str__ representation of applicant attribute
-    fio = fields.Field(column_name='fio',
-                       attribute='applicant')
+    # Note: It returns __str__ representation of `applicant` attribute
+    fio = fields.Field(column_name='fio', attribute='applicant')
     yandex_login = fields.Field(column_name='yandex_login',
                                 attribute='applicant__yandex_id')
 
     class Meta:
         model = Exam
         import_id_fields = ['applicant']
-        # skip_unchanged = True
+        skip_unchanged = True
 
     def __init__(self, **kwargs):
         self.lookup_field = kwargs.get("lookup_field", "")
-        self.allowed_fields = kwargs.get("allowed_fields", False)
+        self.separated_fields = kwargs.get("separated_fields", False)
         self.campaign_ids = kwargs.get("campaign_ids", False)
-        self.passing_score = kwargs.get("passing_score", False)
         self.contest_id = kwargs.get("contest_id", False)
 
-    def get_or_init_instance(self, instance_loader, row):
-        if "applicant" not in row:
-            return self.init_instance(row), True
-        return super(ExamRecordResource, self).get_or_init_instance(
-            instance_loader, row)
-
     def skip_row(self, instance, original):
-        # Skip new instances. Before import we create empty records
-        # and then import only existed.
+        # Skip new instances. We only update existed.
         if not instance.pk:
             return True
         if original.yandex_contest_id != str(instance.yandex_contest_id):
-            # TODO: replace all prints with logger
             print("Contest id from DB != contest_id from csv for record: "
                   "{}".format(instance.applicant.yandex_id))
             return True
-        # We can't find applicant by lookup field, so skip record
-        if not hasattr(instance, "applicant"):
-            return True
-        return super(DetailsApplicantImportMixin, self).skip_row(instance,
-                                                                 original)
-
-    def after_save_instance(self, instance, using_transactions, dry_run):
-        """Update applicant status if score lower than passing_score"""
-        if self.passing_score and instance.score < self.passing_score:
-            instance.applicant.status = Applicant.REJECTED_BY_EXAM
-            instance.applicant.save()
+        return False

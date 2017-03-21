@@ -44,6 +44,9 @@ from .tasks import application_form_send_email
 
 
 # Note: Not useful without Yandex.Contest REST API support :<
+# FIXME: Don't allow to save duplicates.
+# TODO: I'm now sure we need server side wizard.
+# TODO: The same we can achieve with Redux + some js.
 class ApplicantRequestWizardView(NamedUrlSessionWizardView):
     template_name = "learning/admission/application.html"
     form_list = [

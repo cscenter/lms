@@ -88,16 +88,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="applicant" role="tabpanel">
             <dl>
-            {% for field in applicant_form %}
-                <dt>{{ field.label_tag }}</dt>
-                {% if field.name == 'course' %}
-                    <dd>{{ applicant_form.instance.get_course_display }}</dd>
-                {% elif field.name == 'university' %}
-                    <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}{{ applicant_form.instance.university.name }}{% endif %}</dd>
-                {% else %}
-                    <dd>{% if field.value %}{{ field.value|linebreaks }}{% else %}<не указано>{% endif %}</dd>
-                {% endif %}
-            {% endfor %}
+                {% include "learning/admission/_applicant_form.html" with applicant_form=applicant_form %}
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">

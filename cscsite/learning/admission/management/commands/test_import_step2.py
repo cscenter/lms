@@ -21,7 +21,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             '--contests', type=str,
             help='Comma separated contest ids')
 
-    # TODO: Get contest_id from DB by yandex contest id value after replacing yandex_contest_id with FK
+    # TODO: Get contest_id from DB by yandex contest id value
     def handle(self, *args, **options):
         if not options["contests"]:
             raise CommandError("Specify contests ids")
@@ -29,24 +29,23 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         contests = itertools.cycle(contests)
 
         campaigns = self.get_current_campaigns()
+        self.stdout.write("")
         for campaign in campaigns:
             passing_score = campaign.online_test_passing_score
             if not passing_score:
                 self.stdout.write("Zero passing score "
                                   "for {}. Skip".format(campaign))
                 continue
-
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score)
-                          .all())
+                          .values("id", "yandex_id"))
             for a in applicants:
-                self.stdout.write(a.yandex_id)
                 contest_id = next(contests)
                 try:
-                    _ = Exam.objects.get(applicant=a)
+                    _ = Exam.objects.get(applicant_id=a["id"])
                 except Exam.DoesNotExist:
-                    Exam.objects.create(applicant=a,
+                    Exam.objects.create(applicant_id=a["id"],
                                         yandex_contest_id=contest_id,
                                         score=0)
         self.stdout.write("Done")

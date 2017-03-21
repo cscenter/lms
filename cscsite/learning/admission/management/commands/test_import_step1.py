@@ -16,7 +16,8 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
 
         Try to find already existed online test results first by `lookup` field 
         (should be unique within current campaigns)
-        and update record if score is less than previous.
+        and update record if score is less than previous. 
+        Create new record otherwise.
 
         Note: Don't forget manually remove applicant duplicates first
             to avoid errors on `attach_applicant` action.
@@ -24,14 +25,11 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
             yandex login registered in our database.
             Run `online_test_step0` first to create empty records for
             all applicants, even with buggy yandex login.
-
-        Example:
-            ./manage.py online_test_step1 ./results.csv
         """
     )
-    # Values from columns not specified in `allowed_fields` placed to
+    # Data from columns not specified in `separated_fields` placed to
     # `details` JSON field
-    allowed_fields = [
+    separated_fields = [
         'created',
         'yandex_id',
         'stepic_id',
@@ -52,13 +50,12 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
             help='Lookup attribute which store unique applicant identifier '
                  'within current campaigns')
         parser.add_argument(
+            '--city', type=str,
+            help='City code to restrict current campaigns')
+        parser.add_argument(
             '--save',
             action="store_true",
             help='Skip dry mode and save imported data to DB if no errors')
-        parser.add_argument(
-            '--passing_score', type=int,
-            help='You can pass value to set `rejected by online test` '
-                 'status for applicants below passing score (exc)')
         parser.add_argument(
             '--contest_id', type=int,
             help='Save contest_id for debug purpose. '
@@ -67,24 +64,40 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
     def handle(self, *args, **options):
         csv_path = options["csv"]
         lookup_field = options["lookup_field"]
-        passing_score = options["passing_score"]
-        dry_run = not options["skip"]
+        dry_run = not options["save"]
         contest_id = options["contest_id"]
-        campaign_ids = self.get_current_campaign_ids()
+        city_code = options["city"] if options["city"] else None
+        campaign_ids = self.get_current_campaign_ids(city_code)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
 
-        with open(csv_path, "rb") as f:
+        with open(csv_path, "r") as f:
             data = tablib.Dataset().load(f.read())
+            self.clean_yandex_contest_csv_headers(contest_id, data)
             online_test_resource = OnlineTestRecordResource(
                 lookup_field=lookup_field,
-                allowed_fields=self.allowed_fields,
+                separated_fields=self.separated_fields,
                 campaign_ids=campaign_ids,
-                passing_score=passing_score,
                 contest_id=contest_id)
             result = online_test_resource.import_data(data, dry_run=dry_run)
             self.handle_errors(result)
             print("Done")
+            if dry_run:
+                self.stdout.write("Data not imported. Dry run mode ON.")
 
-
+    @staticmethod
+    def clean_yandex_contest_csv_headers(contest_id, data):
+        # Clean some headers before run import
+        del data["place"]
+        del data["user_name"]
+        login_index = data.headers.index("login")
+        data.headers[login_index] = "yandex_id"
+        try:
+            index = data.headers.index("Score")
+            data.headers[index] = data.headers[index].lower()
+        except ValueError:
+            pass
+        if not contest_id and "contest_id" not in data.headers:
+            raise CommandError("Contest id must be provided in csv "
+                               "file or pass with --contest_id arg")

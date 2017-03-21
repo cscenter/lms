@@ -35,7 +35,7 @@
                         <td class="applicant">
                             <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
                             {{ applicant.university }}
-                            {% if applicant.course %}<br><b>Курс</b>: {{ applicant.course }}{% endif %}
+                            {% if applicant.course %}<br><b>Курс</b>: {{ applicant.get_course_display }}{% endif %}
                         </td>
                         <td>{{ applicant.campaign.year }}</td>
                         <td>{{ applicant.preferred_study_programs }}</td>
