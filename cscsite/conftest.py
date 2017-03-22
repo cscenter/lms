@@ -98,21 +98,24 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
         City.objects.update_or_create(
             code="spb",
             defaults={
-                "name": "Saint Petersburg"
+                "name": "Saint Petersburg",
+                "abbr": "spb"
             }
         )
 
         City.objects.update_or_create(
             code="kzn",
             defaults={
-                "name": "Kazan"
+                "name": "Kazan",
+                "abbr": "kzn"
             }
         )
 
         City.objects.update_or_create(
             code="nsk",
             defaults={
-                "name": "Novosibirsk"
+                "name": "Novosibirsk",
+                "abbr": "nsk"
             }
         )
 
