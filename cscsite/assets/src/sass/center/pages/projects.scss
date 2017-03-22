@@ -36,13 +36,45 @@
 }
 
 // Detail page
+.pager {
+  &.__projects {
+    margin: 20px 0 0;
+
+    a {
+      background: none;
+      border: none;
+      font-size: 16px;
+      padding: 10px 0;
+
+      &:hover, &:focus {
+        color: $color-blue;
+        background: none;
+
+        span {
+          position: relative;
+          left: -5px;
+        }
+      }
+    }
+
+    li.next {
+      a {
+        &:hover, &:focus {
+          span {
+            position: relative;
+            left: 5px;
+          }
+        }
+      }
+    }
+  }
+}
 .project-type {
   color: $color-grey;
   margin: 20px 0 15px 0;
 }
 #project-detail-page {
 
-    margin-top: 10px;
     padding: 10px 30px 30px;
     background: #fff;
 
