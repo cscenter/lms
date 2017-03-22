@@ -74,6 +74,7 @@ class City(models.Model):
         max_length=6,
         primary_key=True)
     name = models.CharField(_("City name"), max_length=255)
+    abbr = models.CharField(_("Abbreviation"), max_length=20)
 
     class Meta:
         db_table = 'cities'
