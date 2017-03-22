@@ -184,8 +184,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     paginate_by = 50
 
     def get_context_data(self, **kwargs):
-        context = super(ApplicantListView, self).get_context_data(
-            **kwargs)
+        context = super().get_context_data(**kwargs)
         context["filter"] = self.filterset
         return context
 

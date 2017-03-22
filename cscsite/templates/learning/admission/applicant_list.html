@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
+{% load replace from core_tags %}
 
 {% block title %}Анкеты - CSC{% endblock title %}
 
@@ -38,7 +39,7 @@
                             {% if applicant.course %}<br><b>Курс</b>: {{ applicant.get_course_display }}{% endif %}
                         </td>
                         <td>{{ applicant.campaign.year }}</td>
-                        <td>{{ applicant.preferred_study_programs }}</td>
+                        <td>{{ applicant.preferred_study_programs|replace:", <br>"|safe|default:"-" }}</td>
                         <td>{{ applicant.online_test.score|default:"-" }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}</td>
                         {% if request.user.is_curator %}

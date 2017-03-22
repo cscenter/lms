@@ -11,6 +11,7 @@ from import_export import resources
 
 from core.models import University
 from learning.admission.models import Applicant, Campaign
+from learning.models import AreaOfStudy
 from users.models import CSCUser
 
 from ._utils import HandleErrorsMixin
@@ -132,6 +133,10 @@ class ApplicantImportResource(resources.ModelResource):
                 self.universities_others[u.city_id] = u
         self.universities = {u.name: u for u in universities}
 
+        # Cache study programs
+        self.available_programs = AreaOfStudy.objects.values_list("name_ru",
+                                                                  flat=True)
+
     def before_import_row(self, row, **kwargs):
         """Remove unrelated data and clean"""
         if row['city'] == 'Санкт-Петербург':
@@ -197,6 +202,13 @@ class ApplicantImportResource(resources.ModelResource):
         if other_str in row['where_did_you_learn']:
             row['where_did_you_learn'] = row['where_did_you_learn'].replace(
                 other_str, 'другое')
+        # Normalize preferred_study_programs
+        preferred_study_programs = []
+        for item in row['preferred_study_programs'].split(','):
+            if item.strip() in self.available_programs:
+                preferred_study_programs.append(item.strip())
+        row['preferred_study_programs'] = ", ".join(
+            sorted(preferred_study_programs))
 
     def skip_row(self, instance, original):
         """
