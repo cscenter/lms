@@ -186,6 +186,8 @@ class ApplicantImportResource(resources.ModelResource):
             university = self.universities_others[city_code]
         else:
             university = self.universities[row['university']]
+            # This field should be non-empty only if university == 'Другое'
+            row["university_other"] = ''
         self.custom_fields["university"] = university
         # Remove to skip additional queries
         del row['university']
