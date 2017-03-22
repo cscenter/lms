@@ -21,10 +21,6 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
 
         Note: Don't forget manually remove applicant duplicates first
             to avoid errors on `attach_applicant` action.
-        Note: This command creates online test result record only for
-            yandex login registered in our database.
-            Run `online_test_step0` first to create empty records for
-            all applicants, even with buggy yandex login.
         """
     )
     # Data from columns not specified in `separated_fields` placed to

@@ -176,3 +176,11 @@ def chunks(value, chunk_length):
             yield chunk
         else:
             break
+
+
+@register.filter
+def replace(value, args):
+    """Args must be separated by space"""
+    old, new = args.split(" ")
+    return value.replace(old, new)
+# replace.is_safe = True

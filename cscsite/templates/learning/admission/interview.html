@@ -48,6 +48,10 @@
         </div>
         <div class="tab-pane" id="applicant" role="tabpanel">
             <dl>
+                {% if user.is_curator %}
+                <dt>Статус анкеты:</dt>
+                <dd>{{ applicant_form.instance.get_status_display }}</dd>
+                {% endif %}
             {% include "learning/admission/_applicant_form.html" with applicant_form=applicant_form %}
             </dl>
         </div>
