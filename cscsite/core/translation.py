@@ -4,5 +4,5 @@ from .models import City
 
 @register(City)
 class CityTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ('name', 'abbr',)
     fallback_values = '-- sorry, no translation provided --'

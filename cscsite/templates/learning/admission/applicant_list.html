@@ -15,18 +15,18 @@
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Поступающие / {{ paginator.count }}</h3>
+          <h3 class="panel-title">Анкеты поступающих / {{ paginator.count }}</h3>
         </div>
 
         <div class="panel-body">
           <table class="table">
             <thead>
               <tr>
-                <th>Поступающий</th>
+                <th style="width: 40%;">Поступающий</th>
                 <th>Набор</th>
-                <th>Направление</th>
+                <th style="width: 220px;">Направление</th>
                 <th>Тест</th>
-                <th>Экзамен</th>
+                <th>Экз.</th>
                 {% if request.user.is_curator %}<th>#</th>{% endif %}
               </tr>
             </thead>
@@ -38,7 +38,7 @@
                             {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{{ applicant.university }}{% endif %}
                             {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
                         </td>
-                        <td>{{ applicant.campaign.year }}</td>
+                        <td>{{ applicant.campaign.city.abbr }},&nbsp;{{ applicant.campaign.year }}</td>
                         <td>{{ applicant.preferred_study_programs|replace:", <br>"|safe|default:"-" }}</td>
                         <td>{{ applicant.online_test.score|default:"-" }}</td>
                         <td>{{ applicant.exam.score|default:"-" }}</td>
