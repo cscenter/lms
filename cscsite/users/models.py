@@ -33,6 +33,10 @@ YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
 
 logger = logging.getLogger(__name__)
 
+# Github username may only contain alphanumeric characters or
+# single hyphens, and cannot begin or end with a hyphen
+GITHUB_ID_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
+
 
 # TODO: Add tests. Looks Buggy
 class MonitorFieldMixin(object):
@@ -279,13 +283,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                                    message=_("Only the part before "
                                              "\"@yandex.ru\" is expected"))],
         blank=True)
-    # Github username may only contain alphanumeric characters or
-    # single hyphens, and cannot begin or end with a hyphen
     github_id = models.CharField(
         _("Github ID"),
         max_length=80,
-        validators=[RegexValidator(
-            regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*[a-zA-Z0-9]$")],
+        validators=[GITHUB_ID_VALIDATOR],
         blank=True)
     stepic_id = models.PositiveIntegerField(
         _("Stepic ID"),
