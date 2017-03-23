@@ -9,7 +9,6 @@ from crispy_forms.layout import Layout, Div, Submit, Field, Row, Fieldset, \
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.core.validators import RegexValidator
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
@@ -18,7 +17,7 @@ from core.forms import Ubereditor
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant
-from users.models import CSCUser
+from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
 PHONE_ICON_HTML = '<i class="fa fa-mobile" aria-hidden="true"></i>'
@@ -50,8 +49,7 @@ class ApplicationFormStep1(forms.ModelForm):
     github_id = forms.CharField(
         label='Укажите свой логин на GitHub, если есть',
         max_length=80,
-        validators=[RegexValidator(
-            regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*[a-zA-Z0-9]$")],
+        validators=[GITHUB_ID_VALIDATOR],
         required=False,
         help_text='Если ссылка на ваш профиль на GitHub выглядит вот '
                   'так: https://github.com/XXXX, то логин — это XXXX')
