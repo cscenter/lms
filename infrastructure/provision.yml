@@ -37,10 +37,10 @@
           - web
           - ssh
         instance_tags:
-          Name: cscweb_new
+          Name: "{{ aws_ec2_new_instance_tag }}"
         exact_count: 1
         count_tag:
-          Name: cscweb_new
+          Name: "{{ aws_ec2_new_instance_tag }}"
         volumes:
           - device_name: /dev/sda1
             volume_size: 20

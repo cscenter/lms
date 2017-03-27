@@ -8,7 +8,7 @@
     minute: "0"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py cscbackup
+      /home/{{ item }}/site/repo/manage.py dbbackup
       --settings={{item}}.settings.production
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscbackup.log

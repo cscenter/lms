@@ -3,8 +3,8 @@
 nginx_tls_path: /etc/nginx/crypto
 certbot_script: /opt/certbot-auto
 certbot_auto_renew: yes
-certbot_admin_email: admin@example.com
-certbot_domain: localhost
+certbot_admin_email: webmaster@compscicenter.ru
+certbot_domain: compscicenter.ru
 # Main domain plus additional domains
 certbot_domains:
   - "{{ certbot_domain }}"

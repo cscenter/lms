@@ -71,7 +71,11 @@ const common = {
         // }),
         // extract all common modules to vendor so we can load multiple apps in one page
         new webpack.optimize.CommonsChunkPlugin({
-            names: ['vendor', 'manifest'],
+            name: "vendor"
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "manifest",
+            minChunks: Infinity
         }),
         new CleanWebpackPlugin([PATHS.dist], {
             verbose: true,

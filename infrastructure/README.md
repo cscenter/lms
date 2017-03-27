@@ -1,6 +1,7 @@
 
 # TODO (critical):
 * separated playbook for cronjobs
+* Fix db and media backup cronjob task
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * `apt-get install ntpd` with servers in /etc/ntp.conf
@@ -10,6 +11,7 @@
     server ntp.psn.ru
     server ntp1.imvp.ru
 * Problems with restarting supervisor. All programs can be in RUNNING state, but ansible task failed. (??? is it fixed?)
+* fix certbot default email/domain values! They should be real...
 
 TODO (important):
 * add `registration` app to cscenter, then remove club worker?
@@ -20,8 +22,8 @@ TODO (important):
 Requirements
 ------------
   
-* python2
-* Ansible (>=2.0.0a for s3 role if needed) `pip install ansible`
+* python3
+* Ansible (>=2.x) `pip install ansible`
 * boto library `pip install boto` (may not work from virtualenv)
 * aws cli (optional) `pip install awscli`
 * For Dynamic inventory in Ansible used [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
@@ -33,7 +35,7 @@ Manually created:
 * Administrator User (with Access Key)
 * EC2 KeyPair (don't forget to save in ~/.ssh/)
 * Elastic IP (check var in vars/aws.yml)
-* S3 buckets. Look for inspiration in `s3` ansible role (needs Ansible >= 2.0.0)
+* S3 buckets. Look for inspiration in `s3` ansible role
 
 Before start
 ------------
@@ -50,7 +52,6 @@ Before start
 * Generate EC2 Key Pair and save private key in your `~/.ssh/` directory
 * Add generated EC2 SSH key to your SSH agent (e.g., with ssh-add)
 * Generate github account access key (with read only credentials) and put files under `files/` directory in `app` role (check working example in target directory)
-* Generate TLS certificate and put files under `files/` directory in `app` role (Current TLS cert is valid until **January 27 2016**) (check working example in target directory)
 
 Playbooks
 ---------
