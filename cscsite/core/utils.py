@@ -46,10 +46,6 @@ def get_club_domain(code=None):
     return protocol + prefix + settings.CLUB_DOMAIN
 
 
-def to_unlocode(city_slug, city_country='RU'):
-    return "{} {}".format(city_country, city_slug.upper())
-
-
 class SQLFormatter(logging.Formatter):
     """
     In case you’re working with a 256 color terminal, you should use

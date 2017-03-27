@@ -28,7 +28,6 @@ from formtools.wizard.views import NamedUrlCookieWizardView, \
     NamedUrlSessionWizardView
 
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
-from core.utils import to_unlocode
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter
 from learning.admission.forms import InterviewCommentForm, ApplicantReadOnlyForm, \

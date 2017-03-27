@@ -8,10 +8,9 @@ MIDDLEWARE_CLASSES = [
 ] + MIDDLEWARE_CLASSES
 INTERNAL_IPS = ["127.0.0.1", "::1"]
 
-INSTALLED_APPS += ['fixture_media',
-                   'debug_toolbar',
+INSTALLED_APPS += ['debug_toolbar',
                    'django_extensions',
-                   'template_timings_panel',
+                   # 'template_timings_panel',
                    'rosetta']
 
 DEBUG_TOOLBAR_PANELS = [
