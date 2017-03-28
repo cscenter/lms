@@ -4,9 +4,11 @@ from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict
 
+import itertools
 from loginas.utils import restore_original_login
 
 from learning.reports import ProgressReport
+from learning.utils import is_positive_grade
 from users.models import SHADCourseRecord
 
 try:
@@ -146,7 +148,7 @@ class TeacherDetailView(generic.DetailView):
 
 class UserDetailView(generic.DetailView):
     template_name = "users/user_detail.html"
-    context_object_name = 'user_object'
+    context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
         enrollment_queryset = Enrollment.objects.select_related(
@@ -168,7 +170,7 @@ class UserDetailView(generic.DetailView):
             Prefetch('enrollment_set', queryset=enrollment_queryset)
         ]
         select_list = []
-        if self.request.user.is_authenticated() and self.request.user.is_curator:
+        if self.request.user.is_curator:
             prefetch_list += ['borrows',
                               'borrows__book',
                               'onlinecourserecord_set',
@@ -180,72 +182,42 @@ class UserDetailView(generic.DetailView):
                 .select_related(*select_list)
                 .prefetch_related(*prefetch_list))
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(UserDetailView, self).get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
         u = self.request.user
-        # On center site show club students only to teachers and curators
-        if self.request.site.domain != settings.CLUB_DOMAIN:
-            if (list(context["user_object"]._cached_groups) == [
-                    CSCUser.group.STUDENT_CLUB] and not (
-                    u.is_teacher or u.is_curator)):
+        profile_user = context[self.context_object_name]
+        # On Center site show club students to teachers and curators only
+        if settings.SITE_ID == settings.CENTER_SITE_ID:
+            if (profile_user.get_cached_groups() == {CSCUser.group.STUDENT_CLUB}
+                    and not (u.is_teacher or u.is_curator)):
                 raise Http404
 
-        context['is_editing_allowed'] = (u == self.object or u.is_curator)
-        context['has_curator_permissions'] = u.is_curator
-        context['student_projects'] = (self.object.projectstudent_set
-                                       .select_related('project',
-                                                       'project__semester')
-                                       .order_by('project__semester__index'))
+        context['is_editing_allowed'] = (u == profile_user or u.is_curator)
+        context['student_projects'] = profile_user.projects_qs()
         context['current_semester'] = Semester.get_current()
-        a_ss = None
-        if u.is_curator:
-            related = ['assignment',
-                       'assignment__course_offering',
-                       'assignment__course_offering__course',
-                       'assignment__course_offering__semester']
-            a_ss = (StudentAssignment.objects
-                    .filter(student=self.object)
-                    .filter(assignment__course_offering__semester_id=context[
-                'current_semester'].id)
-                    .order_by('assignment__course_offering__course__name',
-                              'assignment__deadline_at',
-                              'assignment__title')
-                    .select_related(*related))
-            # NOTE(Dmitry): this is needed to skip duplicated CourseOfferings
-            #               in the table (works if objs are sorted by
-            #               CourseOfferings)
-            a_ss = list(a_ss)
-            current_co = None
-            for a_s in a_ss:
-                if a_s.assignment.course_offering != current_co:
-                    setattr(a_s, 'hacky_co_change', True)
-                    current_co = a_s.assignment.course_offering
-        context['a_ss'] = a_ss
-        context["initial"] = {}
-        if context['is_editing_allowed']:
-            context["initial"]["user_id"] = context[self.context_object_name].pk
-        if context[self.context_object_name].photo:
-            try:
-                context["initial"]["photo"] = {
-                    "url": context[self.context_object_name].photo.url,
-                    "width": context[self.context_object_name].photo.width,
-                    "height": context[self.context_object_name].photo.height,
-                    "cropbox": context[self.context_object_name].photo_data
-                }
-            except (IOError, OSError):
-                pass
+        # Assignments sorted by course name
+        assignments_qs = (StudentAssignment.objects
+                          .for_user(profile_user)
+                          .in_term(context['current_semester']))
+        context['assignments'] = u.is_curator and assignments_qs.all()
         # Initial data for photo cropper
-        context["initial"] = json.dumps(context["initial"])
+        photo_data = {}
+        if context['is_editing_allowed']:
+            photo_data = {
+                "user_id": profile_user.pk,
+                "photo": profile_user.photo_data
+            }
+        context["initial"] = json.dumps(photo_data)
         # Collect stats about successfully passed courses
+            # TODO: Вынести в модель?
         if u.is_curator:
-            s = context[self.context_object_name]
-            # TODO: Move to separate method and add tests
+            s = profile_user
             context['total_successfully_passed_courses'] = (
                 len(set(e.course_offering.course_id for e in
                         s.enrollment_set.all() if
-                        ProgressReport.is_positive_grade(e))) +
+                        is_positive_grade(e.grade))) +
                 sum(1 for c in s.shadcourserecord_set.all() if
-                    ProgressReport.is_positive_grade(c)) +
+                    is_positive_grade(c.grade)) +
                 len(s.onlinecourserecord_set.all()))
             context['enrollments_in_current_term'] = (
                 sum(1 for e in s.enrollment_set.all() if

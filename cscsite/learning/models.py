@@ -33,6 +33,8 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from learning import settings as learn_conf
+from learning.managers import StudentAssignmentQuerySet
+
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
 from .utils import get_current_semester_pair, \
@@ -713,6 +715,8 @@ class StudentAssignment(TimeStampedModel):
     LAST_COMMENT_NOBODY = 0
     LAST_COMMENT_STUDENT = 1
     LAST_COMMENT_TEACHER = 2
+
+    objects = StudentAssignmentQuerySet.as_manager()
 
     assignment = models.ForeignKey(
         Assignment,

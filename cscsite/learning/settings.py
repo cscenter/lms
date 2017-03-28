@@ -57,6 +57,12 @@ GRADES = getattr(settings, 'GRADES',
                          ('good', _("Good")),
                          ('excellent', _("Excellent"))))
 
+POSITIVE_GRADES = {
+    getattr(GRADES, "pass"),
+    getattr(GRADES, "good"),
+    getattr(GRADES, "excellent"),
+}
+
 SHORT_GRADES = getattr(settings, 'SHORT_GRADES',
                        Choices(('not_graded', "—"),
                                ('unsatisfactory', "н"),

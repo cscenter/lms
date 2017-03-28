@@ -149,6 +149,7 @@ class ProgressReport(ReportFileOutput):
     def is_positive_grade(course):
         """Check shad or club/center course is successfully passed"""
         # TODO: remove inconsistency, shad - objects, center courses - dicts
+        # FIXME: We have util method for this logic. Use it.
         # Skip dummy course
         if course is None:
             return False
@@ -315,7 +316,7 @@ class ProgressReportFull(ProgressReport):
             student.first_name,
             student.patronymic,
             "+" if student.is_volunteer else "",
-            "+" if student.is_master else "",
+            "+" if student.is_master_student else "",
             student.email,
             student.phone,
             student.university,
@@ -488,7 +489,7 @@ class ProgressReportForSemester(ProgressReport):
             student.first_name,
             student.patronymic,
             "+" if student.is_volunteer else "",
-            "+" if student.is_master else "",
+            "+" if student.is_master_student else "",
             student.email,
             student.phone,
             student.university,
