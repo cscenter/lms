@@ -1,5 +1,7 @@
 import datetime
 from collections import namedtuple
+
+from django.conf import settings
 from six.moves import zip_longest
 
 import dateutil.parser as dparser
@@ -7,7 +9,7 @@ from django.http import Http404
 from django.utils import timezone
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
-    SPRING_TERM_START, GRADES
+    SPRING_TERM_START, GRADES, POSITIVE_GRADES
 
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
@@ -122,6 +124,10 @@ def get_grade_index(grade):
     raise ValueError("Unknown grade type")
 
 
+def is_positive_grade(grade):
+    return grade in POSITIVE_GRADES
+
+
 def split_list(iterable, predicate):
     true_lst, false_lst = [], []
     for x in iterable:
@@ -173,70 +179,68 @@ def co_from_kwargs(kwargs):
 class LearningPermissionsMixin(object):
     @property
     def _cached_groups(self):
-        return []
-
-    def get_cached_groups(self):
         return set()
 
-    @property
-    def is_student_center(self):
-        return False
-
-    @property
-    def is_student_club(self):
-        return False
+    def get_cached_groups(self):
+        return self._cached_groups
 
     @property
     def is_student(self):
-        return False
+        return (self.is_student_center or
+                self.is_student_club or
+                self.is_volunteer)
+
+    @property
+    def is_student_center(self):
+        return self.group.STUDENT_CENTER in self._cached_groups
+
+    @property
+    def is_student_club(self):
+        return self.group.STUDENT_CLUB in self._cached_groups
 
     @property
     def is_active_student(self):
-        return False
-
-    @property
-    def is_teacher_club(self):
-        return False
-
-    @property
-    def is_teacher_center(self):
-        return False
+        if settings.SITE_ID == settings.CLUB_SITE_ID:
+            return self.is_student_club
+        return self.is_student and not self.is_expelled
 
     @property
     def is_teacher(self):
-        return False
+        return self.is_teacher_center or self.is_teacher_club
+
+    @property
+    def is_teacher_club(self):
+        return self.group.TEACHER_CLUB in self._cached_groups
+
+    @property
+    def is_teacher_center(self):
+        return self.group.TEACHER_CENTER in self._cached_groups
 
     @property
     def is_graduate(self):
-        return False
+        return self.group.GRADUATE_CENTER in self._cached_groups
 
     @property
     def is_volunteer(self):
-        return False
+        return self.group.VOLUNTEER in self._cached_groups
 
     @property
-    def is_master(self):
-        return False
+    def is_master_student(self):
+        """Studying for a masters degree"""
+        return self.group.MASTERS_DEGREE in self._cached_groups
 
     @property
     def is_curator(self):
-        return False
+        return self.is_superuser and self.is_staff
 
     @property
     def is_curator_of_projects(self):
-        return False
+        return self.group.CURATOR_PROJECTS in self._cached_groups
 
     @property
     def is_interviewer(self):
-        return False
+        return self.group.INTERVIEWER in self._cached_groups
 
     @property
     def is_project_reviewer(self):
-        return False
-
-    @property
-    def is_expelled(self):
-        return False
-
-    def enrolled_on_the_course(self, *args, **kwargs):
-        return False
+        return self.group.PROJECT_REVIEWER in self._cached_groups

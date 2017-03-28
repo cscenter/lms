@@ -252,7 +252,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         _("CSCUser|photo"),
         upload_to="photos/",
         blank=True)
-    photo_data = JSONField(
+    cropbox_data = JSONField(
         blank=True,
         null=True
     )
@@ -403,10 +403,24 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                                  .strip())
         return abbrev_name or self.username
 
+    @property
+    def photo_data(self):
+        if self.photo:
+            try:
+                return {
+                    "url": self.photo.url,
+                    "width": self.photo.width,
+                    "height": self.photo.height,
+                    "cropbox": self.cropbox_data
+                }
+            except (IOError, OSError):
+                pass
+        return {}
+
     def photo_thumbnail_cropbox(self):
         """Used by `thumbnail` template tag. Format: x1,y1,x2,y2"""
-        if self.photo_data:
-            return photo_thumbnail_cropbox(self.photo_data)
+        if self.cropbox_data:
+            return photo_thumbnail_cropbox(self.cropbox_data)
         return ""
 
     # FIXME(Dmitry): this should use model_utils.fields#SplitField
@@ -434,9 +448,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def get_cached_groups(self):
-        return self._cached_groups
-
     def enrolled_on_the_course(self, course_pk):
         return ((self.is_student or self.is_graduate) and
                 self.enrolled_on_set.filter(pk=course_pk).exists())
@@ -460,68 +471,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         else:
             return ''
 
-    @property
-    def is_student(self):
-        return (self.is_student_center or
-                self.is_student_club or
-                self.is_volunteer)
-
-    # Note: Don't forget about `LearningPermissionsMixin` used for unauth user
-    @cached_property
-    def is_student_center(self):
-        return self.group.STUDENT_CENTER in self._cached_groups
-
-    @cached_property
-    def is_student_club(self):
-        return self.group.STUDENT_CLUB in self._cached_groups
-
-    @cached_property
-    def is_active_student(self):
-        if settings.SITE_ID == settings.CLUB_SITE_ID:
-            return self.is_student_club
-        return self.is_student and not self.is_expelled
-
-    @cached_property
-    def is_teacher_club(self):
-        return self.group.TEACHER_CLUB in self._cached_groups
-
-    @cached_property
-    def is_teacher_center(self):
-        return self.group.TEACHER_CENTER in self._cached_groups
-
-    @cached_property
-    def is_teacher(self):
-        return self.is_teacher_center or self.is_teacher_club
-
-    @cached_property
-    def is_graduate(self):
-        return self.group.GRADUATE_CENTER in self._cached_groups
-
-    @cached_property
-    def is_volunteer(self):
-        return self.group.VOLUNTEER in self._cached_groups
-
-    @cached_property
-    def is_master(self):
-        """Studying for a masters degree"""
-        # TODO: rename, too much honor
-        return self.group.MASTERS_DEGREE in self._cached_groups
-
-    @cached_property
-    def is_curator(self):
-        return self.is_superuser and self.is_staff
-
-    @cached_property
-    def is_curator_of_projects(self):
-        return self.group.CURATOR_PROJECTS in self._cached_groups
-
-    @cached_property
-    def is_interviewer(self):
-        return self.group.INTERVIEWER in self._cached_groups
-
-    @cached_property
-    def is_project_reviewer(self):
-        return self.group.PROJECT_REVIEWER in self._cached_groups
+    def projects_qs(self):
+        """Returns projects through ProjectStudent intermediate model"""
+        return (self.projectstudent_set
+                .select_related('project',
+                                'project__semester')
+                .order_by('project__semester__index'))
 
 
 @python_2_unicode_compatible
@@ -593,4 +548,14 @@ class CSCUserReference(TimeStampedModel):
 
 
 class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
-    pass
+    group = PARTICIPANT_GROUPS
+    is_expelled = True
+    # TODO: Write tests for permissions and then remove attrs below
+    # TODO: They should work fine, but I need to be sure.
+    is_curator = False
+    is_student_center = False
+    is_teacher_center = False
+    is_volunteer = False
+
+    def enrolled_on_the_course(self, course_pk):
+        return False

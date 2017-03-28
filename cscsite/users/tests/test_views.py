@@ -268,7 +268,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.context['user_object'], user)
+        self.assertEqual(resp.context['profile_user'], user)
         self.assertFalse(resp.context['is_editing_allowed'])
 
     def test_user_can_update_profile(self):
@@ -278,7 +278,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertEqual(resp.context['user_object'], user)
+        self.assertEqual(resp.context['profile_user'], user)
         self.assertTrue(resp.context['is_editing_allowed'])
         self.assertContains(resp, reverse('user_update', args=[user.pk]))
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -585,7 +585,6 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         response = self.client.get(url)
-        self.assertEquals(response.context['has_curator_permissions'], False)
         soup = BeautifulSoup(response.content, "html.parser")
         button = soup.find('a', text=_("Create reference"))
         self.assertIsNone(button)
@@ -593,7 +592,6 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         response = self.client.get(url)
-        self.assertEquals(response.context['has_curator_permissions'], True)
         soup = BeautifulSoup(response.content, "html.parser")
         button = soup.find(string=re.compile(_("Create reference")))
         self.assertIsNotNone(button)
@@ -608,7 +606,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.doLogin(curator)
         response = self.client.get(url)
         self.assertEquals(
-            response.context['user_object'].cscuserreference_set.count(), 1)
+            response.context['profile_user'].cscuserreference_set.count(), 1)
         soup = BeautifulSoup(response.content, "html.parser")
         list_header = soup.find('h4', text=re.compile(_("Student references")))
         self.assertIsNotNone(list_header)

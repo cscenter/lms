@@ -71,7 +71,7 @@ class AjaxProfileImageUploader(generic.base.View):
             ret_json = {"success": False,
                         "reason": "Thumbnail generation error"}
         else:
-            user.photo_data = data
+            user.cropbox_data = data
             user.save()
             ret_json = {"success": True, "thumbnail": thumbnail.url}
         return ret_json
@@ -118,7 +118,7 @@ class AjaxProfileImageUploader(generic.base.View):
 
         if success:
             user.photo.name = filename
-            user.photo_data = {}
+            user.cropbox_data = {}
             user.save()
             # send signals
             file_uploaded.send(sender=self.__class__, backend=backend,
