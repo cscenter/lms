@@ -40,7 +40,8 @@ from six.moves import zip
 
 from core.views import ProtectedFormMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, StudentAssignment, \
-    CourseOffering, NonCourseEvent, Semester, Enrollment
+    CourseOffering, NonCourseEvent, Semester, Enrollment, \
+    StudyProgramCourseGroup, StudyProgram
 from learning.settings import LEARNING_BASE, TEACHING_BASE
 from users.utils import create_timezone
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
@@ -176,14 +177,13 @@ class UserDetailView(generic.DetailView):
                               'onlinecourserecord_set',
                               'areas_of_study',
                               'cscuserreference_set']
-            select_list += ['comment_last_author']
         return (auth.get_user_model()._default_manager
                 .all()
                 .select_related(*select_list)
                 .prefetch_related(*prefetch_list))
 
     def get_context_data(self, **kwargs):
-        context = super(UserDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         u = self.request.user
         profile_user = context[self.context_object_name]
         # On Center site show club students to teachers and curators only
@@ -209,13 +209,14 @@ class UserDetailView(generic.DetailView):
             }
         context["initial"] = json.dumps(photo_data)
         # Collect stats about successfully passed courses
-            # TODO: Вынести в модель?
         if u.is_curator:
             s = profile_user
+            passed_courses = set(
+                e.course_offering.course_id for e in s.enrollment_set.all() if
+                is_positive_grade(e.grade))
+            context['passed_courses'] = passed_courses
             context['total_successfully_passed_courses'] = (
-                len(set(e.course_offering.course_id for e in
-                        s.enrollment_set.all() if
-                        is_positive_grade(e.grade))) +
+                len(passed_courses) +
                 sum(1 for c in s.shadcourserecord_set.all() if
                     is_positive_grade(c.grade)) +
                 len(s.onlinecourserecord_set.all()))
@@ -225,6 +226,13 @@ class UserDetailView(generic.DetailView):
                 sum(1 for с in s.shadcourserecord_set.all() if
                     с.semester == context['current_semester'])
             )
+        syllabus = None
+        if profile_user.curriculum_year:
+            syllabus = (StudyProgram.objects
+                        .syllabus()
+                        .filter(year=profile_user.curriculum_year,
+                                city_id=profile_user.city_id))
+        context['syllabus'] = syllabus
         return context
 
 

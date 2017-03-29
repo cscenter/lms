@@ -33,7 +33,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from learning import settings as learn_conf
-from learning.managers import StudentAssignmentQuerySet
+from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet
 
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -1079,6 +1079,8 @@ class StudyProgram(TimeStampedModel):
         verbose_name = _("Study Program")
         verbose_name_plural = _("Study Programs")
 
+    objects = StudyProgramQuerySet.as_manager()
+
 
 class StudyProgramCourseGroup(models.Model):
     courses = models.ManyToManyField(
@@ -1086,7 +1088,7 @@ class StudyProgramCourseGroup(models.Model):
         verbose_name=_("StudyProgramCourseGroup|courses"),
         help_text=_("Courses will be grouped with boolean OR"))
     study_program = models.ForeignKey(
-        StudyProgram,
+        'StudyProgram',
         verbose_name=_("Study Program"),
         related_name='course_groups',
         on_delete=models.PROTECT)

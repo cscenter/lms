@@ -1,4 +1,5 @@
-from django.db.models import query, Manager
+from django.db.models import query, Manager, Prefetch
+
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -16,3 +17,16 @@ class StudentAssignmentQuerySet(query.QuerySet):
 
     def in_term(self, term):
         return self.filter(assignment__course_offering__semester_id=term.id)
+
+
+class StudyProgramQuerySet(query.QuerySet):
+    def syllabus(self):
+        from learning.models import StudyProgramCourseGroup
+        return (self.select_related("area")
+                    .prefetch_related(
+                        Prefetch(
+                            'course_groups',
+                            queryset=(StudyProgramCourseGroup
+                                      .objects
+                                      .prefetch_related("courses")),
+                        )))

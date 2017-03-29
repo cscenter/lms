@@ -203,7 +203,7 @@
                             <tr>
                                 <td>{% trans "StudentInfo|University year" %}:</td>
                                 <td>
-                                    {{ profile_user.uni_year_at_enrollment_display|default:"—" }}</td>
+                                    {{ profile_user.get_uni_year_at_enrollment_display|default:"—" }}</td>
                             </tr>
                             <tr>
                                 <td>{% trans "Comment" %}:</td>
@@ -215,11 +215,9 @@
                                     </div>
                                     {% if profile_user.comment %}
                                         <span class="student-comment-metainfo pull-right">
-                          {{ profile_user.comment_last_author.get_short_name }}
-                                            {% if profile_user.comment_last_author %}
-                                                , {% endif %}
+                                            {% if profile_user.comment_last_author_id %}{{ profile_user.comment_last_author.get_short_name }}, {% endif %}
                                             {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
-                        </span>
+                                        </span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -234,7 +232,24 @@
                             </tr>
                             <tr>
                                 <td>{% trans "Curriculum year" %}:</td>
-                                <td>{{ profile_user.curriculum_year|default:'—' }}</td>
+                                <td>
+                                    {{ profile_user.curriculum_year|default:'—' }}
+                                    <br>
+                                    {% for program in syllabus %}
+                                        <b>{{ program.area.name_en }}</b>
+                                        {% if program.course_groups.all %}
+                                        <ul style="list-style-type: square;">
+                                            {% for course_groups in program.course_groups.all %}
+                                                <li>
+                                                    {% for course in course_groups.courses.all %}
+                                                        {% if course.id in passed_courses %}<span class="text-success">{{ course.name }}</span>{% else %}{{ course.name }}{% endif %}{% if not forloop.last %}{% if course_groups.courses.all|length > 2 %},{% endif %} или {% endif %}
+                                                    {% endfor %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
                             <tr>
                                 <td>{% trans "StudentInfo|Study program" %}:</td>
                                 <td>

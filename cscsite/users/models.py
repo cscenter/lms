@@ -20,7 +20,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
-from core.models import LATEX_MARKDOWN_ENABLED
+from core.models import LATEX_MARKDOWN_ENABLED, City
 from learning.models import Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import LearningPermissionsMixin
@@ -275,6 +275,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
+    city = models.ForeignKey(City, verbose_name=_("Default city"),
+                             blank=True, null=True)
     # FIXME: why not null? The same for github_id
     yandex_id = models.CharField(
         _("Yandex ID"),
@@ -396,7 +398,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
         sign = "."
         # By the decree of Alexander, added additional whitespace for club site
-        if settings.SITE_ID == 2:
+        if settings.SITE_ID == settings.CLUB_SITE_ID:
             sign = ". "
         abbrev_name = smart_text(str(sign)
                                  .join(part for part in parts if part)
@@ -456,20 +458,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     def is_expelled(self):
         """We remove student group from expelled users on login action"""
         return self.status == STUDENT_STATUS.expelled
-
-    @property
-    def status_display(self):
-        if self.status in self.STATUS:
-            return self.STATUS[self.status]
-        else:
-            return ''
-
-    @property
-    def uni_year_at_enrollment_display(self):
-        if self.uni_year_at_enrollment in self.COURSES:
-            return self.COURSES[self.uni_year_at_enrollment]
-        else:
-            return ''
 
     def projects_qs(self):
         """Returns projects through ProjectStudent intermediate model"""

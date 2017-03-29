@@ -248,15 +248,8 @@ class SyllabusView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
+                    .syllabus()
                     .filter(year=2017)
-                    .select_related("area")
-                    .prefetch_related(
-                        Prefetch(
-                            'course_groups',
-                            queryset=(StudyProgramCourseGroup
-                                      .objects
-                                      .prefetch_related("courses")),
-                        ))
                     .order_by("city_id", "area__name_ru"))
         context["programs"] = self.group_programs_by_city(syllabus)
         # TODO: validate entry city
