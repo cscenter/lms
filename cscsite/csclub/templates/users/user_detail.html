@@ -22,11 +22,11 @@
 <div class="container">
 <div class="row">
 <div class="col-xs-9 profile-body">
-    <h2>{{ user_object.get_full_name }}</h2>
-    {% if user_object.is_graduate %}
-      {% blocktrans with year=user_object.graduation_year %}graduated in {{ year }}{% endblocktrans %} ({% trans "enrolled in" %} {{ user_object.enrollment_year }})
-    {% elif user_object.is_student %}
-        {% trans "student"|title %}{% if user_object.enrollment_year %}, {% trans "enrolled in" %} {{ user_object.enrollment_year }}{% endif %}
+    <h2>{{ profile_user.get_full_name }}</h2>
+    {% if profile_user.is_graduate %}
+      {% blocktrans with year=profile_user.graduation_year %}graduated in {{ year }}{% endblocktrans %} ({% trans "enrolled in" %} {{ profile_user.enrollment_year }})
+    {% elif profile_user.is_student %}
+        {% trans "student"|title %}{% if profile_user.enrollment_year %}, {% trans "enrolled in" %} {{ profile_user.enrollment_year }}{% endif %}
     {% endif %}
 
     {% if has_curator_permissions %}
@@ -34,30 +34,30 @@
         <div class="panel panel-default">
             <div class="panel-heading panel-title">Информация для куратора</div>
             <ul class="list-group">
-                <li class="list-group-item"><b>Статус</b>: {{ user_object.get_status_display|default:"—" }}</li>
-                <li class="list-group-item"><b>Группы</b>: {% for group in user_object.groups.all %}{% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп{% endfor %}</li>
+                <li class="list-group-item"><b>Статус</b>: {{ profile_user.get_status_display|default:"—" }}</li>
+                <li class="list-group-item"><b>Группы</b>: {% for group in profile_user.groups.all %}{% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп{% endfor %}</li>
             </ul>
         </div>
     {% endif %}
 
-    {% if user_object.note %}
+    {% if profile_user.note %}
         <div class="about-me">
             <h4>{% trans "About me" %}</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_note" user_object.pk user_object.modified %}
-                {{ user_object.note }}
+              {% markdown 3600 "user_note" profile_user.pk profile_user.modified %}
+                {{ profile_user.note }}
               {% endmarkdown %}
             </div>
         </div>
     {% endif %}
 
     <ul class="list-unstyled">
-    {% if user_object.enrollment_year %}
-        {% if user_object.enrollment_set.all %}
+    {% if profile_user.enrollment_year %}
+        {% if profile_user.enrollment_set.all %}
         <li>
         <h4>{% trans "Courses" %}</h4>
             <ul>
-            {% for enrollment in user_object.enrollment_set.all %}
+            {% for enrollment in profile_user.enrollment_set.all %}
             <li>
               <a href="{% url 'course_offering_detail' enrollment.course_offering.course.slug enrollment.course_offering.semester.slug %}">
                 {{ enrollment.course_offering }}
@@ -93,7 +93,7 @@
             <li>Нет студенческих проектов</li>
         {% endif %}
 
-        {% with shad_courses=user_object.shadcourserecord_set.all %}
+        {% with shad_courses=profile_user.shadcourserecord_set.all %}
         {% if shad_courses %}
         <li>
             <h4>{% trans "School of Data Analysis courses" %}</h4>
@@ -108,8 +108,8 @@
         {% endif %}
         {% endwith %}
 
-        {% if user_object.pk == user.pk or user.is_curator %}
-        {% with recs=user_object.onlinecourserecord_set.all %}
+        {% if profile_user.pk == user.pk or user.is_curator %}
+        {% with recs=profile_user.onlinecourserecord_set.all %}
         {% if recs %}
         <li>
             <h4>{% trans "Online courses" %}</h4>
@@ -126,10 +126,10 @@
         {% endif %}
 
         {% endif %}
-        {% if user_object.is_teacher %}
-        <li>{% trans "teacher"|title %}{% if user_object.teaching_set.all %}:{% endif %}
+        {% if profile_user.is_teacher %}
+        <li>{% trans "teacher"|title %}{% if profile_user.teaching_set.all %}:{% endif %}
           <ul class="">
-            {% for courseoffering in user_object.teaching_set.all %}
+            {% for courseoffering in profile_user.teaching_set.all %}
             <li>
               <a href="{% url 'course_offering_detail' courseoffering.course.slug courseoffering.semester.slug %}">
                 {{ courseoffering }}
@@ -141,7 +141,7 @@
         {% endif %}
     </ul>
 
-    {% if user_object.pk == user.pk %}
+    {% if profile_user.pk == user.pk %}
     <table class="table calc table-condensed table-striped">
         <thead>
         <tr>
@@ -174,13 +174,13 @@
         <table class="table table-condensed table-striped">
         <tr>
             <td>Yandex</td>
-            <td>{{ user_object.yandex_id|default:"—" }}</td>
+            <td>{{ profile_user.yandex_id|default:"—" }}</td>
         </tr>
         <tr>
 
             <td>Github</td>
-            <td>{% if user_object.github_id %}
-                  <a href="https://github.com/{{ user_object.github_id }}" target="_blank">{{ user_object.github_id }}</a>
+            <td>{% if profile_user.github_id %}
+                  <a href="https://github.com/{{ profile_user.github_id }}" target="_blank">{{ profile_user.github_id }}</a>
                 {% else %}
                   —
                 {% endif %}
@@ -189,8 +189,8 @@
         <tr>
 
             <td>Stepic</td>
-            <td>{% if user_object.stepic_id %}
-                  <a href="https://stepic.org/users/{{ user_object.stepic_id }}" target="_blank">{{ user_object.stepic_id }}</a>
+            <td>{% if profile_user.stepic_id %}
+                  <a href="https://stepic.org/users/{{ profile_user.stepic_id }}" target="_blank">{{ profile_user.stepic_id }}</a>
                 {% else %}
                   —
                 {% endif %}
@@ -200,20 +200,20 @@
     </div>
     {% endif %}
 
-    {% if user_object.csc_review %}
+    {% if profile_user.csc_review %}
         <div class="review">
-            <h4>{% blocktrans with name=user_object.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
+            <h4>{% blocktrans with name=profile_user.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
             <div class="ubertext">
-              {% markdown 3600 "csc_review" user_object.pk user_object.modified %}{{ user_object.csc_review }}{% endmarkdown %}
+              {% markdown 3600 "csc_review" profile_user.pk profile_user.modified %}{{ profile_user.csc_review }}{% endmarkdown %}
             </div>
         </div>
     {% endif %}
 
-    {% if user.is_authenticated and user_object.private_contacts.strip %}
+    {% if user.is_authenticated and profile_user.private_contacts.strip %}
         <div class="contact-info">
             <h4>{% trans "Contact information" %}:</h4>
             <div class="ubertext">
-              {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}{{ user_object.private_contacts }}{% endmarkdown %}
+              {% markdown 3600 "user_private_contacts" profile_user.pk profile_user.modified %}{{ profile_user.private_contacts }}{% endmarkdown %}
             </div>
         </div>
     {% endif %}
@@ -254,7 +254,7 @@
         </table>
     {% endif %}
 
-    {% with borrows=user_object.borrows.all %}
+    {% with borrows=profile_user.borrows.all %}
     {% if has_curator_permissions and borrows and request.site.domain == "compscicenter.ru" %}
       <h4 class="_mtop-30">{% trans "books" %}:</h4>
       <ul>
@@ -268,42 +268,42 @@
     {% endif %}
     {% endwith %}
 
-    {% if user_object.is_student or user_object.is_graduate %}
+    {% if profile_user.is_student or profile_user.is_graduate %}
     {% if has_curator_permissions %}
         <h4 class="_mtop-30">{% trans "Student info record" %}:</h4>
         <table class="table table-condensed table-striped">
         <tr>
           <td width="25%">{% trans "University" %}:</td>
-          <td>{{ user_object.university|default:"—" }}</td>
+          <td>{{ profile_user.university|default:"—" }}</td>
         </tr>
         <tr>
           <td>{% trans "Phone" %}:</td>
-          <td>{{ user_object.phone|default:"—" }}</td>
+          <td>{{ profile_user.phone|default:"—" }}</td>
         </tr>
         {% if has_curator_permissions %}
           <tr>
             <td>{% trans "Email" %}:</td>
             <td>
-              {{ user_object.email }}
+              {{ profile_user.email }}
             </td>
           </tr>
         {% endif %}
         <tr>
           <td>{% trans "StudentInfo|University year" %}:</td>
-          <td>{{ user_object.get_uni_year_at_enrollment_display|default:"—" }}</td>
+          <td>{{ profile_user.get_uni_year_at_enrollment_display|default:"—" }}</td>
         </tr>
         <tr>
           <td>{% trans "Comment" %}:</td>
           <td>
             <div class="ubertext">
-              {% markdown 3600 "user_comment" user_object.pk user_object.modified %}
-                {{ user_object.comment|default:"—" }}
+              {% markdown 3600 "user_comment" profile_user.pk profile_user.modified %}
+                {{ profile_user.comment|default:"—" }}
               {% endmarkdown %}
             </div>
-            {% if user_object.comment %}
+            {% if profile_user.comment %}
             <span class="student-comment-metainfo pull-right">
-              {{ user_object.comment_last_author.get_short_name }}{% if user_object.comment_last_author %}, {% endif %}
-              {{ user_object.comment_changed_at|date:"d.m.Y H:i" }}
+              {{ profile_user.comment_last_author.get_short_name }}{% if profile_user.comment_last_author %}, {% endif %}
+              {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
             </span>
             {% endif %}
           </td>
@@ -311,13 +311,13 @@
         <tr>
           <td>{% trans "Status" %}:</td>
           <td>
-            {{ user_object.get_status_display|default:"—" }} {% if user_object.is_volunteer %}({% trans "Non-degree student"|lower %}){% endif %}
+            {{ profile_user.get_status_display|default:"—" }} {% if profile_user.is_volunteer %}({% trans "Non-degree student"|lower %}){% endif %}
           </td>
         </tr>
         <tr>
           <td>{% trans "StudentInfo|Study program" %}:</td>
           <td>
-            {% with sps=user_object.areas_of_study.all %}
+            {% with sps=profile_user.areas_of_study.all %}
             {% if sps %}
             <ul class="list-unstyled">
               {% for sp in sps %}
@@ -332,19 +332,19 @@
         </tr>
         <tr>
           <td>{% trans "Workplace" %}:</td>
-          <td>{{ user_object.workplace|default:"—" }}</td>
+          <td>{{ profile_user.workplace|default:"—" }}</td>
         </tr>
       </table>
     {% endif %}
     {% endif %}
 
-    {% if has_curator_permissions and  user_object.cscuserreference_set.count > 0 %}
-    {% if user_object.is_student or user_object.is_graduate %}
+    {% if has_curator_permissions and  profile_user.cscuserreference_set.count > 0 %}
+    {% if profile_user.is_student or profile_user.is_graduate %}
         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
           <ul>
-            {% for reference in user_object.cscuserreference_set.all %}
+            {% for reference in profile_user.cscuserreference_set.all %}
             <li>
-              <a href="{% url 'user_reference_detail' user_object.id reference.id %}">
+              <a href="{% url 'user_reference_detail' profile_user.id reference.id %}">
                 {{ reference.created|date:"d.m.Y" }}
               </a>
             </li>
@@ -358,8 +358,8 @@
     <div class="text-center">
     <div class="thumbnail-inner">
         <div class="thumbnail-img">
-            {% if user_object.photo %}
-                {% thumbnail user_object.photo "170x238" crop="center" cropbox=user_object.photo_thumbnail_cropbox as im %}
+            {% if profile_user.photo %}
+                {% thumbnail profile_user.photo "170x238" crop="center" cropbox=profile_user.photo_thumbnail_cropbox as im %}
                     <img src="{{ im.url }}" width="{{ im.width }}"
                          height="{{ im.height }}">
                 {% endthumbnail %}
@@ -368,7 +368,7 @@
             {% endif %}
         </div>
 
-    {% if user_object.pk == user.pk or user.is_curator %}
+    {% if profile_user.pk == user.pk or user.is_curator %}
         <div class="photo-actions">
             <a href="#user-photo-upload">{% trans "Change photo" %}</a>
         </div>
@@ -380,21 +380,21 @@
         <div class="clearfix"></div>
         <div class="list-group">
         {% if is_editing_allowed %}
-            <a class="list-group-item" href="{% url 'user_update' user_object.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
+            <a class="list-group-item" href="{% url 'user_update' profile_user.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
         {% endif %}
         {% if has_curator_permissions %}
-            <a href="{% url 'admin:users_cscuser_change' user_object.pk %}" target="_blank" class="list-group-item">
+            <a href="{% url 'admin:users_cscuser_change' profile_user.pk %}" target="_blank" class="list-group-item">
                 <i class="fa fa-pencil-square-o"></i> {% trans "Edit in admin" %}
             </a>
         {% endif %}
-        {% if has_curator_permissions and user_object.enrollment_year %}
-            {% if user_object.is_student or user_object.is_graduate %}
-                <a href="{% url 'user_reference_add' user_object.pk %}" class="list-group-item"><i class="fa fa-file-text-o"></i> {% trans "Create reference" %}</a>
+        {% if has_curator_permissions and profile_user.enrollment_year %}
+            {% if profile_user.is_student or profile_user.is_graduate %}
+                <a href="{% url 'user_reference_add' profile_user.pk %}" class="list-group-item"><i class="fa fa-file-text-o"></i> {% trans "Create reference" %}</a>
             {% endif %}
-            {% if has_curator_permissions and user_object.studentinfo %}
-                <a href="{% url 'student_info_update' user_object.studentinfo.pk %}" class="list-group-item">{% trans "Edit info record" %}</a>
+            {% if has_curator_permissions and profile_user.studentinfo %}
+                <a href="{% url 'student_info_update' profile_user.studentinfo.pk %}" class="list-group-item">{% trans "Edit info record" %}</a>
             {% endif %}
-            {% if user_object.pk == user.pk %}
+            {% if profile_user.pk == user.pk %}
                 <a href="{% url 'password_change' %}" class="list-group-item">{% trans "Change password" %}</a>
             {% endif %}
         {% endif %}
