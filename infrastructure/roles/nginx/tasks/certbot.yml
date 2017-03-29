@@ -43,5 +43,6 @@
       --email {{ certbot_admin_email }}
       -w {{ site_root }}
       -d {{ certbot_domains|join(' -d ') }}
+      --post-hook 'service nginx reload'
     state: present
   when: certbot_auto_renew
