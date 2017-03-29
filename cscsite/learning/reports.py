@@ -326,7 +326,7 @@ class ProgressReportFull(ProgressReport):
             student.graduation_year,
             student.yandex_id,
             " и ".join(s.name for s in student.areas_of_study.all()),
-            student.status_display,
+            student.get_status_display(),
             '',  # FIXME: error in student.status_changed_at field
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
@@ -499,7 +499,7 @@ class ProgressReportForSemester(ProgressReport):
             student.graduation_year,
             student.yandex_id,
             " и ".join(s.name for s in student.areas_of_study.all()),
-            student.status_display,
+            student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at
             student.comment,
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
