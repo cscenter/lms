@@ -56,6 +56,7 @@ AWS_SES_SECRET_ACCESS_KEY = ''
 AWS_SES_REGION_NAME = 'eu-west-1'
 AWS_SES_REGION_ENDPOINT = 'email.eu-west-1.amazonaws.com'
 POST_OFFICE = {
+    'LOG_LEVEL': 1,  # Log only failed emails
     'BACKENDS': {
         'ses': 'django.core.mail.backends.console.EmailBackend',
         'BATCH_SIZE': 10,
