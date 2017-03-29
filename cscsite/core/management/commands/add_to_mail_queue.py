@@ -38,7 +38,7 @@ class Command(BaseCommand):
                                "not found".format(template_name))
 
         with open(file_path, "r") as f:
-            data = tablib.Dataset().load(f.read())
+            data = tablib.Dataset().load(f.read(), format='csv')
             if "email" not in data.headers:
                 raise CommandError("Add `email` header")
             generated = 0
