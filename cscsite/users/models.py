@@ -23,7 +23,7 @@ from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from learning.models import Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
-from learning.utils import LearningPermissionsMixin
+from learning.utils import LearningPermissionsMixin, is_positive_grade
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -465,6 +465,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 .select_related('project',
                                 'project__semester')
                 .order_by('project__semester__index'))
+
+    def passed_courses(self):
+        """Returns set of course ids which student SUCCESSFULLY completed."""
+        return set(e.course_offering.course_id for e in
+                   self.enrollment_set.all() if is_positive_grade(e.grade))
 
 
 @python_2_unicode_compatible

@@ -211,9 +211,7 @@ class UserDetailView(generic.DetailView):
         # Collect stats about successfully passed courses
         if u.is_curator:
             s = profile_user
-            passed_courses = set(
-                e.course_offering.course_id for e in s.enrollment_set.all() if
-                is_positive_grade(e.grade))
+            passed_courses = s.passed_courses()
             context['passed_courses'] = passed_courses
             context['total_successfully_passed_courses'] = (
                 len(passed_courses) +

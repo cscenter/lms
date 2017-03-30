@@ -12,9 +12,9 @@ from learning.models import Course, Semester, CourseOffering, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, AreaOfStudy
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory
-from .utils import get_current_semester_pair
+from .utils import get_current_semester_pair, get_term_by_index
 
 
 class CourseFactory(factory.DjangoModelFactory):
@@ -41,6 +41,12 @@ class SemesterFactory(factory.DjangoModelFactory):
         kwargs.pop('year', None)
         kwargs.pop('type', None)
         return cls.create(year=year, type=type, **kwargs)
+
+    @classmethod
+    def create_next(cls, term):
+        """Get or create term model which following this one"""
+        year, next_term = get_term_by_index(term.index + 1)
+        return cls.create(year=year, type=next_term)
 
 
 class CourseOfferingFactory(factory.DjangoModelFactory):

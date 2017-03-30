@@ -11,7 +11,7 @@ from post_office.utils import get_email_template
 
 class Command(BaseCommand):
     help = """
-    Generate emails from file and add them to django post_office mailing queue.
+    Generate emails from csv and add them to django post_office mailing queue.
     Sender is info@compscicenter.ru
 
     Provide `email` column header in csv. 

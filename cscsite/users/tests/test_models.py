@@ -5,8 +5,9 @@ from __future__ import unicode_literals, absolute_import
 import pytest
 from django.core.exceptions import ValidationError
 
-from learning.factories import CourseOfferingFactory, EnrollmentFactory
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
+from learning.factories import CourseOfferingFactory, EnrollmentFactory, \
+    CourseFactory, SemesterFactory
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from users.factories import StudentFactory, CuratorFactory, UserFactory
 
 
@@ -45,6 +46,30 @@ def test_cached_groups(settings):
     settings.SITE_ID = settings.CLUB_SITE_ID
     assert set(user._cached_groups) == {PARTICIPANT_GROUPS.STUDENT_CENTER,
                                         PARTICIPANT_GROUPS.STUDENT_CLUB}
+
+
+@pytest.mark.django_db
+def test_passed_courses():
+    """Make sure courses not counted twice in passed courses stat"""
+    student = StudentFactory()
+    co1, co2, co3 = CourseOfferingFactory.create_batch(3)
+    # enrollments 1 and 4 for the same course but from different terms
+    e1, e2, e3 = (EnrollmentFactory(course_offering=co,
+                                    student=student,
+                                    grade=GRADES.good)
+                  for co in (co1, co2, co3))
+    co4 = CourseOfferingFactory(course=co1.course,
+                                semester=SemesterFactory.create_next(co1.semester))
+    e4 = EnrollmentFactory(course_offering=co4,
+                           student=student,
+                           grade=GRADES.good)
+    assert len(student.passed_courses()) == 3
+    e4.grade = GRADES.unsatisfactory
+    e4.save()
+    assert len(student.passed_courses()) == 3
+    e2.grade = GRADES.unsatisfactory
+    e2.save()
+    assert len(student.passed_courses()) == 2
 
 
 def test_github_id_validation():
