@@ -24,7 +24,7 @@ var MESSAGE = {
     preloadError: "Ошибка инициализации"
 };
 
-var imageState = profileAppInit.photo;
+var imageData = profileAppInit.photo;
 
 var photoValidation = {
     minWidth: 250,
@@ -68,7 +68,7 @@ var fn = {
         chained.done(function() {
             $("a[href=#user-photo-upload]").click(function () {
                 uploadContainer.modal('toggle');
-                if (imageState === undefined) {
+                if (imageData === null) {
                     fn.uploadInit();
                 }
             });
@@ -77,8 +77,8 @@ var fn = {
                 // for cropper inside hidden div (w x h will be
                 // 0x0 px before display. Due to that, init cropper
                 // once only when modal visible.
-                if (imageState !== undefined) {
-                    fn.thumbInit(imageState);
+                if (imageData !== null) {
+                    fn.thumbInit(imageData);
                 }
             });
         }).fail(function() {
@@ -177,7 +177,7 @@ var fn = {
                     data.width = info.width;
                     data.height = info.height;
                     // Don't forget to update it
-                    imageState = data;
+                    imageData = data;
                     fn.thumbInit(data);
               } else {
                   fn.showError(MESSAGE.imgDimensions);
@@ -277,8 +277,8 @@ var fn = {
 
     // Calculate cropbox data relative to canvas
     setCropBox: function(cropper) {
-        if (imageState.cropbox !== undefined) {
-            var cropBox = imageState.cropbox;
+        if (imageData.cropbox !== undefined) {
+            var cropBox = imageData.cropbox;
             cropper.setData(cropBox);
         }
     },

@@ -417,7 +417,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 }
             except (IOError, OSError):
                 pass
-        return {}
+        return None
 
     def photo_thumbnail_cropbox(self):
         """Used by `thumbnail` template tag. Format: x1,y1,x2,y2"""
