@@ -115,6 +115,7 @@ AWS_SES_ACCESS_KEY_ID = '***REMOVED***'
 AWS_SES_SECRET_ACCESS_KEY = '***REMOVED***'
 
 POST_OFFICE = {
+    'LOG_LEVEL': 1,  # Log only failed emails
     'BACKENDS': {
         'ses': 'django_ses.SESBackend',
         'BATCH_SIZE': 10,
