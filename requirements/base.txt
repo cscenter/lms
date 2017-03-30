@@ -11,8 +11,8 @@ pytz==2016.7
 
 # Db support
 psycopg2==2.6.2
-# JsonField support for Django <= 1.8
-jsonfield==1.0.3
+# JsonField support for Django <= 1.8 or dbs other than postgres
+jsonfield==2.0.1
 django-prettyjson==0.2.2
 standardjson==0.3.1
 
@@ -37,7 +37,7 @@ django-rosetta==0.7.12
 django-modeltranslation==0.12
 
 # Mailing support
-django-post-office==2.0.7
+django-post_office==2.0.8
 django-ses==0.8.2
 
 # Amazon services
@@ -95,9 +95,7 @@ django-ical==1.4
 django-autocomplete-light==3.2.1
 django-mptt==0.8.7
 django-bootstrap-pagination==1.6.2
-# django-bitfield==1.8.0
-# Fork with fixed Django 1.9 & 1.10 warnings
-git+https://github.com/goodmase/django-bitfield.git@cde12bbe093dc1c71b006ac383e3c4d5b5f7defb
+django-bitfield==1.9.2
 django-filter==0.15.3
 hashids==1.2.0
 django-recaptcha==1.2.1
