@@ -22,6 +22,7 @@
 @import "../center/components/panels";
 @import "../center/components/breadcrumbs";
 @import "../center/components/upload_photo";
+@import "../center/components/editor";
 @import "top_menu.scss";
 
 .bg-gray {
@@ -588,23 +589,6 @@ tr.unread {
   font-size: 0.75em;
 }
 
-.ubertext {
-  overflow: hidden;
-
-  pre {
-    padding: 1em;
-
-    code {
-      padding: 0;
-    }
-  }
-  table {
-    @extend .table;
-    @extend .table-bordered;
-    @extend .table-condensed;
-    @extend .table-striped;
-  }
-}
 
 // Teachers list
 .teachers-list {
