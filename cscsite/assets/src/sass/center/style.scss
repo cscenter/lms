@@ -28,6 +28,7 @@
 @import "components/pager";
 @import "components/comment";
 @import "components/hr";
+@import "components/editor";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
 @import "pages/open_in_nsk";
@@ -484,23 +485,7 @@ tr.unread {
   font-size: 0.75em;
 }
 
-.ubertext {
-  overflow: hidden;
 
-  pre {
-    padding: 1em;
-
-    code {
-      padding: 0;
-    }
-  }
-  table {
-    @extend .table;
-    @extend .table-bordered;
-    @extend .table-condensed;
-    @extend .table-striped;
-  }
-}
 
 .scrollable-menu {
   height: auto;
