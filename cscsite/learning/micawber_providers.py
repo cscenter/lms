@@ -59,7 +59,6 @@ def get_oembed_data(url, default=False):
     try:
         [(_url, embed)] = extract_oembed(url)
     except ValueError:
-        logger.warning("Can't extract oembed data from url {}")
         if default:
             embed = {
                 "html": EMBED_IFRAME_TEMPLATE.format(
@@ -67,6 +66,8 @@ def get_oembed_data(url, default=False):
                     settings.MICAWBER_DEFAULT_SETTINGS["maxwidth"],
                     settings.MICAWBER_DEFAULT_SETTINGS["maxheight"])
             }
+        else:
+            logger.warning("Can't extract oembed data from url {}".format(url))
     return embed
 
 
