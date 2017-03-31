@@ -34,6 +34,7 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from learning import settings as learn_conf
 from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet
+from learning.micawber_providers import get_oembed_data, get_oembed_html
 
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -526,27 +527,13 @@ class CourseClass(TimeStampedModel, object):
     type_display_prop.admin_order_field = 'type'
     type_display = property(type_display_prop)
 
-    def video_oembed(self):
-        if not self.video_url:
-            return ""
-        cache_key = make_template_fragment_key('video_oembed',
-                                               [self.pk, self.video_url])
-        embed = cache.get(cache_key)
-        if not embed:
-            try:
-                [(_url, embed)] = extract_oembed(self.video_url)
-                cache.set(cache_key, embed, 3600 * 2)
-            except ValueError:
-                logger.info("Extract oembed error. Return default iframe")
-                iframe_template = """<iframe src={} allowfullscreen=1
-                    width="{}" height="{}"></iframe>"""
-                embed = {
-                    "html": iframe_template.format(
-                        self.video_url,
-                        settings.MICAWBER_DEFAULT_SETTINGS["maxwidth"],
-                        settings.MICAWBER_DEFAULT_SETTINGS["maxheight"])
-                }
-        return embed
+    def video_iframe(self):
+        return get_oembed_html(self.video_url, 'video_oembed',
+                               use_default=True)
+
+    def slides_iframe(self):
+        return get_oembed_html(self.slides_url, 'slides_oembed',
+                               use_default=False)
 
     # TODO: test this
     # Note(lebedev): should be a manager, not a class method.

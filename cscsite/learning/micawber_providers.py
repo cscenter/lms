@@ -1,9 +1,14 @@
+import logging
+
 from django.conf import settings
 from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 from micawber.providers import Provider, bootstrap_basic
 
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger(__name__)
 
 
 class CustomSlideShareProvider(Provider):
@@ -29,13 +34,47 @@ pr = bootstrap_basic(cache)
 pr.unregister('http://www.slideshare.net/[^\/]+/\S+')
 pr.unregister('http://slidesha\.re/\S*')
 pr.register('http://www.slideshare.net/[^\/]+/\S+',
-            CustomSlideShareProvider('http://www.slideshare.net/api/oembed/2',
+            CustomSlideShareProvider('https://www.slideshare.net/api/oembed/2',
                                      format="jsonp"))
 pr.register('http://slidesha\.re/\S*',
-            CustomSlideShareProvider('http://www.slideshare.net/api/oembed/2',
+            CustomSlideShareProvider('https://www.slideshare.net/api/oembed/2',
                                      format="jsonp"))
 
 pr.register(r"https?://(www)?video.yandex.ru/\S*",
             Provider("https://video.yandex.ru/oembed"))
 
 oembed_providers = pr
+
+
+EMBED_IFRAME_TEMPLATE = """
+<iframe src="{}" allowfullscreen="1" width="{}" height="{}"></iframe>"""
+EMBED_IFRAME_CACHE_TIME = 3600 * 2
+
+
+def get_oembed_data(url, default=False):
+    from micawber.contrib.mcdjango import extract_oembed
+    if not url:
+        return None
+    embed = None
+    try:
+        [(_url, embed)] = extract_oembed(url)
+    except ValueError:
+        logger.warning("Can't extract oembed data from url {}")
+        if default:
+            embed = {
+                "html": EMBED_IFRAME_TEMPLATE.format(
+                    url,
+                    settings.MICAWBER_DEFAULT_SETTINGS["maxwidth"],
+                    settings.MICAWBER_DEFAULT_SETTINGS["maxheight"])
+            }
+    return embed
+
+
+def get_oembed_html(url, cache_key, use_default):
+    cache_key = make_template_fragment_key(cache_key, [url])
+    html = cache.get(cache_key)
+    if html is None:
+        embed = get_oembed_data(url, default=use_default)
+        html = embed.get("html", "") if embed else ""
+        cache.set(cache_key, html, EMBED_IFRAME_CACHE_TIME)
+    return html
