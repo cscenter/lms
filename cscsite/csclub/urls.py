@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from solid_i18n.urls import solid_i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
