@@ -109,51 +109,6 @@
                    </div>
                </div>
 
-               <h3 id="registration" class="__underlined">Регистрация на День открытых дверей</h3>
-
-                <form action="" method="post" id="open-nsk-form">
-                   <div class="row">
-                       <div class="col-xs-3">
-                            <div class="form-group">
-                                <label for="sirname">Фамилия</label>
-                                <input type="text" class="form-control" id="sirname" name="sirname" required>
-                            </div>
-                       </div>
-                       <div class="col-xs-3">
-                            <div class="form-group">
-                                <label for="first_name">Имя</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" required>
-                            </div>
-                       </div>
-                       <div class="col-xs-3">
-                            <div class="form-group">
-                                <label for="last_name">Отчество</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" required>
-                            </div>
-                       </div>
-                       <div class="col-xs-3">
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                       </div>
-                   </div>
-                   <div class="row">
-                       <div class="col-xs-3"><label for="source">Откуда вы узнали о мероприятии?</label></div>
-                       <div class="col-xs-6">
-                           <div class="form-group">
-                               <input type="text" class="form-control" id="source" name="source" required>
-                           </div>
-                       </div>
-                       <div class="col-xs-3">
-                           <div class="form-group">
-                               <input type="submit" value="Отправить"
-                                      class="btn btn-primary">
-                           </div>
-                       </div>
-                   </div>
-               </form>
-
                <h3 class="__underlined">У меня остались вопросы</h3>
                <img src="{% static "img/center/open_nsk/mail.svg" %}" alt="" width="110"  align="right" class="_icon-mail">
 <p>Если у вас остались вопросы, а День открытых дверей уже прошёл или попасть
@@ -171,55 +126,3 @@
         </div>
     </div>
 {% endblock content %}
-
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/vendor/validator.min.js" %}"></script>
-    <script>
-        $(document).ready(function() {
-
-    var $form = $("#open-nsk-form");
-
-    $form.validator().on('submit', function (e) {
-      if (e.isDefaultPrevented()) {
-        // handle the invalid form...
-      } else {
-            var $inputs = $form.find("input, select, button, textarea");
-
-            // Serialize the data in the form
-            var serializedData = $form.serialize();
-            // Let's disable the inputs for the duration of the Ajax request.
-            // Note: we disable elements AFTER the form data has been serialized.
-            // Disabled form elements will not be serialized.
-            $inputs.prop("disabled", true);
-
-            // Fire off the request to /form.php
-            $.ajax({
-                url: "https://script.google.com/macros/s/AKfycbxBX79qf-TlRHTIEKjoR0feHW2ziAswE_KkhqspfMLLfoLdQRue/exec",
-                type: "post",
-                data: serializedData
-            })
-            .done(function (response, textStatus, jqXHR) {
-                if (response.result === 'success') {
-                    $("#open-nsk-form").replaceWith("Спасибо, регистрация пройдена!")
-                }
-            })
-            .fail(function (jqXHR, textStatus, errorThrown) {
-                // Log the error to the console
-                $.jGrowl('Что-то пошло не так. Попробуйте повторить отправку или свяжитесь с кураторами.',
-                            { position: 'bottom-right', theme: 'error' });
-            })
-                .always(function () {
-                // Reenable the inputs
-                $inputs.prop("disabled", false);
-            });
-
-            // Prevent default posting of form
-            e.preventDefault();
-      }
-    });
-
-
-});
-
-    </script>
-{% endblock javascripts %}
