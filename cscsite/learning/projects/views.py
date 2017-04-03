@@ -366,7 +366,7 @@ class ProjectDetailView(generic.CreateView):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         # Permissions block
         user = self.request.user
-        context["project"] = self.project
+        context["project"] = project = self.project
         project_student = self.get_authenticated_project_student(self.project)
         # Student participant should already have been redirected to
         # report page if his report exists
@@ -384,6 +384,9 @@ class ProjectDetailView(generic.CreateView):
         context["results_formset"] = ResultsFormSet(
             queryset=self.project.projectstudent_set.select_related("report",
                                                                     "student"))
+        spr = project.supervisor_presentation
+        context["presentation_supervisor_abs"] = (
+            spr and self.request.build_absolute_uri(spr.url))
         return context
 
 
