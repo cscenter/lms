@@ -384,9 +384,6 @@ class ProjectDetailView(generic.CreateView):
         context["results_formset"] = ResultsFormSet(
             queryset=self.project.projectstudent_set.select_related("report",
                                                                     "student"))
-        spr = project.supervisor_presentation
-        context["presentation_supervisor_abs"] = (
-            spr and self.request.build_absolute_uri(spr.url))
         return context
 
 
