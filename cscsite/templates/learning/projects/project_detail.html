@@ -39,17 +39,21 @@
 
                 {% if project.supervisor_presentation_slideshare_url %}
                     <h4>Презентация руководителя</h4>
-                    {% if presentation_supervisor_abs %}
-                        <iframe src="https://docs.google.com/gview?url={{ presentation_supervisor_abs|urlencode }}&embedded=true" style="width:580px; height:500px;" frameborder="0"></iframe>
-                    {% endif %}
+                    {% cache 86400 slideshare_oembed project_supervisor project.pk project.supervisor_presentation_slideshare_url project.modified %}
+                        {{ project.supervisor_presentation_slideshare_url|oembed }}
+                    {% endcache %}
                 {% endif %}
 
-{#                {% if project.presentation_slideshare_url %}#}
-{#                    <h4>Презентация участников</h4>#}
-{#                    {% cache 86400 slideshare_oembed project_participants project.pk project.presentation_slideshare_url project.modified %}#}
-{#                        {{ project.presentation_slideshare_url|oembed }}#}
-{#                    {% endcache %}#}
-{#                {% endif %}#}
+                    {% if user.is_curator and presentation_supervisor_abs %}
+                        <iframe src="https://docs.google.com/gview?url={{ presentation_supervisor_abs|urlencode }}&embedded=true" style="width:580px; height:500px;" frameborder="0"></iframe>
+                    {% endif %}
+
+                {% if project.presentation_slideshare_url %}
+                    <h4>Презентация участников</h4>
+                    {% cache 86400 slideshare_oembed project_participants project.pk project.presentation_slideshare_url project.modified %}
+                        {{ project.presentation_slideshare_url|oembed }}
+                    {% endcache %}
+                {% endif %}
 
                 {% if has_sending_report_permissions %}
                     {% if not project.report_period_started %}
