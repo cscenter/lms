@@ -15,11 +15,11 @@
         <p>{% trans "Are you sure you want to delete" %} "{{ object }}"?</p>
         {% endif %}
         {% if confirmation_button_text %}
-                <input type="submit" class="btn btn-danger btn-block btn-wide" value="{{ confirmation_button_text }}" />
+                <input type="submit" class="btn btn-danger" value="{{ confirmation_button_text }}" />
         {% else %}
-        <input type="submit" class="btn btn-danger btn-block btn-wide" value="{% trans "Delete" %}" />
+        <input type="submit" class="btn btn-danger" value="{% trans "Delete" %}" />
         {% endif %}
-        <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-primary btn-block" onclick="history.back();">{% trans "Cancel" %}</a>
+        <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-primary" onclick="history.back();">{% trans "Cancel" %}</a>
       </form>
     </div>
   </div>
