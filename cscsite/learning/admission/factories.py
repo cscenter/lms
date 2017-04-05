@@ -10,7 +10,7 @@ from factory.fuzzy import FuzzyInteger
 
 from django.utils import timezone
 
-from core.factories import UniversityFactory
+from core.factories import UniversityFactory, CityFactory
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment
 from learning.settings import PARTICIPANT_GROUPS
@@ -22,6 +22,7 @@ class CampaignFactory(factory.DjangoModelFactory):
         model = Campaign
 
     year = factory.Iterator(count(start=2015))
+    city = factory.SubFactory(CityFactory)
     online_test_max_score = FuzzyInteger(30, 40)
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)

@@ -3,9 +3,14 @@
 from __future__ import unicode_literals, absolute_import
 
 import pytest
+from django.core.urlresolvers import reverse
 
-from learning.admission.factories import ApplicantFactory, InterviewFactory
+from core.factories import CityFactory
+from core.settings.base import DEFAULT_CITY_CODE
+from learning.admission.factories import ApplicantFactory, InterviewFactory, \
+    CampaignFactory
 from learning.admission.models import Applicant, Interview
+from users.factories import UserFactory
 
 
 @pytest.mark.django_db
@@ -80,3 +85,53 @@ def test_autoupdate_applicant_status_from_multi():
     interview2.save()
     applicant.refresh_from_db()
     assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
+
+
+@pytest.mark.django_db
+def test_interview_results_dispatch_view(curator, client):
+    # Not enough permissions if you are not a curator
+    city1, city2 = CityFactory.create_batch(2)
+    curator.city = city1
+    curator.save()
+    user = UserFactory(is_staff=False, city=city1)
+    client.login(user)
+    url = reverse('admission_interview_results_dispatch')
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert status_code == 302
+    assert 'login' in redirect_url
+    # No active campaigns. Redirect to default city, we have no any active
+    # campaign yet, so then redirect to applicants list.
+    client.login(curator)
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-2]
+    assert redirect_url == reverse("admission_interview_results_by_city",
+                                   kwargs={"city_slug": DEFAULT_CITY_CODE})
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert redirect_url == reverse("admission_applicants")
+    # Create campaign, but not with curator default city value
+    campaign1 = CampaignFactory.create(city=city2, current=False)
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert redirect_url == reverse("admission_applicants")
+    # Make it active
+    campaign1.current = True
+    campaign1.save()
+    # Now curator should see this active campaign tab
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert redirect_url == reverse("admission_interview_results_by_city",
+                                   kwargs={"city_slug": city2.pk})
+    # Create campaign for curator default city, but not active
+    campaign2 = CampaignFactory.create(city=city1, current=False)
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert redirect_url == reverse("admission_interview_results_by_city",
+                                   kwargs={"city_slug": city2.pk})
+    # Make it active
+    campaign2.current = True
+    campaign2.save()
+    response = client.get(url, follow=True)
+    redirect_url, status_code = response.redirect_chain[-1]
+    assert redirect_url == reverse("admission_interview_results_by_city",
+                                   kwargs={"city_slug": city1.pk})

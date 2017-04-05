@@ -277,9 +277,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         # Get name for selected campaign
         context["selected_campaign"] = _("Current campaign")
         if "campaign" in self.filterset.form.declared_fields:
+            campaign_field = self.filterset.form.fields["campaign"]
             try:
                 default_city = self.request.user.city_id
-                campaign_field = self.filterset.form.fields["campaign"]
                 c = (Campaign.objects
                      .only('pk')
                      .get(current=True,
@@ -288,9 +288,11 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             except Campaign.DoesNotExist:
                 pass
             context["selected_campaign"] = _("All campaigns")
+            campaign_value = self.filterset.data.get("campaign",
+                                                     campaign_field.initial)
             for campaign_id, name in self.filterset.form.declared_fields["campaign"].choices:
                 try:
-                    if campaign_id == int(self.filterset.data.get("campaign")):
+                    if campaign_id == int(campaign_value):
                         context["selected_campaign"] = name
                 except (ValueError, TypeError):
                     pass
@@ -413,9 +415,17 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        """Based on user settings, get preferred page adress and redirect"""
+        """Based on user settings, get preferred page address and redirect"""
+        cs = (Campaign.objects
+              .filter(current=True)
+              .values_list("city_id", flat=True))
+        preferred_city = self.request.user.city_id
+        if preferred_city in cs:
+            city_redirect_to = preferred_city
+        else:
+            city_redirect_to = next(cs.iterator(), DEFAULT_CITY_CODE)
         return reverse("admission_interview_results_by_city", kwargs={
-            "city_slug": DEFAULT_CITY_CODE
+            "city_slug": city_redirect_to
         })
 
 
@@ -469,7 +479,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     def get_queryset(self):
         """Sort data by average interview score"""
         return (Applicant.objects
-            # TODO: Carefully restrict by status also to optimize query
+            # TODO: Carefully restrict by status to optimize query
             .filter(campaign=self.selected_campaign)
             .select_related("exam", "online_test", "university")
             .annotate(has_interviews=Count("interviews__pk"))
@@ -484,7 +494,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         )
 
     def dispatch(self, request, *args, **kwargs):
-        # It's irrelevant to POST action, but not a big deal
+        # It's (mb?) irrelevant to POST action, but not a big deal
         self.active_campaigns = (Campaign.objects
                                  .filter(current=True)
                                  .select_related("city"))
