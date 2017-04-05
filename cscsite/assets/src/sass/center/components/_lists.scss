@@ -49,3 +49,16 @@
     }
   }
 }
+
+ul {
+  &.__files {
+
+    a {
+      text-decoration: none;
+
+      &:hover, &:focus {
+          color: $color-red;
+      }
+    }
+  }
+}
