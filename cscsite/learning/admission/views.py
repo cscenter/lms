@@ -277,6 +277,16 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         # Get name for selected campaign
         context["selected_campaign"] = _("Current campaign")
         if "campaign" in self.filterset.form.declared_fields:
+            try:
+                default_city = self.request.user.city_id
+                campaign_field = self.filterset.form.fields["campaign"]
+                c = (Campaign.objects
+                     .only('pk')
+                     .get(current=True,
+                          city_id=default_city))
+                campaign_field.initial = c.pk
+            except Campaign.DoesNotExist:
+                pass
             context["selected_campaign"] = _("All campaigns")
             for campaign_id, name in self.filterset.form.declared_fields["campaign"].choices:
                 try:
