@@ -276,6 +276,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         blank=True,
         null=True)
     city = models.ForeignKey(City, verbose_name=_("Default city"),
+                             help_text=_("CSCUser|city"),
                              blank=True, null=True)
     # FIXME: why not null? The same for github_id
     yandex_id = models.CharField(

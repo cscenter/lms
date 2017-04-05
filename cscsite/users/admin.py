@@ -111,7 +111,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
         (_('Personal info'), {'fields': ['last_name', 'first_name',
-                                         'patronymic', 'gender',
+                                         'patronymic', 'gender', 'city',
                                          'photo', 'note', 'private_contacts',
                                          'csc_review']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',

@@ -48,7 +48,6 @@ from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     StudentCenterAndVolunteerOnlyMixin
 from six import viewvalues
 
-from users.models import CSCUser
 from . import utils
 from .forms import CourseOfferingPKForm, \
     CourseOfferingEditDescrForm, \
@@ -67,6 +66,9 @@ from .models import Course, CourseClass, CourseOffering, Venue, \
     OnlineCourse, InternationalSchool, Useful, Internship
 
 logger = logging.getLogger(__name__)
+
+DROP_ATTACHMENT_LINK = """
+<a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
 
 
 class TimetableTeacherView(TeacherOnlyMixin,
@@ -935,17 +937,15 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
             co = self.object.course_offering
-            remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
-                "".join("<li>"
-                        "<i class=\"fa fa-times\"></i>&nbsp;"
-                        "<a href=\"{0}\">{1}</a>"
-                        "</li>"
-                        .format(reverse('course_class_attachment_delete',
+            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
+                "".join("<li>{}</li>".format(
+                            DROP_ATTACHMENT_LINK.format(
+                                reverse('course_class_attachment_delete',
                                         args=[co.course.slug,
                                               co.semester.slug,
                                               self.object.pk,
                                               attachment.pk]),
-                                attachment.material_file_name)
+                                attachment.material_file_name))
                         for attachment
                         in self.object.courseclassattachment_set.all()))
         else:
@@ -1539,15 +1539,15 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
             co = self.object.course_offering
-            remove_links = "<ul class=\"list-unstyled\">{0}</ul>".format(
-                "".join("<li><i class=\"fa fa-times\"></i>&nbsp;"
-                        "<a href=\"{0}\">{1}</a></li>"
-                        .format(reverse('assignment_attachment_delete',
+            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
+                "".join("<li>{}</li>".format(
+                            DROP_ATTACHMENT_LINK.format(
+                                reverse('assignment_attachment_delete',
                                         args=[co.course.slug,
                                               co.semester.slug,
                                               self.object.pk,
                                               aa.pk]),
-                                aa.file_name)
+                                aa.file_name))
                         for aa in self.object.assignmentattachment_set.all()))
         else:
             remove_links = ""

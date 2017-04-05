@@ -45,11 +45,13 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-        {% if not form.instance.pk %}
         <ol class="breadcrumb projects">
-          <li>Добавить новое занятие</li>
-        </ol>
+        {% if not form.instance.pk %}
+          <li class="active">Добавление нового занятия</li>
+            {% else %}
+            <li class="active">Редактирование занятия</li>
         {% endif %}
+        </ol>
         {% if form.instance.course_offering.is_completed %}
             <div class="alert alert-block alert-warning">
                 Курс завершён. Только кураторы могут изменить занятие.
