@@ -66,7 +66,7 @@ var fn = {
              });
         });
         chained.done(function() {
-            $("a[href=#user-photo-upload]").click(function () {
+            $("a[href='#user-photo-upload']").click(function () {
                 uploadContainer.modal('toggle');
                 if (imageData === null) {
                     fn.uploadInit();
