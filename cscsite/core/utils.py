@@ -21,11 +21,13 @@ MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |
 MARKDOWN_RENDER_FLAGS = 0
 markdown = h.Hoep(MARKDOWN_EXTENSIONS, MARKDOWN_RENDER_FLAGS)
 
+# This is not really about markdown, This is about html tags that will be
+# saved after markdown rendering
 MARKDOWN_ALLOWED_TAGS = [
     'p', 'ul', 'ol', 'li', 'em', 'strong', 'strike', 'pre', 'br', 'hr',
     'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'a',
     'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'q', 'img',
-    'iframe', 'b', 'i', 'div']
+    'iframe', 'b', 'i', 'div', 'del']
 MARKDOWN_ALLOWED_ATTRS = {
     '*': ['class'],
     'a': ['href'],
