@@ -15,12 +15,12 @@
      > .panel-collapse {
       max-height: 2000px;
       overflow: hidden;
-      @include transition(max-height 0.4s ease-in);
+      //@include transition(max-height 0.4s ease-in);
 
       &.collapse {
         display: block;
         max-height: 0;
-        @include transition(max-height 0.4s ease);
+        //@include transition(max-height 0.4s ease);
       }
 
       .panel-body {
