@@ -89,6 +89,18 @@
   }
 }
 
+#div_id_starts_at, #div_id_ends_at {
+  max-width: 134px;
+
+  .table-condensed td {
+    padding: 3px;
+  }
+
+  .bootstrap-datetimepicker-widget.dropdown-menu {
+    width: 14em;
+  }
+}
+
 
 page[size="A4"] {
   background: white;

@@ -13,7 +13,8 @@ from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
 from learning.settings import GRADES
-from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput
+from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput, \
+    TimeInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
 
@@ -152,12 +153,12 @@ class CourseClassForm(forms.ModelForm):
         widget=DateInputAsTextInput(attrs={'class': 'datepicker'}))
     starts_at = forms.TimeField(
         label=_("Starts at"),
-        help_text="&nbsp;",
-        widget=forms.TimeInput(format="%H:%M"))
+        help_text=_("Format: hh:mm"),
+        widget=TimeInputAsTextInput(format="%H:%M"))
     ends_at = forms.TimeField(
         label=_("Ends at"),
-        help_text="&nbsp;",
-        widget=forms.TimeInput(format="%H:%M"))
+        help_text=_("Format: hh:mm"),
+        widget=TimeInputAsTextInput(format="%H:%M"))
 
     def __init__(self, *args, **kwargs):
         remove_links = kwargs.get('remove_links', "")
@@ -174,9 +175,9 @@ class CourseClassForm(forms.ModelForm):
                 css_class="form-group"),
             Div(Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
                     HTML("&nbsp;"),
-                    'starts_at',
+                    PrependedText('starts_at', '<i class="fa fa-clock-o"></i>'),
                     HTML("&nbsp;"),
-                    'ends_at',
+                    PrependedText('ends_at', '<i class="fa fa-clock-o"></i>'),
                     css_class="form-inline"),
                 css_class="form-group"),
             Fieldset(_("Materials"),

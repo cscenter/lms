@@ -11,15 +11,18 @@ class DateInputAsTextInput(forms.DateInput):
         self.format = '%d.%m.%Y'
 
 
+class TimeInputAsTextInput(forms.TimeInput):
+    input_type = 'text'
+
+
 class CustomSplitDateTimeWidget(forms.MultiWidget):
     """Using bootstrap datetime picker for assignment form"""
     supports_microseconds = False
 
     def __init__(self, attrs=None, date_format=None, time_format=None):
         date_attrs = attrs or {}
-        date_attrs['class'] = 'datepicker'
         widgets = (DateInputAsTextInput(attrs=date_attrs),
-                   forms.TimeInput(attrs=attrs, format=time_format))
+                   TimeInputAsTextInput(attrs=attrs, format=time_format))
         super(CustomSplitDateTimeWidget, self).__init__(widgets, attrs)
 
     def decompress(self, value):
@@ -32,7 +35,7 @@ class CustomSplitDateTimeWidget(forms.MultiWidget):
         return ("""
         <div class="row">
             <div class="col-xs-6">
-                <div class="input-group">
+                <div class="input-group datepicker">
                     <span class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                     </span>
@@ -41,11 +44,12 @@ class CustomSplitDateTimeWidget(forms.MultiWidget):
                 <span class="help-block">{format}: dd.mm.yyyy</span>
             </div>
             <div class="col-xs-6">
-                <div class="input-group">
+                <div class="input-group" id="timepicker">
                     <span class="input-group-addon">
                         <i class="fa fa-clock-o"></i>
                     </span>
                     {1}
                 </div>
+                <span class="help-block">{format}: hh:mm</span>
             </div>
         </div>""".format(*rendered_widgets, format=_("Format")))

@@ -13,10 +13,38 @@
     <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
+            var TIMEPICKER_ICONS = {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-screenshot',
+                clear: 'fa fa-trash',
+                close: 'fa fa-check',
+            };
+            var TIMEPICKER_TOOLTIPS = {
+                today: 'Go to today',
+                clear: 'Clear selection',
+                close: 'Закрыть',
+                selectMonth: 'Выбрать месяц',
+                prevMonth: 'Предыдущий месяц',
+                nextMonth: 'Следующий месяц',
+                selectYear: 'Выбрать год',
+                prevYear: 'Предыдущий год',
+                nextYear: 'Следующий год',
+                selectDecade: 'Выбрать декаду',
+                prevDecade: 'Предыдущая декада',
+                nextDecade: 'Следующая декада',
+                prevCentury: 'Предыдущий век',
+                nextCentury: 'Следующий век'
+            };
             $('.datepicker').datetimepicker({
                 locale: 'ru',
                 format: 'DD.MM.YYYY',
                 stepping: 5,
+                allowInputToggle: true,
                 toolbarPlacement: "bottom",
                 keyBinds: {
                     left: false,
@@ -25,16 +53,24 @@
                         this.hide();
                     },
                 },
-                icons: {
-                    time: 'fa fa-clock-o',
-                    date: 'fa fa-calendar',
-                    up: 'fa fa-chevron-up',
-                    down: 'fa fa-chevron-down',
-                    previous: 'fa fa-chevron-left',
-                    next: 'fa fa-chevron-right',
-                    today: 'fa fa-screenshot',
-                    clear: 'fa fa-trash',
-                    close: 'fa fa-remove'
+                icons: TIMEPICKER_ICONS,
+                tooltips: TIMEPICKER_TOOLTIPS
+            });
+
+            $('#timepicker').datetimepicker({
+                locale: 'ru',
+                format: 'HH:mm',
+                stepping: 1,
+                useCurrent: false,
+                allowInputToggle: true,
+                icons: TIMEPICKER_ICONS,
+                tooltips: TIMEPICKER_TOOLTIPS,
+                defaultDate: new Date("1980-01-01 23:59"),
+                keyBinds: {
+                    left: false,
+                    right: false,
+                    up: false,
+                    down: false
                 }
             });
         });
