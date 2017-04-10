@@ -47,9 +47,6 @@ table {
 #assignments-page {
   margin-top: 40px;
 
-  .assignments-inner {
-    padding: 0;
-  }
   .list-group-item {
     padding: 8px !important;
   }
@@ -479,35 +476,74 @@ h5.assignment {
 }
 
 .assignment-status {
-  color: black;
-  border: 1px solid #D3D3D3;
+  //color: #fff;
   font-weight: normal;
-  border-radius: 5px;
+  white-space: nowrap;
+
+    &.not-checked {
+      color: #000;
+    }
+
+    &.being-checked {
+      color: #E9E9E9;
+    }
+
+    &.unsatisfactory {
+      color: $color-red;
+    }
+
+    &.pass {
+      color: $color-orange;
+    }
+
+    &.good {
+      color: $color-yellow;
+    }
+
+    &.excellent {
+      color: $color-green;
+    }
+
+  &.badge {
+    color: #fff;
+    border-radius: 5px;
+    padding: 4px 6px;
+
+    &.not-checked {
+      color: #000;
+      border: 1px solid #D3D3D3;
+      background-color: #F9F9F9;
+    }
+
+    &.being-checked {
+      background-color: #E9E9E9;
+    }
+
+    &.unsatisfactory {
+      background-color: $color-red;
+    }
+
+    &.pass {
+      background-color: $color-orange;
+    }
+
+    &.good {
+      background-color: $color-yellow;
+    }
+
+    &.excellent {
+      background-color: $color-green;
+    }
+  }
 }
 
-.assignment-status.not-checked {
-  background-color: #F9F9F9;
-}
 
-.assignment-status.being-checked {
-  background-color: #E9E9E9;
-}
 
-.assignment-status.unsatisfactory {
-  background-color: #FF6B78;
-}
 
-.assignment-status.pass {
-  background-color: #F39700;
-}
 
-.assignment-status.good {
-  background-color: #FAEB7D;
-}
 
-.assignment-status.excellent {
-  background-color: $color-green;
-}
+
+
 
 .assignment-date.tomorrow {
   color: #FF6B78;

@@ -400,35 +400,64 @@ h2 {
 }
 
 .assignment-status {
-  color: #fff;
+  //color: #fff;
   font-weight: normal;
-  border-radius: 5px;
-  padding: 4px 6px;
+  white-space: nowrap;
 
-  &.not-checked {
-    color: #000;
-    border: 1px solid #D3D3D3;
-    background-color: #F9F9F9;
-  }
+    &.not-checked {
+      color: #000;
+    }
 
-  &.being-checked {
-    background-color: #E9E9E9;
-  }
+    &.being-checked {
+      color: #E9E9E9;
+    }
 
-  &.unsatisfactory {
-    background-color: $color-red;
-  }
+    &.unsatisfactory {
+      color: $color-red;
+    }
 
-  &.pass {
-    background-color: $color-orange;
-  }
+    &.pass {
+      color: $color-orange;
+    }
 
-  &.good {
-    background-color: $color-yellow;
-  }
+    &.good {
+      color: $color-yellow;
+    }
 
-  &.excellent {
-    background-color: $color-green;
+    &.excellent {
+      color: $color-green;
+    }
+
+  &.badge {
+    color: #fff;
+    border-radius: 5px;
+    padding: 4px 6px;
+
+    &.not-checked {
+      color: #000;
+      border: 1px solid #D3D3D3;
+      background-color: #F9F9F9;
+    }
+
+    &.being-checked {
+      background-color: #E9E9E9;
+    }
+
+    &.unsatisfactory {
+      background-color: $color-red;
+    }
+
+    &.pass {
+      background-color: $color-orange;
+    }
+
+    &.good {
+      background-color: $color-yellow;
+    }
+
+    &.excellent {
+      background-color: $color-green;
+    }
   }
 }
 

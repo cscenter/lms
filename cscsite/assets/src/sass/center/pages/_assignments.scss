@@ -17,9 +17,6 @@
 #assignments-select-button {
   @extend .btn;
   @extend .btn-primary;
-  @extend .btn-outline;
-  background: #fff;
-  border-color: #ccc;
   padding: 6px 12px!important;
 }
 
@@ -34,9 +31,13 @@
   }
 
   .assignments-inner {
-    padding: 30px;
+    padding: 10px;
     background: #fff;
     box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    
+    tr > th:last-child, tr > td:last-child {
+      text-align: right;
+    }
   }
 
   .filters-wrapper {
@@ -51,17 +52,12 @@
   .filters {
     @extend .btn-group;
     @extend .pull-right;
-
-    .btn-default {
-      background: #fff;
-    }
-
     select {
-      width: 100px;
+      width: 320px;
     }
-    .multiselect-container>li>a>label.radio, .multiselect-container>li>a>label.checkbox {
-      width:276px;
-      white-space: normal;
+
+    .bootstrap-select {
+      width: 320px;
     }
   }
 }

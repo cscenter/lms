@@ -368,7 +368,7 @@ class InterviewCommentForm(forms.ModelForm):
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
-        self.fields['score'].label = "Выберите оценку"
+        self.fields['score'].label = "Моя оценка"
 
     def clean_interviewer(self):
         interviewer = self.cleaned_data['interviewer']
