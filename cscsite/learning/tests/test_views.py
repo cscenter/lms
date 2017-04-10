@@ -947,85 +947,87 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(302, resp.status_code)
         # Create co, assignments and enroll students
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
-        for student in students:
-            EnrollmentFactory.create(student=student, course_offering=co)
-        as1, as2 = AssignmentFactory.create_batch(2, course_offering=co)
+        for student1 in students:
+            EnrollmentFactory.create(student=student1, course_offering=co)
+        assignment = AssignmentFactory.create(course_offering=co)
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         # TODO: add wrong term type and check redirect.
-        # TODO: add wrong term year and check redirect to latest co term
-        # By default we show submissions from last 3 assignments,
-        # without grades and with any last commentator
-        self.assertEquals(0, len(resp.context['student_assignment_list']))
-        # Show submissions only without comments
+        # By default we show all submissions without grades
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
+        # Show submissions without comments
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
-        self.assertEquals(6, len(resp.context['student_assignment_list']))
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
+        # TODO: add test which assignment selected by default.
         sas = ((StudentAssignment.objects.get(student=student,
                                               assignment=assignment))
-               for student in students for assignment in (as1, as2))
+               for student in students)
         self.assertSameObjects(sas, resp.context['student_assignment_list'])
         # Let's check assignments with last comment from student only
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
-        # Teacher commented on an assignment
-        student, student2 = students[0], students[1]
-        a_s1 = StudentAssignment.objects.get(student=student, assignment=as1)
-        a_s2 = StudentAssignment.objects.get(student=student, assignment=as2)
-        AssignmentCommentFactory.create(student_assignment=a_s1, author=teacher)
+        # Teacher commented on student1 assignment
+        student1, student2, student3 = students
+        sa1 = StudentAssignment.objects.get(student=student1,
+                                            assignment=assignment)
+        sa2 = StudentAssignment.objects.get(student=student2,
+                                            assignment=assignment)
+        AssignmentCommentFactory.create(student_assignment=sa1, author=teacher)
+        assert sa1.last_comment_from == sa1.LAST_COMMENT_TEACHER
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
-        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         resp = self.client.get(reverse(self.url_name) + "?comment=teacher")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
-        self.assertEquals(5, len(resp.context['student_assignment_list']))
-        # Student commented on another assignment
-        AssignmentCommentFactory.create_batch(2, student_assignment=a_s2,
-                                              author=student)
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
         self.assertEquals(2, len(resp.context['student_assignment_list']))
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
-        self.assertEquals(1, len(resp.context['student_assignment_list']))
-        self.assertSameObjects([a_s2], resp.context['student_assignment_list'])
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
-        self.assertEquals(1, len(resp.context['student_assignment_list']))
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
-        self.assertEquals(4, len(resp.context['student_assignment_list']))
-        # Teacher answered on the assignment
-        AssignmentCommentFactory.create(student_assignment=a_s2, author=teacher)
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
-        self.assertEquals(2, len(resp.context['student_assignment_list']))
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
-        self.assertEquals(0, len(resp.context['student_assignment_list']))
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
-        self.assertEquals(2, len(resp.context['student_assignment_list']))
-        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
-        self.assertEquals(4, len(resp.context['student_assignment_list']))
-        # Other student add comment
-        a1_s2 = StudentAssignment.objects.get(student=student2, assignment=as1)
-        AssignmentCommentFactory.create_batch(3, student_assignment=a1_s2,
+        # Student2 commented on assignment
+        AssignmentCommentFactory.create_batch(2, student_assignment=sa2,
                                               author=student2)
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
         self.assertEquals(3, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
+        self.assertSameObjects([sa2], resp.context['student_assignment_list'])
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        # Teacher answered on the student2 assignment
+        AssignmentCommentFactory.create(student_assignment=sa2, author=teacher)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
+        self.assertEquals(3, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
         self.assertEquals(2, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        # Student 3 add comment on assignment
+        sa3 = StudentAssignment.objects.get(student=student3,
+                                            assignment=assignment)
+        AssignmentCommentFactory.create_batch(3, student_assignment=sa3,
+                                              author=student3)
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
         self.assertEquals(3, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")
+        self.assertEquals(1, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=teacher")
+        self.assertEquals(2, len(resp.context['student_assignment_list']))
+        resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
+        self.assertEquals(0, len(resp.context['student_assignment_list']))
         # teacher has set a grade
-        a1_s2.refresh_from_db()  # update last_comment_from
-        a1_s2.grade = 3
-        a1_s2.save()
+        sa3.grade = 3
+        sa3.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
                                "?comment=student&grades=no")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
                                "?comment=student&grades=all")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
-        a1_s2.refresh_from_db()
-        a_s1.grade = 3
-        a_s1.save()
+        sa3.refresh_from_db()
+        sa1.grade = 3
+        sa1.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
                                "?comment=student&grades=yes")
         self.assertEquals(1, len(resp.context['student_assignment_list']))

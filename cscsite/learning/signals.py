@@ -97,6 +97,8 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
         )
     AssignmentNotification.objects.bulk_create(notifications)
     sa.__class__.objects.filter(pk=sa.pk).update(**sa_update_dict)
+    for attr_name in sa_update_dict:
+        setattr(sa, attr_name, sa_update_dict[attr_name])
 
 
 def track_fields_post_init(sender, instance, **kwargs):

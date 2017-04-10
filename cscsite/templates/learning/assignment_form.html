@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 
 {% block stylesheets %}
     <link href="{% static "css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
@@ -9,8 +10,7 @@
 
 {% block javascripts %}
 {# FIXME: Repeated in interviews.html. Do something with that #}
-    <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
+    {% render_bundle 'forms' 'js' %}
     <script type="text/javascript">
         $(function () {
             var TIMEPICKER_ICONS = {

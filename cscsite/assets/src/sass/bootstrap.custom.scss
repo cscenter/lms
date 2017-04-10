@@ -57,9 +57,6 @@
 @import "bootstrap/responsive-utilities.scss";
 
 
-@import "center/components/multiselect";
-
-
 // Custom styles. Here for now.
 .news {
     @include make-xs-column(10);

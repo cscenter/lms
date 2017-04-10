@@ -15,31 +15,19 @@
     var fn = {
         Launch: function () {
             fn.initFiltersForm();
-
         },
 
         initFiltersForm: function() {
-            assignmentSelect.multiselect({
-                maxHeight: 500,
-                includeSelectAllOption: true,
-                selectAllText: 'Выбрать все',
-                onChange: function(option, checked) {
-                    if (checked) {
-                        assignmentsSelectedCount++;
-                        $(option).data('assignments', assignmentsSelectedCount);
-                    }
-                    else {
-                        $(option).data('assignments', '');
-                    }
-                },
-                buttonText: function(options) {
-                    return options.length + ' выбрано';
-                },
-                onInitialized: function(select, container) {
-                    $(container).closest('.filters').find('.loading').remove();
-                }
+            assignmentSelect.selectpicker({
+                maxOptions: 2,
+                iconBase: 'fa',
+                tickIcon: 'fa-check'
+            });
+            assignmentSelect.on('loaded.bs.select', function (e) {
+              $(this).closest('.filters').find('.loading').remove();
             });
 
+            // TODO: simplify
             filtersForm.on('submit', function () {
                 var selected = $.map(assignmentSelect.find('option:selected'), function (el, i) {
                     return $(el).val();

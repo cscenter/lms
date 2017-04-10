@@ -10,6 +10,7 @@ import posixpath
 from calendar import Calendar
 from collections import OrderedDict, defaultdict, namedtuple
 from itertools import chain
+from urllib.parse import urlencode
 
 import nbconvert
 import unicodecsv as csv
@@ -28,7 +29,8 @@ from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
+    ValidationError
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import Q, Prefetch, When, Value, Case, \
     IntegerField, Count
@@ -1110,8 +1112,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
         return context
 
 
-class AssignmentTeacherListView(TeacherOnlyMixin,
-                                generic.ListView):
+class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
@@ -1128,165 +1129,207 @@ class AssignmentTeacherListView(TeacherOnlyMixin,
         ("empty", _("Without comments")),
     )
 
-    def _get_term_index(self):
-        """
-        Calculate term index from `term` and `year` GET-params.
-        If term index not presented in teachers term_list, redirect
-        to the latest available valid term from this list.
-        """
-        current_year, current_term_type = get_current_semester_pair()
-        term = self.request.GET.get("term", current_term_type)
-        if term not in SEMESTER_TYPES:
-            # Invalid GET-param for term
-            term = current_term_type
-        try:
-            year = int(self.request.GET.get("year", current_year))
-            if year < FOUNDATION_YEAR:
-                # Invalid GET-param for year
-                raise ValueError
-        except ValueError:
-            year = current_year
-        query_term_index = get_term_index(year, term)
-        if not any(t.index == query_term_index for t in self.terms):
-            # TODO: redirect to self.terms[0].year and self.terms[0].type
-            query_term_index = self.terms[0].index
-        return query_term_index
-
-    def prepare_queryset_filter_assignments(self, assignments):
-        try:
-            assignments_str = self.request.GET.get("assignments", "")
-            query = set((int(a) for a in assignments_str.split(",") if a))
-        except ValueError:
-            query = False
-        if not query:
-            # Default values
-            filter_assignments = [a for a in assignments[:3]]
-            # TODO: redirect
-        else:
-            filter_assignments = [a for a in assignments if a.pk in query]
-        return filter_assignments
-
-    def prepare_queryset_filters(self):
-        filters = {}
-        # All teacher course offerings
-        teacher_course_offerings = (CourseOffering.objects
-                                    .filter(teachers=self.request.user)
-                                    .select_related("course", "semester")
-                                    .order_by("semester__index",
-                                              "course__name"))
-        if not teacher_course_offerings:
-            logger.warning("Teacher {} has no course sessions".format(
-                self.request.user))
-            messages.info(self.request,
-                          _("You were redirected from Assignments due to "
-                            "empty course list."),
-                          extra_tags='timeout')
-            raise Redirect(to=reverse("course_list_teacher"))
-        # Collect terms for filter view
-        all_terms = set(c.semester for c in teacher_course_offerings)
-        self.terms = sorted(all_terms, key=lambda t: -t.index)
-        # Get all course offerings for requested term
-        query_term_index = self._get_term_index()
-        self.course_offerings = [c for c in teacher_course_offerings
-                                 if c.semester.index == query_term_index]
-        # Get requested course_offering by GET-param `course`
-        course_slug = self.request.GET.get("course", False)
-        try:
-            co = next(c for c in self.course_offerings if
-                      c.course.slug == course_slug)
-        except StopIteration:
-            # TODO: get self.course_offerings[0].slug and redirect
-            co = self.course_offerings[0]
-        # Set assignments filter
-        self.assignments = list(
-            Assignment.objects
-                .filter(notify_teachers__teacher=self.request.user,
-                        course_offering=co)
-                .only("pk", "deadline_at", "title", "course_offering_id")
-                .order_by("-deadline_at"))
-        filter_assignments = self.prepare_queryset_filter_assignments(
-            self.assignments)
-        filters["assignment__in"] = filter_assignments
-        # Set grade filter
-        filter_grade = self.request.GET.get("grades", "all")
-        # FIXME: validate GET-params in separated method? and redirect here?
-        if filter_grade not in (k for k, v in self.filter_by_grades):
-            filter_grade = "all"
-        if filter_grade == "no":
-            filters["grade__isnull"] = True
-        elif filter_grade == "yes":
-            filters["grade__isnull"] = False
-        # Set status filter
-        filter_by_comments = self.request.GET.get("comment", "any")
-        if filter_by_comments not in (k for k, v in self.filter_by_comments):
-            filter_by_comments = "any"
-        if filter_by_comments == "any":
-            filters["last_comment_from__gt"] = self.model.LAST_COMMENT_NOBODY
-        elif filter_by_comments == "student":
-            filters["last_comment_from"] = self.model.LAST_COMMENT_STUDENT
-        elif filter_by_comments == "teacher":
-            filters["last_comment_from"] = self.model.LAST_COMMENT_TEACHER
-        elif filter_by_comments == "empty":
-            filters["last_comment_from"] = self.model.LAST_COMMENT_NOBODY
-
-        self.query = {
-            "course_slug": co.course.slug,
-            "year": co.semester.year,
-            "term": co.semester.type,
-            "term_index": co.semester.index,
-            "assignments": filter_assignments,
-            "assignments_qs": ",".join((str(a.pk) for a in filter_assignments)),
-            "grades": filter_grade,
-            "comment": filter_by_comments
-        }
-        return filters
-
     def get_queryset(self):
+        # TODO: Show cs center courses on club site?
         filters = self.prepare_queryset_filters()
-        today = now()
-        base_qs = (
+        return (
             StudentAssignment.objects
             .filter(**filters)
-            .order_by('assignment__deadline_at',
-                      'modified')
             .select_related('assignment',
                             'assignment__course_offering',
                             'assignment__course_offering__course',
                             'assignment__course_offering__semester',
                             'student')
             # Hide fat fields
+            # FIXME: This is shit. With .values() I can retrieve only fields that I need and without .select_related
             .defer("assignment__text",
                    "student__university",
-                   # Note: Can't hide `student_comment`.
-                   # See details in CSCUser.__init__() method
+                   "student__comment",
                    "assignment__course_offering__description",
                    "assignment__course_offering__description_ru",
                    "assignment__course_offering__description_en",
                    "assignment__course_offering__course__description",
                    "assignment__course_offering__course__description_ru",
-                   "assignment__course_offering__course__description_en", ))
-        return base_qs
+                   "assignment__course_offering__course__description_en", )
+            .order_by('assignment__deadline_at', 'modified'))
 
     def get_context_data(self, **kwargs):
-        context = (super(AssignmentTeacherListView, self).get_context_data(
-            **kwargs))
+        context = super().get_context_data(**kwargs)
+        context["terms"] = self.all_terms
         context["course_offerings"] = self.course_offerings
-        context["terms"] = self.terms
         context["assignments"] = self.assignments
         context["filter_by_grades"] = self.filter_by_grades
         context["filter_by_comments"] = self.filter_by_comments
         # Url for assignment filter
-        self.query[
-            "form_url"] = "{}?year={}&term={}&course={}&grades={}&comment={}&assignments=".format(
+        query_tuple = [
+            ('term', self.query["term"]),
+            ('course', self.query["course_slug"]),
+            ('grades', self.query["grades"]),
+            ('comment', self.query["comment"]),
+            ('assignment', ""),  # should be the last one
+        ]
+        self.query["form_url"] = "{}?{}".format(
             reverse("assignment_list_teacher"),
-            self.query["year"],
-            self.query["term"],
-            self.query["course_slug"],
-            self.query["grades"],
-            self.query["comment"],
+            urlencode(OrderedDict(query_tuple))
         )
         context["query"] = self.query
         return context
+
+    def prepare_queryset_filters(self):
+        """
+        We process GET-query in optimistic way - assume that invalid data 
+        comes very rarely.
+        Process order of GET-params:
+            term -> course -> assignment -> grade -> comment
+        If query value invalid -> redirect to entry page.
+        Also, we collect data for filter widgets.
+
+        1. Get all courses for authenticated user (we should fallback to 
+        previous term if no readings in current term)
+        2. Collect all available terms (used in filter widget)
+        3. Get term by `term` GET-param if valid or the latest one from step 2.
+        4. Get courses for resulting term (used in filter widget)
+        5. Get course offering by `course` GET-param if valid or get one from 
+        list of courses for resulting term (step 4)
+        6. Get assignments for resulting course (used in filter)
+        7. Get assignment by `assignment` GET-param or latest from step 6.
+        8. Set filters by resulting assignment, grade and last comment.
+        """
+        filters = {}
+        teacher_all_course_offerings = self._get_all_teacher_course_offerings()
+        all_terms = set(c.semester for c in teacher_all_course_offerings)
+        all_terms = sorted(all_terms, key=lambda t: -t.index)
+        # Try to get course offerings for requested term
+        query_term_index = self._get_requested_term_index(all_terms)
+        course_offerings = [c for c in teacher_all_course_offerings
+                            if c.semester.index == query_term_index]
+        # Try to get assignments for requested course_offering
+        query_co = self._get_requested_course_offering(course_offerings)
+        assignments = list(
+            Assignment.objects
+            .filter(notify_teachers__teacher=self.request.user,
+                    course_offering=query_co)
+            .only("pk", "deadline_at", "title", "course_offering_id")
+            .order_by("-deadline_at"))
+        query_assignment = self._get_requested_assignment(assignments)
+        if query_assignment:
+            filters["assignment"] = query_assignment
+        # Set filter by grade
+        query_grade, filter_name, filter_value = self._get_filter_by_grade()
+        if filter_name:
+            filters[filter_name] = filter_value
+        # Set filter by comment
+        query_comment, filter_name, filter_value = self._get_filter_by_status()
+        if filter_name:
+            filters[filter_name] = filter_value
+
+        # Cache to avoid additional queries to DB
+        self.all_terms = all_terms
+        self.course_offerings = course_offerings
+        self.assignments = assignments
+        self.query = {
+            "course_slug": query_co.course.slug,
+            "term": query_co.semester.slug,
+            "assignment": query_assignment,
+            "grades": query_grade,
+            "comment": query_comment
+        }
+        return filters
+
+    def _get_filter_by_grade(self):
+        filter_name, filter_value = None, None
+        query_value = self.request.GET.get("grades", "all")
+        # FIXME: validate GET-params in separated method? and redirect?
+        if query_value not in (k for k, v in self.filter_by_grades):
+            query_value = "all"
+        if query_value == "no":
+            filter_name, filter_value = "grade__isnull", True
+        elif query_value == "yes":
+            filter_name, filter_value = "grade__isnull", False
+        # FIXME: Может не устанавливать его вообще :<
+        return query_value, filter_name, filter_value
+
+    def _get_filter_by_status(self):
+        filter_name, filter_value = None, None
+        query_value = self.request.GET.get("comment", "any")
+        if query_value not in (k for k, v in self.filter_by_comments):
+            query_value = "any"
+        if query_value == "student":
+            filter_name = "last_comment_from"
+            filter_value = self.model.LAST_COMMENT_STUDENT
+        elif query_value == "teacher":
+            filter_name = "last_comment_from"
+            filter_value = self.model.LAST_COMMENT_TEACHER
+        elif query_value == "empty":
+            filter_name = "last_comment_from"
+            filter_value = self.model.LAST_COMMENT_NOBODY
+        return query_value, filter_name, filter_value
+
+    def _get_all_teacher_course_offerings(self):
+        """Returns all course offerings for authenticated user"""
+        u = self.request.user
+        cs = (CourseOffering.objects
+              .filter(teachers=u)
+              .select_related("course", "semester")
+              .order_by("semester__index", "course__name"))
+        if not cs:
+            logger.warning("Teacher {} has no course sessions".format(u))
+            self._redirect_to_course_list()
+        return cs
+
+    def _get_requested_term_index(self, all_terms):
+        """
+        Calculate term index from `term` and `year` GET-params.
+        If term index not presented in teachers term_list, redirect
+        to the latest available valid term from this list.
+        """
+        assert len(all_terms) > 0
+        query_term = self.request.GET.get("term")
+        if not query_term:
+            # Terms in descending order, choose the latest one
+            return all_terms[0].index
+        try:
+            year, term_type = query_term.split("-")
+            year = int(year)
+            if year < FOUNDATION_YEAR:  # invalid GET-param value
+                raise ValidationError("Wrong year value")
+            if term_type not in SEMESTER_TYPES:
+                raise ValidationError("Wrong term type")
+            term = next((t for t in all_terms if
+                         t.type == term_type and t.year == year), None)
+            if not term:
+                raise ValidationError("Term not presented among available")
+        except (ValueError, ValidationError):
+            raise Redirect(to=reverse("assignment_list_teacher"))
+        return term.index
+
+    def _get_requested_course_offering(self, course_offerings):
+        assert len(course_offerings) > 0
+        """Get requested course_offering by GET-param `course`"""
+        course_slug = self.request.GET.get("course", "")
+        try:
+            co = next(c for c in course_offerings if
+                      c.course.slug == course_slug)
+        except StopIteration:
+            # TODO: get term and redirect to entry page
+            co = course_offerings[0]
+        return co
+
+    def _get_requested_assignment(self, assignments):
+        try:
+            assignment_id = int(self.request.GET.get("assignment", ""))
+        except ValueError:
+            # FIXME: Ищем ближайшее, где должен наступить дедлайн
+            assignment_id = next((a.pk for a in assignments), False)
+        return next((a for a in assignments if a.pk == assignment_id),
+                    None)
+
+    def _redirect_to_course_list(self):
+        messages.info(self.request,
+                      _("You were redirected from Assignments due to "
+                        "empty course list."),
+                      extra_tags='timeout')
+        raise Redirect(to=reverse("course_list_teacher"))
 
 
 class AssignmentTeacherDetailView(TeacherOnlyMixin,

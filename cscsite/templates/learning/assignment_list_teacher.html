@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load core_tags %}
 {% load static %}
+{% load render_bundle from webpack_loader %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -14,7 +15,7 @@
     <h5>ПОКАЗАТЬ</h5>
     <div class="list-group inverse">
       {% for code, name in filter_by_grades %}
-          <a href="{%  url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignments={{ query.assignments_qs }}"
+          <a href="{%  url "assignment_list_teacher" %}?term={{ query.term }}&course={{ query.course_slug }}&grades={{ code }}&comment={{ query.comment }}&assignment={{ query.assignment.pk }}"
              class="list-group-item{% if code == query.grades %} active{% endif %}">
               {{ name }}</a>
       {% endfor %}
@@ -23,8 +24,8 @@
     <h5>ПОСЛЕДНИЙ КОММЕНТАРИЙ</h5>
     <div class="list-group inverse">
       {% for code, comment in filter_by_comments %}
-          <a href="{% url "assignment_list_teacher" %}?year={{ query.year }}&term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignments={{ query.assignments_qs }}"
-             class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment }}</a>
+          <a href="{% url "assignment_list_teacher" %}?term={{ query.term }}&course={{ query.course_slug }}&grades={{ query.grades }}&comment={{ code }}&assignment={{ query.assignment.pk }}"
+             class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment|safe }}</a>
       {% endfor %}
     </div>
 
@@ -32,7 +33,7 @@
         <h5>КУРС</h5>
         <div class="list-group inverse">
           {% for co in course_offerings %}
-            <a href="{% url "assignment_list_teacher" %}?year={{ co.semester.year }}&term={{ co.semester.type }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
+            <a href="{% url "assignment_list_teacher" %}?term={{ co.semester.slug }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
                data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}" title="{{ co.course.name }}">{{ co.course.name }}</a>
           {% endfor %}
         </div>
@@ -42,8 +43,8 @@
         <h5>СЕМЕСТР</h5>
         <div class="list-group inverse">
           {% for term in terms %}
-            <a href="{% url "assignment_list_teacher" %}?year={{ term.year }}&term={{ term.type }}&grades={{ query.grades }}&comment={{ query.comment }}"
-               class="list-group-item{% if term.index == query.term_index %} active{% endif %}">{{ term }}</a>
+            <a href="{% url "assignment_list_teacher" %}?term={{ term.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
+               class="list-group-item{% if term.slug == query.term %} active{% endif %}">{{ term }}</a>
           {% endfor %}
         </div>
     {% endif %}
@@ -54,13 +55,13 @@
         <div class="filters">
             <form action="{{ query.form_url }}" method="GET">
                 <input type="hidden" name="assignments" value="" />
-                <select id="assignments-select" multiple="multiple" size="1">
+                <select id="assignments-select">
                     {% for assignment in assignments %}
-                        <option {% if assignment in query.assignments %}selected{% endif %} value="{{ assignment.pk }}">{{ assignment.title }}</option>
+                        <option {% if assignment.pk == query.assignment.pk %}selected{% endif %} value="{{ assignment.pk }}">{{ assignment.title }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" id="assignments-select-button">Фильтровать задания</button>
-                <div class="loading"><i class="fa fa-refresh fa-spin"></i></div>
+                <button type="submit" id="assignments-select-button">Показать</button>
+                <div class="loading"><i class="fa fa-spinner fa-pulse"></i></div>
             </form>
         </div>
     {% endif %}
@@ -69,35 +70,37 @@
     </ol>
     <div class="clearfix"></div>
 
+    {% if query.assignment %}
+    <div class="panel">
+        <div class="panel-body">
+            <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ query.assignment.deadline_at|date_soon_css }}">{{ query.assignment.deadline_at|naturalday:"d E" }} {{ query.assignment.deadline_at|time:"H:i" }}</span>
+            <div class="pull-right"><a href="{% url 'assignment_detail_teacher' query.assignment.pk %}">Страница задания</a></div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="assignments-inner">
-    {% if student_assignment_list %}
+    {% if query.assignment and student_assignment_list %}
       <table class="table" width="100%">
         <thead>
         <tr>
-            <th width="25%">{% trans "Deadline" %}</th>
-            <th></th>
-            <th width="30%">{% trans "Student" %}</th>
+            <th >{% trans "Student" %}</th>
+            <th width="10%">{% trans "Grade" %}</th>
         </tr>
         </thead>
         {% for s_a in student_assignment_list %}
         <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <div class="assignment-date {{ s_a.assignment.deadline_at|date_soon_css }}">
-              <span style="white-space: nowrap;">
-                {{ s_a.assignment.deadline_at|naturalday:"d E" }} {{ s_a.assignment.deadline_at|time:"H:i" }}
-              </span>
-
-            </div>
-          </td>
-          <td><a href="{% url 'a_s_detail_teacher' s_a.pk %}">{{ s_a.assignment.title }}</a></td>
-          <td><a href="{{ s_a.student.get_absolute_url }}">{{ s_a.student.get_short_name }}</a></td>
+          <td><a href="{% url 'a_s_detail_teacher' s_a.pk %}">{{ s_a.student.get_short_name }}</a></td>
+            <td>
+                <span class="assignment-status {{ s_a.state|to_css }}">{{ s_a.state_short }}</span>
+            </td>
         </tr>
         {% endfor %}
       </table>
     {% elif assignments %}
-        Задайте другие критерии поиска.
+        <div style="padding: 5px;">Задайте другие критерии поиска.</div>
     {% else %}
-        Занятия, на которые вы подписаны, не найдены.
+        <div style="padding: 5px;">Занятия, на которые вы подписаны, не найдены.</div>
     {% endif %}
     </div>
 </div>
@@ -106,7 +109,11 @@
 </div>
 {% endblock content %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+{% endblock stylesheets %}
+
 {% block javascripts %}
-    <script type="text/javascript" src="{% static "js/vendor/bootstrap-multiselect.min.js" %}"></script>
+    {% render_bundle 'forms' 'js' %}
     <script type="text/javascript" src="{% static "js/assignment-submissions.js" %}"></script>
 {% endblock javascripts %}
