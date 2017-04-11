@@ -17,7 +17,8 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
         Try to find already existed online test results first by `lookup` field 
         (should be unique within current campaigns)
         and update record if score is less than previous. 
-        Create new record otherwise.
+        Otherwise if user tried to pass context (check by `details` 
+        column content) - create new record.
 
         Note: Don't forget manually remove applicant duplicates first
             to avoid errors on `attach_applicant` action.
@@ -49,13 +50,13 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
             '--city', type=str,
             help='City code to restrict current campaigns')
         parser.add_argument(
-            '--save',
-            action="store_true",
-            help='Skip dry mode and save imported data to DB if no errors')
-        parser.add_argument(
             '--contest_id', type=int,
             help='Save contest_id for debug purpose. '
                  'Overrides `yandex_contest_id` field from source csv file')
+        parser.add_argument(
+            '--save',
+            action="store_true",
+            help='Skip dry mode and save imported data to DB if no errors')
 
     def handle(self, *args, **options):
         csv_path = options["csv"]
@@ -78,15 +79,15 @@ class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
                 contest_id=contest_id)
             result = online_test_resource.import_data(data, dry_run=dry_run)
             self.handle_errors(result)
-            print("Done")
             if dry_run:
                 self.stdout.write("Data not imported. Dry run mode ON.")
+            else:
+                self.stdout.write("Done")
 
     @staticmethod
     def clean_yandex_contest_csv_headers(contest_id, data):
-        # Clean some headers before run import
+        # We don't care about there placement in contest
         del data["place"]
-        del data["user_name"]
         login_index = data.headers.index("login")
         data.headers[login_index] = "yandex_id"
         try:
