@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 
 from core.views import ReportFileOutput
 from learning.settings import GRADES, STUDENT_STATUS
-from learning.utils import get_grade_index
+from learning.utils import get_grade_index, is_positive_grade
 from users.models import CSCUser
 
 
@@ -42,9 +42,11 @@ class ProgressReport(ReportFileOutput):
         courses_headers = OrderedDict()
         for s in students_data:
             self.before_process_row(s)
+            # FIXME: What if we have 2 course offerings for the course, where one is_open=True, but other is_open=False
             student_courses = defaultdict(lambda: {'teachers': '',
                                                    'grade': '',  # code
-                                                   'grade_repr': ''})
+                                                   'grade_str': '',
+                                                   'is_open': False})
             for e in s.enrollments:
                 if self.skip_enrollment(e, s):
                     continue
@@ -64,14 +66,16 @@ class ProgressReport(ReportFileOutput):
                     if new_grade_index > get_grade_index(record["grade"]):
                         student_courses[e.course_offering.course_id] = {
                             "grade": e.grade,
-                            "grade_repr": grade.lower(),
-                            "teachers": ", ".join(teachers)
+                            "grade_str": grade.lower(),
+                            "teachers": ", ".join(teachers),
+                            "is_open": e.course_offering.is_open
                         }
                 else:
                     student_courses[e.course_offering.course_id] = {
                         "grade": e.grade,
-                        "grade_repr": grade.lower(),
-                        "teachers": ", ".join(teachers)
+                        "grade_str": grade.lower(),
+                        "teachers": ", ".join(teachers),
+                        "is_open": e.course_offering.is_open
                     }
             s.courses = student_courses
 
@@ -108,7 +112,8 @@ class ProgressReport(ReportFileOutput):
     def get_queryset(**kwargs):
         raise NotImplementedError("ProgressReport: undefined queryset")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def static_headers(self):
         """Returns array of headers, that always included in report"""
         pass
@@ -148,23 +153,19 @@ class ProgressReport(ReportFileOutput):
     @staticmethod
     def is_positive_grade(course):
         """Check shad or club/center course is successfully passed"""
-        # TODO: remove inconsistency, shad - objects, center courses - dicts
-        # FIXME: We have util method for this logic. Use it.
         # Skip dummy course
         if course is None:
             return False
-        # Shad course
-        if hasattr(course, "grade"):
+        if hasattr(course, "grade"):  # SHAD course
             grade = course.grade
-        else:
-            # Club or center course
+        else:  # Club or Center course
             grade = course["grade"]
-        return grade not in [GRADES.unsatisfactory, GRADES.not_graded, '']
+        return is_positive_grade(grade)
 
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
-            sc = student.courses[course_id]
-            row.extend([sc['grade_repr'], sc['teachers']])
+            c = student.courses[course_id]
+            row.extend([c['grade_str'], c['teachers']])
 
     def _export_row_append_projects(self, row, student):
         student.projects_through.extend(
@@ -197,6 +198,27 @@ class ProgressReport(ReportFileOutput):
                 row.extend([online_course.name])
             else:
                 row.extend([''])
+
+    def passed_courses(self, student):
+        """
+        Vaguely similar method we have in user model, but we can't use it here.
+        """
+        center = 0
+        club = 0
+        shad = 0
+        online = len(student.online_courses)
+        for c in student.courses:
+            if is_positive_grade(c['grade']):
+                if c['is_open']:
+                    club += 1
+                else:
+                    center += 1
+        for c in student.shads:
+            shad += int(is_positive_grade(c.grade))
+        total = center + club + shad + online
+        # FIXME: только курсы клуба с < 6 лекций
+        contribution = total - (club / 2)
+        return total, contribution
 
 
 class ProgressReportForDiplomas(ProgressReport):
@@ -231,16 +253,14 @@ class ProgressReportForDiplomas(ProgressReport):
         return headers
 
     def export_row(self, student):
-        total_success_passed = (len(student.courses) +
-                                len(student.shads) +
-                                len(student.online_courses))
+        total, contribution = self.passed_courses(student)
         row = [
             student.last_name,
             student.first_name,
             student.patronymic,
             student.university,
             " и ".join(s.name for s in student.areas_of_study.all()),
-            total_success_passed
+            total  # FIXME: contribution пока неправильно считается
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
@@ -470,7 +490,7 @@ class ProgressReportForSemester(ProgressReport):
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
             sc = student.courses[course_id]
-            row.append(sc['grade_repr'])
+            row.append(sc['grade_str'])
 
     def export_row(self, student):
         success_total_lt_target_semester = (
