@@ -4,11 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict
 
-import itertools
-from loginas.utils import restore_original_login
-
-from learning.reports import ProgressReport
-from learning.utils import is_positive_grade
 from users.models import SHADCourseRecord
 
 try:
@@ -210,20 +205,7 @@ class UserDetailView(generic.DetailView):
         context["initial"] = json.dumps(photo_data)
         # Collect stats about successfully passed courses
         if u.is_curator:
-            s = profile_user
-            passed_courses = s.passed_courses()
-            context['passed_courses'] = passed_courses
-            context['total_successfully_passed_courses'] = (
-                len(passed_courses) +
-                sum(1 for c in s.shadcourserecord_set.all() if
-                    is_positive_grade(c.grade)) +
-                len(s.onlinecourserecord_set.all()))
-            context['enrollments_in_current_term'] = (
-                sum(1 for e in s.enrollment_set.all() if
-                    e.course_offering.semester == context['current_semester']) +
-                sum(1 for с in s.shadcourserecord_set.all() if
-                    с.semester == context['current_semester'])
-            )
+            context['stats'] = profile_user.stats(context['current_semester'])
         syllabus = None
         if profile_user.curriculum_year:
             syllabus = (StudyProgram.objects
