@@ -473,6 +473,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         Stats for SUCCESSFULLY completed courses. 
         Additional DB queries may occur.
         """
+        # FIXME: учитывать курсы клуба < 6 лекций за 0.5
         center_courses = set()
         club_courses = set()
         enrollments_in_term = 0
@@ -494,7 +495,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return {
             "passed": {
                 "total": center + online + shad + club,
-                "contribution": center + online + shad + (club / 2),
+                # "contribution": center + online + shad + (club / 2),
                 "center": center,
                 "club": club,
                 "online": online,
