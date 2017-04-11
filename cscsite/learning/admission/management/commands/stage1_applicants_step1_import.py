@@ -229,9 +229,11 @@ class ApplicantImportResource(resources.ModelResource):
             return True
         return super().skip_row(instance, original)
 
+    def before_save_instance(self, instance, using_transactions, dry_run):
+        # Invoke clean method to normalize yandex_id
+        instance.clean()
+
     def after_import_instance(self, instance, new, **kwargs):
         """Called exactly after get_or_init_instance."""
         for attr_name, value in self.custom_fields.items():
             setattr(instance, attr_name, value)
-        # Invoke clean method to normalize yandex_id
-        instance.clean()

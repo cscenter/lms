@@ -20,8 +20,14 @@ class Command(HandleErrorsMixin, CurrentCampaignsMixin, BaseCommand):
         """
     )
     # Other fields go to dynamically created `details` field
-    separated_fields = ['created', 'yandex_id', 'stepic_id', 'score',
-                        'yandex_contest_id', 'user_name']
+    separated_fields = [
+        'created',
+        'yandex_id',
+        'stepic_id',
+        'score',
+        'yandex_contest_id',
+        'user_name'
+    ]
     lookup_fields = ["yandex_id", "stepic_id"]
 
     def add_arguments(self, parser):
@@ -75,7 +81,6 @@ class Command(HandleErrorsMixin, CurrentCampaignsMixin, BaseCommand):
     def clean_yandex_contest_csv_headers(contest_id, data):
         # Clean some headers before run import
         del data["place"]
-        del data["user_name"]
         login_index = data.headers.index("login")
         data.headers[login_index] = "yandex_id"
         try:

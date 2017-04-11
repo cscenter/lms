@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
-from learning.admission.import_export import ApplicantRecordResource, \
-    OnlineTestRecordResource, ExamRecordResource
+from learning.admission.import_export import OnlineTestRecordResource, \
+    ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest
 
@@ -65,8 +65,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class ApplicantRecordResourceAdmin(ExportActionModelAdmin):
-    resource_class = ApplicantRecordResource
+class ApplicantAdmin(admin.ModelAdmin):
     list_display = ['id', 'yandex_id', 'second_name', 'first_name', 'last_name',
                     'campaign']
     list_filter = ['campaign', 'status']
@@ -144,7 +143,7 @@ class InterviewCommentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Campaign, CampaignAdmin)
-admin.site.register(Applicant, ApplicantRecordResourceAdmin)
+admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(Interview, InterviewAdmin)

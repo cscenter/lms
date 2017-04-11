@@ -21,27 +21,6 @@ class JsonFieldWidget(widgets.Widget):
         return "\n".join("{}: {}".format(k, v) for k, v in value.items())
 
 
-class ApplicantRecordResource(resources.ModelResource):
-    class Meta:
-        model = Applicant
-        import_id_fields = ['uuid']  # Get existing models by this field
-        skip_unchanged = True
-
-    def import_field(self, field, obj, data):
-        if field.attribute and field.column_name in data:
-            if field.column_name == "where_did_you_learn":
-                data[field.column_name] = data[field.column_name].strip()
-                if not data[field.column_name]:
-                    data[field.column_name] = "<не указано>"
-            if data[field.column_name] == "None":
-                data[field.column_name] = ""
-            field.save(obj, data)
-
-    def before_save_instance(self, instance, using_transactions, dry_run):
-        """Invoke clean method to normalize yandex_id"""
-        instance.clean()
-
-
 class DetailsApplicantImportMixin(object):
     def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
@@ -82,28 +61,32 @@ class DetailsApplicantImportMixin(object):
         """Get applicant id by `lookup` field value within provided campaigns"""
         lookup_field = self.lookup_field
         campaign_ids = self.campaign_ids
+        lookup_index = headers.index(lookup_field)
+        username_index = headers.index("user_name")
 
         def wrapper(row):
             qs = Applicant.objects.filter(campaign_id__in=campaign_ids)
-            index = headers.index(lookup_field)
-            if not row[index]:
+            if not row[lookup_index]:
                 print("Empty {}. Skip".format(lookup_field))
                 return ""
             if lookup_field == "yandex_id":
-                row[index] = row[index].lower().replace("-", ".")
-                qs = qs.filter(yandex_id_normalize=row[index])
+                row[lookup_index] = row[lookup_index].lower().replace("-", ".")
+                qs = qs.filter(yandex_id_normalize=row[lookup_index])
             else:
-                qs = qs.filter(stepic_id=row[index])
+                qs = qs.filter(stepic_id=row[lookup_index])
             cnt = qs.count()
             if cnt > 1:
                 print("Duplicates for {} = {}. Skip".format(
-                    lookup_field, row[index]))
+                    lookup_field, row[lookup_index]))
                 return ""
             elif cnt == 0:
                 score_index = headers.index("score")
-                print("No applicant for {} = {}; score = {}; "
-                      "contest = {}".format(lookup_field, row[index],
-                                            row[score_index], self.contest_id))
+                print("No applicant for {} = {}; user_name = {}; score = {}; "
+                      "contest = {}".format(lookup_field,
+                                            row[lookup_index],
+                                            row[username_index],
+                                            row[score_index],
+                                            self.contest_id))
                 return ""
             return qs.get().pk
 
@@ -148,13 +131,9 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
         # Create record if new
         if not instance.pk:
             return False
-        # Leave the lowest score
+        # Otherwise leave the lowest score
         if original.score and instance.score:
             return instance.score > original.score
-        # Skip results with empty `details`.
-        # It means applicant don't even try to pass this contest
-        if not any(instance.details.values()):
-            return True
         return super().skip_row(instance, original)
 
 
