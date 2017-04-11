@@ -460,6 +460,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         """We remove student group from expelled users on login action"""
         return self.status == STUDENT_STATUS.expelled
 
+    # TODO: Move to manager?
     def projects_qs(self):
         """Returns projects through ProjectStudent intermediate model"""
         return (self.projectstudent_set
@@ -467,10 +468,40 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                                 'project__semester')
                 .order_by('project__semester__index'))
 
-    def passed_courses(self):
-        """Returns set of course ids which student SUCCESSFULLY completed."""
-        return set(e.course_offering.course_id for e in
-                   self.enrollment_set.all() if is_positive_grade(e.grade))
+    def stats(self, term):
+        """
+        Stats for SUCCESSFULLY completed courses. 
+        Additional DB queries may occur.
+        """
+        center_courses = set()
+        club_courses = set()
+        enrollments_in_term = 0
+        for e in self.enrollment_set.all():
+            enrollments_in_term += int(e.course_offering.semester_id == term.pk)
+            if is_positive_grade(e.grade):
+                if e.course_offering.is_open:
+                    club_courses.add(e.course_offering.course_id)
+                else:
+                    center_courses.add(e.course_offering.course_id)
+        center = len(center_courses)
+        club = len(club_courses)
+        online = len(self.onlinecourserecord_set.all())
+        shad = 0
+        for c in self.shadcourserecord_set.all():
+            shad += int(is_positive_grade(c.grade))
+            enrollments_in_term += int(c.semester_id == term.pk)
+
+        return {
+            "passed": {
+                "total": center + online + shad + club,
+                "contribution": center + online + shad + (club / 2),
+                "center": center,
+                "club": club,
+                "online": online,
+                "shad": shad
+            },
+            "enrollments_in_term": enrollments_in_term
+        }
 
 
 @python_2_unicode_compatible

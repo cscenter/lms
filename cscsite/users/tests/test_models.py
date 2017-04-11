@@ -58,18 +58,22 @@ def test_passed_courses():
                                     student=student,
                                     grade=GRADES.good)
                   for co in (co1, co2, co3))
-    co4 = CourseOfferingFactory(course=co1.course,
-                                semester=SemesterFactory.create_next(co1.semester))
+    next_term = SemesterFactory.create_next(co1.semester)
+    co4 = CourseOfferingFactory(course=co1.course, is_open=False,
+                                semester=next_term)
     e4 = EnrollmentFactory(course_offering=co4,
                            student=student,
                            grade=GRADES.good)
-    assert len(student.passed_courses()) == 3
+    stats = student.stats(next_term)
+    assert stats['passed']['total'] == 3
     e4.grade = GRADES.unsatisfactory
     e4.save()
-    assert len(student.passed_courses()) == 3
+    stats = student.stats(next_term)
+    assert stats['passed']['total'] == 3
     e2.grade = GRADES.unsatisfactory
     e2.save()
-    assert len(student.passed_courses()) == 2
+    stats = student.stats(next_term)
+    assert stats['passed']['total'] == 2
 
 
 def test_github_id_validation():
