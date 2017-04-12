@@ -803,7 +803,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
 
     def form_valid(self, form):
         course_offering = get_object_or_404(
-            CourseOffering.objects
+            CourseOffering.custom.site_related(self.request)
                 .filter(pk=form.cleaned_data['course_offering_pk'])
                 .select_related("semester"))
         # CourseOffering enrollment should be active
@@ -839,7 +839,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
     def get_object(self, _=None):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         course_offering = get_object_or_404(
-            CourseOffering.objects
+            CourseOffering.custom.site_related(self.request)
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug'])
