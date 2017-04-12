@@ -167,3 +167,9 @@ class ExamRecordResource(DetailsApplicantImportMixin,
                   "{}".format(instance.applicant.yandex_id))
             return True
         return False
+
+    def before_import_row(self, row, **kwargs):
+        """Double check that score is always a valid type, on DB level we 
+        can have null value, so if we omit django field validation on client, 
+        it will be very bad"""
+        assert int(row["score"]) >= 0

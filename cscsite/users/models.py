@@ -495,7 +495,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return {
             "passed": {
                 "total": center + online + shad + club,
-                # "contribution": center + online + shad + (club / 2),
+                # "adjusted": center + online + shad + (club / 2),
                 "center": center,
                 "club": club,
                 "online": online,
