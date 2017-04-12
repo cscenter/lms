@@ -268,32 +268,6 @@ class Applicant(TimeStampedModel):
         """Successfully pass interview and ready to become student center"""
         return self.status in [self.ACCEPT, self.ACCEPT_IF, self.VOLUNTEER]
 
-    def course_to_numeric(self):
-        """
-        Convert text value to CSCUser COURSES numeric value
-
-        Note: relevant to admission 2016 only
-        """
-        from users.models import CSCUser
-        if "аспирант" in self.course:
-            return CSCUser.COURSES.POSTGRADUATE
-        elif "выпускник университета" in self.course:
-            return CSCUser.COURSES.GRADUATE
-        elif "1 (магистратура)" in self.course:
-            return CSCUser.COURSES.MASTER_1
-        elif "2 (магистратура)" in self.course:
-            return CSCUser.COURSES.MASTER_2
-        elif "5 (специалитет)" in self.course:
-            return CSCUser.COURSES.SPECIALITY_5
-        elif self.course.strip() == "1":
-            return CSCUser.COURSES.BACHELOR_SPECIALITY_1
-        elif self.course.strip() == "2":
-            return CSCUser.COURSES.BACHELOR_SPECIALITY_2
-        elif self.course.strip() == "3":
-            return CSCUser.COURSES.BACHELOR_SPECIALITY_3
-        elif self.course.strip() == "4":
-            return CSCUser.COURSES.BACHELOR_SPECIALITY_4
-
 
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?

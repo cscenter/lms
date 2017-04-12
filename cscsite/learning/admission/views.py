@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
+from django.db.transaction import atomic
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -512,6 +513,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
 class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
     http_method_names = ['post']
 
+    @atomic
     def post(self, request, *args, **kwargs):
         applicant_pk = kwargs.get("pk")
         back_url = reverse("admission_applicants")
@@ -546,9 +548,15 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
                                                password=random_password)
 
         user.groups.add(CSCUser.group.STUDENT_CENTER)
-        # Sync application form info and user profile info
-        user.patronymic = applicant.patronymic
-        user.first_name = applicant.first_name
+        # Migrate data from application form to user profile
+        same_attrs = [
+            "first_name",
+            "patronymic",
+            "stepic_id",
+            "phone"
+        ]
+        for attr_name in same_attrs:
+            setattr(user, attr_name, getattr(applicant, attr_name))
         user.last_name = applicant.surname
         user.enrollment_year = user.curriculum_year = now().year
         # Looks like the same fields below
@@ -557,11 +565,10 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         if applicant.github_id:
             user.github_id = applicant.github_id.split("github.com/",
                                                        maxsplit=1)[-1]
-        user.stepic_id = applicant.stepic_id
-        user.university = applicant.university
-        user.phone = applicant.phone
         user.workplace = applicant.workplace if applicant.workplace else ""
-        user.uni_year_at_enrollment = applicant.course_to_numeric()
+        user.uni_year_at_enrollment = applicant.course
+        user.city_id = applicant.campaign.city_id
+        user.university = applicant.university.name
         user.save()
         # Link applicant and user
         applicant.user = user
