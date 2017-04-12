@@ -366,11 +366,17 @@ class Exam(TimeStampedModel):
         blank=True,
         null=True)
     score = models.PositiveSmallIntegerField(
-        verbose_name=_("Score"))
+        verbose_name=_("Score"),
+        null=True)
 
     class Meta:
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
+
+    def is_imported(self):
+        """NULL value on DB level means we only created model for exam and set
+        contest id, but results never been imported from contest."""
+        return self.score is not None
 
     def __str__(self):
         """ Import/export get repr before instance created in db."""
