@@ -59,9 +59,9 @@ class ApplicantImportResource(resources.ModelResource):
     @cached_property
     def headers(self):
         return {
-            "Фамилия": "second_name",
+            "Фамилия": "surname",
             "Имя": "first_name",
-            "Отчество": "last_name",
+            "Отчество": "patronymic",
             "Номер телефона": "phone",
             "Адрес электронной почты": "email",
             "Город": "city",

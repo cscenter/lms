@@ -56,7 +56,7 @@ class ApplicationFormStep1(forms.ModelForm):
 
     class Meta:
         model = Applicant
-        fields = ("city", "second_name", "first_name", "last_name", "email",
+        fields = ("city", "surname", "first_name", "patronymic", "email",
                   "phone", "yandex_id", "stepic_id", "github_id",)
         labels = {
             'email': 'Адрес электронной почты',
@@ -77,9 +77,9 @@ class ApplicationFormStep1(forms.ModelForm):
         self.helper.layout = Layout(
             InlineRadios('city'),
             Row(
-                Div('second_name', css_class='col-xs-4'),
+                Div('surname', css_class='col-xs-4'),
                 Div('first_name', css_class='col-xs-4'),
-                Div('last_name', css_class='col-xs-4'),
+                Div('patronymic', css_class='col-xs-4'),
             ),
             Row(
                 Div(PrependedText('email', '@'), css_class='col-xs-8'),
@@ -392,7 +392,7 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
 
     class Meta:
         model = Applicant
-        exclude = ("campaign", "first_name", "last_name", "second_name",
+        exclude = ("campaign", "first_name", "patronymic", "surname",
                    "status", "admin_note", "yandex_id_normalize", "user",
                    "university_other")
 

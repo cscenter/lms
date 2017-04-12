@@ -87,8 +87,8 @@ class Applicant(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="applicants")
     first_name = models.CharField(_("First name"), max_length=255)
-    second_name = models.CharField(_("Second name"), max_length=255)
-    last_name = models.CharField(_("Last name"), max_length=255)  # patronymic
+    surname = models.CharField(_("Surname"), max_length=255)
+    patronymic = models.CharField(_("Patronymic"), max_length=255)
     email = models.EmailField(
         _("Email"),
         help_text=_("Applicant|email"))
@@ -243,7 +243,7 @@ class Applicant(TimeStampedModel):
         verbose_name_plural = _("Applicants")
 
     def get_full_name(self):
-        parts = [self.second_name, self.first_name, self.last_name]
+        parts = [self.surname, self.first_name, self.patronymic]
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def clean(self):
