@@ -50,7 +50,7 @@
             <dl>
                 {% if user.is_curator %}
                 <dt>Статус анкеты:</dt>
-                <dd>{{ applicant_form.instance.get_status_display }}</dd>
+                <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
                 {% endif %}
             {% include "learning/admission/_applicant_form.html" with applicant_form=applicant_form %}
             </dl>
