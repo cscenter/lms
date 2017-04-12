@@ -12,8 +12,13 @@ from learning.admission.models import Applicant, Exam
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{city_code}-exam-{type}"
-    help = 'Generate emails about online exam results'
+    help = """
+    Generate emails about online exam results.
+
+    Template string for email templates:
+        {}
+        type: [exam-success|exam-fail]
+    """.format(ValidateTemplatesMixin.TEMPLATE_REGEXP)
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -27,7 +32,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns)
+        self.validate_templates(campaigns, types=["exam-fail", "exam-success"])
 
         generated = 0
         for campaign in campaigns:
@@ -38,7 +43,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                   .only("email"))
             print("Succeed total: {}".format(len(succeed_applicants)))
             for applicant in succeed_applicants:
-                template_name = self.get_template_name(campaign, "success")
+                template_name = self.get_template_name(campaign, "exam-success")
                 template = get_email_template(template_name)
                 recipients = [applicant.email]
                 if not Email.objects.filter(to=recipients,
@@ -59,7 +64,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                  .only("email"))
             print("Failed total: {}".format(len(failed_applicants)))
             for applicant in failed_applicants:
-                template_name = self.get_template_name(campaign, "fail")
+                template_name = self.get_template_name(campaign, "exam-fail")
                 template = get_email_template(template_name)
                 recipients = [applicant.email]
                 if not Email.objects.filter(to=recipients,

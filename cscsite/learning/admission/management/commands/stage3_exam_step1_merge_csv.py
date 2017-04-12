@@ -27,6 +27,7 @@ class Command(BaseCommand):
         в основном файле на основе полученных  значений.
         """
     )
+    # FIXME: WTF
     ADDITIONAL_CSV_ASSIGNMENT_NAME_COL_INDEX = 2
     ADDITIONAL_CSV_USERNAME_COL_INDEX = 3
     ADDITIONAL_CSV_SCORE_COL_INDEX = 8
