@@ -21,7 +21,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score']
     list_filter = ['applicant__campaign']
-    search_fields = ['applicant__yandex_id', 'applicant__second_name',
+    search_fields = ['applicant__yandex_id', 'applicant__surname',
                      'applicant__first_name']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
@@ -36,7 +36,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__city")
-                         .order_by("second_name"))
+                         .order_by("surname"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
@@ -44,7 +44,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     list_display = ['__str__', 'score', 'yandex_contest_id']
-    search_fields = ['applicant__yandex_id', 'applicant__second_name',
+    search_fields = ['applicant__yandex_id', 'applicant__surname',
                      'applicant__first_name']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
@@ -60,17 +60,17 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__city")
-                         .order_by("second_name"))
+                         .order_by("surname"))
         return (super(ExamAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['id', 'yandex_id', 'second_name', 'first_name', 'last_name',
+    list_display = ['id', 'yandex_id', 'surname', 'first_name', 'patronymic',
                     'campaign']
     list_filter = ['campaign', 'status']
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id',
-                     'first_name', 'second_name', 'email']
+                     'first_name', 'surname', 'email']
     readonly_fields = ['yandex_id_normalize']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -107,14 +107,14 @@ class InterviewAdmin(admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__city")
-                         .order_by("second_name"))
+                         .order_by("surname"))
         return (super(InterviewAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
 class InterviewCommentAdmin(admin.ModelAdmin):
     list_display = ['get_interview', 'get_interviewer', 'score']
-    search_fields = ['interview__applicant__second_name']
+    search_fields = ['interview__applicant__surname']
     list_filter = ['interview__applicant__campaign']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -135,7 +135,7 @@ class InterviewCommentAdmin(admin.ModelAdmin):
     def get_interview(self, obj):
         return obj.interview.applicant.get_full_name()
     get_interview.short_description = _("Interview")
-    get_interview.admin_order_field = "interview__applicant__second_name"
+    get_interview.admin_order_field = "interview__applicant__surname"
 
     def get_interviewer(self, obj):
         return obj.interviewer.get_full_name()

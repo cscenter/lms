@@ -28,8 +28,8 @@ def application_form_send_email(applicant_id, language_code):
             template="admission-application-form-complete",
             context={
                 'FIRST_NAME': applicant.first_name,
-                'SECOND_NAME': applicant.second_name,
-                'LAST_NAME': applicant.last_name,
+                'SURNAME': applicant.surname,
+                'PATRONYMIC': applicant.patronymic,
                 'EMAIL': applicant.email,
                 'CITY': applicant.campaign.city.name,
                 'PHONE': applicant.phone,

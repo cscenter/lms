@@ -20,8 +20,8 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         queryset=(Campaign.objects
                   .select_related("city")
                   .order_by("-city__name", "-year").all()))
-    second_name = django_filters.CharFilter(lookup_type='icontains',
-                                            label=_("Second name"))
+    surname = django_filters.CharFilter(lookup_type='icontains',
+                                        label=_("Surname"))
 
     class Meta:
         model = Applicant
@@ -33,7 +33,7 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
             self._form = super(ApplicantFilter, self).form
             self._form.fields["campaign"].help_text = ""
             self._form.fields["status"].help_text = ""
-            self._form.fields["second_name"].help_text = ""
+            self._form.fields["surname"].help_text = ""
             self._form.helper = FormHelper()
             # Looks like I disable it due to GET method
             self._form.helper.disable_csrf = True
@@ -42,7 +42,7 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
                 Row(
                     Div("campaign", css_class="col-xs-4"),
                     Div("status", css_class="col-xs-4"),
-                    Div("second_name", css_class="col-xs-4"),
+                    Div("surname", css_class="col-xs-4"),
                 ),
                 FormActions(Submit('', _('Filter'))))
         return self._form

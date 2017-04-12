@@ -154,8 +154,8 @@ class ApplicantContextMixin(object):
             Q(email=applicant.email),
             (
                 Q(first_name__iexact=applicant.first_name) &
-                Q(second_name__iexact=applicant.second_name) &
-                Q(last_name__iexact=applicant.last_name)
+                Q(surname__iexact=applicant.surname) &
+                Q(patronymic__iexact=applicant.patronymic)
             ),
         ]
         if applicant.phone:
@@ -547,10 +547,9 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 
         user.groups.add(CSCUser.group.STUDENT_CENTER)
         # Sync application form info and user profile info
-        # FIXME: some shit with naming, fix before next campaign
-        user.patronymic = applicant.last_name
+        user.patronymic = applicant.patronymic
         user.first_name = applicant.first_name
-        user.last_name = applicant.second_name
+        user.last_name = applicant.surname
         user.enrollment_year = user.curriculum_year = now().year
         # Looks like the same fields below
         user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
