@@ -15,14 +15,13 @@ from learning.admission.models import Test, Applicant
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     # TODO: scheduled time support?
     # TODO: priority level support?
-    TEMPLATE_REGEXP = "admission-{year}-{city_code}-test-{type}"
     help = """
     Generate mailing list with online test results based on passing score.
 
     Template string for email templates:
         {}
-        type: [success|fail]
-    """.format(TEMPLATE_REGEXP)
+        type: [testing-success|testing-fail]
+    """.format(ValidateTemplatesMixin.TEMPLATE_REGEXP)
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -36,7 +35,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns)
+        self.validate_templates(campaigns, types=["testing-success",
+                                                  "testing-fail"])
 
         total = 0
         generated = 0
@@ -60,9 +60,9 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     'LOGIN': a["yandex_id"],
                 }
                 if score < campaign.online_test_passing_score:
-                    template_type = "fail"
+                    template_type = "testing-fail"
                 else:
-                    template_type = "success"
+                    template_type = "testing-success"
                     assert a["exam__yandex_contest_id"] is not None
                     context['LINK'] = "https://contest.yandex.ru/contest/{}/".format(a["exam__yandex_contest_id"])
                 recipients = [a["email"]]

@@ -46,6 +46,5 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                     _ = Exam.objects.get(applicant_id=a["id"])
                 except Exam.DoesNotExist:
                     Exam.objects.create(applicant_id=a["id"],
-                                        yandex_contest_id=contest_id,
-                                        score=0)
+                                        yandex_contest_id=contest_id)
         self.stdout.write("Done")

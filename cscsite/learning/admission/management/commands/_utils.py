@@ -41,6 +41,8 @@ class HandleErrorsMixin(object):
 
 
 class ValidateTemplatesMixin(object):
+    TEMPLATE_REGEXP = "admission-{year}-{city_code}-{type}"
+
     def validate_templates(self, campaigns, types=None):
         # For each campaign check email template exists and
         # passing score for test results non zero

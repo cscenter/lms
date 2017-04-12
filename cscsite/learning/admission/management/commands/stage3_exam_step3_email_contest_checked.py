@@ -11,8 +11,7 @@ from learning.admission.models import Applicant, Exam
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{city_code}-exam-{type}"
-    TEMPLATE_TYPE = "contest"
+    TEMPLATE_TYPE = "exam-contest"
     help = 'Generate mails about contest check completeness'
 
     def add_arguments(self, parser):
