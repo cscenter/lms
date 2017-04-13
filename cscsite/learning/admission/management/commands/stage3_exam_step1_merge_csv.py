@@ -101,5 +101,5 @@ class Command(BaseCommand):
                     copied[score_col_index] = str(int(copied[score_col_index]) - diff)
             modified_data.append(copied)
 
-        with open(csv_new_path, 'wb') as f:
+        with open(csv_new_path, 'w') as f:
             f.write(modified_data.csv)

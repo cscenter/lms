@@ -10,17 +10,16 @@ WSGI_APPLICATION = 'cscenter.wsgi.application'
 
 BASE_DIR = Path(__file__).parents[1]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'core.middleware.CurrentCityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'users.backends.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'users.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'core.notifications.UnreadNotificationsCacheMiddleware',
-    'annoying.middlewares.RedirectMiddleware',
+    'core.middleware.RedirectMiddleware',
 ]
 INSTALLED_APPS += [
     'learning.admission.apps.AdmissionConfig',

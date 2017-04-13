@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 import nbconvert
 import unicodecsv as csv
-from annoying.exceptions import Redirect
+from core.exceptions import Redirect
 from django.http.response import JsonResponse
 from django.views.generic.edit import BaseUpdateView
 
