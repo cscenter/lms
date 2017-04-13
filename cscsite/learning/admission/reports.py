@@ -49,7 +49,9 @@ class AdmissionReport(ReportFileOutput):
                 value = getattr(applicant, field.name)
                 if field.name == 'status':
                     value = applicant.get_status_display()
-                if field.name == 'id':
+                elif field.name == 'course':
+                    value = applicant.get_course_display()
+                elif field.name == 'id':
                     value = "https://compscicenter.ru{}".format(
                         reverse("admission_applicant_detail", args=[value])
                     )
