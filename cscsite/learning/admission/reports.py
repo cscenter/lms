@@ -11,13 +11,13 @@ from django.utils.encoding import force_text
 from collections import OrderedDict
 
 from core.views import ReportFileOutput
-from learning.admission.models import Applicant, Interview
+from learning.admission.models import Applicant, Interview, Campaign
 from learning.admission.utils import get_best_interview
 
 
 class AdmissionReport(ReportFileOutput):
-    def __init__(self, campaign_pk):
-        self.campaign_pk = campaign_pk
+    def __init__(self, campaign):
+        self.campaign = campaign
         self.max_interview_comments = 0
         applicant_fields = self.get_applicant_fields()
 
@@ -101,7 +101,7 @@ class AdmissionReport(ReportFileOutput):
 
     def get_queryset(self):
         return (Applicant.objects
-                .filter(campaign=self.campaign_pk)
+                .filter(campaign=self.campaign.pk)
                 .select_related("exam", "online_test")
                 .prefetch_related(
                     Prefetch(
@@ -118,6 +118,7 @@ class AdmissionReport(ReportFileOutput):
 
     def get_filename(self):
         today = datetime.datetime.now()
-        return "admission_campaign_{}_report_{}".format(
-            self.campaign_pk,
+        return "admission_{}_{}_report_{}".format(
+            self.campaign.city_id,
+            self.campaign.year,
             today.strftime("%d.%m.%Y"))
