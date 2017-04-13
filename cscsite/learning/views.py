@@ -319,6 +319,11 @@ class CoursesListView(generic.ListView):
     model = Semester
     template_name = "learning/courses/list.html"
 
+    def get_template_names(self):
+        if "test" in self.request.GET:
+            return ["learning/courses/syllabus.html"]
+        return super(CoursesListView, self).get_template_names()
+
     def get_queryset(self):
         co_queryset = (CourseOffering.custom.site_related(self.request)
                        .select_related('course')
