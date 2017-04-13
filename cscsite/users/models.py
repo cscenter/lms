@@ -484,8 +484,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                     club_courses.add(e.course_offering.course_id)
                 else:
                     center_courses.add(e.course_offering.course_id)
-        center = len(center_courses)
-        club = len(club_courses)
         online = len(self.onlinecourserecord_set.all())
         shad = 0
         for c in self.shadcourserecord_set.all():
@@ -494,12 +492,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
         return {
             "passed": {
-                "total": center + online + shad + club,
+                "total": len(center_courses) + online + shad +
+                         len(club_courses),
                 # "adjusted": center + online + shad + (club / 2),
-                "center": center,
-                "club": club,
-                "online": online,
-                "shad": shad
+                "center_courses": center_courses,
+                "club_courses": club_courses,
+                "online_total": online,
+                "shad_total": shad
             },
             "enrollments_in_term": enrollments_in_term
         }

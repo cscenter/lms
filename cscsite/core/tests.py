@@ -1,25 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import pytest
 import six
 
-from learning.settings import PARTICIPANT_GROUPS
-from users.factories import UserFactory
+from io import StringIO as OutputIO
+from mock import Mock
 
-if six.PY3:
-    from io import StringIO as OutputIO
-else:
-    from io import BytesIO as OutputIO
+from django.core import mail, management
 
-
-from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from testfixtures import LogCapture
-from mock import Mock
+from learning.settings import PARTICIPANT_GROUPS
+from users.factories import UserFactory
 
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
@@ -47,14 +40,14 @@ class NotifyCommandTest(TestCase):
     def test_notifications(self):
         out = OutputIO()
         mail.outbox = []
-        Command().execute(stdout=out)
+        management.call_command("notify", stdout=out)
         self.assertEqual(0, len(mail.outbox))
         self.assertEqual(0, len(out.getvalue()))
 
         out = OutputIO()
         mail.outbox = []
         an = AssignmentNotificationFactory.create(is_about_passed=True)
-        Command().execute(stdout=out)
+        management.call_command("notify", stdout=out)
         self.assertEqual(1, len(mail.outbox))
         self.assertTrue(AssignmentNotification.objects
                         .get(pk=an.pk)
@@ -66,7 +59,7 @@ class NotifyCommandTest(TestCase):
 
         out = OutputIO()
         mail.outbox = []
-        Command().execute(stdout=out)
+        management.call_command("notify", stdout=out)
         self.assertEqual(0, len(mail.outbox))
         self.assertEqual(0, len(out.getvalue()))
 
@@ -74,7 +67,7 @@ class NotifyCommandTest(TestCase):
         mail.outbox = []
         conn = CourseOfferingNewsNotificationFactory.create()
         course_offering = conn.course_offering_news.course_offering
-        Command().execute(stdout=out)
+        management.call_command("notify", stdout=out)
         self.assertEqual(1, len(mail.outbox))
         self.assertTrue(CourseOfferingNewsNotification.objects
                         .get(pk=an.pk)
