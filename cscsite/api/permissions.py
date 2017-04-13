@@ -7,7 +7,7 @@ class CuratorAccessPermission(permissions.BasePermission):
     """Check user has curator permissions."""
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated() and request.user.is_curator
+        return request.user.is_authenticated and request.user.is_curator
 
 
 class StudentAccessPermission(permissions.BasePermission):

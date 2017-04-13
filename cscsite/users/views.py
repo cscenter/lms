@@ -152,7 +152,7 @@ class UserDetailView(generic.DetailView):
             'course_offering__semester',
             'course_offering__course'
         )
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             enrollment_queryset = enrollment_queryset.exclude(
                 grade__in=['not_graded', 'unsatisfactory'])
         co_queryset = (CourseOffering.custom.site_related(self.request)
@@ -223,7 +223,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
 
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or (
-        user.is_authenticated() and user.is_curator)
+        user.is_authenticated and user.is_curator)
 
 
 class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
@@ -245,7 +245,7 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
                        args=[self.object.student_id, self.object.pk])
 
     def is_form_allowed(self, user, obj):
-        return user.is_authenticated() and user.is_curator
+        return user.is_authenticated and user.is_curator
 
 
 class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
