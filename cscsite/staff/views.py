@@ -288,18 +288,15 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
         course_offerings = [int(t) for t in course_offerings if t]
         results = list(
             CourseOffering.objects
-                .filter(pk__in=course_offerings)
-                .select_related("course")
-                .prefetch_related(
-                    Prefetch(
-                        "enrolled_students",
-                        queryset=CSCUser.objects.only("pk",
-                                                      "username",
-                                                      "first_name",
-                                                      "last_name",
-                                                      "patronymic"),
-                    )
-                ))
+            .filter(pk__in=course_offerings)
+            .select_related("course")
+            .prefetch_related(
+                Prefetch(
+                    "enrolled_students",
+                    queryset=CSCUser.objects.get_queryset(),
+                    # FIXME: some recusive shit if restrict by only!!! .only("pk", "username", "first_name", "last_name", "patronymic")
+                )
+            ))
         if len(results) > 1:
             first_course, second_course = (
                 {s.pk for s in co.enrolled_students.all()} for co in results)
@@ -386,9 +383,9 @@ def autograde_projects(request):
     if not request.user.is_curator:
         return HttpResponseForbidden()
     try:
-        # FIXME: Only Django 1.10 can return value from `call_command`
         processed = call_command('autograde_projects')
-        messages.success(request, "Операция выполнена успешно.")
+        messages.success(request, "Операция выполнена успешно. "
+                                  "Обработано: {}".format(processed))
     except CommandError as e:
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))

@@ -244,7 +244,8 @@
                                             {% for course_groups in program.course_groups.all %}
                                                 <li>
                                                     {% for course in course_groups.courses.all %}
-                                                        {% if course.id in passed_courses %}<span class="text-success">{{ course.name }}</span>{% else %}{{ course.name }}{% endif %}{% if not forloop.last %}{% if course_groups.courses.all|length > 2 %},{% endif %} или {% endif %}
+                                                        {# Syllabus contains center courses only #}
+                                                        {% if course.id in stats.passed.center_courses %}<span class="text-success">{{ course.name }}</span>{% else %}{{ course.name }}{% endif %}{% if not forloop.last %}{% if course_groups.courses.all|length > 2 %},{% endif %} или {% endif %}
                                                     {% endfor %}
                                                 </li>
                                             {% endfor %}
