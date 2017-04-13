@@ -244,7 +244,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         # TODO: add tests
         # On club site hide summer classes if student not enrolled on
         if self.request.site.domain == settings.CLUB_DOMAIN:
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 summer_enrollments = Enrollment.objects.filter(
                     student=self.request.user,
                     course_offering__is_open=True,
@@ -475,7 +475,7 @@ class CourseUpdateView(CuratorOnlyMixin,
     form_class = CourseForm
 
     def is_form_allowed(self, user, obj):
-        return user.is_authenticated() and user.is_curator
+        return user.is_authenticated and user.is_curator
 
 
 class CourseOfferingDetailView(FailedCourseContextMixin,
@@ -539,7 +539,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         is_club_site = settings.SITE_ID == settings.CLUB_SITE_ID
         can_view_news = (
             not context['is_failed_completed_course'] and
-            ((user.is_authenticated() and not user.is_expelled) or is_club_site)
+            ((user.is_authenticated and not user.is_expelled) or is_club_site)
         )
         context["news"] = can_view_news and co.courseofferingnews_set.all()
         context["classes"] = self.get_classes(co)
@@ -769,7 +769,7 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug']))
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in self._course_offering.teachers.all())
 
 
@@ -784,7 +784,7 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_offering.teachers.all())
 
 
@@ -798,7 +798,7 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_offering.teachers.all())
 
 
@@ -885,7 +885,7 @@ class CourseClassDetailView(generic.DetailView):
         context = (super(CourseClassDetailView, self)
                    .get_context_data(*args, **kwargs))
         context['is_actual_teacher'] = (
-            self.request.user.is_authenticated() and
+            self.request.user.is_authenticated and
             self.request.user in (self.object
                                   .course_offering
                                   .teachers.all()))
@@ -904,7 +904,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def is_form_allowed(self, user, obj):
         return (obj is None or
-                (user.is_authenticated() and user.is_curator) or
+                (user.is_authenticated and user.is_curator) or
                 user in obj.course_offering.teachers.all())
 
     def get_initial(self, *args, **kwargs):
@@ -1027,7 +1027,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_class.course_offering.teachers.all())
 
     def get_success_url(self):
@@ -1052,7 +1052,7 @@ class CourseClassDeleteView(TeacherOnlyMixin,
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_offering.teachers.all())
 
 
@@ -1358,7 +1358,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             self.request.user in (self.object
                                   .course_offering
                                   .teachers.all()))
-        if not is_actual_teacher and (not self.request.user.is_authenticated()
+        if not is_actual_teacher and (not self.request.user.is_authenticated
                                       or not self.request.user.is_curator):
             raise PermissionDenied
         context['a_s_list'] = \
@@ -1687,7 +1687,7 @@ class AssignmentDeleteView(TeacherOnlyMixin,
         return reverse('assignment_list_teacher')
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_offering.teachers.all())
 
 
@@ -1698,7 +1698,7 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated() and user.is_curator) or \
+        return (user.is_authenticated and user.is_curator) or \
                (user in obj.assignment.course_offering.teachers.all())
 
     def get_success_url(self):
@@ -2020,7 +2020,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
             semester_year = int(semester_year)
         except (ValueError, TypeError):
             raise Http404('Course offering not found')
-        if request.user.is_authenticated() and request.user.is_curator:
+        if request.user.is_authenticated and request.user.is_curator:
             base_qs = CourseOffering.objects
         else:
             base_qs = CourseOffering.objects.filter(teachers=request.user)
@@ -2119,7 +2119,7 @@ class MarksSheetTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
 
     def post(self, request, *args, **kwargs):
         filter = dict(pk=self.kwargs.get('course_offering_pk'))
-        if not request.user.is_authenticated() or not request.user.is_curator:
+        if not request.user.is_authenticated or not request.user.is_curator:
             filter['teachers__in'] = [request.user.pk]
         co = get_object_or_404(CourseOffering, **filter)
         # FIXME: replace with util function, too much args to pass

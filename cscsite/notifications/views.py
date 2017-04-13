@@ -10,7 +10,7 @@ class CourseOfferingNewsNotificationUpdate(generic.View):
 
     def post(self, request, *args, **kwargs):
         course_offering = co = request.POST.get("co")
-        if not request.user.is_authenticated() or not course_offering:
+        if not request.user.is_authenticated or not course_offering:
             raise PermissionDenied
         updated = (CourseOfferingNewsNotification.unread
                    .filter(course_offering_news__course_offering=co,

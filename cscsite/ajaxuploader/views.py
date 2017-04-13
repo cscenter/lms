@@ -77,7 +77,7 @@ class AjaxProfileImageUploader(generic.base.View):
         return ret_json
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated() or "user_id" not in request.POST:
+        if not request.user.is_authenticated or "user_id" not in request.POST:
             return HttpResponseBadRequest("Bad user")
 
         try:

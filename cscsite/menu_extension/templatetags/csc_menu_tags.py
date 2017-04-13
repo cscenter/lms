@@ -79,9 +79,9 @@ def has_permissions(item, user, user_groups, **kwargs):
             return False
         elif user.is_student and not user.is_active_student:
             return False
-    if item.extension.unauthenticated and user.is_authenticated():
+    if item.extension.unauthenticated and user.is_authenticated:
         return False
-    if item.extension.protected and not user.is_authenticated():
+    if item.extension.protected and not user.is_authenticated:
         return False
     if item.extension.staff_only and not user.is_staff:
         return False
