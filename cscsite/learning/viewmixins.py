@@ -83,7 +83,7 @@ class FailedCourseContextMixin(object):
             return context
 
         user = self.request.user
-        if not co.is_completed or user.is_anonymous() or user.is_curator:
+        if not co.is_completed or user.is_anonymous or user.is_curator:
             return context
 
         if co.is_completed:
