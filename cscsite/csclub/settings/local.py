@@ -3,9 +3,9 @@ import sys
 from .base import *
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
-] + MIDDLEWARE_CLASSES
+] + MIDDLEWARE
 INTERNAL_IPS = ["127.0.0.1", "::1"]
 
 INSTALLED_APPS += ['fixture_media',

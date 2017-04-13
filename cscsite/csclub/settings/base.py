@@ -10,19 +10,18 @@ SITE_ID = 2
 ROOT_URLCONF = 'csclub.urls'
 WSGI_APPLICATION = 'csclub.wsgi.application'
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'solid_i18n.middleware.SolidLocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'users.backends.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'users.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.notifications.UnreadNotificationsCacheMiddleware',
+    'core.notifications.UnreadNotificationsCacheMiddleware',  # TODO: move to notifications module
     'core.middleware.CurrentCityMiddleware',
-    'annoying.middlewares.RedirectMiddleware',
+    'core.middleware.RedirectMiddleware',
 ]
 
 INSTALLED_APPS += [

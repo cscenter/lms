@@ -53,15 +53,19 @@ class UnreadNotificationsCache(object):
 
 
 class UnreadNotificationsCacheMiddleware(object):
-    def __init__(self):
+    """Set `city_code` based on sub domain for request object."""
+    def __init__(self, get_response):
+        self.get_response = get_response
         global _installed_middleware
         _installed_middleware = True
 
-    def process_request(self, request):
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
         # FIXME: Don't know what is the point to save cache in _thread_locals
         # when it's unique for each request
         _thread_locals.unread_notifications_cache = None
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             cache = UnreadNotificationsCache(
                 (request.user
                  .assignmentnotification_set
@@ -74,3 +78,10 @@ class UnreadNotificationsCacheMiddleware(object):
                                  'course_offering_news__course_offering')))
             _thread_locals.unread_notifications_cache = cache
             setattr(request, 'unread_notifications_cache', cache)
+
+        response = self.get_response(request)
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
