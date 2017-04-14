@@ -293,8 +293,9 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
             .prefetch_related(
                 Prefetch(
                     "enrolled_students",
-                    queryset=CSCUser.objects.get_queryset(),
-                    # FIXME: some recusive shit if restrict by only!!! .only("pk", "username", "first_name", "last_name", "patronymic")
+                    queryset=(CSCUser.objects.get_queryset()
+                              .only("pk", "username", "first_name",
+                                    "last_name", "patronymic")),
                 )
             ))
         if len(results) > 1:

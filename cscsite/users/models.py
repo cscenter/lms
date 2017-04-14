@@ -21,7 +21,7 @@ from sorl.thumbnail import ImageField
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
-from learning.models import Enrollment
+from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import LearningPermissionsMixin, is_positive_grade
 from .managers import CustomUserManager
@@ -39,140 +39,88 @@ GITHUB_ID_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
 
 
 # TODO: Add tests. Looks Buggy
-class MonitorFieldMixin(object):
+class MonitorStatusField(models.ForeignKey):
     """
     Monitor another field of the model and logging changes.
+    Reset monitoring field value by log cls after log entry was added to DB.
 
     How it works:
         Save db state after model init or synced with db.
         When monitored field changed (depends on prev value and `when` attrs
         update monitoring field value, add log entry
     Args:
-        log_class (cls):
-            Class responsible for logging.
+        logging_model (cls):
+            Model responsible for logging.
         monitor (string):
             Monitored field name
         when (iter):
             If monitored field get values from `when` attribute, monitoring
             field updated. Defaults to None, allows all values. [Optional]
     """
+
     def __init__(self, *args, **kwargs):
         cls_name = self.__class__.__name__
-        log_class = kwargs.pop('log_class', None)
-        if not log_class:
-            raise TypeError('%s requires a "log_class" argument' % cls_name)
-        self.log_class = log_class
-        monitor = kwargs.pop('monitor', None)
-        if not monitor:
+        self.logging_model = kwargs.pop('logging_model', None)
+        if not self.logging_model:
+            raise TypeError('%s requires a "logging_model" argument' % cls_name)
+        self.monitored = kwargs.pop('monitored', None)
+        if not self.monitored:
             raise TypeError('%s requires a "monitor" argument' % cls_name)
-        self.monitor = monitor
-        kwargs.setdefault('help_text', _("Automatically updated when {} "
-                                         "changed, but you still can set "
-                                         "it manually. Make no sense without "
-                                         "{} update").format(monitor, monitor))
         when = kwargs.pop('when', None)
         if when is not None:
             when = set(when)
         self.when = when
-        super(MonitorFieldMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name, **kwargs):
-        # Attach attrs to ModelField instance
-        # FIXME: Replace with `from_db` method?
-        self._old_value_attname = '_old_value_%s' % name
-        self.monitor_attname = '_monitor_%s' % name
+        # Add attribute to model instance after initialization
+        self.monitored_attrname = '_monitored_%s' % name
         models.signals.post_init.connect(self._save_initial, sender=cls)
-        models.signals.post_save.connect(self._post_save, sender=cls)
-        super(MonitorFieldMixin, self).contribute_to_class(cls, name, **kwargs)
+        super().contribute_to_class(cls, name, **kwargs)
 
     def get_monitored_value(self, instance):
-        return getattr(instance, self.monitor)
+        return getattr(instance, self.monitored)
 
     def _save_initial(self, sender, instance, **kwargs):
-        """Set current db values of monitoring and monitored fields after
-        __init__ method called or in `post_save` action"""
-        setattr(instance, self._old_value_attname,
-                getattr(instance, self.attname))
-        setattr(instance, self.monitor_attname,
+        if self.monitored in instance.get_deferred_fields():
+            return
+        setattr(instance, self.monitored_attrname,
                 self.get_monitored_value(instance))
 
-    def _post_save(self, instance, created, **kwargs):
-        monitored_prev_value = getattr(instance, self.monitor_attname, None)
-        monitored_current_value = self.get_monitored_value(instance)
-        if monitored_prev_value != monitored_current_value:
-            self._save_initial(instance.__class__, instance)
-            # We set default value in `pre_save`
-            self.create_log_entry(instance, created)
-            # XXX: Reset FK here
-            # FIXME: Looks pretty stupid, we call save in post_save,
-            # mb move to post_save for LogModel?
-            setattr(instance, self.attname, None)
-            instance.save()
+    def pre_save(self, model_instance, add):
+        monitored_prev = getattr(model_instance, self.monitored_attrname)
+        monitored_current = self.get_monitored_value(model_instance)
+        if monitored_prev != monitored_current:
+            if self.when is None or monitored_current in self.when:
+                log_model = self.create_log_entry(model_instance, add)
+                setattr(model_instance, self.attname, log_model.pk)
+                self._save_initial(model_instance.__class__, model_instance)
+        return super(MonitorStatusField, self).pre_save(model_instance, add)
 
-    def create_log_entry(self, instance, created):
-        if created:
+    def create_log_entry(self, instance, new_model):
+        if new_model:
             return False
-        attrs = {}
-        attrs[self.monitor] = self.get_monitored_value(instance)
+        attrs = {self.monitored: self.get_monitored_value(instance)}
         instance_fields = [f.attname for f in instance._meta.fields]
-        for field in self.log_class._meta.fields:
+        for field in self.logging_model._meta.fields:
             # Do not override PK
             if isinstance(field, models.AutoField):
                 continue
             if field.attname not in instance_fields:
                 continue
             attrs[field.attname] = getattr(instance, field.attname)
-        model = self.log_class(**attrs)
-        if model.prepare_fields(instance, self.attname):
-            model.save()
+        model = self.logging_model(**attrs)
+        model.prepare_fields(instance, self.attname)
+        model.save()
+        return model
 
     def deconstruct(self):
-        name, path, args, kwargs = super(MonitorFieldMixin, self).deconstruct()
-        kwargs['monitor'] = self.monitor
-        kwargs['log_class'] = self.log_class
+        name, path, args, kwargs = super().deconstruct()
+        kwargs['monitored'] = self.monitored
+        kwargs['logging_model'] = self.logging_model
         if self.when is not None:
             kwargs['when'] = self.when
         return name, path, args, kwargs
-
-
-# TODO: mv to db/ package. Should be more generic?
-class MonitorDateField(MonitorFieldMixin, models.DateField):
-    """ MonitorField from django.utils + added logging
-    Also you can manually set date if required
-
-    """
-
-    def pre_save(self, model_instance, add):
-        value = now()
-        attname_previous = getattr(model_instance, self._old_value_attname, None)
-        attname_current = getattr(model_instance, self.attname)
-        previous = getattr(model_instance, self.monitor_attname, None)
-        current = self.get_monitored_value(model_instance)
-        if previous != current and (
-                attname_previous == attname_current or not attname_current):
-            if self.when is None or current in self.when:
-                setattr(model_instance, self.attname, value)
-        return super(MonitorDateField, self).pre_save(model_instance, add)
-
-
-class MonitorFKField(MonitorFieldMixin, models.ForeignKey):
-    """
-    Add record to log if monitored field has been changed.
-    Reset monitoring field value by log cls after log entry was added to DB.
-    """
-    def pre_save(self, model_instance, add):
-        """Set monitoring field value to defaults by log cls, if no value
-        specified"""
-        value = self.log_class.get_default_value()
-        monitoring_current_value = getattr(model_instance, self.attname)
-        monitored_prev_value = getattr(model_instance, self.monitor_attname,
-                                       None)
-        monitored_current_value = self.get_monitored_value(model_instance)
-        if (monitored_prev_value != monitored_current_value and
-                not monitoring_current_value):
-            if self.when is None or monitored_current_value in self.when:
-                setattr(model_instance, self.attname, value)
-        return super(MonitorFKField, self).pre_save(model_instance, add)
 
 
 @python_2_unicode_compatible
@@ -189,23 +137,15 @@ class CSCUserStatusLog(models.Model):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"))
 
-    @staticmethod
-    def get_default_value():
-        from learning.models import Semester
-        semester = Semester.get_current()
-        return semester.pk
+    class Meta:
+        ordering = ['-pk']
 
     def prepare_fields(self, monitored_instance, monitoring_field_attname):
         if not self.student_id:
             self.student_id = monitored_instance.pk
+        # Prevent additional queries in admin
         if not self.semester_id:
-            semester_id = getattr(monitored_instance, monitoring_field_attname,
-                                  None)
-            if not semester_id:
-                self.semester_id = self.get_default_value()
-            else:
-                self.semester_id = semester_id
-        return True
+            self.semester_id = Semester.get_current().pk
 
     def __str__(self):
         return smart_text(
@@ -338,16 +278,17 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Status"),
+        help_text=_("Status|HelpText"),
         max_length=15,
         blank=True)
-    # FIXME: Doesn't store current FK value now, replace with semester index value?
-    status_changed_at = MonitorFKField(
-        "learning.Semester",
+    status_last_change = MonitorStatusField(
+        CSCUserStatusLog,
         verbose_name=_("Status changed"),
         blank=True,
         null=True,
-        monitor='status',
-        log_class=CSCUserStatusLog)
+        editable=False,
+        monitored='status',
+        logging_model=CSCUserStatusLog)
 
     areas_of_study = models.ManyToManyField(
         'learning.AreaOfStudy',

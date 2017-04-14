@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
                 ('city', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.City', verbose_name='Default city')),
                 ('comment_last_author', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='cscuser_commented', to=settings.AUTH_USER_MODEL, verbose_name='Author of last edit')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('status_changed_at', users.models.MonitorFKField(blank=True, help_text='Укажите, если хотите, чтобы при изменении поля status в логе появилась запись со значением, отличным от значения по-умолчанию.', log_class=users.models.CSCUserStatusLog, monitor='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='learning.Semester', verbose_name='Status changed')),
+                ('status_changed_at', users.models.MonitorStatusField(blank=True, help_text='Укажите, если хотите, чтобы при изменении поля status в логе появилась запись со значением, отличным от значения по-умолчанию.', logging_model=users.models.CSCUserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='learning.Semester', verbose_name='Status changed')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],
             options={

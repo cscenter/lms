@@ -12,6 +12,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 from import_export.admin import ImportExportMixin, ImportMixin
 
 from core.forms import AdminRichTextAreaWidget
+from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, CSCUserReference, \
     OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
@@ -73,13 +74,41 @@ class CSCUserChangeForm(UserChangeForm):
                 _("User can't be simultaneously in graduate and student group")))
 
 
-class CSCUserStatusLogAdmin(admin.StackedInline):
+class ForeignKeyCacheMixin(object):
+    """
+    Cache foreignkey choices in the request object to prevent unnecessary queries.
+    """
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        formfield = super(ForeignKeyCacheMixin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name != 'semester':
+            return formfield
+        cache = getattr(request, 'db_field_cache', {})
+        if cache.get(db_field.name):
+            formfield.choices = cache[db_field.name]
+        else:
+            formfield.choices.field.cache_choices = True
+            formfield.choices.field.choice_cache = [
+                formfield.choices.choice(obj) for obj in
+                formfield.choices.queryset.all()
+            ]
+            request.db_field_cache = cache
+            request.db_field_cache[db_field.name] = formfield.choices
+        return formfield
+
+
+class CSCUserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
     model = CSCUserStatusLog
     extra = 0
-    readonly_fields = ('created', 'semester', 'status')
+    readonly_fields = ('created', 'status')
+    related_spec = {'select': ['semester', 'student']}
 
     def has_add_permission(self, request, obj=None):
         return False
+
+
+    # FIXME: formfield_for_foreignkey creates additional queries :<
+    # FIXME: Find out how to prevent of doing it (see ForeignKeyCacheMixin)
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
@@ -119,7 +148,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
         (_('External services'), {'fields': ['yandex_id', 'stepic_id',
                                              'github_id']}),
         (_('Student info record'),
-         {'fields': ['status', 'status_changed_at', 'enrollment_year',
+         {'fields': ['status', 'enrollment_year',
                      'graduation_year', 'curriculum_year', 'areas_of_study',
                      'university', 'workplace', 'uni_year_at_enrollment',
                      'phone']}),
