@@ -31,7 +31,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     ValidationError
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Prefetch, When, Value, Case, \
     IntegerField, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \

@@ -20,7 +20,7 @@ from django.conf import settings
 from django.contrib import auth
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.utils import timezone

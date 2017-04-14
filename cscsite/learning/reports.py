@@ -315,7 +315,7 @@ class ProgressReportFull(ProgressReport):
         return headers
 
     def export_row(self, student):
-        from django.core.urlresolvers import reverse
+        from django.urls import reverse
         from learning.admission.models import Applicant
 
         total_success_passed = (

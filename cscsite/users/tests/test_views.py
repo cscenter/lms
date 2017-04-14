@@ -14,7 +14,7 @@ from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text, force_text
 from django.utils import translation

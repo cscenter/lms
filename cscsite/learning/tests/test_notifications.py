@@ -12,7 +12,7 @@ from testfixtures import LogCapture
 from django.conf import settings
 from django.conf.urls.static import static
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.models import model_to_dict
 from django.test.utils import override_settings
 from django.test import TestCase

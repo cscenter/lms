@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper

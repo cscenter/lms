@@ -11,7 +11,7 @@ from string import ascii_lowercase
 from string import digits
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic

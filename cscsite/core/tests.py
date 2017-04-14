@@ -8,7 +8,7 @@ from mock import Mock
 
 from django.core import mail, management
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 
 from learning.settings import PARTICIPANT_GROUPS
