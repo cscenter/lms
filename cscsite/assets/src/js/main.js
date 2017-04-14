@@ -107,19 +107,42 @@ const fn = {
     // Move to `learning` bundle if necessary
     courseOfferingTabs: function() {
         let course_offering = $('#course-offering-detail-page').data('id');
-        let activeTab = $('#course-offering-detail-page__tablist li.active:first a:first');
-        if (activeTab.data("target") === '#course-news') {
-            fn.markNewsAsRead(course_offering, activeTab.get(0));
-        }
-        $('#course-offering-detail-page__tablist').on('click', 'a', function(e) {
-            e.preventDefault();
-            $(this).tab('show');
-            const targetTab = $(this).data("target");
-            if (targetTab === '#course-news') {
-                fn.markNewsAsRead(course_offering, this);
+        if (course_offering !== undefined) {
+            var tabList = $('#course-offering-detail-page__tablist');
+            window.onpopstate = function(event) {
+                var target;
+                if (event.state !== null) {
+                    if ('target' in event.state) {
+                        target = event.state.target;
+                    }
+                }
+                if (target === undefined) {
+                    target = '#course-about';
+                }
+                tabList.find('li').removeClass('active').find('a').blur();
+                tabList.find('a[data-target="' + target + '"]').tab('show').hover();
+            };
+
+            let activeTab = tabList.find('li.active:first a:first');
+            if (activeTab.data("target") === '#course-news') {
+                fn.markNewsAsRead(course_offering, activeTab.get(0));
             }
-        });
-        // TODO: Additional logic if entry tab is `news`
+            tabList.on('click', 'a', function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+                const targetTab = $(this).data("target");
+                if (targetTab === '#course-news') {
+                    fn.markNewsAsRead(course_offering, this);
+                }
+                if (!!(window.history && history.pushState)) {
+                    history.pushState(
+                        {target:targetTab},
+                        "",
+                        $(this).attr("href")
+                    );
+                }
+            });
+        }
     },
 
     markNewsAsRead: function (course_offering, tab) {
