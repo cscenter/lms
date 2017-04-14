@@ -232,15 +232,15 @@
   background: #f8f8f8;
   margin-bottom: 10px;
 
-  .panel-heading, .panel-body {
+  .panel-body {
     padding: 10px 26px;
   }
   .panel-title {
     text-decoration: none;
-    padding: 0;
+    padding: 10px 26px;
   }
   .panel-title span {
-    border-bottom: 1px dashed $color-grey;
+    font-size: 16px;
   }
 }
 
