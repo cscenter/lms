@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import pytest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from core.factories import CityFactory
 from core.settings.base import DEFAULT_CITY_CODE

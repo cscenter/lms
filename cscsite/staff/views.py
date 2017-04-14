@@ -10,7 +10,7 @@ from braces.views import JSONResponseMixin
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Count, Prefetch
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.http import HttpResponseRedirect

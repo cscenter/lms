@@ -10,7 +10,7 @@ import itertools
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Count, Prefetch
 from django.http import Http404
 from django.utils.timezone import now

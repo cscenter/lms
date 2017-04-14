@@ -3,7 +3,7 @@ import copy
 
 from django import template
 from django.conf import settings
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 
 from treemenus.models import Menu, MenuItem
 

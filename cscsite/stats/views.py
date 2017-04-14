@@ -3,7 +3,7 @@ import json
 import itertools
 from collections import OrderedDict
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Prefetch
 from django.views import generic
 from rest_framework.views import APIView

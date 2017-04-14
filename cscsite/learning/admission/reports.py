@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Prefetch
 from django.utils.numberformat import format
 from django.utils.encoding import force_text

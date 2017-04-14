@@ -8,7 +8,7 @@ from crispy_forms.layout import Layout, Div, Submit, Field, Row, Fieldset, \
     MultiField
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices

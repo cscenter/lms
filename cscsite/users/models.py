@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.models import Group
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.utils.encoding import smart_text, python_2_unicode_compatible

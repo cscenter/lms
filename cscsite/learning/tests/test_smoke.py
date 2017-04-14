@@ -12,7 +12,7 @@ from testfixtures import LogCapture
 from django.conf import settings
 from django.conf.urls.static import static
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse, NoReverseMatch, RegexURLPattern
+from django.urls import reverse, NoReverseMatch, RegexURLPattern
 from django.db import connection
 from django.forms.models import model_to_dict
 from django.test.utils import override_settings

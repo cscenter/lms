@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf.urls.static import static
 
 import cscenter.urls

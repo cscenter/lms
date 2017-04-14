@@ -8,7 +8,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
 from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \

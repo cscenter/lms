@@ -9,7 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand, CommandError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.encoding import smart_text
