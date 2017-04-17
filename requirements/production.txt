@@ -1,3 +1,1 @@
 -r base.txt
-
-newrelic==2.82.0.62
