@@ -129,9 +129,11 @@ class Applicant(TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="applicants")
     university2 = models.CharField(
-        _("University"),
-        help_text=_("Applicant|university"),
-        max_length=255)
+        _("University_legacy"),
+        help_text=_("Applicant|university_legacy"),
+        max_length=255,
+        null=True,
+        blank=True)
     university_other = models.CharField(
         _("University (Other)"),
         help_text=_("Applicant|university_other"),
