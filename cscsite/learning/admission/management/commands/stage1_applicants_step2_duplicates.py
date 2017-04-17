@@ -7,6 +7,7 @@ from ._utils import CurrentCampaignsMixin
 from learning.admission.models import Applicant, Campaign
 
 
+# FIXME: Work with yandex_id only! Remove lookup_field logic at all?
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = "Show applicant duplicates within current campaigns"
     lookup_fields = ["yandex_id", "stepic_id"]
@@ -28,6 +29,8 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         auto_resolve = options["resolve"]
         campaign_ids = self.get_current_campaign_ids()
 
+        if lookup_field == "yandex_id":
+            lookup_field = "yandex_id_normalize"
         qs = (Applicant.objects
                        .filter(campaign_id__in=campaign_ids)
                        .values(lookup_field)
