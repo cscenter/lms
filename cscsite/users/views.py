@@ -37,7 +37,7 @@ from core.views import ProtectedFormMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, StudentAssignment, \
     CourseOffering, NonCourseEvent, Semester, Enrollment, \
     StudyProgramCourseGroup, StudyProgram
-from learning.settings import LEARNING_BASE, TEACHING_BASE
+from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from users.utils import create_timezone
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
 from .models import CSCUser, CSCUserReference
@@ -255,8 +255,11 @@ class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = (super(UserReferenceDetailView, self)
                    .get_context_data(*args, **kwargs))
-        student_info = CSCUser.objects.students_info().get(
-            pk=self.object.student.pk)
+        student_info = (CSCUser.objects
+                        .students_info(exclude_grades=[
+                            GRADES.unsatisfactory, GRADES.not_graded
+                        ])
+                        .get(pk=self.object.student.pk))
         enrollments = OrderedDict()
         # From duplicated enrollments get one with higher grade
         for e in student_info.enrollments:
