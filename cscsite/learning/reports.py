@@ -276,7 +276,7 @@ class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
         return (CSCUser.objects
-                .students_info(exclude_grades=[])
+                .students_info()
                 .select_related("applicant"))
 
     @property
@@ -390,7 +390,6 @@ class ProgressReportForSemester(ProgressReport):
                 "status": STUDENT_STATUS.expelled
             },
             semester=kwargs["term"],
-            exclude_grades=[]
         )
 
     def before_process_row(self, student):

@@ -38,8 +38,6 @@ class CSCUserQuerySet(query.QuerySet):
         if exclude:
             q = q.exclude(**exclude)
 
-        if exclude_grades is None:
-            exclude_grades = [GRADES.unsatisfactory, GRADES.not_graded]
         enrollment_qs = (Enrollment.objects
                          .order_by('course_offering__course__name'))
         shad_qs = SHADCourseRecord.objects.get_queryset()
