@@ -259,6 +259,9 @@ class Applicant(TimeStampedModel):
                 return status_name
         return ""
 
+    def get_absolute_url(self):
+        return reverse('admission_applicant_detail', args=[self.pk])
+
     def __str__(self):
         if self.campaign_id:
             return smart_text(
