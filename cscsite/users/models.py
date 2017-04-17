@@ -412,7 +412,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     def stats(self, term):
         """
         Stats for SUCCESSFULLY completed courses. 
-        Additional DB queries may occur.
+        Additional DB queries may occur:
+            * enrollment_set (course_offering for each enrollment 
+                              if not select_related)
+            * onlinecourserecord_set
+            * shadcourserecord_set
         """
         # FIXME: учитывать курсы клуба < 6 лекций за 0.5
         center_courses = set()
