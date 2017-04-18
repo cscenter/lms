@@ -3,7 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.core.management.base import BaseCommand, CommandError
-from django.utils.timezone import now
+from django.db.models import Q
 from post_office import mail
 from post_office.models import EmailTemplate, Email
 from post_office.utils import get_email_template
@@ -13,15 +13,10 @@ from learning.admission.models import Test, Applicant
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    # TODO: scheduled time support?
-    # TODO: priority level support?
     help = """
-    Generate mailing list with online test results based on passing score.
-
-    Template string for email templates:
-        {}
-        type: [testing-success|testing-fail]
-    """.format(ValidateTemplatesMixin.TEMPLATE_REGEXP)
+    Set status REJECTED_BY_TEST for those who fail testing and 
+    send notification about that.
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -35,18 +30,29 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=["testing-success",
-                                                  "testing-fail"])
+        self.validate_templates(campaigns, types=["testing-fail"])
 
         total = 0
         generated = 0
         for campaign in campaigns:
+            # Get applicants where score is empty or < passing score
+            passing_score = campaign.online_test_passing_score
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk)
-                          .values("online_test__score",
+                          .filter(Q(online_test__score__lt=passing_score) |
+                                  Q(online_test__score__isnull=True))
+                          .values("pk",
+                                  "online_test__score",
                                   "exam__yandex_contest_id",
                                   "yandex_id",
-                                  "email"))
+                                  "email")
+                          # Weak attempt to process the latest application if
+                          # user (with unique email) send more then one.
+                          .order_by("-pk"))
+
+            template_type = "testing-fail"
+            template_name = self.get_template_name(campaign, template_type)
+            template = get_email_template(template_name)
 
             for a in applicants:
                 total += 1
@@ -54,20 +60,18 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     score = 0
                 else:
                     score = int(a["online_test__score"])
+                assert score < passing_score
+                # Set status
+                (Applicant.objects
+                 .filter(pk=a["pk"])
+                 .update(status=Applicant.REJECTED_BY_TEST))
+                # Add notification to queue
                 score_str = str(score) + " балл" + self.pluralize(score)
                 context = {
                     'SCORE': score_str,
                     'LOGIN': a["yandex_id"],
                 }
-                if score < campaign.online_test_passing_score:
-                    template_type = "testing-fail"
-                else:
-                    template_type = "testing-success"
-                    assert a["exam__yandex_contest_id"] is not None
-                    context['LINK'] = "https://contest.yandex.ru/contest/{}/".format(a["exam__yandex_contest_id"])
                 recipients = [a["email"]]
-                template_name = self.get_template_name(campaign, template_type)
-                template = get_email_template(template_name)
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     mail.send(
@@ -81,6 +85,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                         backend='ses',
                     )
                     generated += 1
+                else:
+                    self.stdout.write(a["email"])
         self.stdout.write("Processed applicants: {}".format(total))
         self.stdout.write("Generated emails: {}".format(generated))
         self.stdout.write("Done")
