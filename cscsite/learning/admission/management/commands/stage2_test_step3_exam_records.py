@@ -6,7 +6,7 @@ import itertools
 from django.core.management import BaseCommand, CommandError
 
 from ._utils import CurrentCampaignsMixin
-from learning.admission.models import Applicant, Test, Exam
+from learning.admission.models import Applicant, Test, Exam, Contest
 
 
 class Command(CurrentCampaignsMixin, BaseCommand):
@@ -23,19 +23,25 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
     # TODO: Get contest_id from DB by yandex contest id value
     def handle(self, *args, **options):
-        if not options["contests"]:
-            raise CommandError("Specify contests ids")
-        contests = [int(c) for c in options["contests"].split(",")]
-        contests = itertools.cycle(contests)
-
         campaigns = self.get_current_campaigns()
-        self.stdout.write("")
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            self.stdout.write("Canceled")
+            return
         for campaign in campaigns:
-            passing_score = campaign.online_test_passing_score
+            passing_score = int(campaign.online_test_passing_score)
             if not passing_score:
                 self.stdout.write("Zero passing score "
                                   "for {}. Skip".format(campaign))
                 continue
+
+            contests = (Contest.objects
+                        .filter(campaign=campaign)
+                        .values_list("contest_id", flat=True))
+            if not contests.exists():
+                self.stdout.write("Contests not provided for "
+                                  "campaign {}. Skip".format(campaign))
+                continue
+            contests = itertools.cycle(contests)
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score)
