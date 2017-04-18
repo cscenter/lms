@@ -19,7 +19,7 @@ class CampaignAdmin(admin.ModelAdmin):
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
-    list_display = ['__str__', 'score']
+    list_display = ['__str__', 'score', 'get_campaign']
     list_filter = ['applicant__campaign']
     search_fields = ['applicant__yandex_id', 'applicant__surname',
                      'applicant__first_name']
@@ -27,9 +27,15 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         JSONField: {'widget': PrettyJSONWidget}
     }
 
+    def get_campaign(self, obj):
+        return obj.applicant.campaign
+    get_campaign.short_description = _("Campaign")
+
     def get_queryset(self, request):
         qs = super(OnlineTestAdmin, self).get_queryset(request)
-        return qs.select_related('applicant')
+        return qs.select_related('applicant',
+                                 'applicant__campaign',
+                                 'applicant__campaign__city')
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
@@ -53,7 +59,9 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super(ExamAdmin, self).get_queryset(request)
-        return qs.select_related('applicant')
+        return qs.select_related('applicant',
+                                 'applicant__campaign',
+                                 'applicant__campaign__city')
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
