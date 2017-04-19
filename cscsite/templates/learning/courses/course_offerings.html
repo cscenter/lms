@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load static %}
+
+{% block content %}
+<div id="courses-new">
+    <div class="container">
+        <h1 style="font-size: 60px; font-weight: bold;">{% trans "Courses" %}</h1>
+        <ul class="nav nav-pills __test">
+            <li role="presentation" class="active"><a href="#">Санкт-Петербург</a></li>
+            <li role="presentation"><a href="#">Новосибирск</a></li>
+        </ul>
+
+        <div class="row">
+            <div class="col-xs-6">
+                <p style="margin: 20px 0 0 0;">Каждый год в CS центре читают около 40 разных курсов. Студенты выбирают курсы, которые хотят пройти и проходят их. Каждый год курсы разные. Какие именно курсы будут читаться, становится известно в течение семестра.</p>
+            </div>
+        </div>
+
+
+        {% for autumn_spring in semester_list %}
+            <div class="academic-year-wrapper">
+                <h2 style="font-size: 36px; line-height: normal; margin: 20px 0; font-weight: bold;" >{{ autumn_spring.0.year }}...{{ autumn_spring.1.year }}</h2>
+                {% for semester in autumn_spring %}
+                    <div class="term-wrapper" style="">
+                    <h3 style="font-size: 21px; font-weight: bold; text-transform: uppercase; margin: 20px 0 0;">{{ semester.get_type_display }}</h3>
+                    <div class="row">
+                    {% for course_offering in semester.courseofferings %}
+                            <div class="col-xs-4">
+                                <div style="margin-top: 25px;">{% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}<span style="font-weight: 600; font-size: 8px; letter-spacing: 1px;">КУРС CS КЛУБА</span>{% endif %}&nbsp;</div>
+                                <a style="line-height: 1.2; color: #4f86a0; font-size: 18px; margin-bottom: 5px; display: inline-block;" href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}{% if course_offering.is_published_in_video %}<i class="__video" aria-hidden="true"></i>{% endif %}</a><br>
+                                {% for teacher in course_offering.teachers.all %}
+                                    <a style="font-style: italic; white-space: nowrap; margin-right: 10px; font-size: 14px; color: #000;" href="{{ teacher.teacher_profile_url }}" style="">{% if teacher.photo %}
+                                          {% thumbnail teacher.photo "12x12" crop="center" as im %}
+                                            <img style="vertical-align: baseline" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                          {% endthumbnail %}
+                                    {% else %}
+                                        <img src="{% static "img/center/brain.jpg" %}" width="12" height="12" alt="">
+                                    {% endif %}{{ teacher.get_abbreviated_name }}</a>
+                                {% endfor %}
+                            </div>
+                        {% if not forloop.last and forloop.counter|divisibleby:3 %}</div><div class="row">{% endif %}
+                    {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+    <style>
+        .__video {
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAKCAIAAADpZ+PpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoyQzc0NDM3OTFEMjIxMUU3QTE5Q0E1ODg0RDQ1NzlBQyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoyQzc0NDM3QTFEMjIxMUU3QTE5Q0E1ODg0RDQ1NzlBQyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjJDNzQ0Mzc3MUQyMjExRTdBMTlDQTU4ODRENDU3OUFDIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjJDNzQ0Mzc4MUQyMjExRTdBMTlDQTU4ODRENDU3OUFDIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+nTrBpAAAANpJREFUeNpi/P//PwMDw70DB84uWPD+wQNJAwPjhAQpAwOgIANQblV8/EJ//6fnzwPZV9avn2lvf7i/H6Rnd309EL27fx8o+h8GgNJALsMEfX0g5+7+/eUMDEAhiG6gUqBJTJwCAgwwcO/gwUmGhpsLCgQVFIB2MzGgAkl9fe2AACDjx4cPLN8/fAAqAXI4+Pl9J0wAOhLIvrphg5KDAwPQTqCV7x48+Pb+PcQhQCs75OWBVrJATJhlb68VEAC0G2gG0K+xGzYArWSE+B3ifZDJAgJQjzMwAAQYACPWgLJ5GluhAAAAAElFTkSuQmCC');
+            width: 9px;
+            display: inline-block;
+            height: 10px;
+            margin-left: 5px;
+        }
+        .nav-pills.__test li {
+            margin-right: 10px;
+        }
+        .nav-pills.__test a {
+            border: 1px solid #4f86a0;
+            color: #000;
+            font-size: 14px;
+            border-radius: 10px;
+            padding: 8px 15px;
+        }
+        .nav-pills.__test a:hover {
+            background-color: #edf3f5;
+        }
+        .nav-pills.__test li.active a {
+            background-color: #4f86a0;
+        }
+        .term-wrapper {
+            border-bottom: 1px solid #e6e6e6;
+            padding-bottom: 40px;
+            margin-bottom: 30px;
+        }
+        .academic-year-wrapper .term-wrapper:last-child {
+            border-color: #a7c2cf;
+        }
+        .academic-year-wrapper:last-child .term-wrapper:last-child{
+            border-bottom: none;
+        }
+    </style>
+{% endblock content %}
