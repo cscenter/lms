@@ -14,8 +14,8 @@ from learning.admission.models import Test, Applicant
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     help = """
-    Set status REJECTED_BY_TEST for those who fail testing and 
-    send notification about that.
+    Set status REJECTED_BY_TEST for those who fail testing, also 
+    send notification to them.
     """
 
     def add_arguments(self, parser):
