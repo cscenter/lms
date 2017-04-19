@@ -23,7 +23,7 @@
         {% for autumn_spring in semester_list %}
             <div class="academic-year-wrapper">
                 <h2 style="font-size: 36px; line-height: normal; margin: 20px 0; font-weight: bold;" >{{ autumn_spring.0.year }}...{{ autumn_spring.1.year }}</h2>
-                {% for semester in autumn_spring %}
+                {% for semester in autumn_spring reversed %}
                     <div class="term-wrapper" style="">
                     <h3 style="font-size: 21px; font-weight: bold; text-transform: uppercase; margin: 20px 0 0;">{{ semester.get_type_display }}</h3>
                     <div class="row">
