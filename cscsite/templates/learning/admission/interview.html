@@ -72,7 +72,7 @@
                 <hr>
             {% endif %}
             {% if exam %}
-                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam %}<a
+                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam.file %}<a
                         href="{{ contests.exam.file_url }}" target="_blank">Описание задач контеста{% if exam.yandex_contest_id %}
                     #{{ exam.yandex_contest_id }}{% endif %}</a>{% elif exam.yandex_contest_id  %}
                     Контест #{{ exam.yandex_contest_id }}{% endif %}</h4>
