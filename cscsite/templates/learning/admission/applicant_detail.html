@@ -93,7 +93,7 @@
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
             {% if online_test %}
-                <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test %}<a
+                <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test and contests.test.file %}<a
                         href="{{ contests.test.file_url }}" target="_blank">Описание задач контеста{% if online_test.yandex_contest_id %}
                     #{{ online_test.yandex_contest_id }}{% endif %}</a>
                 {% elif online_test.yandex_contest_id  %}Контест #{{ online_test.yandex_contest_id }}{% endif %}</h4>
@@ -108,7 +108,7 @@
                 <hr>
             {% endif %}
             {% if exam %}
-                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam.file %}<a
+                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam and contests.exam.file %}<a
                         href="{{ contests.exam.file_url }}" target="_blank">Описание задач контеста{% if exam.yandex_contest_id %}
                     #{{ exam.yandex_contest_id }}{% endif %}</a>{% elif exam.yandex_contest_id  %}
                     Контест #{{ exam.yandex_contest_id }}{% endif %}</h4>
