@@ -31,7 +31,8 @@ from .views import \
     MarksSheetTeacherImportCSVFromYandexView, \
     GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
-    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView, \
+    CoursesListTestView
 
 course_offering_patterns = url(
     r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/", include([
@@ -96,6 +97,8 @@ course_offering_patterns = url(
 course_patterns = url(
     r"^courses/", include([
         url(r"^$", CoursesListView.as_view(), name="course_list"),
+        url(r"^test/$", CoursesListTestView.as_view(), name="course_list_test"),
+
         url(r"^(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
             name="course_detail"),
         url(r"^(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
