@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load staticfiles %}
-{% load lookup from core_tags %}
+{% load lookup startswith from core_tags %}
 {% load csc_menu from csc_menu_tags %}
 {% csc_menu "compscicenter" as menu %}
 {% load userpreview from custom_thumbnail %}
@@ -41,7 +41,7 @@
                   </ul>
                 </div>
             {% else %}
-                <a href="{% url 'login' %}">{% trans "Login" %}</a>
+                <a href="{% url 'login' %}{% if not request.path|startswith:"/login" %}?next={{ request.get_full_path|urlencode}}{% endif %}">{% trans "Login" %}</a>
             {% endif %}
         </div>
     </div>
