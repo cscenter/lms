@@ -21,7 +21,7 @@ from django.contrib import auth
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -155,6 +155,9 @@ class UserDetailView(generic.DetailView):
         if not self.request.user.is_authenticated:
             enrollment_queryset = enrollment_queryset.exclude(
                 grade__in=['not_graded', 'unsatisfactory'])
+        elif self.request.user.is_curator:
+            enrollment_queryset = enrollment_queryset.annotate(
+                classes_total=Count('course_offering__courseclass'))
         co_queryset = (CourseOffering.custom.site_related(self.request)
                        .select_related('semester', 'course'))
         prefetch_list = [
