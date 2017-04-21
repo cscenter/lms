@@ -67,7 +67,7 @@ Requirements:
         for student in students.all():
             # print(student.pk, student.stats(term=current_term))
             stats = student.stats(term=current_term)
-            total_adjusted = (stats["enrollments_in_term"]["may_contribute"] +
+            total_adjusted = (stats["in_term"]["may_contribute"] +
                               stats["passed"]["adjusted"])
             if total_adjusted >= 12:
                 areas = []
@@ -81,12 +81,11 @@ Requirements:
                     for course_groups in program.course_groups.all():
                         center_courses = stats["passed"]["center_courses"]
                         courses = center_courses.union(
-                            stats["enrollments_in_term"]["courses"])
+                            stats["in_term"]["courses"])
                         groupes_satisfied += any(c.id in courses for c in
                                                  course_groups.courses.all())
                     if groupes_total and groupes_satisfied == groupes_total:
                         areas.append(program.area.code)
-                print(student.pk, areas)
                 if areas:
                     CSCUser.objects.filter(pk=student.pk).update(
                         status=CSCUser.STATUS.will_graduate)
