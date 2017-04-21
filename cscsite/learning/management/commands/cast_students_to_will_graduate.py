@@ -26,22 +26,23 @@ Requirements:
 
     def handle(self, *args, **options):
         current_term = Semester.get_current()
+        # TODO: Restrict programmes by last 4-5 years?
         study_programmes = [sp for sp in StudyProgram.objects.syllabus()]
         students = (CSCUser.objects
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
                     .annotate(passed_projects=Count(Case(
-                                When((Q(projectstudent__final_grade=Enrollment.GRADES.not_graded) |
-                                      Q(projectstudent__final_grade=Enrollment.GRADES.unsatisfactory) &
-                                      ~Q(projectstudent__project__semester_id=current_term.pk)),
+                                When(Q(projectstudent__final_grade=Enrollment.GRADES.not_graded) & ~Q(projectstudent__project__semester_id=current_term.pk),
+                                     then=Value(None)),
+                                When(Q(projectstudent__final_grade=Enrollment.GRADES.unsatisfactory),
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))
                     .filter(groups__in=[CSCUser.group.STUDENT_CENTER],
-                            curriculum_year__gte=str(current_term.year - 3))
+                            curriculum_year__gte=str(current_term.year - 3),
+                            passed_projects__gte=3)
                     .exclude(status__in=[CSCUser.STATUS.will_graduate,
                                          CSCUser.STATUS.expelled])
-                    .exclude(passed_projects__gte=3)
                     .prefetch_related(
                         Prefetch('onlinecourserecord_set',
                                  queryset=(OnlineCourseRecord.objects
