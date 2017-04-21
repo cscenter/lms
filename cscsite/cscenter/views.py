@@ -68,6 +68,7 @@ class IndexView(generic.TemplateView):
                     .order_by("start", "name"))
         random.shuffle(pool)
         context['online_courses'] = pool[:1]
+        context['is_admission_active'] = False
         return context
 
 
