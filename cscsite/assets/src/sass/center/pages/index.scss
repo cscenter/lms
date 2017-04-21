@@ -1,6 +1,8 @@
-.background-grey {
-  background: #f8f8f8;
+.bg-gray {
+  background-color: $background-grey; // This is a copy from styles.scss :<
 }
+
+
 
 a.links-sep-by-vertical-lines {
   padding-right: 10px;
@@ -76,7 +78,6 @@ h2.right-line:after {
 
 #index-online-courses {
   min-width: $min-width;
-  @extend .background-grey;
 
   #onlinecourses-list {
     @extend .container;
@@ -125,28 +126,44 @@ h2.right-line:after {
 
 .testimonials-wrapper {
   &.__index {
-    //@extend .background-grey;
     .testimonials {
       .testimonial {
+        margin-bottom: 40px;
+
         blockquote {
-          background: $background-grey;
-          //padding-left: 3px;
           padding: 30px;
-          //margin-bottom: 10px;
 
           &:before {
             display: none;
             border-color: #f8f8f8 transparent transparent transparent;
           }
         }
+
       }
     }
 
+    &.__inverse {
+      background: $background-grey;
+      .testimonials {
+        .testimonial {
+          margin-bottom: 40px;
+
+          blockquote {
+            padding: 10px 20px 10px 3px;
+            margin-bottom: 10px;
+
+            &:before {
+              display: none;
+              border-color: #fff transparent transparent transparent;
+            }
+          }
+        }
+      }
+    }
   }
 }
 
 #courses-wrapper {
-  @extend .background-grey;
   .card { @extend .z-depth-2;}
 
   #courses {
@@ -189,7 +206,7 @@ h2.right-line:after {
       }
 
       > thead > tr > th {
-        @extend .background-grey;
+        @extend .bg-gray;
         border-bottom: 0;
       }
     }

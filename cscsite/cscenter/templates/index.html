@@ -9,6 +9,7 @@
 
 <div class="index-image-container"></div>
 
+{% if is_admission_active %}
 <div id="admission">
     <div class="center-header">
         <h1>Набор в CS центр 2017</h1>
@@ -27,9 +28,10 @@
         Все этапы проходят в рамках <a href="/enrollment/program/">программы для поступления</a>.<br>Подать заявку на участие в отборе можно <strong>до 20:00 16 апреля (по московскому времени)</strong>.
     </p>
 </div>
+{% endif %}
 
 {% if online_courses %}
-    <div id="index-online-courses">
+    <div id="index-online-courses"{% if is_admission_active %} class="bg-gray"{% endif %}>
         <div id="onlinecourses-list">
             <div class="center-header">
                 <h1>{% trans "Online courses" %}</h1>
@@ -43,7 +45,7 @@
 {% endif %}
 
 {% if testimonials %}
-    <div class="testimonials-wrapper __index">
+    <div class="testimonials-wrapper __index{% if not is_admission_active %} __inverse{% endif %}">
         <div class="testimonials">
             <div class="center-header">
                 <h1>{% trans "Graduates about CS Center" %}</h1>
@@ -75,7 +77,7 @@
 {% endif %}
 
 {% if courses %}
-    <div id="courses-wrapper">
+    <div id="courses-wrapper"{% if is_admission_active %} class="bg-gray"{% endif %}>
     <div id="courses">
         <div class="center-header">
             <h1>{% trans "Full-time courses on video" %}</h1>
