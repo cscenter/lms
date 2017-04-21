@@ -411,41 +411,69 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     def stats(self, term):
         """
-        Stats for SUCCESSFULLY completed courses. 
+        Stats for SUCCESSFULLY completed courses and enrollments in 
+        requested term.
         Additional DB queries may occur:
-            * enrollment_set (course_offering for each enrollment 
-                              if not select_related)
+            * enrollment_set
+            * enrollment_set__course_offering (for each enrollment)
+            * enrollment_set__course_offering__courseclasses (for each course)
             * onlinecourserecord_set
             * shadcourserecord_set
         """
-        # FIXME: учитывать курсы клуба < 6 лекций за 0.5
         center_courses = set()
         club_courses = set()
-        enrollments_in_term = 0
+        club_adjusted = 0
+        in_term_total = 0  # center, club and shad courses
+        in_term_courses = set()  # center and club courses
+        in_term_passed = 0  # # Center and club courses. Included in passed.
+        in_term_may_contribute = 0  # Center and club courses.
         for e in self.enrollment_set.all():
-            enrollments_in_term += int(e.course_offering.semester_id == term.pk)
-            if is_positive_grade(e.grade):
-                if e.course_offering.is_open:
-                    club_courses.add(e.course_offering.course_id)
+            in_term = e.course_offering.semester_id == term.pk
+            if in_term:
+                in_term_total += 1
+                in_term_courses.add(e.course_offering.course_id)
+            if e.course_offering.is_open:
+                # See queryset in `cast_students_to_will_graduate`
+                if hasattr(e, "classes_total"):
+                    classes_total = e.classes_total
                 else:
+                    classes_total = (e.course_offering.courseclass_set.count())
+                contribution = 0.5 if classes_total < 6 else 1
+                if is_positive_grade(e.grade):
+                    club_courses.add(e.course_offering.course_id)
+                    club_adjusted += contribution
+                    in_term_passed += int(in_term)
+                elif in_term:
+                    in_term_may_contribute += contribution
+            else:
+                if is_positive_grade(e.grade):
                     center_courses.add(e.course_offering.course_id)
-        online = len(self.onlinecourserecord_set.all())
-        shad = 0
+                    in_term_passed += int(in_term)
+                elif in_term:
+                    in_term_may_contribute += 1
+        online_total = len(self.onlinecourserecord_set.all())
+        shad_total = 0
         for c in self.shadcourserecord_set.all():
-            shad += int(is_positive_grade(c.grade))
-            enrollments_in_term += int(c.semester_id == term.pk)
+            shad_total += int(is_positive_grade(c.grade))
+            in_term_total += int(c.semester_id == term.pk)
 
         return {
             "passed": {
-                "total": len(center_courses) + online + shad +
+                "total": len(center_courses) + online_total + shad_total +
                          len(club_courses),
-                # "adjusted": center + online + shad + (club / 2),
+                "adjusted": len(center_courses) + online_total + shad_total +
+                            club_adjusted,
                 "center_courses": center_courses,
                 "club_courses": club_courses,
-                "online_total": online,
-                "shad_total": shad
+                "online_total": online_total,
+                "shad_total": shad_total
             },
-            "enrollments_in_term": enrollments_in_term
+            "in_term": {
+                "total": in_term_total,
+                "courses": in_term_courses,  # center and club courses
+                "passed": in_term_passed,
+                "may_contribute": in_term_may_contribute,
+            }
         }
 
 
