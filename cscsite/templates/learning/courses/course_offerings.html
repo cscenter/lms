@@ -19,7 +19,7 @@
                             <div class="row" style="margin-bottom: 10px;">
                                 {% for course_offering in row %}
                                     <div class="col-xs-4">
-                                        <div style="margin: 15px 0 0 0; color: #333; font-weight: 600; font-size: 8px; letter-spacing: 1px;">
+                                        <div style="margin: 15px 0 5px 0; color: #333; font-weight: 600; font-size: 8px; letter-spacing: 1px;">
                                             {% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}
                                                 <span style="">КУРС CS КЛУБА</span>
                                             {% endif %}
@@ -60,12 +60,15 @@
             background-color: #4f86a0;
         }
         .term-wrapper {
-            border-bottom: 1px solid #e6e6e6;
-            padding-bottom: 35px;
-            margin-bottom: 35px;
+            padding-bottom: 0;
+            margin-bottom: 25px;
+        }
+        .academic-year-wrapper {
+            margin-bottom: 10px;
         }
         .academic-year-wrapper .term-wrapper:last-child {
-            border-color: #a7c2cf;
+            padding-bottom: 35px;
+            border-bottom: 1px solid #a7c2cf;
         }
         .academic-year-wrapper:last-child .term-wrapper:last-child{
             border-bottom: none;
