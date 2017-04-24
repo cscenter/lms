@@ -764,7 +764,7 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
     def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         self._course_offering = get_object_or_404(
-            CourseOffering.objects
+            CourseOffering.custom.site_related(self.request)
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug']))
@@ -1571,7 +1571,7 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def get_course_offering(self):
         course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
-        queryset = CourseOffering.objects
+        queryset = CourseOffering.custom.site_related(self.request)
         if not self.request.user.is_curator:
             queryset = queryset.filter(teachers=self.request.user)
         return get_object_or_404(
