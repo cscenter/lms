@@ -9,6 +9,8 @@ from ._utils import CurrentCampaignsMixin
 from learning.admission.models import Applicant, Test
 
 
+# FIXME: Сейчас явно установлены статусы "Отказ по результатам теста" и "Допущен к экзамену".
+# FIXME: Имеет смысл явно использовать эти статусы перед выборкой? Можно сверять размер выборки и находить проблемных таким образом
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = (
         "Recalculate applicant statuses for selected campaign."
