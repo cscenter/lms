@@ -36,10 +36,14 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         generated = 0
         for campaign in campaigns:
             # Get applicants where score is empty or < passing score
-            passing_score = campaign.online_test_passing_score
+            testing_passing_score = campaign.online_test_passing_score
+            if not testing_passing_score:
+                self.stdout.write("Zero testing passing score "
+                                  "for {}. Skip".format(campaign))
+                continue
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk)
-                          .filter(Q(online_test__score__lt=passing_score) |
+                          .filter(Q(online_test__score__lt=testing_passing_score) |
                                   Q(online_test__score__isnull=True))
                           .values("pk",
                                   "online_test__score",
@@ -60,7 +64,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     score = 0
                 else:
                     score = int(a["online_test__score"])
-                assert score < passing_score
+                assert score < testing_passing_score
                 # Set status
                 (Applicant.objects
                  .filter(pk=a["pk"])

@@ -38,10 +38,14 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         total = 0
         generated = 0
         for campaign in campaigns:
-            passing_score = campaign.online_test_passing_score
+            testing_passing_score = campaign.online_test_passing_score
+            if not testing_passing_score:
+                self.stdout.write("Zero testing passing score "
+                                  "for {}. Skip".format(campaign))
+                continue
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
-                                  online_test__score__gte=passing_score)
+                                  online_test__score__gte=testing_passing_score)
                           .values("pk",
                                   "online_test__score",
                                   "exam__yandex_contest_id",
@@ -52,6 +56,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             template_name = self.get_template_name(campaign, template_type)
             template = get_email_template(template_name)
             for a in applicants:
+                # Exam models were created on previous steps
                 assert a["exam__yandex_contest_id"] is not None
                 total += 1
                 # Update status
