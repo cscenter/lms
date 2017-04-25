@@ -16,8 +16,9 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     # TODO: scheduled time support?
     # TODO: priority level support?
     help = """
-    Generate mailing list with online test results for those who passed 
-    it (score >= passing_score).
+    Set status PERMIT_TO_EXAM for those who passed testing 
+    (score >= passing_score) and add notification about this event to 
+    mailing queue.
     """
 
     def add_arguments(self, parser):
@@ -41,7 +42,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score)
-                          .values("online_test__score",
+                          .values("pk",
+                                  "online_test__score",
                                   "exam__yandex_contest_id",
                                   "yandex_id",
                                   "email"))
@@ -50,16 +52,20 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             template_name = self.get_template_name(campaign, template_type)
             template = get_email_template(template_name)
             for a in applicants:
+                assert a["exam__yandex_contest_id"] is not None
                 total += 1
+                # Update status
+                (Applicant.objects
+                 .filter(pk=a["pk"])
+                 .update(status=Applicant.PERMIT_TO_EXAM))
                 score = int(a["online_test__score"])
                 # Add notification to queue
                 score_str = str(score) + " балл" + self.pluralize(score)
                 context = {
                     'SCORE': score_str,
                     'LOGIN': a["yandex_id"],
+                    'LINK"': "https://contest.yandex.ru/contest/{}/".format(a["exam__yandex_contest_id"])
                 }
-                assert a["exam__yandex_contest_id"] is not None
-                context['LINK'] = "https://contest.yandex.ru/contest/{}/".format(a["exam__yandex_contest_id"])
                 recipients = [a["email"]]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
