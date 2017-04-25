@@ -55,9 +55,10 @@ class Campaign(models.Model):
 @python_2_unicode_compatible
 class Applicant(TimeStampedModel):
     REJECTED_BY_TEST = 'rejected_test'
+    PERMIT_TO_EXAM = 'permit_to_exam'
     REJECTED_BY_EXAM = 'rejected_exam'
     REJECTED_BY_CHEATING = 'rejected_cheating'
-    # TODO: rename interview codes here and in DB before next admission campaign
+    # TODO: rename interview codes here and in DB. Replace values type?
     INTERVIEW_TOBE_SCHEDULED = 'interview_phase'  # permitted to interview
     INTERVIEW_SCHEDULED = 'interview_assigned'
     INTERVIEW_COMPLETED = 'interview_completed'
@@ -69,6 +70,7 @@ class Applicant(TimeStampedModel):
     THEY_REFUSED = 'they_refused'
     STATUS = (
         (REJECTED_BY_TEST, _('Rejected by test')),
+        (PERMIT_TO_EXAM, _('Permitted to the exam')),
         (REJECTED_BY_EXAM, _('Rejected by exam')),
         (REJECTED_BY_CHEATING, _('Cheating')),
         (PENDING, _('Pending')),
