@@ -1,7 +1,10 @@
 import factory
+from django.forms import model_to_dict
+from django.urls import reverse
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
 from learning.factories import SemesterFactory
+from learning.projects.forms import ReportReviewForm
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     REVIEW_SCORE_FIELDS
 from users.factories import UserFactory
@@ -69,3 +72,19 @@ class ReviewFactory(factory.DjangoModelFactory):
     score_technologies = FuzzyChoice([v for v, _ in
                                       Review.TECHNOLOGIES_CRITERION])
     score_plans = FuzzyChoice([v for v, _ in Review.PLANS_CRITERION])
+
+
+class ReportReviewFormFactory:
+    def __init__(self, *args, report, reviewer, **kwargs):
+        new_review = ReviewFactory.build(report=report, reviewer=reviewer,
+                                         **kwargs)
+        form = ReportReviewForm(data=model_to_dict(new_review))
+        data = form.data
+        # FIXME: Check if I can pass it directly to ReportReviewForm
+        data[ReportReviewForm.prefix] = "1"
+        self.data = data
+        self.send_to = reverse("projects:project_report", kwargs={
+            "student_pk": report.project_student.student.pk,
+            "project_pk": report.project_student.project.pk,
+        })
+
