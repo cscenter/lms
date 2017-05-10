@@ -494,6 +494,10 @@ h5.assignment {
 
     &.pass {
       color: $color-orange;
+
+      &.__binary {
+        color: $color-green;
+      }
     }
 
     &.good {
@@ -525,6 +529,11 @@ h5.assignment {
 
     &.pass {
       background-color: $color-orange;
+
+      &.__binary {
+        background-color: $color-green;
+        color: #fff;
+      }
     }
 
     &.good {

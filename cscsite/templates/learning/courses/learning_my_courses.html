@@ -30,7 +30,7 @@
             <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
                 <td>
                 <a href="{{ e.course_offering.get_absolute_url }}" class="title">{{ e.course_offering.course.name }}</a> &nbsp;
-                  <span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span><br>
+                  <span class="badge assignment-status {{ e.course_offering.grading_type_css_mixin }} {{ e.grade }}">{{ e.grade_honest }}</span><br>
               {% trans "Professors" %}:
                 {% for teacher in e.course_offering.teachers.all %}
                 <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
@@ -92,7 +92,7 @@
                     <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
                       {{ e.course_offering.course.name }}</a>
                   </td>
-                  <td><span class="badge assignment-status {{ e.grade }}">{{ e.grade_honest }}</span></td>
+                  <td><span class="badge assignment-status {{ e.course_offering.grading_type_css_mixin }} {{ e.grade }}">{{ e.grade_honest }}</span></td>
                   <td>{{ e.course_offering.semester }}</td>
                 </tr>
             {% endfor %}
