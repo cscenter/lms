@@ -63,7 +63,7 @@ class Command(HandleErrorsMixin, CurrentCampaignsMixin, BaseCommand):
         dry_run = not options["save"]
         contest_id = options["contest_id"]
 
-        with open(csv_path, "rb") as f:
+        with open(csv_path, "r") as f:
             data = tablib.Dataset().load(f.read())
             self.clean_yandex_contest_csv_headers(contest_id, data)
             online_exam_resource = ExamRecordResource(
@@ -73,9 +73,10 @@ class Command(HandleErrorsMixin, CurrentCampaignsMixin, BaseCommand):
                 contest_id=contest_id)
             result = online_exam_resource.import_data(data, dry_run=dry_run)
             self.handle_errors(result)
-            print("Done")
             if dry_run:
                 self.stdout.write("Data not imported. Dry run mode ON.")
+            else:
+                print("Done")
 
     @staticmethod
     def clean_yandex_contest_csv_headers(contest_id, data):

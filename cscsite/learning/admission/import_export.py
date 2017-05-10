@@ -2,12 +2,10 @@
 
 from __future__ import unicode_literals, absolute_import
 
-import uuid
 from collections import OrderedDict
+from decimal import Decimal
 
-from django.utils.encoding import smart_text, force_text
 from import_export import resources, fields, widgets
-from import_export.instance_loaders import ModelInstanceLoader
 
 from learning.admission.models import Applicant, Test, Exam
 
@@ -172,4 +170,4 @@ class ExamRecordResource(DetailsApplicantImportMixin,
         """Double check that score is always a valid type, on DB level we 
         can have null value, so if we omit django field validation on client, 
         it will be very bad"""
-        assert int(row["score"]) >= 0
+        assert int(Decimal(row["score"])) >= 0

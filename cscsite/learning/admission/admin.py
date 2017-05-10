@@ -51,7 +51,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     list_display = ['__str__', 'score', 'yandex_contest_id']
     search_fields = ['applicant__yandex_id', 'applicant__surname',
-                     'applicant__first_name']
+                     'applicant__first_name', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
