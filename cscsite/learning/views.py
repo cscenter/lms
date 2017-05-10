@@ -902,39 +902,25 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         super(CourseClassCreateUpdateMixin, self).__init__(*args, **kwargs)
 
     def is_form_allowed(self, user, obj):
-        return (obj is None or
-                (user.is_authenticated and user.is_curator) or
+        # FIXME: Do we need this check? Looks like not.
+        return (obj is None or user.is_curator or
                 user in obj.course_offering.teachers.all())
 
-    def get_initial(self, *args, **kwargs):
-        initial = (super(CourseClassCreateUpdateMixin, self)
-                   .get_initial(*args, **kwargs))
-        # Prefetch Course Offering model
+    def get_course_offering(self):
         course_slug, semester_year, semester_type \
             = utils.co_from_kwargs(self.kwargs)
         base_qs = CourseOffering.custom.site_related(self.request)
         if not self.request.user.is_curator:
             base_qs = base_qs.filter(teachers=self.request.user)
-
-        self._course_offering = get_object_or_404(
+        return get_object_or_404(
             base_qs.filter(course__slug=course_slug,
                            semester__year=semester_year,
                            semester__type=semester_type))
-        # TODO: Add tests for initial data after discussion
-        if isinstance(self, generic.CreateView):
-            previous_class = (CourseClass.objects
-                              .filter(course_offering=self._course_offering.pk)
-                              .defer("description")
-                              .order_by("-date", "starts_at")
-                              .first())
-            if previous_class is not None:
-                initial["type"] = previous_class.type
-                initial["venue"] = previous_class.venue
-                initial["starts_at"] = previous_class.starts_at
-                initial["ends_at"] = previous_class.ends_at
-                initial["date"] = previous_class.date + datetime.timedelta(
-                    weeks=1)
-        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["course_offering"] = self._course_offering
+        return context
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -956,8 +942,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                         in self.object.courseclassattachment_set.all()))
         else:
             remove_links = ""
-        return form_class(remove_links=remove_links,
-                          **self.get_form_kwargs())
+        return form_class(remove_links=remove_links, **self.get_form_kwargs())
 
     def form_valid(self, form):
         assert self._course_offering is not None
@@ -979,6 +964,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if self.request.GET.get('back') == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
+            # TODO: add  `add_class_url` method
             return reverse('course_class_add',
                            args=[self._course_offering.course.slug,
                                  self._course_offering.semester.slug])
@@ -988,18 +974,40 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
 class CourseClassCreateView(CourseClassCreateUpdateMixin,
                             generic.CreateView):
+
+    def get_initial(self, *args, **kwargs):
+        initial = super().get_initial(*args, **kwargs)
+        # TODO: Add tests for initial data after discussion
+        previous_class = (CourseClass.objects
+                          .filter(course_offering=self._course_offering.pk)
+                          .defer("description")
+                          .order_by("-date", "starts_at")
+                          .first())
+        if previous_class is not None:
+            initial["type"] = previous_class.type
+            initial["venue"] = previous_class.venue
+            initial["starts_at"] = previous_class.starts_at
+            initial["ends_at"] = previous_class.ends_at
+            initial["date"] = previous_class.date + datetime.timedelta(
+                weeks=1)
+        return initial
+
     def get_success_url(self):
         msg = _("The class '%s' was successfully created.")
         messages.success(self.request, msg % self.object.name,
                          extra_tags='timeout')
         return super(CourseClassCreateView, self).get_success_url()
 
-    def form_valid(self, form):
-        if self._course_offering.is_completed:
-            form.add_error(None, "Вы не можете создать новое занятие, т.к. "
-                                 "курс завершён.")
-            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
-        return super(CourseClassCreateView, self).form_valid(form)
+    def post(self, request, *args, **kwargs):
+        self._course_offering = self.get_course_offering()
+        is_curator = self.request.user.is_curator
+        if self._course_offering.is_completed and not is_curator:
+            return HttpResponseForbidden()
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self._course_offering = self.get_course_offering()
+        return super().get(request, *args, **kwargs)
 
 
 class CourseClassUpdateView(CourseClassCreateUpdateMixin,
@@ -1010,13 +1018,13 @@ class CourseClassUpdateView(CourseClassCreateUpdateMixin,
                          extra_tags='timeout')
         return super(CourseClassUpdateView, self).get_success_url()
 
-    def form_valid(self, form):
-        if (self._course_offering.is_completed and
-                not self.request.user.is_curator):
-            form.add_error(None, "Данные не были сохранены. Обратитесь к "
-                                 "куратору для обновления данных.")
-            return super(CourseClassCreateUpdateMixin, self).form_invalid(form)
-        return super(CourseClassUpdateView, self).form_valid(form)
+    def post(self, request, *args, **kwargs):
+        self._course_offering = self.get_course_offering()
+        return super().post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self._course_offering = self.get_course_offering()
+        return super().get(request, *args, **kwargs)
 
 
 class CourseClassAttachmentDeleteView(TeacherOnlyMixin,

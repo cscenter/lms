@@ -32,7 +32,7 @@ class SemesterFactory(factory.DjangoModelFactory):
         django_get_or_create = ('year', 'type')
 
     year = 2015
-    type = Semester().TYPES['spring']
+    type = Semester.TYPES.spring
 
     @classmethod
     def create_current(cls, **kwargs):

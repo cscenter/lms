@@ -173,7 +173,7 @@ def co_from_kwargs(kwargs):
         semester_year = int(semester_year)
     except (ValueError, TypeError):
         raise Http404('Course offering not found')
-    return (course_slug, semester_year, semester_type)
+    return course_slug, semester_year, semester_type
 
 
 class LearningPermissionsMixin(object):

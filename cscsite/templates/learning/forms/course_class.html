@@ -90,12 +90,13 @@
             <li class="active">Редактирование занятия</li>
         {% endif %}
         </ol>
-        {% if form.instance.course_offering.is_completed %}
+        {% if not form.instance.pk and course_offering.is_completed and not user.is_curator %}
             <div class="alert alert-block alert-warning">
-                Курс завершён. Только кураторы могут изменить занятие.
+                Курс завершён. Если по какой-то причине вам необходимо добавить новое занятие - обратитесь, пожалуйста, к кураторам.
             </div>
+        {% else %}
+            {% crispy form form.helper %}
         {% endif %}
-      {% crispy form form.helper %}
     </div>
   </div>
 </div>

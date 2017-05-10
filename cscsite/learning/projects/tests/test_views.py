@@ -3,13 +3,16 @@
 from __future__ import unicode_literals, absolute_import
 
 import pytest
+from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from learning.factories import SemesterFactory
-from learning.projects.factories import ProjectFactory, ReportFactory
-from learning.projects.models import Report, ProjectStudent
+from learning.projects.factories import ProjectFactory, ReportFactory, \
+    ReviewFactory, ReportReviewFormFactory
+from learning.projects.forms import ReportReviewForm
+from learning.projects.models import Report, ProjectStudent, Review
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
 from learning.utils import get_current_semester_pair
 from notifications.models import Notification
@@ -305,7 +308,7 @@ def test_reviewer_project_enroll(client, curator):
 
 
 @pytest.mark.django_db
-def test_report_page_permissions(client, curator):
+def test_reportpage_permissions(client, curator):
     reviewer_participant = ProjectReviewerFactory()
     reviewer = ProjectReviewerFactory()
     report = ReportFactory()
@@ -343,7 +346,7 @@ def test_report_page_permissions(client, curator):
 
 
 @pytest.mark.django_db
-def test_report_page_update_permissions():
+def test_reportpage_update_permissions():
     """Check report updating restricted to curators only"""
     from learning.projects.views import (ReportUpdateStatusView,
         ReportCuratorAssessmentView)
@@ -353,7 +356,7 @@ def test_report_page_update_permissions():
 
 
 @pytest.mark.django_db
-def test_report_page_notifications(client, curator):
+def test_reportpage_notifications(client, curator):
     curator.groups.add(PARTICIPANT_GROUPS.CURATOR_PROJECTS)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
@@ -411,7 +414,16 @@ def test_report_page_notifications(client, curator):
 
 
 @pytest.mark.django_db
-def test_report_page_summarize_notifications(client, curator):
+def test_reportpage_notifications_on_status_rollback(client, curator):
+    """
+    When we rollback status to `review` stage, make sure notifications
+    won't send to reviewers, who already were.
+    """
+    pass
+
+
+@pytest.mark.django_db
+def test_reportpage_summarize_notifications(client, curator):
     from learning.viewmixins import CuratorOnlyMixin
     from learning.projects.views import ReportCuratorSummarizeView
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
@@ -446,6 +458,7 @@ def test_report_page_summarize_notifications(client, curator):
     client.post(url, form)
     assert Notification.objects.count() == 1
     assert Notification.objects.all()[0].recipient == student1
+
 
 
 # TODO: проверить видимость форм, на уровне контекста, post-запросы
