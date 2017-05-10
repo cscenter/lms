@@ -11,6 +11,7 @@ import unittest
 import pytest
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
+from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from django.conf import settings
@@ -29,7 +30,7 @@ from users.factories import TeacherCenterFactory, StudentFactory, \
 from ..utils import get_current_semester_pair
 from ..factories import *
 from .mixins import *
-from learning.forms import MarksSheetTeacherImportGradesForm
+from learning.forms import MarksSheetTeacherImportGradesForm, CourseClassForm
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
@@ -1968,11 +1969,8 @@ def test_studentassignment_first_submission_at(curator):
     assert sa.first_submission_at == first_submission_at
 
 
-
 @pytest.mark.django_db
-def test_gradebook_recalculate_grading_type(client,
-                                            student_center_factory,
-                                            teacher_center_factory):
+def test_gradebook_recalculate_grading_type(client):
     teacher = TeacherCenterFactory.create()
     students = StudentCenterFactory.create_batch(2)
     s = SemesterFactory.create_current()
@@ -2030,6 +2028,56 @@ def test_gradebook_recalculate_grading_type(client,
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") not in response.content
     assert smart_bytes("/satisfactory/") in response.content
+
+
+@pytest.mark.django_db
+def test_course_class_form(client, curator, settings):
+    """Test form availability based on `is_completed` value"""
+    # XXX: Date widget depends on locale, don't know exactly why
+    settings.LANGUAGE_CODE = 'ru'
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory(is_completed=False, teachers=[teacher])
+    course_class_add_url = reverse("course_class_add",
+                                   kwargs=dict(course_slug=co.course.slug,
+                                               semester_slug=co.semester.slug))
+    response = client.get(course_class_add_url)
+    assert response.status_code == 302
+    client.login(teacher)
+    response = client.get(course_class_add_url)
+    assert response.status_code == 200
+    # Check form visible
+    assert smart_bytes("submit-id-save") in response.content
+    # Course completed, form invisible for teacher
+    co.is_completed = True
+    co.save()
+    response = client.get(course_class_add_url)
+    assert smart_bytes("Курс завершён") in response.content
+    client.login(curator)
+    response = client.get(course_class_add_url)
+    assert smart_bytes("Курс завершён") not in response.content
+    # Try to send form directly by teacher
+    client.login(teacher)
+    form = {}
+    response = client.post(course_class_add_url, form, follow=True)
+    assert response.status_code == 403
+    # Check we can post form if course is active
+    co.is_completed = False
+    co.save()
+    next_day = now() + datetime.timedelta(days=1)
+    venue = VenueFactory()
+    date_format = CourseClassForm.base_fields['date'].widget.format
+    form = {
+        "type": "lecture",
+        "venue": venue.pk,
+        "name": "Test class",
+        "date": next_day.strftime(date_format),
+        "starts_at": "17:20",
+        "ends_at": "18:50"
+    }
+    response = client.post(course_class_add_url, form, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'success' in message.tags
+    # FIXME: добавить тест на is_form_available и посмотреть, можно ли удалить эту часть, по-моему это лишняя логика
 
 
 # TODO: Написать тест, который проверяет, что по-умолчанию в форму

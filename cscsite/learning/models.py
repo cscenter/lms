@@ -506,7 +506,7 @@ class CourseClass(TimeStampedModel, object):
     def clean(self):
         super(CourseClass, self).clean()
         # ends_at should be later than starts_at
-        if self.starts_at >= self.ends_at:
+        if self.starts_at and self.ends_at and self.starts_at >= self.ends_at:
             raise ValidationError(_("Class should end after it started"))
 
     def save(self, *args, **kwargs):
