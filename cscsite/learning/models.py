@@ -323,6 +323,12 @@ class CourseOffering(TimeStampedModel):
         else:
             return float("inf")
 
+    @property
+    def grading_type_css_mixin(self):
+        if self.grading_type == GRADING_TYPES.binary:
+            return "__binary"
+        return ""
+
 
 @python_2_unicode_compatible
 class CourseOfferingTeacher(models.Model):

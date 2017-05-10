@@ -421,6 +421,10 @@ h2 {
 
     &.pass {
       color: $color-orange;
+
+      &.__binary {
+        color: $color-green;
+      }
     }
 
     &.good {
@@ -452,6 +456,11 @@ h2 {
 
     &.pass {
       background-color: $color-orange;
+
+      &.__binary {
+        background-color: $color-green;
+        color: $color-white;
+      }
     }
 
     &.good {
