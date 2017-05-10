@@ -3,10 +3,11 @@ from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from learning.projects.models import ProjectStudent, Report, Project
+from learning.projects.models import ProjectStudent, Report, Project, Review, \
+    ReportComment
 from learning.settings import PARTICIPANT_GROUPS
 from notifications import types
 from notifications.signals import notify
@@ -15,6 +16,7 @@ _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
 _UNSAVED_FILE_PRESENTATION = 'unsaved_presentation'
 
 
+@receiver(pre_save, sender=Project)
 def pre_save_project(sender, instance, **kwargs):
     """
     Save presentation files after project created and we can get project pk.
@@ -57,6 +59,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
     Project.objects.filter(pk=project_id).update(canceled=all_left_project)
 
 
+@receiver(post_save, sender=Project)
 def post_save_project(sender, instance, created, *args, **kwargs):
     from learning.projects.tasks import (
         download_presentation_from_yandex_disk_supervisor as job_ya_supervisor,
@@ -110,6 +113,7 @@ def post_save_project(sender, instance, created, *args, **kwargs):
                 "presentation_slideshare_url"))
 
 
+@receiver(post_save, sender=Report)
 def post_save_report(sender, instance, created, *args, **kwargs):
     """ Send notifications to curators by email about new report"""
     if created:
@@ -142,6 +146,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                 )
 
 
+@receiver(post_save, sender=Review)
 def post_save_review(sender, instance, created, *args, **kwargs):
     """Update report status if all reviews are completed."""
     review = instance
@@ -155,6 +160,7 @@ def post_save_review(sender, instance, created, *args, **kwargs):
             report.save()
 
 
+@receiver(post_save, sender=ReportComment)
 def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""
     if created:
