@@ -9,88 +9,103 @@ from ._utils import CurrentCampaignsMixin
 from learning.admission.models import Applicant, Test
 
 
-# FIXME: Сейчас явно установлены статусы "Отказ по результатам теста" и "Допущен к экзамену".
-# FIXME: Имеет смысл явно использовать эти статусы перед выборкой? Можно сверять размер выборки и находить проблемных таким образом
+# TODO: set `reject_value` by default to (`pass_value` - 1)?
 class Command(CurrentCampaignsMixin, BaseCommand):
-    help = (
-        "Recalculate applicant statuses for selected campaign."
-    )
+    help = """
+    Recalculate applicant statuses for selected campaign.
+
+        1. Set `REJECTED_BY_EXAM` for applicants with  
+            exam score <= `reject_value`
+        2. Set `INTERVIEW_TOBE_SCHEDULED` for applicants with 
+            exam score >= `exam_score_pass`
+        3. Set `PENDING` for applicants with 
+            exam score in (reject_value, exam_score_pass) range
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')
         parser.add_argument(
-            '--exam_score_reject', type=int,
+            '--reject_value', type=int,
             help='Set `rejected by exam` for applicants with exam score'
                  ' below this value')
 
     def handle(self, *args, **options):
-        """
-        1. Set status `REJECTED_BY_TEST` for applicants without online
-        exam record
-        2. Set `REJECTED_BY_EXAM` for applicants with exam score below
-        `exam_score_reject` value
-        3. Set `INTERVIEW_TOBE_SCHEDULED` for applicants with exam score above
-        `exam_score_pass` value
-        4. Set `PENDING` for applicants with exam score
-        in [exam_score_reject;exam_score_pass]
-        """
-
         if not options["city"]:
-            raise CommandError("Provide city code for current campaign")
+            raise CommandError("Provide campaign city code")
         city_code = options["city"]
         campaigns = self.get_current_campaigns(city_code)
-        assert len(campaigns) > 1
+        assert len(campaigns) == 1
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
-        campaign = campaigns.pop()
-        exam_score_reject = options["exam_score_reject"]
-        if not exam_score_reject:
-            raise CommandError("Exam score value for rejection not specified")
+        campaign = campaigns.first()
+        reject_value = options["reject_value"]
+        if not reject_value:
+            raise CommandError("Score value for rejection is not specified")
         exam_score_pass = campaign.exam_passing_score
         if not exam_score_pass:
             self.stdout.write("Zero exam passing score "
                               "for {}. Cancel".format(campaign))
             return
 
-        print("Total applicants: {}".format(
+        self.stdout.write("Total applicants: {}".format(
             Applicant.objects.filter(campaign=campaign.pk).count()))
 
-        print("Cheaters: {}".format(Applicant.objects
-                .filter(campaign=campaign.pk,
-                        status=Applicant.REJECTED_BY_CHEATING).count()))
+        total_cheaters = (Applicant.objects
+                          .filter(campaign=campaign.pk,
+                                  status=Applicant.REJECTED_BY_CHEATING)
+                          .count())
+        self.stdout.write("Cheaters: {}".format(total_cheaters))
 
-        rejects_by_test_q = (Applicant.objects
-                             .filter(campaign=campaign.pk,
-                                     exam__isnull=True))
-        print("Rejected by test: {}".format(rejects_by_test_q.count()))
-        rejects_by_test_q.update(status=Applicant.REJECTED_BY_TEST)
+        total_rejected_by_test = (Applicant.objects
+                                  .filter(campaign=campaign.pk,
+                                          status=Applicant.REJECTED_BY_TEST)
+                                  .count())
+        self.stdout.write("Rejected by test: {}".format(total_rejected_by_test))
 
         rejects_by_exam_q = (Applicant.objects
-                             .filter(campaign=campaign.pk,
-                                     exam__score__lt=exam_score_reject)
+                             .filter(campaign=campaign.pk)
+                             .filter(Q(exam__score__lte=reject_value) |
+                                     Q(exam__score__isnull=True))
                              .filter(Q(status__isnull=True) |
                                      Q(status=Applicant.PENDING) |
+                                     Q(status=Applicant.PERMIT_TO_EXAM) |
                                      Q(status=Applicant.REJECTED_BY_EXAM)))
-        print("Rejected by exam: {}".format(rejects_by_exam_q.count()))
-        rejects_by_exam_q.update(status=Applicant.REJECTED_BY_EXAM)
-        # FIXME: passing_score - inclusive or exclusive???
+        total_rejects_by_exam = rejects_by_exam_q.update(
+            status=Applicant.REJECTED_BY_EXAM)
+        self.stdout.write("Rejected by exam: {}".format(total_rejects_by_exam))
+
         pass_exam_q = (Applicant.objects
                        .filter(campaign=campaign.pk,
-                               exam__score__gt=exam_score_pass)
+                               exam__score__gte=exam_score_pass)
                        .filter(Q(status__isnull=True) |
                                Q(status=Applicant.PENDING) |
+                               Q(status=Applicant.PERMIT_TO_EXAM) |
                                Q(status=Applicant.INTERVIEW_TOBE_SCHEDULED)))
-        print("Pass exam: {}".format(pass_exam_q.count()))
-        pass_exam_q.update(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+        total_pass_exam = pass_exam_q.update(
+            status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+        self.stdout.write("Pass exam: {}".format(total_pass_exam))
 
         pending_q = (Applicant.objects
                        .filter(campaign=campaign.pk,
-                               exam__score__gte=exam_score_reject,
-                               exam__score__lte=exam_score_pass)
+                               exam__score__gt=reject_value,
+                               exam__score__lt=exam_score_pass)
                        .filter(Q(status__isnull=True) |
+                               Q(status=Applicant.PERMIT_TO_EXAM) |
                                Q(status=Applicant.PENDING)))
-        print("Pending status: {}".format(pending_q.count()))
-        pending_q.update(status=Applicant.PENDING)
+        total_pending = pending_q.update(status=Applicant.PENDING)
+        self.stdout.write("Pending status: {}".format(total_pending))
+
+        total_all = (
+            total_cheaters,
+            total_rejected_by_test,
+            total_rejects_by_exam,
+            total_pass_exam,
+            total_pending
+        )
+        self.stdout.write("{} = {}".format(
+            " + ".join((str(t) for t in total_all)),
+            sum(total_all)
+        ))
