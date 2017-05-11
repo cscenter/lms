@@ -85,7 +85,7 @@ class ReportStatusForm(forms.ModelForm):
         self.helper.layout = Layout(
             FieldWithButtons("status", StrictButton(
                 '<i class="fa fa-floppy-o" aria-hidden="true"></i>',
-                name="new_comment_form",
+                name="update_status_form",
                 type="submit",
                 css_class="btn btn-primary")),
         )

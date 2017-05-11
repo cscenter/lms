@@ -819,29 +819,31 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
                     break
             if all_reports_in_review_state:
                 self.send_email_notification(project_students)
-            # For all reviews drop is_complete flag
-            Review.objects.filter(report=report).update(is_completed=False)
         return response
 
     def send_email_notification(self, project_students):
-        """
-        All project reports in review state, send notification to reviewers
-        about that fact.
-        """
+        """ Send notification to reviewers that all reports in review state """
+        report = self.object
         reports = [(ps.student.pk, ps.student.get_short_name()) for ps
                    in project_students]
         context = {
-            "project_pk": self.object.project_student.project.pk,
-            "project_name": self.object.project_student.project.name,
+            "project_pk": report.project_student.project.pk,
+            "project_name": report.project_student.project.name,
             "reports": reports
         }
-        reviewers = self.object.project_student.project.reviewers.all()
+        # Consider situation when we rollback all reports to `review` stage.
+        # In that case we shouldn't send notification to those reviewers
+        # who already sent review.
+        has_reviews = Review.objects.filter(
+            report=report).values_list("reviewer_id", flat=True)
+        reviewers = report.project_student.project.reviewers.exclude(
+            id__in=has_reviews).all()
         for recipient in reviewers:
             notify.send(
                 self.request.user,  # Curator who changed status
                 type=types.PROJECT_REPORTS_IN_REVIEW_STATE,
                 verb='changed',
-                target=self.object,
+                target=report,
                 recipient=recipient,
                 data=context
             )
