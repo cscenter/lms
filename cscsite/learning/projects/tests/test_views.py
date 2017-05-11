@@ -411,15 +411,46 @@ def test_reportpage_notifications(client, curator):
     response = client.post(report.get_absolute_url(), form)
     assert response.status_code == 403
     assert Notification.objects.count() == 0
-
-
-@pytest.mark.django_db
-def test_reportpage_notifications_on_status_rollback(client, curator):
-    """
-    When we rollback status to `review` stage, make sure notifications
-    won't send to reviewers, who already were.
-    """
-    pass
+    # Also, we can't post review
+    review_form = ReportReviewFormFactory(report=report, reviewer=reviewer1)
+    client.login(reviewer1)
+    response = client.post(review_form.send_to, review_form.data)
+    assert response.status_code == 403
+    # Change report status to send review
+    report.status = Report.REVIEW
+    report.save()
+    response = client.post(review_form.send_to, review_form.data, follow=True)
+    assert response.status_code == 200
+    # Create report for second student
+    ps2, _ = ProjectStudent.objects.get_or_create(project=project,
+                                                  student=student2)
+    report2 = ReportFactory(project_student=ps2, status=Report.COMPLETED)
+    # When we rollback status to `review` stage, make sure notifications
+    # won't send to reviewers, who already sent review.
+    client.login(curator)
+    update_report2_status_url = reverse(
+        "projects:project_report_update_status",
+        kwargs={
+            "student_pk": report2.project_student.student.pk,
+            "project_pk": report2.project_student.project.pk,
+        })
+    client.post(update_report2_status_url, {
+        "report_status_change-status": "review",
+    })
+    assert Notification.objects.count() == 2  # no reviews on report2 yet
+    Notification.objects.get_queryset().delete()
+    client.login(reviewer2)
+    review_form = ReportReviewFormFactory(report=report2, reviewer=reviewer2)
+    response = client.post(review_form.send_to, review_form.data)
+    # Rollback status again, now we have review on report2
+    report2.status = Report.COMPLETED
+    report2.save()
+    client.login(curator)
+    response = client.post(update_report2_status_url, {
+        "report_status_change-status": "review",
+    }, follow=True)
+    assert response.status_code == 200
+    assert Notification.objects.count() == 1
 
 
 @pytest.mark.django_db
