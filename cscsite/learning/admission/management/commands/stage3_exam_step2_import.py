@@ -9,6 +9,10 @@ from learning.admission.import_export import ExamRecordResource
 from ._utils import CurrentCampaignsMixin, HandleErrorsMixin
 
 
+# TODO: Сделать город обязательным. Для записей, которые не подходят по городу
+# - прятать сообщения о том, что не найдена анкета. Для этого надо переделать
+# логику поиска анкет - сначала искать по yandex_id, потом уже отфильтровывать
+# по городу
 class Command(HandleErrorsMixin, CurrentCampaignsMixin, BaseCommand):
     help = (
         """Import results for online exam. Run in dry mode by default.

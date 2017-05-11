@@ -10,6 +10,7 @@ from learning.admission.import_export import OnlineTestRecordResource
 from ._utils import CurrentCampaignsMixin, HandleErrorsMixin
 
 
+# TODO: Make `city` attr required
 class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
     help = (
         """Import results for online test. Run in dry mode by default.

@@ -10,6 +10,7 @@ from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
 from learning.admission.models import Applicant, Exam
 
 
+# TODO: Make `city` attr required
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     TEMPLATE_TYPE = "exam-contest"
     help = 'Generate mails about contest check completeness'
