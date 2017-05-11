@@ -5,16 +5,18 @@ import itertools
 from django.apps import apps
 
 import django_rq
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_init
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.timezone import now
 
-from learning.models import AssignmentComment, AssignmentNotification
+from learning.models import AssignmentComment, AssignmentNotification, \
+    Assignment, CourseClass, CourseOfferingNews, Enrollment
 from learning.tasks import (maybe_upload_slides_yandex,
                             maybe_upload_slides_slideshare)
 
 
+@receiver(post_save, sender=Assignment)
 def create_student_assignments_for_new_assignment(sender, instance, created,
                                                   *args, **kwargs):
     if not created:
@@ -37,6 +39,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
          .save())
 
 
+@receiver(post_save, sender=Assignment)
 def create_deadline_change_notification(sender, instance, created,
                                         *args, **kwargs):
     if created:
@@ -101,10 +104,17 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
         setattr(sa, attr_name, sa_update_dict[attr_name])
 
 
+# FIXME: redesign with `from_db` method!
+@receiver(post_init,
+          sender=CourseClass,
+          dispatch_uid='learning.signals.course_class_post_init')
 def track_fields_post_init(sender, instance, **kwargs):
     instance.__class__.update_track_fields(instance)
 
 
+@receiver(post_save,
+          sender=CourseClass,
+          dispatch_uid='learning.signals.course_class_add_upload_slides_job')
 def add_upload_slides_job(sender, instance, **kwargs):
     if instance.slides and not instance.slides_url:
         queue = django_rq.get_queue('default')
@@ -112,6 +122,7 @@ def add_upload_slides_job(sender, instance, **kwargs):
         queue.enqueue(maybe_upload_slides_slideshare, instance.pk)
 
 
+@receiver(post_save, sender=CourseOfferingNews)
 def create_course_offering_news_notification(sender, instance, created,
                                              *args, **kwargs):
     if not created:
@@ -131,6 +142,7 @@ def create_course_offering_news_notification(sender, instance, created,
          .save())
 
 
+@receiver(post_save, sender=Enrollment)
 def populate_assignments_for_new_enrolled_student(sender, instance, created,
                                                   *args, **kwargs):
     if not created:
