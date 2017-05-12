@@ -53,6 +53,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         self.stdout.write("Total applicants: {}".format(
             Applicant.objects.filter(campaign=campaign.pk).count()))
 
+        # Cheaters are not identifying before exam, but show them for reference.
         total_cheaters = (Applicant.objects
                           .filter(campaign=campaign.pk,
                                   status=Applicant.REJECTED_BY_CHEATING)

@@ -14,12 +14,23 @@ from core.filters import FilterEmptyChoiceMixin
 from learning.admission.models import Applicant, Interview, Campaign
 
 
+class ApplicantStatusFilter(django_filters.ChoiceFilter):
+    def filter(self, qs, value):
+        if value == Applicant.PERMIT_TO_EXAM:
+            return qs.exclude(**{
+                '%s__%s' % (self.name, "exact"): Applicant.REJECTED_BY_TEST
+            })
+        return super().filter(qs, value)
+
+
 class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
         queryset=(Campaign.objects
                   .select_related("city")
                   .order_by("-city__name", "-year").all()))
+    status = ApplicantStatusFilter(choices=Applicant.STATUS,
+                                   label=_("Status"))
     surname = django_filters.CharFilter(lookup_type='icontains',
                                         label=_("Surname"))
 
@@ -65,10 +76,13 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
 
 
 class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
-    status = InterviewStatusFilter(choices=Interview.STATUSES, label=_("Status"),
+    status = InterviewStatusFilter(choices=Interview.STATUSES,
+                                   label=_("Status"),
                                    help_text="")
-    date = django_filters.MethodFilter(action='filter_by_date', label=_("Date"),
-                                       help_text="", name="date")
+    date = django_filters.MethodFilter(action='filter_by_date',
+                                       name="date",
+                                       label=_("Date"),
+                                       help_text="" )
 
     class Meta:
         model = Interview
