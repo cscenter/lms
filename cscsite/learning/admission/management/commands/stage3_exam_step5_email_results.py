@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
 from post_office.models import Email
@@ -12,13 +10,7 @@ from learning.admission.models import Applicant, Exam
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    help = """
-    Generate emails about online exam results.
-
-    Template string for email templates:
-        {}
-        type: [exam-success|exam-fail]
-    """.format(ValidateTemplatesMixin.TEMPLATE_REGEXP)
+    help = """Generate emails about online exam results."""
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -34,50 +26,51 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         self.validate_templates(campaigns, types=["exam-fail", "exam-success"])
 
-        generated = 0
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))
-            succeed_applicants = (Applicant.objects
-                                  .filter(campaign=campaign.pk,
-                                          status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-                                  .only("email"))
-            print("Succeed total: {}".format(len(succeed_applicants)))
-            for applicant in succeed_applicants:
-                template_name = self.get_template_name(campaign, "exam-success")
-                template = get_email_template(template_name)
-                recipients = [applicant.email]
+            statuses = [
+                Applicant.INTERVIEW_TOBE_SCHEDULED,
+                Applicant.REJECTED_BY_EXAM
+            ]
+            applicants = (Applicant.objects
+                          .filter(campaign=campaign.pk,
+                                  status__in=statuses)
+                          .only("email", "status"))
+            succeed = 0
+            total = 0
+            generated = 0
+            for a in applicants.iterator():
+                total += 1
+                succeed += int(a.status == Applicant.INTERVIEW_TOBE_SCHEDULED)
+                template = self.get_template(a, campaign)
+                recipients = [a.email]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
+                    context = {
+                        'SUBJECT_CITY': campaign.city.name
+                    }
                     mail.send(
                         recipients,
                         sender='info@compscicenter.ru',
                         template=template,
                         # Render on delivery, we have no really big amount of
                         # emails to think about saving CPU time
-                        render_on_delivery=True,
+                        render_on_delivery=False,
+                        context = context,
                         backend='ses',
                     )
                     generated += 1
-            failed_applicants = (Applicant.objects
-                                 .filter(campaign=campaign.pk,
-                                         status=Applicant.REJECTED_BY_EXAM)
-                                 .only("email"))
-            print("Failed total: {}".format(len(failed_applicants)))
-            for applicant in failed_applicants:
-                template_name = self.get_template_name(campaign, "exam-fail")
-                template = get_email_template(template_name)
-                recipients = [applicant.email]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
-                    mail.send(
-                        recipients,
-                        sender='info@compscicenter.ru',
-                        template=template,
-                        # Render on delivery, we have no really big amount of
-                        # emails to think about saving CPU time
-                        render_on_delivery=True,
-                        backend='ses',
-                    )
-        self.stdout.write("Generated emails: {}".format(generated))
+            self.stdout.write("Total: {}".format(total))
+            self.stdout.write("Succeed: {}".format(succeed))
+            self.stdout.write("Fail: {}".format(total - succeed))
+            self.stdout.write("Emails generated: {}".format(generated))
         self.stdout.write("Done")
+
+    def get_template(self, applicant, campaign):
+        if applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED:
+            template_type = "exam-success"
+        else:
+            template_type = "exam-fail"
+        template_name = self.get_template_name(campaign, template_type)
+        return get_email_template(template_name)
 
