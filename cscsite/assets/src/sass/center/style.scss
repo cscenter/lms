@@ -83,6 +83,8 @@
 .asteriskField {
   color: $color-red;
 }
+
+// FIXME: It's bad to override styles in this way :<
 .form-control {
   box-shadow: none;
   padding: 8px 12px;

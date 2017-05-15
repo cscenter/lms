@@ -98,6 +98,7 @@ $unsaved-state-color: #dcf0ff;
     .title {
       border-right: 1px solid #fff;
     }
+
     .cell {
       border-right: 1px solid #fff;
 
@@ -110,13 +111,16 @@ $unsaved-state-color: #dcf0ff;
     }
 
     select {
-      @extend .form-control;
+      display: block;
+      width: 100%;
+      color: #555;
+      background: $color-white none;
       border: 1px solid transparent;
       border-radius: 0;
-      box-shadow: none;
       height: $cell-height;
       padding: 0;
     }
+
     .even {
       select {
         background: $even-color;
@@ -130,6 +134,7 @@ $unsaved-state-color: #dcf0ff;
     overflow: hidden;
     text-align: right;
     position: relative;
+
     .title, .cell {
       border-right: 1px solid #fff;
     }
