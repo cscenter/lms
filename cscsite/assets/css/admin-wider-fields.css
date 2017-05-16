@@ -1,9 +1,0 @@
-/* this is for admin page to make field labels wider */
-
-.aligned label {
-  width: 10em !important;
-}
-
-form .aligned p, form .aligned ul {
-  margin-left: 9em !important;
-}

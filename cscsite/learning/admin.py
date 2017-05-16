@@ -11,7 +11,6 @@ from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.admin import WiderLabelsMixin
 from core.forms import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
@@ -77,7 +76,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
-class CourseOfferingAdmin(WiderLabelsMixin, TranslationAdmin, admin.ModelAdmin):
+class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['course', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
     inlines = (CourseOfferingTeacherInline,)

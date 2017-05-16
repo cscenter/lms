@@ -84,11 +84,6 @@ def meta(text=None, **kwargs):
     return decorator
 
 
-class WiderLabelsMixin(object):
-    class Media:
-        css = {'all': ["css/admin-wider-fields.css"]}
-
-
 class UniversityAdmin(admin.ModelAdmin):
     list_editable = ['sort']
     list_display = ['name', 'city', 'sort']
