@@ -22,6 +22,7 @@ from learning.models import Semester, CourseOffering, CourseOfferingTeacher, \
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_current_semester_pair, get_term_index, \
     get_term_index_academic
+from stats.views import StudentsDiplomasStats
 from users.models import CSCUser
 
 
@@ -202,7 +203,7 @@ class AlumniView(generic.ListView):
 
 
 class AlumniByYearView(generic.ListView):
-    filter_by_year = None
+    year = None
     context_object_name = "alumni_list"
     template_name = "users/alumni_by_year.html"
 
@@ -212,35 +213,43 @@ class AlumniByYearView(generic.ListView):
         params = {
             "groups__pk": graduate_pk,
         }
-        assert self.filter_by_year is not None
-        params["graduation_year"] = self.filter_by_year
+        assert self.year is not None
+        params["graduation_year"] = self.year
         return (user_model.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
-        context = super(AlumniByYearView, self).get_context_data(**kwargs)
-        testimonials = cache.get('alumni_2016_testimonials')
+        context = super().get_context_data(**kwargs)
+        context["year"] = self.year
+
+        testimonials = cache.get('alumni_{}_testimonials'.format(self.year))
         if testimonials is None:
             s = (CSCUser.objects
                  .filter(
                     groups=CSCUser.group.GRADUATE_CENTER,
-                    graduation_year=self.filter_by_year,
+                    graduation_year=self.year,
                  )
                  .exclude(csc_review='').exclude(photo='')
                  .prefetch_related("areas_of_study"))
             testimonials = s[:]
-            cache.set('alumni_2016_testimonials', testimonials, 3600)
+            cache.set('alumni_{}_testimonials'.format(self.year),
+                      testimonials, 3600)
         context['testimonials'] = self.testimonials_random(testimonials)
-        context["year"] = self.filter_by_year
+
+        stats = cache.get('alumni_{}_stats'.format(self.year))
+        if not stats:
+            stats = StudentsDiplomasStats.as_view()(self.request, self.year,
+                                                    **kwargs).data
+            cache.set('alumni_{}_stats'.format(self.year), stats, 24 * 3600)
+        context["stats"] = stats
         return context
 
     @staticmethod
     def testimonials_random(testimonials):
         indexes = random.sample(range(len(testimonials)),
                                 min(len(testimonials), 5))
-        for index in indexes:
-            yield testimonials[index]
+        return [testimonials[index] for index in indexes]
 
 
 class SyllabusView(generic.TemplateView):

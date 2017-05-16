@@ -12,7 +12,8 @@ from rest_framework.response import Response
 from api.permissions import CuratorAccessPermission
 from learning.models import Course, Semester, CourseOffering, StudentAssignment, \
     Assignment, Enrollment
-from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
+from learning.reports import ProgressReportForDiplomas
+from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from stats.serializers import ParticipantsStatsSerializer, \
@@ -150,3 +151,52 @@ class EnrollmentsStats(APIView):
 
         serializer = EnrollmentsStatsSerializer(enrollments, many=True)
         return Response(serializer.data)
+
+
+class StudentsDiplomasStats(APIView):
+    http_method_names = ['get']
+    permission_classes = [CuratorAccessPermission]
+
+    def get(self, request, graduation_year, format=None):
+        students = CSCUser.objects.students_info(
+            filters={
+                "groups__in": [CSCUser.group.GRADUATE_CENTER],
+                "graduation_year": graduation_year,
+            },
+            exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
+        )
+        unique_teachers = set()
+        hours = 0
+        enrollments_total = 0
+        unique_projects = set()
+        unique_courses = set()
+        excellent_total = 0
+        good_total = 0
+        for s in students:
+            for project in s.project_set.all():
+                unique_projects.add(project)
+            for enrollment in s.enrollments:
+                enrollments_total += 1
+                if enrollment.grade == GRADES.excellent:
+                    excellent_total += 1
+                elif enrollment.grade == GRADES.good:
+                    good_total += 1
+                unique_courses.add(enrollment.course_offering.course)
+                hours += enrollment.course_offering.courseclass_set.count() * 1.5
+                for teacher in enrollment.course_offering.teachers.all():
+                    unique_teachers.add(teacher.pk)
+        stats = {
+            "total": len(students),
+            "teachers_total": len(unique_teachers),
+            "hours": int(hours),
+            "courses": {
+                "total": len(unique_courses),
+                "enrollments": enrollments_total
+            },
+            "marks": {
+                "good": good_total,
+                "excellent": excellent_total
+            },
+            "projects_total": len(unique_projects)
+        }
+        return Response(stats)
