@@ -199,27 +199,6 @@ class ProgressReport(ReportFileOutput):
             else:
                 row.extend([''])
 
-    def passed_courses(self, student):
-        """
-        Vaguely similar method we have in user model, but we can't use it here.
-        """
-        center = 0
-        club = 0
-        shad = 0
-        online = len(student.online_courses)
-        for c in student.courses:
-            if is_positive_grade(c['grade']):
-                if c['is_open']:
-                    club += 1
-                else:
-                    center += 1
-        for c in student.shads:
-            shad += int(is_positive_grade(c.grade))
-        total = center + club + shad + online
-        # FIXME: только курсы клуба с < 6 лекций
-        contribution = total - (club / 2)
-        return total, contribution
-
 
 class ProgressReportForDiplomas(ProgressReport):
     @staticmethod
@@ -253,14 +232,14 @@ class ProgressReportForDiplomas(ProgressReport):
         return headers
 
     def export_row(self, student):
-        total, contribution = self.passed_courses(student)
+        total = self.passed_courses(student)
         row = [
             student.last_name,
             student.first_name,
             student.patronymic,
             student.university,
             " и ".join(s.name for s in student.areas_of_study.all()),
-            total  # FIXME: contribution пока неправильно считается
+            total
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
@@ -270,6 +249,22 @@ class ProgressReportForDiplomas(ProgressReport):
     def get_filename(self):
         today = datetime.datetime.now()
         return "diplomas_{}".format(today.year)
+
+    def passed_courses(self, student):
+        """Don't consider adjustment for club courses"""
+        center = 0
+        club = 0
+        shad = 0
+        online = len(student.online_courses)
+        for c in student.courses.values():
+            if is_positive_grade(c['grade']):
+                if c['is_open']:
+                    club += 1
+                else:
+                    center += 1
+        for c in student.shads:
+            shad += int(is_positive_grade(c.grade))
+        return center + club + shad + online
 
 
 class ProgressReportFull(ProgressReport):
