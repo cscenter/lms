@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import pytest
+from django.urls import reverse
 
 from django.utils.encoding import smart_bytes
 
@@ -297,7 +298,9 @@ def test_report_for_target_term(rf,
 
 @pytest.mark.django_db
 def test_report_diplomas(student_center_factory,
-                         teacher_center_factory):
+                         teacher_center_factory,
+                         rf):
+    request = rf.get(reverse('staff:exports_students_diplomas_csv'))
     teacher = teacher_center_factory.create()
     student1, student2, student3 = student_center_factory.create_batch(3)
     s = SemesterFactory.create_current()
@@ -312,7 +315,7 @@ def test_report_diplomas(student_center_factory,
     EnrollmentFactory.create(student=student2, course_offering=co1,
                              grade=GRADES.good)
     # Will graduate only student1 now
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.data) == 1
     # This value will not change during all tests
     STATIC_HEADERS_CNT = len(progress_report.static_headers)
@@ -321,50 +324,50 @@ def test_report_diplomas(student_center_factory,
     # student2 will graduate too. He enrolled to the same course as student1
     student2.status = STUDENT_STATUS.will_graduate
     student2.save()
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.data) == 2
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Enroll student2 to new course without any grade
     co2 = CourseOfferingFactory.create(semester=s, teachers=[teacher])
     e_s2_co2 = EnrollmentFactory.create(student=student2, course_offering=co2)
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Now change grade to unsatisfied and check again
     e_s2_co2.grade = GRADES.unsatisfactory
     e_s2_co2.save()
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Set success grade value
     e_s2_co2.grade = GRADES.good
     e_s2_co2.save()
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
     # Grade should be printed with `default` grading type style
     e_s1_co1.grade = getattr(GRADES, "pass")
     e_s1_co1.save()
     co1.grading_type = GRADING_TYPES.binary
     co1.save()
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert progress_report.data[0].pk == student1.pk
     grade_values = [d.get("grade", "") for d in progress_report.data[0].courses.values()]
     assert smart_bytes("satisfactory") not in grade_values
     # Add enrollment for previous term. It should be appeared if grade OK
     EnrollmentFactory.create(student=student1, course_offering=co_prev1,
                              grade=GRADES.good)
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 6
     # Add shad course
     SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
     # This one shouldn't be in report due to grade value
     SHADCourseRecordFactory.create(student=student1, grade=GRADES.not_graded)
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     # +3 headers for 1 shad course
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
     # Online course not included
     OnlineCourseRecordFactory.create(student=student1)
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
     ProjectFactory.create(students=[student1, student2])
-    progress_report = ProgressReportForDiplomas()
+    progress_report = ProgressReportForDiplomas(request=request)
     # +4 headers for project
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 13

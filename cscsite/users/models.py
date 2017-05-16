@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
@@ -321,6 +322,14 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     def teacher_profile_url(self):
         return reverse('teacher_detail', args=[self.pk])
+
+    def get_applicant_form_url(self):
+        try:
+            applicant_form_url = reverse("admission_applicant_detail",
+                                         args=[self.applicant.pk])
+        except ObjectDoesNotExist:
+            applicant_form_url = None
+        return applicant_form_url
 
     def get_full_name(self, last_name_first=False):
         if last_name_first:

@@ -199,6 +199,13 @@ class ProgressReport(ReportFileOutput):
             else:
                 row.extend([''])
 
+    def get_applicant_form_absolute_url(self, student):
+        applicant_form_url = student.get_applicant_form_url()
+        if applicant_form_url:
+            return self.request.build_absolute_uri(applicant_form_url)
+        else:
+            return ""
+
 
 class ProgressReportForDiplomas(ProgressReport):
     @staticmethod
@@ -222,6 +229,7 @@ class ProgressReportForDiplomas(ProgressReport):
             'Университет',
             'Направления',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
+            'Ссылка на анкету',
         ]
 
     def generate_headers(self):
@@ -232,14 +240,14 @@ class ProgressReportForDiplomas(ProgressReport):
         return headers
 
     def export_row(self, student):
-        total = self.passed_courses(student)
         row = [
             student.last_name,
             student.first_name,
             student.patronymic,
             student.university,
             " и ".join(s.name for s in student.areas_of_study.all()),
-            total
+            self.passed_courses_total(student),
+            self.get_applicant_form_absolute_url(student),
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
@@ -250,7 +258,7 @@ class ProgressReportForDiplomas(ProgressReport):
         today = datetime.datetime.now()
         return "diplomas_{}".format(today.year)
 
-    def passed_courses(self, student):
+    def passed_courses_total(self, student):
         """Don't consider adjustment for club courses"""
         center = 0
         club = 0
@@ -310,22 +318,12 @@ class ProgressReportFull(ProgressReport):
         return headers
 
     def export_row(self, student):
-        from django.urls import reverse
-        from learning.admission.models import Applicant
-
         total_success_passed = (
             sum(1 for c in student.courses.values() if
                 self.is_positive_grade(c)) +
             sum(1 for c in student.shads if self.is_positive_grade(c)) +
             sum(1 for _ in student.online_courses)
         )
-        try:
-            applicant_form_url = self.request.build_absolute_uri(
-                reverse("admission_applicant_detail",
-                        args=[student.applicant.pk])
-            )
-        except Applicant.DoesNotExist:
-            applicant_form_url = ""
         row = [
             student.last_name,
             student.first_name,
@@ -347,7 +345,7 @@ class ProgressReportFull(ProgressReport):
             student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
-            applicant_form_url,
+            self.get_applicant_form_absolute_url(student),
             total_success_passed,
         ]
         self._export_row_append_courses(row, student)

@@ -143,7 +143,7 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        progress_report = ProgressReportForDiplomas()
+        progress_report = ProgressReportForDiplomas(request=request)
         return progress_report.output_csv()
 
 
