@@ -10,19 +10,15 @@ import time
 from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.cache import cache
-from django.core.cache.utils import make_template_fragment_key
-from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.urls import reverse
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Q
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
-from micawber.contrib.mcdjango import extract_oembed
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
@@ -33,13 +29,14 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from learning import settings as learn_conf
-from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet
-from learning.micawber_providers import get_oembed_data, get_oembed_html
-
+from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
+    CustomCourseOfferingQuerySet
+from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
 from .utils import get_current_semester_pair, \
-    get_term_index, convert_term_start_to_datetime, get_term_start
+    get_term_index, convert_term_parts_to_datetime, get_term_start, \
+    get_term_by_index
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +157,7 @@ class Semester(models.Model):
         else:
             next_start_str = learn_conf.SPRING_TERM_START
             next_year = self.year + 1
-        return convert_term_start_to_datetime(next_year, next_start_str) \
+        return convert_term_parts_to_datetime(next_year, next_start_str) \
                - datetime.timedelta(days=1)
 
     @classmethod
@@ -188,12 +185,11 @@ class Semester(models.Model):
             return self.year - 1
 
 
-class CustomCourseOfferingQuerySet(models.QuerySet):
-    def site_related(self, request):
-        qs = self.filter(city__pk=request.city_code)
-        if request.site.domain == settings.CLUB_DOMAIN:
-            qs = qs.filter(is_open=True,)
-        return qs
+def next_term_starts_at():
+    year, term_type = get_current_semester_pair()
+    term_index = get_term_index(year, term_type)
+    _, next_term = get_term_by_index(term_index + 1)
+    return get_term_start(year, next_term).date()
 
 
 @python_2_unicode_compatible
@@ -241,9 +237,12 @@ class CourseOffering(TimeStampedModel):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
-    is_completed = models.BooleanField(
-        _("Course already completed"),
-        default=False)
+    completed_at = models.DateField(
+        _("Date of completion"),
+        default=next_term_starts_at,
+        help_text=_("Consider the course as completed from the specified "
+                    "day (inclusive).")
+    )
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Enrolled students"),
@@ -268,6 +267,11 @@ class CourseOffering(TimeStampedModel):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
 
+    @property
+    def is_completed(self):
+        # FIXME: respect timezone!
+        return self.completed_at <= now().date()
+
     def get_city(self):
         return self.city_id
 
@@ -282,8 +286,8 @@ class CourseOffering(TimeStampedModel):
         return cls.objects.filter(semester__type=season,
                                   semester__year=year)
 
-    @cached_property
-    def is_ongoing(self):
+    @property
+    def in_current_term(self):
         current_semester = get_current_semester_pair()
         return (current_semester.year == self.semester.year
                 and current_semester.type == self.semester.type)
@@ -291,7 +295,7 @@ class CourseOffering(TimeStampedModel):
     def enrollment_opened(self):
         if self.is_open:
             return True
-        if self.is_completed or not self.is_ongoing:
+        if self.is_completed:  # or not self.in_current_term:
             return False
         today = timezone.now()
         if self.semester.enroll_before:
