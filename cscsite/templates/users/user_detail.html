@@ -149,7 +149,7 @@
                             <td>Ссылка на анкету</td>
                             <td>
                                 {% if profile_user.applicant %}
-                                    <a target="_blank" href="{% url "admission_applicant_detail" profile_user.applicant.pk %}">#{{ profile_user.applicant.pk }}</a>
+                                    <a target="_blank" href="{{ profile_user.get_applicant_form_url }}">#{{ profile_user.applicant.pk }}</a>
                                 {% else %} Анкета не найдена{% endif %}
                             </td>
                         </tr>
