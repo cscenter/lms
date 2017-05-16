@@ -7,6 +7,7 @@ import datetime
 import unittest
 
 import pytest
+from django.utils.timezone import now
 from mock import patch
 
 from django.core.exceptions import ValidationError
@@ -134,7 +135,7 @@ class CourseOfferingTests(TestCase):
                                  semester__type='spring')
                          .get())
 
-    def test_is_ongoing(self):
+    def test_in_current_term(self):
         """
         In near future only one course should be "ongoing".
         """
@@ -155,14 +156,14 @@ class CourseOfferingTests(TestCase):
                                 .replace(tzinfo=timezone.utc))
         n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
                                         semester=semester)
-                         .is_ongoing)
+                         .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
         n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
                                         semester=semester)
-                         .is_ongoing)
+                         .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = old_now
@@ -380,7 +381,7 @@ class AssignmentNotificationTests(TestCase):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Monkey patch totally broken")
+@pytest.mark.skip(reason="Monkey patching is totally broken")
 # FIXME: We  need monkey patch timezone.now, but for that we should use utc, which use datetime. What a mess, fuck. I'll try to fix this later, now skip test
 def test_course_offering_enrollment_expired(mocker, monkeypatch):
     current_year = 2015
@@ -406,3 +407,16 @@ def test_course_offering_enrollment_expired(mocker, monkeypatch):
     # Back to the future
     mocked_timezone.return_value = start_datetime - datetime.timedelta(days=enrollment_duration + 1)
     assert co.enrollment_opened()
+
+
+@pytest.mark.django_db
+def test_course_offering_manager_completed():
+    """Make sure `completed_at` date works in inclusive way (included in
+    completed courses list)"""
+    today = now().date()
+    CourseOfferingFactory(completed_at=today)
+    assert CourseOffering.custom.completed(True).count() == 1
+    timedelta_1day = datetime.timedelta(days=1)
+    CourseOfferingFactory.create_batch(2, completed_at=today + timedelta_1day)
+    assert CourseOffering.custom.completed(True).count() == 1
+    assert CourseOffering.custom.completed(False).count() == 2

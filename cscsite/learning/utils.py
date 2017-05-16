@@ -19,7 +19,7 @@ def get_current_semester_pair():
     return date_to_term_pair(date)
 
 
-def convert_term_start_to_datetime(year, term_start):
+def convert_term_parts_to_datetime(year, term_start):
     return (dparser
             .parse(term_start)
             .replace(tzinfo=timezone.utc,
@@ -36,16 +36,16 @@ def get_term_start(year, term_type):
         term_start_str = AUTUMN_TERM_START
     else:
         raise ValueError("get_term_start: unknown term type")
-    return convert_term_start_to_datetime(year, term_start_str)
+    return convert_term_parts_to_datetime(year, term_start_str)
 
 
 def date_to_term_pair(date):
     assert timezone.is_aware(date)
 
     year = date.year
-    spring_term_start = convert_term_start_to_datetime(year, SPRING_TERM_START)
-    autumn_term_start = convert_term_start_to_datetime(year, AUTUMN_TERM_START)
-    summer_term_start = convert_term_start_to_datetime(year, SUMMER_TERM_START)
+    spring_term_start = convert_term_parts_to_datetime(year, SPRING_TERM_START)
+    autumn_term_start = convert_term_parts_to_datetime(year, AUTUMN_TERM_START)
+    summer_term_start = convert_term_parts_to_datetime(year, SUMMER_TERM_START)
 
     if spring_term_start <= date < summer_term_start:
         current_term = SEMESTER_TYPES.spring

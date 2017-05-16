@@ -78,7 +78,7 @@ class IndexView(generic.TemplateView):
                         queryset=courseclass_queryset,
                         to_attr='classes'
                     ))
-                .order_by('is_completed', 'course__name'))
+                .order_by('completed_at', 'course__name'))
             # Sort courses by nearest class
             courses.sort(key=self.cmp_courses_by_nearest_class)
             context['courses'] = courses
@@ -89,8 +89,10 @@ class IndexView(generic.TemplateView):
     @staticmethod
     def cmp_courses_by_nearest_class(course):
         if not course.classes:
-            return datetime.date(year=now().year + 1, month=1, day=1)
-        return course.classes[0].date
+            nearest = datetime.date(year=now().year + 1, month=1, day=1)
+        else:
+            nearest = course.classes[0].date
+        return course.is_completed, nearest
 
 
 class TeachersView(generic.ListView):

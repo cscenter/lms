@@ -1,5 +1,7 @@
+from django.conf import settings
+from django.db import models
 from django.db.models import query, Manager, Prefetch
-
+from django.utils.timezone import now
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -30,3 +32,18 @@ class StudyProgramQuerySet(query.QuerySet):
                                       .objects
                                       .prefetch_related("courses")),
                         )))
+
+
+class CustomCourseOfferingQuerySet(models.QuerySet):
+    def site_related(self, request):
+        qs = self.filter(city__pk=request.city_code)
+        if request.site.domain == settings.CLUB_DOMAIN:
+            qs = qs.filter(is_open=True,)
+        return qs
+
+    # FIXME: respect timezones!
+    def completed(self, is_completed):
+        if is_completed:
+            return self.filter(completed_at__lte=now().date())
+        else:
+            return self.filter(completed_at__gt=now().date())

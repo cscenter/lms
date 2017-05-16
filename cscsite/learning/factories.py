@@ -5,6 +5,7 @@ import datetime
 
 import factory
 from django.utils import timezone
+from django.utils.timezone import now
 
 from core.models import City
 from learning.models import Course, Semester, CourseOffering, \
@@ -59,7 +60,7 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
 
     @factory.post_generation
     def city(self, create, extracted, **kwargs):
-        """ Allow set City instance or pass PK """
+        """ Allow to pass City instance or PK """
         if not create:
             return
         if extracted:
@@ -67,6 +68,13 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
                 self.city = extracted
             else:
                 self.city = City.objects.get(pk=extracted)
+
+    @factory.post_generation
+    def is_completed(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            self.completed_at = now().date() - datetime.timedelta(days=1)
 
     # TODO: add "enrolled students" here
     # TODO: create course offering for current semester by default

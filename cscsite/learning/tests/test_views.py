@@ -1757,7 +1757,7 @@ class TestCompletedCourseOfferingBehaviour(object):
         response = client.get(url)
         assert not response.context["is_failed_completed_course"]
         # Change course offering state to not completed
-        co.is_completed = False
+        co.completed_at = now().date() + datetime.timedelta(days=1)
         co.save()
         response = client.get(url)
         assert not response.context["is_failed_completed_course"]
@@ -2048,7 +2048,7 @@ def test_course_class_form(client, curator, settings):
     # Check form visible
     assert smart_bytes("submit-id-save") in response.content
     # Course completed, form invisible for teacher
-    co.is_completed = True
+    co.completed_at = now().date()
     co.save()
     response = client.get(course_class_add_url)
     assert smart_bytes("Курс завершён") in response.content
@@ -2061,7 +2061,7 @@ def test_course_class_form(client, curator, settings):
     response = client.post(course_class_add_url, form, follow=True)
     assert response.status_code == 403
     # Check we can post form if course is active
-    co.is_completed = False
+    co.completed_at = now().date() + datetime.timedelta(days=1)
     co.save()
     next_day = now() + datetime.timedelta(days=1)
     venue = VenueFactory()
