@@ -34,7 +34,7 @@ def to_css(s):
 @register.filter
 def tex(s):
     # TODO: replace double quotes in loop (presume we haven't nested quotes)
-    return s.replace("#", "\#").replace('&', '\&').replace('"', '``', 1).replace('"', "''", 1)
+    return s.replace("#", "\#").replace('&', '\&').replace('"', '``', 1).replace('"', "''", 1).replace("_", "\_")
 
 
 @register.filter
