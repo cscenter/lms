@@ -59,7 +59,7 @@ class CSCUserQuerySet(query.QuerySet):
             q
             .order_by('last_name', 'first_name')
             .prefetch_related(
-                'groups',  # Mb we can do it without user_id IN(blabla million ids)
+                'groups',
                 Prefetch(
                     'enrollment_set',
                     queryset=enrollment_qs,
