@@ -31,10 +31,23 @@ def to_css(s):
     return s.replace("_", "-")
 
 
+TEX_SYMBOLS_TO_ESCAPE = {
+    '#': '\#',
+    '$': '\$',
+    '%': '\%',
+    '_': '\_',
+    '&': '\&',
+    '{': '\{',
+    '}': '\}',
+}
+
+
 @register.filter
 def tex(s):
-    # TODO: replace double quotes in loop (presume we haven't nested quotes)
-    return s.replace("#", "\#").replace('&', '\&').replace('"', '``', 1).replace('"', "''", 1).replace("_", "\_")
+    for a, b in TEX_SYMBOLS_TO_ESCAPE.items():
+        s = s.replace(a, b)
+    # TODO: replace double quotes in a loop (presume we haven't nested quotes)
+    return s.replace('"', '``', 1).replace('"', "''", 1)
 
 
 @register.filter
