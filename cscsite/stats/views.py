@@ -155,7 +155,6 @@ class EnrollmentsStats(APIView):
 
 class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
-    permission_classes = [CuratorAccessPermission]
 
     def get(self, request, graduation_year, format=None):
         students = CSCUser.objects.students_info(
