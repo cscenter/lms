@@ -270,6 +270,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'UNAUTHENTICATED_USER': 'users.models.NotAuthenticatedUser'
 }
 
 WEBPACK_LOADER = {
