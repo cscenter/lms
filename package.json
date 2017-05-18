@@ -6,8 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --progress --config webpack/common.config.js",
     "dev": "webpack --progress --display-error-details --config webpack/common.config.js --watch --colors",
-    "prod": "webpack --progress --config webpack/common.config.js --display-error-details --display-modules",
-    "stats": "webpack --progress --config webpack/stats.config.js --watch --display-error-details"
+    "prod": "webpack --progress --config webpack/common.config.js --display-error-details --display-modules"
   },
   "repository": {
     "type": "git",

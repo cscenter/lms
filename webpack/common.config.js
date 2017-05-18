@@ -20,6 +20,7 @@ const PATHS = {
     forms: path.join(__assetsdir, '/src/js/forms.js'),
     learning: path.join(__assetsdir, '/src/js/learning/index.js'),
     dist: path.join(__assetsdir, '/js/dist'),
+    stats: path.join(__assetsdir, "/src/js/stats/main.js")
 };
 
 const VENDOR = [
@@ -46,6 +47,7 @@ const common = {
         profile: PATHS.profile,
         forms: PATHS.forms,
         learning: PATHS.learning,
+        stats: PATHS.stats,
         vendor: VENDOR,
     },
 
@@ -57,7 +59,9 @@ const common = {
     externals: {
         jquery: 'jQuery',
         // Note: EpicEditor is an old dead shit without correct support.
-        EpicEditor: 'EpicEditor'
+        EpicEditor: 'EpicEditor',
+        "d3": "d3",
+        "c3": "c3"
     },
 
     plugins: [
