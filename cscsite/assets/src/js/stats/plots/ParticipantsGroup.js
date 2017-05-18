@@ -1,5 +1,6 @@
 import * as d3 from "d3";
-// TODO: Also, used global c3, URLS, jQuery. Investigate how to import them explicitly
+import * as c3 from "c3";
+import $ from 'jquery';
 
 class ParticipantsGroup {
 
@@ -48,7 +49,7 @@ class ParticipantsGroup {
     }
 
     static getStats(course_session_id) {
-        let dataURL = URLS["api:stats_participants"](course_session_id);
+        let dataURL = window.URLS["api:stats_participants"](course_session_id);
         return $.getJSON(dataURL);
     }
 

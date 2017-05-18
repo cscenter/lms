@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load core_tags %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 
 {% block body_class %} gray{% endblock body_class %}
 
@@ -17,9 +18,9 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js" charset="utf-8"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="{% static "js/vendor/c3.min.js" %}"></script>
+{#    <script type="text/javascript" src="{% static "js/vendor/c3.min.js" %}"></script>#}
     <script src="{% static 'js/urls/reverse.js' %}"></script>
-    <script type="text/javascript" src="{% static "js/stats.bundle.js" %}"></script>
+    {% render_bundle 'stats' 'js' %}
 
     <script type="text/template" id="plot-filter-gender-template">
         <label for="<%-filterId%>">Пол:</label>

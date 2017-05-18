@@ -1,10 +1,11 @@
 import * as d3 from "d3";
+import * as c3 from "c3";
+import $ from 'jquery';
 import mix from '../MixinBuilder';
 import FilteredPlot from './FilteredPlot';
 import AssignmentsFilterMixin from './AssignmentsFilterMixin';
-// FIXME: remove moment.js?
 import * as moment from 'moment';
-// TODO: Also, used global c3, URLS, jQuery, moment.js. Investigate how to import them explicitly
+
 
 class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
     i18n = {
@@ -53,7 +54,7 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
     }
 
     static getStats(course_session_id) {
-        let dataURL = URLS["api:stats_assignments"](course_session_id);
+        let dataURL = window.URLS["api:stats_assignments"](course_session_id);
         return $.getJSON(dataURL);
     }
 

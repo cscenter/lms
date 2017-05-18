@@ -60,8 +60,7 @@ const common = {
         jquery: 'jQuery',
         // Note: EpicEditor is an old dead shit without correct support.
         EpicEditor: 'EpicEditor',
-        "d3": "d3",
-        "c3": "c3"
+        "d3": "d3"
     },
 
     plugins: [
