@@ -1,3 +1,6 @@
+import $ from 'jquery';
+// TODO: How to deal with global variables like window.URLS? I want to import them explicitly.
+
 import ParticipantsYear from './plots/ParticipantsYear.js';
 import ParticipantsGroup from './plots/ParticipantsGroup.js';
 import AssignmentsProgress from './plots/AssignmentsProgress.js';
