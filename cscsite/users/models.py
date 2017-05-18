@@ -564,5 +564,8 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     is_teacher_center = False
     is_volunteer = False
 
+    def __str__(self):
+        return 'NotAuthenticatedUser'
+
     def enrolled_on_the_course(self, course_pk):
         return False
