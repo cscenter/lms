@@ -100,33 +100,29 @@
             </div>
             <h3>Задания</h3>
             <h5>Сдача заданий</h5>
+            <div class="alert alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                Сейчас фильтр по годам строится на основе таблицы "Записи на курсы".<br>
+                Поскольку я ещё не делал рефакторинг (чтобы не удалялись записи из этой таблицы, а делались неактивными, если студент отписался),
+                то может возникнуть ситуация, когда в фильтре по годам обучения есть год 2012, а в круговой диаграмме выше его нет.
+            </div>
             <div class="row">
                 <div class="col-xs-10">
                     <div id="plot-assignments-progress"></div>
                 </div>
                 <div class="col-xs-2"></div>
             </div>
-            <div class="alert alert-warning" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                Сейчас график распределения по годам строится на основе таблицы "Записи на курсы".<br>
-                Поскольку я ещё не делал рефакторинг (чтобы не удалялись записи из этой таблицы, а делались неактивными, если студент отписался),
-                то может возникнуть ситуация, когда в фильтре по годам обучения есть год 2012, а в круговой диаграмме выше его нет.
-            </div>
 
             <h5>Время до дедлайна</h5>
+            <div class="alert alert-info" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                Учитываются только отправленные решения.
+            </div>
             <div class="row">
                 <div class="col-xs-10">
                     <div id="plot-assignments-deadline"></div>
                 </div>
                 <div class="col-xs-2"></div>
-            </div>
-            <div class="alert alert-danger" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                TODO (wtf): Бага в с3js. Если отключить что-то в легенде, то поменяется порядок.
-                Если после этого нажать "Фильтр", то порядок колбэков восстановится, а отображение (цвет и текст) нет!
-                Попробовать загружать через rows, может найду какой-нибудь workaround.
-                TODO: Почему 2014й есть в списке по годам? Если после фильтрации нифига нет. Может у него тип undefined? Надо проверить.<br>
-                TODO: Выпилить Object.values
             </div>
 
             <h5>Успеваемость</h5>
