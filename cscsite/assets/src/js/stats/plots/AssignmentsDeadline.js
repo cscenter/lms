@@ -39,6 +39,7 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
 
         // Order is unspecified for Object, but I believe browsers sort
         // it in a proper way
+        // FIXME: set explicitly?
         this.types = Object.keys(this.i18n.ru.types).reduce((m, k) => {
             return m.set(k, this.i18n.ru.types[k]);
         }, new Map());
@@ -127,6 +128,7 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             data: {
                 type: this.type,
                 rows: data,
+                order: null, // https://github.com/c3js/c3/issues/1945
                 groups: [
                     Array.from(this.types, ([k, v]) => v)
                 ]
@@ -155,6 +157,20 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
                 }
             },
         });
+    };
+
+    // Ignore students curriculum year who didn't send submission at all
+    calculateFilterProps = (rawJSON) => {
+        const curriculumYearChoices = new Set();
+        rawJSON.forEach(function (assignment) {
+            assignment.assigned_to
+                .filter((s) => { return s.first_submission_at !== null })
+                .forEach(function(sa) {
+                    curriculumYearChoices.add(sa.student.curriculum_year);
+                });
+        });
+        this.filters.choices.curriculumYear = curriculumYearChoices;
+        return rawJSON;
     };
 
     /**

@@ -54,8 +54,8 @@ class ParticipantsGroup {
     }
 
     appendParticipantsInfo = () => {
-        let total = Object.values(this.data).reduce(function (a, b) {
-            return a + b;
+        let total = Object.keys(this.data).reduce((ini, k)  => {
+            return ini + this.data[k];
         }, 0);
 
         d3.select(this.id).insert('div', ":first-child")
