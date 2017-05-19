@@ -14,7 +14,7 @@ register = template.Library()
 
 
 # TODO: Add nested level support
-@register.assignment_tag(takes_context=True)
+@register.simple_tag(takes_context=True)
 def csc_menu(context, menu_name, root_id=False):
     """Caching version of show_menu template tag."""
     if menu_name not in CSCMENU_CACHE:
