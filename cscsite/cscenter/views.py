@@ -246,7 +246,7 @@ class AlumniByYearView(generic.ListView):
         context['testimonials'] = self.testimonials_random(testimonials)
 
         stats = cache.get('alumni_{}_stats'.format(year))
-        if not stats:
+        if stats is None:
             stats = StudentsDiplomasStats.as_view()(self.request, year,
                                                     **kwargs).data
             cache.set('alumni_{}_stats'.format(year), stats, 24 * 3600)
