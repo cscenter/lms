@@ -217,18 +217,18 @@ class AlumniByYearView(generic.ListView):
 
     def get_queryset(self):
         user_model = get_user_model()
-        graduate_pk = user_model.group.GRADUATE_CENTER
-        params = {
-            "groups__pk": graduate_pk,
-            "graduation_year": self.kwargs['year']
-        }
+        year = int(self.kwargs['year'])
+        filters = (Q(groups__pk=user_model.group.GRADUATE_CENTER) &
+                   Q(graduation_year=year))
+        if year == now().year and self.request.user.is_curator:
+            filters = filters | Q(status=CSCUser.STATUS.will_graduate)
         return (user_model.objects
-                .filter(**params)
+                .filter(filters)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        year = self.kwargs['year']
+        year = int(self.kwargs['year'])
         context["year"] = year
         testimonials = cache.get('alumni_{}_testimonials'.format(year))
         if testimonials is None:

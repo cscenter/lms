@@ -4,7 +4,8 @@ import itertools
 from collections import OrderedDict
 
 from django.urls import reverse
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
+from django.utils.timezone import now
 from django.views import generic
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -160,11 +161,12 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
+        filters = (Q(groups__in=[CSCUser.group.GRADUATE_CENTER]) &
+                   Q(graduation_year=graduation_year))
+        if graduation_year == now().year and self.request.user.is_curator:
+            filters = filters | Q(status=CSCUser.STATUS.will_graduate)
         students = CSCUser.objects.students_info(
-            filters={
-                "groups__in": [CSCUser.group.GRADUATE_CENTER],
-                "graduation_year": graduation_year,
-            },
+            filters=filters,
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
         )
         unique_teachers = set()
@@ -175,8 +177,8 @@ class StudentsDiplomasStats(APIView):
         excellent_total = 0
         good_total = 0
         for s in students:
-            for project in s.project_set.all():
-                unique_projects.add(project)
+            for ps in s.projects_through:
+                unique_projects.add(ps.project_id)
             for enrollment in s.enrollments:
                 enrollments_total += 1
                 if enrollment.grade == GRADES.excellent:

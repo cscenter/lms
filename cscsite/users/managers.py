@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from django.contrib.auth.models import UserManager
-from django.db.models import Prefetch, Count, query
+from django.db.models import Prefetch, Count, query, Q
 
 from learning.models import CourseOfferingTeacher
 from learning.settings import GRADES
@@ -27,16 +27,20 @@ class CSCUserQuerySet(query.QuerySet):
         # Note: At the same time student must be only in one of these groups
         # So, group_by not necessary for this m2m relationship (in theory)
         filters = filters or {}
-        if "groups__in" not in filters:
-            filters["groups__in"] = [
-                CSCUser.group.STUDENT_CENTER,
-                CSCUser.group.GRADUATE_CENTER,
-                CSCUser.group.VOLUNTEER
-            ]
-        q = self.filter(**filters)
-
-        if exclude:
-            q = q.exclude(**exclude)
+        if isinstance(filters, dict):
+            if "groups__in" not in filters:
+                filters["groups__in"] = [
+                    CSCUser.group.STUDENT_CENTER,
+                    CSCUser.group.GRADUATE_CENTER,
+                    CSCUser.group.VOLUNTEER
+                ]
+            q = self.filter(**filters)
+            if exclude:
+                q = q.exclude(**exclude)
+        elif isinstance(filters, Q):
+            q = self.filter(filters)
+        else:
+            raise TypeError("students_info: unsupported filters type")
 
         enrollment_qs = (Enrollment.objects
                          .order_by('course_offering__course__name'))
