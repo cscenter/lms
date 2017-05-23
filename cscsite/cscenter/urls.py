@@ -12,7 +12,7 @@ from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, OpenNskView
 from htmlpages import views
 from learning.views import UsefulListView, InternshipListView
-from stats.views import StatsIndexView
+from stats.views import StatsLearningView, StatsIndexView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
@@ -68,10 +68,10 @@ urlpatterns = [
         name='user_update'),
     # Alumni
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
-    url(r'^2016/$', AlumniByYearView.as_view(year=2016),
-        name='alumni_2016'),
-    url(r'^2017/$', AlumniByYearView.as_view(year=2017),
-        name='alumni_2017'),
+    url(r'^(?P<year>[0-9]{4})/$', AlumniByYearView.as_view(),
+        name='alumni_memory'),
+    # url(r'^2017/$', AlumniByYearView.as_view(year=2017),
+    #     name='alumni_2017'),
     url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', AlumniView.as_view(),
         name='alumni_by_area_of_study'),
 
@@ -79,6 +79,7 @@ urlpatterns = [
     url(r'^staff/', include("staff.urls")),
 
     url(r'^stats/$', StatsIndexView.as_view(), name='stats_index'),
+    url(r'^stats/learning/$', StatsLearningView.as_view(), name='stats_learning'),
 
     url(r'^library/', include("library.urls")),
     url(r'^faq/$', QAListView.as_view(), name='faq'),

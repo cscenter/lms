@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from api.permissions import CuratorAccessPermission
 from learning.models import Course, Semester, CourseOffering, StudentAssignment, \
     Assignment, Enrollment
-from learning.reports import ProgressReportForDiplomas
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
@@ -24,8 +23,12 @@ from users.models import CSCUser
 class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "stats/index.html"
 
+
+class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "stats/learning.html"
+
     def get_context_data(self, **kwargs):
-        context = super(StatsIndexView, self).get_context_data(**kwargs)
+        context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
         term_start = get_term_index(CENTER_FOUNDATION_YEAR,
                                     SEMESTER_TYPES.autumn)

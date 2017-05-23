@@ -1,13 +1,13 @@
 import $ from 'jquery';
 // TODO: How to deal with global variables like window.URLS? I want to import them explicitly in
 
-import ParticipantsYear from './plots/ParticipantsYear.js';
-import ParticipantsGroup from './plots/ParticipantsGroup.js';
-import AssignmentsProgress from './plots/AssignmentsProgress.js';
-import AssignmentsDeadline from './plots/AssignmentsDeadline.js';
-import AssignmentsResults from './plots/AssignmentsResults.js';
-import AssignmentsScore from './plots/AssignmentsScore.js';
-import EnrollmentsResults from './plots/EnrollmentsResults.js';
+import ParticipantsYear from './learning/plots/ParticipantsYear.js';
+import ParticipantsGroup from './learning/plots/ParticipantsGroup.js';
+import AssignmentsProgress from './learning/plots/AssignmentsProgress.js';
+import AssignmentsDeadline from './learning/plots/AssignmentsDeadline.js';
+import AssignmentsResults from './learning/plots/AssignmentsResults.js';
+import AssignmentsScore from './learning/plots/AssignmentsScore.js';
+import EnrollmentsResults from './learning/plots/EnrollmentsResults.js';
 let template = require('lodash.template');
 
 // Filter DOM elements here
