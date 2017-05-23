@@ -49,7 +49,7 @@ class ParticipantsGroup {
     }
 
     static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_participants"](course_session_id);
+        let dataURL = window.URLS["api:stats_learning_participants"](course_session_id);
         return $.getJSON(dataURL);
     }
 

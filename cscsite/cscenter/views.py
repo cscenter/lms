@@ -10,6 +10,7 @@ import itertools
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.http.response import HttpResponseRedirect, HttpResponseNotFound
 from django.urls import reverse
 from django.db.models import Q, Count, Prefetch
 from django.http import Http404
@@ -19,7 +20,7 @@ from django.views import generic
 from core.models import Faq
 from learning.models import Semester, CourseOffering, CourseOfferingTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, StudyProgramCourseGroup
-from learning.settings import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair, get_term_index, \
     get_term_index_academic
 from stats.views import StudentsDiplomasStats
@@ -203,45 +204,51 @@ class AlumniView(generic.ListView):
 
 
 class AlumniByYearView(generic.ListView):
-    year = None
     context_object_name = "alumni_list"
     template_name = "users/alumni_by_year.html"
+
+    def get(self, request, *args, **kwargs):
+        year = int(self.kwargs['year'])
+        now__year = now().year
+        if year < CENTER_FOUNDATION_YEAR or year > now__year:
+            return HttpResponseNotFound()
+        return super(AlumniByYearView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         user_model = get_user_model()
         graduate_pk = user_model.group.GRADUATE_CENTER
         params = {
             "groups__pk": graduate_pk,
+            "graduation_year": self.kwargs['year']
         }
-        assert self.year is not None
-        params["graduation_year"] = self.year
         return (user_model.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["year"] = self.year
-
-        testimonials = cache.get('alumni_{}_testimonials'.format(self.year))
+        year = self.kwargs['year']
+        context["year"] = year
+        # TODO: restrict years... :<
+        testimonials = cache.get('alumni_{}_testimonials'.format(year))
         if testimonials is None:
             s = (CSCUser.objects
                  .filter(
                     groups=CSCUser.group.GRADUATE_CENTER,
-                    graduation_year=self.year,
+                    graduation_year=year,
                  )
                  .exclude(csc_review='').exclude(photo='')
                  .prefetch_related("areas_of_study"))
             testimonials = s[:]
-            cache.set('alumni_{}_testimonials'.format(self.year),
+            cache.set('alumni_{}_testimonials'.format(year),
                       testimonials, 3600)
         context['testimonials'] = self.testimonials_random(testimonials)
 
-        stats = cache.get('alumni_{}_stats'.format(self.year))
+        stats = cache.get('alumni_{}_stats'.format(year))
         if not stats:
-            stats = StudentsDiplomasStats.as_view()(self.request, self.year,
+            stats = StudentsDiplomasStats.as_view()(self.request, year,
                                                     **kwargs).data
-            cache.set('alumni_{}_stats'.format(self.year), stats, 24 * 3600)
+            cache.set('alumni_{}_stats'.format(year), stats, 24 * 3600)
         context["stats"] = stats
         return context
 
