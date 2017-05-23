@@ -224,6 +224,7 @@ class AlumniByYearView(generic.ListView):
             filters = filters | Q(status=CSCUser.STATUS.will_graduate)
         return (user_model.objects
                 .filter(filters)
+                .distinct()
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
