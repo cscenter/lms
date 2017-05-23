@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.utils.timezone import now
 
@@ -27,3 +28,6 @@ class Command(BaseCommand):
             user.graduation_year = now().year
             user.status = ""
             user.save()
+
+        # Drop cache on /{YEAR}/ page
+        cache.delete("alumni_{}_stats".format(now().year))
