@@ -115,6 +115,7 @@ class CSCUserQuerySet(query.QuerySet):
                     to_attr='online_courses'
                 ),
             )
+            .distinct()
         )
 
 
