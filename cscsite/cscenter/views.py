@@ -210,7 +210,8 @@ class AlumniByYearView(generic.ListView):
     def get(self, request, *args, **kwargs):
         year = int(self.kwargs['year'])
         now__year = now().year
-        if year < CENTER_FOUNDATION_YEAR or year > now__year:
+        # No graduates in first 2 years after foundation
+        if year < CENTER_FOUNDATION_YEAR + 2 or year > now__year:
             return HttpResponseNotFound()
         return super(AlumniByYearView, self).get(request, *args, **kwargs)
 
@@ -229,7 +230,6 @@ class AlumniByYearView(generic.ListView):
         context = super().get_context_data(**kwargs)
         year = self.kwargs['year']
         context["year"] = year
-        # TODO: restrict years... :<
         testimonials = cache.get('alumni_{}_testimonials'.format(year))
         if testimonials is None:
             s = (CSCUser.objects
