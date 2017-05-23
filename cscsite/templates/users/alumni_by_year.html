@@ -3,6 +3,11 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
+{% load staticfiles %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}
 
 {% block content %}
     <div id="graduates-by-year">
