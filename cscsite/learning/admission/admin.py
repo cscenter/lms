@@ -1,11 +1,14 @@
 from __future__ import unicode_literals, absolute_import
 
+from django.db.models import TextField
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
+from core.forms import AdminRichTextAreaWidget
 from learning.admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, \
@@ -89,6 +92,9 @@ class ApplicantAdmin(admin.ModelAdmin):
 
 class InterviewAssignmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'campaign']
+    formfield_overrides = {
+        TextField: {'widget': AdminRichTextAreaWidget},
+    }
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
