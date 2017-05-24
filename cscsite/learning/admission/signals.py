@@ -31,25 +31,13 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
                               Applicant.ACCEPT_IF,
                               Applicant.REJECTED_BY_INTERVIEW,
                               Applicant.THEY_REFUSED)
-    today_start = datetime.datetime.combine(now(), datetime.time.min)
     # Set applicant status to `INTERVIEW_SCHEDULED` if interview has been
     # created with active status and current applicant status not in final state
-    if created and interview.status in [Interview.APPROVAL, Interview.WAITING]:
+    if created and interview.status in [Interview.APPROVAL, Interview.APPROVED]:
         if interview.applicant.status not in APPLICANT_FINAL_STATES:
             interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
     elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        # When trying to deactivate interview, check that applicant hasn't
-        # other active or completed interviews, if so,
-        # revert applicant status to `INTERVIEW_TOBE_SCHEDULED`
-        has_positive_interviews = (
-            Interview.objects
-            .filter(applicant=interview.applicant,
-                    date__gte=today_start)
-            .exclude(status__in=[Interview.CANCELED, Interview.DEFERRED])
-            .count()
-        ) > 0
-        if not has_positive_interviews:
-            interview.applicant.status = Applicant.INTERVIEW_TOBE_SCHEDULED
+        interview.applicant.status = Applicant.INTERVIEW_TOBE_SCHEDULED
     interview.applicant.save()
 
 

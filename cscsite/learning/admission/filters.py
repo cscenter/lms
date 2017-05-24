@@ -70,7 +70,7 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
     def filter(self, qs, value):
         if value == self.AGREED:
             qs = self.get_method(qs)(**{
-                '%s__%s' % (self.name, "in"): [Interview.COMPLETED, Interview.WAITING]})
+                '%s__%s' % (self.name, "in"): [Interview.COMPLETED, Interview.APPROVED]})
             return qs
         return super(InterviewStatusFilter, self).filter(qs, value)
 
