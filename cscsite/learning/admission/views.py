@@ -37,7 +37,6 @@ from learning.admission.forms import InterviewCommentForm, ApplicantReadOnlyForm
     ApplicationInNskForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign
-from learning.admission.utils import get_best_interview
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
 from .tasks import application_form_send_email
@@ -192,10 +191,10 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return (Applicant.objects
                 .select_related("exam", "online_test", "campaign", "university",
                                 "campaign__city")
-                .prefetch_related("interviews")
-                .annotate(exam_result_null=Coalesce('exam__score', Value(-1)))
-                .order_by("-exam_result_null", "-exam__score",
-                          "-online_test__score", "pk"))
+                .prefetch_related("interview")
+                .annotate(exam__score_coalesce=Coalesce('exam__score',
+                                                        Value(-1)))
+                .order_by("-exam__score_coalesce", "-online_test__score", "pk"))
 
 
 class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
@@ -273,7 +272,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         # TODO: collect stats for curators here?
         context["today"] = self.object_list.filter(
             date__date=now(),
-            status=Interview.WAITING).count()
+            status=Interview.APPROVED).count()
         context["filter"] = self.filterset
         # Get name for selected campaign
         context["selected_campaign"] = _("Current campaign")
@@ -303,7 +302,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         q = (Interview.objects
              .select_related("applicant")
              .prefetch_related("interviewers")
-             .annotate(average=Avg('comments__score'))
+             .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
         # Show current campaigns only by default
         if not self.request.user.is_curator:
@@ -447,20 +446,15 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         for form in context["formset"].forms:
             # Select the highest interview score to sort by
             applicant = form.instance
+            interview = applicant.interview
             stats.update((applicant.status,))
-            best_interview = get_best_interview(applicant)
-            # XXX: Average score already calculated with queryset
-            # No need to check interview has attr `average` or not
-            if best_interview.average is not None:
-                applicant.best_interview_score = best_interview.average
-            else:
-                applicant.best_interview_score = None
 
         def cpm_interview_best_score(form):
-            if form.instance.best_interview_score is None:
+            # XXX: `average` score calculated with queryset
+            if form.instance.interview.average is None:
                 return Comment.UNREACHABLE_COMMENT_SCORE
             else:
-                return form.instance.best_interview_score
+                return form.instance.interview.average
 
         context["formset"].forms.sort(key=cpm_interview_best_score,
                                       reverse=True)
@@ -483,11 +477,10 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
             # TODO: Carefully restrict by status to optimize query
             .filter(campaign=self.selected_campaign)
             .select_related("exam", "online_test", "university")
-            .annotate(has_interviews=Count("interviews__pk"))
-            .filter(has_interviews__gt=0)
+            .exclude(interview__isnull=True)
             .prefetch_related(
                 Prefetch(
-                    'interviews',
+                    'interview',
                     queryset=(Interview.objects
                               .annotate(average=Avg('comments__score'))),
                 ),

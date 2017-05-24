@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.db.models import Prefetch
 from django.utils.numberformat import format
@@ -12,7 +13,6 @@ from collections import OrderedDict
 
 from core.views import ReportFileOutput
 from learning.admission.models import Applicant, Interview, Campaign
-from learning.admission.utils import get_best_interview
 
 
 class AdmissionReport(ReportFileOutput):
@@ -33,8 +33,8 @@ class AdmissionReport(ReportFileOutput):
         applicants = self.get_queryset()
         # TODO: replace with additional query with LEFT JOIN and campaign_id condition
         for applicant in applicants:
-            for interview in applicant.interviews.all():
-                for comment in interview.comments.all():
+            if hasattr(applicant, "interview"):
+                for comment in applicant.interview.comments.all():
                     user = comment.interviewer
                     if user.pk not in interviewers:
                         interviewers[user.pk] = user.get_full_name()
@@ -64,27 +64,29 @@ class AdmissionReport(ReportFileOutput):
                 row.append(applicant.exam.score)
             else:
                 row.append("")
-            best_interview = get_best_interview(applicant)
-            if best_interview is None:
+            try:
+                interview = applicant.interview
+                if interview.average_score() is not None:
+                    formatted = format(interview.average_score(), ".", 2)
+                    row.append(formatted)
+                    # Add interviewers comments and score
+                    comments = ""
+                    interviewers_columns = [None] * len(interviewers)
+                    for comment in interview.comments.all():
+                        comments = "{0}{1}\r\n\r\n".format(
+                            comments,
+                            "{}: {}".format(comment.interviewer, comment.text)
+                        )
+                        index = interviewers_keys.index(comment.interviewer.pk)
+                        interviewers_columns[index] = comment.score
+                    row.append(comments)
+                    row.extend(interviewers_columns)
+                else:
+                    row.append("-")
+            except ObjectDoesNotExist:
                 row.append("<нет интервью>")
                 row.append("")
-            elif best_interview.average_score() is not None:
-                formatted = format(best_interview.average_score(), ".", 2)
-                row.append(formatted)
-                # Add interviewers comments and score
-                comments = ""
-                interviewers_columns = [None] * len(interviewers)
-                for comment in best_interview.comments.all():
-                    comments = "{0}{1}\r\n\r\n".format(
-                        comments,
-                        "{}: {}".format(comment.interviewer, comment.text)
-                    )
-                    index = interviewers_keys.index(comment.interviewer.pk)
-                    interviewers_columns[index] = comment.score
-                row.append(comments)
-                row.extend(interviewers_columns)
-            else:
-                row.append("-")
+
             self.data.append([force_text(x) if x is not None else "" for x in
                               row])
 
@@ -107,7 +109,7 @@ class AdmissionReport(ReportFileOutput):
                 .select_related("exam", "online_test")
                 .prefetch_related(
                     Prefetch(
-                        "interviews",
+                        "interview",
                         queryset=(Interview.objects
                                   .prefetch_related("comments",
                                                     "comments__interviewer"))

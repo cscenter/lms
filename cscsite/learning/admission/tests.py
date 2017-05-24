@@ -35,7 +35,7 @@ def test_autoupdate_applicant_status_canceled():
 @pytest.mark.django_db
 def test_autoupdate_applicant_status_deffered():
     applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(applicant=applicant, status=Interview.WAITING)
+    interview = InterviewFactory(applicant=applicant, status=Interview.APPROVED)
     applicant.refresh_from_db()
     assert applicant.status == Applicant.INTERVIEW_SCHEDULED
     interview.status = Interview.DEFERRED
@@ -58,33 +58,9 @@ def test_autoupdate_applicant_status_completed():
 def test_autoupdate_applicant_status_from_final():
     """Don't update applicant status if it already in final state"""
     applicant = ApplicantFactory(status=Applicant.ACCEPT)
-    InterviewFactory(applicant=applicant, status=Interview.WAITING)
+    InterviewFactory(applicant=applicant, status=Interview.APPROVED)
     applicant.refresh_from_db()
     assert applicant.status == Applicant.ACCEPT
-
-
-@pytest.mark.django_db
-def test_autoupdate_applicant_status_from_multi():
-    """
-    Don't update applicant status if we deactivate interview, but still have
-    active interviews.
-    """
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(applicant=applicant,
-                                 status=Interview.WAITING)
-    interview2 = InterviewFactory(applicant=applicant,
-                                  status=Interview.COMPLETED)
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    interview.status = Interview.DEFERRED
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    # Now no active interviews
-    interview2.status = Interview.CANCELED
-    interview2.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
 
 
 @pytest.mark.django_db

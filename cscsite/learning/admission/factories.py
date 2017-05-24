@@ -88,7 +88,6 @@ class InterviewFactory(factory.DjangoModelFactory):
     applicant = factory.SubFactory(ApplicantFactory)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
-    # TODO: add interviewers, set status
 
 
 class CommentFactory(factory.DjangoModelFactory):

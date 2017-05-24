@@ -421,7 +421,7 @@ class InterviewAssignment(models.Model):
 @python_2_unicode_compatible
 class Interview(TimeStampedModel):
     APPROVAL = 'approval'
-    WAITING = 'waiting'
+    APPROVED = 'waiting'
     DEFERRED = 'deferred'
     CANCELED = 'canceled'
     COMPLETED = 'completed'
@@ -429,16 +429,17 @@ class Interview(TimeStampedModel):
         (APPROVAL, _('Approval')),
         (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
-        (WAITING, _('Waiting for interview')),
+        (APPROVED, _('Waiting for interview')),
         (COMPLETED, _('Completed')),
     )
+    TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
     date = models.DateTimeField(_("When"))
-    applicant = models.ForeignKey(
+    applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="interviews")
+        related_name="interview")
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
@@ -465,6 +466,9 @@ class Interview(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('admission_interview_detail', args=[self.pk])
+
+    def in_transition_state(self):
+        return self.status in self.TRANSITION_STATUSES
 
     def average_score(self):
         scores = [comment.score for comment in self.comments.all()]
