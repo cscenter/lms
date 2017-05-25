@@ -135,7 +135,19 @@ class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        context['students'] = ProgressReportForDiplomas.get_queryset()
+        students = ProgressReportForDiplomas.get_queryset()
+
+        # FIXME: Investigate can I update queryset instead?
+        def is_project_active(ps):
+            return (not ps.project.is_external and
+                    not ps.project.canceled and
+                    ps.final_grade != GRADES.not_graded and
+                    ps.final_grade != GRADES.unsatisfactory)
+
+        for student in students:
+            student.projects_through = list(filter(is_project_active,
+                                                   student.projects_through))
+        context['students'] = students
         return context
 
 
