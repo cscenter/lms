@@ -51,6 +51,7 @@ class ProjectStudentInline(admin.TabularInline):
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
+    search_fields = ["name"]
     inlines = [ProjectStudentInline]
     readonly_fields = ["supervisor_presentation_slideshare_url",
                        "presentation_slideshare_url"]
