@@ -113,6 +113,8 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
                                       attribute='presentation_grade')
     supervisor_grade = fields.Field(column_name='Оценка руководителя',
                                     attribute='supervisor_grade')
+    is_external = fields.Field(column_name='Внешний проект',
+                               attribute='project__get_is_external_display')
 
     class Meta:
         model = ProjectStudent
@@ -126,6 +128,7 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
             "report_score",
             "presentation_grade",
             "supervisor_grade",
+            "is_external",
         )
 
 
