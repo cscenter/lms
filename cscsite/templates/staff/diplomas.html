@@ -24,10 +24,10 @@
 \shad{{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.teachers}}{{ '}' }}{{ '{' }}{{project.grade_display|lower}}{{ '}' }}{% endspaceless %}
 {% endfor %}{% endif %}{{ '}' }}
 {{ '{' }}{% if s.projects_through|length > 0 %}
-{% for ps in s.projects_through %}{% with project=ps.project %}{% if not project.is_external and not project.canceled and ps.final_grade != 'not_graded' %}{% spaceless %}
+{% for ps in s.projects_through %}{% with project=ps.project %}{% spaceless %}
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
          {{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.semester}}{{ '}' }}{{ '{' }}{{ps.get_final_grade_display|lower}}{{ '}' }}{% endspaceless %}
-{% endif %}{% endwith %}{% endfor %}{% endif %}{{ '}' }}
+{% endwith %}{% endfor %}{% endif %}{{ '}' }}
 
 {% empty %}
     Нет студентов со статусом "Будет выпускаться"
