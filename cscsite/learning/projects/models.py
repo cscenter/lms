@@ -212,6 +212,9 @@ class Project(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
 
+    def get_is_external_display(self):
+        return _("Yes") if self.is_external else _("No")
+
     def is_active(self):
         """Check project is from current term"""
         year, term_type = get_current_semester_pair()
