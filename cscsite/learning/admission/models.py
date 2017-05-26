@@ -51,6 +51,9 @@ class Campaign(models.Model):
     def __str__(self):
         return smart_text(_("{}, {}").format(self.city.name, self.year))
 
+    def display_short(self):
+        return smart_text(_("{}, {}").format(self.city.abbr, self.year))
+
 
 @python_2_unicode_compatible
 class Applicant(TimeStampedModel):

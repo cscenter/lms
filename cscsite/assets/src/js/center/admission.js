@@ -1,25 +1,67 @@
+import UberEditor from "../editor";
+import 'jquery-bar-rating';
+
 (function ($) {
     "use strict";
 
-    var ratingSelect = $("select#id_score");
-
-    var commentForm = $("#comment form");
-
-    var commentTextarea = $("textarea[name=text]", commentForm);
+    const assignmentsWrapper = $(".assignments-multicheckbox");
+    const assignmentPreviewWrapper = $("#interview-assignment-model-form");
+    // Interview page
+    const ratingSelect = $("select#id_score");
+    const commentForm = $("#comment form");
 
     var fn = {
         launch: function () {
+            fn.assignmentsMultiSelect();
+
             fn.initRatingBar();
-            fn.submitFormHandler();
+            fn.initInterviewCommentForm();
 
             // Restore tab
-            var hash = window.location.hash;
+            let hash = window.location.hash;
             hash && $('ul.nav a[href="' + hash + '"]').tab('show');
 
             $('.nav-tabs a').click(function (e) {
                 $(this).tab('show');
-                var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+                const scrollmem = $('body').scrollTop() || $('html').scrollTop();
                 $('html,body').scrollTop(scrollmem);
+            });
+        },
+
+        assignmentsMultiSelect: function() {
+            // Some behavior on `assignments` multiple select
+            assignmentsWrapper.on("mouseenter", ".checkbox", function () {
+                let span = $(this).find("span");
+                span.removeClass("text-muted");
+                span.addClass("text-info");
+                span.text('Посмотреть условие');
+            });
+            assignmentsWrapper.on("mouseleave", ".checkbox", function () {
+                let span = $(this).find("span");
+                span.addClass("text-muted");
+                span.removeClass("text-info");
+                span.text(span.data('text'));
+            });
+
+
+            const modalBody = $('.modal-body', assignmentPreviewWrapper);
+            assignmentPreviewWrapper.modal({
+                show: false
+            });
+
+            UberEditor.preload();
+
+            assignmentsWrapper.on("click", ".checkbox span", function () {
+                // Show modal
+                const $this = $(this);
+                // TODO: get reverse from js instead of hardcoding each link
+                $.get($this.data("href"), function (data) {
+                    $('.modal-title', assignmentPreviewWrapper).html(data.name);
+                    modalBody.html(data.description);
+                    UberEditor.render(modalBody.get(0));
+                    assignmentPreviewWrapper.modal('toggle');
+                }).error(function (data) {
+                });
             });
         },
 
@@ -30,13 +72,13 @@
             });
         },
 
-        submitFormHandler: function () {
+        initInterviewCommentForm: function () {
             // Stupid defense from stale sessions
             commentForm.submit(function (e) {
                 e.preventDefault();
-                var _data = commentForm.serializeArray();
-                var data= {};
-                $.map(_data, function(n, i){
+                const _data = commentForm.serializeArray();
+                let data= {};
+                $.map(_data, function(n, i) {
                     data[n['name']] = n['value'];
                 });
                 $.ajax({
@@ -46,7 +88,7 @@
                     type: 'POST',
                 }).done(function (data) {
                     // Form was valid and saved, reload the page
-                    if (data.success == "true") {
+                    if (data.success === "true") {
                         // swal({
                         //     title: "Данные сохранены",
                         //     text: "Страница будет перезагружена\nTODO: перезагрузка будет убрана в ближайшее время!",

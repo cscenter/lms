@@ -4,6 +4,7 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% load markdown from core_tags %}
+{% load render_bundle from webpack_loader %}
 
 {% block title %} Анкета {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
@@ -15,6 +16,7 @@
 {% endblock stylesheets %}
 
 {% block javascripts %}
+    {% render_bundle 'admission' 'js' %}
     {# TODO: Can't add js without pain in Meta class of django form. Rewrite with django-sekizai after investigation    #}
     <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
     <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
@@ -53,6 +55,7 @@
                 $('html,body').scrollTop(scrollmem);
             });
         });
+
     </script>
 {% endblock javascripts %}
 
@@ -139,4 +142,7 @@
     </div>
     </div>
 </div>
+
+    {% include "learning/admission/_interview_assignment_modal.html" %}
+
 {% endblock content %}

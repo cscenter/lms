@@ -308,6 +308,15 @@
       h3.print-version {
         display: none;
       }
+
+      .collapse-link {
+        font-size: 24px;
+        margin: 0;
+      }
+
+      .panel-collapse {
+        margin-top: 10px;
+      }
     }
 
   }
@@ -315,6 +324,27 @@
     margin-top: 15px;
   }
 }
+
+
+
+.assignments-multicheckbox {
+  .checkbox {
+    padding: 5px !important;
+    margin: 0 !important;
+
+    &:hover {
+      background: $background-grey;
+    }
+
+    span {
+      cursor: pointer;
+    }
+  }
+}
+
+
+
+
 
 .admission-applicant-page {
 
@@ -329,6 +359,14 @@
 
 // print mode for interview detail page
 @media print {
+  .collapse-link {
+    display: none;
+  }
+
+  form.interview_assignments_form {
+    display: none;
+  }
+
   div.header, div.footer {
     display: none!important;
   }

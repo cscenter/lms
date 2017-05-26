@@ -5,10 +5,15 @@
 {% load staticfiles %}
 {% load markdown from core_tags %}
 {% load floatdot from core_tags %}
+{% load render_bundle from webpack_loader %}
 
 {% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
 {% block body_class %} gray{% endblock body_class %}
+
+{% block javascripts %}
+    {% render_bundle "admission" "js" %}
+{% endblock javascripts %}
 
 {% block content %}
 <div class="admission-interview-page">
@@ -43,7 +48,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="comment" role="tabpanel">
             {{ form.errors }}
-          {% crispy form form.helper %}
+          {% crispy comment_form comment_form.helper %}
             <div class="clearfix"></div>
         </div>
         <div class="tab-pane" id="applicant" role="tabpanel">
@@ -96,19 +101,28 @@
                         <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}{{ assignment.solution|safe }}{% endmarkdown %}</div>
                     {% endif %}
                     <hr>
-                    {% empty %}
-                    Список задач, предложенных перед прохождением собеседования, пуст.
+                {% empty %}
+                    <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
                 {% endfor %}
+                {% if request.user.is_curator %}
+                    <a href="#assignments-edit-block" data-toggle="collapse" aria-expanded="false" class="collapse-link">Редактировать список</a>
+                    <div class="panel-collapse">
+                        <div class="collapse" id="assignments-edit-block">
+                            {% crispy assignments_form %}
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                {% endif %}
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
-            {% if comments %}
+            {% if show_all_comments and interview.comments.all %}
                 <ul class="panel-info">
                     <li>
                       <div class="num text-info">{{ interview.average_score|floatdot:2 }}</div>
                       <p>Средний балл</p>
                     </li>
                   </ul>
-                {% for comment in comments %}
+                {% for comment in interview.comments.all %}
                     <div class="comment media">
                         <div class="media-left">
                             {% with user=comment.interviewer %}
@@ -147,8 +161,6 @@
       </div>
     </div>
 </div>
-{% endblock content %}
 
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/interview.js" %}"></script>
-{% endblock javascripts %}
+    {% include "learning/admission/_interview_assignment_modal.html" %}
+{% endblock content %}

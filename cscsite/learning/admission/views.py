@@ -11,6 +11,7 @@ from string import ascii_lowercase
 from string import digits
 
 from django.contrib import messages
+from django.http.response import HttpResponseForbidden
 from django.urls import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
@@ -29,14 +30,16 @@ from formtools.wizard.views import NamedUrlCookieWizardView, \
     NamedUrlSessionWizardView
 
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
+from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter
-from learning.admission.forms import InterviewCommentForm, ApplicantReadOnlyForm, \
-    InterviewForm, ApplicantStatusForm,  \
+from learning.admission.forms import InterviewCommentForm, \
+    ApplicantReadOnlyForm, \
+    InterviewForm, ApplicantStatusForm, \
     InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm
+    ApplicationInNskForm, InterviewAssignmentsForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
-    Applicant, Campaign
+    Applicant, Campaign, InterviewAssignment
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
 from .tasks import application_form_send_email
@@ -121,8 +124,8 @@ class ApplicantContextMixin(object):
         context = {}
         applicant = get_object_or_404(
             Applicant.objects
-                     .select_related("exam", "campaign", "online_test",
-                                     "university")
+                     .select_related("exam", "campaign", "campaign__city",
+                                     "online_test", "university")
                      .filter(pk=applicant_id))
         context["applicant"] = applicant
         context["applicant_form"] = ApplicantReadOnlyForm(instance=applicant)
@@ -256,6 +259,19 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
         return reverse("admission_applicant_detail", args=[self.object.pk])
 
 
+class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
+    def get(self, request, **kwargs):
+        assignment_id = self.kwargs['pk']
+        assignment = get_object_or_404(
+            InterviewAssignment.objects.filter(pk=assignment_id))
+        rendered_text = render_markdown(assignment.description)
+        return JsonResponse({
+            'id': assignment_id,
+            'name': assignment.name,
+            'description': rendered_text
+        })
+
+
 class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'interviews'
     model = Interview
@@ -322,23 +338,59 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
 
 class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
-                          TemplateResponseMixin, BaseUpdateView):
-    form_class = InterviewCommentForm
+                          generic.TemplateView):
     template_name = "learning/admission/interview.html"
 
-    def dispatch(self, request, *args, **kwargs):
-        interview_id = self.kwargs.get("pk", None)
-        if not interview_id:
-            raise Http404
-        self.interview = get_object_or_404(Interview.objects
-                                           .filter(pk=interview_id)
-                                           .prefetch_related("interviewers",
-                                                             "assignments"))
-        return super(InterviewDetailView, self).dispatch(request, *args,
-                                                         **kwargs)
+    def get_context_data(self, **kwargs):
+        interview_id = self.kwargs['pk']
+        interview = get_object_or_404(
+            Interview.objects
+                .filter(pk=interview_id)
+                .prefetch_related(
+                    "interviewers",
+                    "assignments",
+                    Prefetch("comments",
+                             queryset=(Comment.objects
+                                       .select_related("interviewer")))))
+        context = self.get_applicant_context(interview.applicant_id)
+        context.update({
+            "interview": interview,
+            "assignments_form": InterviewAssignmentsForm(instance=interview),
+        })
+        show_all_comments = self.request.user.is_curator
+        form_kwargs = {
+            "interview_id": interview.pk,
+            "interviewer": self.request.user.pk
+        }
+        for comment in interview.comments.all():
+            if comment.interviewer == self.request.user:
+                show_all_comments = True
+                form_kwargs["instance"] = comment
+        context["show_all_comments"] = show_all_comments
+        context["comment_form"] = InterviewCommentForm(**form_kwargs)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Update list of assignments"""
+        if not request.user.is_curator:
+            return HttpResponseForbidden()
+        interview = get_object_or_404(Interview.objects
+                                      .filter(pk=self.kwargs["pk"]))
+        form = InterviewAssignmentsForm(instance=interview,
+                                        data=self.request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(self.request, "Список заданий успешно обновлён",
+                             extra_tags='timeout')
+        url = "{}#assignments".format(interview.get_absolute_url())
+        return HttpResponseRedirect(url)
+
+
+class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
+    """Update/Insert view for interview comment"""
+    form_class = InterviewCommentForm
 
     def get_object(self, queryset=None):
-        """Try to fetch comment by interview id and interviewer id"""
         if queryset is None:
             queryset = self.get_queryset()
         try:
@@ -348,42 +400,46 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             return None
 
     def get_queryset(self):
-        interview_id = self.kwargs.get("pk", None)
-        return Comment.objects.filter(interview=interview_id,
+        return Comment.objects.filter(interview=self.kwargs["pk"],
                                       interviewer=self.request.user)
 
-    def get_context_data(self, **kwargs):
-        context = super(InterviewDetailView, self).get_context_data(**kwargs)
-        context["interview"] = self.interview
-        context.update(self.get_applicant_context(self.interview.applicant_id))
-        if hasattr(self, "object"):
-            comment = self.object
-        else:
-            comment = self.get_object()
-        if comment or self.request.user.is_curator:
-            context["comments"] = Comment.objects.filter(
-                interview=self.interview.pk).select_related("interviewer")
-        else:
-            context["comments"] = False
-        return context
+    def get_success_url(self):
+        messages.success(self.request, "Комментарий успешно сохранён",
+                         extra_tags='timeout')
+        return reverse("admission_interview_detail",
+                       args=[self.object.interview_id])
+
+    def form_valid(self, form):
+        if self.request.is_ajax():
+            _ = form.save()
+            return JsonResponse({"success": "true"})
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.is_ajax():
+            return JsonResponse({"success": "false",
+                                 "errors": form.errors.as_json()})
+        return super().form_invalid(form)
 
     def _get_interviewer(self):
+        interview_id = self.kwargs["pk"]
+        interview = get_object_or_404(Interview.objects
+                                      .filter(pk=interview_id)
+                                      .prefetch_related("interviewers"))
         if self.request.user.is_curator:
             return self.request.user
-        for i in self.interview.interviewers.all():
+        for i in interview.interviewers.all():
             if i.pk == self.request.user.pk:
                 return i
-        return False
+        return None
 
     def get_form_kwargs(self):
-        interview_id = self.kwargs.get("pk", None)
-        interviewer = self._get_interviewer()
-        kwargs = super(InterviewDetailView, self).get_form_kwargs()
-        kwargs['initial']['interview'] = interview_id
-        kwargs['initial']['interviewer'] = self.request.user.pk
-        # Store values to validate submitted interviewer/interview on form level
-        kwargs.update({"interviewer": interviewer})
-        kwargs.update({"interview_id": interview_id})
+        interview_id = self.kwargs["pk"]
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            "interviewer": self._get_interviewer(),
+            "interview_id": interview_id
+        })
         if self.request.is_ajax():
             try:
                 json_data = json.loads(self.request.body.decode("utf-8"))
@@ -393,24 +449,6 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             except ValueError:
                 pass
         return kwargs
-
-    def get_success_url(self):
-        messages.success(self.request, "Комментарий успешно сохранён",
-                         extra_tags='timeout')
-        return reverse("admission_interview_detail",
-                       args=[self.object.interview.pk])
-
-    def form_valid(self, form):
-        if self.request.is_ajax():
-            _ = form.save()
-            return JsonResponse({"success": "true"})
-        return super(InterviewDetailView, self).form_valid(form)
-
-    def form_invalid(self, form):
-        if self.request.is_ajax():
-            return JsonResponse({"success": "false",
-                                 "errors": form.errors.as_json()})
-        return super(InterviewDetailView, self).form_invalid(form)
 
 
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
