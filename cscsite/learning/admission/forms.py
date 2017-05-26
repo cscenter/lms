@@ -16,7 +16,8 @@ from model_utils import Choices
 from core.forms import Ubereditor
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
-from learning.admission.models import Interview, Comment, Applicant
+from learning.admission.models import Interview, Comment, Applicant, \
+    InterviewAssignment
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
@@ -320,6 +321,15 @@ class ApplicationInNskForm(ApplicationFormStep2):
 
 
 class InterviewForm(forms.ModelForm):
+    assignments = forms.ModelMultipleChoiceField(
+        label=Interview.assignments.field.verbose_name,
+        queryset=(InterviewAssignment.objects
+                  .select_related("campaign", "campaign__city")
+                  .order_by("-campaign__year", "name")),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )
+
     class Meta:
         model = Interview
         fields = "__all__"
@@ -330,9 +340,37 @@ class InterviewForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(InterviewForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
+        self.helper['assignments'].wrap(
+            Field, template='learning/admission/forms/assignments_field.html')
         self.helper.layout.append(
             FormActions(Submit('create', _('Create interview')),
                         css_class="pull-right"))
+
+
+class InterviewAssignmentsForm(forms.ModelForm):
+    prefix = "interview_assignments_form"
+
+    assignments = forms.ModelMultipleChoiceField(
+        label=Interview.assignments.field.verbose_name,
+        queryset=(InterviewAssignment.objects
+                  .select_related("campaign", "campaign__city")
+                  .order_by("-campaign__year", "name")),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )
+
+    class Meta:
+        model = Interview
+        fields = ["assignments"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper['assignments'].wrap(
+            Field, template='learning/admission/forms/assignments_field.html')
+        self.helper.layout.append(
+            FormActions(Submit('update', _('Update assignments list'))))
+        self.helper.form_class = self.prefix
 
 
 class InterviewCommentForm(forms.ModelForm):
@@ -367,6 +405,13 @@ class InterviewCommentForm(forms.ModelForm):
         )
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
+        initial = kwargs.get("initial", {})
+        initial["interview"] = self.interview_id
+        initial["interviewer"] = self.interviewer
+        kwargs["initial"] = initial
+        self.helper.form_action = reverse("admission_interview_comment",
+                                          kwargs={"pk": self.interview_id})
+        self.helper.html5_required = False
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
 

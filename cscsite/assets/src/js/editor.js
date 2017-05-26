@@ -190,5 +190,4 @@ class UberEditor {
     }
 }
 
-
 export default UberEditor;

@@ -18,6 +18,7 @@ const PATHS = {
     common: path.join(__assetsdir, '/src/js/main.js'),
     profile: path.join(__assetsdir, '/src/js/profile.js'),
     forms: path.join(__assetsdir, '/src/js/forms.js'),
+    admission: path.join(__assetsdir, '/src/js/center/admission.js'),
     learning: path.join(__assetsdir, '/src/js/learning/index.js'),
     dist: path.join(__assetsdir, '/js/dist'),
     stats: path.join(__assetsdir, "/src/js/stats/main.js")
@@ -46,6 +47,7 @@ const common = {
         main: PATHS.common,
         profile: PATHS.profile,
         forms: PATHS.forms,
+        admission: PATHS.admission,
         learning: PATHS.learning,
         stats: PATHS.stats,
         vendor: VENDOR,
