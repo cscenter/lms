@@ -91,6 +91,7 @@
             {% endif %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
+            <div class="interview-info">{{ applicant.get_full_name }}<br>{{ interview.date }}</div>
                 {% for assignment in interview.assignments.all %}
                     <h3>{{ assignment.name }}</h3>
                     <h3 class="print-version">Задание {{ forloop.counter }}</h3>

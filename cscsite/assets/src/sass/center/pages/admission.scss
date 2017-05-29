@@ -305,6 +305,12 @@
     }
 
     #assignments {
+      .interview-info {
+        margin-bottom: 30px;
+        text-align: right;
+        display: none;
+      }
+
       h3.print-version {
         display: none;
       }
@@ -387,6 +393,10 @@
     }
 
     #assignments {
+      .interview-info {
+        display: block!important;
+      }
+
       h3 {
         display: none;
         &.print-version {
