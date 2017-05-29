@@ -17,6 +17,17 @@
         window.profileAppInit["preload"] = [
             "{% static "js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
+        {% if user.is_curator %}
+            $('.loginas-user').click(function(e) {
+                e.preventDefault();
+                var href = $(this).attr("href");
+                $('<form>', {
+                    "method": "POST",
+                    "html": "{% csrf_token %}",
+                    "action": href
+                }).appendTo(document.body).submit();
+            });
+        {% endif %}
     </script>
 
     {% render_bundle 'profile' 'js' %}
@@ -44,7 +55,7 @@
             <h2>{{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
                 {% if user.is_curator %}
                     <a href="{% url 'admin:users_cscuser_change' profile_user.pk %}"
-                       target="_blank"><i class="fa fa-pencil-square-o"></i></a>
+                       target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
                 {% endif %}</h2>
 
             {% if profile_user.is_graduate %}
