@@ -441,6 +441,16 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
                    "status", "admin_note", "yandex_id_normalize", "user",
                    "university_other")
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Swap label with help text for next fields
+        to_swap = [
+            "preferred_study_programs_dm_note",
+            "preferred_study_programs_se_note",
+        ]
+        for field in to_swap:
+            self.fields[field].label = self.fields[field].help_text
+
 
 class ApplicantStatusForm(forms.ModelForm):
     class Meta:
