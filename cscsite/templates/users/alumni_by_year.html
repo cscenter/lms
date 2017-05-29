@@ -54,7 +54,7 @@
                             <div class="counter counter-lg ">
                                 <div class="counter-number-group">
                                     <span class="counter-number">{{ stats.teachers_total }}</span>
-                                    <span class="counter-number-related">{% blocktrans count counter=stats.teachers_total %}teacher{% plural %}teachers{% endblocktrans %}</span>
+                                    <span class="counter-number-related">{% blocktrans count counter=stats.teachers_total context "alumni" %}teacher{% plural %}teachers{% endblocktrans %}</span>
                                 </div>
                             </div>
                             <div class="pull-right white">
@@ -74,7 +74,7 @@
                             <div class="counter-number-group">
                               <span class="counter-number">{{ stats.hours }}</span>
                             </div>
-                            <div class="counter-label">{% blocktrans count counter=stats.hours %}hour{% plural %}hours{% endblocktrans %} в аудитории</div>
+                            <div class="counter-label">{% blocktrans count counter=stats.hours context "alumni" %}hour{% plural %}hours{% endblocktrans %} в аудитории</div>
                           </div>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
                             <div class="counter-number-group">
                               <span class="counter-number">{{ stats.projects_total }}</span>
                             </div>
-                            <div class="counter-label">{% blocktrans count counter=stats.projects_total %} project and research work{% plural %}projects and research works{% endblocktrans %}</div>
+                            <div class="counter-label">{% blocktrans count counter=stats.projects_total context "alumni" %} project and research work{% plural %}projects and research works{% endblocktrans %}</div>
                           </div>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                             <div class="counter-number-group">
                               <span class="counter-number">{{ stats.courses.total }}</span>
                             </div>
-                            <div class="counter-label ">{% blocktrans count counter=stats.courses.total %}passed course{% plural %}passed courses{% endblocktrans %}</div>
+                            <div class="counter-label ">{% blocktrans count counter=stats.courses.total context "alumni" %}passed course{% plural %}passed courses{% endblocktrans %}</div>
                           </div>
                         </div>
                     </div>
