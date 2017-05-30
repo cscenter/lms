@@ -61,7 +61,7 @@
                                 </td>
                                 <td>{{ applicant.online_test.score|default:"-" }}/{{ selected_campaign.online_test_max_score }}</td>
                                 <td>{{ applicant.exam.score|default:"-" }}/{{ selected_campaign.exam_max_score }}</td>
-                                <td>{% if applicant.best_interview_score != None %}{{ applicant.best_interview_score|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
+                                <td>{% if interview.average != None %}{{ interview.average|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
                                 <td>
                                     {{ form.status }}
                                     {{ form.status.errors }}
