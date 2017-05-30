@@ -374,6 +374,7 @@ class InterviewAssignmentsForm(forms.ModelForm):
 
 
 class InterviewCommentForm(forms.ModelForm):
+    use_required_attribute = False
 
     class Meta:
         model = Comment
@@ -381,13 +382,15 @@ class InterviewCommentForm(forms.ModelForm):
         widgets = {
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
-            'score': forms.Select(choices=(
-                ("", ""),
-                (-2, "не брать ни сейчас, ни потом"),
-                (-1, "не брать сейчас"),
-                (0, "нейтрально"),
-                (1, "можно взять"),
-                (2, "точно нужно взять"))),
+            'score': forms.Select(
+                choices=(
+                    ("", ""),
+                    (-2, "не брать ни сейчас, ни потом"),
+                    (-1, "не брать сейчас"),
+                    (0, "нейтрально"),
+                    (1, "можно взять"),
+                    (2, "точно нужно взять")),
+            ),
             'text': Ubereditor(attrs={
                 'data-local-persist': 'true',
             })
@@ -411,7 +414,6 @@ class InterviewCommentForm(forms.ModelForm):
         kwargs["initial"] = initial
         self.helper.form_action = reverse("admission_interview_comment",
                                           kwargs={"pk": self.interview_id})
-        self.helper.html5_required = False
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
 
