@@ -94,11 +94,14 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
 class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
+    BAD_GRADES = [GRADES.unsatisfactory, GRADES.not_graded]
 
     def get_context_data(self, **kwargs):
         context = super(StudentsDiplomasStatsView, self).get_context_data(
             **kwargs)
-        students = ProgressReportForDiplomas.get_queryset()
+        students = CSCUser.objects.students_info(
+            filters={"status": CSCUser.STATUS.will_graduate})
+
         unique_teachers = set()
         total_hours = 0
         total_passed_courses = 0
@@ -106,10 +109,76 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         unique_courses = set()
         excellent_total = 0
         good_total = 0
+        most_courses_students = set()
+        most_open_courses_students = set()
+        most_courses_in_term_students = set()
+        enrolled_on_first_course = set()
+        current_year, _ = get_current_semester_pair()
+        by_enrollment_year = defaultdict(set)
+        finished_two_or_more_programs = set()
+        all_three_practicies_are_internal = set()
+        passed_practicies_in_first_two_years = set()
+        passed_internal_practicies_in_first_two_years = set()
+        most_failed_courses = set()
+        less_failed_courses = set()
+
         for s in students:
-            for project in s.project_set.all():
-                unique_projects.add(project)
+            if len(s.areas_of_study.all()) >= 2:
+                finished_two_or_more_programs.add(s)
+            by_enrollment_year[s.enrollment_year].add(s)
+            if s.uni_year_at_enrollment == CSCUser.COURSES.BACHELOR_SPECIALITY_1:
+                enrolled_on_first_course.add(s)
+            if not most_courses_students:
+                most_courses_students = {s}
+            else:
+                most_courses_student = next(iter(most_courses_students))
+                success_enrollments = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)
+                most_success_enrollments = sum(1 for e in most_courses_student.enrollments if e.grade not in self.BAD_GRADES)
+                if success_enrollments == most_success_enrollments:
+                    most_courses_students.add(s)
+                elif success_enrollments > most_success_enrollments:
+                    most_courses_students = {s}
+            s.pass_open_courses = sum(e.course_offering.is_open for e in s.enrollments if e.grade not in self.BAD_GRADES)
+            if not most_open_courses_students:
+                most_open_courses_students.add(s)
+            else:
+                most_open_courses_student = next(iter(most_open_courses_students))
+                if s.pass_open_courses == most_open_courses_student.pass_open_courses:
+                    most_open_courses_students.add(s)
+                elif s.pass_open_courses > most_open_courses_student.pass_open_courses:
+                    most_open_courses_students = {s}
+
+            internal_projects_cnt = 0
+            projects_in_first_two_years_of_learning = 0
+            internal_projects_in_first_two_years_of_learning = 0
+            enrollment_term_index = get_term_index(s.enrollment_year,
+                                                   SEMESTER_TYPES.autumn)
+            for ps in s.projects_through:
+                if ps.final_grade in self.BAD_GRADES or ps.project.canceled:
+                    continue
+                unique_projects.add(ps.project)
+                internal_projects_cnt += int(not ps.project.is_external)
+                if 0 <= ps.project.semester.index - enrollment_term_index <= 4:
+                    projects_in_first_two_years_of_learning += 1
+                    if not ps.project.is_external:
+                        internal_projects_in_first_two_years_of_learning += 1
+            if internal_projects_cnt == 3:
+                all_three_practicies_are_internal.add(s)
+            if projects_in_first_two_years_of_learning >= 3:
+                passed_practicies_in_first_two_years.add(s)
+            if internal_projects_in_first_two_years_of_learning >= 3:
+                passed_internal_practicies_in_first_two_years.add(s)
+
+            courses_by_term = defaultdict(int)
+            failed_courses = 0
             for enrollment in s.enrollments:
+                # Skip summer courses
+                if enrollment.course_offering.semester.type == SEMESTER_TYPES.summer:
+                    continue
+                if enrollment.grade in self.BAD_GRADES:
+                    failed_courses += 1
+                    continue
+                courses_by_term[enrollment.course_offering.semester_id] += 1
                 total_passed_courses += 1
                 if enrollment.grade == GRADES.excellent:
                     excellent_total += 1
@@ -119,6 +188,49 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                 total_hours += enrollment.course_offering.courseclass_set.count() * 1.5
                 for teacher in enrollment.course_offering.teachers.all():
                     unique_teachers.add(teacher.pk)
+
+            s.failed_courses = failed_courses
+            if not most_failed_courses:
+                most_failed_courses = {s}
+            else:
+                most_failed_course_student = next(iter(most_failed_courses))
+                if s.failed_courses == most_failed_course_student.failed_courses:
+                    most_failed_courses.add(s)
+                elif s.failed_courses > most_failed_course_student.failed_courses:
+                    most_failed_courses = {s}
+            # Less failed courses
+            if not less_failed_courses:
+                less_failed_courses = {s}
+            else:
+                less_failed_course_student = next(iter(most_failed_courses))
+                if s.failed_courses == less_failed_course_student.failed_courses:
+                    less_failed_courses.add(s)
+                elif s.failed_courses < less_failed_course_student.failed_courses:
+                    less_failed_courses = {s}
+
+            try:
+                s.max_courses_in_term = max(courses_by_term.values())
+            except ValueError:
+                s.max_courses_in_term = 0
+            if not most_courses_in_term_students:
+                most_courses_in_term_students = {s}
+            else:
+                most_courses_in_term_student = next(iter(most_courses_in_term_students))
+                if s.max_courses_in_term == most_courses_in_term_student.max_courses_in_term:
+                    most_courses_in_term_students.add(s)
+                elif s.max_courses_in_term > most_courses_in_term_student.max_courses_in_term:
+                    most_courses_in_term_students = {s}
+        context['less_failed_courses'] = less_failed_courses
+        context['most_failed_courses'] = most_failed_courses
+        context['all_three_practicies_are_internal'] = all_three_practicies_are_internal
+        context['passed_practicies_in_first_two_years'] = passed_practicies_in_first_two_years
+        context['passed_internal_practicies_in_first_two_years'] = passed_internal_practicies_in_first_two_years
+        context['finished_two_or_more_programs'] = finished_two_or_more_programs
+        context['by_enrollment_year'] = dict(by_enrollment_year)
+        context['enrolled_on_first_course'] = enrolled_on_first_course
+        context['most_courses_students'] = most_courses_students
+        context['most_courses_in_term_students'] = most_courses_in_term_students
+        context['most_open_courses_students'] = most_open_courses_students
         context['students'] = students
         context["unique_teachers_count"] = len(unique_teachers)
         context["total_hours"] = int(total_hours)
