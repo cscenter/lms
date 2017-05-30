@@ -102,6 +102,9 @@ class ProjectStudent(models.Model):
         May require additional query to db to get project instance
         """
         final_grade = GRADES[self.final_grade]
+        # For research work grade type is binary at most
+        if self.project.project_type == Project.PROJECT_TYPES.research:
+            return final_grade
         # XXX: Assume projects with id greater than magic number -
         # from terms >= spring 2016
         MAGIC_PROJECT_ID = 357
