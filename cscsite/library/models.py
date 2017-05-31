@@ -28,6 +28,9 @@ class Borrow(models.Model):
         verbose_name_plural = _("borrows")
         ordering = ["borrowed_on"]
 
+    def __str__(self):
+        return str(self.student)
+
 
 @python_2_unicode_compatible
 class Book(models.Model):
