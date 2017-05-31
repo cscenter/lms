@@ -20,14 +20,14 @@
             <li>{{ course }}</li>
         {% endfor %}
     </ul>
-    Сдал больше всего курсов (только курсы клуба и центра):
+    Сдал больше всего курсов:
         <ul>
             {% for most_courses_student in most_courses_students %}
                 <li><a href="{{ most_courses_student.get_absolute_url }}">{{ most_courses_student }}</a></li>
             {% endfor %}
         </ul>
 
-    Сдал больше всего курсов в одном семестре (только курсы клуба и центра):
+    Сдал больше всего курсов в одном семестре:
         <ul>
         {% for most_courses_in_term_student in most_courses_in_term_students %}
             <li><a href="{{ most_courses_in_term_student.get_absolute_url }}">{{ most_courses_in_term_student }}</a></li>
@@ -36,7 +36,7 @@
     Сдал больше всего курсов клуба:<br>
         <ul>
             {% for s in most_open_courses_students %}
-                <li><a href="{{ s.get_absolute_url }}">{{ s }}</a>{% if forloop.first %} (всего {{ s.pass_open_courses  }}){% endif %}</li>
+                <li><a href="{{ s.get_absolute_url }}">{{ s }}</a> ({{ s.pass_open_courses  }})</li>
             {% endfor %}<br>
         </ul>
 

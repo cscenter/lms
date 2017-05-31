@@ -110,8 +110,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         excellent_total = 0
         good_total = 0
         most_courses_students = set()
-        most_open_courses_students = set()
         most_courses_in_term_students = set()
+        most_open_courses_students = set()
         enrolled_on_first_course = set()
         current_year, _ = get_current_semester_pair()
         by_enrollment_year = defaultdict(set)
@@ -128,15 +128,17 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             by_enrollment_year[s.enrollment_year].add(s)
             if s.uni_year_at_enrollment == CSCUser.COURSES.BACHELOR_SPECIALITY_1 or (hasattr(s, "applicant") and s.applicant.course == CSCUser.COURSES.BACHELOR_SPECIALITY_1):
                 enrolled_on_first_course.add(s)
+            # Count most_courses_students
+            s.passed_courses = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)
+            s.passed_courses += sum(1 for c in s.shads if c.grade not in self.BAD_GRADES)
             if not most_courses_students:
                 most_courses_students = {s}
             else:
+                # FIXME: most_courses_student и most_courses_student interm
                 most_courses_student = next(iter(most_courses_students))
-                success_enrollments = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)
-                most_success_enrollments = sum(1 for e in most_courses_student.enrollments if e.grade not in self.BAD_GRADES)
-                if success_enrollments == most_success_enrollments:
+                if s.passed_courses == most_courses_student.passed_courses:
                     most_courses_students.add(s)
-                elif success_enrollments > most_success_enrollments:
+                elif s.passed_courses > most_courses_student.passed_courses:
                     most_courses_students = {s}
             s.pass_open_courses = sum(e.course_offering.is_open for e in s.enrollments if e.grade not in self.BAD_GRADES)
             if not most_open_courses_students:
@@ -171,6 +173,12 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
 
             courses_by_term = defaultdict(int)
             failed_courses = 0
+            # Add shad courses
+            for c in s.shads:
+                if c.grade in self.BAD_GRADES:
+                    failed_courses += 1
+                    continue
+                courses_by_term[c.semester_id] += 1
             for enrollment in s.enrollments:
                 # Skip summer courses
                 if enrollment.course_offering.semester.type == SEMESTER_TYPES.summer:
