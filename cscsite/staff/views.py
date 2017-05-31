@@ -126,7 +126,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             if len(s.areas_of_study.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_enrollment_year[s.enrollment_year].add(s)
-            if s.uni_year_at_enrollment == CSCUser.COURSES.BACHELOR_SPECIALITY_1:
+            if s.uni_year_at_enrollment == CSCUser.COURSES.BACHELOR_SPECIALITY_1 or (hasattr(s, "applicant") and s.applicant.course == CSCUser.COURSES.BACHELOR_SPECIALITY_1):
                 enrolled_on_first_course.add(s)
             if not most_courses_students:
                 most_courses_students = {s}
