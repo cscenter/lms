@@ -11,6 +11,7 @@ from string import ascii_lowercase
 from string import digits
 
 from django.contrib import messages
+from django.db import transaction
 from django.http.response import HttpResponseForbidden
 from django.urls import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
@@ -232,6 +233,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             return super(ApplicantDetailView, self).get(request, *args,
                                                         **kwargs)
 
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
         if not request.user.is_curator:
             return self.handle_no_permission(request)
@@ -409,6 +411,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
         return reverse("admission_interview_detail",
                        args=[self.object.interview_id])
 
+    @transaction.atomic
     def form_valid(self, form):
         if self.request.is_ajax():
             _ = form.save()
