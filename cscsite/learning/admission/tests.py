@@ -8,7 +8,7 @@ from django.urls import reverse
 from core.factories import CityFactory
 from core.settings.base import DEFAULT_CITY_CODE
 from learning.admission.factories import ApplicantFactory, InterviewFactory, \
-    CampaignFactory
+    CampaignFactory, InterviewerFactory, CommentFactory
 from learning.admission.models import Applicant, Interview
 from users.factories import UserFactory
 
@@ -46,12 +46,48 @@ def test_autoupdate_applicant_status_deffered():
 
 @pytest.mark.django_db
 def test_autoupdate_applicant_status_completed():
-    """Do not automatically switch applicant status if interview completed"""
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(applicant=applicant,
-                                 status=Interview.COMPLETED)
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
+    """
+    1. If all interviewers leave a comment, change interview status to
+    `complete` status. Also, update applicant status if it's not already in
+    final state.
+    2. If interview took a place and we later remove absent interviewers,
+    try to switch interview and applicant status to `complete` state.
+    """
+    # Default applicant status is nullable, so we can easily set `complete`
+    interview = InterviewFactory(status=Interview.COMPLETED)
+    assert interview.applicant.status == Applicant.INTERVIEW_COMPLETED
+    interview.delete()
+    # Check first event
+    interviewer1, interviewer2 = InterviewerFactory.create_batch(2)
+    interview = InterviewFactory(
+        status=Interview.APPROVED,
+        interviewers=[interviewer1, interviewer2])
+    assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
+    CommentFactory.create(interview=interview, interviewer=interviewer1)
+    interview.refresh_from_db()
+    assert interview.status == Interview.APPROVED
+    comment2 = CommentFactory.create(interview=interview,
+                                     interviewer=interviewer2)
+    interview.refresh_from_db()
+    assert interview.status == Interview.COMPLETED
+    # Now try to remove interviewer and check that status was changed.
+    comment2.delete()
+    interview.status = Interview.APPROVED
+    interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
+    interview.applicant.save()
+    # Interviewers update won't emit interview `post_save` signal, so
+    # change it before `save` method called
+    interview.interviewers = [interviewer1]
+    interview.save()
+    interview.refresh_from_db()
+    assert interview.interviewers.count() == 1
+    assert interview.status == Interview.COMPLETED
+
+
+@pytest.mark.django_db
+def test_autoupdate_applicant_status_completed():
+    """Automatically switch applicant status if interview completed"""
+
 
 
 @pytest.mark.django_db

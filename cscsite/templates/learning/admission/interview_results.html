@@ -22,7 +22,7 @@
         </ul>
         <div class="tab-content">
             {% if formset|length > 0 %}
-                <b>Cтатистика</b>
+                <b>Статистика</b>
                 <ul class="list-unstyled">
                     <li>Всего: {{ formset.total_form_count }}</li>
                 {% for status, cnt in stats %}

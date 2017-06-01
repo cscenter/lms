@@ -6,6 +6,7 @@ from itertools import count
 
 import datetime
 import factory
+from django.db.models.signals import post_save
 from factory.fuzzy import FuzzyInteger
 
 from django.utils import timezone
@@ -13,6 +14,7 @@ from django.utils import timezone
 from core.factories import UniversityFactory, CityFactory
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment
+from learning.admission.signals import post_save_interview
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
 
@@ -88,6 +90,25 @@ class InterviewFactory(factory.DjangoModelFactory):
     applicant = factory.SubFactory(ApplicantFactory)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
+
+    @factory.post_generation
+    def interviewers(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for interviewer in extracted:
+                self.interviewers.add(interviewer)
+
+    @classmethod
+    def _after_postgeneration(cls, obj, create, results=None):
+        """
+        When any RelatedFactory or post_generation attribute is defined
+        on the DjangoModelFactory subclass, a second save() is
+        performed after the call to _create().
+        """
+        post_save.disconnect(post_save_interview, Interview)
+        super(InterviewFactory, cls)._after_postgeneration(obj, create, results)
+        post_save.connect(post_save_interview, Interview)
 
 
 class CommentFactory(factory.DjangoModelFactory):
