@@ -392,6 +392,12 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
     """Update/Insert view for interview comment"""
     form_class = InterviewCommentForm
 
+    def get(self, request, *args, **kwargs):
+        # Quick fix, return empty json on GET
+        if not self.request.is_ajax():
+            return JsonResponse({})
+        return super(InterviewCommentView, self).get(request, *args, **kwargs)
+
     def get_object(self, queryset=None):
         if queryset is None:
             queryset = self.get_queryset()
