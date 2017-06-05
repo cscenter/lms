@@ -15,9 +15,9 @@
         <div class="graduates-list">
             <h3>Выпуск {{ year }} в лицах</h3> <a href="#stats" class="dashed-link">Статистика</a>{% if testimonials %}<a href="#testimonials" class="dashed-link">Отзывы о CS центре</a>{% endif %}
             <div class="clearfix"></div>
-            <div class="__list">
+            <div class="c-student-faces">
             {% for alumni in alumni_list %}
-                <div class="alumni">
+                <div class="student">
                     <a href="{{ alumni.get_absolute_url }}">
                     {% if alumni.photo %}
                         {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
@@ -26,6 +26,7 @@
                     {% else %}
                         <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
                     {% endif %}
+                    <figcaption>{{ alumni.last_name }} {{ alumni.first_name }}</figcaption>
                     </a>
                 </div>
             {% endfor %}

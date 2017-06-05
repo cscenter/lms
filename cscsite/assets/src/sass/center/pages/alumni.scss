@@ -52,3 +52,47 @@
     }
   }
 }
+
+
+.c-student-faces {
+  padding: 30px 0;
+
+  .student {
+    float: left;
+    border: 1px solid #fff;
+    position: relative;
+
+    &:hover {
+      figcaption {
+        opacity: 0.8;
+      }
+    }
+
+    img {
+      background: #4F86A0;
+    }
+
+    figcaption {
+        background: #000;
+        opacity: 0.5;
+        -webkit-transition: 0.3s;
+        transition: 0.3s;
+        width: 100%;
+        font-size: 1.2rem;
+        text-align: left;
+        color: #fff;
+        position: absolute;
+        bottom: 0;
+        padding: .5rem;
+
+      &.expelled {
+        background: $color-red;
+        opacity: 0.8;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

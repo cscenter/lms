@@ -5,12 +5,16 @@
   h3 {
     display: inline-block;
     padding: 10px 15px;
-    font-size: 28px;
+    font-size: 24px;
     background: #f9f9f9;
     font-weight: normal;
     border: 1px solid #f2f2f2;
     margin: 0 20px 20px 0;
     @include clearfix;
+  }
+
+  .dashed-link {
+    font-size: 24px;
   }
 
   .graduates-list {
@@ -50,6 +54,16 @@
   .testimonials {
     @extend .row;
     padding: 0;
+  }
+
+
+  .c-student-faces {
+    padding: 0;
+    overflow: hidden;
+    
+    img {
+      background: none;
+    }
   }
 }
 
