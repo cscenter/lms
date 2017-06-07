@@ -12,7 +12,7 @@ from django.utils.encoding import force_text
 from collections import OrderedDict
 
 from core.views import ReportFileOutput
-from learning.admission.models import Applicant, Interview, Campaign
+from learning.admission.models import Applicant, Interview, Campaign, Comment
 
 
 class AdmissionReport(ReportFileOutput):
@@ -108,13 +108,16 @@ class AdmissionReport(ReportFileOutput):
                 .filter(campaign=self.campaign.pk)
                 .select_related("exam", "online_test")
                 .prefetch_related(
+                    "university",
                     Prefetch(
                         "interview",
                         queryset=(Interview.objects
-                                  .prefetch_related("comments",
-                                                    "comments__interviewer"))
-                    )
-                )
+                                  .prefetch_related(
+                                        Prefetch(
+                                            "comments",
+                                            queryset=(Comment.objects
+                                                       .select_related("interviewer"))))
+                        )))
                 .order_by('pk'))
 
     def export_row(self, row):
