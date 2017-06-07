@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
+
+{% block title %}Результаты набора{% endblock title %}
+{% block body_class %} gray{% endblock body_class %}
+
+{% block content %}
+<div class="interview-results-page">
+    <ol class="breadcrumb projects">
+      <li class="active">Выбор времени собеседования</li>
+    </ol>
+    <div class="panel">
+        <div class="panel-body">
+            {% if interview_approved %}
+                Дата вашего собеседования {{ interview.date }}
+            {% else %}
+                <form action="" method="POST" class="margin-bottom-0">
+                    <b>Дата собеседования</b>: {{ slots.0.stream.date }}<br>
+                    <div class="form-group">
+                        <label>Выберите время начала собеседования</label><br>
+                        <div class="btn-group-vertical" data-toggle="buttons">
+                            {% for slot in slots %}
+                              <label class="btn btn-default">
+                                <input type="radio" name="time" autocomplete="off" > {{ slot.start_at }}
+                              </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <input class="btn btn-primary" type="submit" value="Отправить">
+                </form>
+            {% endif %}
+        </div>
+    </div>
+  </div>
+{% endblock content %}

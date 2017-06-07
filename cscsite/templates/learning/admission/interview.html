@@ -22,7 +22,7 @@
             <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
         {% endif %}</h2>
     </div>
-    <div class="date">Дата собеседования: {{ interview.date }}</div>
+    <div class="date">Дата собеседования: {{ interview.date|default:"Не назначена" }}</div>
     <div class="additional-info">Статус собеседования: {{ interview.get_status_display|default_if_none:"<не указан>" }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
