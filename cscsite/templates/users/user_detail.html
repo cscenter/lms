@@ -247,28 +247,30 @@
                                 <td>{% trans "Curriculum year" %}:</td>
                                 <td>
                                     {{ profile_user.curriculum_year|default:'—' }}<br>
-                                    {% for program in syllabus %}
-                                        <b>{{ program.area.name_en }}</b>
-                                        {% if program.course_groups.all %}
-                                        <ul style="list-style-type: square;">
-                                            {% for course_groups in program.course_groups.all %}
-                                                <li>
-                                                    {% for course in course_groups.courses.all %}
-                                                        {# Syllabus contains center courses only #}
-                                                        {% if course.id in stats.passed.center_courses %}
-                                                            <span class="text-success">{{ course.name }}</span>
-                                                        {% elif course.id in stats.in_term.courses %}
-                                                            <span class="text-info">{{ course.name }}</span>
-                                                        {% else %}
-                                                            {{ course.name }}{% endif %}
-                                                        {% if not forloop.last %}{% if course_groups.courses.all|length > 2 %},{% endif %} или {% endif %}
-                                                    {% endfor %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись в текущем семестре<br>
+                                    {% if syllabus %}
+                                        {% for program in syllabus %}
+                                            <b>{{ program.area.name_en }}</b>
+                                            {% if program.course_groups.all %}
+                                            <ul style="list-style-type: square;">
+                                                {% for course_groups in program.course_groups.all %}
+                                                    <li>
+                                                        {% for course in course_groups.courses.all %}
+                                                            {# Syllabus contains center courses only #}
+                                                            {% if course.id in stats.passed.center_courses %}
+                                                                <span class="text-success">{{ course.name }}</span>
+                                                            {% elif course.id in stats.in_term.courses %}
+                                                                <span class="text-info">{{ course.name }}</span>
+                                                            {% else %}
+                                                                {{ course.name }}{% endif %}
+                                                            {% if not forloop.last %}{% if course_groups.courses.all|length > 2 %},{% endif %} или {% endif %}
+                                                        {% endfor %}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись в текущем семестре<br>
+                                    {% endif %}
                                 </td>
                             <tr>
                                 <td>{% trans "StudentInfo|Study program" %}:</td>

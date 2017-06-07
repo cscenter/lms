@@ -354,7 +354,7 @@ class InterviewAssignmentsForm(forms.ModelForm):
         label=Interview.assignments.field.verbose_name,
         queryset=(InterviewAssignment.objects
                   .select_related("campaign", "campaign__city")
-                  .order_by("-campaign__year", "name")),
+                  .order_by("-campaign__year", "campaign__city_id", "name")),
         widget=forms.CheckboxSelectMultiple(),
         required=False,
     )

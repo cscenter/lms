@@ -59,7 +59,7 @@
       <div class="panel">
         <div class="panel-heading">
           <h3 class="panel-title">
-              {{ selected_campaign }} / {{ paginator.count }}
+              {{ results_title }} / {{ paginator.count }}
           </h3>
           <ul class="panel-info">
               {% if today %}
@@ -97,7 +97,9 @@
                                 <li>
                                     {% if interviewer.photo %}
                                         {% thumbnail interviewer.photo "100x100" crop="center top" cropbox=interviewer.photo_thumbnail_cropbox as im %}
-                                            <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}" alt="{{ interviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                            <a target="_blank" href="{{ interviewer.get_absolute_url }}">
+                                                <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}" alt="{{ interviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                            </a>
                                         {% endthumbnail %}
                                     {% else %}
                                         <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">{{ interviewer.first_name|slice:":1" }}{{ interviewer.last_name|slice:":1" }}</div>

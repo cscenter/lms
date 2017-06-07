@@ -82,7 +82,7 @@ class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     date = django_filters.MethodFilter(action='filter_by_date',
                                        name="date",
                                        label=_("Date"),
-                                       help_text="" )
+                                       help_text="")
 
     class Meta:
         model = Interview
