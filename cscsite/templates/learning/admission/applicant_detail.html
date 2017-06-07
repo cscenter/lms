@@ -131,7 +131,7 @@
         </div>
       {% if request.user.is_curator and applicant.campaign.current %}
           <div class="tab-pane" id="create" role="tabpanel">
-              {% crispy form %}
+                {% crispy form %}
                 <div class="clearfix"></div>
           </div>
           <div class="tab-pane" id="update-status-form" role="tabpanel">

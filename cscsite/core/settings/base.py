@@ -7,7 +7,6 @@ https://docs.djangoproject.com/en/1.6/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
-from enum import IntEnum
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).parents[2]
@@ -284,3 +283,5 @@ WEBPACK_LOADER = {
 ADMIN_REORDER = [
     ('learning', ["AreaOfStudy", "StudyProgram", "StudyProgramCourse"])
 ]
+
+DATE_FORMAT = 'j E Y'

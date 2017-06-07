@@ -1,18 +1,22 @@
 from __future__ import unicode_literals, absolute_import
 
-from django.db.models import TextField
+from django import forms
+from django.contrib.admin import widgets
+from django.db.models import TextField, TimeField
+from django.utils.timezone import now
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
-from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
 from core.forms import AdminRichTextAreaWidget
+from learning.admission.forms import InterviewStreamChangeForm
 from learning.admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, \
-    Exam, Comment, InterviewAssignment, Contest
+    Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
+    InterviewVenue
 
 
 class CampaignAdmin(admin.ModelAdmin):
@@ -156,6 +160,46 @@ class InterviewCommentAdmin(admin.ModelAdmin):
     get_interviewer.short_description = _("Interviewer")
 
 
+class InterviewVenueAdmin(admin.ModelAdmin):
+    pass
+
+
+class InterviewSlotAdmin(admin.ModelAdmin):
+    search_fields = ['stream__date']
+    raw_id_fields = ("interview",)
+
+
+class InterviewSlotsInline(admin.TabularInline):
+    model = InterviewSlot
+    # FIXME: edit queryset for interview and remove from readonly
+    readonly_fields = ["interview", "start_at", "end_at"]
+
+    def has_add_permission(self, request):
+        return False
+
+
+# TODO: Как проверять, что потоки не пересекаются? Если совпадает место?
+class InterviewStreamAdmin(admin.ModelAdmin):
+    form = InterviewStreamChangeForm
+    readonly_fields = ("interviewers",)
+    inlines = [InterviewSlotsInline]
+    # TODO: how to customize time widget format to H:M?
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Interviewers choices restricted by interviewer group list. If someone
+        was removed from this list, they won't be in rendered widget anymore and
+        we can missed information about them on save action. To prevent this,
+        set readonly for `interviewers` in edit view if stream is old enough.
+        """
+        if not obj:
+            return []
+        elif obj.date < now().date():
+            return ['start_at', 'end_at', 'duration', 'interviewers']
+        else:
+            return ['start_at', 'end_at', 'duration']
+
+
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)
@@ -164,3 +208,6 @@ admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment, InterviewAssignmentAdmin)
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Comment, InterviewCommentAdmin)
+admin.site.register(InterviewVenue, InterviewVenueAdmin)
+admin.site.register(InterviewStream, InterviewStreamAdmin)
+admin.site.register(InterviewSlot, InterviewSlotAdmin)

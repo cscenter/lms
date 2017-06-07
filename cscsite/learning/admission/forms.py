@@ -10,6 +10,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.forms.models import ModelForm
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -17,7 +18,7 @@ from core.forms import Ubereditor
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment
+    InterviewAssignment, InterviewSlot, InterviewStream
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
@@ -347,6 +348,28 @@ class InterviewForm(forms.ModelForm):
                         css_class="pull-right"))
 
 
+class StreamForm(forms.Form):
+    prefix = "interview_stream_form"
+
+    stream = forms.ModelChoiceField(
+        label=_("Interview stream"),
+        queryset=InterviewStream.objects.get_queryset())
+    note = forms.CharField(
+        label=_("Note"),
+        widget=forms.Textarea,
+        required=False)
+
+    def __init__(self, city_code, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['stream'].queryset = InterviewStream.objects.filter(
+            date__gte=now().date(),
+            venue__city_id=city_code)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(
+            FormActions(Submit('create', _('Create interview')),
+                        css_class="pull-right"))
+
+
 class InterviewAssignmentsForm(forms.ModelForm):
     prefix = "interview_assignments_form"
 
@@ -500,3 +523,9 @@ class InterviewResultsModelForm(ModelForm):
         if not data:
             return self.instance.status
         return data
+
+
+class InterviewStreamChangeForm(ModelForm):
+    class Meta:
+        model = InterviewSlot
+        fields = "__all__"

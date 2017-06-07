@@ -12,19 +12,21 @@ from string import digits
 
 from django.contrib import messages
 from django.db import transaction
-from django.http.response import HttpResponseForbidden
+from django.http.response import HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse
 from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
     RedirectView
-from django.views.generic.edit import BaseUpdateView, BaseCreateView
+from django.views.generic.edit import BaseUpdateView, BaseCreateView, \
+    ModelFormMixin
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
 from formtools.wizard.views import NamedUrlCookieWizardView, \
@@ -39,9 +41,9 @@ from learning.admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, \
     InterviewForm, ApplicantStatusForm, \
     InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm, InterviewAssignmentsForm
+    ApplicationInNskForm, InterviewAssignmentsForm, StreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
-    Applicant, Campaign, InterviewAssignment
+    Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewStream
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
 from .tasks import application_form_send_email
@@ -216,35 +218,57 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 .get(pk=applicant_id))
 
     def get_context_data(self, **kwargs):
-        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
-        context = super(ApplicantDetailView, self).get_context_data(
-            **kwargs)
+        applicant_id = self.kwargs[self.pk_url_kwarg]
+        context = kwargs
         context.update(self.get_applicant_context(applicant_id))
-        context["status_form"] = ApplicantStatusForm(
-            instance=context["applicant"])
+        applicant = context["applicant"]
+        context["status_form"] = ApplicantStatusForm(instance=applicant)
+        if 'form' not in kwargs:
+            context["form"] = StreamForm(city_code=applicant.campaign.city_id)
         return context
 
     def get(self, request, *args, **kwargs):
-        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        applicant_id = self.kwargs[self.pk_url_kwarg]
         try:
             interview = Interview.objects.get(applicant_id=applicant_id)
             return HttpResponseRedirect(reverse("admission_interview_detail",
                                                 args=[interview.pk]))
         except Interview.DoesNotExist:
-            return super(ApplicantDetailView, self).get(request, *args,
-                                                        **kwargs)
+            return super().get(request, *args, **kwargs)
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
+        """Get data for interview from stream form"""
         if not request.user.is_curator:
             return self.handle_no_permission(request)
-        return super(ApplicantDetailView, self).post(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
         applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
-        kwargs = super(ApplicantDetailView, self).get_form_kwargs()
-        kwargs['initial']['applicant'] = applicant_id
-        return kwargs
+        applicant = get_object_or_404(
+            Applicant.objects
+            .filter(pk=applicant_id)
+            .select_related("campaign"))
+        self.object = None
+        stream_form = StreamForm(city_code=applicant.campaign.city_id,
+                          data=self.request.POST)
+        if not stream_form.is_valid():
+            return self.form_invalid(stream_form)
+        stream = stream_form.cleaned_data['stream']
+
+        data = {
+            'applicant': applicant_id,
+            'status': Interview.APPROVAL,
+            'note': stream_form.cleaned_data['note'],
+            'interviewers': stream.interviewers.all()
+        }
+        form = self.form_class(data=data)
+        # In fact, all data should be valid
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            messages.error(self.request,
+                           "Что-то пошло не так",
+                           extra_tags='timeout')
+            print(form.errors, form.data)
+            return self.form_invalid(stream_form)
 
     def get_success_url(self):
         messages.success(self.request, "Собеседование успешно добавлено",
@@ -654,3 +678,34 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
                 attempts=attempts)
         except CSCUser.DoesNotExist:
             return username
+
+
+class InterviewAppointmentView(generic.TemplateView):
+    template_name = "learning/admission/interview_appointment.html"
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # TODO: А если дата уже прошла?
+            # FIXME: add '%d.%m.%Y' to DATE_INPUT_FORMATS setting?
+            date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
+            secret = uuid.UUID(self.kwargs['secret_code'], version=4)
+        except ValueError:
+            return HttpResponseBadRequest()
+        return super(InterviewAppointmentView, self).get(request, *args,
+                                                         **kwargs)
+
+    def get_context_data(self, **kwargs):
+        date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
+        interview = get_object_or_404(Interview.objects.only("pk").filter(
+            date=date, secret=self.kwargs['secret_code']))
+        # TODO: МОжно выбирать только когда согласование статус?
+        interview_approved = interview.status != Interview.APPROVAL
+        context = {
+            "interview": interview,
+            "interview_approved": interview_approved,
+            "slots": (not interview_approved and
+                      (InterviewSlot.objects
+                       .filter(stream__date=date)
+                       .select_related("stream").all())),
+        }
+        return context

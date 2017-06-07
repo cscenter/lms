@@ -2,18 +2,22 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
+import uuid
 from collections import OrderedDict
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.formats import date_format, time_format
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 
-from core.models import City, University
+from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair
 from users.models import CSCUser
@@ -437,7 +441,10 @@ class Interview(TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    date = models.DateTimeField(_("When"))
+    date = models.DateTimeField(
+        _("When"),
+        null=True,
+        blank=True)
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
@@ -462,10 +469,20 @@ class Interview(TimeStampedModel):
         _("Note"),
         blank=True,
         null=True)
+    secret = models.UUIDField(
+        _("Secret key for interview assign"),
+        default=uuid.uuid4,
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
+
+    def clean(self):
+        if self.status != self.APPROVAL and not self.date:
+            raise ValidationError("You can't change status without date set up")
 
     def get_absolute_url(self):
         return reverse('admission_interview_detail', args=[self.pk])
@@ -515,3 +532,97 @@ class Comment(TimeStampedModel):
         return smart_text("{} [{}]".format(self.interviewer.get_full_name(),
                                            self.interview.applicant.get_full_name()))
 
+
+class InterviewVenue(models.Model):
+    city = models.ForeignKey(City, null=True, blank=True,
+                             default=settings.DEFAULT_CITY_CODE)
+    name = models.CharField(_("Venue|Name"), max_length=140)
+    address = models.CharField(
+        _("Venue|Address"),
+        help_text=(_("Should be resolvable by Google Maps")),
+        max_length=500,
+        blank=True)
+    description = models.TextField(
+        _("How to get"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+
+    class Meta:
+        verbose_name = _("Interview venue")
+        verbose_name_plural = _("Interview venues")
+
+    def __str__(self):
+        return "{0}".format(smart_text(self.name))
+
+    def get_absolute_url(self):
+        return reverse('venue_detail', args=[self.pk])
+
+
+class InterviewStream(TimeStampedModel):
+    date = models.DateField(_("Interview day"))
+    start_at = models.TimeField(_("Period start"))
+    end_at = models.TimeField(_("Period end"))
+    duration = models.IntegerField(
+        _("Slot duration"),
+        validators=[MinValueValidator(10)])
+    venue = models.ForeignKey(
+        InterviewVenue,
+        verbose_name=_("Interview venue"),
+        on_delete=models.PROTECT,
+        related_name="venues")
+    with_assignments = models.BooleanField(
+        _("Has assignments"),
+        help_text=_("Based on this flag, student should arrive 30 min "
+                    "before or not"))
+    interviewers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Interview|Interviewers"),
+        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
+
+    class Meta:
+        verbose_name = _("Interview stream")
+        verbose_name_plural = _("Interview streams")
+
+    def __str__(self):
+        return "{}, {}-{}".format(
+            date_format(self.date, settings.DATE_FORMAT),
+            time_format(self.start_at),
+            time_format(self.end_at))
+
+    def clean(self):
+        if self.start_at and self.end_at and self.duration:
+            self.start_at = self.start_at.replace(second=0, microsecond=0)
+            self.end_at = self.end_at.replace(second=0, microsecond=0)
+            start_at = datetime.timedelta(hours=self.start_at.hour,
+                                          minutes=self.start_at.minute)
+            end_at = datetime.timedelta(hours=self.end_at.hour,
+                                        minutes=self.end_at.minute)
+            diff = (end_at - start_at).total_seconds() / 60
+            if diff < self.duration:
+                raise ValidationError(
+                    _("Stream duration can't be less than slot duration"))
+        # TODO: Divisible or not?
+
+
+class InterviewSlot(TimeStampedModel):
+    interview = models.OneToOneField(
+        Interview,
+        verbose_name=_("Interview"),
+        on_delete=models.PROTECT,
+        related_name="slot",
+        null=True,
+        blank=True)
+    start_at = models.TimeField(_("Interview start"))
+    end_at = models.TimeField(_("Interview end"))
+    stream = models.ForeignKey(
+        InterviewStream,
+        verbose_name=_("Interview stream"),
+        on_delete=models.PROTECT,
+        related_name="slots")
+
+    class Meta:
+        ordering = ['start_at']
+        verbose_name = _("Interview slot")
+        verbose_name_plural = _("Interview slots")
+
+    def __str__(self):
+        return time_format(self.start_at)

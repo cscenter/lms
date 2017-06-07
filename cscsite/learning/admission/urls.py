@@ -4,7 +4,8 @@ from learning.admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
     ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateUserView, \
     InterviewResultsDispatchView, ApplicantRequestWizardView, \
-    ApplicationCompleteView, InterviewAssignmentDetailView, InterviewCommentView
+    ApplicationCompleteView, InterviewAssignmentDetailView, \
+    InterviewCommentView, InterviewAppointmentView
 
 urlpatterns = [
     url(r'^admission/', include([
@@ -18,5 +19,8 @@ urlpatterns = [
         url(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='admission_interview_comment'),
         url(r'^results/$', InterviewResultsDispatchView.as_view(), name='admission_interview_results_dispatch'),
         url(r'^results/(?P<city_slug>\w+)/$', InterviewResultsView.as_view(), name='admission_interview_results_by_city'),
+        url(r'^appointment/(?P<date>\d{2}\.\d{2}\.\d{4})/(?P<secret_code>\w+)/$',
+            InterviewAppointmentView.as_view(),
+            name='admission_interview_appointment'),
     ])),
 ]
