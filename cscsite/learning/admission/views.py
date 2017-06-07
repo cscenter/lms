@@ -30,10 +30,11 @@ from extra_views import ModelFormSetView
 from formtools.wizard.views import NamedUrlCookieWizardView, \
     NamedUrlSessionWizardView
 
+from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
-    InterviewsCuratorFilter
+    InterviewsCuratorFilter, InterviewStatusFilter
 from learning.admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, \
     InterviewForm, ApplicantStatusForm, \
@@ -286,35 +287,50 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return InterviewsFilter
 
     def get_context_data(self, **kwargs):
-        context = super(InterviewListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         # TODO: collect stats for curators here?
         context["today"] = self.object_list.filter(
             date__date=now(),
             status=Interview.APPROVED).count()
         context["filter"] = self.filterset
-        # Get name for selected campaign
-        context["selected_campaign"] = _("Current campaign")
+        # Choose results list title for selected campaign
+        context["results_title"] = _("Current campaign")
         if "campaign" in self.filterset.form.declared_fields:
-            campaign_field = self.filterset.form.fields["campaign"]
             try:
-                default_city = self.request.user.city_id
-                c = (Campaign.objects
-                     .only('pk')
-                     .get(current=True,
-                          city_id=default_city))
-                campaign_field.initial = c.pk
-            except Campaign.DoesNotExist:
-                pass
-            context["selected_campaign"] = _("All campaigns")
-            campaign_value = self.filterset.data.get("campaign",
-                                                     campaign_field.initial)
-            for campaign_id, name in self.filterset.form.declared_fields["campaign"].choices:
-                try:
-                    if campaign_id == int(campaign_value):
-                        context["selected_campaign"] = name
-                except (ValueError, TypeError):
-                    pass
+                campaign_filter_value = int(self.filterset.data.get("campaign"))
+                campaign_field = self.filterset.form.declared_fields["campaign"]
+                for campaign_id, name in campaign_field.choices:
+                    if campaign_id == campaign_filter_value:
+                        context["results_title"] = name
+            except ValueError:
+                context["results_title"] = _("All campaigns")
         return context
+
+    def get(self, request, *args, **kwargs):
+        """
+        Redirects curator to appropriate campaign if no any provided.
+        """
+        user = self.request.user
+        if user.is_curator and "campaign" not in self.request.GET:
+            # Try to find user preferred current campaign id
+            current = list(Campaign.objects.filter(current=True)
+                           .only("pk", "city_id"))
+            try:
+                c = next(c.pk for c in current if c.city_id == user.city_id)
+            except StopIteration:
+                # We didn't find active campaign for user city. Try to get
+                # any current campaign or show all if no active at all.
+                c = next((c.pk for c in current), "")
+            if not c:
+                messages.error(self.request, "Нет активных кампаний по набору.")
+            # Duplicate initial values from filterset
+            status = InterviewStatusFilter.AGREED
+            date = now().strftime("%d.%m.%Y")
+            url = "{}?campaign={}&status={}&date={}".format(
+                reverse("admission_interviews"),
+                c, status, date)
+            return HttpResponseRedirect(redirect_to=url)
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         q = (Interview.objects
@@ -322,20 +338,17 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
-        # Show current campaigns only by default
         if not self.request.user.is_curator:
+            # Show interviewers only interviews from current campaigns where
+            # they participate.
             try:
-                current_campaigns = list(Campaign.objects
-                                         .filter(current=True)
+                current_campaigns = list(Campaign.objects.filter(current=True)
                                          .values_list("pk", flat=True))
             except Campaign.DoesNotExist:
                 messages.error(self.request, "Нет активных кампаний по набору.")
                 return Interview.objects.none()
-            q = (q.filter(applicant__campaign_id__in=current_campaigns)
-                  .filter(interviewers=self.request.user))
-        elif not self.request.GET.get("campaign", False):
-            # TODO: Determine default campaign and redirect
-            pass
+            q = q.filter(applicant__campaign_id__in=current_campaigns,
+                         interviewers=self.request.user)
         return q
 
 
