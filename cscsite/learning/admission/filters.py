@@ -61,7 +61,7 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
 
 class InterviewStatusFilter(django_filters.ChoiceFilter):
     AGREED = "agreed"
-    AGREED_CHOICE = (AGREED, _('Agreed'))
+    AGREED_CHOICE = (AGREED, _('Approved and completed'))
 
     def __init__(self, *args, **kwargs):
         super(InterviewStatusFilter, self).__init__(*args, **kwargs)
