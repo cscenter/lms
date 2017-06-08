@@ -436,7 +436,7 @@ class Interview(TimeStampedModel):
         (APPROVAL, _('Approval')),
         (DEFERRED, _('Deferred')),
         (CANCELED, _('Canceled')),
-        (APPROVED, _('Waiting for interview')),
+        (APPROVED, _('Approved')),
         (COMPLETED, _('Completed')),
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
@@ -563,7 +563,8 @@ class InterviewStream(TimeStampedModel):
     end_at = models.TimeField(_("Period end"))
     duration = models.IntegerField(
         _("Slot duration"),
-        validators=[MinValueValidator(10)])
+        validators=[MinValueValidator(10)],
+        default=30)
     venue = models.ForeignKey(
         InterviewVenue,
         verbose_name=_("Interview venue"),
