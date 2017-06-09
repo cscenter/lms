@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
+import re
 import uuid
 from collections import Counter
 from random import choice
@@ -31,7 +32,12 @@ from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
 from formtools.wizard.views import NamedUrlCookieWizardView, \
     NamedUrlSessionWizardView
+from post_office import mail
+from rest_framework.exceptions import ParseError
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
@@ -41,12 +47,19 @@ from learning.admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, \
     InterviewForm, ApplicantStatusForm, \
     InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm, InterviewAssignmentsForm, StreamForm
+    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewStream
+from learning.admission.serializers import InterviewSlotSerializer
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
+
 from users.models import CSCUser
 from .tasks import application_form_send_email
+
+
+date_re = re.compile(
+    r'(?P<day>\d{1,2})\.(?P<month>\d{1,2})\.(?P<year>\d{4})$'
+)
 
 
 # Note: Not useful without Yandex.Contest REST API support :<
@@ -54,7 +67,7 @@ from .tasks import application_form_send_email
 # TODO: I'm now sure we need server side wizard.
 # TODO: The same we can achieve with Redux + some js.
 class ApplicantRequestWizardView(NamedUrlSessionWizardView):
-    template_name = "learning/admission/application.html"
+    template_name = "learning/admission/application_form.html"
     form_list = [
         ('welcome', ApplicationFormStep1),
         ('spb', ApplicationInSpbForm),
@@ -224,7 +237,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         applicant = context["applicant"]
         context["status_form"] = ApplicantStatusForm(instance=applicant)
         if 'form' not in kwargs:
-            context["form"] = StreamForm(city_code=applicant.campaign.city_id)
+            context["form"] = InterviewFromStreamForm(city_code=applicant.campaign.city_id)
         return context
 
     def get(self, request, *args, **kwargs):
@@ -236,7 +249,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         except Interview.DoesNotExist:
             return super().get(request, *args, **kwargs)
 
-    @transaction.atomic
     def post(self, request, *args, **kwargs):
         """Get data for interview from stream form"""
         if not request.user.is_curator:
@@ -247,26 +259,75 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             .filter(pk=applicant_id)
             .select_related("campaign"))
         self.object = None
-        stream_form = StreamForm(city_code=applicant.campaign.city_id,
-                          data=self.request.POST)
+        stream_form = InterviewFromStreamForm(
+            city_code=applicant.campaign.city_id,
+            data=self.request.POST)
         if not stream_form.is_valid():
+            # TODO: show error message
             return self.form_invalid(stream_form)
-        stream = stream_form.cleaned_data['stream']
+        slot = stream_form.cleaned_data['slot']
 
+        # FIXME: занять слот with respect to concurrency!!! CAS!
+        # TODO: Always set approval? even if slot is empty?
         data = {
             'applicant': applicant_id,
-            'status': Interview.APPROVAL,
+            'status': stream_form.cleaned_data['status'],
+            'interviewers': slot.stream.interviewers.all(),
+            'assignments': stream_form.cleaned_data['assignments'],
             'note': stream_form.cleaned_data['note'],
-            'interviewers': stream.interviewers.all()
         }
+        # TODO: Add InterviewInvitation record
+        if slot:
+            data['date'] = datetime.datetime.combine(slot.stream.date,
+                                                     slot.start_at)
         form = self.form_class(data=data)
         # In fact, all data should be valid
         if form.is_valid():
-            return self.form_valid(form)
+            with transaction.atomic():
+                interview = self.object = form.save()
+                # Try to take a slot for the interview
+                sid = transaction.savepoint()
+                updated = (InterviewSlot.objects
+                           .filter(pk=slot.pk, interview_id__isnull=True)
+                           .update(interview_id=interview.pk))
+                # Generate reminder
+                # FIXME: respect timezone
+                today_naive = datetime.datetime.now()
+                if slot.stream.venue.city_id == 'spb' and(data['date'] - today_naive).total_seconds() > 86400:
+                    when = (data['date'] - datetime.timedelta(days=1))
+                    if slot.stream.with_assignments:
+                        when -= datetime.timedelta(minutes=30)
+                    mail.send(
+                        [applicant.email],
+                        scheduled_time=when,
+                        sender='info@compscicenter.ru',
+                        template="admission-interview-reminder",
+                        context={
+                            "SUBJECT_CITY": applicant.campaign.city.name,
+                            "DATE": interview.date.strftime("%d.%m.%Y"),
+                            "TIME": interview.date.strftime("%H:%M"),
+                            "DIRECTIONS": slot.stream.venue.description
+                        },
+                        # Render on delivery, we have no really big amount of
+                        # emails to think about saving CPU time
+                        render_on_delivery=True,
+                        backend='ses',
+                    )
+
+                if not updated:
+                    transaction.savepoint_rollback(sid)
+                    # FIXME: Нужно ли сбрасывать дату? Или потом возможность выбора слота надо просто убрать, тогда и проблемы не будет...
+                    messages.error(
+                        self.request,
+                        "Cлот уже был занят другим участником! Нужно вручную "
+                        "разобраться в ситуации.")
+                    # FIXME: add link to admin
+                else:
+                    transaction.savepoint_commit(sid)
+            return super(ModelFormMixin, self).form_valid(form)
         else:
             messages.error(self.request,
-                           "Что-то пошло не так",
-                           extra_tags='timeout')
+                           "Что-то пошло не так")
             print(form.errors, form.data)
             return self.form_invalid(stream_form)
 
@@ -286,6 +347,7 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
         return reverse("admission_applicant_detail", args=[self.object.pk])
 
 
+# FIXME: rewrite with rest framework
 class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
     def get(self, request, **kwargs):
         assignment_id = self.kwargs['pk']
@@ -696,6 +758,7 @@ class InterviewAppointmentView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
+        # FIXME: date is datetime.date now, but `date` attr is datetime.datetime :(
         interview = get_object_or_404(Interview.objects.only("pk").filter(
             date=date, secret=self.kwargs['secret_code']))
         # TODO: МОжно выбирать только когда согласование статус?
@@ -709,3 +772,22 @@ class InterviewAppointmentView(generic.TemplateView):
                        .select_related("stream").all())),
         }
         return context
+
+
+class InterviewSlots(APIView):
+    """
+    Returns interview slots for requested venue and date.
+    """
+    http_method_names = ['get']
+    permission_classes = [CuratorAccessPermission]
+
+    def get(self, request, format=None):
+        slots = []
+        if "stream" in request.GET:
+            try:
+                stream = int(self.request.GET["stream"])
+            except ValueError:
+                raise ParseError()
+            slots = InterviewSlot.objects.filter(stream_id=stream)
+        serializer = InterviewSlotSerializer(slots, many=True)
+        return Response(serializer.data)

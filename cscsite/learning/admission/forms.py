@@ -18,7 +18,8 @@ from core.forms import Ubereditor
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment, InterviewSlot, InterviewStream
+    InterviewAssignment, InterviewSlot, InterviewStream, InterviewVenue
+from learning.widgets import DateInputAsTextInput
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
@@ -326,7 +327,7 @@ class InterviewForm(forms.ModelForm):
         label=Interview.assignments.field.verbose_name,
         queryset=(InterviewAssignment.objects
                   .select_related("campaign", "campaign__city")
-                  .order_by("-campaign__year", "name")),
+                  .order_by("-campaign__year", "campaign__city_id", "name")),
         widget=forms.CheckboxSelectMultiple(),
         required=False,
     )
@@ -348,23 +349,64 @@ class InterviewForm(forms.ModelForm):
                         css_class="pull-right"))
 
 
-class StreamForm(forms.Form):
-    prefix = "interview_stream_form"
+class InterviewFromStreamForm(forms.Form):
+    prefix = "interview_from_stream"
 
     stream = forms.ModelChoiceField(
         label=_("Interview stream"),
-        queryset=InterviewStream.objects.get_queryset())
+        queryset=InterviewStream.objects.get_queryset(),
+        required=True)
+
+    # TODO: set `disabled` in widget
+    slot = forms.ModelChoiceField(
+        label="Время собеседования",
+        queryset=InterviewSlot.objects.select_related("stream").none(),
+        help_text="Ручной выбор слота - это временное решение.",
+        required=True)
+
+    status = forms.ChoiceField(
+        label=_("Status"),
+        choices=Interview.STATUSES, required=False,
+        initial=Interview.APPROVAL)
+
+    assignments = forms.ModelMultipleChoiceField(
+        label=Interview.assignments.field.verbose_name,
+        queryset=(InterviewAssignment.objects
+                  .select_related("campaign", "campaign__city")
+                  .order_by("-campaign__year", "campaign__city_id", "name")),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+    )
+
     note = forms.CharField(
         label=_("Note"),
         widget=forms.Textarea,
         required=False)
 
-    def __init__(self, city_code, *args, **kwargs):
+    # FIXME: check consistency - slot should be from strem
+
+    def clean(self):
+        slot = self.cleaned_data.get("slot")
+        if slot:
+            stream = self.cleaned_data['stream']
+            if not stream or slot.stream != stream:
+                raise ValidationError("Выбранный слот должен соответствовать "
+                                      "выбранному потоку.")
+
+    def __init__(self, city_code, stream_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        stream_field = self.prefix + "-stream"
+        if 'data' in kwargs and kwargs['data'][stream_field]:
+            stream_id = kwargs['data'][stream_field]
+            self.fields['slot'].queryset = (InterviewSlot.objects
+                                            .select_related("stream")
+                                            .filter(stream_id=stream_id))
         self.fields['stream'].queryset = InterviewStream.objects.filter(
-            date__gte=now().date(),
-            venue__city_id=city_code)
+            venue__city_id=city_code,
+            date__gte=now().date()).select_related("venue")
         self.helper = FormHelper(self)
+        self.helper['assignments'].wrap(
+            Field, template='learning/admission/forms/assignments_field.html')
         self.helper.layout.append(
             FormActions(Submit('create', _('Create interview')),
                         css_class="pull-right"))

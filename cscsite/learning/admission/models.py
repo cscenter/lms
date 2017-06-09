@@ -441,10 +441,7 @@ class Interview(TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    date = models.DateTimeField(
-        _("When"),
-        null=True,
-        blank=True)
+    date = models.DateTimeField(_("When"))
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
@@ -469,12 +466,6 @@ class Interview(TimeStampedModel):
         _("Note"),
         blank=True,
         null=True)
-    secret = models.UUIDField(
-        _("Secret key for interview assign"),
-        default=uuid.uuid4,
-        null=True,
-        blank=True
-    )
 
     class Meta:
         verbose_name = _("Interview")
@@ -543,8 +534,7 @@ class InterviewVenue(models.Model):
         max_length=500,
         blank=True)
     description = models.TextField(
-        _("How to get"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+        _("How to get"))
 
     class Meta:
         verbose_name = _("Interview venue")
@@ -565,6 +555,7 @@ class InterviewStream(TimeStampedModel):
         _("Slot duration"),
         validators=[MinValueValidator(10)],
         default=30)
+    # TODO: do not change if some slots already was taken
     venue = models.ForeignKey(
         InterviewVenue,
         verbose_name=_("Interview venue"),
@@ -608,7 +599,7 @@ class InterviewSlot(TimeStampedModel):
     interview = models.OneToOneField(
         Interview,
         verbose_name=_("Interview"),
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="slot",
         null=True,
         blank=True)
