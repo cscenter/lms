@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-08 15:10+0300\n"
-"PO-Revision-Date: 2017-06-08 15:10+0230\n"
+"POT-Creation-Date: 2017-06-08 17:50+0300\n"
+"PO-Revision-Date: 2017-06-08 17:51+0230\n"
 "Last-Translator: b'  <andrei.ivanow@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -59,54 +59,58 @@ msgid "Filter"
 msgstr "Фильтровать"
 
 #: cscsite/learning/admission/filters.py:64
-#| msgid "Interview completed"
 msgid "Approved and completed"
 msgstr "Согласованные и завершенные"
 
 #: cscsite/learning/admission/filters.py:84
+#: cscsite/learning/admission/forms.py:360
 msgid "Date"
 msgstr "Дата"
 
-#: cscsite/learning/admission/forms.py:39
+#: cscsite/learning/admission/forms.py:40
 msgid "St Petersburg"
 msgstr "Санкт-Петербург"
 
-#: cscsite/learning/admission/forms.py:40
+#: cscsite/learning/admission/forms.py:41
 msgid "Novosibirsk"
 msgstr "Новосибирск"
 
-#: cscsite/learning/admission/forms.py:347
-#: cscsite/learning/admission/forms.py:369
+#: cscsite/learning/admission/forms.py:348
+#: cscsite/learning/admission/forms.py:393
 msgid "Create interview"
 msgstr "Создать собеседование"
 
-#: cscsite/learning/admission/forms.py:355
-#: cscsite/learning/admission/models.py:583
-#: cscsite/learning/admission/models.py:619
-msgid "Interview stream"
-msgstr "Поток собеседований"
+#: cscsite/learning/admission/forms.py:356
+#: cscsite/learning/admission/models.py:550
+#: cscsite/learning/admission/models.py:570
+msgid "Interview venue"
+msgstr "Место"
 
-#: cscsite/learning/admission/forms.py:358
+#: cscsite/learning/admission/forms.py:361
+msgid "Enter an interview date in  dd.mm.yyyy format"
+msgstr "Введите дату собеседования в формате дд.мм.гггг"
+
+#: cscsite/learning/admission/forms.py:379
 #: cscsite/learning/admission/models.py:469
 msgid "Note"
 msgstr "Доп. информация"
 
-#: cscsite/learning/admission/forms.py:395
+#: cscsite/learning/admission/forms.py:419
 msgid "Update assignments list"
 msgstr "Обновить список заданий"
 
-#: cscsite/learning/admission/forms.py:428
+#: cscsite/learning/admission/forms.py:452
 msgid "Save"
 msgstr "Сохранить"
 
-#: cscsite/learning/admission/forms.py:448
+#: cscsite/learning/admission/forms.py:472
 msgid ""
 "Sorry, but you should be in interviewers list to create or update comment."
 msgstr ""
 "Вы не входите в список собеседующих данное интервью и не можете оставить "
 "комментарий."
 
-#: cscsite/learning/admission/forms.py:489
+#: cscsite/learning/admission/forms.py:513
 msgid "Update"
 msgstr "Обновить"
 
@@ -145,7 +149,7 @@ msgstr ""
 "этап."
 
 #: cscsite/learning/admission/models.py:49
-#: cscsite/learning/admission/views.py:321
+#: cscsite/learning/admission/views.py:343
 msgid "Current campaign"
 msgstr "Текущий набор"
 
@@ -622,11 +626,6 @@ msgstr ""
 msgid "How to get"
 msgstr "Как добраться"
 
-#: cscsite/learning/admission/models.py:550
-#: cscsite/learning/admission/models.py:570
-msgid "Interview venue"
-msgstr "Место"
-
 #: cscsite/learning/admission/models.py:551
 msgid "Interview venues"
 msgstr "Места проведения собеседований"
@@ -657,6 +656,11 @@ msgstr ""
 "Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
 " раньше."
 
+#: cscsite/learning/admission/models.py:583
+#: cscsite/learning/admission/models.py:619
+msgid "Interview stream"
+msgstr "Поток собеседований"
+
 #: cscsite/learning/admission/models.py:584
 msgid "Interview streams"
 msgstr "Потоки собеседований"
@@ -683,7 +687,7 @@ msgstr "Слот для собеседования"
 msgid "Interview slots"
 msgstr "Слоты для собеседований"
 
-#: cscsite/learning/admission/views.py:330
+#: cscsite/learning/admission/views.py:352
 msgid "All campaigns"
 msgstr "Все наборы"
 

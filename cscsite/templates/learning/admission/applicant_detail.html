@@ -16,36 +16,12 @@
 {% endblock stylesheets %}
 
 {% block javascripts %}
+    {% render_bundle 'forms' 'js' %}
     {% render_bundle 'admission' 'js' %}
-    {# TODO: Can't add js without pain in Meta class of django form. Rewrite with django-sekizai after investigation    #}
-    <script type="text/javascript" src="{% static "js/vendor/moment/moment-with-locales.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/vendor/bootstrap-datetimepicker.min.js" %}"></script>
+    {# TODO: move to admission.js? #}
     <script type="text/javascript">
         $(function () {
-            $('.datetimeinput').datetimepicker({
-                locale: 'ru',
-                stepping: 5,
-                collapse: false,
-                sideBySide: true,
-                toolbarPlacement: "bottom",
-                keyBinds: {
-                    left: false,
-                    right: false,
-                },
-                showClose: true,
-                icons: {
-                    time: 'fa fa-clock-o',
-                    date: 'fa fa-calendar',
-                    up: 'fa fa-chevron-up',
-                    down: 'fa fa-chevron-down',
-                    previous: 'fa fa-chevron-left',
-                    next: 'fa fa-chevron-right',
-                    today: 'fa fa-screenshot',
-                    clear: 'fa fa-trash',
-                    close: 'fa fa-remove'
-                }
-            });
-
+            // TODO: Maybe I should include this code for all tabs on  site? But what if more than 1 tab holder on a page?
             var hash = window.location.hash;
             hash && $('ul.nav a[href="' + hash + '"]').tab('show');
 
