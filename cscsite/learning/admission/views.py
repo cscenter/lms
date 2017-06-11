@@ -294,18 +294,19 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 # FIXME: respect timezone
                 today_naive = datetime.datetime.now()
                 if slot.stream.venue.city_id == 'spb' and(data['date'] - today_naive).total_seconds() > 86400:
-                    when = (data['date'] - datetime.timedelta(days=1))
+                    scheduled_time = (data['date'] - datetime.timedelta(days=1))
+                    when = interview.date
                     if slot.stream.with_assignments:
                         when -= datetime.timedelta(minutes=30)
                     mail.send(
                         [applicant.email],
-                        scheduled_time=when,
+                        scheduled_time=scheduled_time,
                         sender='info@compscicenter.ru',
                         template="admission-interview-reminder",
                         context={
                             "SUBJECT_CITY": applicant.campaign.city.name,
-                            "DATE": interview.date.strftime("%d.%m.%Y"),
-                            "TIME": interview.date.strftime("%H:%M"),
+                            "DATE": when.strftime("%d.%m.%Y"),
+                            "TIME": when.strftime("%H:%M"),
                             "DIRECTIONS": slot.stream.venue.description
                         },
                         # Render on delivery, we have no really big amount of
