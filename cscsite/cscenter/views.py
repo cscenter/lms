@@ -245,11 +245,13 @@ class AlumniByYearView(generic.ListView):
                       testimonials, 3600)
         context['testimonials'] = self.testimonials_random(testimonials)
 
-        stats = cache.get('alumni_{}_stats'.format(year))
+        is_curator = self.request.user.is_curator
+        stats = cache.get('alumni_{}_stats_{}'.format(year, is_curator))
         if stats is None:
             stats = StudentsDiplomasStats.as_view()(self.request, year,
                                                     **kwargs).data
-            cache.set('alumni_{}_stats'.format(year), stats, 24 * 3600)
+            cache.set('alumni_{}_stats_{}'.format(year, is_curator), stats,
+                      24 * 3600)
         context["stats"] = stats
         return context
 
