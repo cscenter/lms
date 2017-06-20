@@ -87,6 +87,10 @@
 	&.error {
 		background: $color-red;
 		word-break: normal;
+
+		a {
+			color: #000;
+		}
 	}
 	&.info {
 		background: #d9edf7;

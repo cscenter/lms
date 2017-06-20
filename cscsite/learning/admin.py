@@ -121,10 +121,18 @@ class CourseOfferingNewsAdmin(admin.ModelAdmin):
     }
 
 
+class VenueAdminForm(forms.ModelForm):
+    class Meta:
+        model = Venue
+        fields = '__all__'
+        widgets = {
+            'description': AdminRichTextAreaWidget(),
+            'flags': BitFieldCheckboxSelectMultiple()
+        }
+
+
 class VenueAdmin(admin.ModelAdmin):
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
+    form = VenueAdminForm
 
 
 class AssignmentAdminForm(forms.ModelForm):

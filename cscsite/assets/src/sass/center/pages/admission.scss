@@ -368,6 +368,30 @@
   }
 }
 
+
+#admission-appointment {
+  width: auto;
+  max-width: 980px;
+
+  .form-group {
+    margin-top: 5px;
+  }
+  .btn-group {
+
+    .btn {
+      margin: -1px 0 0 -1px;
+      width: 80px;
+
+      &.disabled {
+        pointer-events: none;
+      }
+    }
+  }
+}
+
+
+
+
 // print mode for interview detail page
 @media print {
   .collapse-link {

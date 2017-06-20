@@ -3,27 +3,35 @@
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
 
-{% block title %}Результаты набора{% endblock title %}
+{% block title %}Согласование времени{% endblock title %}
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
-<div class="interview-results-page">
-    <ol class="breadcrumb projects">
+<div class="container page-inverse" id="admission-appointment">
+    <ol class="breadcrumb gray">
       <li class="active">Выбор времени собеседования</li>
     </ol>
     <div class="panel">
         <div class="panel-body">
-            {% if interview_approved %}
-                Дата вашего собеседования {{ interview.date }}
+            {% if interview %}
+                <p>Ждём вас на собеседование в CS центр {{ interview.date|date:"d E" }} к {{ interview.date|date:"H:i" }}.</p>
+                {% if invitation.stream.venue.directions %}
+                    <b>Как добраться</b><br>
+                    {{ invitation.stream.venue.directions }}
+                {% endif %}
+            {% elif invitation.is_expired %}
+                Приглашение больше не актуально.
             {% else %}
                 <form action="" method="POST" class="margin-bottom-0">
-                    <b>Дата собеседования</b>: {{ slots.0.stream.date }}<br>
+                {% csrf_token %}
+                    Собеседование планируется провести <span class="nowrap">{{ invitation.date|date:"d E" }}</span>.<br>
+                    Место проведения: {{ invitation.stream.venue.address }}
                     <div class="form-group">
-                        <label>Выберите время начала собеседования</label><br>
-                        <div class="btn-group-vertical" data-toggle="buttons">
+                        <label>Выберите из доступных вариантов время, в которое сможете подъехать:</label><br>
+                        <div class="btn-group" data-toggle="buttons">
                             {% for slot in slots %}
-                              <label class="btn btn-default">
-                                <input type="radio" name="time" autocomplete="off" > {{ slot.start_at }}
+                              <label class="btn btn-default {% if slot.interview_id %}disabled{% endif %}">
+                                <input type="radio" name="time" autocomplete="off" {% if slot.interview_id %}disabled{% endif %} value="{{ slot.pk }}"> {{ slot.start_at }}
                               </label>
                             {% endfor %}
                         </div>

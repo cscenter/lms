@@ -112,38 +112,39 @@ def test_interview_results_dispatch_view(curator, client):
     redirect_url, status_code = response.redirect_chain[-1]
     assert status_code == 302
     assert 'login' in redirect_url
-    # No active campaigns. Redirect to default city, we have no any active
-    # campaign yet, so then redirect to applicants list.
+    # No active campaigns at this moment.
     client.login(curator)
     response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[-2]
+    # Redirect to default city
+    redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission_interview_results_by_city",
                                    kwargs={"city_slug": DEFAULT_CITY_CODE})
-    redirect_url, status_code = response.redirect_chain[-1]
+    # And then to applicants list page
+    redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission_applicants")
     # Create campaign, but not with curator default city value
     campaign1 = CampaignFactory.create(city=city2, current=False)
     response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[-1]
+    redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission_applicants")
     # Make it active
     campaign1.current = True
     campaign1.save()
     # Now curator should see this active campaign tab
     response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[-1]
+    redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission_interview_results_by_city",
                                    kwargs={"city_slug": city2.pk})
     # Create campaign for curator default city, but not active
     campaign2 = CampaignFactory.create(city=city1, current=False)
     response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[-1]
+    redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission_interview_results_by_city",
                                    kwargs={"city_slug": city2.pk})
     # Make it active
     campaign2.current = True
     campaign2.save()
     response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[-1]
+    redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission_interview_results_by_city",
                                    kwargs={"city_slug": city1.pk})

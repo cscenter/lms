@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 from pathlib import Path
 
+import pytz
+
 PROJECT_DIR = Path(__file__).parents[2]
 ROOT_DIR = PROJECT_DIR.parent
 
@@ -161,8 +163,14 @@ LOCALE_PATHS = [
     str(PROJECT_DIR / "core" / "locale"),
 ]
 
-TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
+TIME_ZONE = 'Europe/Moscow'
+# Better to move timezone values to `City` model and cache it later
+TIME_ZONES = {
+    'spb': pytz.timezone('Europe/Moscow'),
+    'nsk': pytz.timezone('Asia/Novosibirsk'),
+    'kzn': pytz.timezone('Europe/Moscow')
+}
 
 AUTH_USER_MODEL = "users.CSCUser"
 AUTHENTICATION_BACKENDS = [

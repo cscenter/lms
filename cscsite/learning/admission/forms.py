@@ -18,7 +18,7 @@ from core.forms import Ubereditor
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment, InterviewSlot, InterviewStream, InterviewVenue
+    InterviewAssignment, InterviewSlot, InterviewStream
 from learning.widgets import DateInputAsTextInput
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
@@ -357,39 +357,19 @@ class InterviewFromStreamForm(forms.Form):
         queryset=InterviewStream.objects.get_queryset(),
         required=True)
 
-    # TODO: set `disabled` in widget
     slot = forms.ModelChoiceField(
         label="Время собеседования",
         queryset=InterviewSlot.objects.select_related("stream").none(),
-        help_text="Ручной выбор слота - это временное решение.",
-        required=True)
-
-    status = forms.ChoiceField(
-        label=_("Status"),
-        choices=Interview.STATUSES, required=False,
-        initial=Interview.APPROVAL)
-
-    assignments = forms.ModelMultipleChoiceField(
-        label=Interview.assignments.field.verbose_name,
-        queryset=(InterviewAssignment.objects
-                  .select_related("campaign", "campaign__city")
-                  .order_by("-campaign__year", "campaign__city_id", "name")),
-        widget=forms.CheckboxSelectMultiple(),
-        required=False,
-    )
-
-    note = forms.CharField(
-        label=_("Note"),
-        widget=forms.Textarea,
+        help_text="Если указать, то приглашение согласовать время "
+                  "не будет отправлено на почту. "
+                  "Сейчас не обязательно только для СПб.",
         required=False)
-
-    # FIXME: check consistency - slot should be from strem
 
     def clean(self):
         slot = self.cleaned_data.get("slot")
         if slot:
             stream = self.cleaned_data['stream']
-            if not stream or slot.stream != stream:
+            if not stream or slot.stream.pk != stream.pk:
                 raise ValidationError("Выбранный слот должен соответствовать "
                                       "выбранному потоку.")
 
@@ -405,10 +385,8 @@ class InterviewFromStreamForm(forms.Form):
             venue__city_id=city_code,
             date__gte=now().date()).select_related("venue")
         self.helper = FormHelper(self)
-        self.helper['assignments'].wrap(
-            Field, template='learning/admission/forms/assignments_field.html')
         self.helper.layout.append(
-            FormActions(Submit('create', _('Create interview')),
+            FormActions(Submit('create', _('Send')),
                         css_class="pull-right"))
 
 

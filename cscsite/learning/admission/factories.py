@@ -13,9 +13,10 @@ from django.utils import timezone
 
 from core.factories import UniversityFactory, CityFactory
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
-    Exam, InterviewAssignment, Interview, Comment, InterviewVenue, \
+    Exam, InterviewAssignment, Interview, Comment, \
     InterviewSlot, InterviewStream
 from learning.admission.signals import post_save_interview
+from learning.factories import VenueFactory
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
 
@@ -121,19 +122,11 @@ class CommentFactory(factory.DjangoModelFactory):
     score = factory.Iterator(range(-2, 3))
 
 
-class InterviewVenueFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = InterviewVenue
-
-    name = factory.Sequence(lambda n: "Interview venue %03d" % n)
-    address = "Venue address"
-
-
 class InterviewStreamFactory(factory.DjangoModelFactory):
     class Meta:
         model = InterviewStream
 
-    venue = factory.SubFactory(InterviewVenueFactory)
+    venue = factory.SubFactory(VenueFactory)
 
 
 class InterviewSlotFactory(factory.DjangoModelFactory):
