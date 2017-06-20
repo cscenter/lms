@@ -7,20 +7,34 @@ import uuid
 from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import query, Q
 from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
+from django.utils.timezone import now
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+from post_office import mail
 
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
+from learning.models import Venue
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair
 from users.models import CSCUser
+
+
+WITH_ASSIGNMENTS_TEXT = """
+Сперва мы предложим Вам решить несколько задач в течение получаса, а само 
+собеседование займёт ещё около 30 минут. На нём мы обсудим Вашу мотивацию 
+поступления в центр, существующий опыт и успехи в учёбе. Возможно, в разговоре 
+мы затронем также результаты экзамена, попросим решить какие-то задачи по 
+математике и программированию. Специально готовиться к собеседованию не стоит: 
+приходите с теми знаниями, которые есть, а вот про мотивацию подумайте, 
+пожалуйста, заранее. Собеседование проведут кураторы и преподаватели центра."""
 
 
 def current_year():
@@ -524,29 +538,6 @@ class Comment(TimeStampedModel):
                                            self.interview.applicant.get_full_name()))
 
 
-class InterviewVenue(models.Model):
-    city = models.ForeignKey(City, null=True, blank=True,
-                             default=settings.DEFAULT_CITY_CODE)
-    name = models.CharField(_("Venue|Name"), max_length=140)
-    address = models.CharField(
-        _("Venue|Address"),
-        help_text=(_("Should be resolvable by Google Maps")),
-        max_length=500,
-        blank=True)
-    description = models.TextField(
-        _("How to get"))
-
-    class Meta:
-        verbose_name = _("Interview venue")
-        verbose_name_plural = _("Interview venues")
-
-    def __str__(self):
-        return "{0}".format(smart_text(self.name))
-
-    def get_absolute_url(self):
-        return reverse('venue_detail', args=[self.pk])
-
-
 class InterviewStream(TimeStampedModel):
     date = models.DateField(_("Interview day"))
     start_at = models.TimeField(_("Period start"))
@@ -557,10 +548,10 @@ class InterviewStream(TimeStampedModel):
         default=30)
     # TODO: do not change if some slots already was taken
     venue = models.ForeignKey(
-        InterviewVenue,
+        Venue,
         verbose_name=_("Interview venue"),
         on_delete=models.PROTECT,
-        related_name="venues")
+        related_name="streams")
     with_assignments = models.BooleanField(
         _("Has assignments"),
         help_text=_("Based on this flag, student should arrive 30 min "
@@ -595,6 +586,14 @@ class InterviewStream(TimeStampedModel):
         # TODO: Divisible or not?
 
 
+class InterviewSlotQuerySet(query.QuerySet):
+    def take(self, slot, interview):
+        """Try to fill interview slot in a CAS manner"""
+        return (self.filter(pk=slot.pk,
+                            interview_id__isnull=True)
+                .update(interview_id=interview.pk))
+
+
 class InterviewSlot(TimeStampedModel):
     interview = models.OneToOneField(
         Interview,
@@ -616,5 +615,85 @@ class InterviewSlot(TimeStampedModel):
         verbose_name = _("Interview slot")
         verbose_name_plural = _("Interview slots")
 
+    objects = InterviewSlotQuerySet.as_manager()
+
     def __str__(self):
         return time_format(self.start_at)
+
+
+class InterviewInvitationQuerySet(query.QuerySet):
+    def for_applicant(self, applicant):
+        """Returns last active invitation for requested user"""
+        today = now()
+        return (self.filter(Q(expired_at__gt=today) | Q(expired_at__isnull=True,
+                                                        date__gte=today.date()))
+                    .filter(applicant=applicant)
+                .order_by("-pk")
+                .first())
+
+
+class InterviewInvitation(TimeStampedModel):
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="interview_invitations")
+    stream = models.ForeignKey(
+        InterviewStream,
+        verbose_name=_("Interview stream"),
+        on_delete=models.PROTECT,
+        related_name="interview_invitations")
+    secret_code = models.UUIDField(
+        verbose_name=_("Secret code"),
+        default=uuid.uuid4)
+    expired_at = models.DateTimeField(_("Expired at"), blank=True, null=True)
+    date = models.DateField(
+        _("Estimated interview day"),
+        editable=False)
+
+    class Meta:
+        verbose_name = _("Interview invitation")
+        verbose_name_plural = _("Interview invitations")
+
+    objects = InterviewInvitationQuerySet.as_manager()
+
+    def __str__(self):
+        return str(self.date)
+
+    @property
+    def is_expired(self):
+        today = now()
+        if self.expired_at:
+            return self.expired_at <= today
+        else:
+            return self.date <= today.date()
+
+    def get_absolute_url(self):
+        return reverse("admission_interview_appointment", kwargs={
+            "date": self.date.strftime('%d.%m.%Y'),
+            "secret_code": str(self.secret_code).replace("-", "")
+        })
+
+    def send_email(self, request=None):
+        if request:
+            secret_link = request.build_absolute_uri(self.get_absolute_url())
+        else:
+            secret_link = "https://compscicenter.ru{}".format(
+                self.get_absolute_url())
+        context = {
+            "SHORT_DATE": date_format(self.stream.date, "d E"),
+            "OFFICE_TITLE": self.stream.venue.name,
+            "WITH_ASSIGNMENTS": self.stream.with_assignments,
+            "SECRET_LINK": secret_link,
+            "DIRECTIONS": self.stream.venue.directions,
+        }
+        return mail.send(
+            [self.applicant.email],
+            sender='info@compscicenter.ru',
+            template="admission-interview-invitation",
+            context=context,
+            # Render on delivery, we have no really big amount of
+            # emails to think about saving CPU time
+            render_on_delivery=True,
+            backend='ses',
+        )

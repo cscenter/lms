@@ -408,7 +408,11 @@ class CourseOfferingNews(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Venue(models.Model):
-    city = models.ForeignKey(City, null=True, blank=True, \
+    INTERVIEW = 'interview'
+    LECTURE = 'lecture'
+    UNSPECIFIED = 0  # BitField uses BigIntegerField internal
+
+    city = models.ForeignKey(City, null=True, blank=True,
                              default=settings.DEFAULT_CITY_CODE)
     sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
@@ -420,6 +424,18 @@ class Venue(models.Model):
     description = models.TextField(
         _("Description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    directions = models.TextField(
+        _("Directions"),
+        blank=True,
+        null=True)
+    flags = BitField(
+        verbose_name=_("Flags"),
+        flags=(
+            (LECTURE, _('Class')),
+            (INTERVIEW, _('Interview')),
+        ),
+        default=(LECTURE,),
+        help_text=(_("Set purpose of this place")))
     is_preferred = models.BooleanField(
         _("Preferred"),
         help_text=(_("Will be displayed on top of the venue list")),

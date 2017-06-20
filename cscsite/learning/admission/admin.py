@@ -16,7 +16,7 @@ from learning.admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from learning.admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
-    InterviewVenue
+    InterviewInvitation
 
 
 class CampaignAdmin(admin.ModelAdmin):
@@ -160,10 +160,6 @@ class InterviewCommentAdmin(admin.ModelAdmin):
     get_interviewer.short_description = _("Interviewer")
 
 
-class InterviewVenueAdmin(admin.ModelAdmin):
-    pass
-
-
 class InterviewSlotAdmin(admin.ModelAdmin):
     search_fields = ['stream__date']
     raw_id_fields = ("interview",)
@@ -195,9 +191,14 @@ class InterviewStreamAdmin(admin.ModelAdmin):
         if not obj:
             return []
         elif obj.date < now().date():
-            return ['start_at', 'end_at', 'duration', 'interviewers']
+            return ['start_at', 'end_at', 'duration', 'interviewers', 'date']
         else:
-            return ['start_at', 'end_at', 'duration']
+            return ['start_at', 'end_at', 'duration', 'date']
+
+
+class InterviewInvitationAdmin(admin.ModelAdmin):
+    model = InterviewInvitation
+    readonly_fields = ("applicant", "secret_code",)
 
 
 admin.site.register(Campaign, CampaignAdmin)
@@ -208,6 +209,6 @@ admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment, InterviewAssignmentAdmin)
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Comment, InterviewCommentAdmin)
-admin.site.register(InterviewVenue, InterviewVenueAdmin)
 admin.site.register(InterviewStream, InterviewStreamAdmin)
 admin.site.register(InterviewSlot, InterviewSlotAdmin)
+admin.site.register(InterviewInvitation, InterviewInvitationAdmin)
