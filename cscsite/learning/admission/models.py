@@ -681,6 +681,7 @@ class InterviewInvitation(TimeStampedModel):
             secret_link = "https://compscicenter.ru{}".format(
                 self.get_absolute_url())
         context = {
+            "SUBJECT_CITY": self.stream.venue.city.name,
             "SHORT_DATE": date_format(self.stream.date, "d E"),
             "OFFICE_TITLE": self.stream.venue.name,
             "WITH_ASSIGNMENTS": self.stream.with_assignments,
