@@ -314,7 +314,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
     def create_interview(self, applicant, stream_form, slot):
         data = {
             'applicant': applicant.pk,
-            'status': Interview.APPROVAL,
+            'status': Interview.APPROVED,
             'interviewers': slot.stream.interviewers.all(),
             'date': datetime.datetime.combine(slot.stream.date, slot.start_at)
         }
@@ -832,7 +832,7 @@ class InterviewAppointmentView(generic.TemplateView):
                         stream_id=invitation.stream_id))
         data = {
             'applicant': invitation.applicant_id,
-            'status': Interview.APPROVAL,
+            'status': Interview.APPROVED,
             'interviewers': invitation.stream.interviewers.all(),
             'date': datetime.datetime.combine(invitation.stream.date,
                                               slot.start_at)

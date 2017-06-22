@@ -14,7 +14,7 @@
     <div class="panel">
         <div class="panel-body">
             {% if interview %}
-                <p>Ждём вас на собеседование в CS центр {{ interview.date|date:"d E" }} к {{ interview.date|date:"H:i" }}.</p>
+                <p>Ждём вас на собеседование в CS центр {{ interview.date|date:"d E" }} к {{ interview.date|date:"H:i" }}.</p><br>
                 {% if invitation.stream.venue.directions %}
                     <b>Как добраться</b><br>
                     {{ invitation.stream.venue.directions }}
@@ -24,7 +24,7 @@
             {% else %}
                 <form action="" method="POST" class="margin-bottom-0">
                 {% csrf_token %}
-                    Собеседование планируется провести <span class="nowrap">{{ invitation.date|date:"d E" }}</span>.<br>
+                    Собеседование пройдёт <span class="nowrap">{{ invitation.date|date:"d E" }}</span>.<br>
                     Место проведения: {{ invitation.stream.venue.address }}
                     <div class="form-group">
                         <label>Выберите из доступных вариантов время, в которое сможете подъехать:</label><br>
