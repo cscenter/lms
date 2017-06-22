@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
 
 from learning.admission.models import Applicant, Interview, Comment, Campaign, \
@@ -29,22 +29,35 @@ def post_save_campaign(sender, instance, created, *args, **kwargs):
 
 @receiver(post_save, sender=Interview)
 def post_save_interview(sender, instance, created, *args, **kwargs):
-    """Set appropriate applicant status based on interview status."""
-    interview = instance
-    applicant_status_updated = False
-    # Set applicant status to `INTERVIEW_SCHEDULED` if interview has been
-    # created with active status and current applicant status not in final state
-    if created and interview.status in [Interview.APPROVAL, Interview.APPROVED]:
-        if interview.applicant.status not in APPLICANT_FINAL_STATES:
-            interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
-    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        interview.applicant.status = Applicant.INTERVIEW_TOBE_SCHEDULED
-    else:
-        applicant_status_updated = __check_interview_status(interview)
-    if not applicant_status_updated:
-        (Applicant.objects
-         .filter(pk=interview.applicant_id)
-         .update(status=interview.applicant.status))
+    __sync_applicant_status(instance)
+
+
+@receiver(post_delete, sender=Interview)
+def post_delete_interview(sender, instance, *args, **kwargs):
+    # TODO: set applicant status
+    # TODO: remove reminder
+    pass
+
+
+@receiver(m2m_changed, sender=Interview.interviewers.through)
+def interview_interviewers_m2m_changed(sender, instance, action, *args, **kwargs):
+    """
+    We are struggling with two cases:
+        * We only remove some interviewers
+        * We remove and add some interviewers. In that case `post_remove`
+        will be called first, then `post_add`
+    """
+    if action == "post_remove":
+        __sync_applicant_status(instance, check_comments=True)
+        instance.__post_remove_called_before = True
+        instance.__status_was_changed_by_sync_method_call = True
+    elif action == "post_add":
+        # Previous `post_remove` call could accidentally update interview and
+        # applicant status to `complete` state. Fix this if need.
+        # FIXME: Кажется, что нужно проверять 2 вещи - что-то было удалено и статус изменился со времени вызова `post_remove`, т.е. он был неверно подкорректирован.
+        # TODO: add test
+        pass
+
 
 
 @receiver(post_save, sender=Comment)
@@ -59,34 +72,36 @@ def post_save_interview_comment(sender, instance, created, *args, **kwargs):
     comment = instance
     interview = comment.interview
     interviewers = interview.interviewers.all()
-    __check_interview_status(interview)
+    __sync_applicant_status(interview, check_comments=True)
     if comment.interviewer not in interviewers and comment.interviewer.is_curator:
         interview.interviewers.add(comment.interviewer)
 
 
-def __check_interview_status(interview):
-    """
-    Try to sync interview and applicant statuses when `complete`
-    state is reachable.
-    """
-    update_applicant_status = False
-    if interview.status == Interview.APPROVED:
-        if len(interview.interviewers.all()) == interview.comments.count():
+def __sync_applicant_status(interview, check_comments=False):
+    """Keep in sync interview and applicant statuses."""
+    if interview.applicant.status in APPLICANT_FINAL_STATES:
+        return
+    new_status = object()
+    if interview.status in [Interview.APPROVAL, Interview.APPROVED]:
+        if check_comments and len(
+                interview.interviewers.all()) == interview.comments.count():
             interview.status = Interview.COMPLETED
-            (Interview.objects
-             .filter(pk=interview.pk)
-             .update(status=interview.status))
-            update_applicant_status = True
+            Interview.objects.filter(pk=interview.pk).update(
+                status=interview.status)
+            new_status = Applicant.INTERVIEW_COMPLETED
+        else:
+            new_status = Applicant.INTERVIEW_SCHEDULED
+    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
+        new_status = Applicant.INTERVIEW_TOBE_SCHEDULED
     elif interview.status == Interview.COMPLETED:
-        update_applicant_status = True
-    if (update_applicant_status and
-            interview.applicant.status not in APPLICANT_FINAL_STATES):
-        interview.applicant.status = Applicant.INTERVIEW_COMPLETED
-        rows = (Applicant.objects
-                .filter(pk=interview.applicant.pk)
-                .update(status=interview.applicant.status))
-        return rows > 0
-    return False
+        new_status = Applicant.INTERVIEW_COMPLETED
+    else:
+        raise ValueError("Unknown interview status")
+    if interview.applicant.status != new_status:
+        print("fuck!")
+        interview.applicant.status = new_status
+        Applicant.objects.filter(pk=interview.applicant.pk).update(
+            status=interview.applicant.status)
 
 
 @receiver(post_save, sender=InterviewStream)

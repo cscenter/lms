@@ -25,11 +25,12 @@ def test_autoupdate_applicant_status_canceled():
     interview.save()
     applicant.refresh_from_db()
     assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
-    # Autoupdate works only when interview created
+    # Autoupdate for applicant status works each time you set approval/approved
+    # and applicant status not in final state
     interview.status = Interview.APPROVAL
     interview.save()
     applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
+    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
 
 
 @pytest.mark.django_db
