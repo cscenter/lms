@@ -78,14 +78,10 @@ import 'jquery-bar-rating';
             // Stupid defense from stale sessions
             commentForm.submit(function (e) {
                 e.preventDefault();
-                const _data = commentForm.serializeArray();
-                let data= {};
-                $.map(_data, function(n, i) {
-                    data[n['name']] = n['value'];
-                });
+                const data = commentForm.serializeArray();
                 $.ajax({
                     url: commentForm.attr("action"),
-                    data: JSON.stringify(data),
+                    data: data,
                     dataType: 'json',
                     type: 'POST',
                 }).done(function (data) {
