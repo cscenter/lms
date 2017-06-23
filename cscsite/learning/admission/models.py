@@ -648,8 +648,14 @@ class InterviewInvitation(TimeStampedModel):
         default=uuid.uuid4)
     expired_at = models.DateTimeField(_("Expired at"), blank=True, null=True)
     date = models.DateField(
-        _("Estimated interview day"),
-        editable=False)
+        _("Estimated interview day"))
+    interview = models.ForeignKey(
+        Interview,
+        verbose_name=_("Interview"),
+        on_delete=models.CASCADE,
+        related_name="invitations",
+        null=True,
+        blank=True)
 
     class Meta:
         verbose_name = _("Interview invitation")
@@ -667,6 +673,10 @@ class InterviewInvitation(TimeStampedModel):
             return self.expired_at <= today
         else:
             return self.date <= today.date()
+
+    @property
+    def is_accepted(self):
+        return bool(self.interview)
 
     def get_absolute_url(self):
         return reverse("admission_interview_appointment", kwargs={

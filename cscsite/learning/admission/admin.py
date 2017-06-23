@@ -198,7 +198,13 @@ class InterviewStreamAdmin(admin.ModelAdmin):
 
 class InterviewInvitationAdmin(admin.ModelAdmin):
     model = InterviewInvitation
-    readonly_fields = ("applicant", "secret_code",)
+    list_display = ['date', 'applicant', 'get_accepted']
+    raw_id_fields = ("interview", "applicant")
+    readonly_fields = ("secret_code",)
+
+    def get_accepted(self, obj):
+        return _("Yes") if obj.is_accepted else _("No")
+    get_accepted.short_description = _("Accepted")
 
 
 admin.site.register(Campaign, CampaignAdmin)
