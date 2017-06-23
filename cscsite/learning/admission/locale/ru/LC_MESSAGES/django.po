@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-20 19:56+0300\n"
-"PO-Revision-Date: 2017-06-20 19:58+0230\n"
+"POT-Creation-Date: 2017-06-23 15:44+0300\n"
+"PO-Revision-Date: 2017-06-23 15:44+0230\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -30,6 +30,7 @@ msgstr "Набор"
 #: cscsite/learning/admission/models.py:485
 #: cscsite/learning/admission/models.py:515
 #: cscsite/learning/admission/models.py:600
+#: cscsite/learning/admission/models.py:654
 msgid "Interview"
 msgstr "Интервью"
 
@@ -37,6 +38,20 @@ msgstr "Интервью"
 #: cscsite/learning/admission/models.py:520
 msgid "Interviewer"
 msgstr "Собеседующий"
+
+#: cscsite/learning/admission/admin.py:206
+msgid "Yes"
+msgstr "Да"
+
+#: cscsite/learning/admission/admin.py:206
+#| msgid "Note"
+msgid "No"
+msgstr "Нет"
+
+#: cscsite/learning/admission/admin.py:207
+#| msgid "Accept"
+msgid "Accepted"
+msgstr "Принято"
 
 #: cscsite/learning/admission/apps.py:7
 msgid "Admission"
@@ -87,7 +102,7 @@ msgstr "Поток собеседований"
 
 #: cscsite/learning/admission/forms.py:389
 msgid "Send"
-msgstr ""
+msgstr "Отправить"
 
 #: cscsite/learning/admission/forms.py:415
 msgid "Update assignments list"
@@ -670,17 +685,14 @@ msgid "Expired at"
 msgstr "Истекает"
 
 #: cscsite/learning/admission/models.py:651
-#| msgid "Interview day"
 msgid "Estimated interview day"
 msgstr "Предполагаемая дата собеседования"
 
-#: cscsite/learning/admission/models.py:655
-#| msgid "Interview start"
+#: cscsite/learning/admission/models.py:661
 msgid "Interview invitation"
 msgstr "Приглашение на собеседование"
 
-#: cscsite/learning/admission/models.py:656
-#| msgid "Interview start"
+#: cscsite/learning/admission/models.py:662
 msgid "Interview invitations"
 msgstr "Приглашения на собеседования"
 

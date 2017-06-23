@@ -261,9 +261,9 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         context["status_form"] = ApplicantStatusForm(instance=applicant)
         if 'form' not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
-            print(invitation)
             if not invitation:
-                context["form"] = InterviewFromStreamForm(city_code=applicant.campaign.city_id)
+                context["form"] = InterviewFromStreamForm(
+                    city_code=applicant.campaign.city_id)
             else:
                 context["invitation"] = invitation
         return context
