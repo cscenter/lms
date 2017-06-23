@@ -66,6 +66,7 @@ const common = {
     },
 
     plugins: [
+        new webpack.optimize.ModuleConcatenationPlugin(),
         new BundleTracker({filename: './webpack/webpack-stats.json'}),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         // TODO: Prevent autoload jquery for now
