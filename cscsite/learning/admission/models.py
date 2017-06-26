@@ -14,7 +14,7 @@ from django.core.validators import RegexValidator, MinValueValidator, \
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -657,7 +657,7 @@ class InterviewInvitation(TimeStampedModel):
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
         default=uuid.uuid4)
-    expired_at = models.DateTimeField(_("Expired at"), blank=True, null=True)
+    expired_at = models.DateTimeField(_("Expired at"))
     date = models.DateField(
         _("Estimated interview day"))
     interview = models.ForeignKey(
@@ -679,11 +679,7 @@ class InterviewInvitation(TimeStampedModel):
 
     @property
     def is_expired(self):
-        today = now()
-        if self.expired_at:
-            return self.expired_at <= today
-        else:
-            return self.date <= today.date()
+        return now() >= self.expired_at
 
     @property
     def is_accepted(self):
