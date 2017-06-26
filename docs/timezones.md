@@ -94,6 +94,8 @@ http://asvetlov.blogspot.ru/2011/02/date-and-time.html
 
 Мораль - перед тем как пользоваться strftime, нужно учесть часовой пояс. Более общее утверждение - перед форматированием учесть часовой пояс.
 
+Если хочется, чтобы postgres возвращал всё в UTC, нужно выполнить `SET SESSION timezone TO 'UTC';` для текущей сессии.
+
 
    
 ### Некоторые особенности работы postgres с датами
@@ -122,4 +124,30 @@ cscdb=> select '2014-04-04 20:00:00'::timestamp at time zone 'UTC';
 ------------------------
  2014-04-05 00:00:00+04
 (1 row) -- В зоне UTC было 20:00, а наше местное на 4 часа больше. Его мы и видим.
+```
+
+### Как python отображает даты в консоли:
+
+Из кода ниже можно сделать вывод, что время показывается локальное, с учетом часового пояса
+
+```
+# Naive
+In [1]: datetime(2017, 6, 26, 0, 0)
+Out[1]: datetime.datetime(2017, 6, 26, 0, 0)
+
+# Aware with UTC timezone
+In [2]: datetime(2017, 6, 26, 0, 0, tzinfo=pytz.UTC)
+Out[2]: datetime.datetime(2017, 6, 26, 0, 0, tzinfo=<UTC>)
+
+# Incorrect aware with MSK timezone (call `normalize` to fix)
+In [3]: datetime(2017, 6, 26, 0, 0, tzinfo=tz_msk)
+Out[3]: datetime.datetime(2017, 6, 26, 0, 0, tzinfo=<DstTzInfo 'Europe/Moscow' LMT+2:30:00 STD>)
+
+# Correct aware with MSK timezone
+In [4]: tz_msk.localize(datetime(2017, 6, 26, 0, 0))
+Out[4]: datetime.datetime(2017, 6, 26, 0, 0, tzinfo=<DstTzInfo 'Europe/Moscow' MSK+3:00:00 STD>)
+
+# Convert previous datetime to UTC timezone
+In [5]: tz_msk.localize(datetime(2017, 6, 26, 0, 0)).astimezone(pytz.UTC)
+Out[5]: datetime.datetime(2017, 6, 25, 21, 0, tzinfo=<UTC>)
 ```
