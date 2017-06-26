@@ -48,10 +48,10 @@ def generate_interview_reminder(interview, slot):
             [interview.applicant.email],
             scheduled_time=scheduled_time,
             sender='info@compscicenter.ru',
-            template="admission-interview-reminder",
+            template=interview.REMINDER_TEMPLATE,
             context={
                 "SUBJECT_CITY": interview.applicant.campaign.city.name,
-                "DATE": when.strftime("%d.%m.%Y"),  # TODO: move this to template
+                "DATE": when.strftime("%d.%m.%Y"),  # TODO: move this to template?
                 "TIME": when.strftime("%H:%M"),
                 "DIRECTIONS": slot.stream.venue.directions
             },

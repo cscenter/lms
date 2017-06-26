@@ -3,6 +3,8 @@ import datetime
 
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
+from post_office.models import Email
+from post_office.utils import get_email_template
 
 from learning.admission.models import Applicant, Interview, Comment, Campaign, \
     InterviewStream, InterviewSlot
@@ -29,14 +31,20 @@ def post_save_campaign(sender, instance, created, *args, **kwargs):
 
 @receiver(post_save, sender=Interview)
 def post_save_interview(sender, instance, created, *args, **kwargs):
-    __sync_applicant_status(instance)
+    interview = instance
+    __sync_applicant_status(interview)
+    if interview.status in [Interview.CANCELED, Interview.DEFERRED]:
+        interview.delete_reminder()
 
 
+# TODO: add tests
 @receiver(post_delete, sender=Interview)
 def post_delete_interview(sender, instance, *args, **kwargs):
-    # TODO: set applicant status
-    # TODO: remove reminder
-    pass
+    interview = instance
+    applicant = interview.applicant
+    Applicant.objects.filter(pk=applicant.pk).update(
+        status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+    interview.delete_reminder()
 
 
 @receiver(m2m_changed, sender=Interview.interviewers.through)
@@ -57,7 +65,6 @@ def interview_interviewers_m2m_changed(sender, instance, action, *args, **kwargs
         # FIXME: Кажется, что нужно проверять 2 вещи - что-то было удалено и статус изменился со времени вызова `post_remove`, т.е. он был неверно подкорректирован.
         # TODO: add test
         pass
-
 
 
 @receiver(post_save, sender=Comment)
@@ -98,7 +105,6 @@ def __sync_applicant_status(interview, check_comments=False):
     else:
         raise ValueError("Unknown interview status")
     if interview.applicant.status != new_status:
-        print("fuck!")
         interview.applicant.status = new_status
         Applicant.objects.filter(pk=interview.applicant.pk).update(
             status=interview.applicant.status)

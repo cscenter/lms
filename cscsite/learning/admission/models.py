@@ -19,6 +19,8 @@ from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from post_office import mail
+from post_office.models import Email, EmailTemplate
+from post_office.utils import get_email_template
 
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Venue
@@ -454,6 +456,7 @@ class Interview(TimeStampedModel):
         (COMPLETED, _('Completed')),
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
+    REMINDER_TEMPLATE = "admission-interview-reminder"
 
     date = models.DateTimeField(_("When"))
     applicant = models.OneToOneField(
@@ -502,6 +505,14 @@ class Interview(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.applicant)
+
+    def delete_reminder(self):
+        try:
+            template = get_email_template(Interview.REMINDER_TEMPLATE)
+            Email.objects.filter(template=template,
+                                 to=self.applicant.email).delete()
+        except EmailTemplate.DoesNotExist:
+            pass
 
 
 @python_2_unicode_compatible
