@@ -62,17 +62,12 @@ h2.right-line:after {
     }
 }
 
-
-.index-image-container {
-    min-width: $min-width;
-    background: url("/static/img/center/cscenter.jpg") top center no-repeat;
-    background-size: 100%;
-    overflow-x: hidden;
-    margin-top: -28px;
-    min-height: 200px;
-    max-height: 482px;
-    padding-top: 25%;
+.index-page-image {
+  margin-top: -28px;
+  max-width: 100%;
+  min-width: $min-width;
 }
+
 
 
 
@@ -81,7 +76,6 @@ h2.right-line:after {
 
   #onlinecourses-list {
     @extend .container;
-    padding-bottom: 30px;
     padding-top: 0;
 
     .center-header {
