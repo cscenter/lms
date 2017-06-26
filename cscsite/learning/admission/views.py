@@ -11,6 +11,7 @@ from random import choice
 from string import ascii_lowercase
 from string import digits
 
+from django.apps import apps
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.http.response import HttpResponseForbidden, HttpResponseBadRequest
@@ -21,7 +22,7 @@ from django.db.transaction import atomic
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, localtime
+from django.utils.timezone import now, localtime, make_aware
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
@@ -58,6 +59,9 @@ from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 
 from users.models import CSCUser
 from .tasks import application_form_send_email
+
+
+ADMISSION_SETTINGS = apps.get_app_config("admission")
 
 
 date_re = re.compile(
@@ -346,8 +350,13 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
     def create_invitation(self, applicant, stream_form):
         stream = stream_form.cleaned_data['stream']
+        interview_day = stream.date
+        # Set deadline for invitation
+        expired_in_hours = ADMISSION_SETTINGS.INVITATION_EXPIRED_IN_HOURS
+        expired_at = now() + datetime.timedelta(hours=expired_in_hours)
         invitation = InterviewInvitation(applicant=applicant,
-                                         date=stream.date,
+                                         date=interview_day,
+                                         expired_at=expired_at,
                                          stream=stream)
         try:
             with transaction.atomic():
