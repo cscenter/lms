@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const development = require('./dev.config');
 const production = require('./prod.config');
@@ -65,30 +66,6 @@ const common = {
         "d3": "d3"
     },
 
-    plugins: [
-        new webpack.optimize.ModuleConcatenationPlugin(),
-        new BundleTracker({filename: './webpack/webpack-stats.json'}),
-        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-        // TODO: Prevent autoload jquery for now
-        // new webpack.ProvidePlugin({
-        //     '$': 'jquery',
-        //     'jQuery': 'jquery',
-        //     'window.jQuery': 'jquery'
-        // }),
-        // extract all common modules to vendor so we can load multiple apps in one page
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor"
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "manifest",
-            minChunks: Infinity
-        }),
-        new CleanWebpackPlugin([PATHS.dist], {
-            verbose: true,
-            root: process.cwd()
-        })
-    ],
-
     resolve: {
         extensions: ['.jsx', '.js'],
         modules: [
@@ -110,9 +87,43 @@ const common = {
                     }
                 ],
                 exclude: '/node_modules/',
+            },
+            {
+                test: /\.css$/,
+                use: ExtractTextPlugin.extract({
+                    use: ['css-loader']
+                })
             }
         ]
     },
+
+    plugins: [
+        new webpack.optimize.ModuleConcatenationPlugin(),
+        new BundleTracker({filename: './webpack/webpack-stats.json'}),
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+        // TODO: Prevent autoload jquery for now
+        // new webpack.ProvidePlugin({
+        //     '$': 'jquery',
+        //     'jQuery': 'jquery',
+        //     'window.jQuery': 'jquery'
+        // }),
+        // extract all common modules to vendor so we can load multiple apps in one page
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "vendor"
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "manifest",
+            minChunks: Infinity
+        }),
+        new CleanWebpackPlugin([PATHS.dist], {
+            verbose: true,
+            root: process.cwd()
+        }),
+        new ExtractTextPlugin({
+            filename: '[name].css',
+            allChunks: true
+        }),
+    ],
 
     // sassLoader: {
     //     data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
