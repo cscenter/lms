@@ -124,6 +124,11 @@ LOGGING = {
             "level": "DEBUG",
             'propagate': False,
         },
+        "post_office": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
