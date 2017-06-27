@@ -256,7 +256,7 @@
                                                     <li>
                                                         {% for course in course_groups.courses.all %}
                                                             {# Syllabus contains center courses only #}
-                                                            {% if course.id in stats.passed.center_courses %}
+                                                            {% if course.id in stats.passed.center_courses or course.id in stats.passed.club_courses %}
                                                                 <span class="text-success">{{ course.name }}</span>
                                                             {% elif course.id in stats.in_term.courses %}
                                                                 <span class="text-info">{{ course.name }}</span>
