@@ -30,8 +30,6 @@ INSTALLED_APPS += [
 # Add site specific templates
 TEMPLATES[0]['DIRS'] += [str(BASE_DIR / "templates")]
 
-# FIXME: Remove after Django 1.8.4 would been released?
-# https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS += [
     str(BASE_DIR / "locale"),
     str(PROJECT_DIR / "learning" / "projects" / "locale"),

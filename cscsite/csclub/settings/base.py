@@ -34,7 +34,6 @@ SOLID_I18N_USE_REDIRECTS = False
 # Redirect from /ru/... to /... if default_lang == 'ru'
 SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
-# https://code.djangoproject.com/ticket/24159
 LOCALE_PATHS = [
     str(BASE_DIR / "locale"),
 ] + LOCALE_PATHS
