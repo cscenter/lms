@@ -72,6 +72,11 @@ LOGGING = {
             "level": "WARNING",
             'propagate': False,
         },
+        "post_office": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
         'sentry.errors': {
             'level': 'DEBUG',
             'handlers': ['console'],
