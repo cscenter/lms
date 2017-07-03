@@ -147,7 +147,7 @@ class UserDetailView(generic.DetailView):
     context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
-        enrollment_queryset = Enrollment.objects.select_related(
+        enrollment_queryset = Enrollment.active.select_related(
             'course_offering',
             'course_offering__semester',
             'course_offering__course'

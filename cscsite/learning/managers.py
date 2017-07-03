@@ -47,3 +47,27 @@ class CustomCourseOfferingQuerySet(models.QuerySet):
             return self.filter(completed_at__lte=now().date())
         else:
             return self.filter(completed_at__gt=now().date())
+
+
+class _EnrollmentDefaultManager(models.Manager):
+    pass
+
+
+class _EnrollmentActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class EnrollmentDefaultQuerySet(models.QuerySet):
+    def site_related(self, request):
+        qs = (self.select_related("course_offering")
+                  .filter(course_offering__city_id=request.city_code))
+        if request.site.domain == settings.CLUB_DOMAIN:
+            qs = qs.filter(course_offering__is_open=True)
+        return qs
+
+
+EnrollmentDefaultManager = _EnrollmentDefaultManager.from_queryset(
+    EnrollmentDefaultQuerySet)
+EnrollmentActiveManager = _EnrollmentActiveManager.from_queryset(
+    EnrollmentDefaultQuerySet)

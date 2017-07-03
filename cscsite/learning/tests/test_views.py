@@ -3,34 +3,27 @@ from __future__ import unicode_literals, absolute_import
 
 import logging
 import os
-import pytest
-import re
-import unicodecsv
 import unittest
 
 import pytest
+import unicodecsv
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
-from django.utils.timezone import now
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms.models import model_to_dict
+from django.test import TestCase
+from django.test.utils import override_settings
+from django.utils.encoding import smart_text, smart_bytes
+from django.utils.translation import ugettext as _
 from testfixtures import LogCapture
 
-from django.conf import settings
-from django.conf.urls.static import static
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
-from django.forms.models import model_to_dict
-from django.test.utils import override_settings
-from django.test import TestCase
-from django.utils.encoding import smart_text, force_text, force_str, smart_bytes
-from django.utils.translation import ugettext as _
-from learning.settings import GRADES, GRADING_TYPES, GRADING_TYPES, \
+from learning.forms import MarksSheetTeacherImportGradesForm, CourseClassForm
+from learning.settings import GRADES, GRADING_TYPES, \
     STUDENT_STATUS
 from users.factories import TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
-from ..utils import get_current_semester_pair
-from ..factories import *
 from .mixins import *
-from learning.forms import MarksSheetTeacherImportGradesForm, CourseClassForm
+from ..factories import *
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
@@ -415,7 +408,9 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
     def test_assignment_list(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        next_day = now() + datetime.timedelta(days=1)
+        co = CourseOfferingFactory.create(teachers=[teacher],
+                                          completed_at=next_day)
         url = co.get_absolute_url()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1104,8 +1099,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentFactory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
-                                   is_completed=True)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
@@ -1156,7 +1150,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
 
     def test_assignment_contents(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
-        co = CourseOfferingFactory.create()
+        semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -1169,7 +1164,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_teacher_redirect_to_appropriate_link(self):
         student = UserFactory.create(groups=['Student [CENTER]'])
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        semester = SemesterFactory.create_current()
+        co = CourseOfferingFactory.create(teachers=[teacher], semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -1486,7 +1482,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             name = "{}&nbsp;{}.".format(student.last_name,
                                         student.first_name[0])
             self.assertContains(resp, name, 1)
-            enrollment = Enrollment.objects.get(student=student,
+            enrollment = Enrollment.active.get(student=student,
                                         course_offering=co1)
             field = 'final_grade_{}'.format(enrollment.pk)
             self.assertIn(field, resp.context['form'].fields)
@@ -1580,7 +1576,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                      for a in [a1, a2]],
             [2, 3, 4, 5])
         for submission, grade in pairs:
-            enrollment = Enrollment.objects.get(student=submission.student,
+            enrollment = Enrollment.active.get(student=submission.student,
                                                 course_offering=co)
             form['a_s_{}'.format(submission.pk)] = grade
             field = 'final_grade_{}'.format(enrollment.pk)
@@ -1591,7 +1587,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                      .get(pk=a_s.pk)
                                      .grade))
         for student in students:
-            self.assertEqual('good', (Enrollment.objects
+            self.assertEqual('good', (Enrollment.active
                                       .get(student=student,
                                            course_offering=co)
                                       .grade))
@@ -1716,8 +1712,7 @@ class TestCompletedCourseOfferingBehaviour(object):
         student = student_factory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
-                                   is_completed=True)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
@@ -1738,8 +1733,7 @@ class TestCompletedCourseOfferingBehaviour(object):
         student = StudentFactory()
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester,
-                                   is_completed=True)
+        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
@@ -1762,138 +1756,6 @@ class TestCompletedCourseOfferingBehaviour(object):
         response = client.get(url)
         assert not response.context["is_failed_completed_course"]
 
-
-class CourseOfferingEnrollmentTests(MyUtilitiesMixin, TestCase):
-
-    @unittest.skip('not implemented')
-    def test_enrollment_for_club_students(self):
-        """ Club Student can enroll only on open courses """
-        pass
-
-    def test_unenrollment(self):
-        s = UserFactory.create(groups=['Student [CENTER]'])
-        today = timezone.now()
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester)
-        as_ = AssignmentFactory.create_batch(3, course_offering=co)
-        form = {'course_offering_pk': co.pk}
-        url = reverse('course_offering_unenroll',
-                      args=[co.course.slug, co.semester.slug])
-        self.doLogin(s)
-        # Enrollment already closed
-        current_semester.enroll_before = (today - datetime.timedelta(days=1)).date()
-        current_semester.save()
-        response = self.client.post(reverse('course_offering_enroll',
-                                 args=[co.course.slug, co.semester.slug]),
-                         form)
-        assert response.status_code == 403
-        current_semester.enroll_before = today.date()
-        current_semester.save()
-        self.client.post(reverse('course_offering_enroll',
-                                 args=[co.course.slug, co.semester.slug]),
-                         form)
-        resp = self.client.get(url)
-        self.assertContains(resp, "Unenroll")
-        self.assertContains(resp, smart_text(co))
-        self.client.post(url, form)
-        self.assertEquals(0, Enrollment.objects
-                          .filter(student=s, course_offering=co)
-                          .count())
-        a_ss = (StudentAssignment.objects
-                .filter(student=s,
-                        assignment__course_offering=co))
-        self.assertEquals(3, len(a_ss))
-        self.client.post(reverse('course_offering_enroll',
-                                 args=[co.course.slug, co.semester.slug]),
-                         form)
-        url += "?back=course_list_student"
-        self.assertRedirects(self.client.post(url, form),
-                             reverse('course_list_student'))
-        self.assertSameObjects(a_ss, (StudentAssignment.objects
-                                      .filter(student=s,
-                                              assignment__course_offering=co)))
-
-    def test_enrollment_capacity(self):
-        s = UserFactory.create(groups=['Student [CENTER]'])
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester,
-                                          is_open=True)
-        co_url = reverse('course_offering_detail',
-                         args=[co.course.slug, co.semester.slug])
-        co_enroll_url = reverse('course_offering_enroll',
-                                args=[co.course.slug, co.semester.slug])
-        self.doLogin(s)
-        response = self.client.get(co_url)
-        assert smart_bytes(_("Places available")) not in response.content
-        assert smart_bytes(_("No places available")) not in response.content
-        co.capacity = 1
-        co.save()
-        response = self.client.get(co_url)
-        assert smart_bytes(_("Places available")) in response.content
-        form = {'course_offering_pk': co.pk}
-        self.client.post(co_enroll_url, form)
-        assert 1 == (Enrollment.objects.filter(student=s, course_offering=co)
-                     .count())
-        # Capacity reached, show to second student nothing
-        s2 = UserFactory.create(groups=['Student [CENTER]'])
-        self.doLogin(s2)
-        response = self.client.get(co_url)
-        assert smart_bytes(_("No places available")) in response.content
-        co.capacity = 2
-        co.save()
-        response = self.client.get(co_url)
-        assert (smart_bytes(_("Places available")) + b": 1") in response.content
-
-
-@pytest.mark.django_db
-def test_enrollment(client, student_center_factory):
-    student = StudentCenterFactory.create()
-    client.login(student)
-    today = timezone.now()
-    current_semester = SemesterFactory.create_current()
-    current_semester.enroll_before = today.date()
-    current_semester.save()
-    co = CourseOfferingFactory.create(semester=current_semester)
-    url = reverse('course_offering_enroll',
-                  args=[co.course.slug, co.semester.slug])
-    form = {'course_offering_pk': co.pk}
-    response = client.post(url, form)
-    assert response.status_code == 302
-    # FIXME: Find how to assert redirects with pytest and Django
-    # assert response.url == client.request.get_absolute_uri(co.get_absolute_url())
-    assert 1 == (Enrollment.objects
-                      .filter(student=student, course_offering=co)
-                      .count())
-    as_ = AssignmentFactory.create_batch(3, course_offering=co)
-    assert set((student.pk, a.pk) for a in as_) == set(StudentAssignment.objects
-                          .filter(student=student)
-                          .values_list('student', 'assignment'))
-    co_other = CourseOfferingFactory.create(semester=current_semester)
-    form.update({'back': 'course_list_student'})
-    url = reverse('course_offering_enroll',
-                  args=[co_other.course.slug, co_other.semester.slug])
-    response = client.post(url, form)
-    assert response.status_code == 302
-    # assert response.url == reverse('course_list_student')
-    # Try to enroll to old CO
-    old_semester = SemesterFactory.create(year=2010)
-    old_co = CourseOfferingFactory.create(semester=old_semester)
-    form = {'course_offering_pk': old_co.pk}
-    url = reverse('course_offering_enroll',
-                  args=[old_co.course.slug, old_co.semester.slug])
-    assert client.post(url, form).status_code == 403
-    # If course offering has limited capacity and we reach it - reject request
-    co.capacity = 1
-    co.save()
-    student2 = StudentCenterFactory.create()
-    client.login(student2)
-    form = {'course_offering_pk': co.pk}
-    client.post(url, form, follow=True)
-    assert co.enrollment_set.count() == 1
-    co.capacity = 2
-    co.save()
-    client.post(url, form, follow=True)
-    assert co.enrollment_set.count() == 2
 
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
 
@@ -2036,7 +1898,8 @@ def test_course_class_form(client, curator, settings):
     # XXX: Date widget depends on locale, don't know exactly why
     settings.LANGUAGE_CODE = 'ru'
     teacher = TeacherCenterFactory()
-    co = CourseOfferingFactory(is_completed=False, teachers=[teacher])
+    semester = SemesterFactory.create_current()
+    co = CourseOfferingFactory(semester=semester, teachers=[teacher])
     course_class_add_url = reverse("course_class_add",
                                    kwargs=dict(course_slug=co.course.slug,
                                                semester_slug=co.semester.slug))

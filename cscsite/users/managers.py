@@ -42,7 +42,7 @@ class CSCUserQuerySet(query.QuerySet):
         else:
             raise TypeError("students_info: unsupported filters type")
 
-        enrollment_qs = (Enrollment.objects
+        enrollment_qs = (Enrollment.active
                          .order_by('course_offering__course__name'))
         shad_qs = SHADCourseRecord.objects.get_queryset()
         if exclude_grades:

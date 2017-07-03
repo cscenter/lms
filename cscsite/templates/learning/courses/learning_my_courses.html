@@ -38,7 +38,7 @@
                 </td>
                 <td>
                     {% if e.course_offering.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ e.course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
-                    {% if e.course_offering.enrollment_opened %}
+                    {% if e.course_offering.enrollment_is_open %}
                     <a href="{% url 'course_offering_unenroll' e.course_offering.course.slug e.course_offering.semester.slug %}?back=course_list_student"
                        class=" btn btn-sm btn-block btn-warning">{% trans "Leave course" %}
                     </a>
@@ -58,7 +58,7 @@
                 {% endfor %}
               </td>
               <td>
-                  {% if course_offering.enrollment_opened %}
+                  {% if course_offering.enrollment_is_open %}
 
                 <form method="post" action="{% url 'course_offering_enroll' course_offering.course.slug course_offering.semester.slug %}">
                 {% csrf_token %}

@@ -56,7 +56,7 @@ Requirements:
                                            .order_by())),
                         Prefetch(
                             'enrollment_set',
-                            queryset=(Enrollment.objects
+                            queryset=(Enrollment.active
                                       .select_related("course_offering",
                                                       "course_offering__course",
                                                       "course_offering__semester")

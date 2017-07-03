@@ -12,7 +12,8 @@ from learning.models import Course, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, AreaOfStudy
+    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, \
+    AreaOfStudy, next_term_starts_at
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory
 from .utils import get_current_semester_pair, get_term_by_index
@@ -58,6 +59,14 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
 
+    @classmethod
+    def create(cls, **kwargs):
+        attrs = cls.attributes(create=True, extra=kwargs)
+        if "completed_at" not in kwargs:
+            term = attrs["semester"]
+            attrs["completed_at"] = term.ends_at + datetime.timedelta(days=1)
+        return cls._generate(True, attrs)
+
     @factory.post_generation
     def city(self, create, extracted, **kwargs):
         """ Allow to pass City instance or PK """
@@ -68,13 +77,6 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
                 self.city = extracted
             else:
                 self.city = City.objects.get(pk=extracted)
-
-    @factory.post_generation
-    def is_completed(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            self.completed_at = now().date() - datetime.timedelta(days=1)
 
     # TODO: add "enrolled students" here
     # TODO: create course offering for current semester by default
@@ -168,7 +170,6 @@ class AssignmentFactory(factory.DjangoModelFactory):
         model = Assignment
 
     course_offering = factory.SubFactory(CourseOfferingFactory)
-    # TODO(Dmitry): add assigned_to
     deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                    + datetime.timedelta(days=1))
     is_online = True

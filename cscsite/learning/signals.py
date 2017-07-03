@@ -11,7 +11,8 @@ from django.utils import timezone
 from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification, \
-    Assignment, CourseClass, CourseOfferingNews, Enrollment
+    Assignment, CourseClass, CourseOfferingNews, Enrollment, \
+    CourseOfferingTeacher
 from learning.tasks import (maybe_upload_slides_yandex,
                             maybe_upload_slides_slideshare)
 
@@ -23,17 +24,19 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
         return
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     StudentAssignment = apps.get_model('learning', 'StudentAssignment')
-    students = instance.course_offering.enrolled_students.all()
-    for student in students:
+    course_offering = instance.course_offering
+    active_enrollments = Enrollment.active.filter(
+        course_offering=course_offering)
+    for e in active_enrollments:
         a_s = StudentAssignment.objects.create(assignment=instance,
-                                               student=student)
+                                               student_id=e.student_id)
         # Note(Dmitry): we create notifications here instead of a separate
         #               receiver because it's much more efficient than getting
         #               StudentAssignment objects back one by one. It seems
         #               reasonable that 2*N INSERTs are better than bulk_create
         #               + N SELECTs + N INSERTs.
         # bulk_create doesn't return pks, that's the main reason
-        (AssignmentNotification(user=student,
+        (AssignmentNotification(user_id=e.student_id,
                                 student_assignment=a_s,
                                 is_about_creation=True)
          .save())
@@ -47,11 +50,12 @@ def create_deadline_change_notification(sender, instance, created,
     StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     if 'deadline_at' in instance.tracker.changed():
-        students = instance.course_offering.enrolled_students.all()
-        for student in students:
-            a_s = StudentAssignment.objects.get(student=student,
+        active_enrollments = Enrollment.active.filter(
+            course_offering=instance.course_offering)
+        for e in active_enrollments:
+            a_s = StudentAssignment.objects.get(student_id=e.student_id,
                                                 assignment=instance)
-            (AssignmentNotification(user=student,
+            (AssignmentNotification(user_id=e.student_id,
                                     student_assignment=a_s,
                                     is_about_deadline=True)
              .save())
@@ -128,17 +132,19 @@ def create_course_offering_news_notification(sender, instance, created,
     if not created:
         return
 
-    students = (instance.course_offering.enrolled_students.all())
-    teachers = (instance.course_offering.teachers.all())
+    co = instance.course_offering
+    CourseOfferingNewsNotification = apps.get_model(
+        'learning', 'CourseOfferingNewsNotification')
+    active_enrollments = Enrollment.active.filter(course_offering=co)
+    teachers = CourseOfferingTeacher.objects.filter(course_offering=co)
 
-    CourseOfferingNewsNotification = apps.get_model('learning',
-                                                    'CourseOfferingNewsNotification')
-    # this loop can be optimized using bulk_create at the expence of
-    # pre/post_save signals on CourseOfferingNewsNotification
-    for user in itertools.chain(students, teachers):
-        (CourseOfferingNewsNotification(
-            user=user,
-            course_offering_news=instance)
+    for e in active_enrollments:
+        (CourseOfferingNewsNotification(user_id=e.student_id,
+                                        course_offering_news=instance)
+         .save())
+    for co_t in teachers:
+        (CourseOfferingNewsNotification(user_id=co_t.teacher_id,
+                                        course_offering_news=instance)
          .save())
 
 
