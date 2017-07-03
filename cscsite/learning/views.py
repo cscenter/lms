@@ -161,7 +161,8 @@ class TimetableStudentView(StudentOnlyMixin,
                                'next_week': next_w_cal[1]}
         return (CourseClass.objects
                 .filter(date__range=[start, end],
-                        course_offering__enrolled_students=self.request.user)
+                        course_offering__enrollment__student_id=self.request.user.pk,
+                        course_offering__enrollment__is_deleted=False)
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
@@ -305,8 +306,10 @@ class CalendarStudentView(StudentOnlyMixin,
     user_type = "student"
 
     def get_queryset(self):
+        user = self.request.user
         return (super(CalendarStudentView, self).get_queryset()
-                .filter(course_offering__enrolled_students=self.request.user))
+                .filter(course_offering__enrollment__student_id=user.pk,
+                        course_offering__enrollment__is_deleted=False))
 
 
 class CalendarFullView(LoginRequiredMixin,
