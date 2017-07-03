@@ -30,7 +30,8 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from learning import settings as learn_conf
 from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
-    CustomCourseOfferingQuerySet
+    CustomCourseOfferingQuerySet, EnrollmentDefaultManager, \
+    EnrollmentActiveManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -185,8 +186,11 @@ class Semester(models.Model):
             return self.year - 1
 
 
-def next_term_starts_at():
-    year, term_type = get_current_semester_pair()
+def next_term_starts_at(term_pair=None):
+    if not term_pair:
+        year, term_type = get_current_semester_pair()
+    else:
+        year, term_type = term_pair
     term_index = get_term_index(year, term_type)
     _, next_term = get_term_by_index(term_index + 1)
     return get_term_start(year, next_term).date()
@@ -243,6 +247,7 @@ class CourseOffering(TimeStampedModel):
         help_text=_("Consider the course as completed from the specified "
                     "day (inclusive).")
     )
+    # TODO: rename or delete?
     enrolled_students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Enrolled students"),
@@ -267,10 +272,13 @@ class CourseOffering(TimeStampedModel):
         return reverse('course_offering_detail', args=[self.course.slug,
                                                        self.semester.slug])
 
-    @property
-    def is_completed(self):
-        # FIXME: respect timezone!
-        return self.completed_at <= now().date()
+    def get_enroll_url(self):
+        return reverse('course_offering_enroll',
+                       args=[self.course.slug, self.semester.slug])
+
+    def get_unenroll_url(self):
+        return reverse('course_offering_unenroll',
+                       args=[self.course.slug, self.semester.slug])
 
     def get_city(self):
         return self.city_id
@@ -287,17 +295,23 @@ class CourseOffering(TimeStampedModel):
                                   semester__year=year)
 
     @property
-    def in_current_term(self):
-        current_semester = get_current_semester_pair()
-        return (current_semester.year == self.semester.year
-                and current_semester.type == self.semester.type)
+    def is_completed(self):
+        # FIXME: respect timezone!
+        return self.completed_at <= now().date()
 
-    def enrollment_opened(self):
+    @property
+    def in_current_term(self):
+        year, term_type = get_current_semester_pair()
+        return year == self.semester.year and term_type == self.semester.type
+
+    @property
+    def enrollment_is_open(self):
+        # FIXME: respect timezone!
         if self.is_open:
             return True
         if self.is_completed:  # or not self.in_current_term:
             return False
-        today = timezone.now()
+        today = now()
         if self.semester.enroll_before:
             enroll_before_date = self.semester.enroll_before
             enroll_before = datetime.datetime(
@@ -316,13 +330,14 @@ class CourseOffering(TimeStampedModel):
             return False
         return True
 
+    @property
     def is_capacity_limited(self):
         return self.capacity > 0
 
     @cached_property
     def places_left(self):
         """Returns how many places left if the number is limited"""
-        if self.is_capacity_limited():
+        if self.is_capacity_limited:
             return max(0, self.capacity - self.enrollment_set.count())
         else:
             return float("inf")
@@ -890,20 +905,11 @@ class AssignmentComment(TimeStampedModel):
         return (now() - self.created).total_seconds() > 600
 
 
-class SiteRelatedEnrollmentQuerySet(models.QuerySet):
-    def site_related(self, request):
-        qs = self.select_related("course_offering").filter(
-            course_offering__city__pk=request.city_code)
-        if request.site.domain == settings.CLUB_DOMAIN:
-            qs = qs.filter(course_offering__is_open=True)
-        return qs
-
-
 @python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
     GRADES = GRADES
-    objects = models.Manager()
-    custom = SiteRelatedEnrollmentQuerySet.as_manager()
+    objects = EnrollmentDefaultManager()
+    active = EnrollmentActiveManager()
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -920,6 +926,9 @@ class Enrollment(TimeStampedModel):
     grade_changed = MonitorField(
         verbose_name=_("Enrollment|grade changed"),
         monitor='grade')
+    is_deleted = models.BooleanField(
+        _("The student left the course"),
+        default=False)
 
     class Meta:
         ordering = ["student", "course_offering"]

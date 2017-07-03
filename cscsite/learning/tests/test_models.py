@@ -397,26 +397,30 @@ def test_course_offering_enrollment_expired(mocker, monkeypatch):
     import pytz
     start_datetime = datetime.datetime(current_year, month=1, day=10, tzinfo=pytz.utc)  # should be equal to term start
     mocked_timezone.return_value = start_datetime
-    assert co.enrollment_opened()
+    assert co.enrollment_is_open
     mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration - 1)
-    assert co.enrollment_opened()
+    assert co.enrollment_is_open
     mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration)
-    assert co.enrollment_opened()
+    assert co.enrollment_is_open
     mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration + 1)
-    assert not co.enrollment_opened()
+    assert not co.enrollment_is_open
     # Back to the future
     mocked_timezone.return_value = start_datetime - datetime.timedelta(days=enrollment_duration + 1)
-    assert co.enrollment_opened()
+    assert co.enrollment_is_open
 
 
 @pytest.mark.django_db
 def test_course_offering_manager_completed():
-    """Make sure `completed_at` date works in inclusive way (included in
-    completed courses list)"""
+    """
+    Make sure `completed` manager method considers `completed_at` as
+    inclusive date.
+    """
     today = now().date()
-    CourseOfferingFactory(completed_at=today)
+    semester = SemesterFactory.create_current()
+    co = CourseOfferingFactory(completed_at=today, semester=semester)
     assert CourseOffering.custom.completed(True).count() == 1
     timedelta_1day = datetime.timedelta(days=1)
-    CourseOfferingFactory.create_batch(2, completed_at=today + timedelta_1day)
+    CourseOfferingFactory.create_batch(2, completed_at=today + timedelta_1day,
+                                       semester=semester)
     assert CourseOffering.custom.completed(True).count() == 1
     assert CourseOffering.custom.completed(False).count() == 2

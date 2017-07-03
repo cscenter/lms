@@ -87,8 +87,8 @@ class FailedCourseContextMixin(object):
 
         if co.is_completed:
             # TODO: optimize query
-            enrollment = Enrollment.objects.filter(student=user,
-                                                   course_offering=co).first()
+            enrollment = Enrollment.active.filter(student=user,
+                                                  course_offering=co).first()
             if enrollment and enrollment.grade in (
             Enrollment.GRADES.unsatisfactory, Enrollment.GRADES.not_graded):
                 context["is_failed_completed_course"] = True

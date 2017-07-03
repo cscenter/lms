@@ -401,9 +401,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def enrolled_on_the_course(self, course_pk):
-        return ((self.is_student or self.is_graduate) and
-                self.enrolled_on_set.filter(pk=course_pk).exists())
+    def enrolled_on_the_course(self, course_offering_id):
+        enrollment_qs = Enrollment.active.filter(
+            student=self, course_offering_id=course_offering_id)
+        return (self.is_student or self.is_graduate) and enrollment_qs.exists()
 
     @property
     def is_expelled(self):

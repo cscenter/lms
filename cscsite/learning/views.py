@@ -245,7 +245,7 @@ class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
         # On club site hide summer classes if student not enrolled on
         if self.request.site.domain == settings.CLUB_DOMAIN:
             if self.request.user.is_authenticated:
-                summer_enrollments = Enrollment.objects.filter(
+                summer_enrollments = Enrollment.active.filter(
                     student=self.request.user,
                     course_offering__is_open=True,
                     course_offering__semester__type=SEMESTER_TYPES.summer
@@ -389,23 +389,11 @@ class CourseStudentListView(StudentOnlyMixin,
     template_name = "learning/courses/learning_my_courses.html"
 
     def get_context_data(self, **kwargs):
-        current_year, current_term_type = utils.get_current_semester_pair()
-        available = (CourseOffering.custom.site_related(self.request)
-                     .filter(semester__type=current_term_type,
-                             semester__year=current_year)
-                     .exclude(enrolled_students=self.request.user)
-                     .order_by('semester__year', '-semester__type',
-                               'course__name')
-                     .select_related('course', 'semester')
-                     .prefetch_related('teachers'))
-        # Show summer courses in available on center site only
-        if (settings.SITE_ID != settings.CENTER_SITE_ID and
-                    current_term_type == SEMESTER_TYPES.summer):
-            available = [c for c in available
-                         if c.semester.type != SEMESTER_TYPES.summer]
-
-        enrolled_on = (Enrollment.custom
-                       .site_related(self.request)
+        current_year, current_term = get_current_semester_pair()
+        # Get all student enrollments and split them
+        # FIXME: Наверное, я хочу сразу получить все COurseOffering!
+        # Сначала id всех активных записей юзера, а там уже CourseOffering! Это будет легче в плане запросов.
+        enrolled_on = (Enrollment.active.site_related(self.request)
                        .filter(student=self.request.user)
                        .order_by('course_offering__semester__year',
                                  '-course_offering__semester__type',
@@ -414,16 +402,34 @@ class CourseStudentListView(StudentOnlyMixin,
                                        'course_offering__course',
                                        'course_offering__semester')
                        .prefetch_related('course_offering__teachers'))
-        ongoing, archive = utils.split_list(
+        # FIXME: remove split_list
+        enrolled_ongoing, enrolled_archive = utils.split_list(
             enrolled_on,
             lambda e: (e.course_offering.semester.year == current_year
-                       and e.course_offering.semester.type == current_term_type))
+                       and e.course_offering.semester.type == current_term))
+
+        current_term_index = get_term_index(current_year, current_term)
+        available = (CourseOffering.custom.site_related(self.request)
+                     .filter(semester__index=current_term_index)
+                     .select_related('course', 'semester')
+                     .order_by('semester__year', '-semester__type',
+                               'course__name')
+                     .prefetch_related('teachers'))
+        # Show summer courses in available on center site only
+        if (settings.SITE_ID != settings.CENTER_SITE_ID and
+                current_term == SEMESTER_TYPES.summer):
+            available = available.exclude(semester__type=SEMESTER_TYPES.summer)
+        enrolled_in_current_term = {e.course_offering_id for e in
+                                    enrolled_ongoing}
+        available = [co for co in available if co.pk not in
+                     enrolled_in_current_term]
         context = {
             "course_list_available": available,
-            "enrollments_ongoing": ongoing,
-            "enrollments_archive": archive,
+            "enrollments_ongoing": enrolled_ongoing,
+            "enrollments_archive": enrolled_archive,
             # FIXME: what about custom template tag for this?
-            "current_term": "{} {}".format(SEMESTER_TYPES[current_term_type],
+            # TODO: Add util method
+            "current_term": "{} {}".format(SEMESTER_TYPES[current_term],
                                            current_year).capitalize()
         }
         return context
@@ -542,7 +548,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         )
         context["news"] = can_view_news and co.courseofferingnews_set.all()
         context["classes"] = self.get_classes(co)
-        context["course_reviews"] = co.enrollment_opened() and (
+        context["course_reviews"] = co.enrollment_is_open and (
             CourseOffering.objects
                 .defer("description")
                 .select_related("semester")
@@ -811,26 +817,25 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
                 .filter(pk=form.cleaned_data['course_offering_pk'])
                 .select_related("semester"))
         # CourseOffering enrollment should be active
-        if not course_offering.enrollment_opened():
+        if not course_offering.enrollment_is_open:
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
-        if self.request.site.domain == settings.CLUB_DOMAIN and \
+        if settings.SITE_ID == settings.CLUB_SITE_ID and \
                 not course_offering.is_open:
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
-        if course_offering.is_capacity_limited():
+        if course_offering.is_capacity_limited:
             if not course_offering.places_left:
                 msg = _("No places available, sorry")
                 messages.error(self.request, msg, extra_tags='timeout')
                 return HttpResponseRedirect(course_offering.get_absolute_url())
-        Enrollment.objects.get_or_create(
-            student=self.request.user, course_offering=course_offering)
+        Enrollment.objects.update_or_create(
+            student=self.request.user, course_offering=course_offering,
+            defaults={'is_deleted': False})
         if self.request.POST.get('back') == 'course_list_student':
             return redirect('course_list_student')
         else:
-            return redirect('course_offering_detail',
-                            course_slug=course_offering.course.slug,
-                            semester_slug=course_offering.semester.slug)
+            return HttpResponseRedirect(course_offering.get_absolute_url())
 
 
 class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
@@ -838,27 +843,25 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
 
     def __init__(self, *args, **kwargs):
         self._course_offering = None
-        super(CourseOfferingUnenrollView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_object(self, _=None):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        course_offering = get_object_or_404(
-            CourseOffering.custom.site_related(self.request)
-                .filter(semester__type=semester_type,
-                        semester__year=year,
-                        course__slug=self.kwargs['course_slug'])
-                .select_related("semester"))
-        self._course_offering = course_offering
         enrollment = get_object_or_404(
-            Enrollment.objects.filter(student=self.request.user,
-                                      course_offering=course_offering))
-        if not enrollment.course_offering.enrollment_opened():
+            Enrollment.objects
+            .filter(
+                student=self.request.user,
+                course_offering__semester__type=semester_type,
+                course_offering__semester__year=year,
+                course_offering__course__slug=self.kwargs['course_slug'])
+            .select_related("course_offering", "course_offering__semester"))
+        self._course_offering = enrollment.course_offering
+        if not enrollment.course_offering.enrollment_is_open:
             raise PermissionDenied
         return enrollment
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseOfferingUnenrollView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(**kwargs)
         context['confirmation_text'] = (
             _("Are you sure you want to unenroll "
               "from \"%(course)s\"?")
@@ -866,14 +869,17 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
         context['confirmation_button_text'] = _("Unenroll")
         return context
 
+    def delete(self, request, *args, **kwargs):
+        enrollment = self.get_object()
+        Enrollment.objects.filter(pk=enrollment.pk,
+                                  is_deleted=False).update(is_deleted=True)
+        return HttpResponseRedirect(self.get_success_url())
+
     def get_success_url(self):
         if self.request.GET.get('back') == 'course_list_student':
             return reverse('course_list_student')
         else:
-            c_o = self._course_offering
-            return reverse('course_offering_detail',
-                           kwargs={"course_slug": c_o.course.slug,
-                                   "semester_slug": c_o.semester.slug})
+            return self._course_offering.get_absolute_url()
 
 
 class CourseClassDetailView(generic.DetailView):
@@ -1109,7 +1115,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
         context = (super(StudentAssignmentListView, self)
                    .get_context_data(*args, **kwargs))
         # Get student enrollments from current term and then related co's
-        actual_co = (Enrollment.objects.filter(
+        actual_co = (Enrollment.active.filter(
             course_offering__semester=self.current_semester,
             student=self.request.user).values_list("course_offering",
                                                    flat=True))
@@ -1866,7 +1872,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
         )
         self.student_assignments = student_assignments
 
-        enrollment_list = (Enrollment.objects
+        enrollment_list = (Enrollment.active
                            .filter(course_offering=course_offering)
                            .select_related("student"))
         self.enrollment_list = enrollment_list
@@ -1923,7 +1929,7 @@ class MarksSheetTeacherView(TeacherOnlyMixin, generic.FormView):
 
     def recalculate_grading_type(self):
         """Update grading type for binded course offering if needed"""
-        es = (Enrollment.objects
+        es = (Enrollment.active
               .filter(course_offering=self.course_offering)
               .values_list("grade", flat=True))
         grading_type = GRADING_TYPES.default
@@ -2051,7 +2057,7 @@ class MarksSheetTeacherCSVView(TeacherOnlyMixin,
                                 'assignment__course_offering__course',
                                 'assignment__course_offering__semester',
                                 'student'))
-        enrollments = (Enrollment.objects
+        enrollments = (Enrollment.active
                        .filter(course_offering=co)
                        .select_related('course_offering', 'student'))
         structured = OrderedDict()

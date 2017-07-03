@@ -205,7 +205,7 @@
               <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.semester.slug %}"
                  class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
             {% endif %}
-            {% if request.user.is_active_student and course_offering.enrollment_opened %}
+            {% if request.user.is_active_student and course_offering.enrollment_is_open %}
                 {% if is_enrolled %}
                     <a href="{% url 'course_offering_unenroll' course_offering.course.slug course_offering.semester.slug %}"
                        class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}
