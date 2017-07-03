@@ -17,8 +17,8 @@
             {% endif %}
         </ul>
         <div class="tab-content">
-        {% if enrollments_ongoing or course_list_available %}
           <div class="tab-pane active" id="current" role="tabpanel">
+            {% if enrollments_ongoing or course_list_available %}
 
           <table class="table" width="100%">
             <thead>
@@ -74,8 +74,10 @@
             {% endfor %}
             </tbody>
           </table>
+            {% else %}
+                Список курсов на <b>{{ current_term|lower }}</b> пуст.
+            {% endif %}
           </div>
-      {% endif %}
 
       {% if enrollments_archive %}
           <div class="tab-pane" id="archive" role="tabpanel">
