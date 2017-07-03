@@ -14,8 +14,8 @@ from learning.models import Enrollment, StudentAssignment, \
 from users.factories import UserFactory, StudentCenterFactory
 
 
-# TODO:
-# TODO:
+# TODO: TimetableStudentView - есть фильтр по enrolled_students, туда может попадать лишнее сейчас
+# TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
 # TODO:
 
 # Workaround to use Django's assertRedirects()

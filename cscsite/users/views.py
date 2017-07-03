@@ -363,7 +363,8 @@ class ICalClassesView(UserSpecificCalMixin, ICalView):
                 .select_related(*cc_related))
         student_ccs = (
             CourseClass.objects
-                .filter(course_offering__enrolled_students=user)
+                .filter(course_offering__enrollment__student_id=user.pk,
+                        course_offering__enrollment__is_deleted=False)
                 .select_related(*cc_related))
 
         tz = timezone.get_current_timezone()
