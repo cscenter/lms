@@ -4,65 +4,77 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
-from post_office.models import EmailTemplate
+from post_office.models import EmailTemplate, Email
+from post_office.utils import get_email_template
 
+from learning.admission.management.commands._utils import CurrentCampaignsMixin
 from learning.admission.models import Campaign, Applicant
 
+FINAL_STATUSES = [Applicant.ACCEPT,
+                  Applicant.ACCEPT_IF,
+                  Applicant.REJECTED_BY_INTERVIEW,
+                  Applicant.VOLUNTEER]
 
-class Command(BaseCommand):
+
+class Command(CurrentCampaignsMixin, BaseCommand):
     help = """
     For selected campaign generate emails about admission results
     based on interview results.
     """
 
     def add_arguments(self, parser):
-        # TODO: replace with campaign year, cast campaign code to unique int
-        parser.add_argument('--campaign_id', type=int,
-                            dest='campaign_id',
-                            help='Campaign ID')
+        parser.add_argument(
+            '--city', type=str,
+            help='City code to restrict current campaigns')
 
     @staticmethod
-    def get_template_name(code, status):
-        return "admission-{}-interview-{}".format(code, status)
+    def get_template_name(campaign, status):
+        return "admission-{}-{}-interview-{}".format(campaign.year,
+                                                     campaign.city.code,
+                                                     status)
 
     def handle(self, *args, **options):
-        campaign_id = options["campaign_id"]
-        if not campaign_id:
-            raise CommandError("Specify campaign ID")
+        city_code = options["city"]
+        campaigns = self.get_current_campaigns(city_code)
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            self.stdout.write("Canceled")
+            return
 
-        try:
-            admission_campaign = Campaign.objects.get(pk=campaign_id)
-        except Campaign.DoesNotExist:
-            raise CommandError("Admission campaign with id=%s not found"
-                               % campaign_id)
-
-        statuses = [Applicant.ACCEPT,
-                    Applicant.ACCEPT_IF,
-                    Applicant.REJECTED_BY_INTERVIEW,
-                    Applicant.VOLUNTEER]
-        # Check templates exists before send any email
-        for status in statuses:
-            template_name = self.get_template_name(admission_campaign.code,
-                                                   status)
-            if not EmailTemplate.objects.filter(name=template_name).exists():
-                raise CommandError("Abort. To continue create email template "
-                                   "with name {}".format(template_name))
-        # Now generate emails
-        for status in statuses:
-            template_name = self.get_template_name(admission_campaign.code,
-                                                   status)
-
-            applicants = Applicant.objects.filter(campaign_id=campaign_id,
-                                                  status=status)
-            for a in applicants:
-                mail.send(
-                    [a.email],
-                    sender='info@compscicenter.ru',
-                    template=template_name,
-                    backend='ses',
-                )
-            print("for status {} {} emails generated.".format(status,
-                                                              len(applicants)))
+        for campaign in campaigns:
+            # Check templates exists before send any email
+            for status in FINAL_STATUSES:
+                template_name = self.get_template_name(campaign, status)
+                if not EmailTemplate.objects.filter(name=template_name).exists():
+                    raise CommandError(
+                        "Abort. To continue create "
+                        "email template with name {}".format(template_name))
+            context = {
+                'SUBJECT_CITY': campaign.city.name
+            }
+            # Generate emails for each status
+            for status in FINAL_STATUSES:
+                template_name = self.get_template_name(campaign, status)
+                template = get_email_template(template_name)
+                applicants = Applicant.objects.filter(campaign_id=campaign.pk,
+                                                      status=status)
+                sent = 0
+                for a in applicants:
+                    if a.status in FINAL_STATUSES:
+                        recipients = [a.email]
+                        if not Email.objects.filter(to=recipients,
+                                                    template=template).exists():
+                            mail.send(
+                                recipients,
+                                sender='info@compscicenter.ru',
+                                template=template_name,
+                                context=context,
+                                # Render on delivery, we have no really big
+                                # amount of emails to think about saving CPU time
+                                render_on_delivery=True,
+                                backend='ses',
+                            )
+                            sent += 1
+                print("for status {} {} emails generated.".format(status, sent))
 
 
 

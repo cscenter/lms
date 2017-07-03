@@ -56,7 +56,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                         # Render on delivery, we have no really big amount of
                         # emails to think about saving CPU time
                         render_on_delivery=True,
-                        context = context,
+                        context=context,
                         backend='ses',
                     )
                     generated += 1
