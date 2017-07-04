@@ -7,7 +7,7 @@ from stats.views import CourseParticipantsStatsByGroup, AssignmentsStats, \
 urlpatterns = [
     url(r'^stats/', include([
         url(r'^learning/participants/(?P<course_session_id>\d+)/$',
-            CourseParticipantsStatsByGroup.as_view(),
+            CourseParticipantsStatsByGroup.as_view({'get': 'list'}),
             name='stats_learning_participants'),
         url(r'^learning/assignments/(?P<course_session_id>\d+)/$',
             AssignmentsStats.as_view(),

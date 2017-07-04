@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.views import generic
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.permissions import CuratorAccessPermission
 from learning.models import Course, Semester, CourseOffering, StudentAssignment, \
@@ -81,25 +82,22 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-# TODO: rewrite with read-only api view? (see example in docs)
-class CourseParticipantsStatsByGroup(APIView):
+class CourseParticipantsStatsByGroup(ReadOnlyModelViewSet):
     """
     Aggregate stats about course offering participants.
     """
-    http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
+    serializer_class = ParticipantsStatsSerializer
 
-    def get(self, request, course_session_id, format=None):
-        participants = (CSCUser.objects
-                        .only("curriculum_year")
-                        .filter(
-                            enrollment__is_deleted=False,
-                            enrollment__course_offering_id=course_session_id)
-                        .prefetch_related("groups")
-                        .order_by())
-
-        serializer = ParticipantsStatsSerializer(participants, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        course_offering_id = self.kwargs['course_session_id']
+        return (CSCUser.objects
+                .only("curriculum_year")
+                .filter(
+                    enrollment__is_deleted=False,
+                    enrollment__course_offering_id=course_offering_id)
+                .prefetch_related("groups")
+                .order_by())
 
 
 class AssignmentsStats(APIView):
