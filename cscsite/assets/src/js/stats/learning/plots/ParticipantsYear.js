@@ -104,8 +104,16 @@ class ParticipantsYear {
 
     renderSwitchButtons = () => {
         let buttons = [
-            { name: this.i18n.ru.pieChart, callback: this.renderPieChart },
-            { name: this.i18n.ru.barChart, callback: this.renderBarChart },
+            {
+                name: this.i18n.ru.pieChart,
+                active: this.state.data.type === void 0,
+                callback: this.renderPieChart
+            },
+            {
+                name: this.i18n.ru.barChart,
+                active: this.state.data.type === 'bar',
+                callback: this.renderBarChart
+            },
         ];
         // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
         d3.select(this.id)
@@ -115,9 +123,20 @@ class ParticipantsYear {
             .attr('aria-label', 'Toggle')
             .selectAll('button')
             .data(buttons)
-            .enter().append('button').attr('class', 'btn btn-default')
+            .enter().append('button').attr('class', function (d) {
+                if (d.active) {
+                    return 'btn btn-default active';
+                } else {
+                    return 'btn btn-default';
+                }
+            })
             .text(d => d.name)
-            .on('click',  (d) => {
+            .on('click',  (d, i) => {
+                const buttons = d3.select(this.id)
+                    .select('div')
+                    .selectAll('button')
+                    .classed('active', false);
+                d3.select(buttons[0][i]).classed('active', true);
                 d.callback();
             });
     };
