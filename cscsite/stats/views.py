@@ -93,7 +93,8 @@ class CourseParticipantsStatsByGroup(APIView):
         participants = (CSCUser.objects
                         .only("curriculum_year")
                         .filter(
-            enrollment__course_offering_id=course_session_id)
+                            enrollment__is_deleted=False,
+                            enrollment__course_offering_id=course_session_id)
                         .prefetch_related("groups")
                         .order_by())
 
@@ -109,15 +110,20 @@ class AssignmentsStats(APIView):
     permission_classes = [CuratorAccessPermission]
 
     def get(self, request, course_session_id, format=None):
+        active_students = (Enrollment.active.filter(
+                course_offering_id=course_session_id)
+            .values_list("student_id", flat=True))
         assignments = (Assignment
                        .objects
                        .only("pk", "title", "course_offering_id", "deadline_at",
                              "grade_min", "grade_max", "is_online")
+                       .filter(course_offering_id=course_session_id)
                        .prefetch_related(
             Prefetch(
                 "assigned_to",
                 # FIXME: что считать всё-таки сданным. Там где есть оценка?
                 queryset=(StudentAssignment.objects
+                          .filter(student_id__in=active_students)
                           .select_related("student", "assignment")
                           .only("pk", "assignment_id", "grade",
                                 "student_id", "first_submission_at",
@@ -128,9 +134,6 @@ class AssignmentsStats(APIView):
                                 "assignment__is_online")
                           .order_by())
             ))
-                        # TODO: Сказать, что оставил только задания онлайн
-                       .filter(course_offering_id=course_session_id,
-                               )
                        .order_by("deadline_at"))
 
         serializer = AssignmentsStatsSerializer(assignments, many=True)
@@ -145,8 +148,7 @@ class EnrollmentsStats(APIView):
     permission_classes = [CuratorAccessPermission]
 
     def get(self, request, course_session_id, format=None):
-        enrollments = (Enrollment
-                       .objects
+        enrollments = (Enrollment.active
                        .only("pk", "grade", "student_id", "student__gender",
                              "student__curriculum_year")
                        .select_related("student")

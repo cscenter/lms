@@ -20,8 +20,9 @@ class ParticipantsYear {
                 x : 'x',
                 unload: true,
                 columns: [],
+                order: null, // https://github.com/c3js/c3/issues/1945
             },
-            groups: []
+            groups: [],
         };
         this.plot = c3.generate({
             bindto: this.id,
@@ -90,14 +91,13 @@ class ParticipantsYear {
     };
 
     renderPieChart = () => {
-        if (this.state.data.type == 'pie') { return; }
+        if (this.state.data.type === 'pie') { return; }
         this.state.data.type = 'pie';
         this.plot.load(this.state.data);
     };
 
     renderBarChart = () => {
-        if (this.state.data.type == 'bar') { return; }
-
+        if (this.state.data.type === 'bar') { return; }
         this.state.data.type = 'bar';
         this.plot.load(this.state.data);
     };

@@ -36,7 +36,8 @@ class ParticipantsGroup {
             },
             data: {
                 type: this.type,
-                columns: []
+                columns: [],
+                order: null, // https://github.com/c3js/c3/issues/1945
             }
         });
         let promise = options.apiRequest ||
@@ -83,7 +84,7 @@ class ParticipantsGroup {
         // Prepare data for plot
         let columns = [];
         for (let key in data) {
-            if (key != 3 || data[key] != 0) {
+            if (key !== 3 || data[key] !== 0) {
                 columns.push([this.groups[key], data[key]]);
             }
         }

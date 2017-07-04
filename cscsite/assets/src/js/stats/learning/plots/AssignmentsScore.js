@@ -88,6 +88,7 @@ class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
             oninit: () => { this.renderFilters() },
             data: {
                 type: this.type,
+                order: null, // https://github.com/c3js/c3/issues/1945
                 rows: data
             },
             tooltip: {
@@ -103,7 +104,7 @@ class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
               }
             },
             legend: {
-                position: 'right'
+                position: 'bottom'
             },
             grid: {
                 y: {

@@ -55,7 +55,12 @@
 {% endblock javascripts %}
 
 {% block content %}
-<div class="container" id="stats-page">
+<div class="container container-responsive" id="stats-page">
+    <ol class="breadcrumb projects">
+        <li class="">Статистика</li>
+        <li class="active">Курсы</li>
+    </ol>
+
     <form action="" method="GET" id="courses-filter-form">
         <div class="row">
             <div class="col-xs-3 form-group">
@@ -88,7 +93,7 @@
 
     <div class="panel">
         <div class="panel-body">
-            <h3>Слушатели курса</h3>
+            <h3>Слушатели</h3>
             <div class="row">
                   <div class="col-xs-6">
                       <div id="plot-participants-by-group"></div>
@@ -98,42 +103,36 @@
                   </div>
             </div>
             <h3>Задания</h3>
-            <h5>Сдача заданий</h5>
-            <div class="alert alert-warning" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                Сейчас фильтр по годам строится на основе таблицы "Записи на курсы".<br>
-                Поскольку я ещё не делал рефакторинг (чтобы не удалялись записи из этой таблицы, а делались неактивными, если студент отписался),
-                то может возникнуть ситуация, когда в фильтре по годам обучения есть год 2012, а в круговой диаграмме выше его нет.
-            </div>
-            <div class="row">
+            <h5 class="text-uppercase">Сдача заданий</h5>
+            <div class="row margin-bottom-50">
                 <div class="col-xs-10">
                     <div id="plot-assignments-progress"></div>
                 </div>
                 <div class="col-xs-2"></div>
             </div>
 
-            <h5>Время до дедлайна</h5>
+            <h5 class="text-uppercase">Время до дедлайна</h5>
             <div class="alert alert-info" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 Учитываются только отправленные решения.
             </div>
-            <div class="row">
+            <div class="row margin-bottom-50">
                 <div class="col-xs-10">
                     <div id="plot-assignments-deadline"></div>
                 </div>
                 <div class="col-xs-2"></div>
             </div>
 
-            <h5>Успеваемость</h5>
-            <div class="row">
+            <h5 class="text-uppercase">Успеваемость</h5>
+            <div class="row margin-bottom-50">
                 <div class="col-xs-10">
                     <div id="plot-assignments-results"></div>
                 </div>
                 <div class="col-xs-2"></div>
             </div>
 
-            <h5>Соотношение среднего балла с проходным</h5>
-            <div class="row">
+            <h5 class="text-uppercase">Соотношение среднего балла с проходным</h5>
+            <div class="row margin-bottom-50">
                 <div class="col-xs-10">
                     <div id="plot-assignments-score"></div>
                 </div>
@@ -141,7 +140,7 @@
             </div>
 
             <h3>Итоги</h3>
-            <div class="row">
+            <div class="row margin-bottom-50">
                 <div class="col-xs-10">
                     <div id="plot-enrollments-results"></div>
                 </div>

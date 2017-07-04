@@ -13,11 +13,11 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
         ru: {
             no_assignments: "Заданий не найдено.",
             types: {
-                after: "После дедлайна",
-                lt3hours: "Менее 3 часов",
-                lte3to24hours: "3-24 часа",
-                lte1to6days: "1-6 дней",
                 gte7days: "7 дней и более",
+                lte1to6days: "1-6 дней",
+                lte3to24hours: "3-24 часа",
+                lt3hours: "Менее 3 часов",
+                after: "После дедлайна",
                 // no_submission: "Не сдавал"
             }
         }
@@ -146,10 +146,10 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
                 }
             },
             color: {
-                pattern: ['#d62728', '#9c27b0', '#ff7f0e', '#ffbb78', '#2ca02c', '#9467bd', '#c5b0d5', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+                pattern: ['#2ca02c', '#9c27b0', '#ffbb78', '#ff7f0e', '#d62728', '#9467bd', '#c5b0d5', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
             },
             legend: {
-                position: 'right'
+                position: 'bottom'
             },
             grid: {
                 y: {
