@@ -76,7 +76,7 @@ class EnrollmentsResults {
             tooltip: {
                 format: {
                     value: (value, ratio, id)  => {
-                        if (this.type == 'pie') {
+                        if (this.type === 'pie') {
                             return value + '&nbsp;чел.';
                         } else {
                             return value;
