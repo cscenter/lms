@@ -22,24 +22,20 @@ let fn = {
         fn.initCoursesFilter()
     },
 
+    getTemplate: function (id) {
+        return template(document.getElementById(id).innerHTML);
+    },
+
     renderPlots: function (courseSessionId) {
-        // Prepare templates
-        let filterGenderTpl = template(document.getElementById(
-                "plot-filter-gender-template").innerHTML),
-            filterIsOnlineTpl = template(document.getElementById(
-                "plot-filter-is-online-template").innerHTML),
-            filterCurriculumYearTpl = template(document.getElementById(
-                "plot-filter-curriculum_year-template").innerHTML),
-            filterSubmitButtonTpl = template(document.getElementById(
-                "plot-filter-submit-button").innerHTML);
         // Participants
-        let options = {
-            course_session_id: courseSessionId,
-            apiRequest: ParticipantsYear.getStats(courseSessionId)
-        };
-        new ParticipantsYear('#plot-participants-by-year', options);
+        let options = { course_session_id: courseSessionId };
         new ParticipantsGroup('#plot-participants-by-group', options);
+        new ParticipantsYear('#plot-participants-by-year', options);
         // Assignments
+        const filterGenderTpl = fn.getTemplate("plot-filter-gender-template");
+        const filterIsOnlineTpl = fn.getTemplate("plot-filter-is-online-template");
+        const filterCurriculumYearTpl = fn.getTemplate("plot-filter-curriculum_year-template");
+        const filterSubmitButtonTpl = fn.getTemplate("plot-filter-submit-button");
         options = {
             course_session_id: courseSessionId,
             templates: {

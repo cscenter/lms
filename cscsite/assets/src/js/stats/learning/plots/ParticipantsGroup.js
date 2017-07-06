@@ -9,7 +9,8 @@ class ParticipantsGroup {
             groups: {
                 STUDENT_CENTER: "Студент центра",
                 VOLUNTEER: "Вольнослушатель",
-                GRADUATE: "Выпускник"
+                GRADUATE: "Выпускник",
+                MASTERS_DEGREE: "Магистр АУ"
             },
             total_participants: "Всего слушателей курса"
         }
@@ -17,14 +18,21 @@ class ParticipantsGroup {
 
     constructor(id, options) {
         this.id = id;
-        this.type = 'pie';
-        // TODO: load from backend?
         this.groups = {
             1: this.i18n.ru.groups.STUDENT_CENTER,
             4: this.i18n.ru.groups.VOLUNTEER,
-            3: this.i18n.ru.groups.GRADUATE
+            3: this.i18n.ru.groups.GRADUATE,
+            8: this.i18n.ru.groups.MASTERS_DEGREE,
         };
-        this.data = {};
+
+        this.state = {
+            data: {
+                type: 'pie',
+                columns: [],
+                order: null, // https://github.com/c3js/c3/issues/1945
+            }
+        };
+
         this.plot = c3.generate({
             bindto: this.id,
             tooltip: {
@@ -34,11 +42,7 @@ class ParticipantsGroup {
                     }
                 }
             },
-            data: {
-                type: this.type,
-                columns: [],
-                order: null, // https://github.com/c3js/c3/issues/1945
-            }
+            data: this.state.data
         });
         let promise = options.apiRequest ||
                       this.constructor.getStats(options.course_session_id);
@@ -46,19 +50,32 @@ class ParticipantsGroup {
             .then(this.convertData)
             .then(this.render)
             .done(this.appendParticipantsInfo);
-
     }
 
     static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_learning_participants"](course_session_id);
+        let dataURL = window.URLS["api:stats_learning_participants_group"](course_session_id);
         return $.getJSON(dataURL);
     }
 
-    appendParticipantsInfo = () => {
-        let total = Object.keys(this.data).reduce((ini, k)  => {
-            return ini + this.data[k];
-        }, 0);
+    convertData = (rawJSON) => {
+        let columns = [];
+        rawJSON.forEach((e) => {
+            columns.push([this.groups[e.group], e.students]);
+        });
+        this.state.data.columns = columns;
+        return rawJSON;
+    };
 
+    render = (columns) => {
+        this.plot.load(this.state.data);
+        return columns;
+    };
+
+    appendParticipantsInfo = (rawJSON) => {
+        let total = 0;
+        rawJSON.forEach((e) => {
+            total += e.students;
+        });
         d3.select(this.id).insert('div', ":first-child")
             .attr('class', 'info')
             .selectAll('div')
@@ -66,37 +83,6 @@ class ParticipantsGroup {
             .enter()
             .append('div')
             .text(d => this.i18n.ru.total_participants + ': ' + d);
-    };
-
-    convertData = (jsonData) => {
-        let data = Object.keys(this.groups).reduce(function(a, b) {
-          a[b] = 0; return a;
-        }, {});
-        // Inaccuracy if student have student and volunteer group or haven't both.
-        jsonData.forEach(function (student) {
-            student.groups.forEach(function (group) {
-                if (group in data) {
-                    data[group] += 1;
-                }
-            });
-        });
-        this.data = data;
-        // Prepare data for plot
-        let columns = [];
-        for (let key in data) {
-            if (key !== 3 || data[key] !== 0) {
-                columns.push([this.groups[key], data[key]]);
-            }
-        }
-        console.log(columns);
-        return columns;
-    };
-
-    render = (columns) => {
-        this.plot.load({
-            type: this.type,
-            columns: columns,
-        });
     };
 }
 

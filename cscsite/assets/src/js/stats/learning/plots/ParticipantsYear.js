@@ -19,10 +19,10 @@ class ParticipantsYear {
                 type: void 0,
                 x : 'x',
                 unload: true,
-                columns: [],
                 order: null, // https://github.com/c3js/c3/issues/1945
+                columns: []
             },
-            groups: [],
+            groups: []
         };
         this.plot = c3.generate({
             bindto: this.id,
@@ -52,12 +52,12 @@ class ParticipantsYear {
     }
 
     static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_learning_participants"](course_session_id);
+        let dataURL = window.URLS["api:stats_learning_participants_year"](course_session_id);
         return $.getJSON(dataURL);
     }
 
     /**
-     *  To use data without convertion both in `line` and `pie` chart we
+     *  To use data both in `bar` and `pie` chart we
      *  need something like this:
      *  columns: [
      *       ['2013', 30, 0],
@@ -67,26 +67,19 @@ class ParticipantsYear {
      * @returns {Array}
      */
     convertData = (rawJSON) => {
-        // year => {total students}
-        let data = new Map();
-        rawJSON.forEach(function (e) {
-            data.set(e.curriculum_year,
-                    (data.get(e.curriculum_year) || 0) + 1);
-        });
-        // Recreate to make sure we will iterate entries sorted by year
-        data = new Map([...data.entries()].sort());
-        let years = Array.from(data.keys(), e => e.toString());
-        this.state.groups = [years];
-        this.plot.groups(this.state.groups);
-        let columns = [
-            ['x'].concat(years)
-        ];
-        data.forEach((v, k) => {
-            let row = new Array(data.size + 1).fill(0);
-            row[0] = k.toString();
-            row[years.indexOf(row[0]) + 1] = v;
+        let columns = [];
+        let years = [];
+        rawJSON.forEach(function (e, i) {
+            const year = e.curriculum_year.toString();
+            years.push(year);
+            let row = new Array(rawJSON.length + 1).fill(0);
+            row[0] = year;
+            row[i + 1] = e.students;
             columns.push(row);
         });
+        columns.push(["x"].concat(years));
+        this.state.groups = [years];
+        this.plot.groups(this.state.groups);
         this.state.data.columns = columns;
     };
 
@@ -107,15 +100,15 @@ class ParticipantsYear {
             {
                 name: this.i18n.ru.pieChart,
                 active: this.state.data.type === void 0,
-                callback: this.renderPieChart
+                render: this.renderPieChart
             },
             {
                 name: this.i18n.ru.barChart,
                 active: this.state.data.type === 'bar',
-                callback: this.renderBarChart
+                render: this.renderBarChart
             },
         ];
-        // FIXME: Если всё время вызывать generate, то лучше перенести кнопки из графика...
+
         d3.select(this.id)
             .insert('div', ":first-child")
             .attr('class', 'btn-group pull-right')
@@ -137,7 +130,7 @@ class ParticipantsYear {
                     .selectAll('button')
                     .classed('active', false);
                 d3.select(buttons[0][i]).classed('active', true);
-                d.callback();
+                d.render();
             });
     };
 }
