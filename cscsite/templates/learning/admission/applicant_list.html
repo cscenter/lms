@@ -37,7 +37,7 @@
                             <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a>
                             {% if request.user.is_curator %}
                                 {% if applicant.user_id %}
-                                    <a style="display: inline-block; min-width:20px;" title="Профиль на сайте" href="{% url "user_detail" applicant.user_id %}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                                    <a style="float: left; margin-bottom: 30px;" class="btn btn-link" title="Профиль на сайте" href="{% url "user_detail" applicant.user_id %}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
                                 {% elif applicant.interview_successfull and applicant.campaign.current %}
                                     <form method="post" action="{% url "admission_applicant_create_user" applicant.pk %}">
                                         {% csrf_token %}
