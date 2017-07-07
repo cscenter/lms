@@ -1,5 +1,6 @@
 import itertools
 import json
+from collections import OrderedDict
 
 from django.db.models import Q
 from django.utils.timezone import now
@@ -8,6 +9,7 @@ from django.views import generic
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from learning.admission.models import Campaign
 from learning.models import Semester, CourseOffering
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
@@ -72,6 +74,47 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         context["json_data"] = json.dumps({
             "courses": courses,
             "course_session_id": course_session_id,
+        })
+        return context
+
+
+class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "stats/admission.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaigns = list(Campaign.objects
+                         .values("pk", "year", "city_id", "city__name")
+                         .order_by("city_id", "-year"))
+        cities = OrderedDict()
+        for c in campaigns:
+            cities[c["city_id"]] = c["city__name"]
+        campaigns = {city_code: list(cs) for city_code, cs in
+                     itertools.groupby(campaigns, key=lambda c: c["city_id"])}
+        # Find selected campaign and term
+        campaign_id = self.request.GET.get("campaign")
+        try:
+            campaign_id = int(campaign_id)
+        except TypeError:
+            city_code = next(iter(campaigns))
+            campaign_id = campaigns[city_code][0]["pk"]
+        city_code = None
+        for by_city in campaigns.values():
+            for c in by_city:
+                if c["pk"] == campaign_id:
+                    city_code = c["city_id"]
+                    break
+        context["cities"] = cities
+        context["campaigns"] = campaigns
+        context["data"] = {
+            "selected": {
+                "city_code": city_code,
+                "campaign_id": campaign_id,
+            },
+        }
+        context["json_data"] = json.dumps({
+            "campaigns": campaigns,
+            "campaign": campaign_id,
         })
         return context
 

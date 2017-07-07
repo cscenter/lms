@@ -1,0 +1,43 @@
+<script type="text/template" id="plot-filter-gender-template">
+    <label for="<%-filterId%>">Пол:</label>
+    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+        <option value="">-----</option>
+        <option value="M">Мужской</option>
+        <option value="F">Женский</option>
+    </select>
+</script>
+
+<script type="text/template" id="plot-filter-is-online-template">
+    <label for="<%-filterId%>">Способ сдачи:</label>
+    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+        <option value="">-----</option>
+        <option value="true">Через сайт</option>
+        <option value="false">Другой способ</option>
+    </select>
+</script>
+
+<script type="text/template" id="plot-filter-curriculum_year-template">
+    <label for="<%-filterId%>">Год обучения:</label>
+    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+        <option value="">-----</option>
+        <% items.forEach(function(item) { %>
+        <option value="<%-item%>"><%-item%></option>
+        <% }); %>
+    </select>
+</script>
+
+<script type="text/template" id="plot-filter-select-template">
+    <label for="<%-filterId%>"><%-filterName%>:</label>
+    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+        <option value="">-----</option>
+        <% items.forEach(function(item) { %>
+        <option value="<%-item.value%>"><%-item.name%></option>
+        <% }); %>
+    </select>
+</script>
+
+<script type="text/template" id="plot-filter-submit-button">
+    <div class="controls">
+        <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">Фильтровать</button>
+    </div>
+</script>

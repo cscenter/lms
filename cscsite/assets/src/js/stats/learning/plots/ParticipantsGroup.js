@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
+import {GROUPS} from 'stats/utils';
 
 class ParticipantsGroup {
 
@@ -18,12 +19,7 @@ class ParticipantsGroup {
 
     constructor(id, options) {
         this.id = id;
-        this.groups = {
-            1: this.i18n.ru.groups.STUDENT_CENTER,
-            4: this.i18n.ru.groups.VOLUNTEER,
-            3: this.i18n.ru.groups.GRADUATE,
-            8: this.i18n.ru.groups.MASTERS_DEGREE,
-        };
+        this.groups = GROUPS;
 
         this.state = {
             data: {

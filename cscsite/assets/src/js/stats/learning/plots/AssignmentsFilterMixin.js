@@ -1,3 +1,5 @@
+import {GROUPS} from "stats/utils";
+
 let AssignmentsFilterMixin = (superclass) => class extends superclass {
 
     constructor(id, options) {
@@ -10,12 +12,14 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
                 assignment: ["is_online"],
                 student_assignment: [
                     "student.gender",
-                    "student.curriculum_year"
+                    "student.curriculum_year",
+                    "student.groups",
 
                 ]
             },
             choices: {
-                curriculumYear: undefined
+                curriculumYear: undefined,
+                studentGroups: GROUPS,
             },
             // path in dot-notation from the top-level of JSON object.
             state: {
@@ -42,6 +46,59 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
         });
         this.filters.choices.curriculumYear = curriculumYearChoices;
         return rawJSON;
+    };
+
+    filterDataCurriculumYear = () => {
+        if (this.filters.choices.curriculumYear.size === 0) {
+            return;
+        }
+        let choices = [...this.filters.choices.curriculumYear].sort();
+        let filterId = this.id +  "-curriculum-year-filter";
+        let self = this;
+        return {
+            id: '#' + filterId,
+            html: this.templates.filters.curriculumYear({
+                filterId: filterId,
+                items: choices
+            }),
+            callback: function() {
+                $(this.id).selectpicker('render')
+                .on('changed.bs.select', function () {
+                    self.filters.state["student.curriculum_year"] =
+                        (this.value !== "") ? parseInt(this.value) : this.value;
+                });
+            }
+        };
+    };
+
+    filterByStudentGroup = () => {
+        if (this.filters.choices.studentGroups.size === 0) {
+            return;
+        }
+        const choices = [];
+        Object.keys(this.filters.choices.studentGroups).forEach((k) => {
+           choices.push({
+               value: k,
+               name: this.filters.choices.studentGroups[k]
+           });
+        });
+        let filterId = this.id +  "-select-filter";
+        let self = this;
+        return {
+            id: '#' + filterId,
+            html: this.templates.filters.select({
+                filterName: "Группа",
+                filterId: filterId,
+                items: choices
+            }),
+            callback: function() {
+                $(this.id).selectpicker('render')
+                .on('changed.bs.select', function () {
+                    self.filters.state["student.groups"] =
+                        (this.value !== "") ? parseInt(this.value) : this.value;
+                });
+            }
+        };
     };
 };
 

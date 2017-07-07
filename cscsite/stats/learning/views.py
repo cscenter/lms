@@ -24,11 +24,10 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
     pandas_serializer_class = ParticipantsByGroupPandasSerializer
 
     def get_queryset(self):
-        TARGET_GROUPS = [
+        STUDENT_GROUPS = [
             CSCUser.group.STUDENT_CENTER,
             CSCUser.group.VOLUNTEER,
             CSCUser.group.GRADUATE_CENTER,
-            CSCUser.group.MASTERS_DEGREE,
         ]
         course_offering_id = self.kwargs['course_session_id']
         return (CSCUser.objects
@@ -39,7 +38,7 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
                 .prefetch_related(
                     Prefetch(
                         "groups",
-                        queryset=Group.objects.filter(pk__in=TARGET_GROUPS)
+                        queryset=Group.objects.filter(pk__in=STUDENT_GROUPS)
                     )
                 )
                 .order_by())
@@ -87,6 +86,7 @@ class AssignmentsStats(APIView):
                 queryset=(StudentAssignment.objects
                           .filter(student_id__in=active_students)
                           .select_related("student", "assignment")
+                          .prefetch_related("student__groups")
                           .only("pk", "assignment_id", "grade",
                                 "student_id", "first_submission_at",
                                 "student__gender", "student__curriculum_year",
@@ -97,7 +97,6 @@ class AssignmentsStats(APIView):
                           .order_by())
             ))
                        .order_by("deadline_at"))
-
         serializer = AssignmentsStatsSerializer(assignments, many=True)
         return Response(serializer.data)
 
