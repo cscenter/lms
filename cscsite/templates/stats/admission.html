@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load core_tags %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+{% block body_class %} gray{% endblock body_class %}
+
+{% block stylesheets %}
+     <link href="{% static "css/vendor/c3.min.css" %}" rel="stylesheet">
+     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    <script charset="utf-8">
+        var json_data = jQuery.parseJSON('{{ json_data|escapejs }}');
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+{#    <script type="text/javascript" src="{% static "js/vendor/c3.min.js" %}"></script>#}
+    <script src="{% static 'js/urls/reverse.js' %}"></script>
+    {% render_bundle 'stats' 'js' %}
+
+    {% include "stats/_filter_templates.html" %}
+{% endblock javascripts %}
+
+{% block content %}
+<div class="container container-responsive" id="stats-page">
+    <ol class="breadcrumb projects">
+        <li class=""><a href="{% url "stats_index" %}">Статистика</a></li>
+        <li class="active">Набор</li>
+    </ol>
+    <form action="" method="GET" id="campaigns-filter-form">
+        <div class="row">
+            <div class="col-xs-5 form-group">
+                <select class="form-control selectpicker" id="city-filter">
+                    {% for city_code, city_name in cities.items %}
+                        <option value="{{ city_code }}"
+                                {% if data.selected.city_code == city_code %}selected="selected"{% endif %}
+                                {% if campaigns|lookup:city_code|length == 0 %}disabled{% endif %}>{{ city_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-xs-5 form-group">
+                <select name="campaign" class="form-control selectpicker" id="campaign-filter">
+                    {% for c in campaigns|lookup:data.selected.city_code %}
+                        <option {% if data.selected.campaign_id == c.pk %}selected="selected"{% endif %} value="{{ c.pk }}">{{ c.year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-xs-2 form-group">
+                <div class="controls">
+                    <button disabled type="submit" class="btn btn-primary btn-block">Пересчитать</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h3>Слушатели курса</h3>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-enrollments-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

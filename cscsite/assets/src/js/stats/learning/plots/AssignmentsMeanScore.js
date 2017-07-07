@@ -6,7 +6,7 @@ import FilteredPlot from './FilteredPlot';
 import AssignmentsFilterMixin from './AssignmentsFilterMixin';
 
 
-class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
+class AssignmentsMeanScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
     i18n = {
         lang: 'ru',
         ru: {
@@ -151,6 +151,7 @@ class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
             },
             // Filter by curriculum year
             this.filterDataCurriculumYear(),  // can return null
+            this.filterByStudentGroup(),
             // Submit button
             {
                 isSubmitButton: true,
@@ -173,4 +174,4 @@ class AssignmentsScore extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
     };
 }
 
-export default AssignmentsScore;
+export default AssignmentsMeanScore;

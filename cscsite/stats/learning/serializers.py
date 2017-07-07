@@ -25,8 +25,16 @@ class ParticipantsStatsSerializer(serializers.Serializer):
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CSCUser
+        model = Group
         fields = ("curriculum_year", "gender")
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = CSCUser
+        fields = ("curriculum_year", "gender", "groups")
 
 
 class StudentAssignmentsSerializer(serializers.ModelSerializer):
@@ -37,7 +45,8 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentAssignment
-        fields = ("id", "sent", "first_submission_at", "grade", "student", "state")
+        fields = ("id", "sent", "first_submission_at", "grade", "student",
+                  "state")
 
     def get_sent(self, obj):
         """

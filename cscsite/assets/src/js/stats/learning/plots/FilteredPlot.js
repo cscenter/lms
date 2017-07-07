@@ -22,8 +22,10 @@ class FilteredPlot {
 
     matchFilter = (value, stateAttrName) => {
         let stateValue = this.filters.state[stateAttrName];
-        return stateValue === void 0 || stateValue === ""
-               || stateValue === value;
+        return stateValue === void 0 ||
+               stateValue === "" ||
+               stateValue === value ||
+               value.includes(stateValue);
     };
 
     renderFilters = () => {
@@ -69,29 +71,6 @@ class FilteredPlot {
      */
     getFilterFormData = () => {
         return [];
-    };
-
-    filterDataCurriculumYear = () => {
-        if (this.filters.choices.curriculumYear.size == 0) {
-            return;
-        }
-        let choices = [...this.filters.choices.curriculumYear].sort();
-        let filterId = this.id +  "-curriculum-year-filter";
-        let self = this;
-        return {
-            id: '#' + filterId,
-            html: this.templates.filters.curriculumYear({
-                filterId: filterId,
-                items: choices
-            }),
-            callback: function() {
-                $(this.id).selectpicker('render')
-                .on('changed.bs.select', function () {
-                    self.filters.state["student.curriculum_year"] =
-                        (this.value !== "") ? parseInt(this.value) : this.value;
-                });
-            }
-        };
     };
 }
 

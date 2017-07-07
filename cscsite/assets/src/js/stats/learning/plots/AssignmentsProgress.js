@@ -145,6 +145,7 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             },
             // Filter by curriculum year
             this.filterDataCurriculumYear(),  // can return null
+            this.filterByStudentGroup(),
             // Submit button
             {
                 isSubmitButton: true,
