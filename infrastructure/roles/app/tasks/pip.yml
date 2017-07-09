@@ -22,6 +22,6 @@
     version: "{{ item.version }}"
   with_items:
     - name: uwsgi
-      version: "2.0.13.1"
+      version: "2.0.15"
     - name: uwsgitop
-      version: "0.9"
+      version: "0.10"

@@ -12,10 +12,11 @@
     server ntp1.imvp.ru
 * Problems with restarting supervisor. All programs can be in RUNNING state, but ansible task failed. (??? is it fixed?)
 * fix certbot default email/domain values! They should be real...
+* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 uses as system 
+`python3` (now py3.4 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
 
 TODO (important):
 * add `registration` app to cscenter, then remove club worker?
-* install newerest version of python3.4(4-5) with ppa:fkrull/deadsnakes
 * restore db from s3
 * add tags. Then use it. E.g. `ansible-playbook -i inventory/ec2.py  provision.yml -v -t lvm` setup lvm only
 

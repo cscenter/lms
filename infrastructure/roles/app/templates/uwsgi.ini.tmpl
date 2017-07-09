@@ -2,8 +2,7 @@
 # Django-related settings
 chdir           = /home/{{ item }}/site/repo/cscsite
 module          = {{ item }}.wsgi:application
-home            = /home/{{ item }}/site/env
-pythonpath      = /home/{{ item }}/site/env/lib/python3.4/site-packages
+virtualenv      = /home/{{ item }}/site/env
 pythonpath      = /home/{{ item }}/site/repo/cscsite
 env             = DJANGO_SETTINGS_MODULE={{ item }}.settings.production
 env             = PYTHONIOENCODING=UTF-8
@@ -24,3 +23,4 @@ gid             = {{ group_shared }}
 logto           = /home/{{ item }}/site/logs/uwsgi.log
 log-maxsize     = 5242880
 wait-for-socket-timeout = 600
+unprivileged-binary-patch-arg = %(virtualenv)/bin/uwsgi --ini {{ item }}.ini

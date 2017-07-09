@@ -51,7 +51,7 @@
   pip:
     requirements: "/home/{{ cscenter_user }}/site/repo/requirements.txt"
     virtualenv: "/home/{{ cscenter_user }}/site/env/"
-    virtualenv_python: python3.4
+    virtualenv_python: python3.5
 
 - name: install CSC website deps for csclub
   become: yes
@@ -59,7 +59,7 @@
   pip:
     requirements: "/home/{{ csclub_user }}/site/repo/requirements.txt"
     virtualenv: "/home/{{ csclub_user }}/site/env/"
-    virtualenv_python: python3.4
+    virtualenv_python: python3.5
 
 - name: Copy upstart uwsgi config
   template:
