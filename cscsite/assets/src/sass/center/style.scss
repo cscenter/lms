@@ -188,13 +188,21 @@ h1.bigger-margin {
   margin-bottom: 20px !important;
 }
 
+
+h3 {
+  &.title-inverse {
+    color: $color-gray-48;
+    font-weight: normal;
+  }
+}
+
 h4.bigger-margin {
   margin-top: 20px !important;
   margin-bottom: 20px !important;
 }
 
 h4.no-top-margin {
-  margin-top: 0px !important;
+  margin-top: 0 !important;
 }
 
 // Container modifications

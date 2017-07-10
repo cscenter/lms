@@ -2260,5 +2260,6 @@ class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
 
     def get_queryset(self):
         return (Internship.objects
-                .filter(site=settings.CENTER_SITE_ID)
-                .order_by("sort"))
+                .filter(category__site=settings.CENTER_SITE_ID)
+                .select_related("category")
+                .order_by("category__sort", "sort"))

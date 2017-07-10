@@ -1196,13 +1196,28 @@ class Useful(models.Model):
         return smart_text(self.question)
 
 
-@python_2_unicode_compatible
+class InternshipCategory(models.Model):
+    name = models.CharField(_("Category name"), max_length=255)
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
+    site = models.ForeignKey(Site, verbose_name=_("Site"),
+                             default=settings.CENTER_SITE_ID)
+
+    class Meta:
+        ordering = ["sort"]
+        verbose_name = _("Internship category")
+        verbose_name_plural = _("Internship categories")
+
+    def __str__(self):
+        return smart_text(self.name)
+
+
 class Internship(TimeStampedModel):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"),
-                             default=settings.CENTER_SITE_ID)
+    category = models.ForeignKey(InternshipCategory,
+                                 verbose_name=_("Internship category"),
+                                 null=True)
 
     class Meta:
         ordering = ["sort"]

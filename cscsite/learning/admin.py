@@ -13,6 +13,7 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.forms import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
+from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 from .models import Course, Semester, CourseOffering, Venue, \
@@ -268,10 +269,16 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-class InternshipAdmin(admin.ModelAdmin):
+class InternshipCategoryAdmin(admin.ModelAdmin):
     list_filter = ['site']
-    list_display = ['question', 'sort']
-    exclude = ["site"]
+    list_display = ['name', 'sort']
+
+
+class InternshipAdmin(admin.ModelAdmin):
+    list_select_related = ['category']
+    list_filter = ['category']
+    list_editable = ['sort']
+    list_display = ['category', 'question', 'sort']
 
 
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
@@ -292,4 +299,5 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
+admin.site.register(InternshipCategory, InternshipCategoryAdmin)
 admin.site.register(Internship, InternshipAdmin)
