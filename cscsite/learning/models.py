@@ -1217,7 +1217,8 @@ class Internship(TimeStampedModel):
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     category = models.ForeignKey(InternshipCategory,
                                  verbose_name=_("Internship category"),
-                                 null=True)
+                                 null=True,
+                                 blank=True)
 
     class Meta:
         ordering = ["sort"]

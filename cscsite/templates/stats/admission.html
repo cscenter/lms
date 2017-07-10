@@ -59,7 +59,67 @@
 
     <div class="panel">
         <div class="panel-body">
-            <h3>Слушатели курса</h3>
+            <h3>Оценки собеседующих</h3>
+            <form action="" method="GET" id="interviewers-filter-form">
+                <div class="row">
+                    <div class="col-xs-5 form-group">
+                        <select name="interviewer" class="form-control selectpicker" id="interviewer-filter">
+                            <option value="">--------</option>
+                            {% for interviewer in interviewers %}
+                                <option value="{{ interviewer.cscuser_id }}"
+                                        {% if data.selected.interviewer_id == interviewer.cscuser_id %}selected="selected"{% endif %}
+                                        >{{ interviewer.cscuser.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-xs-2 form-group">
+                        <div class="controls">
+                            <button type="submit" class="btn btn-primary btn-block">Показать</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if data.interviewer_stats %}
+                        <table class="table table-condensed">
+                            <tr class="bg-gray">
+                                <th>ФИО</th>
+                                <th>Набор</th>
+                                <th>Балл за собеседование</th>
+                                <th>Итог</th>
+                            </tr>
+                            {% for comment in data.interviewer_stats %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ comment.interview.applicant.get_absolute_url }}">{{ comment.interview.applicant.get_full_name }}</a>
+                                    </td>
+                                    <td>{{ comment.interview.applicant.campaign.display_short }}</td>
+                                    <td>{{ comment.score }}</td>
+                                    <td>
+                                        {% if not comment.interview.applicant.user_id %}
+                                            {{ comment.interview.applicant.get_status_display }}
+                                        {% else %}
+                                            {% with user=comment.interview.applicant.user %}
+                                                {% if user.is_graduate %}
+                                                    Выпускник
+                                                {% elif user.is_center_student %}
+                                                    Студент {% if user.status %}[{{ user.get_status_display }}]{% endif %}
+                                                {% else %}
+                                                    {{ user.get_status_display }}
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% endif %}
+
+                </div>
+            </div>
+
+
             <div class="row">
                 <div class="col-xs-10">
                     <div id="plot-enrollments-results"></div>
