@@ -9,7 +9,7 @@ from django.views import generic
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from learning.admission.models import Campaign
+from learning.admission.models import Campaign, Interview, Comment, Applicant
 from learning.models import Semester, CourseOffering
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
@@ -82,41 +82,76 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "stats/admission.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        campaigns, selected_campaign_id = self.get_campaigns()
+        cities, selected_city_code = self.get_cities(campaigns,
+                                                     selected_campaign_id)
+        interviewers, selected_interviewer = self.get_interviewers()
+        if selected_interviewer:
+            interviewer_stats = (Comment.objects
+                                 .filter(interviewer_id=selected_interviewer)
+                                 .select_related("interview",
+                                                 "interview__applicant",
+                                                 "interview__applicant__campaign",
+                                                 "interview__applicant__campaign__city",
+                                                 "interview__applicant__user")
+                                 .prefetch_related("interview__applicant__user__groups"))
+        context = {
+            "cities": cities,
+            "campaigns": campaigns,
+            "interviewers": interviewers,
+            "data": {
+                "selected": {
+                    "city_code": selected_city_code,
+                    "campaign_id": selected_campaign_id,
+                    "interviewer_id": selected_interviewer
+                },
+                "interviewer_stats": interviewer_stats
+            },
+            "json_data": json.dumps({
+                "campaigns": campaigns,
+                "campaign": selected_campaign_id,
+            })
+        }
+        return context
+
+    def get_campaigns(self):
         campaigns = list(Campaign.objects
                          .values("pk", "year", "city_id", "city__name")
-                         .order_by("city_id", "-year"))
-        cities = OrderedDict()
-        for c in campaigns:
-            cities[c["city_id"]] = c["city__name"]
+                         .order_by("-city_id", "-year"))
         campaigns = {city_code: list(cs) for city_code, cs in
                      itertools.groupby(campaigns, key=lambda c: c["city_id"])}
-        # Find selected campaign and term
+        # Find selected campaign
         campaign_id = self.request.GET.get("campaign")
         try:
             campaign_id = int(campaign_id)
         except TypeError:
             city_code = next(iter(campaigns))
             campaign_id = campaigns[city_code][0]["pk"]
-        city_code = None
+        return campaigns, campaign_id
+
+    @staticmethod
+    def get_cities(campaigns, selected_campaign_id):
+        cities = OrderedDict()
+        selected_city_code = None
         for by_city in campaigns.values():
             for c in by_city:
-                if c["pk"] == campaign_id:
-                    city_code = c["city_id"]
+                cities[c["city_id"]] = c["city__name"]
+                if c["pk"] == selected_campaign_id:
+                    selected_city_code = c["city_id"]
                     break
-        context["cities"] = cities
-        context["campaigns"] = campaigns
-        context["data"] = {
-            "selected": {
-                "city_code": city_code,
-                "campaign_id": campaign_id,
-            },
-        }
-        context["json_data"] = json.dumps({
-            "campaigns": campaigns,
-            "campaign": campaign_id,
-        })
-        return context
+        return cities, selected_city_code
+
+    def get_interviewers(self):
+        selected_interviewer = self.request.GET.get("interviewer", '')
+        try:
+            selected_interviewer = int(selected_interviewer)
+        except ValueError:
+            selected_interviewer = ''
+        interviewers = (Interview.interviewers.through.objects
+                        .distinct("cscuser__last_name", "cscuser_id")
+                        .order_by("cscuser__last_name")
+                        .select_related("cscuser"))
+        return interviewers, selected_interviewer
 
 
 class StudentsDiplomasStats(APIView):
