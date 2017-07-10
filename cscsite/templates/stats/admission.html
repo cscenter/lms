@@ -62,7 +62,7 @@
             <h3>Оценки собеседующих</h3>
             <form action="" method="GET" id="interviewers-filter-form">
                 <div class="row">
-                    <div class="col-xs-5 form-group">
+                    <div class="col-xs-10 form-group">
                         <select name="interviewer" class="form-control selectpicker" id="interviewer-filter">
                             <option value="">--------</option>
                             {% for interviewer in interviewers %}
@@ -105,8 +105,10 @@
                                                     Выпускник
                                                 {% elif user.is_center_student %}
                                                     Студент {% if user.status %}[{{ user.get_status_display }}]{% endif %}
-                                                {% else %}
+                                                {% elif user.status %}
                                                     {{ user.get_status_display }}
+                                                {% else %}
+                                                    {{ comment.interview.applicant.get_status_display }}
                                                 {% endif %}
                                             {% endwith %}
                                         {% endif %}
