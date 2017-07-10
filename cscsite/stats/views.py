@@ -86,15 +86,15 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
         cities, selected_city_code = self.get_cities(campaigns,
                                                      selected_campaign_id)
         interviewers, selected_interviewer = self.get_interviewers()
-        if selected_interviewer:
-            interviewer_stats = (Comment.objects
-                                 .filter(interviewer_id=selected_interviewer)
-                                 .select_related("interview",
-                                                 "interview__applicant",
-                                                 "interview__applicant__campaign",
-                                                 "interview__applicant__campaign__city",
-                                                 "interview__applicant__user")
-                                 .prefetch_related("interview__applicant__user__groups"))
+
+        interviewer_stats = selected_interviewer and (Comment.objects
+             .filter(interviewer_id=selected_interviewer)
+             .select_related("interview",
+                             "interview__applicant",
+                             "interview__applicant__campaign",
+                             "interview__applicant__campaign__city",
+                             "interview__applicant__user")
+             .prefetch_related("interview__applicant__user__groups"))
         context = {
             "cities": cities,
             "campaigns": campaigns,

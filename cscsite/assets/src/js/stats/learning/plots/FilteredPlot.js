@@ -25,7 +25,7 @@ class FilteredPlot {
         return stateValue === void 0 ||
                stateValue === "" ||
                stateValue === value ||
-               value.includes(stateValue);
+              (Array.isArray(value) && value.includes(stateValue));
     };
 
     renderFilters = () => {
