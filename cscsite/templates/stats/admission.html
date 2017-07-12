@@ -13,7 +13,7 @@
 
 {% block javascripts %}
     <script charset="utf-8">
-        var json_data = jQuery.parseJSON('{{ json_data|escapejs }}');
+        var jsonData = jQuery.parseJSON('{{ json_data|escapejs }}');
     </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js" charset="utf-8"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
@@ -26,7 +26,7 @@
 {% endblock javascripts %}
 
 {% block content %}
-<div class="container container-responsive" id="stats-page">
+<div class="container container-responsive" id="stats-page" data-entry="admission">
     <ol class="breadcrumb projects">
         <li class=""><a href="{% url "stats_index" %}">Статистика</a></li>
         <li class="active">Набор</li>
@@ -34,7 +34,7 @@
     <form action="" method="GET" id="campaigns-filter-form">
         <div class="row">
             <div class="col-xs-5 form-group">
-                <select class="form-control selectpicker" id="city-filter">
+                <select name="city_code" class="form-control selectpicker" id="city-filter">
                     {% for city_code, city_name in cities.items %}
                         <option value="{{ city_code }}"
                                 {% if data.selected.city_code == city_code %}selected="selected"{% endif %}
@@ -59,7 +59,7 @@
 
     <div class="panel">
         <div class="panel-body">
-            <h3>Оценки собеседующих</h3>
+            <h5 class="text-uppercase">Оценки собеседующих</h5>
             <form action="" method="GET" id="interviewers-filter-form">
                 <div class="row">
                     <div class="col-xs-10 form-group">
@@ -120,11 +120,59 @@
 
                 </div>
             </div>
+        </div>
+    </div>
 
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Этапы по годам</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaign-stages-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Итоги набора</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaign-applicants-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Успеваемость поступивших</h5>
             <div class="row">
                 <div class="col-xs-10">
-                    <div id="plot-enrollments-results"></div>
+                    <div id="plot-campaign-students-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Распределение баллов по тесту</h5>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-campaign-testing-scores"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Распределение баллов по экзамену</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaign-exam-scores"></div>
                 </div>
             </div>
         </div>

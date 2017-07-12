@@ -10,10 +10,7 @@ from post_office.utils import get_email_template
 from learning.admission.management.commands._utils import CurrentCampaignsMixin
 from learning.admission.models import Campaign, Applicant
 
-FINAL_STATUSES = [Applicant.ACCEPT,
-                  Applicant.ACCEPT_IF,
-                  Applicant.REJECTED_BY_INTERVIEW,
-                  Applicant.VOLUNTEER]
+
 
 
 class Command(CurrentCampaignsMixin, BaseCommand):
@@ -42,7 +39,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
         for campaign in campaigns:
             # Check templates exists before send any email
-            for status in FINAL_STATUSES:
+            for status in Applicant.FINAL_STATUSES:
                 template_name = self.get_template_name(campaign, status)
                 if not EmailTemplate.objects.filter(name=template_name).exists():
                     raise CommandError(
@@ -52,14 +49,14 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                 'SUBJECT_CITY': campaign.city.name
             }
             # Generate emails for each status
-            for status in FINAL_STATUSES:
+            for status in Applicant.FINAL_STATUSES:
                 template_name = self.get_template_name(campaign, status)
                 template = get_email_template(template_name)
                 applicants = Applicant.objects.filter(campaign_id=campaign.pk,
                                                       status=status)
                 sent = 0
                 for a in applicants:
-                    if a.status in FINAL_STATUSES:
+                    if a.status in Applicant.FINAL_STATUSES:
                         recipients = [a.email]
                         if not Email.objects.filter(to=recipients,
                                                     template=template).exists():

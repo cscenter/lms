@@ -1,22 +1,34 @@
-import getTemplate from 'stats/utils';
+import CampaignResultsStages from "./plots/CampaignResultsStages";
+import CampaignResultsApplicants from "./plots/CampaignResultsApplicants";
+import CampaignResultsStudents from "./plots/CampaignResultsStudents";
+import CampaignTestScore from "./plots/CampaignTestScore";
+import CampaignExamScore from "./plots/CampaignExamScore";
 
 // DOM elements
 let cityFilter = $('#city-filter');
 let campaignFilter = $('#campaign-filter');
 let campaignFilterForm = $('#campaigns-filter-form');
 
- function renderPlots (campaignID) {
-     return;
+ function renderPlots (jsonData) {
+    let options = {
+        campaignId: jsonData.campaignId,
+        cityCode: jsonData.cityCode
+    };
+    console.log(options);
+    new CampaignResultsStages('#plot-campaign-stages-results', options);
+    new CampaignResultsApplicants('#plot-campaign-applicants-results', options);
+    // new CampaignResultsStudents('#plot-campaign-students-results', options);
+    new CampaignTestScore('#plot-campaign-testing-scores', options);
+    new CampaignExamScore('#plot-campaign-exam-scores', options);
 }
 
 function initFilter() {
     campaignFilter.on('change', function () {
         $('button[type=submit]', campaignFilterForm).removeAttr('disabled');
     });
-    // TODO: refactor
     cityFilter.on('change', function () {
         const cityCode = $(this).val();
-        const items = json_data.campaigns[cityCode];
+        const items = jsonData.campaigns[cityCode];
         campaignFilter.empty();
         items.forEach(function (item) {
             let opt = document.createElement('option');
@@ -30,9 +42,8 @@ function initFilter() {
 }
 
 function initPlots() {
-    const id = json_data.campaign;
     initFilter();
-    renderPlots(id);
+    renderPlots(jsonData);
 }
 
 module.exports = {
