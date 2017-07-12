@@ -109,7 +109,8 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
             },
             "json_data": json.dumps({
                 "campaigns": campaigns,
-                "campaign": selected_campaign_id,
+                "campaignId": selected_campaign_id,
+                "cityCode": selected_city_code
             })
         }
         return context
@@ -117,7 +118,7 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
     def get_campaigns(self):
         campaigns = list(Campaign.objects
                          .values("pk", "year", "city_id", "city__name")
-                         .order_by("-city_id", "-year"))
+                         .order_by("city_id", "-year"))
         campaigns = {city_code: list(cs) for city_code, cs in
                      itertools.groupby(campaigns, key=lambda c: c["city_id"])}
         # Find selected campaign

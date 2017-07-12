@@ -2,7 +2,6 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 
 from learning.models import StudentAssignment
-from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
 
 

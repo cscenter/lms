@@ -4,8 +4,8 @@ import $ from 'jquery';
 import {GROUPS, URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
-class ParticipantsGroup {
-    static ENTRY_POINT_URL = "api:stats_learning_participants_group";
+class CampaignResultsStudents {
+    static ENTRY_POINT_URL = "api:stats_admission_campaign_students_results";
 
     constructor(id, options) {
         this.id = id;
@@ -30,17 +30,15 @@ class ParticipantsGroup {
             },
             data: this.state.data
         });
-
-        let promise = options.apiRequest ||
-                      this.getStats(options.course_session_id);
+        let promise = options.apiRequest || this.getStats(options.campaign_id);
         promise
             .then(this.convertData)
             .then(this.render)
             .done(this.appendParticipantsInfo);
     }
 
-    getStats(course_session_id) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](course_session_id);
+    getStats(campaign_id) {
+        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](campaign_id);
         return $.getJSON(dataURL);
     }
 
@@ -69,8 +67,8 @@ class ParticipantsGroup {
             .data([total])
             .enter()
             .append('div')
-            .text(d => i18n.total_participants + ': ' + d);
+            .text(d => this.i18n.total_participants + ': ' + d);
     };
 }
 
-export default ParticipantsGroup;
+export default CampaignResultsStudents;

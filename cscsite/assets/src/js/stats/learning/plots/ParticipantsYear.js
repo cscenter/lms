@@ -1,16 +1,11 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
+import {URLS} from 'stats/utils';
+import i18n from 'stats/i18n';
 
 class ParticipantsYear {
-
-    i18n = {
-        ru: {
-            pieChart: "Круговая",
-            barChart: "Гистограмма",
-            students: ""
-        }
-    };
+    static ENTRY_POINT_URL = "api:stats_learning_participants_year";
 
     constructor(id, options) {
         this.id = id;
@@ -45,14 +40,14 @@ class ParticipantsYear {
         });
 
         let promise = options.apiRequest ||
-                      this.constructor.getStats(options.course_session_id);
+            this.getStats(options.course_session_id);
         promise
             .then(this.convertData)
             .done(this.renderPieChart);
     }
 
-    static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_learning_participants_year"](course_session_id);
+    getStats(course_session_id) {
+        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](course_session_id);
         return $.getJSON(dataURL);
     }
 
@@ -98,12 +93,12 @@ class ParticipantsYear {
     renderSwitchButtons = () => {
         let buttons = [
             {
-                name: this.i18n.ru.pieChart,
+                name: i18n.pieChart,
                 active: this.state.data.type === void 0,
                 render: this.renderPieChart
             },
             {
-                name: this.i18n.ru.barChart,
+                name: i18n.barChart,
                 active: this.state.data.type === 'bar',
                 render: this.renderBarChart
             },

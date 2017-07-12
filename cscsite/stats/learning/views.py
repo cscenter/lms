@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Prefetch
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 
 from api.permissions import CuratorAccessPermission
@@ -63,14 +64,13 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
                 .order_by())
 
 
-class AssignmentsStats(APIView):
+class AssignmentsStats(ReadOnlyModelViewSet):
     """
     Aggregate stats about course offering assignment progress.
     """
-    http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
 
-    def get(self, request, course_session_id, format=None):
+    def list(self, request, course_session_id, *args, **kwargs):
         active_students = (Enrollment.active.filter(
                 course_offering_id=course_session_id)
             .values_list("student_id", flat=True))
