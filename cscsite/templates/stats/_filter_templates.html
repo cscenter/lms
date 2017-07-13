@@ -1,6 +1,6 @@
 <script type="text/template" id="plot-filter-gender-template">
-    <label for="<%-filterId%>">Пол:</label>
-    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+    <label for="<%-id%>">Пол:</label>
+    <select class="form-control selectpicker" id="<%-id%>" name="<%-id%>">
         <option value="">-----</option>
         <option value="M">Мужской</option>
         <option value="F">Женский</option>
@@ -8,8 +8,8 @@
 </script>
 
 <script type="text/template" id="plot-filter-is-online-template">
-    <label for="<%-filterId%>">Способ сдачи:</label>
-    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+    <label for="<%-id%>">Способ сдачи:</label>
+    <select class="form-control selectpicker" id="<%-id%>" name="<%-id%>">
         <option value="">-----</option>
         <option value="true">Через сайт</option>
         <option value="false">Другой способ</option>
@@ -17,8 +17,8 @@
 </script>
 
 <script type="text/template" id="plot-filter-curriculum_year-template">
-    <label for="<%-filterId%>">Год обучения:</label>
-    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+    <label for="<%-id%>">Год обучения:</label>
+    <select class="form-control selectpicker" id="<%-id%>" name="<%-id%>">
         <option value="">-----</option>
         <% items.forEach(function(item) { %>
         <option value="<%-item%>"><%-item%></option>
@@ -27,9 +27,11 @@
 </script>
 
 <script type="text/template" id="plot-filter-select-template">
-    <label for="<%-filterId%>"><%-filterName%>:</label>
-    <select class="form-control selectpicker" id="<%-filterId%>" name="<%-filterId%>">
+    <label for="<%-id%>"><%-filterName%>:</label>
+    <select class="form-control selectpicker" id="<%-id%>" name="<%-id%>">
+        <% if (selected === undefined) { %>
         <option value="">-----</option>
+        <% } %>
         <% items.forEach(function(item) { %>
         <option value="<%-item.value%>"><%-item.name%></option>
         <% }); %>
@@ -38,6 +40,8 @@
 
 <script type="text/template" id="plot-filter-submit-button">
     <div class="controls">
-        <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">Фильтровать</button>
+        <button type="submit" name="update" value="Y" class="btn btn-primary btn-block">
+            <% if ( typeof value === "undefined") { %>Фильтровать<% } else { %><%-value%><% } %>
+        </button>
     </div>
 </script>

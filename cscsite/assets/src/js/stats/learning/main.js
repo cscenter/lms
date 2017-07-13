@@ -15,8 +15,8 @@ let courseFilterForm = $('#courses-filter-form');
  function renderPlots (courseSessionId) {
     // Participants
     let options = { course_session_id: courseSessionId };
-    new ParticipantsGroup('#plot-participants-by-group', options);
-    new ParticipantsYear('#plot-participants-by-year', options);
+    new ParticipantsGroup('plot-participants-by-group', options);
+    new ParticipantsYear('plot-participants-by-year', options);
     // Assignments
      options = {
         course_session_id: courseSessionId,
@@ -36,7 +36,7 @@ let courseFilterForm = $('#courses-filter-form');
     new AssignmentsResults('plot-assignments-results', options);
     new AssignmentsMeanScore('plot-assignments-score', options);
     // Enrollments
-    new EnrollmentsResults('#plot-enrollments-results',
+    new EnrollmentsResults('plot-enrollments-results',
         courseSessionId);
 }
 

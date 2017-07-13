@@ -2,20 +2,11 @@ import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
 import mix from '../../MixinBuilder';
-import FilteredPlot from './FilteredPlot';
+import PlotOptions from 'stats/PlotOptions';
 import AssignmentsFilterMixin from './AssignmentsFilterMixin';
+import i18n from 'stats/i18n';
 
-class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
-    // Сейчас это попадает в AssignmentsProgress.prototype
-    i18n = {
-        lang: 'ru',
-        ru: {
-            titles: "Задания",
-            participants: "Слушатели курса",
-            passed: "Сдали задание",
-            no_assignments: "Заданий не найдено."
-        }
-    };
+class AssignmentsProgress extends mix(PlotOptions).with(AssignmentsFilterMixin) {
 
     constructor(id, options) {
         super(id, options);
@@ -46,8 +37,8 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
 
     // Recalculate data based on current filters state
     convertData = (rawJSON) => {
-        let participants = [this.i18n.ru.participants],
-            passed = [this.i18n.ru.passed],
+        let participants = [i18n.assignments.participants],
+            passed = [i18n.assignments.passed],
             titles = [];
         rawJSON
             .filter((a) => this.matchFilters(a, "assignment"))
@@ -71,13 +62,13 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
 
     render = (data) => {
         if (!this.state.titles.length) {
-            $('#' + this.id).html(this.i18n.ru.no_assignments);
+            $('#' + this.id).html(i18n.assignments.no_assignments);
             return;
         }
 
         this.plot = c3.generate({
             bindto: '#' + this.id,
-            oninit: () => { this.renderFilters() },
+            oninit: () => { this.appendOptionsForm() },
             data: {
                 type: this.type,
                 columns: data
@@ -113,17 +104,17 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
      * with d3js. Each element must have `html` attribute. Callback is optional.
      * @returns {[*,*]}
      */
-    getFilterFormData = () => {
+    getOptions = () => {
         let self = this;
         let data = [
             // Filter by student gender
             {
-                id: `#${this.id}-gender-filter`,
-                html: this.templates.filters.gender({
-                    filterId: `${this.id}-gender-filter`
-                }),
-                callback: function () {
-                    $(this.id).selectpicker('render')
+                options: {
+                    id: `${this.id}-gender-filter`
+                },
+                template: this.templates.filters.gender,
+                onRendered: function () {
+                    $(`#${this.options.id}`).selectpicker('render')
                         .on('changed.bs.select', function () {
                             self.filters.state["student.gender"] = this.value;
                         });
@@ -131,12 +122,12 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             },
             // Filter by `is_online`
             {
-                id: `#${this.id}-is-online-filter`,
-                html: this.templates.filters.isOnline({
-                    filterId: `${this.id}-is-online-filter`,
-                }),
-                callback: function () {
-                    $(this.id).selectpicker('render')
+                options: {
+                    id: `${this.id}-is-online-filter`,
+                },
+                template: this.templates.filters.isOnline,
+                onRendered: function () {
+                    $(`#${this.options.id}`).selectpicker('render')
                         .on('changed.bs.select', function () {
                             self.filters.state.is_online = (this.value === "") ?
                                 undefined : (this.value === "true");
@@ -149,10 +140,22 @@ class AssignmentsProgress extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             // Submit button
             {
                 isSubmitButton: true,
-                html: this.templates.filters.submitButton()
+                template: this.templates.filters.submitButton,
+                options: {}
             }
         ];
         return data.filter((e) => e);
+    };
+
+    submitButtonHandler = () => {
+        let data = this.convertData(this.rawJSON);
+        this.plot.load({
+            type: this.type,
+            columns: data,
+            // Clean plot if no data, otherwise save animation transition
+            unload: this.state.titles.length > 0 ? {} : true,
+        });
+        return false;
     };
 }
 

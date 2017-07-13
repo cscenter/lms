@@ -1,31 +1,18 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
-
+import i18n from 'stats/i18n';
 
 class EnrollmentsResults {
-    i18n = {
-        lang: 'ru',
-        ru: {
-            no_enrollments: "Студенты не найдены.",
-            grades: {
-                not_graded: "Без оценки",
-                unsatisfactory: "Незачет",
-                pass: "Удовлетворительно",
-                good: "Хорошо",
-                excellent: "Отлично"
-            }
-        }
-    };
 
     constructor(id, course_session_id) {
-        this.id = id;
+        this.id = `#${id}`;
         this.type = 'pie';
         this.data = {};
         this.plot = undefined;
 
-        this.grades = Object.keys(this.i18n.ru.grades).reduce((m, k) => {
-            return m.set(k, this.i18n.ru.grades[k]);
+        this.grades = Object.keys(i18n.enrollments.grades).reduce((m, k) => {
+            return m.set(k, i18n.enrollments.grades[k]);
         }, new Map());
 
         this.loadStats(course_session_id)
@@ -61,7 +48,7 @@ class EnrollmentsResults {
 
     render = (data) => {
         if (!data.length) {
-            $(this.id).html(this.i18n.ru.no_enrollments);
+            $(this.id).html(i18n.enrollments.no_enrollments);
             return;
         }
 

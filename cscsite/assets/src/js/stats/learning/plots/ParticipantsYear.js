@@ -8,7 +8,7 @@ class ParticipantsYear {
     static ENTRY_POINT_URL = "api:stats_learning_participants_year";
 
     constructor(id, options) {
-        this.id = id;
+        this.id = `#${id}`;
         this.state = {
             data: {
                 type: void 0,
