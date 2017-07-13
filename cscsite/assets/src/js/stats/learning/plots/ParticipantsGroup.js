@@ -8,7 +8,7 @@ class ParticipantsGroup {
     static ENTRY_POINT_URL = "api:stats_learning_participants_group";
 
     constructor(id, options) {
-        this.id = id;
+        this.id = `#${id}`;
         this.groups = GROUPS;
 
         this.state = {

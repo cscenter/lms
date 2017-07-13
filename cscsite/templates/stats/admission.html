@@ -31,6 +31,7 @@
         <li class=""><a href="{% url "stats_index" %}">Статистика</a></li>
         <li class="active">Набор</li>
     </ol>
+
     <form action="" method="GET" id="campaigns-filter-form">
         <div class="row">
             <div class="col-xs-5 form-group">
@@ -56,6 +57,65 @@
             </div>
         </div>
     </form>
+
+    <h3>Город / {% for c in campaigns|lookup:data.selected.city_code %}{% if c.pk == data.selected.campaign_id %}{{ c.city__name }}{% endif %}{% endfor %}</h3>
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Этапы</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaigns-stages-by-year"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Итоги набора</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaign-applicants-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Набор / {% for c in campaigns|lookup:data.selected.city_code %}{% if c.pk == data.selected.campaign_id %}{{ c.city__name }}, {{ c.year }}{% endif %}{% endfor %}</h3>
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Этапы</h5>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-campaign-stages-by-universities"></div>
+                </div>
+                <div class="col-xs-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Распределение баллов по тесту</h5>
+            <div class="row">
+                <div class="col-xs-10">
+                    <div id="plot-campaign-testing-scores"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <h5 class="text-uppercase">Распределение баллов по экзамену</h5>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="plot-campaign-exam-scores"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="panel">
         <div class="panel-body">
@@ -118,61 +178,6 @@
                         </table>
                     {% endif %}
 
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-body">
-            <h5 class="text-uppercase">Этапы по годам</h5>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div id="plot-campaign-stages-results"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-body">
-            <h5 class="text-uppercase">Итоги набора</h5>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div id="plot-campaign-applicants-results"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-body">
-            <h5 class="text-uppercase">Успеваемость поступивших</h5>
-            <div class="row">
-                <div class="col-xs-10">
-                    <div id="plot-campaign-students-results"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-body">
-            <h5 class="text-uppercase">Распределение баллов по тесту</h5>
-            <div class="row">
-                <div class="col-xs-10">
-                    <div id="plot-campaign-testing-scores"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-body">
-            <h5 class="text-uppercase">Распределение баллов по экзамену</h5>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div id="plot-campaign-exam-scores"></div>
                 </div>
             </div>
         </div>

@@ -21,13 +21,7 @@ class CampaignResultsApplicants {
                         "accept_if",
                         "volunteer",
                         "rejected_interview",
-                        // "rejected_test",
-                        // "rejected_exam",
-                        // "they_refused",
-                        // "interview_phase",
-                        // "rejected_cheating",
-                        // "interview_assigned",
-                        // "interview_completed",
+                        "they_refused",
                     ],
                 },
                 names: i18n.statuses,
@@ -37,9 +31,13 @@ class CampaignResultsApplicants {
         };
 
 
-
         this.plot = c3.generate({
             bindto: this.id,
+            axis: {
+                x: {
+                    type: 'categories'
+                }
+            },
             data: this.state.data
         });
         let promise = options.apiRequest || this.getStats(options.cityCode);
@@ -63,10 +61,6 @@ class CampaignResultsApplicants {
         return columns;
     };
 }
-
-
-
-
 
 
 export default CampaignResultsApplicants;

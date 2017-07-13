@@ -5,15 +5,15 @@ import {URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
 
-class CampaignResultsStages {
-    static ENTRY_POINT_URL = "api:stats_admission_campaign_stages";
+export default class CampaignsStagesByYear {
+    static ENTRY_POINT_URL = "api:stats_admission_campaigns_stages_by_year";
 
     constructor(id, options) {
         this.id = id;
 
         this.state = {
             data: {
-                type: 'line',
+                type: 'spline',
                 keys: {
                     x: 'campaign__year',
                     value: ['application_form', 'testing', 'examination', 'interviewing'],
@@ -54,5 +54,3 @@ class CampaignResultsStages {
         return columns;
     };
 }
-
-export default CampaignResultsStages;

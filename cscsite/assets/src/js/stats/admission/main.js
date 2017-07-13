@@ -1,8 +1,10 @@
-import CampaignResultsStages from "./plots/CampaignResultsStages";
+import CampaignsStagesByYear from "./plots/CampaignsStagesByYear";
 import CampaignResultsApplicants from "./plots/CampaignResultsApplicants";
 import CampaignResultsStudents from "./plots/CampaignResultsStudents";
 import CampaignTestScore from "./plots/CampaignTestScore";
 import CampaignExamScore from "./plots/CampaignExamScore";
+import CampaignStages from "./plots/CampaignStages";
+import {getTemplate} from "stats/utils";
 
 // DOM elements
 let cityFilter = $('#city-filter');
@@ -12,11 +14,21 @@ let campaignFilterForm = $('#campaigns-filter-form');
  function renderPlots (jsonData) {
     let options = {
         campaignId: jsonData.campaignId,
-        cityCode: jsonData.cityCode
+        cityCode: jsonData.cityCode,
+        templates: {
+            select: getTemplate(
+                "plot-filter-select-template",
+                {selected: undefined}
+            ),
+            submitButton: getTemplate("plot-filter-submit-button")
+        },
     };
-    console.log(options);
-    new CampaignResultsStages('#plot-campaign-stages-results', options);
+    // By city
+    new CampaignsStagesByYear('#plot-campaigns-stages-by-year', options);
     new CampaignResultsApplicants('#plot-campaign-applicants-results', options);
+    // By admission campaign
+    new CampaignStages('plot-campaign-stages-by-universities',
+        options);
     // new CampaignResultsStudents('#plot-campaign-students-results', options);
     new CampaignTestScore('#plot-campaign-testing-scores', options);
     new CampaignExamScore('#plot-campaign-exam-scores', options);

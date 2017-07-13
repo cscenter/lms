@@ -32,6 +32,28 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
     }
 
     /**
+     * For each filter `f` from `this.filters.props[name]` get filter
+     * state from `this.state.filters` and make sure `obj.f` match state value.
+     * @param obj Object to compare values with filters state
+     * @param name Filters collection name in dot-notation
+     * @returns {bool}
+     */
+    matchFilters(obj, name) {
+        return this.filters.props[name].reduce((a, b) => {
+            let obj_value = b.split('.').reduce((a, b) => a[b], obj);
+            return a && this.matchFilter(obj_value, b);
+        }, true);
+    }
+
+    matchFilter = (value, stateAttrName) => {
+        let stateValue = this.filters.state[stateAttrName];
+        return stateValue === void 0 ||
+               stateValue === "" ||
+               stateValue === value ||
+              (Array.isArray(value) && value.includes(stateValue));
+    };
+
+    /**
      * Collect filter choices. Don't want to calculate this data every
      * time on filter event
      * @param rawJSON JSON from REST API call
@@ -53,20 +75,19 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
             return;
         }
         let choices = [...this.filters.choices.curriculumYear].sort();
-        let filterId = this.id +  "-curriculum-year-filter";
         let self = this;
         return {
-            id: '#' + filterId,
-            html: this.templates.filters.curriculumYear({
-                filterId: filterId,
+            options: {
+                id: this.id + "-curriculum-year-filter",
                 items: choices
-            }),
-            callback: function() {
-                $(this.id).selectpicker('render')
-                .on('changed.bs.select', function () {
-                    self.filters.state["student.curriculum_year"] =
-                        (this.value !== "") ? parseInt(this.value) : this.value;
-                });
+            },
+            template: this.templates.filters.curriculumYear,
+            onRendered: function () {
+                $(`#${this.options.id}`).selectpicker('render')
+                    .on('changed.bs.select', function () {
+                        self.filters.state["student.curriculum_year"] =
+                            (this.value !== "") ? parseInt(this.value) : this.value;
+                    });
             }
         };
     };
@@ -82,21 +103,21 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
                name: this.filters.choices.studentGroups[k]
            });
         });
-        let filterId = this.id +  "-select-filter";
         let self = this;
         return {
-            id: '#' + filterId,
-            html: this.templates.filters.select({
+            options: {
                 filterName: "Группа",
-                filterId: filterId,
+                selected: undefined,
+                id: this.id +  "-select-filter",
                 items: choices
-            }),
-            callback: function() {
-                $(this.id).selectpicker('render')
-                .on('changed.bs.select', function () {
-                    self.filters.state["student.groups"] =
-                        (this.value !== "") ? parseInt(this.value) : this.value;
-                });
+            },
+            template: this.templates.filters.select,
+            onRendered: function () {
+                $(`#${this.options.id}`).selectpicker('render')
+                    .on('changed.bs.select', function () {
+                        self.filters.state["student.groups"] =
+                            (this.value !== "") ? parseInt(this.value) : this.value;
+                    });
             }
         };
     };

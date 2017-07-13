@@ -1,27 +1,14 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
-import mix from '../../MixinBuilder';
-import FilteredPlot from './FilteredPlot';
-import AssignmentsFilterMixin from './AssignmentsFilterMixin';
 import * as moment from 'moment';
+import mix from '../../MixinBuilder';
+import PlotOptions from 'stats/PlotOptions';
+import AssignmentsFilterMixin from './AssignmentsFilterMixin';
+import i18n from 'stats/i18n';
 
 
-class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin) {
-    i18n = {
-        lang: 'ru',
-        ru: {
-            no_assignments: "Заданий не найдено.",
-            types: {
-                gte7days: "7 дней и более",
-                lte1to6days: "1-6 дней",
-                lte3to24hours: "3-24 часа",
-                lt3hours: "Менее 3 часов",
-                after: "После дедлайна",
-                // no_submission: "Не сдавал"
-            }
-        }
-    };
+class AssignmentsDeadline extends mix(PlotOptions).with(AssignmentsFilterMixin) {
 
     constructor(id, options) {
         super(id, options);
@@ -40,8 +27,8 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
         // Order is unspecified for Object, but I believe browsers sort
         // it in a proper way
         // FIXME: set explicitly?
-        this.types = Object.keys(this.i18n.ru.types).reduce((m, k) => {
-            return m.set(k, this.i18n.ru.types[k]);
+        this.types = Object.keys(i18n.submissions.deadline_types).reduce((m, k) => {
+            return m.set(k, i18n.submissions.deadline_types[k]);
         }, new Map());
 
         let promise = options.apiRequest ||
@@ -117,14 +104,14 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
 
     render = (data) => {
         if (!this.state.titles.length) {
-            $('#' + this.id).html(this.i18n.ru.no_assignments);
+            $('#' + this.id).html(i18n.assignments.no_assignments);
             return;
         }
 
         // Let's generate here, a lot of troubles with c3.load method right now
         this.plot = c3.generate({
             bindto: '#' + this.id,
-            oninit: () => { this.renderFilters() },
+            oninit: () => { this.appendOptionsForm() },
             data: {
                 type: this.type,
                 rows: data,
@@ -178,17 +165,16 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
      * with d3js. Each element must have `html` attribute. Callback is optional.
      * @returns {[*,*]}
      */
-    getFilterFormData = () => {
+    getOptions = () => {
         let self = this;
         let data = [
             // Filter by student gender
             {
-                id: `#${this.id}-gender-filter`,
-                html: this.templates.filters.gender({
-                    filterId: `${this.id}-gender-filter`
-                }),
-                callback: function () {
-                    $(this.id).selectpicker('render')
+                // id: `#${this.id}-gender-filter`,
+                options: {id: `${this.id}-gender-filter`},
+                template: this.templates.filters.gender,
+                onRendered: function () {
+                    $(`#${this.options.id}`).selectpicker('render')
                         .on('changed.bs.select', function () {
                             self.filters.state["student.gender"] = this.value;
                         });
@@ -200,7 +186,8 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             // Submit button
             {
                 isSubmitButton: true,
-                html: this.templates.filters.submitButton()
+                template: this.templates.filters.submitButton,
+                options: {}
             }
         ];
         return data.filter((e) => e);
@@ -212,11 +199,8 @@ class AssignmentsDeadline extends mix(FilteredPlot).with(AssignmentsFilterMixin)
             type: this.type,
             rows: filteredData,
             // Clean plot if no data, otherwise save animation transition
-            // FIXME: убрать бы эту зависимость от state
             unload: this.state.titles.length > 0 ? {} : true
         });
-        // FIXME: попробовать убрать Array.from везде. Но надо искать баг в самой c3.js
-        // this.plot.groups([Array.from(this.types, ([k, v]) => v)]);
         return false;
     };
 }
