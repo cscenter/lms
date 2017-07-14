@@ -8,6 +8,14 @@ export const GROUPS = {
     3: i18n.groups.GRADUATE_CENTER
 };
 
+export const COLOR_PALETTE = [
+    '#5cb85c',
+    '#f96868',
+    '#F6BE80',
+    '#515492',
+    '#4F86A0'
+];
+
 export const URLS = window.URLS;
 
 export function getTemplate (id) {

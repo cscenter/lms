@@ -33,7 +33,7 @@ class CampaignResultsStudents {
         let promise = options.apiRequest || this.getStats(options.campaign_id);
         promise
             .then(this.convertData)
-            .then(this.render)
+            .then(this.reflow)
             .done(this.appendParticipantsInfo);
     }
 
@@ -51,7 +51,7 @@ class CampaignResultsStudents {
         return rawJSON;
     };
 
-    render = (columns) => {
+    reflow = (columns) => {
         this.plot.load(this.state.data);
         return columns;
     };
