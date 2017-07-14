@@ -4,7 +4,7 @@ const i18n = {
     total: "Всего",
     total_participants: "Всего слушателей курса",
     people_suffix: "&nbsp;чел.",
-    score_suffix: "&nbsp;баллов",
+    score_suffix: "&nbsp;бал.",
     groups: {
         STUDENT_CENTER: "Студент центра",
         VOLUNTEER: "Вольнослушатель",

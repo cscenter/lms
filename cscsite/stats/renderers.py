@@ -11,7 +11,11 @@ class PandasListIndentJSONRenderer(JSONRenderer):
                 "Response data is a %s, not a DataFrame!" % type(data)
             )
         # FIXME: this solution is unordered! But PandasJSONRenderer not indented
-        return super().render(data.to_dict(orient='records'),
+        request = renderer_context['request']
+        orient = request.GET.get('orient', '')
+        if orient not in {'split', 'records', 'dict', 'list', 'series'}:
+            orient = 'records'
+        return super().render(data.to_dict(orient=orient),
                               accepted_media_type,
                               renderer_context)
 

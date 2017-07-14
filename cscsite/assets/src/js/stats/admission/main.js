@@ -1,5 +1,5 @@
-import CampaignsStagesByYear from "./plots/CampaignsStagesByYear";
-import CampaignResultsApplicants from "./plots/CampaignResultsApplicants";
+import CampaignsStagesByYear from "./plots/CampaignStagesTimeline";
+import CampaignResultsApplicants from "./plots/ApplicantsResultsTimeline";
 import CampaignResultsStudents from "./plots/CampaignResultsStudents";
 import CampaignTestScore from "./plots/CampaignTestScore";
 import CampaignExamScore from "./plots/CampaignExamScore";
@@ -16,10 +16,7 @@ let campaignFilterForm = $('#campaigns-filter-form');
         campaignId: jsonData.campaignId,
         cityCode: jsonData.cityCode,
         templates: {
-            select: getTemplate(
-                "plot-filter-select-template",
-                {selected: undefined}
-            ),
+            select: getTemplate("plot-filter-select-template"),
             submitButton: getTemplate("plot-filter-submit-button")
         },
     };
@@ -29,9 +26,9 @@ let campaignFilterForm = $('#campaigns-filter-form');
     // By admission campaign
     new CampaignStages('plot-campaign-stages-by-universities',
         options);
+    new CampaignTestScore('plot-campaign-testing-scores', options);
+    new CampaignExamScore('plot-campaign-exam-scores', options);
     // new CampaignResultsStudents('#plot-campaign-students-results', options);
-    new CampaignTestScore('#plot-campaign-testing-scores', options);
-    new CampaignExamScore('#plot-campaign-exam-scores', options);
 }
 
 function initFilter() {

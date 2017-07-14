@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
-import mix from '../../MixinBuilder';
+import mix from 'stats/MixinBuilder';
 import PlotOptions from 'stats/PlotOptions';
 import AssignmentsFilterMixin from './AssignmentsFilterMixin';
 import i18n from 'stats/i18n';

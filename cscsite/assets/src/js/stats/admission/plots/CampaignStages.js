@@ -3,10 +3,13 @@ import * as c3 from "c3";
 import $ from 'jquery';
 import {URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
+import mix from 'stats/MixinBuilder';
 import PlotOptions from "stats/PlotOptions";
+import {COLOR_PALETTE} from "stats/utils";
+import PlotTypeOptionMixin from "./PlotTypeOptionMixin";
 
 
-export default class CampaignsStages extends PlotOptions {
+export default class CampaignsStages extends mix(PlotOptions).with(PlotTypeOptionMixin) {
     static PLOT_TYPES = {
         "universities": {
             type: "universities",
@@ -16,12 +19,8 @@ export default class CampaignsStages extends PlotOptions {
         "courses": {
             type: "courses",
             entry_point: "api:stats_admission_campaign_stages_by_course",
-            x_axis: "course"
+            x_axis: "course__name"
         }
-    };
-    static ENTRY_POINTS = {
-        universities: "api:stats_admission_campaign_stages_by_university",
-        courses: "api:stats_admission_campaign_stages_by_course",
     };
 
     constructor(id, options) {
@@ -76,7 +75,7 @@ export default class CampaignsStages extends PlotOptions {
                 }
             },
             color: {
-                pattern: ['#5cb85c', '#f96868', '#F6BE80', '#515492']
+                pattern: COLOR_PALETTE
             },
             bindto: '#' + this.id,
             oninit: () => {
@@ -84,15 +83,19 @@ export default class CampaignsStages extends PlotOptions {
             },
             data: this.state.data
         });
-        // FIXME: Добавить эту логику в отдельный метод? Она же используется в submitHandler
-        this.getStats(this.state.campaignId)
+        this.fetchAndReflow(this.state.campaignId);
+    }
+
+    fetchAndReflow(campaignId) {
+        this.getStats(campaignId)
             .then(this.convertData)
-            .done(this.render);
+            .done(this.reflow);
     }
 
     getStats(campaignId) {
-        let entryPointURL = this.constructor.ENTRY_POINTS[this.state.type];
-        let dataURL = URLS[entryPointURL](campaignId);
+        // TODO: cache query
+        let url = this.constructor.PLOT_TYPES[this.state.type].entry_point;
+        let dataURL = URLS[url](campaignId);
         return $.getJSON(dataURL);
     }
 
@@ -101,25 +104,14 @@ export default class CampaignsStages extends PlotOptions {
         return json;
     };
 
-    render = (json) => {
+    reflow = (json) => {
         this.plot.load(this.state.data);
         return json;
     };
 
     getOptions = () => {
         let data = [
-            {
-                options: {
-                    filterName: "Вид",
-                    id: this.id + "-select",
-                    selected: this.state.type,
-                    items: [
-                        {name: 'Университеты', value: 'universities'},
-                        {name: 'Курсы', value: 'courses'},
-                    ]
-                },
-                template: this.templates.select,
-            },
+            this.getPlotTypeOptionData(),
             // Submit button
             {
                 isSubmitButton: true,
@@ -137,9 +129,7 @@ export default class CampaignsStages extends PlotOptions {
             newState in this.constructor.PLOT_TYPES) {
             this.state.type = this.constructor.PLOT_TYPES[newState].type;
             this.state.data.keys.x = this.constructor.PLOT_TYPES[newState].x_axis;
-            this.getStats(this.state.campaignId)
-                .then(this.convertData)
-                .done(this.render);
+            this.fetchAndReflow(this.state.campaignId);
         }
         return false;
     };

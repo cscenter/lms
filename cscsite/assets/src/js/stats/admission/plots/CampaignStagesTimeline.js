@@ -5,45 +5,41 @@ import {URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
 
-class CampaignResultsApplicants {
-    static ENTRY_POINT_URL = "api:stats_admission_campaign_applicants_results";
+/**
+ * Renders plot with stages statistics by years for provided city
+ */
+export default class CampaignStagesTimeline {
+    static ENTRY_POINT_URL = "api:stats_admission_campaigns_stages_by_year";
 
     constructor(id, options) {
         this.id = id;
 
         this.state = {
             data: {
-                type: 'bar',
+                type: 'spline',
                 keys: {
                     x: 'campaign__year',
-                    value: [
-                        "accept",
-                        "accept_if",
-                        "volunteer",
-                        "rejected_interview",
-                        "they_refused",
-                    ],
+                    value: ['application_form', 'testing', 'examination', 'interviewing'],
                 },
-                names: i18n.statuses,
+                names: {
+                    application_form: i18n.stages.application_form,
+                    testing: i18n.stages.testing,
+                    examination: i18n.stages.examination,
+                    interviewing: i18n.stages.interviewing,
+                },
                 json: [],
                 order: null, // https://github.com/c3js/c3/issues/1945
             }
         };
 
-
         this.plot = c3.generate({
             bindto: this.id,
-            axis: {
-                x: {
-                    type: 'categories'
-                }
-            },
             data: this.state.data
         });
         let promise = options.apiRequest || this.getStats(options.cityCode);
         promise
             .then(this.convertData)
-            .done(this.render);
+            .done(this.reflow);
     }
 
     getStats(cityCode) {
@@ -56,11 +52,8 @@ class CampaignResultsApplicants {
         return rawJSON;
     };
 
-    render = (columns) => {
+    reflow = (columns) => {
         this.plot.load(this.state.data);
         return columns;
     };
 }
-
-
-export default CampaignResultsApplicants;

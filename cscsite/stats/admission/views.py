@@ -10,7 +10,9 @@ from rest_pandas.serializers import SimpleSerializer
 
 from api.permissions import CuratorAccessPermission
 from learning.admission.models import Applicant, Test, Exam
-from stats.admission.pandas_serializers import ApplicantsResultsSerializer
+from stats.admission.pandas_serializers import ApplicantsResultsSerializer, \
+    TestingScoreByUniversitiesSerializer, TestingScoreByCoursesSerializer
+from stats.admission.serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
 
 TestingCountAnnotation = Count(Case(When(online_test__isnull=False, then=1),
@@ -59,19 +61,18 @@ class CampaignStagesByUniversities(ReadOnlyModelViewSet):
 class CampaignStagesByCourses(ReadOnlyModelViewSet):
     """Admission campaign stages by courses."""
     permission_classes = [CuratorAccessPermission]
+    serializer_class = StageByYearSerializer
 
-    def list(self, request, *args, **kwargs):
+    def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
-        applicants = (Applicant.objects
-                      .filter(campaign_id=campaign_id)
-                      .values('course')
-                      .annotate(application_form=Count("campaign_id"),
-                                testing=TestingCountAnnotation,
-                                examination=ExaminationCountAnnotation,
-                                interviewing=InterviewingCountAnnotation)
-                      )
-        # TODO: Add serializers for course name
-        return Response(applicants)
+        return (Applicant.objects
+                .filter(campaign_id=campaign_id)
+                .values('course')
+                .annotate(application_form=Count("campaign_id"),
+                          testing=TestingCountAnnotation,
+                          examination=ExaminationCountAnnotation,
+                          interviewing=InterviewingCountAnnotation)
+                .order_by("course"))
 
 
 class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
@@ -107,27 +108,61 @@ class CampaignStatsStudentsResults(ReadOnlyModelViewSet):
         return Response({})
 
 
-class CampaignStatsOnlineTestScore(ReadOnlyModelViewSet):
-    """Distribution of online test results by scores."""
+class CampaignStatsTestingScoreByUniversities(ListRenderersMixin, PandasView):
+    """Distribution of online test results by universities."""
     permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = TestingScoreByUniversitiesSerializer
 
-    def list(self, request, *args, **kwargs):
+    def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
-        qs = (Test.objects
-              .filter(applicant__campaign_id=campaign_id)
-              .values('score')
-              .annotate(total=Count('score')))
-        return Response(qs)
+        return (Test.objects
+                .filter(applicant__campaign_id=campaign_id)
+                .values('score', 'applicant__university__name')
+                .annotate(total=Count('score')))
 
 
-class CampaignStatsExamScore(ReadOnlyModelViewSet):
-    """Distribution of exam results by scores."""
+class CampaignStatsTestingScoreByCourses(ListRenderersMixin, PandasView):
+    """Distribution of online test results by courses."""
     permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = TestingScoreByCoursesSerializer
 
-    def list(self, request, *args, **kwargs):
+    def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
-        qs = (Exam.objects
-              .filter(applicant__campaign_id=campaign_id)
-              .values('score')
-              .annotate(total=Count('score')))
-        return Response(qs)
+        return (Test.objects
+                .filter(applicant__campaign_id=campaign_id)
+                .values('score', 'applicant__course')
+                .annotate(total=Count('score'))
+                .order_by('applicant__course'))
+
+
+# XXX: difference from Testing view in model class only (the same for *ByCourses
+# view) Looks like we can easily make them generic. Is it worth it?
+class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
+    """Distribution of exam results by universities."""
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = TestingScoreByUniversitiesSerializer
+
+    def get_queryset(self):
+        campaign_id = self.kwargs.get('campaign_id')
+        return (Exam.objects
+                .filter(applicant__campaign_id=campaign_id)
+                .values('score', 'applicant__university__name')
+                .annotate(total=Count('score')))
+
+
+class CampaignStatsExamScoreByCourses(ListRenderersMixin, PandasView):
+    """Distribution of exam results by courses."""
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = TestingScoreByCoursesSerializer
+
+    def get_queryset(self):
+        campaign_id = self.kwargs.get('campaign_id')
+        return (Exam.objects
+                .filter(applicant__campaign_id=campaign_id)
+                .values('score', 'applicant__course')
+                .annotate(total=Count('score'))
+                .order_by('applicant__course'))
