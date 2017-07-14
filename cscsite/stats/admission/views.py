@@ -1,17 +1,16 @@
-import json
-from itertools import groupby
-
 from django.db.models import Count, When, IntegerField, Case
 from rest_framework.response import Response
-from rest_framework.serializers import ListSerializer, BaseSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 from rest_pandas.serializers import SimpleSerializer
 
 from api.permissions import CuratorAccessPermission
 from learning.admission.models import Applicant, Test, Exam
-from stats.admission.pandas_serializers import ApplicantsResultsSerializer, \
-    TestingScoreByUniversitiesSerializer, TestingScoreByCoursesSerializer
+from stats.admission.pandas_serializers import \
+    CampaignResultsTimelineSerializer, \
+    ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
+    CampaignResultsByUniversitiesSerializer, \
+    CampaignResultsByCoursesSerializer
 from stats.admission.serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
 
@@ -21,6 +20,12 @@ ExaminationCountAnnotation = Count(Case(When(exam__isnull=False, then=1),
                                         output_field=IntegerField()))
 InterviewingCountAnnotation = Count(Case(When(interview__isnull=False, then=1),
                                          output_field=IntegerField()))
+
+STATUSES = [Applicant.ACCEPT,
+            Applicant.ACCEPT_IF,
+            Applicant.REJECTED_BY_INTERVIEW,
+            Applicant.VOLUNTEER,
+            Applicant.THEY_REFUSED]
 
 
 class CampaignsStagesByYears(ReadOnlyModelViewSet):
@@ -44,18 +49,17 @@ class CampaignsStagesByYears(ReadOnlyModelViewSet):
 class CampaignStagesByUniversities(ReadOnlyModelViewSet):
     """Admission campaign stages by universities."""
     permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
 
-    def list(self, request, *args, **kwargs):
+    def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
-        applicants = (Applicant.objects
-                      .filter(campaign_id=campaign_id)
-                      .values('university_id', 'university__name')
-                      .annotate(application_form=Count("campaign_id"),
-                                testing=TestingCountAnnotation,
-                                examination=ExaminationCountAnnotation,
-                                interviewing=InterviewingCountAnnotation)
-                      )
-        return Response(applicants)
+        return (Applicant.objects
+                .filter(campaign_id=campaign_id)
+                .values('university_id', 'university__name')
+                .annotate(application_form=Count("campaign_id"),
+                          testing=TestingCountAnnotation,
+                          examination=ExaminationCountAnnotation,
+                          interviewing=InterviewingCountAnnotation))
 
 
 class CampaignStagesByCourses(ReadOnlyModelViewSet):
@@ -76,17 +80,17 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
 
 
 class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
-    """Admission campaign results by applicants"""
+    """
+    Admission campaign results by applicants.
+
+    Not sure how many statuses will be needed in the future, so combine them
+    on application lvl instead of aggregation on DB.
+    """
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = ApplicantsResultsSerializer
+    pandas_serializer_class = CampaignResultsTimelineSerializer
 
     def get_queryset(self):
-        STATUSES = [Applicant.ACCEPT,
-                    Applicant.ACCEPT_IF,
-                    Applicant.REJECTED_BY_INTERVIEW,
-                    Applicant.VOLUNTEER,
-                    Applicant.THEY_REFUSED]
         city_code = self.kwargs.get('city_code')
         qs = (Applicant.objects
               .filter(campaign__city_id=city_code,
@@ -95,6 +99,37 @@ class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
               .annotate(total=Count("status"))
               # Under the assumption that campaign year is unique.
               .order_by('campaign__year'))
+        return qs
+
+
+class CampaignResultsByUniversities(ListRenderersMixin, PandasView):
+    """Admission campaign stages by universities."""
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = CampaignResultsByUniversitiesSerializer
+
+    def get_queryset(self):
+        campaign_id = self.kwargs.get('campaign_id')
+        qs = (Applicant.objects
+              .filter(campaign_id=campaign_id,
+                      status__in=STATUSES)
+              .values('university_id', 'university__name', 'status')
+              .annotate(total=Count("status")))
+        return qs
+
+
+class CampaignResultsByCourses(ListRenderersMixin, PandasView):
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = CampaignResultsByCoursesSerializer
+
+    def get_queryset(self):
+        campaign_id = self.kwargs.get('campaign_id')
+        qs = (Applicant.objects
+              .filter(campaign_id=campaign_id,
+                      status__in=STATUSES)
+              .values('course', 'status')
+              .annotate(total=Count("status")))
         return qs
 
 
@@ -112,7 +147,7 @@ class CampaignStatsTestingScoreByUniversities(ListRenderersMixin, PandasView):
     """Distribution of online test results by universities."""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = TestingScoreByUniversitiesSerializer
+    pandas_serializer_class = ScoreByUniversitiesSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
@@ -126,7 +161,7 @@ class CampaignStatsTestingScoreByCourses(ListRenderersMixin, PandasView):
     """Distribution of online test results by courses."""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = TestingScoreByCoursesSerializer
+    pandas_serializer_class = ScoreByCoursesSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
@@ -143,7 +178,7 @@ class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
     """Distribution of exam results by universities."""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = TestingScoreByUniversitiesSerializer
+    pandas_serializer_class = ScoreByUniversitiesSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
@@ -157,7 +192,7 @@ class CampaignStatsExamScoreByCourses(ListRenderersMixin, PandasView):
     """Distribution of exam results by courses."""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = TestingScoreByCoursesSerializer
+    pandas_serializer_class = ScoreByCoursesSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')

@@ -4,7 +4,14 @@ from django.utils.translation import ugettext_lazy as _
 from users.models import CSCUser
 
 
-class ApplicantsResultsSerializer(PandasSerializer):
+def _index_to_name(course_index):
+    if course_index in CSCUser.COURSES:
+        return str(CSCUser.COURSES[course_index])
+    else:
+        return str(_("Other"))
+
+
+class CampaignResultsTimelineSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         return (dataframe
                 .pivot_table(index='campaign__year', columns='status',
@@ -12,7 +19,31 @@ class ApplicantsResultsSerializer(PandasSerializer):
                 .reset_index('campaign__year'))
 
 
-class TestingScoreByUniversitiesSerializer(PandasSerializer):
+class CampaignResultsByUniversitiesSerializer(PandasSerializer):
+    def transform_dataframe(self, dataframe):
+        return (dataframe
+                .pivot_table(index='university__name',
+                             columns='status',
+                             values='total',
+                             fill_value=0)
+                .reset_index('university__name'))
+
+
+class CampaignResultsByCoursesSerializer(PandasSerializer):
+    def transform_dataframe(self, dataframe):
+        df = (dataframe
+              .pivot_table(index='course',
+                           columns='status',
+                           values='total',
+                           fill_value=0))
+        df.index = df.index.map(_index_to_name)
+        df.index.rename("course__name", inplace=True)
+        df = df.reset_index('course__name')
+        return df
+
+
+class ScoreByUniversitiesSerializer(PandasSerializer):
+    """Both applicable for testing and examination scores serialization"""
     def transform_dataframe(self, dataframe):
         return (dataframe
                 .pivot_table(index='score',
@@ -22,20 +53,17 @@ class TestingScoreByUniversitiesSerializer(PandasSerializer):
                 .reset_index('score'))
 
 
-class TestingScoreByCoursesSerializer(PandasSerializer):
+class ScoreByCoursesSerializer(PandasSerializer):
+    """Both applicable for testing and examination scores serialization"""
     def transform_dataframe(self, dataframe):
         df = (dataframe
               .pivot_table(index='score',
                            columns='applicant__course',
                            values='total',
                            fill_value=0))
-        to_rename = {c: self.index_to_name(c) for c in df.columns}
+        to_rename = {c: _index_to_name(c) for c in df.columns}
         df.rename(columns=to_rename, inplace=True)
         df = df.reset_index('score')
         return df
 
-    def index_to_name(self, course_index):
-        if course_index in CSCUser.COURSES:
-            return str(CSCUser.COURSES[course_index])
-        else:
-            return str(_("Other"))
+
