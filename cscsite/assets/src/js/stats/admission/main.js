@@ -1,9 +1,10 @@
-import CampaignsStagesByYear from "./plots/CampaignStagesTimeline";
-import CampaignResultsApplicants from "./plots/ApplicantsResultsTimeline";
+import CampaignStagesTimeline from "./plots/CampaignStagesTimeline";
+import ApplicantsResultsTimeline from "./plots/ApplicantsResultsTimeline";
 import CampaignResultsStudents from "./plots/CampaignResultsStudents";
 import CampaignTestScore from "./plots/CampaignTestScore";
 import CampaignExamScore from "./plots/CampaignExamScore";
 import CampaignStages from "./plots/CampaignStages";
+import CampaignResultsApplicants from "./plots/CampaignResultsApplicants";
 import {getTemplate} from "stats/utils";
 
 // DOM elements
@@ -21,11 +22,11 @@ let campaignFilterForm = $('#campaigns-filter-form');
         },
     };
     // By city
-    new CampaignsStagesByYear('#plot-campaigns-stages-by-year', options);
-    new CampaignResultsApplicants('#plot-campaign-applicants-results', options);
+    new CampaignStagesTimeline('#plot-campaigns-stages-timeline', options);
+    new ApplicantsResultsTimeline('#plot-applicants-results-timeline', options);
     // By admission campaign
-    new CampaignStages('plot-campaign-stages-by-universities',
-        options);
+    new CampaignStages('plot-campaign-stages', options);
+    new CampaignResultsApplicants('plot-campaign-applicants-results', options);
     new CampaignTestScore('plot-campaign-testing-scores', options);
     new CampaignExamScore('plot-campaign-exam-scores', options);
     // new CampaignResultsStudents('#plot-campaign-students-results', options);
