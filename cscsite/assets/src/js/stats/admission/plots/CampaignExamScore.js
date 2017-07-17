@@ -107,7 +107,6 @@ export default class CampaignExamScore extends mix(PlotOptions).with(PlotTypeOpt
     reflow = (json) => {
         this.plot.groups([this.state.data.keys.value]);
         this.plot.load(this.state.data);
-        console.log(this.state.data);
         return json;
     };
 
