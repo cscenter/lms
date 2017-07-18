@@ -1,15 +1,14 @@
-from __future__ import unicode_literals, absolute_import
-
-from django import forms
-from django.contrib.admin import widgets
+from django.db import models
 from django.db.models import TextField, TimeField
-from django.utils.timezone import now
+from django.utils import timezone
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
+from core.admin import CityAwareModelForm, BaseCityAwareSplitDateTimeWidget, \
+    CityAwareSplitDateTimeField
 from core.forms import AdminRichTextAreaWidget
 from learning.admission.forms import InterviewStreamChangeForm
 from learning.admission.import_export import OnlineTestRecordResource, \
@@ -190,13 +189,21 @@ class InterviewStreamAdmin(admin.ModelAdmin):
         """
         if not obj:
             return []
-        elif obj.date < now().date():
+        elif obj.date < timezone.now().date():
             return ['start_at', 'end_at', 'duration', 'interviewers', 'date']
         else:
             return ['start_at', 'end_at', 'duration', 'date']
 
 
 class InterviewInvitationAdmin(admin.ModelAdmin):
+    form = CityAwareModelForm
+    # TODO: Попробовать перенести это в саму форму? Или унаследоваться от admin.ModelAdmin и попробовать патчить уже форму?
+    formfield_overrides = {
+        models.DateTimeField: {
+            'widget': BaseCityAwareSplitDateTimeWidget,
+            'form_class': CityAwareSplitDateTimeField
+        }
+    }
     model = InterviewInvitation
     list_display = ['date', 'applicant', 'get_accepted']
     raw_id_fields = ("interview", "applicant")

@@ -116,6 +116,7 @@ class VenueFactory(factory.DjangoModelFactory):
     class Meta:
         model = Venue
 
+    # TODO: make sure city_id is one from `settings.TIME_ZONES`
     name = "Test venue"
     description = "This is a special venue for tests"
 

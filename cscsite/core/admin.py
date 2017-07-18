@@ -1,8 +1,15 @@
-from __future__ import absolute_import, unicode_literals
+import datetime
+import six
+import sys
 
+from django import forms
+from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin import widgets
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.urls import reverse, NoReverseMatch
 from django.db.models import Model
 from django.db.models.query import QuerySet
@@ -103,8 +110,117 @@ class FaqAdmin(admin.ModelAdmin):
     list_filter = ['site']
     list_display = ['question', 'sort']
 
+
 admin.site.register(University, UniversityAdmin)
 admin.site.register(City, CityAdmin)
-
 admin.site.register(Faq, FaqAdmin)
 admin.site.register(FaqCategory, FaqCategoryAdmin)
+
+
+# TIMEZONE SUPPORT
+
+def city_aware_to_naive(value, instance):
+    """
+    Convert aware datetime to naive in the timezone of the city for display.
+    """
+    if settings.USE_TZ and value is not None and timezone.is_aware(value):
+        if not hasattr(instance, "get_city_timezone"):
+            raise NotImplementedError("Implement `get_city_timezone` method "
+                                      "for %s model" % str(instance.__class__))
+        city_timezone = instance.get_city_timezone()
+        return timezone.make_naive(value, city_timezone)
+    return value
+
+
+class CityAwareModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """
+        Attach model instance to all `AdminSplitDateTime` widgets.
+        This allow to get city code inside widget and make datetime city aware.
+        """
+        super().__init__(*args, **kwargs)
+        for field_name, field_data in self.fields.items():
+            if isinstance(field_data, forms.SplitDateTimeField):
+                if not isinstance(field_data, CityAwareSplitDateTimeField):
+                    raise TypeError("`%s` field must be subclassed from "
+                                    "CustomSplitDateTimeField" % field_name)
+                widget = field_data.widget
+                if isinstance(widget, widgets.AdminSplitDateTime) and \
+                        not isinstance(widget, BaseCityAwareSplitDateTimeWidget):
+                    raise TypeError("`%s` field widget must be subclassed from "
+                                    "BaseCityAwareSplitDateTimeWidget" % field_name)
+                else:
+                    widget.instance = self.instance
+
+    def save(self, commit=True):
+        """
+        If city aware field was changed - fix timezone for all datetime fields.
+        """
+        if self.instance.city_aware_field_name in self.changed_data:
+            city_timezone = self.instance.get_city_timezone()
+            for field_name, field_data in self.fields.items():
+                if isinstance(field_data, CityAwareSplitDateTimeField):
+                    value = self.cleaned_data[field_name]
+                    value = value.replace(tzinfo=None)
+                    value = timezone.make_aware(value, city_timezone)
+                    self.cleaned_data[field_name] = value
+                    setattr(self.instance, field_name, value)
+        return super().save(commit)
+
+
+class BaseCityAwareSplitDateTimeWidget(widgets.AdminSplitDateTime):
+    def decompress(self, value):
+        if value:
+            value = city_aware_to_naive(value, self.instance)
+            return [value.date(), value.time().replace(microsecond=0)]
+        return [None, None]
+
+
+def naive_to_city_aware(value, instance):
+    """
+    When time zone support is enabled, convert naive datetimes to aware
+    datetimes.
+    """
+    if settings.USE_TZ and value is not None and timezone.is_naive(value):
+        city_timezone = instance.get_city_timezone()
+        try:
+            return timezone.make_aware(value, city_timezone)
+        except Exception:
+            message = _(
+                '%(datetime)s couldn\'t be interpreted '
+                'in time zone %(city_timezone)s; it '
+                'may be ambiguous or it may not exist.'
+            )
+            params = {'datetime': value, 'current_timezone': city_timezone}
+            six.reraise(ValidationError, ValidationError(
+                message,
+                code='ambiguous_timezone',
+                params=params,
+            ), sys.exc_info()[2])
+    return value
+
+
+class CityAwareSplitDateTimeField(forms.SplitDateTimeField):
+    def compress(self, data_list):
+        if data_list:
+            # Raise a validation error if time or date is empty
+            # (possible if SplitDateTimeField has required=False).
+            if data_list[0] in self.empty_values:
+                raise ValidationError(self.error_messages['invalid_date'], code='invalid_date')
+            if data_list[1] in self.empty_values:
+                raise ValidationError(self.error_messages['invalid_time'], code='invalid_time')
+            result = datetime.datetime.combine(*data_list)
+            city_aware = naive_to_city_aware(result, self.widget.instance)
+            return city_aware
+        return None
+
+    def has_changed(self, initial, data):
+        # FIXME: Сейчас похоже надо игнорировать этот метод в принципе, поскольку есть зависимость от `empty_permitted` и этот флаг влияет на то, когда будет
+        # сформирована `changed_data` - до обновления модели или после.
+        # FIXME: Либо надо удалить зависить от таймзоны в этом методе. Это возможно ли?
+        # FIXME: Ещё проблема - возможна ситуация. когда и stream и дату поправили так, что оно в итоге не попало в changed_data
+        # FIXME: Есть ещё противоречие - вроде бы поправили только стрим, но поправили и datetime. Надо ли это отражать в логе?
+        # print(initial, data, "initial and data?")
+        changed = super().has_changed(initial, data)
+        return changed
+
