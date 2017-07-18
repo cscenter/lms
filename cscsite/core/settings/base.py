@@ -164,7 +164,7 @@ LOCALE_PATHS = [
 ]
 
 USE_TZ = True
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'UTC'
 # Better to move timezone values to `City` model and cache it later
 TIME_ZONES = {
     'spb': pytz.timezone('Europe/Moscow'),

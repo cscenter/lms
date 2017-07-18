@@ -1,24 +1,29 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
+import random
 import uuid
 from itertools import count
 
 import datetime
 import factory
 from django.db.models.signals import post_save
-from factory.fuzzy import FuzzyInteger, FuzzyDateTime
+from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate, \
+    FuzzyDateTime
 
 from django.utils import timezone
 
 from core.factories import UniversityFactory, CityFactory
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
-    InterviewSlot, InterviewStream
+    InterviewSlot, InterviewStream, InterviewInvitation
 from learning.admission.signals import post_save_interview
 from learning.factories import VenueFactory
 from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
+
+
+class FuzzyTime(FuzzyNaiveDateTime):
+    def fuzz(self):
+        dt = super().fuzz()
+        return dt.time()
 
 
 class CampaignFactory(factory.DjangoModelFactory):
@@ -90,6 +95,7 @@ class InterviewFactory(factory.DjangoModelFactory):
         model = Interview
 
     applicant = factory.SubFactory(ApplicantFactory)
+    # TODO: replace with FuzzyDate
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
 
@@ -127,6 +133,14 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
         model = InterviewStream
 
     venue = factory.SubFactory(VenueFactory)
+    date = FuzzyDate(datetime.date(2011, 1, 1))
+    # 13:00 - 15:00
+    start_at = FuzzyTime(datetime.datetime(2011, 1, 1, 13, 0, 0),
+                         datetime.datetime(2011, 1, 1, 15, 0, 0))
+    # 16:00 - 17:00
+    end_at = FuzzyTime(datetime.datetime(2011, 1, 1, 16, 0, 0),
+                       datetime.datetime(2011, 1, 1, 17, 0, 0))
+    with_assignments = random.choice([True, False])
 
 
 class InterviewSlotFactory(factory.DjangoModelFactory):
@@ -135,3 +149,14 @@ class InterviewSlotFactory(factory.DjangoModelFactory):
 
     interview = factory.SubFactory(InterviewFactory)
     stream = factory.SubFactory(InterviewStreamFactory)
+
+
+class InterviewInvitationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = InterviewInvitation
+
+    applicant = factory.SubFactory(ApplicantFactory)
+    interview = factory.SubFactory(InterviewFactory)
+    stream = factory.SubFactory(InterviewStreamFactory)
+    date = FuzzyDate(datetime.date(2011, 1, 1))
+    expired_at = FuzzyNaiveDateTime(datetime.datetime(2017, 1, 1, 13, 0, 0))

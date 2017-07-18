@@ -461,6 +461,13 @@ class Venue(models.Model):
         verbose_name = _("Venue")
         verbose_name_plural = _("Venues")
 
+    def get_city_timezone(self):
+        return settings.TIME_ZONES[self.city_id]
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.city.field.name
+
     def __str__(self):
         return "{0}".format(smart_text(self.name))
 

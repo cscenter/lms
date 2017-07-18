@@ -288,7 +288,8 @@ class ICalView(generic.base.View):
         """
         'calname' and 'caldesc' should be set by overrriding method
         """
-        tz = timezone.get_current_timezone()
+        # FIXME: respect timezones!
+        tz = settings.TIME_ZONES['spb']
 
         min_dt = timezone.now()
         max_dt = min_dt + relativedelta(years=1)

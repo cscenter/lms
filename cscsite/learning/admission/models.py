@@ -577,6 +577,15 @@ class InterviewStream(TimeStampedModel):
         verbose_name = _("Interview stream")
         verbose_name_plural = _("Interview streams")
 
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        # self.venue.get_city_timezone()
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.venue.field.name
+
     def __str__(self):
         return "{}, {}-{}".format(
             date_format(self.date, settings.DATE_FORMAT),
@@ -674,6 +683,15 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name_plural = _("Interview invitations")
 
     objects = InterviewInvitationQuerySet.as_manager()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        # self.stream.venue.get_city_timezone()
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.stream.field.name
 
     def __str__(self):
         return str(self.date)

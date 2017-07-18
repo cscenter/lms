@@ -19,8 +19,8 @@ from learning.models import AssignmentNotification, \
 from learning.factories import AssignmentNotificationFactory, \
     CourseOfferingNewsNotificationFactory, StudentAssignmentFactory
 
-from .management.commands.notify import Command, get_base_url
-from .models import related_spec_to_list, apply_related_spec
+from core.management.commands.notify import Command, get_base_url
+from core.models import related_spec_to_list, apply_related_spec
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
