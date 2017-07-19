@@ -59,7 +59,6 @@ TEMPLATES = [
 ]
 
 INSTALLED_APPS = [
-    # 'flat',
     'modeltranslation',  # insert before admin
     'dal',
     'dal_select2',

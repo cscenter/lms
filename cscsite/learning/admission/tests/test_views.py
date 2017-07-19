@@ -1,10 +1,16 @@
 import pytest
+import datetime
+
+from bs4 import BeautifulSoup
+from django.apps import apps
 from django.urls import reverse
+from django.utils import timezone
 
 from core.factories import CityFactory
 from core.settings.base import DEFAULT_CITY_CODE
 from learning.admission.factories import ApplicantFactory, InterviewFactory, \
-    CampaignFactory, InterviewerFactory, CommentFactory
+    CampaignFactory, InterviewerFactory, CommentFactory, \
+    InterviewInvitationFactory, InterviewStreamFactory
 from learning.admission.models import Applicant, Interview
 from users.factories import UserFactory
 
@@ -145,3 +151,35 @@ def test_interview_results_dispatch_view(curator, client):
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission_interview_results_by_city",
                                    kwargs={"city_slug": city1.pk})
+
+
+@pytest.mark.django_db
+def test_invitation(curator, client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    admission_settings = apps.get_app_config("admission")
+    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
+    # Make sure invitation will be active
+    dt = timezone.now() + datetime.timedelta(hours=expired_after + 30)
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
+                                    end_at=datetime.time(15, 0),
+                                    duration=20,
+                                    date=dt.date(),
+                                    with_assignments=False)
+    assert stream.slots.count() == 3
+    invitation = InterviewInvitationFactory(expired_at=dt, stream=stream)
+    client.login(curator)
+    response = client.get(invitation.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any("14:40" in s.string for s in
+               html.find_all('input', {"name": "time"}))
+    # 30 min diff if stream with assignments
+    stream.with_assignments = True
+    stream.save()
+    response = client.get(invitation.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any("13:30" in s.string for s in
+               html.find_all('input', {"name": "time"}))
+
+# TODO: создание из потока  + слот - убедиться, что не можем создать приглашение для уже занятого слота. Если слот не занят ещё - то создаётся собесед и не отправляется приглашение.
+# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
+# TODO: Проверить время отправки напоминания, время/дату собеседования

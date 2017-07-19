@@ -21,8 +21,7 @@ from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, localtime, make_aware
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
@@ -31,15 +30,12 @@ from django.views.generic.edit import BaseUpdateView, BaseCreateView, \
     ModelFormMixin
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
-from formtools.wizard.views import NamedUrlCookieWizardView, \
-    NamedUrlSessionWizardView
-from post_office import mail
+from formtools.wizard.views import NamedUrlSessionWizardView
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.permissions import CuratorAccessPermission
-from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE, TIME_ZONES
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
@@ -97,7 +93,7 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
             del cleaned_data['workplace']
             del cleaned_data['position']
         city_code = cleaned_data['city']
-        today = now()
+        today = timezone.now()
         campaign = (Campaign.objects
                     .filter(year=today.year, city__code=city_code)
                     .first())
@@ -265,8 +261,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         if 'form' not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
             if not invitation:
-                context["form"] = InterviewFromStreamForm(
-                    city_code=applicant.campaign.city_id)
+                city_code = applicant.campaign.city_id
+                context["form"] = InterviewFromStreamForm(city_code=city_code)
             else:
                 context["invitation"] = invitation
         return context
@@ -284,7 +280,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         """Get data for interview from stream form"""
         if not request.user.is_curator:
             return self.handle_no_permission(request)
-        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
+        applicant_id = self.kwargs.get(self.pk_url_kwarg)
         applicant = get_object_or_404(
             Applicant.objects
             .filter(pk=applicant_id)
@@ -301,11 +297,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         if slot:
             response = self.create_interview(applicant, stream_form, slot)
         else:
-            # FIXME: temporary restrict this action to spb only
-            if applicant.campaign.city_id != 'spb':
-                messages.error(self.request,
-                               "Действие сейчас доступно только для СПб.")
-                return self.form_invalid(stream_form)
             response = self.create_invitation(applicant, stream_form)
         return response
 
@@ -315,13 +306,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         return reverse("admission_interview_detail", args=[self.object.pk])
 
     def create_interview(self, applicant, stream_form, slot):
-        data = {
-            'applicant': applicant.pk,
-            'status': Interview.APPROVED,
-            'interviewers': slot.stream.interviewers.all(),
-            'date': datetime.datetime.combine(slot.stream.date, slot.start_at)
-        }
-        form = self.form_class(data=data)
+        data = InterviewForm.build_data(applicant, slot)
+        form = InterviewForm(data=data)
         if form.is_valid():
             with transaction.atomic():
                 interview = self.object = form.save()
@@ -349,12 +335,16 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
     def create_invitation(self, applicant, stream_form):
         stream = stream_form.cleaned_data['stream']
-        interview_day = stream.date
-        # Set deadline for invitation
+        tz = stream.get_city_timezone()
+        interview_day = datetime.datetime(stream.date.year, stream.date.month,
+                                          stream.date.day, tzinfo=tz)
+        # Calculate deadline for invitation
         expired_in_hours = ADMISSION_SETTINGS.INVITATION_EXPIRED_IN_HOURS
-        expired_at = now() + datetime.timedelta(hours=expired_in_hours)
+        expired_at = timezone.now() + datetime.timedelta(hours=expired_in_hours)
+        # 00:00 of interview day is deadline, respect this
+        expired_at = min(expired_at, interview_day)
         invitation = InterviewInvitation(applicant=applicant,
-                                         date=interview_day,
+                                         date=stream.date,
                                          expired_at=expired_at,
                                          stream=stream)
         try:
@@ -368,7 +358,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 extra_tags='timeout')
         except IntegrityError:
             messages.error(self.request, "Приглашение не было создано.")
-
         url = reverse("admission_applicant_detail", args=[applicant.pk])
         return HttpResponseRedirect("{}#create".format(url))
 
@@ -423,7 +412,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         context = super().get_context_data(**kwargs)
         # TODO: collect stats for curators here?
         context["today"] = self.object_list.filter(
-            date__date=now(),
+            date__date=timezone.now(),
             status=Interview.APPROVED).count()
         context["filter"] = self.filterset
         # Choose results list title for selected campaign
@@ -459,7 +448,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 messages.error(self.request, "Нет активных кампаний по набору.")
             # Duplicate initial values from filterset
             status = InterviewStatusFilter.AGREED
-            date = now().strftime("%d.%m.%Y")
+            date = timezone.now().strftime("%d.%m.%Y")
             url = "{}?campaign={}&status={}&date={}".format(
                 reverse("admission_interviews"),
                 c, status, date)
@@ -468,7 +457,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_queryset(self):
         q = (Interview.objects
-             .select_related("applicant")
+             .select_related("applicant", "applicant__campaign")
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
@@ -502,6 +491,8 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                              queryset=(Comment.objects
                                        .select_related("interviewer")))))
         context = self.get_applicant_context(interview.applicant_id)
+        # Activate timezone for the whole detail view
+        timezone.activate(context['applicant'].get_city_timezone())
         context.update({
             "interview": interview,
             "assignments_form": InterviewAssignmentsForm(instance=interview),
@@ -749,7 +740,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         for attr_name in same_attrs:
             setattr(user, attr_name, getattr(applicant, attr_name))
         user.last_name = applicant.surname
-        user.enrollment_year = user.curriculum_year = now().year
+        user.enrollment_year = user.curriculum_year = timezone.now().year
         # Looks like the same fields below
         user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
         # For github left part after github.com/ only
@@ -808,6 +799,7 @@ class InterviewAppointmentView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         invitation = self.get_invitation()
+        timezone.activate(invitation.get_city_timezone())
         context = {
             "invitation": invitation,
             "interview": None
@@ -817,9 +809,6 @@ class InterviewAppointmentView(generic.TemplateView):
             interview = invitation.applicant.interview
             if invitation.stream.with_assignments:
                 interview.date -= time_diff
-                city_code = interview.applicant.campaign.city_id
-                interview.date = localtime(interview.date,
-                                           TIME_ZONES[city_code])
             context["interview"] = interview
         elif not invitation.is_expired:
             slots = invitation.stream.slots.all()
@@ -827,17 +816,16 @@ class InterviewAppointmentView(generic.TemplateView):
                 for slot in slots:
                     slot.start_at = calculate_time(slot.start_at, time_diff)
             context["slots"] = slots
-        # FIXME: Надо учесть с задачами или без?
-        # FIXME: А если так получилось, что все слоты заняты. Возможно?
+        # TODO: What if slots are all busy? Is it possible?
         return context
 
     def get_invitation(self):
         date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
         return get_object_or_404(
             InterviewInvitation.objects
+                .select_related("stream", "stream__venue", "applicant")
                 .filter(date=date,
-                        secret_code=self.kwargs['secret_code'])
-                .select_related("stream", "applicant"))
+                        secret_code=self.kwargs['secret_code']))
 
     def post(self, request, *args, **kwargs):
         invitation = self.get_invitation()
@@ -846,6 +834,7 @@ class InterviewAppointmentView(generic.TemplateView):
                            extra_tags="timeout")
             return HttpResponseRedirect(invitation.get_absolute_url())
         # Can't edit through admin interface
+        # TODO: Do I really need to store date in invitation model?
         assert invitation.date == invitation.stream.date
         slot_id = int(request.POST['time'])
         slot = get_object_or_404(
@@ -854,13 +843,7 @@ class InterviewAppointmentView(generic.TemplateView):
                         # Additional check that slot consistent
                         # with invitation stream
                         stream_id=invitation.stream_id))
-        data = {
-            'applicant': invitation.applicant_id,
-            'status': Interview.APPROVED,
-            'interviewers': invitation.stream.interviewers.all(),
-            'date': datetime.datetime.combine(invitation.stream.date,
-                                              slot.start_at)
-        }
+        data = InterviewForm.build_data(invitation.applicant, slot)
         form = InterviewForm(data=data)
         if form.is_valid():
             with transaction.atomic():

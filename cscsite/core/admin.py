@@ -213,14 +213,3 @@ class CityAwareSplitDateTimeField(forms.SplitDateTimeField):
             city_aware = naive_to_city_aware(result, self.widget.instance)
             return city_aware
         return None
-
-    def has_changed(self, initial, data):
-        # FIXME: Сейчас похоже надо игнорировать этот метод в принципе, поскольку есть зависимость от `empty_permitted` и этот флаг влияет на то, когда будет
-        # сформирована `changed_data` - до обновления модели или после.
-        # FIXME: Либо надо удалить зависить от таймзоны в этом методе. Это возможно ли?
-        # FIXME: Ещё проблема - возможна ситуация. когда и stream и дату поправили так, что оно в итоге не попало в changed_data
-        # FIXME: Есть ещё противоречие - вроде бы поправили только стрим, но поправили и datetime. Надо ли это отражать в логе?
-        # print(initial, data, "initial and data?")
-        changed = super().has_changed(initial, data)
-        return changed
-

@@ -4,6 +4,7 @@ from itertools import count
 
 import datetime
 import factory
+import pytz
 from django.db.models.signals import post_save
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate, \
     FuzzyDateTime
@@ -96,8 +97,8 @@ class InterviewFactory(factory.DjangoModelFactory):
 
     applicant = factory.SubFactory(ApplicantFactory)
     # TODO: replace with FuzzyDate
-    date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-            + datetime.timedelta(days=3)).date()
+    date = (datetime.datetime.now().replace(tzinfo=pytz.UTC)
+            + datetime.timedelta(days=3))
 
     @factory.post_generation
     def interviewers(self, create, extracted, **kwargs):
@@ -159,4 +160,5 @@ class InterviewInvitationFactory(factory.DjangoModelFactory):
     interview = factory.SubFactory(InterviewFactory)
     stream = factory.SubFactory(InterviewStreamFactory)
     date = FuzzyDate(datetime.date(2011, 1, 1))
-    expired_at = FuzzyNaiveDateTime(datetime.datetime(2017, 1, 1, 13, 0, 0))
+    expired_at = FuzzyDateTime(datetime.datetime(2017, 1, 1, 13, 0, 0,
+                                                 tzinfo=pytz.UTC))

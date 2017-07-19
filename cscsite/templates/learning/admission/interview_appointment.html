@@ -14,7 +14,7 @@
     <div class="panel">
         <div class="panel-body">
             {% if interview %}
-                <p>Ждём вас на собеседование в CS центр {{ interview.date|date:"d E" }} к {{ interview.date|date:"H:i" }}.</p><br>
+                <p>Ждём вас на собеседование в CS центр {{ interview.date_local|date:"d E" }} к {{ interview.date_local|date:"H:i" }}.</p><br>
                 {% if invitation.stream.venue.directions %}
                     <b>Как добраться</b><br>
                     {{ invitation.stream.venue.directions }}
