@@ -116,7 +116,14 @@ class ContestAdmin(admin.ModelAdmin):
 
 
 class InterviewAdmin(admin.ModelAdmin):
-    list_display = ['date', 'applicant', 'status']
+    form = CityAwareModelForm
+    formfield_overrides = {
+        models.DateTimeField: {
+            'widget': BaseCityAwareSplitDateTimeWidget,
+            'form_class': CityAwareSplitDateTimeField
+        }
+    }
+    list_display = ['date_local', 'applicant', 'status']
     list_filter = ['status', 'applicant__campaign']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -197,7 +204,6 @@ class InterviewStreamAdmin(admin.ModelAdmin):
 
 class InterviewInvitationAdmin(admin.ModelAdmin):
     form = CityAwareModelForm
-    # TODO: Попробовать перенести это в саму форму? Или унаследоваться от admin.ModelAdmin и попробовать патчить уже форму?
     formfield_overrides = {
         models.DateTimeField: {
             'widget': BaseCityAwareSplitDateTimeWidget,

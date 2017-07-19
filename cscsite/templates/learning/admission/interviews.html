@@ -4,6 +4,7 @@
 {% load thumbnail %}
 {% load bootstrap_pagination %}
 {% load static %}
+{% load tz %}
 {% load floatdot from core_tags %}
 {% load render_bundle from webpack_loader %}
 
@@ -53,6 +54,7 @@
 {% endblock javascripts %}
 
 {% block content %}
+{% localtime off %}
 <div class="admission-list-page">
     {% crispy filter.form %}
     <div class="page-content">
@@ -84,9 +86,8 @@
                 {% for interview in interviews %}
                     <tr>
                         <td class="date">
-
-                            <div class="time">{{ interview.date|date:"H:i" }}</div>
-                            {{ interview.date|date:"d E" }}
+                            <div class="time">{{ interview.date_local|date:"H:i" }}</div>
+                            {{ interview.date_local|date:"d E" }}
                         </td>
                         <td class="applicant">
                             <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.get_full_name }}</a>
@@ -132,4 +133,5 @@
       </div>
     </div>
   </div>
+{% endlocaltime %}
 {% endblock content %}

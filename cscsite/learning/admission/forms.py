@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from datetime import datetime
+
 from crispy_forms.bootstrap import FormActions, PrependedText, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Field, Row, Fieldset, \
@@ -10,6 +12,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.forms.models import ModelForm
+from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
@@ -348,6 +351,17 @@ class InterviewForm(forms.ModelForm):
             FormActions(Submit('create', _('Create interview')),
                         css_class="pull-right"))
 
+    @staticmethod
+    def build_data(applicant, slot):
+        date = datetime.combine(slot.stream.date, slot.start_at)
+        date = timezone.make_aware(date, applicant.get_city_timezone())
+        return {
+            'applicant': applicant.pk,
+            'status': Interview.APPROVED,
+            'interviewers': slot.stream.interviewers.all(),
+            'date': date
+        }
+
 
 class InterviewFromStreamForm(forms.Form):
     prefix = "interview_from_stream"
@@ -360,9 +374,8 @@ class InterviewFromStreamForm(forms.Form):
     slot = forms.ModelChoiceField(
         label="Время собеседования",
         queryset=InterviewSlot.objects.select_related("stream").none(),
-        help_text="Если указать, то приглашение согласовать время "
-                  "не будет отправлено на почту. "
-                  "Сейчас не обязательно только для СПб.",
+        help_text="Если указать, то будет создано собеседование вместо "
+                  "отправки приглашения на почту.",
         required=False)
 
     def clean(self):

@@ -8,13 +8,14 @@ from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import query, Q
+from django.templatetags.tz import datetimeobject
 from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
-from django.utils.timezone import now, make_aware
+from django.utils.timezone import now, make_aware, localtime
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -67,6 +68,13 @@ class Campaign(models.Model):
     class Meta:
         verbose_name = _("Campaign")
         verbose_name_plural = _("Campaigns")
+
+    def get_city_timezone(self):
+        return settings.TIME_ZONES[self.city_id]
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.city.field.name
 
     def __str__(self):
         return smart_text(_("{}, {}").format(self.city.name, self.year))
@@ -269,6 +277,14 @@ class Applicant(TimeStampedModel):
     class Meta:
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.campaign.field.name
 
     def get_full_name(self):
         parts = [self.surname, self.first_name, self.patronymic]
@@ -488,6 +504,19 @@ class Interview(TimeStampedModel):
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
+
+    def date_local(self, timezone=None):
+        if not timezone:
+            timezone = self.get_city_timezone()
+        return localtime(self.date, timezone=timezone)
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.applicant.field.name
 
     def clean(self):
         if self.status != self.APPROVAL and not self.date:
