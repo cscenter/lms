@@ -63,8 +63,7 @@ class ProjectAdmin(admin.ModelAdmin):
                     .filter(Q(groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER) |
                             Q(is_superuser=True, is_staff=True))
                     .distinct())
-        return super(ProjectAdmin,
-                     self).formfield_for_manytomany(db_field, request, **kwargs)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class ReportAdmin(admin.ModelAdmin):

@@ -107,7 +107,7 @@ django-recaptcha==1.2.1
 django-registration-redux==1.4
 django-fixture-media==0.1.4
 django-annoying==0.10.3
-django-bootstrap3==7.1.0
+django-bootstrap3==9.0.0
 django-extra-views==0.8.0
 # Generic, reusable mixins
 django-braces==1.11.0
