@@ -123,7 +123,9 @@ class InterviewAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         }
     }
-    list_display = ['date_local', 'applicant', 'status']
+    # TODO: replace all datetime fields with str objects for lists? It will prevent
+    # auto localization
+    list_display = ['get_date_local', 'applicant', 'status']
     list_filter = ['status', 'applicant__campaign']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -134,6 +136,10 @@ class InterviewAdmin(admin.ModelAdmin):
                          .order_by("surname"))
         return (super(InterviewAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
+
+    def get_date_local(self, obj):
+        return str(obj.date_local())
+    get_date_local.short_description = _("Date")
 
 
 class InterviewCommentAdmin(admin.ModelAdmin):
