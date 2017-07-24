@@ -236,10 +236,9 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 # We didn't find active campaign for user city. Try to get
                 # any current campaign or show all if no active at all.
                 c = next((c.pk for c in current), "")
-            status = Applicant.INTERVIEW_TOBE_SCHEDULED
-            url = "{}?campaign={}&status={}".format(
+            url = "{}?campaign={}&status=".format(
                 reverse("admission_applicants"),
-                c, status)
+                c)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -722,8 +721,12 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
             user = CSCUser.objects.create_user(username=username,
                                                email=applicant.email,
                                                password=random_password)
-
-        user.groups.add(CSCUser.group.STUDENT_CENTER)
+        groups = []
+        if applicant.status == Applicant.VOLUNTEER:
+            groups.append(CSCUser.group.VOLUNTEER)
+        else:
+            groups.append(CSCUser.group.STUDENT_CENTER)
+        user.groups.add(*groups)
         # Migrate data from application form to user profile
         same_attrs = [
             "first_name",
