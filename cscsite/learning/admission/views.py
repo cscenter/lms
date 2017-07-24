@@ -408,6 +408,17 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             return InterviewsCuratorFilter
         return InterviewsFilter
 
+    def get_filterset_kwargs(self, filterset_class):
+        # Note: With django-filter 1.0.4 the best way to define initial value
+        # for form without magic is to put it in the view.
+        kwargs = super().get_filterset_kwargs(filterset_class)
+        if not kwargs["data"]:
+            kwargs["data"] = {
+                "status": InterviewStatusFilter.AGREED,
+                "date": now().date()
+            }
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # TODO: collect stats for curators here?
@@ -417,6 +428,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         context["filter"] = self.filterset
         # Choose results list title for selected campaign
         context["results_title"] = _("Current campaign")
+        # TODO: Move to appropriate place?
         if "campaign" in self.filterset.form.declared_fields:
             try:
                 campaign_filter_value = int(self.filterset.data.get("campaign"))

@@ -29,9 +29,9 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         queryset=(Campaign.objects
                   .select_related("city")
                   .order_by("-city__name", "-year").all()))
-    status = ApplicantStatusFilter(choices=Applicant.STATUS,
+    status = ApplicantStatusFilter(empty_label=None, choices=Applicant.STATUS,
                                    label=_("Status"))
-    surname = django_filters.CharFilter(lookup_type='icontains',
+    surname = django_filters.CharFilter(lookup_expr='icontains',
                                         label=_("Surname"))
 
     class Meta:
@@ -65,7 +65,7 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
 
     def __init__(self, *args, **kwargs):
         super(InterviewStatusFilter, self).__init__(*args, **kwargs)
-        self.extra['choices'] = (self.AGREED_CHOICE,) + self.extra['choices']
+        self.extra['choices'] = [self.AGREED_CHOICE] + self.extra['choices']
 
     def filter(self, qs, value):
         if value == self.AGREED:
@@ -76,22 +76,21 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
 
 
 class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
-    status = InterviewStatusFilter(choices=Interview.STATUSES,
+    status = InterviewStatusFilter(empty_label=None,
+                                   choices=Interview.STATUSES,
                                    label=_("Status"),
                                    help_text="")
-    date = django_filters.MethodFilter(action='filter_by_date',
-                                       name="date",
-                                       label=_("Date"),
-                                       help_text="")
+    date = django_filters.DateFilter(method='filter_by_date',
+                                     name="date",
+                                     label=_("Date"),
+                                     help_text="")
 
     class Meta:
         model = Interview
+        fields = ["status", "date"]
 
-    def filter_by_date(self, queryset, value):
-        try:
-            day_start = datetime.datetime.strptime(value, '%d.%m.%Y')
-        except ValueError:
-            return queryset
+    def filter_by_date(self, queryset, name, value):
+        day_start = value
         day_end = day_start + datetime.timedelta(days=1)
         return queryset.filter(
             date__range=(day_start, day_end)
@@ -100,10 +99,7 @@ class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     @property
     def form(self):
         if not hasattr(self, '_form'):
-            today = now().date()
             self._form = super().form
-            self._form.fields["status"].initial = InterviewStatusFilter.AGREED
-            self._form.fields["date"].initial = today.strftime("%d.%m.%Y")
             self._form.helper = FormHelper(self._form)
             self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"

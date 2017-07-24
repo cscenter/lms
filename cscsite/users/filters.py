@@ -27,12 +27,13 @@ class CSCUserFilter(django_filters.FilterSet):
 
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
 
-    name = django_filters.MethodFilter(action='name_filter')
-    cnt_enrollments = django_filters.MethodFilter(action='cnt_enrollments_filter')
+    name = django_filters.CharFilter(method='name_filter')
+    cnt_enrollments = django_filters.CharFilter(method='cnt_enrollments_filter')
     # FIXME: replace with range?
     curriculum_year = ListFilter(name='curriculum_year')
-    status = django_filters.MethodFilter(action='status_filter')
-    status_log = django_filters.MethodFilter(action='status_log_filter')
+    # TODO: TypedChoiceFilter?
+    status = django_filters.CharFilter(method='status_filter')
+    status_log = django_filters.CharFilter(method='status_log_filter')
     # FIXME: set cscuserstatuslog__created_0 and cscuserstatuslog__created_1 EXAMPLE: 2015-01-01%208:00
     cscuserstatuslog__created = django_filters.DateTimeFromToRangeFilter()
 
@@ -63,7 +64,7 @@ class CSCUserFilter(django_filters.FilterSet):
                 groups.remove(CSCUser.group.GRADUATE_CENTER)
             self.data.setlist("groups", groups)
 
-    def cnt_enrollments_filter(self, queryset, value):
+    def cnt_enrollments_filter(self, queryset, name, value):
         value_list = value.split(u',')
         try:
             value_list = [int(v) for v in value_list if v]
@@ -97,7 +98,7 @@ class CSCUserFilter(django_filters.FilterSet):
 
         return queryset.filter(condition)
 
-    def status_filter(self, queryset, value):
+    def status_filter(self, queryset, name, value):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
@@ -111,7 +112,7 @@ class CSCUserFilter(django_filters.FilterSet):
         return queryset.filter(status__in=value_list).distinct()
 
     # FIXME: Difficult and unpredictable
-    def name_filter(self, queryset, value):
+    def name_filter(self, queryset, name, value):
         qstr = value.strip()
         tsquery = self._form_name_tsquery(qstr)
         if tsquery is None:

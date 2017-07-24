@@ -16,6 +16,6 @@ class FilterEmptyChoiceMixin(object):
             lambda f: isinstance(self.filters[f], django_filters.ChoiceFilter),
             self.filters)
         for field_name in choices:
-            extended_choices = ((EMPTY_CHOICE,) +
+            extended_choices = ([EMPTY_CHOICE] +
                                 self.filters[field_name].extra['choices'])
             self.filters[field_name].extra['choices'] = extended_choices
