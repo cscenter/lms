@@ -45,8 +45,14 @@ class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
             .all())
     )
 
-    supervisor = django_filters.CharFilter(lookup_type='icontains',
+    supervisor = django_filters.CharFilter(lookup_expr='icontains',
                                            label=_("Supervisor"))
+
+    projectstudent__final_grade = django_filters.ChoiceFilter(
+        empty_label=None,
+        choices=Project.GRADES,
+        lookup_expr='exact',
+        label=_("Final grade"))
 
     class Meta:
         model = Project
@@ -226,8 +232,7 @@ class ReportFilter(django_filters.ChoiceFilter):
         return qs
 
 
-class CurrentTermProjectsFilter(FilterEmptyChoiceMixin,
-                                django_filters.FilterSet):
+class CurrentTermProjectsFilter(django_filters.FilterSet):
 
     participant_slides = SlidesStatusFilter(
         label=_("Participants presentation"), help_text="")
