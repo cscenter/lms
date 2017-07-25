@@ -188,3 +188,8 @@ SLIDESHARE_USERNAME = "pacahon"
 SLIDESHARE_PASSWORD = "q3wcp001"
 
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
+
+# Disable django-debug-toolbar jquery
+DEBUG_TOOLBAR_CONFIG = {
+    "JQUERY_URL": ""
+}
