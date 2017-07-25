@@ -1,9 +1,9 @@
 (function ($) {
     "use strict";
 
-    const faq = $("#questions-wrapper");
+    var faq = $("#questions-wrapper");
 
-    let fn = {
+    var fn = {
         launch: function () {
             fn.toggleBehaviour();
         },
