@@ -9,7 +9,7 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
 
-from core.views import RobotsView, MarkdownHowToHelpView
+from core.views import MarkdownHowToHelpView, robots
 from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
     ICalEventsView, UserReferenceCreateView, UserReferenceDetailView
@@ -78,7 +78,7 @@ urlpatterns = solid_i18n_patterns(
 )
 
 urlpatterns += [
-    url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
+    url(r'^robots\.txt$', robots, name='robotstxt'),
     url(r'^logout/$', LogoutView.as_view(permanent=False), name='logout'),
     url(r'^tools/markdown/preview/$',
         MarkdownRenderView.as_view(),

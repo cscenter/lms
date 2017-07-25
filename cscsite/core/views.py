@@ -13,6 +13,7 @@ from braces.views import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import render_to_response
 from django.utils.encoding import smart_text, python_2_unicode_compatible, \
     force_text
 from django.views import generic
@@ -21,14 +22,8 @@ from xlsxwriter import Workbook
 from .utils import render_markdown
 
 
-class RobotsView(generic.TemplateView):
-    template_name = "robots.txt"
-
-    def render_to_response(self, context, **kwargs):
-        return (super(RobotsView, self)
-                .render_to_response(context,
-                                    content_type='text/plain',
-                                    **kwargs))
+def robots(request):
+    return render_to_response('robots.txt', content_type="text/plain")
 
 
 # TODO: move mixins to separated module
