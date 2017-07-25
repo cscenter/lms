@@ -7,7 +7,7 @@ from django.views.generic import RedirectView
 from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
-from core.views import RobotsView, MarkdownRenderView, MarkdownHowToHelpView
+from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, OpenNskView
 from htmlpages import views
@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^open-nsk/$', OpenNskView.as_view(), name='open_nsk'),
     url(r'^api/', include('api.urls')),
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^robots\.txt$', RobotsView.as_view(), name='robotstxt'),
+    url(r'^robots\.txt$', robots, name='robotstxt'),
     # Redirect from old url `/pages/questions/` to more appropriate
     url(r'^pages/questions/$',
         RedirectView.as_view(url='/enrollment/program/',
