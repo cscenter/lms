@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=960">
+    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
+    <title>{% block title %}Computer Science Center{% endblock title %}</title>
+    <link rel="shortcut icon" type="image/png" href="{{ static("img/center/favicon.png") }}">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{ static("css/center/style.css") }}" rel="stylesheet">
+    {% if request.user.is_curator %}
+        <link href="{{ static("css/center/staff.css") }}" rel="stylesheet">
+    {% endif %}
+    {% block hightlight_styles %}
+    <link href="{{ static("css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
+    {% endblock hightlight_styles %}
+    {% block stylesheets %} {% endblock stylesheets %}
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script>
+      // Global Configuration
+      window.CSC = {
+          config: {
+              JS_SRC: {
+                MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
+                HIGHLIGHTJS: "{{ static("js/vendor/highlight.pack.js") }}",
+              },
+              // Used to reflow editor on tab toggle event
+              uberEditors: [],
+              localStorage: {
+                  // Map from hash to dummy value (effectively a set)
+                  hashes: []
+              }
+          }
+      }
+    </script>
+  </head>
+
+  <body class="tex2jax_ignore{% block body_class %}{% endblock body_class %}">
+{#    {% include "_top_menu.html" %}#}
+
+    {% block content %}
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          hello world
+        </div>
+      </div>
+    </div>
+    {% endblock content %}
+
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-9">{% trans %}Computer Science Center, 2011?17 ??.{% endtrans %}</div>
+          <div class="col-xs-3 social">
+            <a href="mailto:info@compscicenter.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
+            <a href="https://vk.com/compscicenter" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+            <a href="https://www.facebook.com/CSCenter" target="_blank"><i class="fa fa-facebook fa-2x"></i></a>
+            <a href="http://twitter.com/#Compscicenter" target="_blank"><i class="fa fa-twitter fa-2x"></i></a>
+            <a href="https://www.youtube.com/c/compscicenterru" target="_blank"><i class="fa fa-youtube fa-2x"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("js/vendor/jquery-1.12.4.min.js") }}"><\/script>')</script>
+    <script type="text/javascript" src="{{ static("js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js") }}"></script>
+    <script type="text/javascript" src="//cdn.ravenjs.com/3.10.0/raven.min.js"></script>
+    <script type="text/javascript" src="{{ static("js/raven_conf.js") }}"></script>
+
+    {{ render_bundle('manifest', 'js') }}
+    {{ render_bundle('vendor', 'js') }}
+    {{ render_bundle('main', 'js') }}
+
+    {% if messages %}
+      <script type="text/javascript">
+        $(function() {
+          $.jGrowl.defaults.closerTemplate = '<div>[{% trans %}close all{% endtrans %}]</div>';
+          {% for message in messages %}
+            $.jGrowl("{{ message | safe }}", {
+                position: 'bottom-right'
+                {%  if not message.extra_tags or "timeout" not in message.extra_tags %}, sticky: true{% endif %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}, theme: 'error'{% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}, theme: 'info'{% endif %}
+            });
+          {% endfor %}
+        });
+      </script>
+    {% endif %}
+
+    {% block javascripts %}{% endblock javascripts %}
+{#    {% sitemetrics by yandex for "25844420" %}#}
+  </body>
+</html>

@@ -11,7 +11,50 @@ INTERNAL_IPS = ["127.0.0.1", "::1"]
 INSTALLED_APPS += ['debug_toolbar',
                    'django_extensions',
                    # 'template_timings_panel',
-                   'rosetta']
+                   'rosetta',
+                   'django_jinja']
+
+TEMPLATES = [{
+    "BACKEND": "django_jinja.backend.Jinja2",
+    "APP_DIRS": False,
+    'DIRS': [
+        str(PROJECT_DIR / "templates"),
+    ],
+    "NAME": "jinja2",
+    "OPTIONS": {
+        "match_extension": ".jinja2",
+        "match_regex": r"^(?!narnia/).*",
+        # Or put filters under templatetags and load with
+        # django-jinja decorator
+        # "filters": {
+        #     # "thumbnail": "cscenter.settings.debug.thumbnail",
+        # },
+        "extensions": [
+            "jinja2.ext.do",
+            "jinja2.ext.loopcontrols",
+            "jinja2.ext.with_",
+            "jinja2.ext.i18n",
+            "jinja2.ext.autoescape",
+            "pipeline.jinja2.PipelineExtension",
+            "django_jinja.builtins.extensions.CsrfExtension",
+            "django_jinja.builtins.extensions.CacheExtension",
+            "django_jinja.builtins.extensions.TimezoneExtension",
+            "django_jinja.builtins.extensions.UrlsExtension",
+            "django_jinja.builtins.extensions.StaticFilesExtension",
+            "django_jinja.builtins.extensions.DjangoFiltersExtension",
+            "webpack_loader.contrib.jinja2ext.WebpackExtension",
+        ],
+        "bytecode_cache": {
+            "name": "default",
+            "backend": "django_jinja.cache.BytecodeCache",
+            "enabled": False,
+        },
+        "newstyle_gettext": True,
+        "autoescape": True,
+        "auto_reload": DEBUG,
+        "translation_engine": "django.utils.translation",
+    }
+}] + TEMPLATES
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',

@@ -96,6 +96,8 @@ django-js-reverse==0.7.3
 icalendar==3.11.3
 django-ical==1.4
 
+django-jinja==2.3.1
+
 # Misc utils
 django-autocomplete-light==3.2.1
 django-mptt==0.8.7
