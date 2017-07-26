@@ -22,13 +22,9 @@ let ends_at_touched = false;
 $(document).ready(function () {
     fn.configureCSRFAjax();
     fn.renderText();
-    // Clean stale local storage cache
-    fn.cleanLocalStorageEditorsFiles();
     fn.initUberEditors();
     fn.courseClassSpecificCode();
-    // Depends on `editors` var, which populated in initUberEditor method
-    fn.reflowEditorOnTabToggle();
-    fn.admissionFormSpecificCode();
+    fn.applicationForm();
     fn.courseOfferingTabs();
     fn.syllabusTabs();
 });
@@ -65,52 +61,20 @@ const fn = {
             const editor = UberEditor.init(textarea);
             CSC.config.uberEditors.push(editor);
         });
-    },
-    // TODO: move logic to new editor module
-    cleanLocalStorageEditorsFiles: function () {
-        // eliminate old and persisted epiceditor "files"
-        if ($ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
-            const editor = new EpicEditor();
-            const files = editor.getFiles(null, true);
-            Object.keys(files).forEach((fileKey) => {
-                let f = files[fileKey];
-                const hoursOld = (((new Date()) - (new Date(f.modified))) / (1000 * 60 * 60));
-                if (hoursOld > 24) {
-                    editor.remove(fileKey);
-                } else if (CSC.config.localStorage.hashes) {
-                    let text = editor.exportFile(fileKey).replace(/\s+/g, '');
-                    let hash = md5(text).toString();
-                    if (hash in CSC.config.localStorage.hashes) {
-                        editor.remove(fileKey);
-                    }
-                }
-            });
+        if ($ubereditors.length > 0) {
+            $('a[data-toggle="tab"]').on('shown.bs.tab',
+                                         UberEditor.reflowOnTabToggle);
         }
-    },
-    // TODO: move logic to new editor module
-    reflowEditorOnTabToggle: function () {
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var activeTab = $($(e.target).attr('href'));
-            var editorIframes = activeTab.find('iframe[id^=epiceditor-]');
-            var editorIDs = [];
-            editorIframes.each(function(i, iframe) {
-                editorIDs.push($(iframe).attr('id'));
-            });
-            $(CSC.config.uberEditors).each(function(i, editor) {
-                if ($.inArray(editor._instanceId, editorIDs) !== -1) {
-                    editor.reflow();
-                }
-            });
-        });
+        UberEditor.cleanLocalStorage($ubereditors);
     },
 
     // Move to `learning` bundle if necessary
     courseOfferingTabs: function() {
         let course_offering = $('#course-offering-detail-page').data('id');
         if (course_offering !== undefined) {
-            var tabList = $('#course-offering-detail-page__tablist');
+            const tabList = $('#course-offering-detail-page__tablist');
             window.onpopstate = function(event) {
-                var target;
+                let target;
                 if (event.state !== null) {
                     if ('target' in event.state) {
                         target = event.state.target;
@@ -207,8 +171,7 @@ const fn = {
         });
     },
 
-    admissionFormSpecificCode: function() {
-        // TODO: Move
+    applicationForm: function() {
         if ($(".forms-iframe").length > 0) {
             $(window).on("message", function(a){
                 var e=a.originalEvent,i=e.data,n=e.source;

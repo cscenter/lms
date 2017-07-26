@@ -37,11 +37,12 @@ from .views import \
 course_offering_patterns = url(
     r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/", include([
         # Common pages
-        url(r"^$",
-            CourseOfferingDetailView.as_view(),
+        url(r"^$", CourseOfferingDetailView.as_view(),
             name="course_offering_detail"),
-        url(r"^edit-descr$",
-            CourseOfferingEditDescrView.as_view(),
+        url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
+            CourseOfferingDetailView.as_view(),
+            name="course_offering_detail_with_active_tab"),
+        url(r"^edit-descr$", CourseOfferingEditDescrView.as_view(),
             name="course_offering_edit_descr"),
         url(r"^news/add$",
             CourseOfferingNewsCreateView.as_view(),
