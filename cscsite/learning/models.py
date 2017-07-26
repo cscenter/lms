@@ -420,6 +420,29 @@ class CourseOfferingNews(TimeStampedModel):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
 
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        self._create_notifications(created)
+
+    def _create_notifications(self, created):
+        if not created:
+            return
+        co_id = self.course_offering_id
+        active_enrollments = Enrollment.active.filter(course_offering_id=co_id)
+        teachers = CourseOfferingTeacher.objects.filter(course_offering=co_id)
+        # Replace cached queryset with .bulk_create() + .iterator()
+        notifications = []
+        for e in active_enrollments.iterator():
+            notifications.append(
+                CourseOfferingNewsNotification(user_id=e.student_id,
+                                               course_offering_news_id=self.pk))
+        for co_t in teachers.iterator():
+            notifications.append(
+                CourseOfferingNewsNotification(user_id=co_t.teacher_id,
+                                               course_offering_news_id=self.pk))
+        CourseOfferingNewsNotification.objects.bulk_create(notifications)
+
 
 @python_2_unicode_compatible
 class Venue(models.Model):

@@ -11,7 +11,7 @@
       <li class="active">Отчеты, {{ current_term }}</li>
     </ol>
     <div class="deadlines">
-        Период отправки отчета: {{ current_term.report_starts_at|date:"d E" }} &mdash; {{ current_term.report_ends_at|date:"d E Y" }} г.
+        Период отправки отчета{% if current_term.report_starts_at %}: {{ current_term.report_starts_at|date:"d E" }} &mdash; {{ current_term.report_ends_at|date:"d E Y" }} г.{% else %} не указан.{% endif %}
         {% if request.user.is_curator and not request.user.is_project_reviewer %}
             <br><span class="text-danger">Внимание!</span> Уведомления не будут приходить на почту, если не добавить себе группу "Project reviewer".
         {% endif %}
