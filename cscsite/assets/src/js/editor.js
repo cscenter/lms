@@ -188,6 +188,41 @@ class UberEditor {
             });
         }]);
     }
+
+    static reflowOnTabToggle (e) {
+        const activeTab = $($(e.target).attr('href'));
+        const editorIframes = activeTab.find('iframe[id^=epiceditor-]');
+        let editorIDs = [];
+        editorIframes.each(function(i, iframe) {
+            editorIDs.push($(iframe).attr('id'));
+        });
+        $(CSC.config.uberEditors).each(function(i, editor) {
+            if ($.inArray(editor._instanceId, editorIDs) !== -1) {
+                editor.reflow();
+            }
+        });
+    }
+
+    static cleanLocalStorage (ubereditors) {
+        // eliminate old and persisted epiceditor "files"
+        if (ubereditors.length > 0 && window.hasOwnProperty("localStorage")) {
+            const editor = new EpicEditor();
+            const files = editor.getFiles(null, true);
+            Object.keys(files).forEach((fileKey) => {
+                let f = files[fileKey];
+                const hoursOld = (((new Date()) - (new Date(f.modified))) / (1000 * 60 * 60));
+                if (hoursOld > 24) {
+                    editor.remove(fileKey);
+                } else if (CSC.config.localStorage.hashes) {
+                    let text = editor.exportFile(fileKey).replace(/\s+/g, '');
+                    let hash = md5(text).toString();
+                    if (hash in CSC.config.localStorage.hashes) {
+                        editor.remove(fileKey);
+                    }
+                }
+            });
+        }
+    }
 }
 
 export default UberEditor;

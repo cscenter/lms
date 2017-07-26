@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-07-26 14:39+0000\n"
-"PO-Revision-Date: 2017-07-26 14:40+0000\n"
+"PO-Revision-Date: 2017-07-26 16:30+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1353,7 +1353,7 @@ msgstr "Нет"
 
 #: cscsite/learning/views.py:777
 msgid "News was successfully created"
-msgstr "Новость была успешно создана"
+msgstr "Новость успешно добавлена"
 
 #: cscsite/learning/views.py:780
 msgid "News wasn't created. Try again."

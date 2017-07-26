@@ -27,13 +27,13 @@
             <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
                 {% for tab in tabs.values %}
                     {% if tab.show %}
-                        <li role="presentation" {% if tab.target == entry_tab %}class="active"{% endif %}>
+                        <li role="presentation" {% if tab.target == active_tab %}class="active"{% endif %}>
                             <a role="tab"
-                               aria-expanded="{% if tab.target == entry_tab %}true{% else %}false{% endif %}"
+                               aria-expanded="{% if tab.target == active_tab %}true{% else %}false{% endif %}"
                                aria-controls="course-{{ tab.target }}"
                                data-target="#course-{{ tab.target }}"
                                data-has-unread="{% if tab.badge %}true{% else %}false{% endif %}"
-                               href="{{ course_offering.get_absolute_url }}?tab={{ tab.target }}">
+                               href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
                                 {{ tab.name }}{% if tab.badge %} <span class="badge badge-success">+{{ tab.badge }}</span>{% endif %}
                             </a>
                         </li>
@@ -43,7 +43,7 @@
 
             <div class="tab-content">
                 {% with tab=tabs.about %}
-                <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-about">
+                <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-about">
                     <div class="ubertext course-description">
                     {% if course_offering.description %}
                       {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
@@ -60,7 +60,7 @@
 
                 {% with tab=tabs.contacts %}
                 {% if tab.show %}
-                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-contacts">
+                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-contacts">
                     {% for course_teacher in contacts %}
                         {% with user_object=course_teacher.teacher %}
                             <h4>{{ user_object.get_full_name }}</h4>
@@ -74,7 +74,7 @@
 
                 {% with tab=tabs.reviews %}
                 {% if tab.show %}
-                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-reviews">
+                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-reviews">
                         {% for co in course_reviews %}
                             <h4>{{ co.semester|title }}</h4>
                               {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
@@ -87,7 +87,7 @@
 
                 {% with tab=tabs.classes %}
                 {% if tab.show %}
-                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-classes">
+                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
                         <thead>
                         <tr>
@@ -121,7 +121,7 @@
 
                 {% with tab=tabs.assignments %}
                 {% if tab.show %}
-                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-assignments">
+                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-assignments">
                         <table class="table timetable">
                         <thead>
                             <tr>
@@ -163,7 +163,7 @@
 
                 {% with tab=tabs.news %}
                 {% if tab.show %}
-                    <div class="tab-pane {% if tab.target == entry_tab %}active{% endif %}" role="tabpanel" id="course-news">
+                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-news">
                     {% with course_news=news %}
                     {% for news in course_news %}
                         <div class="panel bg-gray" id="news-{{ news.pk }}">

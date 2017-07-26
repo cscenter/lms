@@ -493,6 +493,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
     model = CourseOffering
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
+    default_tab = "about"
 
     def get(self, request, *args, **kwargs):
         # Validate GET-params
@@ -569,24 +570,20 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         context["contacts"] = [ct for g in course_teachers.values() for ct in g
                                if len(ct.teacher.private_contacts.strip()) > 0]
         context["tabs"] = self.make_tabbed_pane(context)
-        context["entry_tab"] = self.get_entry_tab(context["tabs"])
+        # Tab name if provided already validated in url regexp.
+        active_tab = self.kwargs.get('tab', self.default_tab)
+        context["active_tab"] = active_tab
         return context
-
-    def get_entry_tab(self, tabs, default="about"):
-        entry_tab = self.request.GET.get('tab', default)
-        if entry_tab not in tabs:
-            entry_tab = default
-        return entry_tab
 
     def make_tabbed_pane(self, c):
         pane = TabbedPane()
         u = self.request.user
         co = self.object
         news_badge = c.get("is_enrolled") and c.get("news") and (
-            CourseOfferingNewsNotification
-                .unread
+            CourseOfferingNewsNotification.unread
                 .filter(course_offering_news__course_offering=co, user=u)
                 .count())
+        # TODO: Добавить табе параметр exist. Если перешли и её нет -> редирект. Если нет доступа (show==false), то показываем авторизацию.
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
                 True),
