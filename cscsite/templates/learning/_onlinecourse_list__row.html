@@ -20,7 +20,7 @@
         </div>
     <div class="clearfix"></div>
         <div class="onlinecourses-list__item-left">
-            <a class="btn btn-primary btn-block btn-wide" href="{{ online_course.link|safe }}" role="button">{% trans "Go to course" %}</a>
+            <a class="btn btn-primary btn-block btn-wide" href="{{ online_course.link|safe }}" role="button" target="_blank">{% trans "Go to course" %}</a>
         </div>
         <div class="onlinecourses-list__item-right _collaboration">
             {% if online_course.is_au_collaboration %}{% trans "The course was developed in collaboration with the <a href='http://mit.spbau.ru/'>Academic University</a>." %}{% endif %}
