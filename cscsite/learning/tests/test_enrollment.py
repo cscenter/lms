@@ -16,7 +16,6 @@ from users.factories import UserFactory, StudentCenterFactory
 
 # TODO: TimetableStudentView - есть фильтр по enrolled_students, туда может попадать лишнее сейчас
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
-# TODO:
 
 # Workaround to use Django's assertRedirects()
 STS = SimpleTestCase()
@@ -197,5 +196,6 @@ def test_assignments(client):
     assert active_students == 2
     assert AssignmentNotification.objects.count() == active_students
     CourseOfferingNewsNotification.objects.all().delete()
+    assert CourseOfferingNewsNotification.objects.count() == 0
     CourseOfferingNewsFactory.create(course_offering=co)
     assert CourseOfferingNewsNotification.objects.count() == active_students

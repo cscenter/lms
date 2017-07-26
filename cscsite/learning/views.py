@@ -14,6 +14,8 @@ from urllib.parse import urlencode
 
 import nbconvert
 import unicodecsv as csv
+from django.db import transaction, IntegrityError
+
 from core.exceptions import Redirect
 from django.http.response import JsonResponse
 from django.views.generic.edit import BaseUpdateView
@@ -767,7 +769,15 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
         self.success_url = self._course_offering.get_absolute_url()
         self.object = form.save(commit=False)
         self.object.author = self.request.user
-        self.object.save()
+        try:
+            with transaction.atomic():
+                self.object.save()
+            messages.success(
+                self.request,
+                _("News was successfully created"),
+                extra_tags='timeout')
+        except IntegrityError:
+            messages.error(self.request, _("News wasn't created. Try again."))
         return redirect(self.get_success_url())
 
     def is_form_allowed(self, user, obj):

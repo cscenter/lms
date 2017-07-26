@@ -12,7 +12,7 @@ from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification, \
     Assignment, CourseClass, CourseOfferingNews, Enrollment, \
-    CourseOfferingTeacher
+    CourseOfferingTeacher, CourseOfferingNewsNotification
 from learning.tasks import (maybe_upload_slides_yandex,
                             maybe_upload_slides_slideshare)
 
@@ -124,28 +124,6 @@ def add_upload_slides_job(sender, instance, **kwargs):
         queue = django_rq.get_queue('default')
         queue.enqueue(maybe_upload_slides_yandex, instance.pk)
         queue.enqueue(maybe_upload_slides_slideshare, instance.pk)
-
-
-@receiver(post_save, sender=CourseOfferingNews)
-def create_course_offering_news_notification(sender, instance, created,
-                                             *args, **kwargs):
-    if not created:
-        return
-
-    co = instance.course_offering
-    CourseOfferingNewsNotification = apps.get_model(
-        'learning', 'CourseOfferingNewsNotification')
-    active_enrollments = Enrollment.active.filter(course_offering=co)
-    teachers = CourseOfferingTeacher.objects.filter(course_offering=co)
-
-    for e in active_enrollments:
-        (CourseOfferingNewsNotification(user_id=e.student_id,
-                                        course_offering_news=instance)
-         .save())
-    for co_t in teachers:
-        (CourseOfferingNewsNotification(user_id=co_t.teacher_id,
-                                        course_offering_news=instance)
-         .save())
 
 
 @receiver(post_save, sender=Enrollment)
