@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
+from django.utils import formats
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
@@ -78,7 +79,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
 
 
 class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
-    list_filter = ['course', 'semester']
+    list_filter = ['semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
     inlines = (CourseOfferingTeacherInline,)
     formfield_overrides = {
@@ -116,10 +117,16 @@ class CourseClassAdmin(admin.ModelAdmin):
 
 class CourseOfferingNewsAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
-    list_display = ['title', 'course_offering', 'created']
+    list_display = ['title', 'course_offering', 'created_local']
+    raw_id_fields = ["course_offering", "author"]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+
+    def created_local(self, obj):
+        return formats.date_format(obj.created_local(), 'j E Y г. G:i e')
+    created_local.admin_order_field = 'created'
+    created_local.short_description = _("Created")
 
 
 class VenueAdminForm(forms.ModelForm):

@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import TextField, TimeField
-from django.utils import timezone
+from django.utils import timezone, formats
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
@@ -123,8 +123,6 @@ class InterviewAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         }
     }
-    # TODO: replace all datetime fields with str objects for lists? It will prevent
-    # auto localization
     list_display = ['get_date_local', 'applicant', 'status']
     list_filter = ['status', 'applicant__campaign']
 
@@ -138,7 +136,8 @@ class InterviewAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
     def get_date_local(self, obj):
-        return str(obj.date_local())
+        return formats.date_format(obj.date_local(), 'j E Y г. G:i e')
+    get_date_local.admin_order_field = 'date'
     get_date_local.short_description = _("Date")
 
 
