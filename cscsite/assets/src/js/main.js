@@ -1,9 +1,7 @@
 import Cookies from 'js-cookie';
 import 'bootstrap-sass';
 import $ from 'jquery';
-import md5 from "blueimp-md5";
 import "jgrowl/jquery.jgrowl.js";
-import swal from "bootstrap-sweetalert";
 import "mathjax_config";
 import UberEditor from "./editor";
 import {csrfSafeMethod} from './utils';
