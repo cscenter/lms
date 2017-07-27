@@ -31,9 +31,6 @@ urlpatterns = [
                              permanent=True)),
     url(r'^orgs/$', TeamView.as_view(), name='orgs'),
     url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
-    # TODO: Remove this link as a stale in a while
-    url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
-        name='comment_the_right_way'),
     url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='commenting_the_right_way'),
 

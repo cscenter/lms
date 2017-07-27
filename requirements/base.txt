@@ -57,7 +57,6 @@ raven==6.0.0
 newrelic==2.82.0.62
 
 # Localization
-solid_i18n==1.4.1
 
 # Markdown support
 # hoep==1.0.2
