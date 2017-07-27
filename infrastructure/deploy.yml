@@ -72,7 +72,7 @@
     become: yes
     become_user: "{{ app_user }}"
     django_manage:
-      command: "collectstatic --noinput --ignore=src --ignore=_builds"
+      command: "collectstatic --noinput"
       app_path: "{{ site_src }}"
       settings: "{{ app_user }}.settings.production"
       virtualenv: "{{ venv_dir }}"
