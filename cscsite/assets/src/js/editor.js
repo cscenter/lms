@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import md5 from "blueimp-md5";
+import swal from "bootstrap-sweetalert";
 import {getLocalStorageKey} from './utils';
 
 let _escape = require("lodash/escape");
