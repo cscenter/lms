@@ -26,15 +26,15 @@
 
             <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
                 {% for tab in tabs.values %}
-                    {% if tab.show %}
+                    {% if tab.visible %}
                         <li role="presentation" {% if tab.target == active_tab %}class="active"{% endif %}>
                             <a role="tab"
                                aria-expanded="{% if tab.target == active_tab %}true{% else %}false{% endif %}"
                                aria-controls="course-{{ tab.target }}"
                                data-target="#course-{{ tab.target }}"
-                               data-has-unread="{% if tab.badge %}true{% else %}false{% endif %}"
+                               data-has-unread="{% if tab.unread_cnt > 0 %}true{% else %}false{% endif %}"
                                href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
-                                {{ tab.name }}{% if tab.badge %} <span class="badge badge-success">+{{ tab.badge }}</span>{% endif %}
+                                {{ tab.name }}{% if tab.unread_cnt > 0 %} <span class="badge badge-success">+{{ tab.unread_cnt }}</span>{% endif %}
                             </a>
                         </li>
                     {% endif %}
@@ -59,7 +59,7 @@
                 {% endwith %}
 
                 {% with tab=tabs.contacts %}
-                {% if tab.show %}
+                {% if tab.visible %}
                     <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-contacts">
                     {% for course_teacher in contacts %}
                         {% with user_object=course_teacher.teacher %}
@@ -73,7 +73,7 @@
                 {% endwith %}
 
                 {% with tab=tabs.reviews %}
-                {% if tab.show %}
+                {% if tab.visible %}
                     <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-reviews">
                         {% for co in course_reviews %}
                             <h4>{{ co.semester|title }}</h4>
@@ -86,7 +86,7 @@
                 {% endwith %}
 
                 {% with tab=tabs.classes %}
-                {% if tab.show %}
+                {% if tab.visible %}
                     <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
                         <thead>
@@ -120,7 +120,7 @@
                 {% endwith %}
 
                 {% with tab=tabs.assignments %}
-                {% if tab.show %}
+                {% if tab.visible %}
                     <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-assignments">
                         <table class="table timetable">
                         <thead>
@@ -162,7 +162,7 @@
                 {% endwith %}
 
                 {% with tab=tabs.news %}
-                {% if tab.show %}
+                {% if tab.visible %}
                     <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-news">
                     {% with course_news=news %}
                     {% for news in course_news %}
