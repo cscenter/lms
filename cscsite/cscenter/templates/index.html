@@ -7,7 +7,9 @@
 
 {% block content %}
 
-<img class="index-page-image" src="{% static "img/center/cscenter.jpg" %}" alt="Computer Science Center">
+<div id="index-page-image">
+    <img src="{% static "img/center/cscenter.jpg" %}" alt="Computer Science Center">
+</div>
 
 {% if is_admission_active %}
 <div id="admission">
