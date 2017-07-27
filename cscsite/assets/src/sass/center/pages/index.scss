@@ -62,10 +62,15 @@ h2.right-line:after {
     }
 }
 
-.index-page-image {
+#index-page-image {
   margin-top: -28px;
-  max-width: 100%;
-  min-width: $min-width;
+  text-align: center;
+  background: $background-grey;
+
+  img {
+    max-width: 100%;
+    min-width: $min-width;
+  }
 }
 
 
