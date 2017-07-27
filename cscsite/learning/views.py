@@ -503,6 +503,15 @@ class CourseOfferingDetailView(generic.DetailView):
             _ = int(year)
         except ValueError:
             return HttpResponseBadRequest()
+        # Redirect old style links
+        if "tab" in request.GET:
+            tab_name = request.GET["tab"]
+            # TODO: check for valid names
+            url_params = dict(self.kwargs)
+            url_params["tab"] = tab_name
+            url = reverse("course_offering_detail_with_active_tab",
+                          kwargs=url_params)
+            return HttpResponseRedirect(url)
         self.object = self.get_object()
         try:
             context = self.get_context_data(object=self.object)
