@@ -10,10 +10,12 @@ import posixpath
 from calendar import Calendar
 from collections import OrderedDict, defaultdict, namedtuple
 from itertools import chain
+from typing import List
 from urllib.parse import urlencode
 
 import nbconvert
 import unicodecsv as csv
+from django.contrib.auth.views import redirect_to_login
 from django.db import transaction, IntegrityError
 
 from core.exceptions import Redirect
@@ -35,7 +37,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     ValidationError
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Prefetch, When, Value, Case, \
-    IntegerField, Count
+    IntegerField, BooleanField, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -48,7 +50,7 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     GRADING_TYPES
 from learning.utils import get_current_semester_pair, get_term_index
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin, FailedCourseContextMixin, ParticipantOnlyMixin, \
+    CuratorOnlyMixin, ParticipantOnlyMixin, \
     StudentCenterAndVolunteerOnlyMixin
 from six import viewvalues
 
@@ -488,8 +490,7 @@ class CourseUpdateView(CuratorOnlyMixin,
         return user.is_authenticated and user.is_curator
 
 
-class CourseOfferingDetailView(FailedCourseContextMixin,
-                               generic.DetailView):
+class CourseOfferingDetailView(generic.DetailView):
     model = CourseOffering
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
@@ -503,7 +504,12 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         except ValueError:
             return HttpResponseBadRequest()
         self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
+        try:
+            context = self.get_context_data(object=self.object)
+        except Redirect as e:
+            if e.kwargs.get("to") == settings.LOGIN_URL:
+                return redirect_to_login(request.get_full_path(),
+                                         settings.LOGIN_URL)
 
         # Redirect to club if course was created before center establishment.
         co = context[self.context_object_name]
@@ -538,23 +544,21 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                 ))
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
         co = self.object
         user = self.request.user
-        context['is_enrolled'] = user.enrolled_on_the_course(co.pk)
-        context['is_actual_teacher'] = (
-            user.pk in (co.teacher_id for co in co.course_teachers))
-
-        context['assignments'] = self.get_assignments(context)
-
+        student_enrollment = user.enrollment_in_the_course(co.pk)
+        is_enrolled = student_enrollment is not None
+        co_failed_by_student = co.failed_by_student(
+            user, enrollment=student_enrollment)
         is_club_site = settings.SITE_ID == settings.CLUB_SITE_ID
-        can_view_news = (
-            not context['is_failed_completed_course'] and
-            ((user.is_authenticated and not user.is_expelled) or is_club_site)
-        )
-        context["news"] = can_view_news and co.courseofferingnews_set.all()
-        context["classes"] = self.get_classes(co)
-        context["course_reviews"] = co.enrollment_is_open and (
+        can_view_news = (not co_failed_by_student and
+            ((user.is_authenticated and not user.is_expelled) or is_club_site))
+        # `.course_teachers` attached in queryset
+        teachers_ids = (co.teacher_id for co in co.course_teachers)
+        is_actual_teacher = user.pk in teachers_ids
+        assignments = self.get_assignments(is_actual_teacher, is_enrolled,
+                                           co_failed_by_student)
+        course_reviews = co.enrollment_is_open and list(
             CourseOffering.objects
                 .defer("description")
                 .select_related("semester")
@@ -562,64 +566,82 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                         semester__index__lt=co.semester.index)
                 .exclude(reviews__isnull=True)
                 .exclude(reviews__exact='')
-                .order_by("-semester__index")
-                .all())
-        course_teachers = CourseOfferingTeacher.grouped(co.course_teachers)
-        context["teachers"] = course_teachers
-        # Collect teachers contacts
-        context["contacts"] = [ct for g in course_teachers.values() for ct in g
-                               if len(ct.teacher.private_contacts.strip()) > 0]
-        context["tabs"] = self.make_tabbed_pane(context)
-        # Tab name if provided already validated in url regexp.
-        active_tab = self.kwargs.get('tab', self.default_tab)
-        context["active_tab"] = active_tab
+                .order_by("-semester__index"))
+        teachers_by_role = CourseOfferingTeacher.grouped(co.course_teachers)
+        # Aggregate teachers contacts
+        contacts = [ct for g in teachers_by_role.values() for ct in g
+                    if len(ct.teacher.private_contacts.strip()) > 0]
+        context = {
+            'course_offering': co,
+            'is_enrolled': is_enrolled,
+            'is_actual_teacher': is_actual_teacher,
+            'can_view_news': can_view_news,
+            'assignments': assignments,
+            'news': co.courseofferingnews_set.all(),
+            'classes': self.get_classes(co),
+            'course_reviews': course_reviews,
+            'teachers': teachers_by_role,
+            'contacts': contacts
+        }
+        # Tab name should be already validated in url pattern.
+        active_tab_name = self.kwargs.get('tab', self.default_tab)
+        pane = self.make_tabbed_pane(context)
+        active_tab = pane[active_tab_name]
+        if not active_tab.exist:
+            raise Http404
+        elif not active_tab.visible:
+            raise Redirect(to=settings.LOGIN_URL)
+        context["tabs"] = pane
+        context["active_tab"] = active_tab_name
         return context
 
     def make_tabbed_pane(self, c):
+        """Generate tabs list based on context"""
         pane = TabbedPane()
         u = self.request.user
         co = self.object
-        news_badge = c.get("is_enrolled") and c.get("news") and (
+        unread_news_cnt = c.get("is_enrolled") and c.get("news") and (
             CourseOfferingNewsNotification.unread
                 .filter(course_offering_news__course_offering=co, user=u)
                 .count())
-        # TODO: Добавить табе параметр exist. Если перешли и её нет -> редирект. Если нет доступа (show==false), то показываем авторизацию.
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
-                True),
+                exist=True, visible=True),
             Tab("contacts", pgettext_lazy("course-tab", "Contacts"),
-                (c.get('is_enrolled') or u.is_curator) and c.get('contacts')),
+                exist=bool(c['contacts']),
+                visible=(c['is_enrolled'] or u.is_curator) and bool(c['contacts'])),
             Tab("reviews", pgettext_lazy("course-tab", "Reviews"),
-                (u.is_student or u.is_curator) and c.get('course_reviews')),
+                exist=bool(c['course_reviews']),
+                visible=(u.is_student or u.is_curator) and bool(c['course_reviews'])),
             Tab("classes", pgettext_lazy("course-tab", "Classes"),
-                c.get('classes')),
+                exist=bool(c['classes']),
+                visible=bool(c['classes'])),
             Tab("assignments", pgettext_lazy("course-tab", "Assignments"),
-                c.get('assignments')),
+                exist=bool(c['assignments']),
+                visible=bool(c['assignments'])),
             Tab("news", pgettext_lazy("course-tab", "News"),
-                c.get("news"), news_badge)
+                exist=bool(c['news']),
+                visible=c["can_view_news"],
+                unread_cnt=unread_news_cnt)
         ]
         for t in tabs:
             pane.add(t)
         return pane
 
     @staticmethod
-    def get_classes(course_offering):
+    def get_classes(course_offering) -> List[CourseClass]:
         """Get course classes with attached materials"""
-        # Note: django-debug-toolbar shows duplicated queries if put
-        # query logic below inside `get_queryset` method, so I leave it here.
-        course_classes = (
-            course_offering.courseclass_set
-                .select_related("venue")
-                .prefetch_related(
-                    # Optimize query by changing default order
-                    Prefetch(
-                        'courseclassattachment_set',
-                        queryset=(CourseClassAttachment.objects
-                                  .order_by("pk"))
-                    ))
-                .order_by("date", "starts_at")
-        )
-        for cc in course_classes:
+        course_classes_qs = (course_offering.courseclass_set
+            .select_related("venue")
+            .annotate(attachments_cnt=Count('courseclassattachment'))
+            .annotate(has_attachments=Case(
+                When(attachments_cnt__gt=0, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField()
+            ))
+            .order_by("date", "starts_at"))
+        course_classes = []
+        for cc in course_classes_qs.iterator():
             class_url = cc.get_absolute_url()
             materials = []
             if cc.slides:
@@ -628,7 +650,7 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
             if cc.video_url:
                 materials.append({'url': class_url + "#video",
                                   'name': _("video")})
-            if cc.courseclassattachment_set.count() > 0:
+            if cc.has_attachments:
                 materials.append({'url': class_url + "#attachments",
                                   'name': _("Files")})
             other_materials_embed = (
@@ -647,11 +669,12 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                                             for x in materials[i:i + 2])
                                       for i in range(0, len(materials), 2))
             materials_str = materials_str or _("No")
-
             setattr(cc, 'materials_str', materials_str)
+            course_classes.append(cc)
         return course_classes
 
-    def get_assignments(self, context):
+    def get_assignments(self, is_actual_teacher: bool, is_enrolled: bool,
+                        co_failed_by_student: bool) -> List[Assignment]:
         """
         Build text-only list of course assignments or with links based on user
         enrollment.
@@ -660,9 +683,8 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
         """
         user = self.request.user
         can_view_assignments = (user.is_student or user.is_graduate or
-                                user.is_curator or
-                                context["is_actual_teacher"] or
-                                context['is_enrolled'])
+                                user.is_curator or is_actual_teacher or
+                                is_enrolled)
         if not can_view_assignments:
             return []
         assignments_qs = (self.object.assignment_set
@@ -671,34 +693,31 @@ class CourseOfferingDetailView(FailedCourseContextMixin,
                           .prefetch_related("assignmentattachment_set")
                           .order_by('deadline_at', 'title'))
         # Prefetch progress on assignments for authenticated student
-        if context["is_enrolled"]:
+        if is_enrolled:
             assignments_qs = assignments_qs.prefetch_related(
                 Prefetch(
                     "studentassignment_set",
-                    queryset=(
-                        StudentAssignment.objects
+                    queryset=(StudentAssignment.objects
                             .filter(student=user)
                             .only("pk", "assignment_id", "grade")
                             .annotate(student_comments_cnt=Count(Case(
-                            When(assignmentcomment__author_id=user.pk,
-                                 then=Value(1)),
-                            output_field=IntegerField())))
-                            .order_by("pk")  # optimize by setting order
-                    )
+                                When(assignmentcomment__author_id=user.pk,
+                                     then=Value(1)),
+                                output_field=IntegerField())))
+                            .order_by("pk"))  # optimize by setting order
                 )
             )
-
         assignments = assignments_qs.all()
         for a in assignments:
             to_details = None
-            if context["is_actual_teacher"] or user.is_curator:
+            if is_actual_teacher or user.is_curator:
                 to_details = reverse("assignment_detail_teacher", args=[a.pk])
-            elif context["is_enrolled"]:
+            elif is_enrolled:
                 a_s = a.studentassignment_set.first()
                 if a_s is not None:
                     # Hide link if student didn't try to solve assignment
                     # in completed course. No comments and grade => no attempt
-                    if (context["is_failed_completed_course"] and
+                    if (co_failed_by_student and
                             not a_s.student_comments_cnt and
                             (a_s.grade is None or a_s.grade == 0)):
                         continue
@@ -1468,7 +1487,6 @@ class StudentAssignmentDetailMixin(object):
 
 # TODO: Refactor without generic view
 class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
-                                         FailedCourseContextMixin,
                                          StudentAssignmentDetailMixin,
                                          generic.CreateView):
     """
@@ -1479,9 +1497,11 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        co = context['course_offering']
+        co_failed_by_student = co.failed_by_student(self.request.user)
         sa = context['a_s']
-        if context['is_failed_completed_course']:
-            # When student fail course, deny access if he hasn't submissions
+        if co_failed_by_student:
+            # After student failed course, deny access if he hasn't submissions
             # TODO: move logic to context to avoid additional loop over comments
             has_comments = False
             for c in context['comments']:

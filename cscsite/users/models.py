@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import logging
+from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
@@ -401,10 +402,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def enrolled_on_the_course(self, course_offering_id):
+    def enrollment_in_the_course(self, course_offering_id) -> Optional[Enrollment]:
         enrollment_qs = Enrollment.active.filter(
             student=self, course_offering_id=course_offering_id)
-        return (self.is_student or self.is_graduate) and enrollment_qs.exists()
+        if self.is_student or self.is_graduate:
+            return enrollment_qs.first()
+        return None
 
     @property
     def is_expelled(self):
@@ -568,5 +571,5 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     def __str__(self):
         return 'NotAuthenticatedUser'
 
-    def enrolled_on_the_course(self, course_pk):
-        return False
+    def enrollment_in_the_course(self, course_offering_id: int) -> Optional[Enrollment]:
+        return None

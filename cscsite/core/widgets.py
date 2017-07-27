@@ -24,9 +24,10 @@ class DateTimeRangeWidget(RangeWidget):
         </div>
         """.format(rendered_widgets[0], rendered_widgets[1])
 
-
-Tab = namedtuple('Tab', ['target', 'name', 'show', 'badge'])
-Tab.__new__.__defaults__ = (None,) * len(Tab._fields)
+_fields = ['target', 'name', 'exist', 'visible', 'unread_cnt']
+Tab = namedtuple('Tab', _fields)
+Tab.__new__.__defaults__ = (None, None, False, False, 0)
+# TODO: override `visible` to False if not exist
 
 
 class TabbedPane(OrderedDict):

@@ -348,6 +348,22 @@ class CourseOffering(TimeStampedModel):
             return "__binary"
         return ""
 
+    def failed_by_student(self, student, **kwargs) -> bool:
+        if (self.is_open or not self.is_completed or
+                student.is_anonymous or student.is_curator):
+            return False
+        # The course is completed, check that student didn't fail it.
+        bad_grades = [Enrollment.GRADES.unsatisfactory,
+                      Enrollment.GRADES.not_graded]
+        if "enrollment" in kwargs:
+            e = kwargs["enrollment"]
+            return e.grade in bad_grades if e else False
+        return (Enrollment.active
+                .filter(student_id=student.pk,
+                        course_offering_id=self.pk,
+                        grade__in=bad_grades)
+                .exists())
+
 
 @python_2_unicode_compatible
 class CourseOfferingTeacher(models.Model):
@@ -966,13 +982,13 @@ class Enrollment(TimeStampedModel):
         verbose_name = _("Enrollment")
         verbose_name_plural = _("Enrollments")
 
-    def clean(self):
-        if not self.student.is_student:
-            raise ValidationError(_("Only students can enroll to courses"))
-
     def __str__(self):
         return "{0} - {1}".format(smart_text(self.course_offering),
                                   smart_text(self.student.get_full_name()))
+
+    def clean(self):
+        if not self.student.is_student:
+            raise ValidationError(_("Only students can enroll to courses"))
 
     @property
     def grade_display(self):
