@@ -505,10 +505,10 @@ class Interview(TimeStampedModel):
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
 
-    def date_local(self, timezone=None):
-        if not timezone:
-            timezone = self.get_city_timezone()
-        return localtime(self.date, timezone=timezone)
+    def date_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return localtime(self.date, timezone=tz)
 
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

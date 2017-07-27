@@ -162,7 +162,6 @@ class TeachersView(generic.ListView):
         return context
 
 
-# TODO: Rewrite filter by study programs with js and 1 additional db query?
 class AlumniView(generic.ListView):
     filter_by_year = None
     template_name = "users/alumni_list.html"

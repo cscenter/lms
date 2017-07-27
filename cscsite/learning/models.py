@@ -283,6 +283,13 @@ class CourseOffering(TimeStampedModel):
     def get_city(self):
         return self.city_id
 
+    def get_city_timezone(self):
+        return settings.TIME_ZONES[self.city_id]
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.city.field.name
+
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
@@ -458,6 +465,19 @@ class CourseOfferingNews(TimeStampedModel):
                 CourseOfferingNewsNotification(user_id=co_t.teacher_id,
                                                course_offering_news_id=self.pk))
         CourseOfferingNewsNotification.objects.bulk_create(notifications)
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
 
 
 @python_2_unicode_compatible

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tz %}
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
@@ -162,32 +163,34 @@
                 {% endwith %}
 
                 {% with tab=tabs.news %}
-                {% if tab.visible %}
-                    <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-news">
-                    {% with course_news=news %}
-                    {% for news in course_news %}
-                        <div class="panel bg-gray" id="news-{{ news.pk }}">
-                            <div class="panel-body">
-                                <div class="date">{{ news.created|date:"d E Y" }}</div>
-                                <h4>{{ news.title }}</h4>
-                                <div class="ubertext shorten">
-                                {% markdown 3600 "co_news_text" news.pk news.modified %}
-                                  {{ news.text }}
-                                {% endmarkdown %}
+                    {% localtime off %}
+                    {% if tab.visible %}
+                        <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-news">
+                        {% with course_news=news %}
+                        {% for news in course_news %}
+                            <div class="panel bg-gray" id="news-{{ news.pk }}">
+                                <div class="panel-body">
+                                    <div class="date">{{ news.created_local|date:"d E Y" }}</div>
+                                    <h4>{{ news.title }}</h4>
+                                    <div class="ubertext shorten">
+                                    {% markdown 3600 "co_news_text" news.pk news.modified %}
+                                      {{ news.text }}
+                                    {% endmarkdown %}
+                                    </div>
                                 </div>
+                                {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+                                    <div class="panel-footer text-right">
+                {#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
+                                        <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
+                                        <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
+                                    </div>
+                                {% endif %}
                             </div>
-                            {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-                                <div class="panel-footer text-right">
-            {#                            <a class="__pr5" href="#news-{{ news.pk }}">поделиться</a>#}
-                                    <a class="__pr5" href="{% url 'course_offering_news_update' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "edit" %}</a>
-                                    <a href="{% url 'course_offering_news_delete' course_offering.course.slug course_offering.semester.slug news.pk %}">{% trans "delete" %}</a>
-                                </div>
-                            {% endif %}
+                        {% endfor %}
+                        {% endwith %}
                         </div>
-                    {% endfor %}
-                    {% endwith %}
-                    </div>
-                {% endif %}
+                    {% endif %}
+                    {% endlocaltime %}
                 {% endwith %}
             </div>
     </div>
