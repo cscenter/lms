@@ -12,7 +12,7 @@ run:
 	python manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
 
 club:
-	python manage.py runserver_plus --settings=csclub.settings.local 8002
+	python manage.py runserver --settings=csclub.settings.local 8002
 
 run_flame:
 	python manage.py runserver_plus --nothreading --noreload --settings=$(PROJECT).settings.local $(PORT)
@@ -30,7 +30,7 @@ msgcompile:
 	python manage.py compilemessages --settings=csclub.settings.local
 
 static:
-	python manage.py collectstatic --noinput $(DJANGO_POSTFIX) --ignore src --ignore *.map --ignore _builds
+	python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
 
 freeze:
 	pip freeze --local > requirements.txt

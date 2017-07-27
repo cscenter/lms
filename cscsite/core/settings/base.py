@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sites',
-    'django.contrib.staticfiles',
+    'core.storage.StaticFilesConfig',  # custom ignore patterns list
     'django.contrib.humanize',
 
     'treemenus',
