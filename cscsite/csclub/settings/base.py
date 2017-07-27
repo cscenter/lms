@@ -13,7 +13,7 @@ WSGI_APPLICATION = 'csclub.wsgi.application'
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
-    'solid_i18n.middleware.SolidLocaleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'users.middleware.AuthenticationMiddleware',
@@ -29,10 +29,6 @@ INSTALLED_APPS += [
     'registration',
 ]
 
-
-SOLID_I18N_USE_REDIRECTS = False
-# Redirect from /ru/... to /... if default_lang == 'ru'
-SOLID_I18N_DEFAULT_PREFIX_REDIRECT = True
 
 LOCALE_PATHS = [
     str(BASE_DIR / "locale"),

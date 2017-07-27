@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
-from solid_i18n.urls import solid_i18n_patterns
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
@@ -22,11 +22,8 @@ from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
 
 admin.autodiscover()
 
-urlpatterns = solid_i18n_patterns(
+urlpatterns = i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
-    # TODO: Remove this link as a stale in a while
-    url(r'^comment-the-right-way/$', MarkdownHowToHelpView.as_view(),
-        name='comment_the_right_way'),
     url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='commenting_the_right_way'),
     course_patterns,
@@ -75,6 +72,7 @@ urlpatterns = solid_i18n_patterns(
     url(r'^users/reset/done$',
         auth_views.password_reset_complete,
         name='password_reset_complete'),
+    prefix_default_language=False
 )
 
 urlpatterns += [
@@ -137,8 +135,10 @@ if settings.DEBUG:
     ]
 
 # Note: htmlpages should be the last one
-urlpatterns += solid_i18n_patterns(url(r'^(?P<url>.*/)$', views.flatpage,
-                                       name='html_pages'))
+urlpatterns += i18n_patterns(
+    url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
+    prefix_default_language=False
+)
 
 # XXX: Remove after old.compsciclub.ru termination
 from django.conf.urls import handler404
