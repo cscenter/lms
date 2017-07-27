@@ -67,12 +67,10 @@ urlpatterns = [
         name='user_update'),
     # Alumni
     url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
-    url(r'^(?P<year>[0-9]{4})/$', AlumniByYearView.as_view(),
-        name='alumni_memory'),
-    # url(r'^2017/$', AlumniByYearView.as_view(year=2017),
-    #     name='alumni_2017'),
     url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', AlumniView.as_view(),
         name='alumni_by_area_of_study'),
+    url(r'^(?P<year>[0-9]{4})/$', AlumniByYearView.as_view(),
+        name='alumni_memory'),
 
     url(r'^notifications/', include("notifications.urls")),
     url(r'^staff/', include("staff.urls")),
