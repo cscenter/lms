@@ -165,12 +165,16 @@ class TeachersView(generic.ListView):
 # TODO: Rewrite filter by study programs with js and 1 additional db query?
 class AlumniView(generic.ListView):
     filter_by_year = None
-    areas_of_study = None
     template_name = "users/alumni_list.html"
 
     def get(self, request, *args, **kwargs):
         # Validate query params
         code = self.kwargs.get("area_of_study_code", False)
+        # Support old code "dm" for `Data Mining`
+        if code == "dm":
+            redirect_to = reverse("alumni_by_area_of_study", kwargs={
+                "area_of_study_code": "ds"})
+            return HttpResponseRedirect(redirect_to)
         self.areas_of_study = AreaOfStudy.objects.all()
         if code and code not in (s.code for s in self.areas_of_study):
             # TODO: redirect to alumni/ page
