@@ -31,11 +31,20 @@ from .views import \
     MarksSheetTeacherImportCSVFromYandexView, \
     GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
-    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView, \
-    CoursesListTestView
+    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+
+
+course_patterns = url(
+    r"^courses/", include([
+        url(r"^$", CoursesListView.as_view(), name="course_list"),
+        url(r"^(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
+            name="course_detail"),
+        url(r"^(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
+            name="course_edit"),
+    ]))
 
 course_offering_patterns = url(
-    r"^courses/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)/", include([
+    r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk/|spb/|/)(?P<semester_slug>[-\w]+)/", include([
         # Common pages
         url(r"^$", CourseOfferingDetailView.as_view(),
             name="course_offering_detail"),
@@ -44,6 +53,10 @@ course_offering_patterns = url(
             name="course_offering_detail_with_active_tab"),
         url(r"^edit-descr$", CourseOfferingEditDescrView.as_view(),
             name="course_offering_edit_descr"),
+        # FIXME: this was added for .get_absolute_url support, but in fact it should lead to course offering page and focus on news.
+        url(r"^news/(?P<pk>\d+)/$",
+            CourseOfferingNewsUpdateView.as_view(),
+            name="course_offering_news_detail"),
         url(r"^news/add$",
             CourseOfferingNewsCreateView.as_view(),
             name="course_offering_news_create"),
@@ -93,17 +106,6 @@ course_offering_patterns = url(
                 name='assignment_attachment_delete'),
 
         ])),
-    ]))
-
-course_patterns = url(
-    r"^courses/", include([
-        url(r"^$", CoursesListView.as_view(), name="course_list"),
-        url(r"^test/$", CoursesListTestView.as_view(), name="course_list_test"),
-
-        url(r"^(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
-            name="course_detail"),
-        url(r"^(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
-            name="course_edit"),
     ]))
 
 teaching_section_patterns = url(

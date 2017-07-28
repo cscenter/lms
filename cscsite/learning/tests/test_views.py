@@ -1741,3 +1741,5 @@ def test_course_class_form(client, curator, settings):
 
 # TODO: Написать тест, который проверяет, что по-умолчанию в форму
 # редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
+
+# TODO: test redirects on course offering page if tab exists but user has no access

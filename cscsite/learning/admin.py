@@ -124,6 +124,7 @@ class CourseOfferingNewsAdmin(admin.ModelAdmin):
     }
 
     def created_local(self, obj):
+        # TODO: Move to utils
         return formats.date_format(obj.created_local(), 'j E Y г. G:i e')
     created_local.admin_order_field = 'created'
     created_local.short_description = _("Created")

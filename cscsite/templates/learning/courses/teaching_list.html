@@ -16,7 +16,7 @@
         {% for course_offering in course_list %}
         <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
           <td>
-            <a href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+            <a href="{{ course_offering.get_absolute_url }}">
               {{ course_offering.course.name }}
             </a>
           </td>

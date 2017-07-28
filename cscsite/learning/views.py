@@ -371,10 +371,6 @@ class CoursesListView(generic.ListView):
         return context
 
 
-class CoursesListTestView(CoursesListView):
-    template_name = "learning/courses/course_offerings.html"
-
-
 class CourseTeacherListView(TeacherOnlyMixin,
                             generic.ListView):
     model = CourseOffering
@@ -559,9 +555,6 @@ class CourseOfferingDetailView(generic.DetailView):
         is_enrolled = student_enrollment is not None
         co_failed_by_student = co.failed_by_student(
             user, enrollment=student_enrollment)
-        is_club_site = settings.SITE_ID == settings.CLUB_SITE_ID
-        can_view_news = (not co_failed_by_student and
-            ((user.is_authenticated and not user.is_expelled) or is_club_site))
         # `.course_teachers` attached in queryset
         teachers_ids = (co.teacher_id for co in co.course_teachers)
         is_actual_teacher = user.pk in teachers_ids
@@ -582,21 +575,21 @@ class CourseOfferingDetailView(generic.DetailView):
                     if len(ct.teacher.private_contacts.strip()) > 0]
         context = {
             'course_offering': co,
+            'co_failed_by_student': co_failed_by_student,
             'is_enrolled': is_enrolled,
             'is_actual_teacher': is_actual_teacher,
-            'can_view_news': can_view_news,
             'assignments': assignments,
             'news': co.courseofferingnews_set.all(),
             'classes': self.get_classes(co),
             'course_reviews': course_reviews,
             'teachers': teachers_by_role,
-            'contacts': contacts
+            'contacts': contacts,
         }
         # Tab name should be already validated in url pattern.
         active_tab_name = self.kwargs.get('tab', self.default_tab)
         pane = self.make_tabbed_pane(context)
         active_tab = pane[active_tab_name]
-        if not active_tab.exist:
+        if not active_tab.exist():
             raise Http404
         elif not active_tab.visible:
             raise Redirect(to=settings.LOGIN_URL)
@@ -613,24 +606,30 @@ class CourseOfferingDetailView(generic.DetailView):
             CourseOfferingNewsNotification.unread
                 .filter(course_offering_news__course_offering=co, user=u)
                 .count())
+        can_view_assignments = (u.is_student or u.is_graduate or u.is_curator or
+                                c['is_actual_teacher'] or c['is_enrolled'])
+        can_view_news = (not c['co_failed_by_student'] and
+                         ((u.is_authenticated and not u.is_expelled) or
+                          settings.SITE_ID == settings.CLUB_SITE_ID))
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
-                exist=True, visible=True),
+                exist=lambda: True, visible=True),
             Tab("contacts", pgettext_lazy("course-tab", "Contacts"),
-                exist=bool(c['contacts']),
-                visible=(c['is_enrolled'] or u.is_curator) and bool(c['contacts'])),
+                exist=lambda: c['contacts'],
+                visible=(c['is_enrolled'] or u.is_curator) and c['contacts']),
+            # Note: reviews `exist` until enrollment is open
             Tab("reviews", pgettext_lazy("course-tab", "Reviews"),
-                exist=bool(c['course_reviews']),
-                visible=(u.is_student or u.is_curator) and bool(c['course_reviews'])),
+                exist=lambda: c['course_reviews'],
+                visible=(u.is_student or u.is_curator) and c['course_reviews']),
             Tab("classes", pgettext_lazy("course-tab", "Classes"),
-                exist=bool(c['classes']),
-                visible=bool(c['classes'])),
+                exist=lambda: c['classes'],
+                visible=c['classes']),
             Tab("assignments", pgettext_lazy("course-tab", "Assignments"),
-                exist=bool(c['assignments']),
-                visible=bool(c['assignments'])),
+                exist=lambda: c['assignments'],
+                visible=can_view_assignments and c['assignments']),
             Tab("news", pgettext_lazy("course-tab", "News"),
-                exist=bool(c['news']),
-                visible=c["can_view_news"],
+                exist=lambda: c['news'],
+                visible=can_view_news and c['news'],
                 unread_cnt=unread_news_cnt)
         ]
         for t in tabs:
@@ -640,6 +639,7 @@ class CourseOfferingDetailView(generic.DetailView):
     @staticmethod
     def get_classes(course_offering) -> List[CourseClass]:
         """Get course classes with attached materials"""
+        classes = []
         course_classes_qs = (course_offering.courseclass_set
             .select_related("venue")
             .annotate(attachments_cnt=Count('courseclassattachment'))
@@ -649,7 +649,6 @@ class CourseOfferingDetailView(generic.DetailView):
                 output_field=BooleanField()
             ))
             .order_by("date", "starts_at"))
-        course_classes = []
         for cc in course_classes_qs.iterator():
             class_url = cc.get_absolute_url()
             materials = []
@@ -679,8 +678,8 @@ class CourseOfferingDetailView(generic.DetailView):
                                       for i in range(0, len(materials), 2))
             materials_str = materials_str or _("No")
             setattr(cc, 'materials_str', materials_str)
-            course_classes.append(cc)
-        return course_classes
+            classes.append(cc)
+        return classes
 
     def get_assignments(self, is_actual_teacher: bool, is_enrolled: bool,
                         co_failed_by_student: bool) -> List[Assignment]:
@@ -691,11 +690,6 @@ class CourseOfferingDetailView(generic.DetailView):
         passed assignments only.
         """
         user = self.request.user
-        can_view_assignments = (user.is_student or user.is_graduate or
-                                user.is_curator or is_actual_teacher or
-                                is_enrolled)
-        if not can_view_assignments:
-            return []
         assignments_qs = (self.object.assignment_set
                           .only("title", "course_offering_id", "is_online",
                                 "deadline_at")
