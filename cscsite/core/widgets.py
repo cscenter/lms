@@ -26,7 +26,7 @@ class DateTimeRangeWidget(RangeWidget):
 
 _fields = ['target', 'name', 'exist', 'visible', 'unread_cnt']
 Tab = namedtuple('Tab', _fields)
-Tab.__new__.__defaults__ = (None, None, False, False, 0)
+Tab.__new__.__defaults__ = (None, None, lambda: False, False, 0)
 # TODO: override `visible` to False if not exist
 
 

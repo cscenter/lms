@@ -269,16 +269,25 @@ class CourseOffering(TimeStampedModel):
                                  smart_text(self.semester))
 
     def get_absolute_url(self):
-        return reverse('course_offering_detail', args=[self.course.slug,
-                                                       self.semester.slug])
+        return reverse('course_offering_detail', kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": ""
+        })
 
     def get_enroll_url(self):
-        return reverse('course_offering_enroll',
-                       args=[self.course.slug, self.semester.slug])
+        return reverse('course_offering_enroll', kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": ""
+        })
 
     def get_unenroll_url(self):
-        return reverse('course_offering_unenroll',
-                       args=[self.course.slug, self.semester.slug])
+        return reverse('course_offering_unenroll', kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": ""
+        })
 
     def get_city(self):
         return self.city_id
@@ -443,6 +452,14 @@ class CourseOfferingNews(TimeStampedModel):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
 
+    def get_absolute_url(self):
+        return reverse("course_offering_news_detail", kwargs={
+            "city_code": "",
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "pk": self.pk,
+        })
+
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
@@ -594,10 +611,12 @@ class CourseClass(TimeStampedModel, object):
         return smart_text(self.name)
 
     def get_absolute_url(self):
-        return reverse('class_detail',
-                       args=[self.course_offering.course.slug,
-                             self.course_offering.semester.slug,
-                             self.pk])
+        return reverse('class_detail', kwargs={
+           "city_code": "",
+           "course_slug": self.course_offering.course.slug,
+           "semester_slug": self.course_offering.semester.slug,
+           "pk": self.pk
+        })
 
     @property
     def track_fields(self):
@@ -721,7 +740,7 @@ class Assignment(TimeStampedModel, object):
         verbose_name_plural = _("Assignments")
 
     def __init__(self, *args, **kwargs):
-        super(Assignment, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.pk:
             self._original_course_offering_id = self.course_offering_id
 

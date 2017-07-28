@@ -50,7 +50,7 @@
             {% for course_offering in course_list_available %}
             <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
               <td>
-                <a class="title" href="{% url 'course_offering_detail' course_offering.course.slug course_offering.semester.slug %}">
+                <a class="title" href="{{ course_offering.get_absolute_url }}">
                     {{ course_offering.course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}<span>, курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
                 {% for teacher in course_offering.teachers.all %}
@@ -91,7 +91,7 @@
             {% for e in enrollments_archive %}
                 <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
                   <td>
-                    <a href="{% url 'course_offering_detail' e.course_offering.course.slug e.course_offering.semester.slug %}">
+                    <a href="{{ e.course_offering.get_absolute_url }}">
                       {{ e.course_offering.course.name }}</a>
                   </td>
                   <td><span class="badge assignment-status {{ e.course_offering.grading_type_css_mixin }} {{ e.grade }}">{{ e.grade_honest }}</span></td>

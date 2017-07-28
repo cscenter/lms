@@ -50,12 +50,12 @@
         <tr>
           <td>{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</td>
           <td>
-            <a href="{% url 'class_detail' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}">
+            <a href="{{ class.get_absolute_url }}">
               {{ class.name }}
             </a>
           </td>
           <td>
-            <a href="{% url 'course_offering_detail' class.course_offering.course.slug class.course_offering.semester.slug %}">
+            <a href="{{ class.course_offering.get_absolute_url }}">
               {{ class.course_offering.course.name }}
             </a>
           </td>

@@ -354,7 +354,7 @@
                                 <ul>
                                     {% for enrollment in profile_user.enrollment_set.all %}
                                         <li>
-                                            <a href="{% url 'course_offering_detail' enrollment.course_offering.course.slug enrollment.course_offering.semester.slug %}">
+                                            <a href="{{ enrollment.course_offering.get_absolute_url }}">
                                                 {{ enrollment.course_offering }}
                                             </a>
                                             /{{ enrollment.grade_honest|lower }}/
@@ -420,7 +420,7 @@
                             <ul class="">
                                 {% for courseoffering in profile_user.teaching_set.all %}
                                     <li>
-                                        <a href="{% url 'course_offering_detail' courseoffering.course.slug courseoffering.semester.slug %}">
+                                        <a href="{{ courseoffering.get_absolute_url }}">
                                             {{ courseoffering }}
                                         </a>
                                     </li>

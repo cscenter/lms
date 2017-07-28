@@ -29,7 +29,7 @@
         {% if offerings %}
           <ul>
           {% for offering in offerings %}
-          <li><a href="{% url 'course_offering_detail' course.slug offering.semester.slug %}">{{ offering.semester }}</a></li>
+          <li><a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a></li>
           {% endfor %}
           </ul>
         {% else %}
