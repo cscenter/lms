@@ -199,13 +199,13 @@
     {% if user.is_authenticated %}
         <div class="o-buttons-vertical">
             {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-              <a href="{% url 'assignment_add' course_offering.city_id course_offering.course.slug course_offering.semester.slug %}"
+              <a href="{% url 'assignment_add'  course_offering.course.slug course_offering.city_id "" course_offering.semester.slug %}"
                  class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
-              <a href="{% url 'course_offering_news_create' course_offering.city_id course_offering.course.slug course_offering.semester.slug %}"
+              <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.city_id "" course_offering.semester.slug %}"
                  class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
-              <a href="{% url 'course_class_add' course_offering.city_id course_offering.course.slug course_offering.semester.slug %}"
+              <a href="{% url 'course_class_add' course_offering.course.slug course_offering.city_id "" course_offering.semester.slug %}"
                  class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
-              <a href="{% url 'course_offering_edit_descr' course_offering.city_id course_offering.course.slug course_offering.semester.slug %}"
+              <a href="{% url 'course_offering_edit_descr' course_offering.course.slug course_offering.city_id "" course_offering.semester.slug %}"
                  class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
             {% endif %}
             {% if request.user.is_active_student and course_offering.enrollment_is_open %}

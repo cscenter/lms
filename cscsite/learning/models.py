@@ -27,7 +27,7 @@ from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
-from core.utils import hashids
+from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
 from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
     CustomCourseOfferingQuerySet, EnrollmentDefaultManager, \
@@ -269,24 +269,24 @@ class CourseOffering(TimeStampedModel):
                                  smart_text(self.semester))
 
     def get_absolute_url(self):
-        return reverse('course_offering_detail', kwargs={
+        return city_aware_reverse('course_offering_detail', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": ""
+            "city_code": "",
         })
 
     def get_enroll_url(self):
-        return reverse('course_offering_enroll', kwargs={
+        return city_aware_reverse('course_offering_enroll', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": ""
+            "city_code": "",
         })
 
     def get_unenroll_url(self):
-        return reverse('course_offering_unenroll', kwargs={
+        return city_aware_reverse('course_offering_unenroll', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": ""
+            "city_code": "",
         })
 
     def get_city(self):
@@ -453,7 +453,7 @@ class CourseOfferingNews(TimeStampedModel):
                                   smart_text(self.course_offering))
 
     def get_absolute_url(self):
-        return reverse("course_offering_news_detail", kwargs={
+        return city_aware_reverse("course_offering_news_detail", kwargs={
             "city_code": "",
             "course_slug": self.course_offering.course.slug,
             "semester_slug": self.course_offering.semester.slug,
@@ -611,7 +611,7 @@ class CourseClass(TimeStampedModel, object):
         return smart_text(self.name)
 
     def get_absolute_url(self):
-        return reverse('class_detail', kwargs={
+        return city_aware_reverse('class_detail', kwargs={
            "city_code": "",
            "course_slug": self.course_offering.course.slug,
            "semester_slug": self.course_offering.semester.slug,
