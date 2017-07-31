@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http.response import Http404
 from django.shortcuts import redirect
 
 from core.exceptions import Redirect
@@ -6,18 +7,35 @@ from .context_processors import cities
 
 
 class CurrentCityMiddleware(object):
-    """Set `city_code` based on sub domain for request object."""
+    """
+    Attach city code to request object:
+        * If view contains `city_aware` keyword argument, get city code from
+        resolved url parameters
+        * If not, try to cast sub domain to city code.
+        * Otherwise, fallback to `settings.DEFAULT_CITY_CODE`. It makes
+        sense in case of `www` or empty sub domain.
+    """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        """Presume we have only 1 lvl sub domains and cities from Russia"""
-        # Code to be executed for each request before
-        # the view (and later middleware) are called.
-        if settings.SITE_ID == settings.CENTER_SITE_ID:
-            # For center site always set spb
-            request.city_code = settings.DEFAULT_CITY_CODE
+        return self.get_response(request)
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        url_aware_of_the_city = bool(view_kwargs.get("city_aware", False))
+        if url_aware_of_the_city:
+            delimiter = view_kwargs["city_delimiter"]
+            city_code = view_kwargs["city_code"]
+            if not city_code:
+                if delimiter:
+                    # For default city delimiter must be empty
+                    raise Http404
+                city_code = settings.DEFAULT_CITY_CODE
+            elif city_code not in settings.TIME_ZONES or not delimiter:
+                # None-empty delimiter if valid city code provided
+                raise Http404
         else:
+            # Assume we have only 1 lvl sub domains
             sub_domain = request.get_host().rsplit('.', 2)[:-2]
             if sub_domain:
                 current = sub_domain[0].lower()
@@ -25,17 +43,12 @@ class CurrentCityMiddleware(object):
                 current = None
             for city in cities(request)['CITY_LIST']:
                 if city.code == current:
-                    request.city_code = current
+                    city_code = current
                     break
-            if not hasattr(request, "city_code"):
-                request.city_code = settings.DEFAULT_CITY_CODE
-
-        response = self.get_response(request)
-
-        # Code to be executed for each request/response after
-        # the view is called.
-
-        return response
+            else:
+                city_code = settings.DEFAULT_CITY_CODE
+        request.city_code = city_code
+        return None
 
 
 class RedirectMiddleware(object):

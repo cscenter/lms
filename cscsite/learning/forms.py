@@ -45,7 +45,7 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
                 template='crispy_forms/square_tabs.html'
             ),
             CANCEL_SAVE_PAIR)
-        super(CourseOfferingEditDescrForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = CourseOffering

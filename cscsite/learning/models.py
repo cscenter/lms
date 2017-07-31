@@ -296,8 +296,8 @@ class CourseOffering(TimeStampedModel):
             "city_code": self.get_city()
         })
 
-    def get_update_description_url(self):
-        return city_aware_reverse("course_offering_edit_descr", kwargs={
+    def get_update_url(self):
+        return city_aware_reverse("course_offering_update", kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
             "city_code": self.get_city()
@@ -679,7 +679,7 @@ class CourseClass(TimeStampedModel, object):
         })
 
     def get_update_url(self):
-        return city_aware_reverse('course_class_edit', kwargs={
+        return city_aware_reverse('course_class_update', kwargs={
             "course_slug": self.course_offering.course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
@@ -854,7 +854,7 @@ class Assignment(TimeStampedModel, object):
         return self.__class__.course_offering.field.name
 
     def get_update_url(self):
-        return city_aware_reverse('assignment_edit', kwargs={
+        return city_aware_reverse('assignment_update', kwargs={
             "course_slug": self.course_offering.course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),

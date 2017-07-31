@@ -444,7 +444,7 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        url = co.get_update_description_url()
+        url = co.get_update_url()
         self.assertLoginRedirect(url)
         self.doLogin(teacher_other)
         self.assertLoginRedirect(url)
