@@ -29,7 +29,7 @@
             </ul>
           </td>
           <td>
-            <a href="{% url 'course_offering_news_create' course_offering.course.slug course_offering.semester.slug %}" class="btn btn-link" role="button">
+            <a href="{{ course_offering.get_create_news_url }}" class="btn btn-link" role="button">
               {% trans "Add news" %}
             </a>
           </td>

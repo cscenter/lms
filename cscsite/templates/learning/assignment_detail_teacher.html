@@ -15,8 +15,8 @@
           <small><a href="{{ assignment.course_offering.get_absolute_url }}">{{ assignment.course_offering }}</a></small>
       </h2>
       <div class="btn-toolbar">
-        <a href="{% url 'assignment_edit' assignment.course_offering.course.slug assignment.course_offering.semester.slug assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-        <a href="{% url 'assignment_delete' assignment.course_offering.course.slug assignment.course_offering.semester.slug assignment.pk %}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+        <a href="{{ assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{{ assignment.get_delete_url }}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
       </div>
       <hr>
     </div>

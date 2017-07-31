@@ -71,21 +71,21 @@
             <ul class="list-unstyled no-margin">
               {% if class.slides %}
               <li>
-                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_slides">
+                <a href="{{ class.get_update_url }}#div_id_slides">
                   {% trans "Slides" %}
                 </a>
               </li>
               {% endif %}
               {% if class.video_url %}
               <li>
-                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_video_url">
+                <a href="{{ class.get_update_url }}#div_id_video_url">
                   {% trans "Video" %}
                 </a>
               </li>
               {% endif %}
               {% if not class.slides and not class.video %}
               <li>
-                <a href="{% url 'course_class_edit' class.course_offering.course.slug class.course_offering.semester.slug class.pk %}#div_id_slides">
+                <a href="{{ class.get_update_url }}#div_id_slides">
                   {% trans "No" %}
                 </a>
               </li>

@@ -272,21 +272,49 @@ class CourseOffering(TimeStampedModel):
         return city_aware_reverse('course_offering_detail', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": "",
+            "city_code": self.get_city()
+        })
+
+    def get_create_assignment_url(self):
+        return city_aware_reverse("assignment_add", kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": self.get_city()
+        })
+
+    def get_create_news_url(self):
+        return city_aware_reverse("course_offering_news_create", kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": self.get_city()
+        })
+
+    def get_create_class_url(self):
+        return city_aware_reverse("course_class_add", kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": self.get_city()
+        })
+
+    def get_update_description_url(self):
+        return city_aware_reverse("course_offering_edit_descr", kwargs={
+            "course_slug": self.course.slug,
+            "semester_slug": self.semester.slug,
+            "city_code": self.get_city()
         })
 
     def get_enroll_url(self):
         return city_aware_reverse('course_offering_enroll', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": "",
+            "city_code": self.get_city()
         })
 
     def get_unenroll_url(self):
         return city_aware_reverse('course_offering_unenroll', kwargs={
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
-            "city_code": "",
+            "city_code": self.get_city()
         })
 
     def get_city(self):
@@ -452,12 +480,40 @@ class CourseOfferingNews(TimeStampedModel):
         return "{0} ({1})".format(smart_text(self.title),
                                   smart_text(self.course_offering))
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
+
     def get_absolute_url(self):
         return city_aware_reverse("course_offering_news_detail", kwargs={
-            "city_code": "",
             "course_slug": self.course_offering.course.slug,
             "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
             "pk": self.pk,
+        })
+
+    def get_update_url(self):
+        return city_aware_reverse('course_offering_news_update', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
+        })
+
+    def get_delete_url(self):
+        return city_aware_reverse('course_offering_news_delete', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
         })
 
     def save(self, *args, **kwargs):
@@ -482,14 +538,6 @@ class CourseOfferingNews(TimeStampedModel):
                 CourseOfferingNewsNotification(user_id=co_t.teacher_id,
                                                course_offering_news_id=self.pk))
         CourseOfferingNewsNotification.objects.bulk_create(notifications)
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
 
     def created_local(self, tz=None):
         if not tz:
@@ -610,17 +658,45 @@ class CourseClass(TimeStampedModel, object):
     def __str__(self):
         return smart_text(self.name)
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
+
     def get_absolute_url(self):
         return city_aware_reverse('class_detail', kwargs={
-           "city_code": "",
+           "city_code": self.get_city(),
            "course_slug": self.course_offering.course.slug,
            "semester_slug": self.course_offering.semester.slug,
            "pk": self.pk
         })
 
+    def get_update_url(self):
+        return city_aware_reverse('course_class_edit', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
+        })
+
+    def get_delete_url(self):
+        return city_aware_reverse('course_class_delete', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
+        })
+
     @property
     def track_fields(self):
-        return ("slides",)
+        return "slides",
 
     def update_track_fields(self):
         for field in self.track_fields:
@@ -691,6 +767,27 @@ class CourseClassAttachment(TimeStampedModel, object):
     def __str__(self):
         return "{0}".format(smart_text(self.material_file_name))
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_class.field.name
+
+    def get_delete_url(self):
+        return city_aware_reverse('course_class_attachment_delete', kwargs={
+            "course_slug": self.course_class.course_offering.course.slug,
+            "semester_slug": self.course_class.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "class_pk": self.course_class.pk,
+            "pk": self.pk
+        })
+
     @property
     def material_file_name(self):
         return os.path.basename(self.material.name)
@@ -743,6 +840,34 @@ class Assignment(TimeStampedModel, object):
         super().__init__(*args, **kwargs)
         if self.pk:
             self._original_course_offering_id = self.course_offering_id
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
+
+    def get_update_url(self):
+        return city_aware_reverse('assignment_edit', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
+        })
+
+    def get_delete_url(self):
+        return city_aware_reverse('assignment_delete', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "pk": self.pk
+        })
 
     def clean(self):
         if (self.pk and

@@ -45,7 +45,7 @@
       </h2>
       {% if user.is_curator or user_type == 'teacher' and is_actual_teacher %}
       <div class="btn-toolbar">
-        <a href="{% url 'assignment_edit' a_s.assignment.course_offering.course.slug a_s.assignment.course_offering.semester.slug a_s.assignment.pk %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{{ a_s.assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
       </div>
       {% endif %}
       <hr>

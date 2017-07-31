@@ -49,7 +49,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                 'deadline_at_0': a.deadline_at__date(),
                 'deadline_at_1': '00:00'
         }
-        url = reverse('assignment_add', args=[co.course.slug, co.semester.slug])
+        url = co.get_create_assignment_url()
         response = self.client.post(url, form, follow=True)
         assert response.status_code == 200
         assignments = co.assignment_set.all()
@@ -134,7 +134,7 @@ def test_notification_teachers_list_for_assignment(client,
         'deadline_at_0': a.deadline_at__date(),
         'deadline_at_1': '00:00'
     }
-    url = reverse('assignment_add', args=[co.course.slug, co.semester.slug])
+    url = co.get_create_assignment_url()
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     assignments = co.assignment_set.all()
@@ -143,7 +143,7 @@ def test_notification_teachers_list_for_assignment(client,
     assert len(assignment.notify_teachers.all()) == 3
     # Update assignment and check, that notify_teachers list not changed
     form['grade_max'] = 10
-    url = reverse('assignment_edit', args=[co.course.slug, co.semester.slug, assignment.pk])
+    url = assignment.get_update_url()
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     assert len(assignment.notify_teachers.all()) == 3
