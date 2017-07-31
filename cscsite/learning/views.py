@@ -23,7 +23,6 @@ from django.http.response import JsonResponse
 from django.views.generic.edit import BaseUpdateView
 
 from core import comment_persistence
-from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, get_club_domain, render_markdown
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from core.widgets import TabbedPane, Tab
@@ -733,9 +732,9 @@ class CourseOfferingDetailView(generic.DetailView):
         return assignments
 
 
-class CourseOfferingEditDescrView(TeacherOnlyMixin,
-                                  ProtectedFormMixin,
-                                  generic.UpdateView):
+class CourseOfferingEditView(TeacherOnlyMixin,
+                             ProtectedFormMixin,
+                             generic.UpdateView):
     model = CourseOffering
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingEditDescrForm
@@ -757,7 +756,7 @@ class CourseOfferingEditDescrView(TeacherOnlyMixin,
 
     def get_initial(self):
         """Keep in mind that `initial` overrides values from model dict"""
-        initial = super(CourseOfferingEditDescrView, self).get_initial()
+        initial = super().get_initial()
         # Note: In edit view we always have an object
         if not self.object.description_ru:
             initial["description_ru"] = self.object.course.description_ru

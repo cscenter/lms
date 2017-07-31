@@ -10,7 +10,7 @@ from .views import \
     CourseStudentListView, \
     CoursesListView, CourseDetailView, CourseUpdateView, \
     CourseOfferingDetailView, \
-    CourseOfferingEditDescrView, \
+    CourseOfferingEditView, \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
     CourseOfferingNewsDeleteView, \
@@ -51,8 +51,8 @@ course_offering_patterns = url(
         url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
             CourseOfferingDetailView.as_view(),
             name="course_offering_detail_with_active_tab"),
-        url(r"^edit-descr$", CourseOfferingEditDescrView.as_view(),
-            name="course_offering_edit_descr"),
+        url(r"^edit$", CourseOfferingEditView.as_view(),
+            name="course_offering_update"),
         # FIXME: this was added for .get_absolute_url support, but in fact it should lead to course offering page and focus on news.
         url(r"^news/(?P<pk>\d+)/$",
             CourseOfferingNewsUpdateView.as_view(),
@@ -82,7 +82,7 @@ course_offering_patterns = url(
                 name='course_class_add'),
             url(r'^(?P<pk>\d+)/edit$',
                 CourseClassUpdateView.as_view(),
-                name='course_class_edit'),
+                name='course_class_update'),
             url(r'^(?P<class_pk>\d+)/attachments/(?P<pk>\d+)/delete$',
                 CourseClassAttachmentDeleteView.as_view(),
                 name='course_class_attachment_delete'),
@@ -97,7 +97,7 @@ course_offering_patterns = url(
                 name='assignment_add'),
             url(r'^(?P<pk>\d+)/edit$',
                 AssignmentUpdateView.as_view(),
-                name='assignment_edit'),
+                name='assignment_update'),
             url(r'^(?P<pk>\d+)/delete$',
                 AssignmentDeleteView.as_view(),
                 name='assignment_delete'),
@@ -106,7 +106,7 @@ course_offering_patterns = url(
                 name='assignment_attachment_delete'),
 
         ])),
-    ]))
+    ]), kwargs={"city_aware": True})
 
 teaching_section_patterns = url(
     r'^teaching/', include([
