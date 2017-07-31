@@ -970,11 +970,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
             remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
                 "".join("<li>{}</li>".format(
                             DROP_ATTACHMENT_LINK.format(
-                                reverse('course_class_attachment_delete',
-                                        args=[co.course.slug,
-                                              co.semester.slug,
-                                              self.object.pk,
-                                              attachment.pk]),
+                                attachment.get_delete_url(),
                                 attachment.material_file_name))
                         for attachment
                         in self.object.courseclassattachment_set.all()))
@@ -1002,10 +998,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if self.request.GET.get('back') == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
-            # TODO: add  `add_class_url` method
-            return reverse('course_class_add',
-                           args=[self._course_offering.course.slug,
-                                 self._course_offering.semester.slug])
+            return self._course_offering.get_create_class_url()
         else:
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
@@ -1077,10 +1070,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
 
     def get_success_url(self):
         co = self.object.course_class.course_offering
-        return reverse('course_class_edit',
-                       args=[co.course.slug,
-                             co.semester.slug,
-                             self.object.course_class.pk])
+        return self.object.course_class.get_update_url()
 
     def delete(self, request, *args, **kwargs):
         resp = (super(CourseClassAttachmentDeleteView, self)
@@ -1749,10 +1739,7 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
 
     def get_success_url(self):
         co = self.object.assignment.course_offering
-        return reverse('assignment_edit',
-                       args=[co.course.slug,
-                             co.semester.slug,
-                             self.object.assignment.pk])
+        return self.object.assignment.get_update_url()
 
     def delete(self, request, *args, **kwargs):
         resp = (super(AssignmentAttachmentDeleteView, self)

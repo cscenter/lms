@@ -72,9 +72,7 @@ class NotifyCommandTest(TestCase):
         self.assertTrue(CourseOfferingNewsNotification.objects
                         .get(pk=an.pk)
                         .is_notified)
-        self.assertIn(reverse('course_offering_detail',
-                              args=[course_offering.course.slug,
-                                    course_offering.semester.slug]),
+        self.assertIn(course_offering.get_absolute_url(),
                       mail.outbox[0].body)
         self.assertIn("sending notification for", out.getvalue())
 

@@ -91,9 +91,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # Now unenroll from the course
         form = {'course_offering_pk': co.pk}
-        url = reverse('course_offering_unenroll',
-                      args=[co.course.slug, co.semester.slug])
-        response = self.client.post(url, form)
+        response = self.client.post(co.get_unenroll_url(), form)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertEquals(2, len(resp.context['assignment_list_archive']))

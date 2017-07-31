@@ -91,10 +91,7 @@ def test_enrollment_capacity(client):
     current_semester = SemesterFactory.create_current()
     co = CourseOfferingFactory.create(semester=current_semester,
                                       is_open=True)
-    co_url = reverse('course_offering_detail',
-                     args=[co.course.slug, co.semester.slug])
-    co_enroll_url = reverse('course_offering_enroll',
-                            args=[co.course.slug, co.semester.slug])
+    co_url = co.get_absolute_url()
     client.login(s)
     response = client.get(co_url)
     assert smart_bytes(_("Places available")) not in response.content
@@ -104,7 +101,7 @@ def test_enrollment_capacity(client):
     response = client.get(co_url)
     assert smart_bytes(_("Places available")) in response.content
     form = {'course_offering_pk': co.pk}
-    client.post(co_enroll_url, form)
+    client.post(co.get_enroll_url(), form)
     assert 1 == (Enrollment.active.filter(student=s, course_offering=co)
                  .count())
     # Capacity reached, show to second student nothing
@@ -127,8 +124,7 @@ def test_enrollment(client):
     current_semester.enroll_before = today.date()
     current_semester.save()
     co = CourseOfferingFactory.create(semester=current_semester)
-    url = reverse('course_offering_enroll',
-                  args=[co.course.slug, co.semester.slug])
+    url = co.get_enroll_url()
     form = {'course_offering_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
@@ -143,8 +139,7 @@ def test_enrollment(client):
                           .values_list('student', 'assignment'))
     co_other = CourseOfferingFactory.create(semester=current_semester)
     form.update({'back': 'course_list_student'})
-    url = reverse('course_offering_enroll',
-                  args=[co_other.course.slug, co_other.semester.slug])
+    url = co_other.get_enroll_url()
     response = client.post(url, form)
     assert response.status_code == 302
     # assert response.url == reverse('course_list_student')
@@ -152,8 +147,7 @@ def test_enrollment(client):
     old_semester = SemesterFactory.create(year=2010)
     old_co = CourseOfferingFactory.create(semester=old_semester)
     form = {'course_offering_pk': old_co.pk}
-    url = reverse('course_offering_enroll',
-                  args=[old_co.course.slug, old_co.semester.slug])
+    url = old_co.get_enroll_url()
     assert client.post(url, form).status_code == 403
     # If course offering has limited capacity and we reach it - reject request
     co.capacity = 1

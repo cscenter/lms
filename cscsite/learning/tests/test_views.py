@@ -16,6 +16,7 @@ from django.test.utils import override_settings
 from django.utils.encoding import smart_text, smart_bytes
 from testfixtures import LogCapture
 
+from core.utils import city_aware_reverse
 from learning.forms import MarksSheetTeacherImportGradesForm, CourseClassForm
 from learning.settings import GRADES, GRADING_TYPES, \
     STUDENT_STATUS
@@ -362,7 +363,11 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
     def test_basic_get(self):
         co = CourseOfferingFactory.create()
         assert 200 == self.client.get(co.get_absolute_url()).status_code
-        url = reverse('course_offering_detail', args=["space-odyssey", "2010"])
+        url = city_aware_reverse('course_offering_detail', kwargs={
+            "course_slug": "space-odyssey",
+            "semester_slug": "2010",
+            "city_code": ""
+        })
         # Can't parse `semester_slug`
         self.assertEqual(400, self.client.get(url).status_code)
 
@@ -439,8 +444,7 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        url = reverse('course_offering_edit_descr',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_update_description_url()
         self.assertLoginRedirect(url)
         self.doLogin(teacher_other)
         self.assertLoginRedirect(url)
@@ -454,9 +458,7 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
         self.teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         self.teacher_other = UserFactory.create(groups=['Teacher [CENTER]'])
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
-        self.url = reverse('course_offering_news_create',
-                           args=[self.co.course.slug,
-                                 self.co.semester.slug])
+        self.url = self.co.get_create_news_url()
         self.n_dict = CourseOfferingNewsFactory.attributes(create=True)
         self.n_dict.update({'course_offering': self.co})
 
@@ -487,10 +489,7 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
                                                     author=self.teacher)
-        self.url = reverse('course_offering_news_update',
-                           args=[self.co.course.slug,
-                                 self.co.semester.slug,
-                                 self.con.pk])
+        self.url = self.con.get_update_url()
         self.con_dict = model_to_dict(self.con)
         self.con_dict.update({'text': "foobar text"})
 
@@ -518,10 +517,7 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
                                                     author=self.teacher)
-        self.url = reverse('course_offering_news_delete',
-                           args=[self.co.course.slug,
-                                 self.co.semester.slug,
-                                 self.con.pk])
+        self.url = self.con.get_delete_url()
 
     def test_security(self):
         self.assertPOSTLoginRedirect(self.url, {})
@@ -598,8 +594,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
-        url = reverse('course_class_add',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_create_class_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
 
@@ -612,8 +607,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
         del form['slides']
-        url = reverse('course_class_add',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_create_class_url()
         self.doLogin(teacher)
         # should save with course_offering = co
         self.assertEqual(302, self.client.post(url, form).status_code)
@@ -638,12 +632,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form.update({'venue': VenueFactory.create().pk, '_addanother': True})
         del form['slides']
         self.doLogin(teacher)
-        url = reverse('course_class_add',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_create_class_url()
         # should save with course_offering = co
         response = self.client.post(url, form)
-        expected_url = reverse('course_class_add', args=[co.course.slug,
-                                                         co.semester.slug])
+        expected_url = co.get_create_class_url()
         self.assertEqual(302, response.status_code)
         self.assertRedirects(response, expected_url)
         self.assertEqual(1, (CourseClass.objects
@@ -669,8 +661,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        url = reverse('course_class_edit',
-                      args=[co.course.slug, co.semester.slug, cc.pk])
+        url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
         del form['slides']
@@ -687,8 +678,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        url = reverse('course_class_edit',
-                      args=[co.course.slug, co.semester.slug, cc.pk])
+        url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
         del form['slides']
@@ -699,8 +689,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                           self.client.get(cc.get_absolute_url())
                           .context['object'].name)
         form.update({'_addanother': True})
-        expected_url = reverse('course_class_add',
-                      args=[co.course.slug, co.semester.slug])
+        expected_url = co.get_create_class_url()
         self.assertRedirects(self.client.post(url, form), expected_url)
 
     def test_delete(self):
@@ -709,8 +698,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        url = reverse('course_class_delete',
-                      args=[co.course.slug, co.semester.slug, cc.pk])
+        url = cc.get_delete_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, {})
         self.doLogin(teacher)
@@ -725,8 +713,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
-        base_url = reverse('course_class_edit',
-                           args=[co.course.slug, co.semester.slug, cc.pk])
+        base_url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
         del form['slides']
@@ -754,18 +741,11 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertContains(resp, cca2.material.url)
         self.assertContains(resp, cca2.material_file_name)
         self.doLogin(teacher)
-        url = reverse('course_class_edit',
-                      args=[co.course.slug, co.semester.slug, cc.pk])
+        url = cc.get_update_url()
         resp = self.client.get(url)
-        self.assertContains(resp,
-                            reverse('course_class_attachment_delete',
-                                    args=[co.course.slug, co.semester.slug,
-                                          cc.pk, cca1.pk]))
+        self.assertContains(resp, cca1.get_delete_url())
         self.assertContains(resp, cca1.material_file_name)
-        self.assertContains(resp,
-                            reverse('course_class_attachment_delete',
-                                    args=[co.course.slug, co.semester.slug,
-                                          cc.pk, cca2.pk]))
+        self.assertContains(resp, cca2.get_delete_url())
         self.assertContains(resp, cca2.material_file_name)
 
     def test_attachments(self):
@@ -780,8 +760,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form = model_to_dict(cc)
         del form['slides']
         form['attachments'] = [f1, f2]
-        url = reverse('course_class_edit',
-                      args=[co.course.slug, co.semester.slug, cc.pk])
+        url = cc.get_update_url()
         self.assertRedirects(self.client.post(url, form),
                              cc.get_absolute_url())
         # check that files are available from course class page
@@ -802,9 +781,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertEquals(as_[0][1], b"attachment1_content")
         self.assertEquals(as_[1][1], b"attachment2_content")
         # delete one of the files, check that it's deleted and other isn't
-        url = reverse('course_class_attachment_delete',
-                      args=[co.course.slug, co.semester.slug,
-                            cc.pk, cca_to_delete.pk])
+        url = cca_to_delete.get_delete_url()
         # check security just in case
         self.doLogout()
         self.assertLoginRedirect(url)
@@ -813,10 +790,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         self.assertContains(self.client.get(url),
                             cca_to_delete.material_file_name)
         self.assertRedirects(self.client.post(url),
-                             reverse('course_class_edit',
-                                     args=[co.course.slug,
-                                           co.semester.slug,
-                                           cc.pk]))
+                             cc.get_update_url())
         response = self.client.get(cc.get_absolute_url())
         spans = (BeautifulSoup(response.content, "html.parser")
                  .find_all('span', class_='assignment-attachment'))
@@ -1256,8 +1230,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         form = AssignmentFactory.attributes(create=True)
         form.update({'course_offering': co.pk,
                      'attached_file': None})
-        url = reverse('assignment_add',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_create_assignment_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student [CENTER]']]:
@@ -1266,8 +1239,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
         a = AssignmentFactory.create()
-        url = reverse('assignment_edit',
-                      args=[co.course.slug, co.semester.slug, a.pk])
+        url = a.get_update_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
@@ -1275,8 +1247,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
-        url = reverse('assignment_delete',
-                      args=[co.course.slug, co.semester.slug, a.pk])
+        url = a.get_delete_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, form)
         for groups in [[], ['Student [CENTER]'], ['Teacher [CENTER]']]:
@@ -1296,8 +1267,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
-        url = reverse('assignment_add',
-                      args=[co.course.slug, co.semester.slug])
+        url = co.get_create_assignment_url()
         self.doLogin(teacher)
         self.client.post(url, form)
         assert Assignment.objects.count() == 1
@@ -1318,8 +1288,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
-        url = reverse('assignment_edit',
-                      args=[co.course.slug, co.semester.slug, a.pk])
+        url = a.get_update_url()
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
         self.assertNotContains(self.client.get(list_url), form['title'])
@@ -1332,8 +1301,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         teacher = UserFactory.create(groups=['Teacher [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
         a = AssignmentFactory.create(course_offering=co)
-        url = reverse('assignment_delete',
-                      args=[co.course.slug, co.semester.slug, a.pk])
+        url = a.get_delete_url()
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
         self.assertContains(self.client.get(list_url), a.title)
@@ -1696,9 +1664,7 @@ def test_course_class_form(client, curator, settings):
     teacher = TeacherCenterFactory()
     semester = SemesterFactory.create_current()
     co = CourseOfferingFactory(semester=semester, teachers=[teacher])
-    course_class_add_url = reverse("course_class_add",
-                                   kwargs=dict(course_slug=co.course.slug,
-                                               semester_slug=co.semester.slug))
+    course_class_add_url = co.get_create_class_url()
     response = client.get(course_class_add_url)
     assert response.status_code == 302
     client.login(teacher)
