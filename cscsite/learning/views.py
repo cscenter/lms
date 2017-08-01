@@ -732,6 +732,7 @@ class CourseOfferingDetailView(generic.DetailView):
         return assignments
 
 
+# FIXME: Do I need ProtectedFormMixin?
 class CourseOfferingEditView(TeacherOnlyMixin,
                              ProtectedFormMixin,
                              generic.UpdateView):
