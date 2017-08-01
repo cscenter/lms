@@ -8,6 +8,7 @@ from learning.factories import CourseOfferingFactory, CourseOfferingNewsFactory
 SPB_OFFSET = 3
 NSK_OFFSET = 7
 
+
 @pytest.mark.django_db
 def test_news_get_city_timezone(settings):
     news = CourseOfferingNewsFactory(course_offering__city_id='nsk')
@@ -46,7 +47,5 @@ def test_course_offering_news(settings, admin_client):
     assert date_str == "14"
     response = admin_client.get(co.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    # FIXME: Тест сейчас падает, потому что Прочтение привязано к городу и зависит от request.city_code
-    # FIXME: Нужно мутировать request.city_code на уровне URL?
     assert any(date_str in s.string for s in
                html.find_all('div', {"class": "date"}))
