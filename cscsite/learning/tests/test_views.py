@@ -504,7 +504,7 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
 
     def test_news_update(self):
         self.doLogin(self.teacher)
-        co_url = self.co.get_absolute_url()
+        co_url = self.co.get_url_for_tab("news")
         self.assertRedirects(
             self.client.post(self.url, self.con_dict), co_url)
         self.assertContains(self.client.get(co_url), self.con_dict['text'])
