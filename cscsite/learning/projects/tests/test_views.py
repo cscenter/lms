@@ -25,13 +25,13 @@ URL_ALL_PROJECTS = reverse("projects:all_projects")
 
 
 @pytest.mark.django_db
-def test_user_detail(client, student_center_factory):
+def test_user_detail(client):
     """
     Students should have `projects` in their info on profile page.
 
     Just a simple test to check something appears.
     """
-    student = student_center_factory(enrollment_year='2013')
+    student = StudentCenterFactory(enrollment_year='2013')
     semester1 = SemesterFactory.create(year=2014, type='spring')
     semester2 = SemesterFactory.create(year=2014, type='autumn')
     p1 = ProjectFactory.create(students=[student], semester=semester1)
@@ -48,8 +48,8 @@ def test_user_detail(client, student_center_factory):
 
 
 @pytest.mark.django_db
-def test_staff_diplomas_view(curator, client, student_center_factory):
-    student = student_center_factory(enrollment_year='2013',
+def test_staff_diplomas_view(curator, client):
+    student = StudentCenterFactory(enrollment_year='2013',
                                      status=STUDENT_STATUS.will_graduate)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
@@ -62,17 +62,14 @@ def test_staff_diplomas_view(curator, client, student_center_factory):
 
 
 @pytest.mark.django_db
-def test_project_reviewer_only_mixin_security(client,
-                                              student_center_factory,
-                                              user_factory,
-                                              curator):
+def test_project_reviewer_only_mixin_security(client, curator):
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
-    student = student_center_factory()
+    student = StudentCenterFactory()
     client.login(student)
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
-    reviewer = user_factory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
+    reviewer = UserFactory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
     client.login(reviewer)
     response = client.get(URL_REPORTS)
     assert response.status_code == 200
@@ -84,14 +81,14 @@ def test_project_reviewer_only_mixin_security(client,
 
 
 @pytest.mark.django_db
-def test_reviewer_list(client, curator, student_center_factory):
+def test_reviewer_list(client, curator):
     """Test GET-filter `show` works"""
     reviewer = ProjectReviewerFactory.create()
     year, term_type = get_current_semester_pair()
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     client.login(reviewer)
-    student = student_center_factory()
+    student = StudentCenterFactory()
     response = client.get(URL_REPORTS)
     assert response.status_code == 200
     assert len(response.context["projects"]) == 0

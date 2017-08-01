@@ -32,7 +32,8 @@ from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import CSCUserCreationForm, CSCUserChangeForm
 from users.models import CSCUser, CSCUserReference
 from users.factories import UserFactory, SHADCourseRecordFactory, \
-    CSCUserReferenceFactory
+    CSCUserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
+    StudentFactory, StudentCenterFactory
 
 
 class CustomSemesterFactory(SemesterFactory):
@@ -361,18 +362,14 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, student_mail)
 
 @pytest.mark.django_db
-def test_club_students_profiles_on_cscenter_site(client,
-                                                 user_factory,
-                                                 student_club_factory,
-                                                 student_factory,
-                                                 teacher_center_factory):
+def test_club_students_profiles_on_cscenter_site(client):
     """Only teachers and curators can see club students profiles on cscenter site"""
-    student_club = student_club_factory.create()
+    student_club = StudentClubFactory.create()
     url = reverse('user_detail', args=[student_club.pk])
     response = client.get(url)
     assert response.status_code == 404
 
-    student = student_factory()
+    student = StudentFactory()
     url = reverse('user_detail', args=[student.pk])
     response = client.get(url)
     assert response.status_code == 200
@@ -381,7 +378,7 @@ def test_club_students_profiles_on_cscenter_site(client,
     response = client.get(url)
     assert response.status_code == 404
 
-    teacher_center = teacher_center_factory.create()
+    teacher_center = TeacherCenterFactory.create()
     client.login(teacher_center)
     url = reverse('user_detail', args=[student_club.pk])
     response = client.get(url)
@@ -389,33 +386,26 @@ def test_club_students_profiles_on_cscenter_site(client,
 
 
 @pytest.mark.django_db
-def test_expelled(client,
-                  student_center_factory,
-                  student_club_factory,
-                  student_factory):
+def test_expelled(client):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
-    student = student_center_factory(status=STUDENT_STATUS.expelled)
+    student = StudentCenterFactory(status=STUDENT_STATUS.expelled)
     client.login(student)
     url = reverse('course_list_student')
     response = client.get(url)
     assert response.status_code == 302
     assert "login" in response["Location"]
     # active student
-    active_student = student_center_factory()
+    active_student = StudentCenterFactory()
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
 
+
 @pytest.mark.django_db
-def test_alumni(client,
-                student_center_factory,
-                student_club_factory,
-                student_factory,
-                user_factory,
-                teacher_center_factory):
-    graduated = user_factory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
-    student_center = student_center_factory()
+def test_alumni(client):
+    graduated = UserFactory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    student_center = StudentCenterFactory()
     url_list_all = reverse('alumni')
     response = client.get(url_list_all)
     assert student_center.last_name not in force_text(response.content)
@@ -498,7 +488,6 @@ def test_login_restrictions(client, settings):
     assert response.context["request"].user.is_authenticated
     # Just to make sure we have no super user permissions
     assert not response.context["request"].user.is_curator
-
 
 
 class ICalTests(MyUtilitiesMixin, TestCase):

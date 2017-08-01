@@ -9,11 +9,10 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
 from learning.settings import PARTICIPANT_GROUPS
-from users.factories import UserFactory, StudentFactory, StudentClubFactory, \
-    TeacherCenterFactory, StudentCenterFactory
+from users.factories import UserFactory
 
-CENTER_SITE_ID = 1
-CLUB_SITE_ID = 2
+CENTER_SITE_ID = settings.CENTER_SITE_ID
+CLUB_SITE_ID = settings.CLUB_SITE_ID
 
 
 def pytest_report_header(config):
@@ -40,27 +39,10 @@ def client():
 def user_factory():
     return UserFactory
 
-# FIXME: avoid this fixture and try to delete it in the future
-@pytest.fixture(scope="session")
-def student_factory():
-    """Both club and center groups"""
-    return StudentFactory
 
-# FIXME: avoid this fixture and try to delete it in the future
-@pytest.fixture(scope="session")
-def student_center_factory():
-    return StudentCenterFactory
-
-
-# FIXME: avoid this fixture and try to delete it in the future
-@pytest.fixture(scope="session")
-def student_club_factory():
-    return StudentClubFactory
-
-# FIXME: avoid this fixture and try to delete it in the future
-@pytest.fixture(scope="session")
-def teacher_center_factory():
-    return TeacherCenterFactory
+@pytest.fixture(scope="function")
+def curator(user_factory):
+    return user_factory.create(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -127,10 +109,3 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
                     "code": t.name
                 }
             )
-
-
-@pytest.fixture(scope="function")
-def curator(user_factory):
-    return user_factory.create(is_superuser=True, is_staff=True)
-
-

@@ -22,6 +22,7 @@ import cscenter.urls
 from learning.admin import AssignmentAdmin
 from learning.utils import get_current_semester_pair
 from learning.models import AssignmentNotification
+from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 from .mixins import *
 
@@ -108,14 +109,12 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
 
 
 @pytest.mark.django_db
-def test_notification_teachers_list_for_assignment(client,
-                                                   teacher_center_factory,
-                                                   student_factory):
+def test_notification_teachers_list_for_assignment(client):
     """After assignment creation we must be sure that `notify_teachers`
     m2m prepopulated with course offering teachers whom notify_by_default flag is set.
     """
-    student = student_factory()
-    t1, t2, t3, t4 = teacher_center_factory.create_batch(4)
+    student = StudentCenterFactory()
+    t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
     # Course offering with 4 teachers whom notify_by_default flag set to True
     co = CourseOfferingFactory.create(teachers=[t1, t2, t3, t4])
     co_teacher1 = CourseOfferingTeacher.objects.get(course_offering=co, teacher=t1)
@@ -166,12 +165,11 @@ def test_notification_teachers_list_for_assignment(client,
 
 
 @pytest.mark.django_db
-def test_notify_teachers_assignment_admin_form(client, curator,
-                                               teacher_center_factory):
+def test_notify_teachers_assignment_admin_form(client, curator):
     """`notify_teachers` should be prepopulated with course offering
     teachers if list is not specified manually"""
     from django.contrib.admin.sites import AdminSite
-    t1, t2, t3, t4 = teacher_center_factory.create_batch(4)
+    t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
     co = CourseOfferingFactory.create(teachers=[t1, t2, t3, t4])
     ma = AssignmentAdmin(Assignment, AdminSite())
     client.login(curator)
