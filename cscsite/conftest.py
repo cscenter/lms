@@ -22,15 +22,18 @@ def pytest_report_header(config):
 
 
 class CustomDjangoTestClient(Client):
-    """ Add some utility methods to Django test client """
     def login(self, user_model):
+        """
+        User factory creates model with attached raw password what allows to
+        authenticate user later with default backend.
+        """
         return super(CustomDjangoTestClient, self).login(
             username=user_model.username, password=user_model.raw_password)
 
 
 @pytest.fixture()
 def client():
-    """Override Django test client instance."""
+    """Customize login method for Django test client."""
     skip_if_no_django()
     return CustomDjangoTestClient()
 

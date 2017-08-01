@@ -43,8 +43,9 @@ course_patterns = url(
             name="course_edit"),
     ]))
 
+# TODO: dynamically generate city_code regex part
 course_offering_patterns = url(
-    r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/", include([
+    r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/", include([
         # Common pages
         url(r"^$", CourseOfferingDetailView.as_view(),
             name="course_offering_detail"),
