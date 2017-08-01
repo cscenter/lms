@@ -818,7 +818,7 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
     form_class = CourseOfferingNewsForm
 
     def get_success_url(self):
-        return self.object.course_offering.get_absolute_url()
+        return self.object.course_offering.get_url_for_tab("news")
 
     def is_form_allowed(self, user, obj):
         return (user.is_authenticated and user.is_curator) or \
@@ -832,6 +832,10 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def get_success_url(self):
+        """
+        Since we don't check was it the last deleted news or not - redirect to
+        default active tab.
+        """
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):

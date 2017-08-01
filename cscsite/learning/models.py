@@ -268,54 +268,49 @@ class CourseOffering(TimeStampedModel):
         return "{0}, {1}".format(smart_text(self.course),
                                  smart_text(self.semester))
 
-    def get_absolute_url(self):
-        return city_aware_reverse('course_offering_detail', kwargs={
+    def _get_url_kwargs(self) -> dict:
+        """
+        Returns keyword arguments useful for most of course offering url
+        patterns.
+        """
+        return {
             "course_slug": self.course.slug,
             "semester_slug": self.semester.slug,
             "city_code": self.get_city()
-        })
+        }
+
+    def get_absolute_url(self):
+        return city_aware_reverse('course_offering_detail',
+                                  kwargs=self._get_url_kwargs())
+
+    def get_url_for_tab(self, active_tab):
+        kwargs = {**self._get_url_kwargs(), "tab": active_tab}
+        return city_aware_reverse("course_offering_detail_with_active_tab",
+                                  kwargs=kwargs)
 
     def get_create_assignment_url(self):
-        return city_aware_reverse("assignment_add", kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse("assignment_add",
+                                  kwargs=self._get_url_kwargs())
 
     def get_create_news_url(self):
-        return city_aware_reverse("course_offering_news_create", kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse("course_offering_news_create",
+                                  kwargs=self._get_url_kwargs())
 
     def get_create_class_url(self):
-        return city_aware_reverse("course_class_add", kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse("course_class_add",
+                                  kwargs=self._get_url_kwargs())
 
     def get_update_url(self):
-        return city_aware_reverse("course_offering_update", kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse("course_offering_update",
+                                  kwargs=self._get_url_kwargs())
 
     def get_enroll_url(self):
-        return city_aware_reverse('course_offering_enroll', kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse('course_offering_enroll',
+                                  kwargs=self._get_url_kwargs())
 
     def get_unenroll_url(self):
-        return city_aware_reverse('course_offering_unenroll', kwargs={
-            "course_slug": self.course.slug,
-            "semester_slug": self.semester.slug,
-            "city_code": self.get_city()
-        })
+        return city_aware_reverse('course_offering_unenroll',
+                                  kwargs=self._get_url_kwargs())
 
     def get_city(self):
         return self.city_id
