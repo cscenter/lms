@@ -11,7 +11,7 @@ from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
     TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, OpenNskView
 from htmlpages import views
-from learning.views import UsefulListView, InternshipListView
+from learning.views.students import UsefulListView, InternshipListView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \

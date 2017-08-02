@@ -587,7 +587,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_user_detail_reference_list_view(self):
         """Check reference list appears on student profile page for curators only"""
-        student = UserFactory.create(groups=['Student [CENTER]'])
+        student = StudentCenterFactory()
         EnrollmentFactory.create()
         CSCUserReferenceFactory.create(student=student)
         curator = UserFactory.create(is_superuser=True, is_staff=True)
@@ -618,7 +618,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         sig_input = soup.find(id="id_signature")
         self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
 
-        student = UserFactory.create(groups=['Student [CENTER]'])
+        student = StudentCenterFactory()
         reference = CSCUserReferenceFactory.build(student=student)
         expected_reference_id = 1
         form_url = reverse('user_reference_add', args=[student.id])

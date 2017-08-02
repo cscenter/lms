@@ -34,9 +34,9 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                 .unread_notifications_cache)
 
     def test_assignment(self):
-        student = UserFactory.create(groups=['Student [CENTER]'])
-        teacher1 = UserFactory.create(groups=['Teacher [CENTER]'])
-        teacher2 = UserFactory.create(groups=['Teacher [CENTER]'])
+        student = StudentCenterFactory()
+        teacher1 = TeacherCenterFactory()
+        teacher2 = TeacherCenterFactory()
         co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
         EnrollmentFactory.create(student=student, course_offering=co)
         # Notify_teachers m2m populated only from view action

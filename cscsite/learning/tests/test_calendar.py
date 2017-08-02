@@ -1,0 +1,140 @@
+import datetime
+
+import pytest
+from dateutil.relativedelta import relativedelta
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from learning.factories import CourseClassFactory, NonCourseEventFactory, \
+    CourseOfferingFactory, EnrollmentFactory
+from learning.settings import PARTICIPANT_GROUPS
+from learning.tests.mixins import MyUtilitiesMixin
+from learning.tests.test_views import GroupSecurityCheckMixin
+from users.factories import UserFactory, StudentCenterFactory, \
+    TeacherCenterFactory
+
+
+# TODO: add test: kzn courses not shown on center site and spb on kzn
+# TODO: add test: summer courses not shown on club site on main page
+
+
+class CalendarTeacherTests(GroupSecurityCheckMixin,
+                           MyUtilitiesMixin, TestCase):
+    url_name = 'calendar_teacher'
+    groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+
+    def test_teacher_calendar(self):
+        teacher = TeacherCenterFactory()
+        other_teacher = TeacherCenterFactory()
+        self.doLogin(teacher)
+        classes = self.calendar_month_to_object_list(
+            self.client.get(reverse(self.url_name)).context['month'])
+        self.assertEqual(0, len(classes))
+        this_month_date = (datetime.datetime.now()
+                           .replace(day=15,
+                                    tzinfo=timezone.utc))
+        own_classes = (
+            CourseClassFactory
+            .create_batch(3, course_offering__teachers=[teacher],
+                          date=this_month_date))
+        others_classes = (
+            CourseClassFactory
+            .create_batch(5, course_offering__teachers=[other_teacher],
+                          date=this_month_date))
+        events = (
+            NonCourseEventFactory
+            .create_batch(2, date=this_month_date))
+        # teacher should see only his own classes and non-course events
+        resp = self.client.get(reverse(self.url_name))
+        classes = self.calendar_month_to_object_list(resp.context['month'])
+        self.assertSameObjects(own_classes + events, classes)
+        # but in full calendar all classes should be shown
+        classes = self.calendar_month_to_object_list(
+            self.client.get(reverse('calendar_full_teacher')).context['month'])
+        self.assertSameObjects(own_classes + others_classes + events, classes)
+        next_month_qstr = (
+            "?year={0}&month={1}"
+            .format(resp.context['next'].year,
+                    str(resp.context['next'].month).zfill(2)))
+        next_month_url = reverse(self.url_name) + next_month_qstr
+        self.assertContains(resp, next_month_qstr)
+        classes = self.calendar_month_to_object_list(
+            self.client.get(next_month_url).context['month'])
+        self.assertSameObjects([], classes)
+        next_month_date = this_month_date + relativedelta(months=1)
+        next_month_classes = (
+            CourseClassFactory
+            .create_batch(2, course_offering__teachers=[teacher],
+                          date=next_month_date))
+        classes = self.calendar_month_to_object_list(
+            self.client.get(next_month_url).context['month'])
+        self.assertSameObjects(next_month_classes, classes)
+
+
+class CalendarStudentTests(GroupSecurityCheckMixin,
+                           MyUtilitiesMixin, TestCase):
+    url_name = 'calendar_student'
+    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
+
+    def test_student_calendar(self):
+        student = StudentCenterFactory(city_id='spb')
+        self.doLogin(student)
+        co = CourseOfferingFactory.create()
+        co_other = CourseOfferingFactory.create()
+        e = EnrollmentFactory.create(course_offering=co, student=student)
+        classes = self.calendar_month_to_object_list(
+            self.client.get(reverse(self.url_name)).context['month'])
+        self.assertEqual(0, len(classes))
+        this_month_date = (datetime.datetime.now()
+                           .replace(day=15,
+                                    tzinfo=timezone.utc))
+        own_classes = (
+            CourseClassFactory
+            .create_batch(3, course_offering=co, date=this_month_date))
+        others_classes = (
+            CourseClassFactory
+            .create_batch(5, course_offering=co_other, date=this_month_date))
+        # student should see only his own classes
+        resp = self.client.get(reverse(self.url_name))
+        classes = self.calendar_month_to_object_list(resp.context['month'])
+        self.assertSameObjects(own_classes, classes)
+        # but in full calendar all classes should be shown
+        classes = self.calendar_month_to_object_list(
+            self.client.get(reverse('calendar_full_student')).context['month'])
+        self.assertSameObjects(own_classes + others_classes, classes)
+        next_month_qstr = (
+            "?year={0}&month={1}"
+            .format(resp.context['next'].year,
+                    str(resp.context['next'].month).zfill(2)))
+        next_month_url = reverse(self.url_name) + next_month_qstr
+        self.assertContains(resp, next_month_qstr)
+        classes = self.calendar_month_to_object_list(
+            self.client.get(next_month_url).context['month'])
+        self.assertSameObjects([], classes)
+        next_month_date = this_month_date + relativedelta(months=1)
+        next_month_classes = (
+            CourseClassFactory
+            .create_batch(2, course_offering=co, date=next_month_date))
+        classes = self.calendar_month_to_object_list(
+            self.client.get(next_month_url).context['month'])
+        self.assertSameObjects(next_month_classes, classes)
+
+
+class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
+    """
+    This TestCase is used only for security check, actual tests for
+    "full calendar" are done in CalendarTeacher/CalendarStudent tests
+    """
+    def test_full_calendar_security(self):
+        u = StudentCenterFactory(city_id='spb')
+        url = 'calendar_full_student'
+        self.assertLoginRedirect(reverse(url))
+        self.doLogin(u)
+        self.assertStatusCode(200, url)
+        self.client.logout()
+        # For teacher role we can skip city setting
+        u = TeacherCenterFactory()
+        self.doLogin(u)
+        url = 'calendar_full_teacher'
+        self.assertStatusCode(200, url)

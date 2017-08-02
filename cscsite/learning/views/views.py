@@ -7,68 +7,66 @@ import itertools
 import logging
 import os
 import posixpath
+from abc import ABCMeta, abstractmethod
 from calendar import Calendar
-from collections import OrderedDict, defaultdict, namedtuple
+from collections import OrderedDict, defaultdict
 from itertools import chain
 from typing import List
 from urllib.parse import urlencode
 
 import nbconvert
 import unicodecsv as csv
-from django.contrib.auth.views import redirect_to_login
-from django.db import transaction, IntegrityError
-
-from core.exceptions import Redirect
-from django.http.response import JsonResponse
-from django.views.generic.edit import BaseUpdateView
-
-from core import comment_persistence
-from core.utils import hashids, get_club_domain, render_markdown
-from core.views import ProtectedFormMixin, LoginRequiredMixin
-from core.widgets import TabbedPane, Tab
-from learning.models import CourseOfferingTeacher
-from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
-    ValidateWeekMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     ValidationError
-from django.urls import reverse_lazy, reverse
+from django.db import transaction, IntegrityError
 from django.db.models import Q, Prefetch, When, Value, Case, \
     IntegerField, BooleanField, Count
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.timezone import now
+from django.urls import reverse_lazy, reverse
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
-from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
-    CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
-    GRADING_TYPES
-from learning.utils import get_current_semester_pair, get_term_index
-from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin, ParticipantOnlyMixin, \
-    StudentCenterAndVolunteerOnlyMixin
+from django.views.generic.edit import BaseUpdateView
 from six import viewvalues
 
-from . import utils
-from .forms import CourseOfferingPKForm, \
-    CourseOfferingEditDescrForm, \
+from core import comment_persistence
+from core.exceptions import Redirect
+from core.utils import hashids, get_club_domain, render_markdown, is_club_site
+from core.views import ProtectedFormMixin, LoginRequiredMixin
+from core.widgets import TabbedPane, Tab
+from learning import utils
+from learning.calendar import EventsCalendar
+from learning.forms import CourseOfferingEditDescrForm, \
     CourseOfferingNewsForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, GradeBookFormFactory, \
-    AssignmentModalCommentForm
-from .management.imports import ImportGradesByStepicID, \
+    AssignmentModalCommentForm, CalendarData
+from learning.management.imports import ImportGradesByStepicID, \
     ImportGradesByYandexLogin
-from .models import Course, CourseClass, CourseOffering, Venue, \
+from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseOfferingNews, Enrollment, Assignment, AssignmentAttachment, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     CourseOfferingNewsNotification, Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool, Useful, Internship
+    OnlineCourse, InternationalSchool, CourseOfferingTeacher
+from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
+    ASSIGNMENT_TASK_ATTACHMENT, SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
+    CENTER_FOUNDATION_YEAR, FOUNDATION_YEAR, SEMESTER_TYPES, GRADES, \
+    GRADING_TYPES
+from learning.utils import get_current_semester_pair, get_term_index, now_local
+from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
+    CuratorOnlyMixin
+from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
+    ValidateWeekMixin
+from learning.views.utils import get_student_city_code, get_teacher_city_code
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +94,7 @@ class TimetableTeacherView(TeacherOnlyMixin,
         return super(TimetableTeacherView, self).get(request, args, kwargs)
 
     def get_queryset(self):
-        today = now().date()
+        today = timezone.now().date()
         year = int(self.request.GET.get('year', today.year))
         month = int(self.request.GET.get('month', today.month))
         chosen_month_date = datetime.date(year=year, month=month, day=1)
@@ -135,7 +133,7 @@ class TimetableStudentView(StudentOnlyMixin,
 
     def __init__(self, *args, **kwargs):
         self._context_weeks = None
-        super(TimetableStudentView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if not self.year_is_valid(request):
@@ -145,7 +143,7 @@ class TimetableStudentView(StudentOnlyMixin,
         return super(TimetableStudentView, self).get(request, args, kwargs)
 
     def get_queryset(self):
-        today = now().date()
+        today = timezone.now().date()
         today_year, today_week, _ = today.isocalendar()
         week = int(self.request.GET.get('week', today_week))
         year = int(self.request.GET.get('year', today_year))
@@ -173,152 +171,118 @@ class TimetableStudentView(StudentOnlyMixin,
                                 'course_offering__semester'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(TimetableStudentView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         context.update(self._context_weeks)
         context['user_type'] = self.user_type
         return context
 
 
-class CalendarMixin(ValidateYearMixin, ValidateMonthMixin):
-    model = CourseClass
+class _BaseEventsCalendarView(generic.TemplateView):
+    calendar_type = "full"
     template_name = "learning/calendar.html"
 
-    def __init__(self, *args, **kwargs):
-        self._month_date = None
-        self._non_course_events = None
-        super(CalendarMixin, self).__init__(*args, **kwargs)
-
     def get(self, request, *args, **kwargs):
-        if not self.year_is_valid(request):
+        """Validate GET-parameters"""
+        # Validate and set `year` and `month` values
+        data = CalendarData(request.GET)
+        if not data.is_valid():
             return HttpResponseRedirect(request.path)
-        if not self.month_is_valid(request):
-            return HttpResponseRedirect(request.path)
-        return super(CalendarMixin, self).get(request, args, kwargs)
+        city_code = self._get_city_code()
+        today = now_local(city_code).date()
+        cleaned_data = data.cleaned_data
+        year = cleaned_data['year'] if cleaned_data['year'] else today.year
+        month = cleaned_data['month'] if cleaned_data['month'] else today.month
+        context = self.get_context_data(year, month, city_code, today, **kwargs)
+        return self.render_to_response(context)
 
-    def noncourse_events(self, request, month, year, prev_month_date,
-                         next_month_date):
-        if settings.SITE_ID == settings.CLUB_SITE_ID:
-            return NonCourseEvent.objects.none()
-        return (NonCourseEvent.objects
-                .filter(Q(date__month=month, date__year=year) |
-                        Q(date__month=prev_month_date.month,
-                          date__year=prev_month_date.year) |
-                        Q(date__month=next_month_date.month,
-                          date__year=next_month_date.year))
-                .order_by('date', 'starts_at')
-                .select_related('venue'))
-
-    def get_queryset(self):
-        today = now().date()
-        year = int(self.request.GET.get('year', today.year))
-        month = int(self.request.GET.get('month', today.month))
-        return self._get_queryset(year, month)
-
-    def _get_queryset(self, year, month):
-        self._month_date = datetime.date(year=year, month=month, day=1)
-        prev_month_date = self._month_date + relativedelta(months=-1)
-        next_month_date = self._month_date + relativedelta(months=+1)
-
-        # FIXME(Dmitry): somewhat dirty, come up with better generalization
-        self._non_course_events = \
-            self.noncourse_events(self.request, month, year, prev_month_date,
-                                  next_month_date)
-
-        q = (CourseClass.objects
-             .filter(Q(date__month=month,
-                       date__year=year)
-                     | Q(date__month=prev_month_date.month,
-                         date__year=prev_month_date.year)
-                     | Q(date__month=next_month_date.month,
-                         date__year=next_month_date.year))
-             .filter(course_offering__city__pk=self.request.city_code)
-             .order_by('date', 'starts_at')
-             .select_related('venue',
-                             'course_offering',
-                             'course_offering__course',
-                             'course_offering__semester'))
-        if settings.SITE_ID == settings.CLUB_SITE_ID:
-            q = q.filter(course_offering__is_open=True)
-        return q
-
-    def get_context_data(self, *args, **kwargs):
-        context = (super(CalendarMixin, self)
-                   .get_context_data(*args, **kwargs))
-        # TODO: add tests
-        # On club site hide summer classes if student not enrolled on
-        if self.request.site.domain == settings.CLUB_DOMAIN:
-            if self.request.user.is_authenticated:
-                summer_enrollments = Enrollment.active.filter(
-                    student=self.request.user,
-                    course_offering__is_open=True,
-                    course_offering__semester__type=SEMESTER_TYPES.summer
-                ).values_list("course_offering__pk", flat=True)
-            else:
-                summer_enrollments = []
-
-            def club_filter_co(course_class):
-                co = course_class.course_offering
-                if (co.semester.type != SEMESTER_TYPES.summer or
-                            co.pk in summer_enrollments):
-                    return True
-                return False
-
-            context["object_list"] = filter(club_filter_co,
-                                            context["object_list"])
-
-        context['next_date'] = self._month_date + relativedelta(months=1)
-        context['prev_date'] = self._month_date + relativedelta(months=-1)
-        context['user_type'] = self.user_type
-
-        events = sorted(chain(context['object_list'],
-                              self._non_course_events.all()),
-                        key=lambda evt: (evt.date, evt.starts_at))
-        dates_to_events = defaultdict(list)
-        for event in events:
-            dates_to_events[event.date].append(event)
-
-        cal = Calendar(0)
-
-        month_cal = cal.monthdatescalendar(self._month_date.year,
-                                           self._month_date.month)
-        month = [(week[0].isocalendar()[1],
-                  [(day, dates_to_events[day],
-                    day.month == self._month_date.month,
-                    now().date() == day)
-                   for day in week])
-                 for week in month_cal]
-        context['month'] = month
-        context['month_date'] = self._month_date
+    def get_context_data(self, year, month, city_code, today, **kwargs):
+        calendar = EventsCalendar()
+        classes = self._get_classes(year, month, city_code)
+        non_course_events = (NonCourseEvent.objects
+                             .for_calendar()
+                             .for_city(city_code)
+                             .in_month(year, month))
+        calendar.add_events(classes, non_course_events)
+        current = datetime.date(year=year, month=month, day=1)
+        context = {
+            "current": current,
+            "prev": current + relativedelta(months=-1),
+            "next": current + relativedelta(months=+1),
+            "calendar_type": self.calendar_type,
+            "month": calendar.as_matrix(year, month, today)
+        }
         return context
 
+    def _get_city_code(self):
+        """Returns city code for authenticated user"""
+        raise NotImplementedError()
 
-class CalendarTeacherView(TeacherOnlyMixin,
-                          CalendarMixin,
-                          generic.ListView):
-    user_type = 'teacher'
-
-    def get_queryset(self):
-        return (super(CalendarTeacherView, self).get_queryset()
-                .filter(course_offering__teachers=self.request.user))
+    def _get_classes(self, year, month, city_code):
+        raise NotImplementedError()
 
 
-class CalendarStudentView(StudentOnlyMixin,
-                          CalendarMixin,
-                          generic.ListView):
-    user_type = "student"
+class CalendarStudentFullView(StudentOnlyMixin, _BaseEventsCalendarView):
+    """
+    Shows all non-course events and all classes to authenticated student.
+    """
+    def _get_city_code(self):
+        return get_student_city_code(self.request)
 
-    def get_queryset(self):
-        user = self.request.user
-        return (super(CalendarStudentView, self).get_queryset()
-                .filter(course_offering__enrollment__student_id=user.pk,
-                        course_offering__enrollment__is_deleted=False))
+    def _get_classes(self, year, month, city_code):
+        return (CourseClass.objects
+                .for_calendar(self.request.user)
+                .in_month(year, month)
+                .for_city(city_code))
 
 
-class CalendarFullView(LoginRequiredMixin,
-                       CalendarMixin,
-                       generic.ListView):
-    user_type = 'full'
+class CalendarStudentView(StudentOnlyMixin, _BaseEventsCalendarView):
+    """
+    Shows all non-course events and classes for courses on which authenticated
+    student enrolled.
+    """
+    calendar_type = "student"
+    template_name = "learning/calendar.html"
+
+    def _get_city_code(self):
+        return get_student_city_code(self.request)
+
+    def _get_classes(self, year, month, city_code):
+        return (CourseClass.objects
+                .for_calendar(self.request.user)
+                .in_month(year, month)
+                .for_student(self.request.user))
+
+
+class CalendarTeacherFullView(TeacherOnlyMixin, _BaseEventsCalendarView):
+    """Shows all non-course events and all classes to authenticated teacher."""
+
+    def _get_city_code(self):
+        return get_teacher_city_code(self.request)
+
+    def _get_classes(self, year, month, city_code):
+        return (CourseClass.objects
+                .for_calendar(self.request.user)
+                .in_month(year, month)
+                .for_city(city_code))
+
+
+# FIXME: What about non-course events? What cities to show??? Both?
+class CalendarTeacherView(TeacherOnlyMixin, _BaseEventsCalendarView):
+    """
+    Shows all non-course events and classes for courses in which authenticated
+    teacher participated.
+    """
+    calendar_type = 'teacher'
+    template_name = "learning/calendar.html"
+
+    def _get_city_code(self):
+        return get_teacher_city_code(self.request)
+
+    def _get_classes(self, year, month, city_code):
+        return (CourseClass.objects
+                .for_calendar(self.request.user)
+                .in_month(year, month)
+                .for_teacher(self.request.user))
 
 
 class CoursesListView(generic.ListView):
@@ -843,81 +807,6 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
                (user in obj.course_offering.teachers.all())
 
 
-class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
-    http_method_names = ['post']
-    form_class = CourseOfferingPKForm
-
-    def form_valid(self, form):
-        course_offering = get_object_or_404(
-            CourseOffering.custom.site_related(self.request)
-                .filter(pk=form.cleaned_data['course_offering_pk'])
-                .select_related("semester"))
-        # CourseOffering enrollment should be active
-        if not course_offering.enrollment_is_open:
-            return HttpResponseForbidden()
-        # Club students can't enroll on center courses
-        if settings.SITE_ID == settings.CLUB_SITE_ID and \
-                not course_offering.is_open:
-            return HttpResponseForbidden()
-        # Reject if capacity limited and no places available
-        if course_offering.is_capacity_limited:
-            if not course_offering.places_left:
-                msg = _("No places available, sorry")
-                messages.error(self.request, msg, extra_tags='timeout')
-                return HttpResponseRedirect(course_offering.get_absolute_url())
-        Enrollment.objects.update_or_create(
-            student=self.request.user, course_offering=course_offering,
-            defaults={'is_deleted': False})
-        if self.request.POST.get('back') == 'course_list_student':
-            return redirect('course_list_student')
-        else:
-            return HttpResponseRedirect(course_offering.get_absolute_url())
-
-
-class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
-    template_name = "learning/simple_delete_confirmation.html"
-
-    def __init__(self, *args, **kwargs):
-        self._course_offering = None
-        super().__init__(*args, **kwargs)
-
-    def get_object(self, _=None):
-        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        enrollment = get_object_or_404(
-            Enrollment.objects
-            .filter(
-                student=self.request.user,
-                course_offering__semester__type=semester_type,
-                course_offering__semester__year=year,
-                course_offering__course__slug=self.kwargs['course_slug'])
-            .select_related("course_offering", "course_offering__semester"))
-        self._course_offering = enrollment.course_offering
-        if not enrollment.course_offering.enrollment_is_open:
-            raise PermissionDenied
-        return enrollment
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['confirmation_text'] = (
-            _("Are you sure you want to unenroll "
-              "from \"%(course)s\"?")
-            % {'course': self.object.course_offering})
-        context['confirmation_button_text'] = _("Unenroll")
-        return context
-
-    def delete(self, request, *args, **kwargs):
-        enrollment = self.get_object()
-        Enrollment.objects.filter(pk=enrollment.pk,
-                                  is_deleted=False).update(is_deleted=True)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        if self.request.GET.get('back') == 'course_list_student':
-            return reverse('course_list_student')
-        else:
-            return self._course_offering.get_absolute_url()
-
-
 class CourseClassDetailView(generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
@@ -1110,50 +999,6 @@ class VenueListView(generic.ListView):
 class VenueDetailView(generic.DetailView):
     model = Venue
     template_name = "learning/venue_detail.html"
-
-
-class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
-    """ Show assignments from current semester only. """
-    model = StudentAssignment
-    context_object_name = 'assignment_list'
-    template_name = "learning/assignment_list_student.html"
-    user_type = 'student'
-
-    def get_queryset(self):
-        current_semester = Semester.get_current()
-        self.current_semester = current_semester
-        return (self.model.objects
-                .filter(
-            student=self.request.user,
-            assignment__course_offering__semester=current_semester)
-                .order_by('assignment__deadline_at',
-                          'assignment__course_offering__course__name',
-                          'pk')
-                # FIXME: this prefetch doesn't seem to work
-                .prefetch_related('assignmentnotification_set')
-                .select_related('assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__course',
-                                'assignment__course_offering__semester',
-                                'student'))
-
-    def get_context_data(self, *args, **kwargs):
-        context = (super(StudentAssignmentListView, self)
-                   .get_context_data(*args, **kwargs))
-        # Get student enrollments from current term and then related co's
-        actual_co = (Enrollment.active.filter(
-            course_offering__semester=self.current_semester,
-            student=self.request.user).values_list("course_offering",
-                                                   flat=True))
-        open_, archive = utils.split_list(
-            context['assignment_list'],
-            lambda
-                a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
-        archive.reverse()
-        context['assignment_list_open'] = open_
-        context['assignment_list_archive'] = archive
-        context['user_type'] = self.user_type
-        return context
 
 
 class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
@@ -1480,49 +1325,6 @@ class StudentAssignmentDetailMixin(object):
         comment.save()
         comment_persistence.report_saved(comment.text)
         return redirect(self.get_success_url())
-
-
-# TODO: Refactor without generic view
-class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
-                                         StudentAssignmentDetailMixin,
-                                         generic.CreateView):
-    """
-    ParticipantOnlyMixin here for 2 reasons - we should redirect teachers
-    to there own view and show submissions to graduates and expelled students
-    """
-    user_type = 'student'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        co = context['course_offering']
-        co_failed_by_student = co.failed_by_student(self.request.user)
-        sa = context['a_s']
-        if co_failed_by_student:
-            # After student failed course, deny access if he hasn't submissions
-            # TODO: move logic to context to avoid additional loop over comments
-            has_comments = False
-            for c in context['comments']:
-                if c.author == self.request.user:
-                    has_comments = True
-                    break
-            if not has_comments and (sa.grade is None or sa.grade == 0):
-                raise PermissionDenied
-        return context
-
-    def _additional_permissions_check(self, *args, **kwargs):
-        a_s = kwargs.get("a_s")
-        user = self.request.user
-        if user in a_s.assignment.course_offering.teachers.all():
-            raise Redirect(to=reverse("a_s_detail_teacher", args=[a_s.pk]))
-        # This should guard against reading other's assignments. Not generic
-        # enough, but can't think of better way
-        if not a_s.student == user and not user.is_curator:
-            raise Redirect(to="{}?next={}".format(settings.LOGIN_URL,
-                                                  self.request.get_full_path()))
-
-    def get_success_url(self):
-        pk = self.kwargs.get('pk')
-        return reverse('a_s_detail_student', args=[pk])
 
 
 class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
@@ -2189,13 +1991,13 @@ class OnlineCoursesListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
         context["recent_courses"] = filter(
-            lambda c: not c.is_self_paced and (not c.end or c.end > now()),
+            lambda c: not c.is_self_paced and (not c.end or c.end > timezone.now()),
             context[self.context_object_name])
         context["self_paced_courses"] = sorted(filter(
             lambda c: c.is_self_paced,
             context[self.context_object_name]), key=lambda c: c.name)
         context["archive_courses"] = filter(
-            lambda c: c.end and c.end <= now() and not c.is_self_paced,
+            lambda c: c.end and c.end <= timezone.now() and not c.is_self_paced,
             context[self.context_object_name]
         )
         return context
@@ -2266,19 +2068,3 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         return response
 
 
-class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
-    context_object_name = "faq"
-    template_name = "useful.html"
-
-    def get_queryset(self):
-        return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by(
-            "sort")
-
-
-class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
-    context_object_name = "faq"
-    template_name = "learning/internships.html"
-
-    def get_queryset(self):
-        return (Internship.objects
-                .order_by("sort"))

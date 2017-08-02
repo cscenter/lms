@@ -15,6 +15,7 @@ from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
                                SEMESTER_TYPES)
 from learning.utils import split_list, get_term_index, get_term_by_index, \
     get_term_index_academic
+from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 
 
@@ -39,9 +40,9 @@ class UtilTests(TestCase):
 
     @patch('django.contrib.messages.api.add_message')
     def test_import_stepic(self, mock_messages):
-        teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        teacher = TeacherCenterFactory()
         co = CourseOfferingFactory.create(teachers=[teacher])
-        student = UserFactory.create(groups=['Student [CENTER]'])
+        student = StudentCenterFactory()
         student.stepic_id = 20
         student.save()
         EnrollmentFactory.create(student=student, course_offering=co)

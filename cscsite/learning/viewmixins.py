@@ -2,7 +2,6 @@ from braces.views import UserPassesTestMixin
 from django.conf import settings
 from django.utils.timezone import now
 
-from learning.models import Enrollment
 from learning.settings import FOUNDATION_YEAR
 
 

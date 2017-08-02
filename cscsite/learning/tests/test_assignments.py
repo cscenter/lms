@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory
 from learning.models import StudentAssignment
-from learning.settings import GRADES
+from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.utils import get_current_semester_pair
@@ -24,10 +24,10 @@ from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'
-    groups_allowed = ['Student [CENTER]']
+    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
 
     def test_list(self):
-        u = UserFactory.create(groups=['Student [CENTER]'])
+        u = StudentCenterFactory()
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(semester=s)
@@ -77,7 +77,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         """Move to archive active assignments from course offerings
         which student already leave
         """
-        u = UserFactory.create(groups=['Student [CENTER]'])
+        u = StudentCenterFactory()
         now_year, now_season = get_current_semester_pair()
         s = SemesterFactory.create(year=now_year, type=now_season)
         # Create open co to pass enrollment limit
@@ -153,8 +153,8 @@ class TestCompletedCourseOfferingBehaviour(object):
 
 @pytest.mark.django_db
 def test_assignment_contents(client):
-    teacher = UserFactory.create(groups=['Teacher [CENTER]'])
-    student = UserFactory.create(groups=['Student [CENTER]'])
+    teacher = TeacherCenterFactory()
+    student = StudentCenterFactory()
     # XXX: Unexpected Segfault when running pytest.
     # Move this test from ASTeacherDetailTests cls.
     # No idea why it's happening on login action

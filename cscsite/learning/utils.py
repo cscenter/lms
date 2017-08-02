@@ -14,6 +14,11 @@ from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
 
+def now_local(city_code) -> datetime.datetime:
+    tz = settings.TIME_ZONES[city_code]
+    return timezone.localtime(timezone.now(), timezone=tz)
+
+
 def get_current_semester_pair():
     date = timezone.now()
     return date_to_term_pair(date)
@@ -159,8 +164,12 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def grouper(iterable, n, fillvalue=None):
-    """Collect data into fixed-length chunks or blocks"""
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    """
+    Collect data into fixed-length chunks or blocks:
+    Example:
+        In: grouper('ABCDEFG', 3, 'x')
+        Out: ABC DEF Gxx
+    """
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fillvalue, *args)
 
