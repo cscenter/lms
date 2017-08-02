@@ -7,12 +7,15 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, \
+    MinValueValidator, MaxLengthValidator
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
-from learning.settings import GRADES
+from learning.settings import GRADES, FOUNDATION_YEAR
 from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput, \
     TimeInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
@@ -445,3 +448,19 @@ class GradeBookFormFactory(object):
         initial.update({cls.FINAL_GRADE_PREFIX.format(e.pk): e.grade for e in
                         enrollment_list})
         return initial
+
+
+class CalendarData(forms.Form):
+    year = forms.IntegerField(required=False,
+                              validators=[MinValueValidator(FOUNDATION_YEAR)])
+    month = forms.IntegerField(required=False,
+                               validators=[MinValueValidator(1),
+                                           MaxValueValidator(12)])
+
+    def clean_year(self):
+        year = self.cleaned_data['year']
+        if year:
+            today = timezone.now()
+            if year > today.year + 1:
+                raise ValidationError("Year value too big")
+        return year

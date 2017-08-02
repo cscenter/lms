@@ -31,7 +31,7 @@ from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
 from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
     CustomCourseOfferingQuerySet, EnrollmentDefaultManager, \
-    EnrollmentActiveManager
+    EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -650,6 +650,8 @@ class CourseClass(TimeStampedModel, object):
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
 
+    objects = CourseClassQuerySet.as_manager()
+
     def __str__(self):
         return smart_text(self.name)
 
@@ -1237,6 +1239,7 @@ class CourseOfferingNewsNotification(TimeStampedModel):
 
 @python_2_unicode_compatible
 class NonCourseEvent(TimeStampedModel):
+    objects = NonCourseEventQuerySet.as_manager()
     venue = models.ForeignKey(
         Venue,
         verbose_name=_("CourseClass|Venue"),

@@ -23,7 +23,8 @@ from learning.factories import CourseFactory, CourseOfferingFactory, \
 from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
     StudentAssignment
 from learning.settings import SEMESTER_TYPES
-from users.factories import UserFactory
+from users.factories import UserFactory, StudentCenterFactory, \
+    TeacherCenterFactory
 
 
 class CommonTests(TestCase):
@@ -252,7 +253,7 @@ class AssignmentAttachmentTest(TestCase):
 
 class StudentAssignmentTests(TestCase):
     def test_clean(self):
-        u1 = UserFactory.create(groups=['Student [CENTER]'])
+        u1 = StudentCenterFactory()
         u2 = UserFactory.create(groups=[])
         as_ = StudentAssignmentFactory.create(student=u1)
         as_.student = u2
@@ -265,8 +266,8 @@ class StudentAssignmentTests(TestCase):
         as_.save()
 
     def test_is_passed(self):
-        u_student = UserFactory.create(groups=['Student [CENTER]'])
-        u_teacher = UserFactory.create(groups=['Teacher [CENTER]'])
+        u_student = StudentCenterFactory()
+        u_teacher = TeacherCenterFactory()
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
@@ -311,7 +312,7 @@ class StudentAssignmentTests(TestCase):
     def test_student_assignment_state(self):
         import datetime
         from django.utils import timezone
-        student = UserFactory.create(groups=['Student [CENTER]'])
+        student = StudentCenterFactory()
         a_online = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=True,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
@@ -375,7 +376,7 @@ class EnrollmentTests(TestCase):
 class AssignmentNotificationTests(TestCase):
     def test_clean(self):
         an = AssignmentNotificationFactory.create(
-            user=UserFactory.create(groups=['Student [CENTER]']),
+            user=StudentCenterFactory(),
             is_about_passed=True)
         self.assertRaises(ValidationError, an.clean)
 

@@ -1,7 +1,11 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import query, Manager, Prefetch
+from django.db.models import query, Manager, Prefetch, Q
 from django.utils.timezone import now
+
+from core.utils import is_club_site
+from learning.calendar import EventsCalendar, get_bounds_for_month
+from learning.settings import SEMESTER_TYPES
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -32,6 +36,60 @@ class StudyProgramQuerySet(query.QuerySet):
                                       .objects
                                       .prefetch_related("courses")),
                         )))
+
+
+class CourseClassQuerySet(query.QuerySet):
+    def for_calendar(self, user=None):
+        q = (self
+             .select_related('venue',
+                             'course_offering',
+                             'course_offering__course',
+                             'course_offering__semester')
+             .order_by('date', 'starts_at'))
+        # Hide summer classes on compsciclub.ru if user not enrolled in
+        if is_club_site() and user:
+            active_summer_enrollments = Q(
+                course_offering__is_open=True,
+                course_offering__semester__type=SEMESTER_TYPES.summer,
+                course_offering__enrollment__student_id=user.pk,
+                course_offering__enrollment__is_deleted=False)
+            others = ~Q(course_offering__semester__type=SEMESTER_TYPES.summer)
+            q = self.filter(active_summer_enrollments | others)
+        return q
+
+    def for_city(self, city_code):
+        return self.filter(course_offering__city_id=city_code)
+
+    def in_month(self, year, month):
+        date_start, date_end = get_bounds_for_month(year, month)
+        return self.filter(date__gte=date_start, date__lte=date_end)
+
+    def open_only(self):
+        return self.filter(course_offering__is_open=True)
+
+    def for_student(self, user):
+        """More strict than in `.for_calendar`. Let DB optimize it later."""
+        return self.filter(course_offering__enrollment__student_id=user.pk,
+                           course_offering__enrollment__is_deleted=False)
+
+    def for_teacher(self, user):
+        return self.filter(course_offering__teachers=user)
+
+
+class NonCourseEventQuerySet(query.QuerySet):
+    def for_calendar(self):
+        if is_club_site():
+            return self.none()
+        return (self
+                .select_related('venue')
+                .order_by('date', 'starts_at'))
+
+    def for_city(self, city_code):
+        return self.filter(venue__city_id=city_code)
+
+    def in_month(self, year, month):
+        date_start, date_end = get_bounds_for_month(year, month)
+        return self.filter(date__gte=date_start, date__lte=date_end)
 
 
 class CustomCourseOfferingQuerySet(models.QuerySet):

@@ -43,6 +43,10 @@ def render_markdown(text):
                         attributes=MARKDOWN_ALLOWED_ATTRS)
 
 
+def is_club_site():
+    return settings.SITE_ID == settings.CLUB_SITE_ID
+
+
 def get_club_domain(code=None):
     protocol = "http://"
     prefix = "kzn." if code == "kzn" else ""

@@ -2,9 +2,11 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 
 from learning.settings import LEARNING_BASE, TEACHING_BASE
+from learning.views import CalendarTeacherFullView
+from learning.views.views import CalendarStudentFullView
 from .views import \
     TimetableTeacherView, TimetableStudentView, \
-    CalendarTeacherView, CalendarStudentView, CalendarFullView, \
+    CalendarTeacherView, CalendarStudentView, \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
@@ -14,16 +16,14 @@ from .views import \
     CourseOfferingNewsCreateView, \
     CourseOfferingNewsUpdateView, \
     CourseOfferingNewsDeleteView, \
-    CourseOfferingEnrollView, CourseOfferingUnenrollView, \
     CourseClassDetailView, \
     CourseClassCreateView, \
     CourseClassUpdateView, \
     CourseClassDeleteView, \
     CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
-    StudentAssignmentListView, AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, StudentAssignmentStudentDetailView, \
-    StudentAssignmentTeacherDetailView, \
+    AssignmentTeacherListView, \
+    AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     MarksSheetTeacherView, MarksSheetTeacherCSVView, \
@@ -32,7 +32,9 @@ from .views import \
     GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
-
+from learning.views.students import StudentAssignmentStudentDetailView, \
+    StudentAssignmentListView, CourseOfferingEnrollView, \
+    CourseOfferingUnenrollView
 
 course_patterns = url(
     r"^courses/", include([
@@ -118,7 +120,7 @@ teaching_section_patterns = url(
             name='timetable_teacher'),
         url(r'^calendar/$', CalendarTeacherView.as_view(),
             name='calendar_teacher'),
-        url(r'^full-calendar/$', CalendarFullView.as_view(),
+        url(r'^full-calendar/$', CalendarTeacherFullView.as_view(),
             name='calendar_full_teacher'),
         url(r'^courses/$', CourseTeacherListView.as_view(),
             name='course_list_teacher'),
@@ -174,7 +176,7 @@ student_section_patterns = url(
             name='timetable_student'),
         url(r'^calendar/$', CalendarStudentView.as_view(),
             name='calendar_student'),
-        url(r'^full-calendar/$', CalendarFullView.as_view(),
+        url(r'^full-calendar/$', CalendarStudentFullView.as_view(),
             name='calendar_full_student'),
     ]))
 
