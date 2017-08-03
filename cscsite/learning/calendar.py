@@ -2,12 +2,18 @@ import datetime
 
 from calendar import Calendar, monthrange
 from collections import namedtuple, defaultdict
+
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from itertools import chain
 
+from rest_framework import serializers, fields
+
+from learning.settings import FOUNDATION_YEAR
 from learning.utils import grouper
 
-__all__ = ['get_bounds_for_calendar_month', 'EventsCalendar']
+__all__ = ['get_bounds_for_calendar_month', 'EventsCalendar',
+           'CalendarQueryParams']
 
 MONDAY_WEEKDAY = 0
 _CALENDAR = Calendar(firstweekday=MONDAY_WEEKDAY)
@@ -77,3 +83,15 @@ class EventsCalendar:
                 week_data.append(data)
             by_week.append(Week(index=week_number, days=week_data))
         return by_week
+
+
+class CalendarQueryParams(serializers.Serializer):
+    year = fields.IntegerField(required=False, min_value=FOUNDATION_YEAR)
+    month = fields.IntegerField(required=False, min_value=1, max_value=12)
+    week = fields.IntegerField(required=False, min_value=1)
+
+    def validate_year(self, value):
+        today = timezone.now()
+        if value > today.year + 1:
+            raise ValidationError("Year value too big")
+        return value

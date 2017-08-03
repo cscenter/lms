@@ -1,8 +1,4 @@
 from braces.views import UserPassesTestMixin
-from django.conf import settings
-from django.utils.timezone import now
-
-from learning.settings import FOUNDATION_YEAR
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):

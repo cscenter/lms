@@ -12,10 +12,6 @@ from .views import \
     CourseStudentListView, \
     CoursesListView, CourseDetailView, CourseUpdateView, \
     CourseOfferingDetailView, \
-    CourseOfferingEditView, \
-    CourseOfferingNewsCreateView, \
-    CourseOfferingNewsUpdateView, \
-    CourseOfferingNewsDeleteView, \
     CourseClassDetailView, \
     CourseClassCreateView, \
     CourseClassUpdateView, \
@@ -32,6 +28,9 @@ from .views import \
     GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+from learning.views.course_offering import CourseOfferingEditView, \
+    CourseOfferingNewsCreateView, CourseOfferingNewsUpdateView, \
+    CourseOfferingNewsDeleteView
 from learning.views.students import StudentAssignmentStudentDetailView, \
     StudentAssignmentListView, CourseOfferingEnrollView, \
     CourseOfferingUnenrollView
