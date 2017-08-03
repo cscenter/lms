@@ -319,7 +319,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         a_s.delete()
         with LogCapture(level=logging.INFO) as l:
             self.assertEqual(200, self.client.get(url).status_code)
-            l.check(('learning.views.views',
+            l.check(('learning.views.course_offering',
                      'ERROR',
                      "can't find StudentAssignment for "
                      "student ID {0}, assignment ID {1}"
