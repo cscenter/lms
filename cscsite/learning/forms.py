@@ -448,19 +448,3 @@ class GradeBookFormFactory(object):
         initial.update({cls.FINAL_GRADE_PREFIX.format(e.pk): e.grade for e in
                         enrollment_list})
         return initial
-
-
-class CalendarData(forms.Form):
-    year = forms.IntegerField(required=False,
-                              validators=[MinValueValidator(FOUNDATION_YEAR)])
-    month = forms.IntegerField(required=False,
-                               validators=[MinValueValidator(1),
-                                           MaxValueValidator(12)])
-
-    def clean_year(self):
-        year = self.cleaned_data['year']
-        if year:
-            today = timezone.now()
-            if year > today.year + 1:
-                raise ValidationError("Year value too big")
-        return year

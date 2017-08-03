@@ -1,13 +1,11 @@
 import datetime
 
 import django_rq
-from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse, Http404, HttpResponseRedirect
-from django.http.response import HttpResponseNotAllowed, HttpResponseForbidden
 from django.utils.timezone import now, get_current_timezone
 from django.views import generic
 # TODO: (XXX) Dont' forget to remove it after old.* termination.
@@ -17,13 +15,12 @@ from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 
 from csclub import tasks
-from learning.calendar import EventsCalendar
-from learning.forms import CalendarData
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair, now_local
+from learning.views import CalendarGenericView
 
 
 class AsyncEmailRegistrationView(RegistrationView):
@@ -41,39 +38,21 @@ class AsyncEmailRegistrationView(RegistrationView):
         return new_user
 
 
-class CalendarClubScheduleView(generic.TemplateView):
+class CalendarClubScheduleView(CalendarGenericView):
     """Shows all classes from open course offerings."""
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
 
-    def get(self, request, *args, **kwargs):
-        data = CalendarData(request.GET)
-        if not data.is_valid():
-            return HttpResponseRedirect(request.path)
-        today = now_local(request.city_code)
-        cleaned_data = data.cleaned_data
-        year = cleaned_data['year'] if cleaned_data['year'] else today.year
-        month = cleaned_data['month'] if cleaned_data['month'] else today.month
-        context = self.get_context_data(year, month, today, **kwargs)
-        return self.render_to_response(context)
-
-    def get_context_data(self, year, month, today, **kwargs):
-        calendar = EventsCalendar()
+    def get_events(self, year, month, city_code):
         classes = (CourseClass.objects
                    .for_calendar(self.request.user)
                    .in_month(year, month)
                    .for_city(self.request.city_code)
                    .open_only())
-        calendar.add_events(classes)
-        current = datetime.date(year=year, month=month, day=1)
-        context = {
-            "current": current,
-            "prev": current + relativedelta(months=-1),
-            "next": current + relativedelta(months=+1),
-            "calendar_type": self.calendar_type,
-            "month": calendar.as_matrix(year, month, today)
-        }
-        return context
+        return [classes]
+
+    def get_city_code(self):
+        return self.request.city_code
 
 
 class IndexView(generic.TemplateView):
