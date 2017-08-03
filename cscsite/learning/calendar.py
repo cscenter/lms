@@ -7,7 +7,7 @@ from itertools import chain
 
 from learning.utils import grouper
 
-__all__ = ['get_bounds_for_month', 'EventsCalendar']
+__all__ = ['get_bounds_for_calendar_month', 'EventsCalendar']
 
 MONDAY_WEEKDAY = 0
 _CALENDAR = Calendar(firstweekday=MONDAY_WEEKDAY)
@@ -15,7 +15,8 @@ Week = namedtuple("Week", ['index', 'days'])
 EventDay = namedtuple("EventDay", ['day', 'events', 'is_this_month', 'is_today'])
 
 
-def get_bounds_for_month(year, month):
+def get_bounds_for_calendar_month(year, month):
+    """Returns calendar bounds of a month (inclusive)"""
     day1, days_in_month = monthrange(year, month)
     date = datetime.date(year, month, 1)
     # Go back to the beginning of the week
@@ -54,8 +55,7 @@ class EventsCalendar:
 
     @staticmethod
     def get_bounds(year, month):
-        """Returns the bounds of a month (inclusive)"""
-        return get_bounds_for_month(year, month)
+        return get_bounds_for_calendar_month(year, month)
 
     def as_matrix(self, year, month, today):
         """

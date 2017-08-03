@@ -7,10 +7,7 @@ import itertools
 import logging
 import os
 import posixpath
-from abc import ABCMeta, abstractmethod
-from calendar import Calendar
 from collections import OrderedDict, defaultdict
-from itertools import chain
 from typing import List
 from urllib.parse import urlencode
 
@@ -34,6 +31,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
+from rest_framework import serializers, fields
 from six import viewvalues
 
 from core import comment_persistence
@@ -48,7 +46,7 @@ from learning.forms import CourseOfferingEditDescrForm, \
     CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     MarksSheetTeacherImportGradesForm, GradeBookFormFactory, \
-    AssignmentModalCommentForm, CalendarData
+    AssignmentModalCommentForm
 from learning.management.imports import ImportGradesByStepicID, \
     ImportGradesByYandexLogin
 from learning.models import Course, CourseClass, CourseOffering, Venue, \
@@ -64,8 +62,6 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
 from learning.utils import get_current_semester_pair, get_term_index, now_local
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
-from learning.viewmixins import ValidateYearMixin, ValidateMonthMixin, \
-    ValidateWeekMixin
 from learning.views.utils import get_student_city_code, get_teacher_city_code
 
 logger = logging.getLogger(__name__)
@@ -74,37 +70,35 @@ DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
 
 
-class TimetableTeacherView(TeacherOnlyMixin,
-                           ValidateYearMixin,
-                           ValidateMonthMixin,
-                           generic.ListView):
-    model = CourseClass
+class CalendarQueryParams(serializers.Serializer):
+    year = fields.IntegerField(required=False, min_value=FOUNDATION_YEAR)
+    month = fields.IntegerField(required=False, min_value=1, max_value=12)
+    week = fields.IntegerField(required=False, min_value=1)
+
+    def validate_year(self, value):
+        today = timezone.now()
+        if value > today.year + 1:
+            raise ValidationError("Year value too big")
+        return value
+
+
+class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
     user_type = 'teacher'
     template_name = "learning/timetable_teacher.html"
 
-    def __init__(self, *args, **kwargs):
-        self._context_weeks = None
-        super(TimetableTeacherView, self).__init__(*args, **kwargs)
-
     def get(self, request, *args, **kwargs):
-        if not self.year_is_valid(request):
+        query_params = CalendarQueryParams(data=request.GET)
+        if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        if not self.month_is_valid(request):
-            return HttpResponseRedirect(request.path)
-        return super(TimetableTeacherView, self).get(request, args, kwargs)
+        # FIXME: get teacher city code????
+        city_code = request.city_code
+        today = now_local(city_code)
+        year = query_params.validated_data.get('year', today.year)
+        month = query_params.validated_data.get('month', today.month)
+        context = self.get_context_data(year, month, **kwargs)
+        return self.render_to_response(context)
 
-    def get_queryset(self):
-        today = timezone.now().date()
-        year = int(self.request.GET.get('year', today.year))
-        month = int(self.request.GET.get('month', today.month))
-        chosen_month_date = datetime.date(year=year, month=month, day=1)
-        prev_month_date = chosen_month_date + relativedelta(months=-1)
-        next_month_date = chosen_month_date + relativedelta(months=+1)
-        self._context_dates = {'month': month,
-                               'year': year,
-                               'current_date': chosen_month_date,
-                               'prev_date': prev_month_date,
-                               'next_date': next_month_date}
+    def get_queryset(self, year, month):
         return (CourseClass.objects
                 .filter(date__month=month,
                         date__year=year,
@@ -115,51 +109,44 @@ class TimetableTeacherView(TeacherOnlyMixin,
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    def get_context_data(self, *args, **kwargs):
-        context = (super(TimetableTeacherView, self)
-                   .get_context_data(*args, **kwargs))
-        context.update(self._context_dates)
-        context['user_type'] = self.user_type
+    def get_context_data(self, year, month, **kwargs):
+        chosen_month_date = datetime.date(year=year, month=month, day=1)
+        prev_month_date = chosen_month_date + relativedelta(months=-1)
+        next_month_date = chosen_month_date + relativedelta(months=+1)
+        context = {
+            'object_list': self.get_queryset(year, month),
+            'month': month,
+            'year': year,
+            'current_date': chosen_month_date,
+            'prev_date': prev_month_date,
+            'next_date': next_month_date,
+            'user_type': self.user_type
+        }
         return context
 
 
-class TimetableStudentView(StudentOnlyMixin,
-                           ValidateYearMixin,
-                           ValidateWeekMixin,
-                           generic.ListView):
+class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
     model = CourseClass
     user_type = 'student'
     template_name = "learning/timetable_student.html"
 
-    def __init__(self, *args, **kwargs):
-        self._context_weeks = None
-        super().__init__(*args, **kwargs)
-
     def get(self, request, *args, **kwargs):
-        if not self.year_is_valid(request):
+        query_params = CalendarQueryParams(data=request.GET)
+        if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        if not self.week_is_valid(request):
-            return HttpResponseRedirect(request.path)
-        return super(TimetableStudentView, self).get(request, args, kwargs)
-
-    def get_queryset(self):
-        today = timezone.now().date()
+        # FIXME: get teacher city code????
+        city_code = request.city_code
+        today = now_local(city_code)
+        # This returns current week number. Beware: the week's number
+        # is as of ISO8601, so 29th of December can be reported as
+        # 1st week of the next year.
         today_year, today_week, _ = today.isocalendar()
-        week = int(self.request.GET.get('week', today_week))
-        year = int(self.request.GET.get('year', today_year))
-        start = utils.iso_to_gregorian(year, week, 1)
-        end = utils.iso_to_gregorian(year, week, 7)
-        next_w_cal = (start + datetime.timedelta(weeks=1)).isocalendar()
-        prev_w_cal = (start + datetime.timedelta(weeks=-1)).isocalendar()
-        self._context_weeks = {'week': week,
-                               'week_start': start,
-                               'week_end': end,
-                               'month': start.month,
-                               'year': year,
-                               'prev_year': prev_w_cal[0],
-                               'prev_week': prev_w_cal[1],
-                               'next_year': next_w_cal[0],
-                               'next_week': next_w_cal[1]}
+        year = query_params.validated_data.get('year', today_year)
+        week = query_params.validated_data.get('week', today_week)
+        context = self.get_context_data(year, week, **kwargs)
+        return self.render_to_response(context)
+
+    def get_queryset(self, start, end):
         return (CourseClass.objects
                 .filter(date__range=[start, end],
                         course_offering__enrollment__student_id=self.request.user.pk,
@@ -170,39 +157,49 @@ class TimetableStudentView(StudentOnlyMixin,
                                 'course_offering__course',
                                 'course_offering__semester'))
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context.update(self._context_weeks)
-        context['user_type'] = self.user_type
+    def get_context_data(self, year, week, **kwargs):
+        start = utils.iso_to_gregorian(year, week, 1)
+        end = utils.iso_to_gregorian(year, week, 7)
+        next_year, next_week, _ = (start +
+                                   datetime.timedelta(weeks=1)).isocalendar()
+        prev_year, prev_week, _ = (start +
+                                   datetime.timedelta(weeks=-1)).isocalendar()
+        context = {
+            'object_list': self.get_queryset(start, end),
+            'user_type': self.user_type,
+            'week': week,
+            'week_start': start,
+            'week_end': end,
+            'month': start.month,
+            'year': year,
+            'prev_year': prev_year,
+            'prev_week': prev_week,
+            'next_year': next_year,
+            'next_week': next_week,
+        }
         return context
 
 
-class _BaseEventsCalendarView(generic.TemplateView):
+class CalendarGenericView(generic.TemplateView):
     calendar_type = "full"
     template_name = "learning/calendar.html"
 
     def get(self, request, *args, **kwargs):
-        """Validate GET-parameters"""
-        # Validate and set `year` and `month` values
-        data = CalendarData(request.GET)
-        if not data.is_valid():
+        """Validates GET-parameters, set defaults if no values provided."""
+        query_params = CalendarQueryParams(data=request.GET)
+        if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        city_code = self._get_city_code()
+        city_code = self.get_city_code()
         today = now_local(city_code).date()
-        cleaned_data = data.cleaned_data
-        year = cleaned_data['year'] if cleaned_data['year'] else today.year
-        month = cleaned_data['month'] if cleaned_data['month'] else today.month
+        year = query_params.validated_data.get('year', today.year)
+        month = query_params.validated_data.get('month', today.month)
         context = self.get_context_data(year, month, city_code, today, **kwargs)
         return self.render_to_response(context)
 
     def get_context_data(self, year, month, city_code, today, **kwargs):
         calendar = EventsCalendar()
-        classes = self._get_classes(year, month, city_code)
-        non_course_events = (NonCourseEvent.objects
-                             .for_calendar()
-                             .for_city(city_code)
-                             .in_month(year, month))
-        calendar.add_events(classes, non_course_events)
+        events = self.get_events(year, month, city_code)
+        calendar.add_events(*events)
         current = datetime.date(year=year, month=month, day=1)
         context = {
             "current": current,
@@ -213,20 +210,31 @@ class _BaseEventsCalendarView(generic.TemplateView):
         }
         return context
 
-    def _get_city_code(self):
+    def get_events(self, year, month, city_code) -> list:
+        raise NotImplementedError()
+
+    def get_city_code(self):
         """Returns city code for authenticated user"""
         raise NotImplementedError()
 
-    def _get_classes(self, year, month, city_code):
-        raise NotImplementedError()
 
-
-class CalendarStudentFullView(StudentOnlyMixin, _BaseEventsCalendarView):
+class CalendarStudentFullView(StudentOnlyMixin, CalendarGenericView):
     """
     Shows all non-course events and all classes to authenticated student.
     """
-    def _get_city_code(self):
+    def get_city_code(self):
         return get_student_city_code(self.request)
+
+    def get_events(self, year, month, city_code):
+        return [self._get_classes(year, month, city_code),
+                self._get_non_course_events(year, month, city_code)]
+
+    @staticmethod
+    def _get_non_course_events(year, month, city_code):
+        return (NonCourseEvent.objects
+                .for_calendar()
+                .for_city(city_code)
+                .in_month(year, month))
 
     def _get_classes(self, year, month, city_code):
         return (CourseClass.objects
@@ -235,7 +243,7 @@ class CalendarStudentFullView(StudentOnlyMixin, _BaseEventsCalendarView):
                 .for_city(city_code))
 
 
-class CalendarStudentView(StudentOnlyMixin, _BaseEventsCalendarView):
+class CalendarStudentView(CalendarStudentFullView):
     """
     Shows all non-course events and classes for courses on which authenticated
     student enrolled.
@@ -243,22 +251,30 @@ class CalendarStudentView(StudentOnlyMixin, _BaseEventsCalendarView):
     calendar_type = "student"
     template_name = "learning/calendar.html"
 
-    def _get_city_code(self):
-        return get_student_city_code(self.request)
-
     def _get_classes(self, year, month, city_code):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .for_student(self.request.user))
+        qs = super()._get_classes(year, month, city_code)
+        return qs.for_student(self.request.user)
 
 
-class CalendarTeacherFullView(TeacherOnlyMixin, _BaseEventsCalendarView):
+class CalendarTeacherFullView(TeacherOnlyMixin, CalendarGenericView):
     """Shows all non-course events and all classes to authenticated teacher."""
 
-    def _get_city_code(self):
+    def get_city_code(self):
         return get_teacher_city_code(self.request)
 
+    def get_events(self, year, month, city_code):
+        return [self._get_classes(year, month, city_code),
+                self._get_non_course_events(year, month, city_code)]
+
+    # FIXME: What about non-course events? What cities to show??? Both?
+    @staticmethod
+    def _get_non_course_events(year, month, city_code):
+        return (NonCourseEvent.objects
+                .for_calendar()
+                .for_city(city_code)
+                .in_month(year, month))
+
+    # FIXME: What about non-course events? What cities to show??? Both??????
     def _get_classes(self, year, month, city_code):
         return (CourseClass.objects
                 .for_calendar(self.request.user)
@@ -266,17 +282,13 @@ class CalendarTeacherFullView(TeacherOnlyMixin, _BaseEventsCalendarView):
                 .for_city(city_code))
 
 
-# FIXME: What about non-course events? What cities to show??? Both?
-class CalendarTeacherView(TeacherOnlyMixin, _BaseEventsCalendarView):
+class CalendarTeacherView(CalendarTeacherFullView):
     """
     Shows all non-course events and classes for courses in which authenticated
     teacher participated.
     """
     calendar_type = 'teacher'
     template_name = "learning/calendar.html"
-
-    def _get_city_code(self):
-        return get_teacher_city_code(self.request)
 
     def _get_classes(self, year, month, city_code):
         return (CourseClass.objects

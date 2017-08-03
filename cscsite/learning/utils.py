@@ -20,6 +20,7 @@ def now_local(city_code) -> datetime.datetime:
 
 
 def get_current_semester_pair():
+    # FIXME: respect timezone?
     date = timezone.now()
     return date_to_term_pair(date)
 
@@ -145,7 +146,7 @@ def split_list(iterable, predicate):
 
 # Following two functions are taken from
 # http://stackoverflow.com/a/1700069/275084
-def iso_year_start(iso_year):
+def iso_year_start(iso_year) -> datetime.date:
     """
     The gregorian calendar date of the first day of the given ISO year
     """
@@ -154,7 +155,7 @@ def iso_year_start(iso_year):
     return fourth_jan - delta
 
 
-def iso_to_gregorian(iso_year, iso_week, iso_day):
+def iso_to_gregorian(iso_year, iso_week, iso_day) -> datetime.date:
     """
     Gregorian calendar date for the given ISO year, week and day
     """

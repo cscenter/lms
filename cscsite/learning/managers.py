@@ -4,7 +4,7 @@ from django.db.models import query, Manager, Prefetch, Q
 from django.utils.timezone import now
 
 from core.utils import is_club_site
-from learning.calendar import EventsCalendar, get_bounds_for_month
+from learning.calendar import EventsCalendar, get_bounds_for_calendar_month
 from learning.settings import SEMESTER_TYPES
 
 
@@ -61,7 +61,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(course_offering__city_id=city_code)
 
     def in_month(self, year, month):
-        date_start, date_end = get_bounds_for_month(year, month)
+        date_start, date_end = get_bounds_for_calendar_month(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
     def open_only(self):
@@ -88,7 +88,7 @@ class NonCourseEventQuerySet(query.QuerySet):
         return self.filter(venue__city_id=city_code)
 
     def in_month(self, year, month):
-        date_start, date_end = get_bounds_for_month(year, month)
+        date_start, date_end = get_bounds_for_calendar_month(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
 
