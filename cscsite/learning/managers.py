@@ -39,7 +39,7 @@ class StudyProgramQuerySet(query.QuerySet):
 
 
 class CourseClassQuerySet(query.QuerySet):
-    def for_calendar(self, user=None):
+    def for_calendar(self, user):
         q = (self
              .select_related('venue',
                              'course_offering',
@@ -47,14 +47,17 @@ class CourseClassQuerySet(query.QuerySet):
                              'course_offering__semester')
              .order_by('date', 'starts_at'))
         # Hide summer classes on compsciclub.ru if user not enrolled in
-        if is_club_site() and user:
-            active_summer_enrollments = Q(
+        if is_club_site():
+            summer_classes_enrolled_in = Q(
                 course_offering__is_open=True,
                 course_offering__semester__type=SEMESTER_TYPES.summer,
                 course_offering__enrollment__student_id=user.pk,
                 course_offering__enrollment__is_deleted=False)
             others = ~Q(course_offering__semester__type=SEMESTER_TYPES.summer)
-            q = self.filter(active_summer_enrollments | others)
+            if user.is_authenticated:
+                q = q.filter(summer_classes_enrolled_in | others)
+            else:
+                q = q.filter(others)
         return q
 
     def for_city(self, city_code):
