@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 
 from core.exceptions import Redirect
+from core.utils import is_club_site
 from learning import utils
 from learning.forms import CourseOfferingPKForm
 from learning.models import Useful, Internship, StudentAssignment, Semester, \
@@ -15,6 +16,7 @@ from learning.models import Useful, Internship, StudentAssignment, Semester, \
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
 from learning.views import StudentAssignmentDetailMixin
+from learning.views.utils import get_student_city_code
 
 
 class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
@@ -135,8 +137,9 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         if not course_offering.enrollment_is_open:
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
-        if settings.SITE_ID == settings.CLUB_SITE_ID and \
-                not course_offering.is_open:
+        if is_club_site() and not course_offering.is_open:
+            return HttpResponseForbidden()
+        if get_student_city_code(self.request) != course_offering.get_city():
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
         if course_offering.is_capacity_limited:
