@@ -1,11 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
+import datetime
+
 import bleach
 import logging
 import hoep as h
 
 from django.conf import settings
 from django.urls import reverse
+from django.utils import formats
 from hashids import Hashids
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
@@ -103,3 +106,6 @@ def city_aware_reverse(viewname, urlconf=None, args=None, kwargs=None,
         kwargs["city_delimiter"] = "/"
     return reverse(viewname, urlconf, args, kwargs, current_app)
 
+
+def admin_datetime(dt: datetime.datetime) -> str:
+    return formats.date_format(dt, 'j E Y г. G:i e')

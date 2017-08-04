@@ -254,7 +254,8 @@ class CourseOffering(TimeStampedModel):
         related_name='enrolled_on_set',
         blank=True,
         through='Enrollment')
-    city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE)
+    city = models.ForeignKey(City, verbose_name=_("City"),
+                             default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
@@ -998,6 +999,14 @@ class StudentAssignment(TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.assignment),
                                   smart_text(self.student.get_full_name()))
 
+    # TODO: replace all {% url ... %} with this method
+    def get_teacher_url(self):
+        return reverse('a_s_detail_teacher', self.pk)
+
+    # TODO: replace all {% url ... %} with this method
+    def get_student_url(self):
+        return reverse('a_s_detail_student', self.pk)
+
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.assignments
@@ -1150,6 +1159,23 @@ class Enrollment(TimeStampedModel):
     def clean(self):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
+
+    def grade_changed_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.grade_changed, timezone=tz)
 
     @property
     def grade_display(self):

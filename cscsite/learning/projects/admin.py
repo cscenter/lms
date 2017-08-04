@@ -67,7 +67,8 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_select_related = ["project_student", "project_student__project"]
+    list_select_related = ["project_student", "project_student__project",
+                           "project_student__student"]
     list_display = ['get_student_name', 'get_project_name', 'status']
     list_filter = ['status']
 

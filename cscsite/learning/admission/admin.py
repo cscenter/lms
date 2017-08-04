@@ -10,6 +10,7 @@ from import_export.admin import ExportActionModelAdmin, ExportMixin
 from core.admin import CityAwareModelForm, BaseCityAwareSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
 from core.forms import AdminRichTextAreaWidget
+from core.utils import admin_datetime
 from learning.admission.forms import InterviewStreamChangeForm
 from learning.admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
@@ -136,7 +137,7 @@ class InterviewAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
     def get_date_local(self, obj):
-        return formats.date_format(obj.date_local(), 'j E Y г. G:i e')
+        return admin_datetime(obj.date_local())
     get_date_local.admin_order_field = 'date'
     get_date_local.short_description = _("Date")
 
