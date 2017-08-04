@@ -51,11 +51,9 @@ class EventsCalendar:
         return timezone.localtime(timezone.now(), timezone=tz)
 
     def add_events(self, *iterables):
+        events = chain(*iterables)
         if len(iterables) > 1:
-            _chain = chain(*iterables)
-            events = sorted(_chain, key=lambda evt: (evt.date, evt.starts_at))
-        else:
-            events = iterables
+            events = sorted(events, key=lambda evt: (evt.date, evt.starts_at))
         for event in events:
             self.dates_to_events[event.date].append(event)
 
