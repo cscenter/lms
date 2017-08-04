@@ -12,8 +12,11 @@ from django.utils import formats
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
+from core.admin import CityAwareModelForm, BaseCityAwareSplitDateTimeWidget, \
+    CityAwareSplitDateTimeField
 from core.forms import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
+from core.utils import admin_datetime
 from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
@@ -79,7 +82,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
 
 
 class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
-    list_filter = ['semester']
+    list_filter = ['city', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
     inlines = (CourseOfferingTeacherInline,)
     formfield_overrides = {
@@ -124,8 +127,7 @@ class CourseOfferingNewsAdmin(admin.ModelAdmin):
     }
 
     def created_local(self, obj):
-        # TODO: Move to utils
-        return formats.date_format(obj.created_local(), 'j E Y г. G:i e')
+        return admin_datetime(obj.created_local())
     created_local.admin_order_field = 'created'
     created_local.short_description = _("Created")
 
@@ -161,6 +163,10 @@ class AssignmentAdminForm(forms.ModelForm):
                 self.add_error('notify_teachers', ValidationError(
                         _("Assignment|Please, double check teachers list. Some "
                           "of them not related to selected course offering")))
+
+
+class AssignmentAttachmentAdmin(admin.ModelAdmin):
+    raw_id_fields = ["assignment"]
 
 
 class AssignmentAdmin(admin.ModelAdmin):
@@ -208,25 +214,54 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     readonly_fields = ['student_assignment']
+    list_display = ["get_assignment_name", "get_student", "author"]
+    search_fields = ["student_assignment__assignment__title",
+                     "student_assignment__assignment__id"]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    related_spec = {'select': [('student_assignment',
-                                [('assignment',
-                                  [('course_offering',
-                                    ['semester', 'course'])]),
-                                 'student'])]}
+    related_spec = {
+        'select': [
+            ('student_assignment', [
+                 ('assignment', [('course_offering', ['semester', 'course'])]),
+                 'student'
+             ]),
+            'author'
+        ]}
+
+    def get_student(self, obj: AssignmentComment):
+        return obj.student_assignment.student
+    get_student.short_description = _("Assignment|assigned_to")
+
+    def get_assignment_name(self, obj: AssignmentComment):
+        return obj.student_assignment.assignment.title
+    get_assignment_name.admin_order_field = 'student_assignment__assignment__title'
+    get_assignment_name.short_description = _("Asssignment|name")
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'course_offering', 'grade', 'grade_changed']
+    form = CityAwareModelForm
+    formfield_overrides = {
+        db_models.DateTimeField: {
+            'widget': BaseCityAwareSplitDateTimeWidget,
+            'form_class': CityAwareSplitDateTimeField
+        }
+    }
+    list_display = ['student', 'course_offering', 'grade', 'grade_changed_local']
     list_filter = ['course_offering__semester', 'course_offering__course']
+    exclude = ['grade_changed']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course_offering', 'grade_changed', 'modified']
+            return ['student', 'course_offering', 'grade_changed_local',
+                    'modified']
         else:
-            return ['grade_changed', 'modified']
+            return ['grade_changed_local', 'modified']
+
+    def grade_changed_local(self, obj):
+        return admin_datetime(obj.grade_changed_local())
+    grade_changed_local.admin_order_field = 'grade_changed'
+    grade_changed_local.short_description = _("Enrollment|grade changed")
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
@@ -301,7 +336,7 @@ admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
-admin.site.register(AssignmentAttachment)
+admin.site.register(AssignmentAttachment, AssignmentAttachmentAdmin)
 admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
