@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load tz %}
 {% load humanize %}
 {% load core_tags %}
 {% load static %}
@@ -8,6 +9,7 @@
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
+{% localtime off %}
 <div class="container" id="assignments-page">
 <div class="row">
 
@@ -73,7 +75,7 @@
     {% if query.assignment %}
     <div class="panel">
         <div class="panel-body">
-            <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ query.assignment.deadline_at|date_soon_css }}">{{ query.assignment.deadline_at|naturalday:"d E" }} {{ query.assignment.deadline_at|time:"H:i" }}</span>
+            <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ query.assignment.deadline_at_local|date_soon_css }}">{{ query.assignment.deadline_at_local|naturalday:"d E" }} {{ query.assignment.deadline_at_local|time:"H:i" }}</span>
             <div class="pull-right"><a href="{% url 'assignment_detail_teacher' query.assignment.pk %}">Страница задания</a></div>
         </div>
     </div>
@@ -107,6 +109,7 @@
 
 </div>
 </div>
+{% endlocaltime %}
 {% endblock content %}
 
 {% block stylesheets %}

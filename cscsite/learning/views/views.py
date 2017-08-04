@@ -691,6 +691,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
                             if c.semester.index == query_term_index]
         # Try to get assignments for requested course_offering
         query_co = self._get_requested_course_offering(course_offerings)
+        # FIXME: attach course offering or pass it to deadline_at_local
         assignments = list(
             Assignment.objects
             .filter(notify_teachers__teacher=self.request.user,
@@ -1025,16 +1026,10 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         if self.object is not None:
             # NOTE(Dmitry): dirty, but I don't see a better way given
             #               that forms are generated in code
-            co = self.object.course_offering
             remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
                 "".join("<li>{}</li>".format(
-                            DROP_ATTACHMENT_LINK.format(
-                                reverse('assignment_attachment_delete',
-                                        args=[co.course.slug,
-                                              co.semester.slug,
-                                              self.object.pk,
-                                              aa.pk]),
-                                aa.file_name))
+                    DROP_ATTACHMENT_LINK.format(aa.get_delete_url(),
+                                                aa.file_name))
                         for aa in self.object.assignmentattachment_set.all()))
         else:
             remove_links = ""

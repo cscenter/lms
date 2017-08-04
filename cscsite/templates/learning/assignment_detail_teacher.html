@@ -30,8 +30,8 @@
       </div>
       <p>
         {% trans "Deadline" %}:
-        {{ assignment.deadline_at|naturalday:"d E Y" }}
-        {{ assignment.deadline_at|time:"H:i" }}
+        {{ assignment.deadline_at_local|naturalday:"d E Y" }}
+        {{ assignment.deadline_at_local|time:"H:i" }}
       </p>
       <p>
         {% trans "Can be passed online" %}:
