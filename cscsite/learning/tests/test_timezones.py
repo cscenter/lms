@@ -3,10 +3,12 @@ import pytest
 import pytz
 from bs4 import BeautifulSoup
 
-from learning.factories import CourseOfferingFactory, CourseOfferingNewsFactory
+from learning.factories import CourseOfferingNewsFactory
 
 SPB_OFFSET = 3
 NSK_OFFSET = 7
+
+# TODO: move to appropriate module
 
 
 @pytest.mark.django_db

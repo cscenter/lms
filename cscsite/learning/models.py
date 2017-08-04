@@ -792,7 +792,7 @@ class CourseClassAttachment(TimeStampedModel, object):
 
 
 @python_2_unicode_compatible
-class Assignment(TimeStampedModel, object):
+class Assignment(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
         verbose_name=_("Course offering"),
@@ -850,6 +850,11 @@ class Assignment(TimeStampedModel, object):
     @property
     def city_aware_field_name(self):
         return self.__class__.course_offering.field.name
+
+    def deadline_at_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.deadline_at, timezone=tz)
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
@@ -927,11 +932,18 @@ class AssignmentAttachment(TimeStampedModel, object):
         return ext
 
     def file_url(self):
-        return reverse(
-            "assignment_attachments_download",
-            args=[
-                hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)]
-        )
+        return reverse("assignment_attachments_download", kwargs={
+            "sid": hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)
+        })
+
+    def get_delete_url(self):
+        return city_aware_reverse('assignment_attachment_delete', kwargs={
+            "course_slug": self.assignment.course_offering.course.slug,
+            "semester_slug": self.assignment.course_offering.semester.slug,
+            "assignment_pk": self.assignment.pk,
+            "pk": self.pk,
+            "city_code": self.assignment.course_offering.get_city(),
+        })
 
 
 @python_2_unicode_compatible
@@ -1109,12 +1121,10 @@ class AssignmentComment(TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse(
-            "assignment_attachments_download",
-            args=[hashids.encode(
-                learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
-                self.pk)]
-        )
+        return reverse("assignment_attachments_download", kwargs={
+            "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
+                                  self.pk)
+        })
 
     def is_stale_for_edit(self):
         # Teacher can edit comment during 10 min period only
