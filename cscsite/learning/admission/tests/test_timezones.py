@@ -63,8 +63,6 @@ def test_get_city_timezone(settings):
 def test_admin_view(settings, admin_client):
     # Datetime widget depends on locale, change it
     settings.LANGUAGE_CODE = 'ru'
-    # expired_at_naive = datetime.datetime(date.year, date.month, date.day,
-    #                                      HOUR, 0, 0, 0)
     invitation = InterviewInvitationFactory()
     venue_in_spb = VenueFactory(city_id='spb')
     venue_in_nsk = VenueFactory(city_id='nsk')
@@ -124,7 +122,7 @@ def test_admin_view(settings, admin_client):
     assert time_input.get('value') == '06:00:00'
     assert invitation.expired_at.hour == 3
     assert invitation.expired_at.minute == 0
-    # Update stream and expired_at, but UTC time shouldn't change
+    # Update stream and expired_at, but choose values when UTC shouldn't change
     form_data["stream"] = stream_for_nsk.pk
     form_data["expired_at_1"] = "10:00:00"
     response = admin_client.post(admin_url, form_data)
@@ -149,6 +147,15 @@ def test_admin_view(settings, admin_client):
     time_input = widget.find('input', {"name": 'expired_at_1'})
     assert time_input.get('value') == '10:00:00'
     assert invitation.expired_at.hour == 3
+    # Empty city aware field (`stream` for `InterviewInvitation`)
+    add_url = reverse('admin:admission_interviewinvitation_add')
+    form_data['stream'] = ''
+    response = admin_client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    widget_html = response.context['adminform'].form['expired_at'].as_widget()
+    widget = BeautifulSoup(widget_html, "html.parser")
+    time_input = widget.find('input', {"name": 'expired_at_1'})
+    assert time_input.get('value') == '10:00:00'
 
 
 @pytest.mark.django_db
