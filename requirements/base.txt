@@ -98,6 +98,7 @@ django-ical==1.4
 django-jinja==2.3.1
 
 # Misc utils
+django-vanilla-views==1.0.4
 django-autocomplete-light==3.2.1
 django-mptt==0.8.7
 django-bootstrap-pagination==1.6.2

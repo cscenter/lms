@@ -21,6 +21,9 @@ from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput, \
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
 
+
+DROP_ATTACHMENT_LINK = """
+<a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        onclick='history.go(-1);',
                        css_class="btn btn-default")
@@ -164,15 +167,23 @@ class CourseClassForm(forms.ModelForm):
         widget=TimeInputAsTextInput(format="%H:%M"))
 
     def __init__(self, *args, **kwargs):
-        remove_links = kwargs.get('remove_links', "")
-        del kwargs['remove_links']
+        course_offering = kwargs.pop('course_offering', None)
+        assert course_offering is not None
+        if "instance" in kwargs:
+            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
+                "".join("<li>{}</li>".format(
+                            DROP_ATTACHMENT_LINK.format(
+                                attachment.get_delete_url(),
+                                attachment.material_file_name))
+                        for attachment
+                        in kwargs["instance"].courseclassattachment_set.all()))
+        else:
+            remove_links = ""
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div(Div('type',
-                        css_class='col-xs-2'),
-                    Div('venue',
-                        css_class='col-xs-3'),
-                    css_class='row'),
+            Div(Div('type', css_class='col-xs-2'),
+                Div('venue', css_class='col-xs-3'),
+                css_class='row'),
             Div('name',
                 'description',
                 css_class="form-group"),
@@ -200,6 +211,7 @@ class CourseClassForm(forms.ModelForm):
             )
         )
         super(CourseClassForm, self).__init__(*args, **kwargs)
+        self.instance.course_offering = course_offering
 
     class Meta:
         model = CourseClass
@@ -351,7 +363,15 @@ class AssignmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         course_offering = kwargs.pop('course_offering', None)
         assert course_offering is not None
-        remove_links = kwargs.pop('remove_links', "")
+        if "instance" in kwargs:
+            instance = kwargs["instance"]
+            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
+                "".join("<li>{}</li>".format(
+                    DROP_ATTACHMENT_LINK.format(aa.get_delete_url(),
+                                                aa.file_name))
+                        for aa in instance.assignmentattachment_set.all()))
+        else:
+            remove_links = ""
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(
