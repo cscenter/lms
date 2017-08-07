@@ -12,11 +12,13 @@ from django.core.validators import MaxValueValidator, \
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from core.admin import CityAwareSplitDateTimeField, \
+    CityAwareAdminSplitDateTimeWidget, CityAwareModelForm
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
 from learning.settings import GRADES, FOUNDATION_YEAR
-from learning.widgets import CustomSplitDateTimeWidget, DateInputAsTextInput, \
+from learning.widgets import CityAwareSplitDateTimeWidget, DateInputAsTextInput, \
     TimeInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
@@ -330,7 +332,7 @@ class AssignmentGradeForm(forms.Form):
         return cleaned_data
 
 
-class AssignmentForm(forms.ModelForm):
+class AssignmentForm(CityAwareModelForm):
     title = forms.CharField(
         label=_("Title"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
@@ -338,12 +340,12 @@ class AssignmentForm(forms.ModelForm):
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
-    deadline_at = forms.SplitDateTimeField(
+    deadline_at = CityAwareSplitDateTimeField(
         label=_("Deadline"),
         input_date_formats=["%d.%m.%Y"],
         input_time_formats=["%H:%M"],
-        widget=CustomSplitDateTimeWidget(date_format="%d.%m.%Y",
-                                         time_format="%H:%M")
+        widget=CityAwareSplitDateTimeWidget(date_format="%d.%m.%Y",
+                                            time_format="%H:%M")
     )
     attachments = forms.FileField(
         label=_("Attached file"),
@@ -386,8 +388,7 @@ class AssignmentForm(forms.ModelForm):
                 Div(
                     Div('grade_min',
                         'grade_max',
-                        css_class="form-inline"
-                    ),
+                        css_class="form-inline"),
                     css_class="form-group"
                 ),
                 'is_online',
@@ -399,18 +400,12 @@ class AssignmentForm(forms.ModelForm):
 
     class Meta:
         model = Assignment
-        fields = ['title',
-                  'text',
-                  'deadline_at',
-                  'attachments',
-                  'is_online',
-                  'grade_min',
-                  'grade_max']
+        fields = ['title', 'text', 'deadline_at', 'attachments', 'is_online',
+                  'grade_min', 'grade_max']
 
 
 class MarksSheetTeacherImportGradesForm(forms.Form):
-    """Import grades for particular CourseOffering from *.csv
-    """
+    """Import grades for particular CourseOffering from *.csv"""
 
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
@@ -425,7 +420,7 @@ class MarksSheetTeacherImportGradesForm(forms.Form):
     csv_file = forms.FileField(
         label=_('Select csv file'),
         validators=[FileValidator(
-            allowd_mimetypes=('text/csv', 'application/vnd.ms-excel')),
+            allowed_mimetypes=('text/csv', 'application/vnd.ms-excel')),
         ]
     )
 

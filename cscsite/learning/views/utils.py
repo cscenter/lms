@@ -7,6 +7,7 @@ from core.utils import is_club_site
 logger = logging.getLogger(__name__)
 
 
+# FIXME: remove redirect!
 def get_student_city_code(request) -> str:
     """
     Returns city code for authenticated student.

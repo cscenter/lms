@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
-from core.admin import CityAwareModelForm, BaseCityAwareSplitDateTimeWidget, \
+from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
 from core.forms import AdminRichTextAreaWidget
 from core.utils import admin_datetime
@@ -120,7 +120,7 @@ class InterviewAdmin(admin.ModelAdmin):
     form = CityAwareModelForm
     formfield_overrides = {
         models.DateTimeField: {
-            'widget': BaseCityAwareSplitDateTimeWidget,
+            'widget': CityAwareAdminSplitDateTimeWidget,
             'form_class': CityAwareSplitDateTimeField
         }
     }
@@ -212,7 +212,7 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
     form = CityAwareModelForm
     formfield_overrides = {
         models.DateTimeField: {
-            'widget': BaseCityAwareSplitDateTimeWidget,
+            'widget': CityAwareAdminSplitDateTimeWidget,
             'form_class': CityAwareSplitDateTimeField
         }
     }

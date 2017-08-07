@@ -176,7 +176,7 @@ class CityAwareModelForm(forms.ModelForm):
                                     "CustomSplitDateTimeField" % field_name)
                 widget = field_data.widget
                 if isinstance(widget, widgets.AdminSplitDateTime) and \
-                        not isinstance(widget, BaseCityAwareSplitDateTimeWidget):
+                        not isinstance(widget, CityAwareAdminSplitDateTimeWidget):
                     raise TypeError("`%s` field widget must be subclassed from "
                                     "BaseCityAwareSplitDateTimeWidget" % field_name)
                 else:
@@ -198,7 +198,7 @@ class CityAwareModelForm(forms.ModelForm):
         return super().save(commit)
 
 
-class BaseCityAwareSplitDateTimeWidget(widgets.AdminSplitDateTime):
+class CityAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
     def decompress(self, value):
         if value:
             value = city_aware_to_naive(value, self.instance)

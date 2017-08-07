@@ -47,7 +47,8 @@ course_patterns = url(
 # TODO: dynamically generate city_code regex part
 course_offering_patterns = url(
     r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/", include([
-        # Common pages
+        # TODO: Ещё раз проверить, что во всех вьюхах учитывается city_code
+        # Course offering
         url(r"^$", CourseOfferingDetailView.as_view(),
             name="course_offering_detail"),
         url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
@@ -55,25 +56,25 @@ course_offering_patterns = url(
             name="course_offering_detail_with_active_tab"),
         url(r"^edit$", CourseOfferingEditView.as_view(),
             name="course_offering_update"),
-        # FIXME: this was added for .get_absolute_url support, but in fact it should lead to course offering page and focus on news.
-        url(r"^news/(?P<pk>\d+)/$",
-            CourseOfferingNewsUpdateView.as_view(),
-            name="course_offering_news_detail"),
-        url(r"^news/add$",
-            CourseOfferingNewsCreateView.as_view(),
-            name="course_offering_news_create"),
-        url(r"^news/(?P<pk>\d+)/edit$",
-            CourseOfferingNewsUpdateView.as_view(),
-            name="course_offering_news_update"),
-        url(r"^news/(?P<pk>\d+)/delete$",
-            CourseOfferingNewsDeleteView.as_view(),
-            name="course_offering_news_delete"),
+        # Enroll/Unenroll
         url(r"^enroll$",
             CourseOfferingEnrollView.as_view(),
             name="course_offering_enroll"),
         url(r"^unenroll$",
             CourseOfferingUnenrollView.as_view(),
             name="course_offering_unenroll"),
+        # News
+        url(r"^news/", include([
+            url(r"^add$",
+                CourseOfferingNewsCreateView.as_view(),
+                name="course_offering_news_create"),
+            url(r"^(?P<pk>\d+)/edit$",
+                CourseOfferingNewsUpdateView.as_view(),
+                name="course_offering_news_update"),
+            url(r"^(?P<pk>\d+)/delete$",
+                CourseOfferingNewsDeleteView.as_view(),
+                name="course_offering_news_delete"),
+        ])),
         # Classes
         url(r"^classes/", include([
             url(r"^(?P<pk>\d+)/$",
@@ -85,12 +86,12 @@ course_offering_patterns = url(
             url(r'^(?P<pk>\d+)/edit$',
                 CourseClassUpdateView.as_view(),
                 name='course_class_update'),
-            url(r'^(?P<class_pk>\d+)/attachments/(?P<pk>\d+)/delete$',
-                CourseClassAttachmentDeleteView.as_view(),
-                name='course_class_attachment_delete'),
             url(r'^(?P<pk>\d+)/delete$',
                 CourseClassDeleteView.as_view(),
                 name='course_class_delete'),
+            url(r'^(?P<class_pk>\d+)/attachments/(?P<pk>\d+)/delete$',
+                CourseClassAttachmentDeleteView.as_view(),
+                name='course_class_attachment_delete'),
         ])),
         # Assignments
         url(r'^assignments/', include([

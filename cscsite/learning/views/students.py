@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -124,13 +125,16 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
         return context
 
 
-class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
-    http_method_names = ['post']
-    form_class = CourseOfferingPKForm
-
-    def form_valid(self, form):
+class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
+    def post(self, request, *args, **kwargs):
+        # FIXME: Do I need this form, when it just validate course_offering_pk int or not?
+        form = CourseOfferingPKForm(data=request.POST)
+        if not form.is_valid():
+            return HttpResponseBadRequest()
+        # TODO: validate slug values and so on?
         course_offering = get_object_or_404(
-            CourseOffering.custom.site_related(self.request)
+            CourseOffering.custom
+                .in_city(self.request.city_code)
                 .filter(pk=form.cleaned_data['course_offering_pk'])
                 .select_related("semester"))
         # CourseOffering enrollment should be active
@@ -139,6 +143,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.FormView):
         # Club students can't enroll on center courses
         if is_club_site() and not course_offering.is_open:
             return HttpResponseForbidden()
+        # Students can enroll in only on courses from their city
         if get_student_city_code(self.request) != course_offering.get_city():
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available

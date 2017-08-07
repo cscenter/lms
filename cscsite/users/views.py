@@ -125,7 +125,7 @@ class TeacherDetailView(generic.DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
-        co_queryset = (CourseOffering.custom.site_related(self.request)
+        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
                        .select_related('semester', 'course'))
         return (auth.get_user_model()._default_manager
             .all()
@@ -158,7 +158,7 @@ class UserDetailView(generic.DetailView):
         elif self.request.user.is_curator:
             enrollment_queryset = enrollment_queryset.annotate(
                 classes_total=Count('course_offering__courseclass'))
-        co_queryset = (CourseOffering.custom.site_related(self.request)
+        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),

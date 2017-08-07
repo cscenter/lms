@@ -72,9 +72,8 @@ class IndexView(generic.TemplateView):
                                                .filter(date__gte=today)
                                                .order_by('date', 'starts_at'))
             courses = list(
-                CourseOffering
-                .custom
-                .site_related(self.request)
+                CourseOffering.custom
+                .site_related(self.request.city_code)
                 .filter(semester=featured_term.pk)
                 .select_related('course', 'semester')
                 .prefetch_related(
@@ -124,7 +123,7 @@ class TeacherDetailView(generic.DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
-        co_queryset = (CourseOffering.custom.site_related(self.request)
+        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
                        .select_related('semester', 'course'))
         return (get_user_model()._default_manager
                 .all()

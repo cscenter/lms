@@ -9,7 +9,7 @@ from django.db.models import Q, Prefetch, When, Value, Case, \
     IntegerField, BooleanField, Count
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 
@@ -48,12 +48,13 @@ class CourseOfferingDetailView(generic.DetailView):
             return HttpResponseBadRequest()
         # Redirect old style links
         if "tab" in request.GET:
-            tab_name = request.GET["tab"]
-            # TODO: check for valid names
             url_params = dict(self.kwargs)
-            url_params["tab"] = tab_name
-            url = reverse("course_offering_detail_with_active_tab",
-                          kwargs=url_params)
+            try:
+                tab_name = request.GET["tab"]
+                url = reverse("course_offering_detail_with_active_tab",
+                              kwargs={**url_params, "tab": tab_name})
+            except NoReverseMatch:
+                url = reverse("course_offering_detail", kwargs=url_params)
             return HttpResponseRedirect(url)
         self.object = self.get_object()
         try:
@@ -78,8 +79,8 @@ class CourseOfferingDetailView(generic.DetailView):
 
     def get_queryset(self):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        return (
-            CourseOffering.custom.site_related(self.request)
+        return (CourseOffering.custom
+                .in_city(self.request.city_code)
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug'])
@@ -317,9 +318,10 @@ class CourseOfferingEditView(TeacherOnlyMixin,
         return user.is_curator or user in obj.teachers.all()
 
     def get_queryset(self):
-        return self.model.custom.site_related(self.request)
+        return self.model.custom.site_related(self.request.city_code)
 
 
+# FIXME: Rewrite with django-vanilla-views
 class CourseOfferingNewsCreateView(TeacherOnlyMixin,
                                    ProtectedFormMixin,
                                    generic.CreateView):
@@ -339,10 +341,9 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
         try:
             with transaction.atomic():
                 self.object.save()
-            messages.success(
-                self.request,
-                _("News was successfully created"),
-                extra_tags='timeout')
+            messages.success(self.request,
+                             _("News was successfully created"),
+                             extra_tags='timeout')
         except IntegrityError:
             messages.error(self.request, _("News wasn't created. Try again."))
         return redirect(self.get_success_url())
@@ -350,12 +351,11 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
     def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         self._course_offering = get_object_or_404(
-            CourseOffering.custom.site_related(self.request)
+            CourseOffering.custom.site_related(self.request.city_code)
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug']))
-        return (user.is_authenticated and user.is_curator) or \
-               (user in self._course_offering.teachers.all())
+        return user.is_curator or user in self._course_offering.teachers.all()
 
 
 class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
@@ -369,8 +369,7 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
         return self.object.course_offering.get_url_for_tab("news")
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_offering.teachers.all())
+        return user.is_curator or user in obj.course_offering.teachers.all()
 
 
 class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
@@ -387,5 +386,4 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
         return self.object.course_offering.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_offering.teachers.all())
+        return user.is_curator or user in obj.course_offering.teachers.all()
