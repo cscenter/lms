@@ -421,6 +421,7 @@ class CourseClassDetailView(generic.DetailView):
         return context
 
 
+# FIXME: Merge permission checks into one mixin
 class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = CourseClass
     form_class = CourseClassForm
@@ -961,16 +962,11 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         return reverse('a_s_detail_teacher', args=[pk])
 
 
+# FIXME: Merge permission check
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
     form_class = AssignmentForm
     template_name = "learning/assignment_form.html"
-
-    # FIXME: Is it useful?
-    def get_queryset(self):
-        return self.model.objects.select_related("course_offering",
-                                                 "course_offering__course",
-                                                 "course_offering__semester")
 
     def is_form_allowed(self, user, obj):
         return (obj is None or user.is_curator or
