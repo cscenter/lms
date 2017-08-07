@@ -28,6 +28,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 from six import viewvalues
+from vanilla import CreateView, UpdateView, DeleteView
 
 from core import comment_persistence
 from core.exceptions import Redirect
@@ -422,57 +423,34 @@ class CourseClassDetailView(generic.DetailView):
 
 class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = CourseClass
-    template_name = "learning/forms/course_class.html"
     form_class = CourseClassForm
-
-    def __init__(self, *args, **kwargs):
-        self._course_offering = None
-        super(CourseClassCreateUpdateMixin, self).__init__(*args, **kwargs)
+    template_name = "learning/forms/course_class.html"
 
     def is_form_allowed(self, user, obj):
-        # FIXME: Do we need this check? Looks like not.
         return (obj is None or user.is_curator or
                 user in obj.course_offering.teachers.all())
 
     def get_course_offering(self):
-        course_slug, semester_year, semester_type \
-            = utils.co_from_kwargs(self.kwargs)
-        base_qs = CourseOffering.custom.site_related(self.request)
+        course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
+        qs = CourseOffering.custom.site_related(self.request)
         if not self.request.user.is_curator:
-            base_qs = base_qs.filter(teachers=self.request.user)
-        return get_object_or_404(
-            base_qs.filter(course__slug=course_slug,
-                           semester__year=semester_year,
-                           semester__type=semester_type))
+            qs = qs.filter(teachers=self.request.user)
+        return get_object_or_404(qs.filter(course__slug=course_slug,
+                                           semester__year=term_year,
+                                           semester__type=term_type))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["course_offering"] = self._course_offering
-        return context
+    def get_form(self, **kwargs):
+        form_class = self.get_form_class()
+        kwargs["course_offering"] = self.get_course_offering()
+        kwargs["initial"] = self.get_initial(**kwargs)
+        return form_class(**kwargs)
 
-    def get_form(self, form_class=None):
-        if form_class is None:
-            form_class = self.get_form_class()
-        if self.object is not None:
-            # NOTE(Dmitry): dirty, but I don't see a better way given
-            #               that forms are generated in code
-            co = self.object.course_offering
-            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
-                "".join("<li>{}</li>".format(
-                            DROP_ATTACHMENT_LINK.format(
-                                attachment.get_delete_url(),
-                                attachment.material_file_name))
-                        for attachment
-                        in self.object.courseclassattachment_set.all()))
-        else:
-            remove_links = ""
-        return form_class(remove_links=remove_links, **self.get_form_kwargs())
+    def get_initial(self, **kwargs):
+        return None
 
+    # TODO: add atomic
     def form_valid(self, form):
-        assert self._course_offering is not None
-        self.object = form.save(commit=False)
-        self.object.course_offering = self._course_offering
-        self.object.save()
+        self.object = form.save()
         attachments = self.request.FILES.getlist('attachments')
         if attachments:
             for attachment in attachments:
@@ -481,37 +459,38 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        if self.request.GET.get('back') == 'timetable':
+        return_url = self.request.GET.get('back')
+        if return_url == 'timetable':
             return reverse('timetable_teacher')
-        if self.request.GET.get('back') == 'course_offering':
-            return self._course_offering.get_absolute_url()
-        if self.request.GET.get('back') == 'calendar':
+        if return_url == 'course_offering':
+            return self.object.course_offering.get_absolute_url()
+        if return_url == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
-            return self._course_offering.get_create_class_url()
+            return self.object.course_offering.get_create_class_url()
         else:
             return super(CourseClassCreateUpdateMixin, self).get_success_url()
 
 
-class CourseClassCreateView(CourseClassCreateUpdateMixin,
-                            generic.CreateView):
+class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
 
-    def get_initial(self, *args, **kwargs):
-        initial = super().get_initial(*args, **kwargs)
+    def get_initial(self, **kwargs):
         # TODO: Add tests for initial data after discussion
+        course_offering = kwargs["course_offering"]
         previous_class = (CourseClass.objects
-                          .filter(course_offering=self._course_offering.pk)
+                          .filter(course_offering=course_offering.pk)
                           .defer("description")
                           .order_by("-date", "starts_at")
                           .first())
         if previous_class is not None:
-            initial["type"] = previous_class.type
-            initial["venue"] = previous_class.venue
-            initial["starts_at"] = previous_class.starts_at
-            initial["ends_at"] = previous_class.ends_at
-            initial["date"] = previous_class.date + datetime.timedelta(
-                weeks=1)
-        return initial
+            return {
+                "type": previous_class.type,
+                "venue": previous_class.venue,
+                "starts_at": previous_class.starts_at,
+                "ends_at": previous_class.ends_at,
+                "date": previous_class.date + datetime.timedelta(weeks=1)
+            }
+        return None
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully created.")
@@ -520,37 +499,23 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin,
         return super(CourseClassCreateView, self).get_success_url()
 
     def post(self, request, *args, **kwargs):
-        self._course_offering = self.get_course_offering()
         is_curator = self.request.user.is_curator
-        if self._course_offering.is_completed and not is_curator:
+        # FIXME: queryset call duplicated
+        if not is_curator and self.get_course_offering().is_completed:
             return HttpResponseForbidden()
         return super().post(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        self._course_offering = self.get_course_offering()
-        return super().get(request, *args, **kwargs)
 
-
-class CourseClassUpdateView(CourseClassCreateUpdateMixin,
-                            generic.UpdateView):
+class CourseClassUpdateView(CourseClassCreateUpdateMixin, UpdateView):
     def get_success_url(self):
         msg = _("The class '%s' was successfully updated.")
         messages.success(self.request, msg % self.object.name,
                          extra_tags='timeout')
         return super(CourseClassUpdateView, self).get_success_url()
 
-    def post(self, request, *args, **kwargs):
-        self._course_offering = self.get_course_offering()
-        return super().post(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        self._course_offering = self.get_course_offering()
-        return super().get(request, *args, **kwargs)
-
-
-class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
-                                      ProtectedFormMixin,
-                                      generic.DeleteView):
+class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                                      DeleteView):
     model = CourseClassAttachment
     template_name = "learning/simple_delete_confirmation.html"
 
@@ -558,15 +523,15 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin,
         return (user.is_authenticated and user.is_curator) or \
                (user in obj.course_class.course_offering.teachers.all())
 
-    def get_success_url(self):
-        co = self.object.course_class.course_offering
-        return self.object.course_class.get_update_url()
-
-    def delete(self, request, *args, **kwargs):
-        resp = (super(CourseClassAttachmentDeleteView, self)
-                .delete(request, *args, **kwargs))
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        # TODO: move to model method
         os.remove(self.object.material.path)
-        return resp
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.object.course_class.get_update_url()
 
 
 class CourseClassDeleteView(TeacherOnlyMixin,
@@ -998,9 +963,10 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
 
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
-    template_name = "learning/assignment_form.html"
     form_class = AssignmentForm
+    template_name = "learning/assignment_form.html"
 
+    # FIXME: Is it useful?
     def get_queryset(self):
         return self.model.objects.select_related("course_offering",
                                                  "course_offering__course",
@@ -1015,38 +981,21 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
         queryset = CourseOffering.custom.site_related(self.request)
         if not self.request.user.is_curator:
             queryset = queryset.filter(teachers=self.request.user)
-        return get_object_or_404(
-            queryset.filter(course__slug=course_slug,
-                            semester__year=term_year,
-                            semester__type=term_type))
+        return get_object_or_404(queryset.filter(course__slug=course_slug,
+                                                 semester__year=term_year,
+                                                 semester__type=term_type))
 
-    def get_form(self, form_class=None):
-        if form_class is None:
-            form_class = self.get_form_class()
-        if self.object is not None:
-            # NOTE(Dmitry): dirty, but I don't see a better way given
-            #               that forms are generated in code
-            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
-                "".join("<li>{}</li>".format(
-                    DROP_ATTACHMENT_LINK.format(aa.get_delete_url(),
-                                                aa.file_name))
-                        for aa in self.object.assignmentattachment_set.all()))
-        else:
-            remove_links = ""
-        course_offering = self.get_course_offering()
-        form_kwargs = self.get_form_kwargs()
-        form_kwargs["remove_links"] = remove_links
-        form_kwargs["course_offering"] = course_offering
-        return form_class(**form_kwargs)
+    def get_form(self, **kwargs):
+        form_class = self.get_form_class()
+        kwargs["course_offering"] = self.get_course_offering()
+        return form_class(**kwargs)
 
     def get_success_url(self):
         return reverse('assignment_detail_teacher', args=[self.object.pk])
 
-    def save_instance(self, form):
-        self.object = form.save()
-
+    # TODO: Add atomic
     def form_valid(self, form):
-        self.save_instance(form)
+        self.save_form(form)
         attachments = self.request.FILES.getlist('attachments')
         if attachments:
             for attachment in attachments:
@@ -1054,25 +1003,40 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                  .create(assignment=self.object, attachment=attachment))
         return redirect(self.get_success_url())
 
+    def save_form(self, form):
+        raise NotImplementedError()
 
-class AssignmentCreateView(AssignmentCreateUpdateMixin,
-                           generic.CreateView):
-    def save_instance(self, form):
-        super(AssignmentCreateView, self).save_instance(form)
-        # Populate notification receivers
+
+class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
+    def save_form(self, form):
+        self.object = form.save()
+        # Set up notifications recipients setting
         course_offering = self.object.course_offering
         co_teachers = course_offering.courseofferingteacher_set.all()
         notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
         self.object.notify_teachers.add(*notify_teachers)
 
 
-# Same here
-class AssignmentUpdateView(AssignmentCreateUpdateMixin,
-                           generic.UpdateView):
-    pass
+class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
+    def save_form(self, form):
+        self.object = form.save()
+
+
+class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
+    model = Assignment
+    template_name = "learning/simple_delete_confirmation.html"
+
+    def get_success_url(self):
+        return reverse('assignment_list_teacher')
+
+    def is_form_allowed(self, user, obj):
+        return (user.is_authenticated and user.is_curator) or \
+               (user in obj.course_offering.teachers.all())
+
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
+# FIXME: replace with vanilla view
 class AssignmentCommentUpdateView(generic.UpdateView):
     model = AssignmentComment
     pk_url_kwarg = 'comment_pk'
@@ -1109,20 +1073,6 @@ class AssignmentCommentUpdateView(generic.UpdateView):
         self.object = self.get_object()
         self.check_permissions(self.object)
         return super(BaseUpdateView, self).post(request, *args, **kwargs)
-
-
-class AssignmentDeleteView(TeacherOnlyMixin,
-                           ProtectedFormMixin,
-                           generic.DeleteView):
-    model = Assignment
-    template_name = "learning/simple_delete_confirmation.html"
-
-    def get_success_url(self):
-        return reverse('assignment_list_teacher')
-
-    def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_offering.teachers.all())
 
 
 class AssignmentAttachmentDeleteView(TeacherOnlyMixin,

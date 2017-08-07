@@ -17,6 +17,7 @@ from django.shortcuts import render_to_response
 from django.utils.encoding import smart_text, python_2_unicode_compatible, \
     force_text
 from django.views import generic
+from vanilla import CreateView
 from xlsxwriter import Workbook
 
 from .utils import render_markdown
@@ -77,7 +78,7 @@ class ProtectedFormMixin(object):
         # This is needed because BaseCreateView doesn't call get_object,
         # setting self.object to None instead. Of course, this hack is fragile,
         # but, anyway, it will crash instead of letting do wrong things.
-        if isinstance(self, generic.edit.BaseCreateView):
+        if isinstance(self, (generic.edit.BaseCreateView, CreateView)):
             obj = None
         else:
             obj = self._cached_object = self.get_object()
