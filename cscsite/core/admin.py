@@ -1,4 +1,6 @@
 import datetime
+
+import pytz
 import six
 import sys
 
@@ -8,7 +10,7 @@ from django.contrib import admin
 from django.contrib.admin import widgets
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils import timezone
 from django.urls import reverse, NoReverseMatch
 from django.db.models import Model
@@ -132,6 +134,34 @@ def city_aware_to_naive(value, instance):
     return value
 
 
+def naive_to_city_aware(value, instance):
+    """
+    When time zone support is enabled, convert naive datetimes to aware
+    datetimes.
+    """
+    if settings.USE_TZ and value is not None and timezone.is_naive(value):
+        try:
+            city_timezone = instance.get_city_timezone()
+        except ObjectDoesNotExist:
+            # Until city aware field is empty, we can't determine timezone
+            city_timezone = pytz.UTC
+        try:
+            return timezone.make_aware(value, city_timezone)
+        except Exception:
+            message = _(
+                '%(datetime)s couldn\'t be interpreted '
+                'in time zone %(city_timezone)s; it '
+                'may be ambiguous or it may not exist.'
+            )
+            params = {'datetime': value, 'current_timezone': city_timezone}
+            six.reraise(ValidationError, ValidationError(
+                message,
+                code='ambiguous_timezone',
+                params=params,
+            ), sys.exc_info()[2])
+    return value
+
+
 class CityAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """
@@ -174,30 +204,6 @@ class BaseCityAwareSplitDateTimeWidget(widgets.AdminSplitDateTime):
             value = city_aware_to_naive(value, self.instance)
             return [value.date(), value.time().replace(microsecond=0)]
         return [None, None]
-
-
-def naive_to_city_aware(value, instance):
-    """
-    When time zone support is enabled, convert naive datetimes to aware
-    datetimes.
-    """
-    if settings.USE_TZ and value is not None and timezone.is_naive(value):
-        city_timezone = instance.get_city_timezone()
-        try:
-            return timezone.make_aware(value, city_timezone)
-        except Exception:
-            message = _(
-                '%(datetime)s couldn\'t be interpreted '
-                'in time zone %(city_timezone)s; it '
-                'may be ambiguous or it may not exist.'
-            )
-            params = {'datetime': value, 'current_timezone': city_timezone}
-            six.reraise(ValidationError, ValidationError(
-                message,
-                code='ambiguous_timezone',
-                params=params,
-            ), sys.exc_info()[2])
-    return value
 
 
 class CityAwareSplitDateTimeField(forms.SplitDateTimeField):
