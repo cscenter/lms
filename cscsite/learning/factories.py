@@ -62,9 +62,11 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     @classmethod
     def create(cls, **kwargs):
         attrs = cls.attributes(create=True, extra=kwargs)
+        # FIXME: replace with Trait
         if "completed_at" not in kwargs:
             term = attrs["semester"]
-            attrs["completed_at"] = term.ends_at + datetime.timedelta(days=1)
+            attrs["completed_at"] = (term.ends_at +
+                                     datetime.timedelta(days=1)).date()
         return cls._generate(True, attrs)
 
     @factory.post_generation

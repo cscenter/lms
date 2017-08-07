@@ -488,14 +488,6 @@ class CourseOfferingNews(TimeStampedModel):
     def city_aware_field_name(self):
         return self.__class__.course_offering.field.name
 
-    def get_absolute_url(self):
-        return city_aware_reverse("course_offering_news_detail", kwargs={
-            "course_slug": self.course_offering.course.slug,
-            "semester_slug": self.course_offering.semester.slug,
-            "city_code": self.get_city(),
-            "pk": self.pk,
-        })
-
     def get_update_url(self):
         return city_aware_reverse('course_offering_news_update', kwargs={
             "course_slug": self.course_offering.course.slug,

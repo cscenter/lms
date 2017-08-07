@@ -246,7 +246,7 @@ class CoursesListView(generic.ListView):
     template_name = "learning/courses/list.html"
 
     def get_queryset(self):
-        co_queryset = (CourseOffering.custom.site_related(self.request)
+        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
                        .select_related('course')
                        .prefetch_related('teachers')
                        .order_by('course__name'))
@@ -331,7 +331,7 @@ class CourseStudentListView(StudentOnlyMixin,
                        and e.course_offering.semester.type == current_term))
 
         current_term_index = get_term_index(current_year, current_term)
-        available = (CourseOffering.custom.site_related(self.request)
+        available = (CourseOffering.custom.site_related(self.request.city_code)
                      .filter(semester__index=current_term_index)
                      .select_related('course', 'semester')
                      .order_by('semester__year', '-semester__type',
@@ -389,7 +389,7 @@ class CourseDetailView(generic.DetailView):
                    .get_context_data(**kwargs))
 
         context['offerings'] = (CourseOffering.custom
-                                .site_related(self.request)
+                                .site_related(self.request.city_code)
                                 .filter(course=self.object).all())
         return context
 
@@ -433,7 +433,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
 
     def get_course_offering(self):
         course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
-        qs = CourseOffering.custom.site_related(self.request)
+        qs = CourseOffering.custom.in_city(self.request.city_code)
         if not self.request.user.is_curator:
             qs = qs.filter(teachers=self.request.user)
         return get_object_or_404(qs.filter(course__slug=course_slug,
@@ -535,16 +535,14 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         return self.object.course_class.get_update_url()
 
 
-class CourseClassDeleteView(TeacherOnlyMixin,
-                            ProtectedFormMixin,
-                            generic.DeleteView):
+class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                            DeleteView):
     model = CourseClass
     template_name = "learning/simple_delete_confirmation.html"
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_offering.teachers.all())
+        return user.is_curator or user in obj.course_offering.teachers.all()
 
 
 class VenueListView(generic.ListView):
@@ -552,11 +550,10 @@ class VenueListView(generic.ListView):
     template_name = "learning/venue_list.html"
 
     def get_queryset(self):
-        q = Venue.objects.filter(sites__pk=settings.SITE_ID)
-        if hasattr(self.request, 'city'):
-            q = q.filter(
-                Q(city__pk=self.request.city_code) | Q(city__isnull=True))
-        return q
+        return (Venue.objects
+                .filter(sites__pk=settings.SITE_ID)
+                .filter(Q(city_id=self.request.city_code) |
+                        Q(city__isnull=True)))
 
 
 class VenueDetailView(generic.DetailView):
@@ -564,6 +561,7 @@ class VenueDetailView(generic.DetailView):
     template_name = "learning/venue_detail.html"
 
 
+# Note: Looks like shit
 class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
@@ -803,9 +801,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                    .get_context_data(*args, **kwargs))
 
         is_actual_teacher = (
-            self.request.user in (self.object
-                                  .course_offering
-                                  .teachers.all()))
+            self.request.user in (self.object.course_offering.teachers.all()))
         if not is_actual_teacher and (not self.request.user.is_authenticated
                                       or not self.request.user.is_curator):
             raise PermissionDenied
@@ -821,6 +817,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         return context
 
 
+# FIXME: rewrite with vanilla view
 class StudentAssignmentDetailMixin(object):
     model = AssignmentComment
     template_name = "learning/assignment_submission_detail.html"
@@ -962,7 +959,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         return reverse('a_s_detail_teacher', args=[pk])
 
 
-# FIXME: Merge permission check
+# FIXME: Merge permission check?
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
     form_class = AssignmentForm
@@ -973,8 +970,9 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                 user in obj.course_offering.teachers.all())
 
     def get_course_offering(self):
+        # FIXME: replace co_from_kwargs with serializer.
         course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
-        queryset = CourseOffering.custom.site_related(self.request)
+        queryset = CourseOffering.custom.in_city(self.request.city_code)
         if not self.request.user.is_curator:
             queryset = queryset.filter(teachers=self.request.user)
         return get_object_or_404(queryset.filter(course__slug=course_slug,
@@ -1026,9 +1024,7 @@ class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
         return reverse('assignment_list_teacher')
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_offering.teachers.all())
-
+        return user.is_curator or user in obj.course_offering.teachers.all()
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
@@ -1071,25 +1067,23 @@ class AssignmentCommentUpdateView(generic.UpdateView):
         return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
-class AssignmentAttachmentDeleteView(TeacherOnlyMixin,
-                                     ProtectedFormMixin,
-                                     generic.DeleteView):
+class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                                     DeleteView):
     model = AssignmentAttachment
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.assignment.course_offering.teachers.all())
+        return (user.is_curator or
+                user in obj.assignment.course_offering.teachers.all())
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        os.remove(self.object.attachment.path)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        co = self.object.assignment.course_offering
         return self.object.assignment.get_update_url()
-
-    def delete(self, request, *args, **kwargs):
-        resp = (super(AssignmentAttachmentDeleteView, self)
-                .delete(request, *args, **kwargs))
-        os.remove(self.object.attachment.path)
-        return resp
 
 
 class GradebookDispatchView(generic.ListView):

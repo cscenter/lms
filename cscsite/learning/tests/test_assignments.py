@@ -15,7 +15,7 @@ from django.utils.translation import ugettext as _
 from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory
-from learning.models import StudentAssignment, Assignment
+from learning.models import StudentAssignment, Assignment, CourseOffering
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
@@ -589,3 +589,50 @@ def test_assignment_admin_view(settings, admin_client):
     assert assignment.deadline_at.hour == 3
     assert assignment.deadline_at.minute == 0
     assert assignment.course_offering_id == co_in_nsk.pk
+
+
+@pytest.mark.django_db
+def test_assignment_public_form_for_teachers(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    teacher = TeacherCenterFactory()
+    co_in_spb = CourseOfferingFactory(city='spb', teachers=[teacher])
+    client.login(teacher)
+    form_data = {
+        "title": "title",
+        "text": "text",
+        "deadline_at_0": "29.06.2017",
+        "deadline_at_1": "00:00",
+        "grade_min": "3",
+        "grade_max": "5",
+    }
+    add_url = co_in_spb.get_create_assignment_url()
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.count() == 1
+    assignment = Assignment.objects.first()
+    # In DB we store datetime values in UTC
+    assert assignment.deadline_at.day == 28
+    assert assignment.deadline_at.hour == 21
+    assert assignment.deadline_at.minute == 0
+    assert assignment.course_offering_id == co_in_spb.pk
+    tz_diff = datetime.timedelta(hours=3)  # UTC+3 for msk timezone
+    assert assignment.deadline_at_local().utcoffset() == tz_diff
+    # Check widget shows local time
+    response = client.get(assignment.get_update_url())
+    widget_html = response.context['form']['deadline_at'].as_widget()
+    widget = BeautifulSoup(widget_html, "html.parser")
+    time_input = widget.find('input', {"name": 'deadline_at_1'})
+    assert time_input.get('value') == '00:00'
+    # Clone CO from msk
+    co_in_nsk = CourseOfferingFactory(city='nsk', course=co_in_spb.course,
+                                      teachers=[teacher])
+    add_url = co_in_nsk.get_create_assignment_url()
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.count() == 2
+    assignment_last = Assignment.objects.order_by("pk").last()
+    assert assignment_last.course_offering_id == co_in_nsk.pk
+    tz_diff = datetime.timedelta(hours=7)  # UTC+7 for nsk timezone
+    assert assignment_last.deadline_at_local().utcoffset() == tz_diff
+    assert assignment_last.deadline_at.hour == 17
+

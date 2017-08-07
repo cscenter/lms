@@ -2,6 +2,8 @@ from django.forms.utils import to_current_timezone
 from django.utils.translation import ugettext_lazy as _
 from floppyforms import __future__ as forms
 
+from core.admin import city_aware_to_naive
+
 
 class DateInputAsTextInput(forms.DateInput):
     input_type = 'text'
@@ -15,7 +17,8 @@ class TimeInputAsTextInput(forms.TimeInput):
     input_type = 'text'
 
 
-class CustomSplitDateTimeWidget(forms.MultiWidget):
+# TODO: Move to core.widgets?
+class CityAwareSplitDateTimeWidget(forms.MultiWidget):
     """Using bootstrap datetime picker for assignment form"""
     supports_microseconds = False
 
@@ -23,11 +26,11 @@ class CustomSplitDateTimeWidget(forms.MultiWidget):
         date_attrs = attrs or {}
         widgets = (DateInputAsTextInput(attrs=date_attrs),
                    TimeInputAsTextInput(attrs=attrs, format=time_format))
-        super(CustomSplitDateTimeWidget, self).__init__(widgets, attrs)
+        super().__init__(widgets, attrs)
 
     def decompress(self, value):
         if value:
-            value = to_current_timezone(value)
+            value = city_aware_to_naive(value, self.instance)
             return [value.date(), value.time().replace(microsecond=0)]
         return [None, None]
 

@@ -38,7 +38,7 @@ class IndexView(generic.TemplateView):
             current_term_index = get_term_index(year, term_type)
             term_index = get_term_index_academic(year, term_type,
                                                  rewind_years=2)
-            pool = list(CourseOffering.custom.site_related(self.request)
+            pool = list(CourseOffering.custom.site_related(self.request.city_code)
                 .filter(is_published_in_video=True,
                         is_open=False,
                         semester__index__gte=term_index,

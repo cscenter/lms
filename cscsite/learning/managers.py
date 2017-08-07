@@ -96,11 +96,15 @@ class NonCourseEventQuerySet(query.QuerySet):
 
 
 class CustomCourseOfferingQuerySet(models.QuerySet):
-    def site_related(self, request):
-        qs = self.filter(city__pk=request.city_code)
-        if request.site.domain == settings.CLUB_DOMAIN:
+    # FIXME: Make it explicit? Split into `in_city` and `club_only(is_club_site())`?
+    def site_related(self, city_code):
+        qs = self.filter(city__pk=city_code)
+        if is_club_site():
             qs = qs.filter(is_open=True,)
         return qs
+
+    def in_city(self, city_code):
+        return self.filter(city__pk=city_code)
 
     # FIXME: respect timezones!
     def completed(self, is_completed):

@@ -16,6 +16,8 @@ from users.factories import UserFactory, StudentCenterFactory
 
 # TODO: TimetableStudentView - есть фильтр по enrolled_students, туда может попадать лишнее сейчас
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
+# TODO: Добавить тест о том, что не могут записаться в чужом городе
+
 
 # Workaround to use Django's assertRedirects()
 STS = SimpleTestCase()
@@ -29,10 +31,11 @@ def test_enrollment_for_club_students(self):
 
 @pytest.mark.django_db
 def test_unenrollment(client):
-    s = StudentCenterFactory.create()
+    s = StudentCenterFactory.create(city_id='spb')
+    assert s.city_id is not None
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory.create(semester=current_semester)
+    co = CourseOfferingFactory.create(semester=current_semester, city='spb')
     as_ = AssignmentFactory.create_batch(3, course_offering=co)
     form = {'course_offering_pk': co.pk}
     # Enrollment already closed
@@ -41,12 +44,15 @@ def test_unenrollment(client):
     current_semester.save()
     response = client.post(co.get_enroll_url(), form)
     assert response.status_code == 403
-    current_semester.enroll_before = today.date()
+    current_semester.enroll_before = (today + datetime.timedelta(days=1)).date()
     current_semester.save()
-    client.post(co.get_enroll_url(), form)
-    resp = client.get(co.get_unenroll_url())
-    assert smart_bytes("Unenroll") in resp.content
-    assert smart_bytes(co) in resp.content
+    # FIXME: Здесь происходит неявный редирект на главную. Что, в принципе, тупо. Надо удалить это поведение
+    response = client.post(co.get_enroll_url(), form, follow=True)
+    assert response.status_code == 200
+    assert Enrollment.objects.count() == 1
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Unenroll") in response.content
+    assert smart_bytes(co) in response.content
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     assert not enrollment.is_deleted
@@ -87,7 +93,7 @@ def test_unenrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_capacity(client):
-    s = StudentCenterFactory()
+    s = StudentCenterFactory(city_id='spb')
     current_semester = SemesterFactory.create_current()
     co = CourseOfferingFactory.create(semester=current_semester,
                                       is_open=True)
@@ -117,7 +123,7 @@ def test_enrollment_capacity(client):
 
 @pytest.mark.django_db
 def test_enrollment(client):
-    student = StudentCenterFactory.create()
+    student = StudentCenterFactory.create(city_id='spb')
     client.login(student)
     today = timezone.now()
     current_semester = SemesterFactory.create_current()
@@ -152,7 +158,7 @@ def test_enrollment(client):
     # If course offering has limited capacity and we reach it - reject request
     co.capacity = 1
     co.save()
-    student2 = StudentCenterFactory.create()
+    student2 = StudentCenterFactory.create(city_id='spb')
     client.login(student2)
     form = {'course_offering_pk': co.pk}
     client.post(url, form, follow=True)
