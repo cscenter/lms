@@ -46,7 +46,6 @@ def test_unenrollment(client):
     assert response.status_code == 403
     current_semester.enroll_before = (today + datetime.timedelta(days=1)).date()
     current_semester.save()
-    # FIXME: Здесь происходит неявный редирект на главную. Что, в принципе, тупо. Надо удалить это поведение
     response = client.post(co.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     assert Enrollment.objects.count() == 1

@@ -1,13 +1,10 @@
-from django.contrib import messages
 import logging
 
-from core.exceptions import Redirect
 from core.utils import is_club_site
 
 logger = logging.getLogger(__name__)
 
 
-# FIXME: remove redirect!
 def get_student_city_code(request) -> str:
     """
     Returns city code for authenticated student.
@@ -21,9 +18,8 @@ def get_student_city_code(request) -> str:
         if not city_code:
             logger.error("Empty city code for "
                          "student {}".format(request.user.pk))
-            messages.error(request, "Для вашего профиля не был указан "
-                                    "город. Обратитесь к куратору.")
-            raise Redirect(to="/")
+            raise ValueError("Для вашего профиля не был указан "
+                             "город. Обратитесь к куратору.")
     return city_code
 
 

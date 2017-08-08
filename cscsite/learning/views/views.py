@@ -168,7 +168,11 @@ class CalendarStudentFullView(StudentOnlyMixin, CalendarGenericView):
     Shows all non-course events and all classes to authenticated student.
     """
     def get_city_code(self):
-        return get_student_city_code(self.request)
+        try:
+            return get_student_city_code(self.request)
+        except ValueError as e:
+            messages.error(self.request, e.args[0])
+            raise Redirect('/')
 
     def get_events(self, year, month, city_code):
         return [self._get_classes(year, month, city_code),
