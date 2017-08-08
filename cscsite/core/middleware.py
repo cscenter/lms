@@ -3,17 +3,19 @@ from django.http.response import Http404
 from django.shortcuts import redirect
 
 from core.exceptions import Redirect
+from core.utils import is_club_site
 from .context_processors import cities
 
 
 class CurrentCityMiddleware(object):
     """
     Attach city code to request object:
+        * On compsciclub.ru always resolve city from sub domain
         * If view contains `city_aware` keyword argument, get city code from
-        resolved url parameters
+          URL parameters
         * If not, try to cast sub domain to city code.
         * Otherwise, fallback to `settings.DEFAULT_CITY_CODE`. It makes
-        sense in case of `www` or empty sub domain.
+          sense in case of `www` or empty sub domain.
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -23,7 +25,7 @@ class CurrentCityMiddleware(object):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         url_aware_of_the_city = bool(view_kwargs.get("city_aware", False))
-        if url_aware_of_the_city:
+        if url_aware_of_the_city and not is_club_site():
             delimiter = view_kwargs["city_delimiter"]
             city_code = view_kwargs["city_code"]
             if not city_code:
@@ -35,6 +37,9 @@ class CurrentCityMiddleware(object):
                 # None-empty delimiter if valid city code provided
                 raise Http404
         else:
+            if url_aware_of_the_city:
+                if view_kwargs["city_code"] or view_kwargs["city_delimiter"]:
+                    raise Http404
             # Assume we have only 1 lvl sub domains
             sub_domain = request.get_host().rsplit('.', 2)[:-2]
             if sub_domain:

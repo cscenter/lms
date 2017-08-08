@@ -79,3 +79,17 @@ def test_current_city_middleware(rf, settings, mocker):
     middleware.process_view(request, view_func=lambda: "",
                             view_args=[], view_kwargs=view_kwargs)
     assert request.city_code == "nsk"
+    # For compsciclub.ru always resolve sub domain
+    settings.SITE_ID = settings.CLUB_SITE_ID
+    domain = "kzn.compsciclub.ru"
+    request.site.domain = domain
+    request.META['HTTP_HOST'] = "{}:8000".format(domain)
+    view_kwargs = dict(city_aware=True, city_code="nsk", city_delimiter="/")
+    with pytest.raises(Http404):
+        # We don't support `city_code` for compsciclub.ru , it must be empty
+        middleware.process_view(request, view_func=lambda: "",
+                                view_args=[], view_kwargs=view_kwargs)
+    view_kwargs = dict(city_aware=True, city_code="", city_delimiter="")
+    middleware.process_view(request, view_func=lambda: "",
+                            view_args=[], view_kwargs=view_kwargs)
+    assert request.city_code == "kzn"
