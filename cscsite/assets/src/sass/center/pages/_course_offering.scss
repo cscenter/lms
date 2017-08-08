@@ -89,6 +89,16 @@ div[id^="news-"] {
 #course-news {
   h4 {
     margin-top: 0;
+
+    a {
+      opacity: 0;
+    }
+
+    &:hover {
+      a {
+        opacity: 1;
+      }
+    }
   }
 
   .panel-body {

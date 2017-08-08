@@ -66,25 +66,10 @@ const fn = {
         UberEditor.cleanLocalStorage($ubereditors);
     },
 
-    // Move to `learning` bundle if necessary
     courseOfferingTabs: function() {
         let course_offering = $('#course-offering-detail-page').data('id');
         if (course_offering !== undefined) {
             const tabList = $('#course-offering-detail-page__tablist');
-            window.onpopstate = function(event) {
-                let target;
-                if (event.state !== null) {
-                    if ('target' in event.state) {
-                        target = event.state.target;
-                    }
-                }
-                if (target === undefined) {
-                    target = '#course-about';
-                }
-                tabList.find('li').removeClass('active').find('a').blur();
-                tabList.find('a[data-target="' + target + '"]').tab('show').hover();
-            };
-
             let activeTab = tabList.find('li.active:first a:first');
             if (activeTab.data("target") === '#course-news') {
                 fn.markNewsAsRead(course_offering, activeTab.get(0));
