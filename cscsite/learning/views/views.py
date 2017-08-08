@@ -12,6 +12,7 @@ import unicodecsv as csv
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist, \
     ValidationError
 from django.db.models import Q, Prefetch, When, Value, Case
@@ -53,16 +54,13 @@ from learning.utils import get_current_semester_pair, get_term_index, now_local
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView
-from learning.views.utils import get_student_city_code, get_teacher_city_code
+from learning.views.utils import get_student_city_code, get_teacher_city_code, \
+    get_co_from_query_params
 
 logger = logging.getLogger(__name__)
 
 DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
-
-term_types = "|".join(slug for slug, _ in SEMESTER_TYPES)
-semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
-                              term_types + ")$")
 
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
@@ -400,8 +398,7 @@ class CourseDetailView(generic.DetailView):
         return context
 
 
-class CourseUpdateView(CuratorOnlyMixin,
-                       ProtectedFormMixin,
+class CourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
                        generic.UpdateView):
     model = Course
     template_name = "learning/simple_crispy_form.html"
@@ -416,8 +413,7 @@ class CourseClassDetailView(generic.DetailView):
     context_object_name = 'course_class'
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(CourseClassDetailView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         context['is_actual_teacher'] = (
             self.request.user.is_authenticated and
             self.request.user in (self.object
@@ -427,28 +423,28 @@ class CourseClassDetailView(generic.DetailView):
         return context
 
 
-# FIXME: Merge permission checks into one mixin
-class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
+class CourseClassCreateUpdateMixin(TeacherOnlyMixin):
     model = CourseClass
     form_class = CourseClassForm
     template_name = "learning/forms/course_class.html"
 
-    def is_form_allowed(self, user, obj):
-        return (obj is None or user.is_curator or
-                user in obj.course_offering.teachers.all())
-
     def get_course_offering(self):
-        return _get_co_from_query_params(self.kwargs, self.request.city_code,
-                                         self.request.user)
+        return get_co_from_query_params(self.kwargs, self.request.city_code)
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
         co = kwargs.get("course_offering", self.get_course_offering())
         if not co:
             raise Http404('Course offering not found')
+        if not self.is_form_allowed(self.request.user, co):
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course_offering"] = co
         kwargs["initial"] = self.get_initial(**kwargs)
         return form_class(**kwargs)
+
+    @staticmethod
+    def is_form_allowed(user, course_offering):
+        return user.is_curator or user in course_offering.teachers.all()
 
     def get_initial(self, **kwargs):
         return None
@@ -968,52 +964,27 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         return reverse('a_s_detail_teacher', args=[pk])
 
 
-def _get_co_from_query_params(query_params, city_code, authenticated_teacher):
-    """
-    Returns course offering based on URL-parameters if authenticated teacher
-    has permissions.
-
-    We already parsed `city_code` query-param in middleware and attached it
-    to request object, so pass it as parameter.
-    """
-    match = semester_slug_re.search(query_params.get("semester_slug", ""))
-    if not match:
-        return None
-    term_year, term_type = match.group("term_year"), match.group("term_type")
-    course_slug = query_params.get("course_slug", "")
-    qs = (CourseOffering.objects
-          .in_city(city_code)
-          .open_only(is_club_site()))
-    if not authenticated_teacher.is_curator:
-        qs = qs.filter(teachers=authenticated_teacher)
-    try:
-        return qs.get(course__slug=course_slug, semester__year=term_year,
-                      semester__type=term_type)
-    except qs.model.DoesNotExist:
-        return None
-
-
-# FIXME: Merge permission check?
-class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
+class AssignmentCreateUpdateMixin(TeacherOnlyMixin):
     model = Assignment
     form_class = AssignmentForm
     template_name = "learning/assignment_form.html"
 
-    def is_form_allowed(self, user, obj):
-        return (obj is None or user.is_curator or
-                user in obj.course_offering.teachers.all())
-
     def get_course_offering(self):
-        return _get_co_from_query_params(self.kwargs, self.request.city_code,
-                                         self.request.user)
+        return get_co_from_query_params(self.kwargs, self.request.city_code)
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
         co = self.get_course_offering()
         if not co:
             raise Http404('Course offering not found')
+        if not self.is_form_allowed(self.request.user, co):
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course_offering"] = co
         return form_class(**kwargs)
+
+    @staticmethod
+    def is_form_allowed(user, course_offering):
+        return user.is_curator or user in course_offering.teachers.all()
 
     def get_success_url(self):
         return reverse('assignment_detail_teacher', args=[self.object.pk])

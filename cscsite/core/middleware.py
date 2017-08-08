@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
 
 from core.exceptions import Redirect
@@ -71,4 +71,7 @@ class RedirectMiddleware(object):
     def process_exception(self, request, exception):
         if not isinstance(exception, Redirect):
             return
-        return redirect(*exception.args, **exception.kwargs)
+        redirect_to = exception.kwargs.pop("to")
+        if isinstance(redirect_to, HttpResponseRedirect):
+            redirect_to = redirect_to.url
+        return redirect(redirect_to, **exception.kwargs)

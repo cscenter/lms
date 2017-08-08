@@ -360,7 +360,7 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
             302, self.client.post(self.url, self.n_dict).status_code)
 
     def test_news_creation(self):
-        co_url = self.co.get_absolute_url()
+        co_url = self.co.get_url_for_tab("news")
         self.doLogin(self.teacher)
         self.assertRedirects(
             self.client.post(self.url, self.n_dict), co_url)
