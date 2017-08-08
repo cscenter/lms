@@ -38,15 +38,16 @@ class IndexView(generic.TemplateView):
             current_term_index = get_term_index(year, term_type)
             term_index = get_term_index_academic(year, term_type,
                                                  rewind_years=2)
-            pool = list(CourseOffering.custom.site_related(self.request.city_code)
-                .filter(is_published_in_video=True,
-                        is_open=False,
-                        semester__index__gte=term_index,
-                        semester__index__lte=current_term_index)
-                .defer('description')
-                .select_related('course')
-                .prefetch_related('teachers', 'semester')
-                .annotate(Count('courseclass')))
+            pool = list(CourseOffering.objects
+                        .in_city(self.request.city_code)
+                        .filter(is_published_in_video=True,
+                                is_open=False,
+                                semester__index__gte=term_index,
+                                semester__index__lte=current_term_index)
+                        .defer('description')
+                        .select_related('course')
+                        .prefetch_related('teachers', 'semester')
+                        .annotate(Count('courseclass')))
             cache.set('index_page_spb_courses_with_video', pool, 3600)
         random.shuffle(pool)
         context['courses'] = pool[:3]

@@ -4,6 +4,9 @@ from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict
 
+from vanilla import DetailView
+
+from core.utils import is_club_site
 from users.models import SHADCourseRecord
 
 try:
@@ -35,8 +38,7 @@ from six.moves import zip
 
 from core.views import ProtectedFormMixin, SuperUserOnlyMixin
 from learning.models import CourseClass, Assignment, StudentAssignment, \
-    CourseOffering, NonCourseEvent, Semester, Enrollment, \
-    StudyProgramCourseGroup, StudyProgram
+    CourseOffering, NonCourseEvent, Semester, Enrollment, StudyProgram
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from users.utils import create_timezone
 from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
@@ -120,22 +122,23 @@ class LogoutView(LoginRequiredMixin,
         return redirect_to
 
 
-class TeacherDetailView(generic.DetailView):
+class TeacherDetailView(DetailView):
     template_name = "users/teacher_detail.html"
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
-        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
+        co_queryset = (CourseOffering.objects
+                       .in_city(self.request.city_code)
+                       .open_only(is_club_site())
                        .select_related('semester', 'course'))
         return (auth.get_user_model()._default_manager
-            .all()
             .prefetch_related(
             Prefetch('teaching_set',
                      queryset=co_queryset.all(),
                      to_attr='course_offerings')))
 
     def get_context_data(self, **kwargs):
-        context = super(TeacherDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         teacher = context[self.context_object_name]
         if not teacher.is_teacher:
             raise Http404
@@ -158,7 +161,9 @@ class UserDetailView(generic.DetailView):
         elif self.request.user.is_curator:
             enrollment_queryset = enrollment_queryset.annotate(
                 classes_total=Count('course_offering__courseclass'))
-        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
+        co_queryset = (CourseOffering.objects
+                       .in_city(self.request.city_code)
+                       .open_only(is_club_site())
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
@@ -225,8 +230,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
-        return obj.pk == user.pk or (
-        user.is_authenticated and user.is_curator)
+        return obj.pk == user.pk or user.is_curator
 
 
 class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
@@ -248,7 +252,7 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
                        args=[self.object.student_id, self.object.pk])
 
     def is_form_allowed(self, user, obj):
-        return user.is_authenticated and user.is_curator
+        return user.is_curator
 
 
 class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):

@@ -1,8 +1,6 @@
 from django.contrib import messages
 import logging
 
-from rest_framework import serializers, fields
-
 from core.exceptions import Redirect
 from core.utils import is_club_site
 

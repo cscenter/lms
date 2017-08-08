@@ -29,7 +29,7 @@ from vanilla import CreateView, UpdateView, DeleteView
 
 from core import comment_persistence
 from core.exceptions import Redirect
-from core.utils import hashids, render_markdown
+from core.utils import hashids, render_markdown, is_club_site
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning import utils
 from learning.calendar import CalendarQueryParams
@@ -247,25 +247,23 @@ class CoursesListView(generic.ListView):
     template_name = "learning/courses/list.html"
 
     def get_queryset(self):
-        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
+        co_queryset = (CourseOffering.objects
+                       .in_city(self.request.city_code)
+                       .open_only(is_club_site())
                        .select_related('course')
                        .prefetch_related('teachers')
                        .order_by('course__name'))
-        q = (self.model.objects.prefetch_related(
-            Prefetch(
-                'courseoffering_set',
-                queryset=co_queryset,
-                to_attr='courseofferings'
-            ),
-        )
-        )
+        q = (Semester.objects
+            .prefetch_related(
+                Prefetch('courseoffering_set',
+                         queryset=co_queryset,
+                         to_attr='courseofferings')))
         # Courses in CS Center started at 2011 year
-        if self.request.site.domain != settings.CLUB_DOMAIN:
+        if not is_club_site():
             q = (q.filter(year__gte=2011)
                 .exclude(type=Case(
-                When(year=2011, then=Value(Semester.TYPES.spring)),
-                default=Value(""))
-            ))
+                    When(year=2011, then=Value(Semester.TYPES.spring)),
+                    default=Value(""))))
         return q
 
     def get_context_data(self, **kwargs):
@@ -332,7 +330,9 @@ class CourseStudentListView(StudentOnlyMixin,
                        and e.course_offering.semester.type == current_term))
 
         current_term_index = get_term_index(current_year, current_term)
-        available = (CourseOffering.custom.site_related(self.request.city_code)
+        available = (CourseOffering.objects
+                     .in_city(self.request.city_code)
+                     .open_only(is_club_site())
                      .filter(semester__index=current_term_index)
                      .select_related('course', 'semester')
                      .order_by('semester__year', '-semester__type',
@@ -389,8 +389,9 @@ class CourseDetailView(generic.DetailView):
         context = (super(CourseDetailView, self)
                    .get_context_data(**kwargs))
 
-        context['offerings'] = (CourseOffering.custom
-                                .site_related(self.request.city_code)
+        context['offerings'] = (CourseOffering.objects
+                                .in_city(self.request.city_code)
+                                .open_only(is_club_site())
                                 .filter(course=self.object).all())
         return context
 
@@ -976,7 +977,9 @@ def _get_co_from_query_params(query_params, city_code, authenticated_teacher):
         return None
     term_year, term_type = match.group("term_year"), match.group("term_type")
     course_slug = query_params.get("course_slug", "")
-    qs = CourseOffering.custom.in_city(city_code)
+    qs = (CourseOffering.objects
+          .in_city(city_code)
+          .open_only(is_club_site()))
     if not authenticated_teacher.is_curator:
         qs = qs.filter(teachers=authenticated_teacher)
     try:

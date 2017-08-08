@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 
 from core.exceptions import Redirect
-from core.utils import get_club_domain
+from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from core.widgets import TabbedPane, Tab
 from learning.forms import CourseOfferingEditDescrForm, CourseOfferingNewsForm
@@ -79,8 +79,9 @@ class CourseOfferingDetailView(generic.DetailView):
 
     def get_queryset(self):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        return (CourseOffering.custom
+        return (CourseOffering.objects
                 .in_city(self.request.city_code)
+                .open_only(is_club_site())
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug'])
@@ -318,7 +319,7 @@ class CourseOfferingEditView(TeacherOnlyMixin,
         return user.is_curator or user in obj.teachers.all()
 
     def get_queryset(self):
-        return self.model.custom.site_related(self.request.city_code)
+        return self.model.objects.in_city(self.request.city_code).open_only(is_club_site())
 
 
 # FIXME: Rewrite with django-vanilla-views
@@ -351,7 +352,9 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin,
     def is_form_allowed(self, user, obj):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         self._course_offering = get_object_or_404(
-            CourseOffering.custom.site_related(self.request.city_code)
+            CourseOffering.objects
+                .in_city(self.request.city_code)
+                .open_only(is_club_site())
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug']))

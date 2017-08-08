@@ -13,6 +13,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.shortcuts import redirect
 from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
+from vanilla import DetailView
 
 from csclub import tasks
 from learning.gallery.models import Image
@@ -72,9 +73,9 @@ class IndexView(generic.TemplateView):
                                                .filter(date__gte=today)
                                                .order_by('date', 'starts_at'))
             courses = list(
-                CourseOffering.custom
-                .site_related(self.request.city_code)
-                .filter(semester=featured_term.pk)
+                CourseOffering.objects
+                .in_city(self.request.city_code)
+                .filter(is_open=True, semester=featured_term.pk)
                 .select_related('course', 'semester')
                 .prefetch_related(
                     'teachers',
@@ -118,15 +119,16 @@ class TeachersView(generic.ListView):
                 .distinct)
 
 
-class TeacherDetailView(generic.DetailView):
+class TeacherDetailView(DetailView):
     template_name = "users/teacher_club_detail.html"
     context_object_name = 'teacher'
 
-    def get_queryset(self, *args, **kwargs):
-        co_queryset = (CourseOffering.custom.site_related(self.request.city_code)
+    def get_queryset(self):
+        co_queryset = (CourseOffering.objects
+                       .in_city(self.request.city_code)
+                       .filter(is_open=True)
                        .select_related('semester', 'course'))
         return (get_user_model()._default_manager
-                .all()
                 .prefetch_related(
                     Prefetch('teaching_set',
                              queryset=co_queryset.all(),
@@ -138,7 +140,7 @@ class TeacherDetailView(generic.DetailView):
                     ))
 
     def get_context_data(self, **kwargs):
-        context = super(TeacherDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         teacher = context[self.context_object_name]
         if not teacher.is_teacher:
             raise Http404
