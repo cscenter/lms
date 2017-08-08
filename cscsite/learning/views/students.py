@@ -145,7 +145,12 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
         if is_club_site() and not course_offering.is_open:
             return HttpResponseForbidden()
         # Students can enroll in only on courses from their city
-        if get_student_city_code(self.request) != course_offering.get_city():
+        try:
+            city_code = get_student_city_code(self.request)
+        except ValueError as e:
+            messages.error(request, e.args[0])
+            raise Redirect("/")
+        if city_code != course_offering.get_city():
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
         if course_offering.is_capacity_limited:
