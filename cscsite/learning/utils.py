@@ -175,17 +175,6 @@ def grouper(iterable, n, fillvalue=None):
     return zip_longest(fillvalue=fillvalue, *args)
 
 
-def co_from_kwargs(kwargs):
-    course_slug = kwargs['course_slug']
-    semester_slug = kwargs['semester_slug']
-    try:
-        semester_year, semester_type = semester_slug.split('-')
-        semester_year = int(semester_year)
-    except (ValueError, TypeError):
-        raise Http404('Course offering not found')
-    return course_slug, semester_year, semester_type
-
-
 class LearningPermissionsMixin(object):
     @property
     def _cached_groups(self):
