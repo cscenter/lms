@@ -449,7 +449,7 @@ class ICalAssignmentsView(UserSpecificCalMixin, ICalView):
         student_as = []
         for a_s in student_a_ss:
             a = a_s.assignment
-            url = reverse('a_s_detail_student', args=[a_s.pk])
+            url = a_s.get_student_url()
             setattr(a, 'hacky_url', url)
             student_as.append(a)
 

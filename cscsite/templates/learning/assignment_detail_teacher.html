@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load tz %}
 {% load humanize %}
 {% load crispy_forms_tags %}
 {% load core_tags %}
 {% load markdown from core_tags %}
 
-{% block content %}
+{% block content %}{% localtime off %}
 <div class="container">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
@@ -30,8 +31,7 @@
       </div>
       <p>
         {% trans "Deadline" %}:
-        {{ assignment.deadline_at_local|naturalday:"d E Y" }}
-        {{ assignment.deadline_at_local|time:"H:i" }}
+        {{ assignment.deadline_at_local|naturalday:"d E Y" }} {{ assignment.deadline_at_local|time:"H:i" }}
       </p>
       <p>
         {% trans "Can be passed online" %}:
@@ -69,7 +69,7 @@
             {% for a_s in a_s_list %}
             <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
               <td>
-                <a href="{% url 'a_s_detail_teacher' a_s.pk %}">{{ a_s.student.get_short_name }}</a> {% if a_s.student.is_volunteer %}<span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
+                <a href="{{ a_s.get_teacher_url }}">{{ a_s.student.get_short_name }}</a> {% if a_s.student.is_volunteer %}<span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
               </td>
               <td>
                 <span style="white-space: nowrap;"
@@ -86,4 +86,4 @@
   </div>
   {% endif %}
 </div>
-{% endblock content %}
+{% endlocaltime off %}{% endblock content %}

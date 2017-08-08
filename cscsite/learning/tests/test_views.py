@@ -310,8 +310,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.title)
         a_s = StudentAssignment.objects.get(assignment=a, student=student)
-        self.assertContains(self.client.get(url),
-                            reverse('a_s_detail_student', args=[a_s.pk]))
+        self.assertContains(self.client.get(url), a_s.get_student_url())
         a_s.delete()
         with LogCapture(level=logging.INFO) as l:
             self.assertEqual(200, self.client.get(url).status_code)
@@ -700,7 +699,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_student', args=[a_s.pk])
+        url = a_s.get_student_url()
         self.assertLoginRedirect(url)
         test_groups = [
             [],
@@ -735,7 +734,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
         assert s_a.grade is None
         self.doLogin(student)
-        url = reverse("a_s_detail_student", args=[s_a.pk])
+        url = s_a.get_student_url()
         response = self.client.get(url)
         assert response.status_code == 403
         # Student discussed the assignment, so has access
@@ -787,7 +786,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_student', args=[a_s.pk])
+        url = a_s.get_student_url()
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.text)
 
@@ -801,11 +800,11 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_student', args=[a_s.pk])
+        url = a_s.get_student_url()
         self.doLogin(student)
         self.assertEquals(200, self.client.get(url).status_code)
         self.doLogin(teacher)
-        expected_url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        expected_url = a_s.get_teacher_url()
         self.assertEquals(302, self.client.get(url).status_code)
         self.assertRedirects(self.client.get(url), expected_url)
 
@@ -817,7 +816,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_student', args=[a_s.pk])
+        url = a_s.get_student_url()
         comment_dict = {'text': "Test comment without file"}
         self.doLogin(student)
         self.assertRedirects(self.client.post(url, comment_dict), url)
@@ -841,7 +840,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        url = a_s.get_teacher_url()
         self.assertLoginRedirect(url)
         test_groups = [
             [],
@@ -899,7 +898,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        url = a_s.get_teacher_url()
         comment_dict = {'text': "Test comment without file"}
         self.doLogin(teacher)
         self.assertRedirects(self.client.post(url, comment_dict), url)
@@ -922,7 +921,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        url = a_s.get_teacher_url()
         grade_dict = {'grading_form': True,
                       'grade': 11}
         self.doLogin(teacher)
@@ -955,8 +954,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         a_s_other = (StudentAssignment.objects
                      .filter(assignment=a_other, student=student)
                      .get())
-        url1 = reverse('a_s_detail_teacher', args=[a_s1.pk])
-        url2 = reverse('a_s_detail_teacher', args=[a_s2.pk])
+        url1 = a_s1.get_teacher_url()
+        url2 = a_s2.get_teacher_url()
         self.doLogin(teacher)
         self.assertEqual(None, self.client.get(url1).context['next_a_s_pk'])
         self.assertEqual(None, self.client.get(url2).context['next_a_s_pk'])

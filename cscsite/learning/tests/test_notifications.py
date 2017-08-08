@@ -59,8 +59,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        student_url = reverse('a_s_detail_student', args=[a_s.pk])
-        teacher_url = reverse('a_s_detail_teacher', args=[a_s.pk])
+        student_url = a_s.get_student_url()
+        teacher_url = a_s.get_teacher_url()
         student_list_url = reverse('assignment_list_student', args=[])
         teacher_list_url = reverse('assignment_list_teacher', args=[])
         student_comment_dict = {'text': "Test student comment without file"}
@@ -149,7 +149,7 @@ def test_notification_teachers_list_for_assignment(client):
     # Leave a comment from student
     client.login(student)
     sa = StudentAssignment.objects.get(assignment=assignment, student=student)
-    sa_url = reverse('a_s_detail_student', args=[sa.pk])
+    sa_url = sa.get_student_url()
     client.post(sa_url, {'text': 'test first comment'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     # 1 - about assignment creation and 3 for teachers

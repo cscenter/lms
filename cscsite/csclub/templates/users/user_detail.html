@@ -239,7 +239,7 @@
                 {% endif %}
               </td>
               <td>
-                <a href="{% url 'a_s_detail_teacher' a_s.pk %}">
+                <a href="{{ a_s.get_teacher_url }}">
                   {{ a_s.assignment.title }}
                 </a>
               </td>

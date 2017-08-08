@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load tz %}
 {% load humanize %}
 {% load crispy_forms_tags %}
 {% load core_tags %}
@@ -25,6 +26,7 @@
 
 
 {% block content %}
+{% localtime off %}
     {#    TODO: append instead of replace #}
 <script type="text/javascript">
   CSC.config.localStorage.hashes = {{ hashes_json|safe }};
@@ -107,7 +109,8 @@
                 </a>
               </span>
               {% endif %}
-              <span class="metainfo pull-right">{{ comment.created|date:"d.m.Y H:i" }}</span>
+                {# Use timezone filter instead of created_local for optimization #}
+              <span class="metainfo pull-right">{{ comment.created|timezone:a_s.assignment.course_offering.get_city_timezone|date:"d.m.Y H:i" }}</span>
             </div>
           </div>
         </li>
@@ -154,7 +157,7 @@
                 <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
 
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
-                <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span> {{ a_s.assignment.deadline_at|time:"H:i" }}
+                <span class="nowrap">{{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at_local|time:"H:i" }}</span>
 
                 <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
                 <span style="white-space: nowrap;">{{ a_s.assignment.grade_max }}</span>
@@ -184,4 +187,5 @@
             </div>
         </div>
     </div>
+{% endlocaltime off %}
 {% endblock content %}
