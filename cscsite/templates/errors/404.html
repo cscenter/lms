@@ -44,47 +44,10 @@
             color: #fff;
         }
 
-        .plain.error-page-wrapper hr {
-            height: 1px;
-            background-color: rgba(255, 255, 255, .2);
-            border: none;
-            width: 250px;
-            margin: 35px 0;
-        }
-
-        .plain.error-page-wrapper .context {
-            transition: color .2s linear;
-            font-size: 18px;
-            line-height: 27px;
-            color: #fff;
-        }
-
-        .plain.error-page-wrapper .context p {
-            margin: 0;
-        }
-
-        .plain.error-page-wrapper .context p:nth-child(n+2) {
-            margin-top: 12px;
-        }
-
         @media screen and (max-width: 485px) {
-            .plain.error-page-wrapper .header {
-                font-size: 36px;
-            }
-
             .plain.error-page-wrapper .subheader {
                 font-size: 27px;
                 line-height: 38px;
-            }
-
-            .plain.error-page-wrapper hr {
-                width: 185px;
-                margin: 25px 0;
-            }
-
-            .plain.error-page-wrapper .context {
-                font-size: 16px;
-                line-height: 24px;
             }
         }
 
@@ -97,7 +60,7 @@
         }
     </style>
 </head>
-<body class="plain error-page-wrapper background-color background-image">
+<body class="plain error-page-wrapper">
 <div class="content-container">
     <div class="head-line secondary-text-color">
         404
@@ -105,7 +68,6 @@
     <div class="subheader primary-text-color">
         Page not found
     </div>
-    <hr>
     <div class="clearfix"></div>
 </div>
 
