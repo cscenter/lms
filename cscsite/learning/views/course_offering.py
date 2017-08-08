@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
+from vanilla import DeleteView, UpdateView, CreateView
 
 from core.exceptions import Redirect
 from core.utils import get_club_domain, is_club_site
@@ -24,6 +25,7 @@ from learning.models import CourseOffering, CourseOfferingTeacher, \
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
+from learning.views.utils import get_co_from_query_params
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
            'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',
@@ -283,8 +285,7 @@ class CourseOfferingDetailView(generic.DetailView):
 
 
 # FIXME: Do I need ProtectedFormMixin?
-class CourseOfferingEditView(TeacherOnlyMixin,
-                             ProtectedFormMixin,
+class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
                              generic.UpdateView):
     model = CourseOffering
     template_name = "learning/simple_crispy_form.html"
@@ -322,48 +323,43 @@ class CourseOfferingEditView(TeacherOnlyMixin,
         return self.model.objects.in_city(self.request.city_code).open_only(is_club_site())
 
 
-# FIXME: Rewrite with django-vanilla-views
-class CourseOfferingNewsCreateView(TeacherOnlyMixin,
-                                   ProtectedFormMixin,
-                                   generic.CreateView):
+class CourseOfferingNewsCreateView(TeacherOnlyMixin, CreateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingNewsForm
 
-    def __init__(self, *args, **kwargs):
-        self._course_offering = None
-        super(CourseOfferingNewsCreateView, self).__init__(*args, **kwargs)
+    def get_form(self, **kwargs):
+        form_class = self.get_form_class()
+        co = get_co_from_query_params(self.kwargs, self.request.city_code)
+        if not co:
+            raise Http404('Course offering not found')
+        if not self.is_form_allowed(self.request.user, co):
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
+        kwargs["course_offering"] = co
+        return form_class(**kwargs)
 
     def form_valid(self, form):
-        form.instance.course_offering = self._course_offering
-        self.success_url = self._course_offering.get_absolute_url()
         self.object = form.save(commit=False)
         self.object.author = self.request.user
         try:
+            # Try to create news and notifications
             with transaction.atomic():
                 self.object.save()
-            messages.success(self.request,
-                             _("News was successfully created"),
+            messages.success(self.request, _("News was successfully created"),
                              extra_tags='timeout')
         except IntegrityError:
             messages.error(self.request, _("News wasn't created. Try again."))
         return redirect(self.get_success_url())
 
-    def is_form_allowed(self, user, obj):
-        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        self._course_offering = get_object_or_404(
-            CourseOffering.objects
-                .in_city(self.request.city_code)
-                .open_only(is_club_site())
-                .filter(semester__type=semester_type,
-                        semester__year=year,
-                        course__slug=self.kwargs['course_slug']))
-        return user.is_curator or user in self._course_offering.teachers.all()
+    def get_success_url(self):
+        return self.object.course_offering.get_url_for_tab("news")
+
+    def is_form_allowed(self, user, course_offering):
+        return user.is_curator or user in course_offering.teachers.all()
 
 
-class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
-                                   ProtectedFormMixin,
-                                   generic.UpdateView):
+class CourseOfferingNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
+                                   UpdateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseOfferingNewsForm
@@ -375,9 +371,8 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin,
         return user.is_curator or user in obj.course_offering.teachers.all()
 
 
-class CourseOfferingNewsDeleteView(TeacherOnlyMixin,
-                                   ProtectedFormMixin,
-                                   generic.DeleteView):
+class CourseOfferingNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                                   DeleteView):
     model = CourseOfferingNews
     template_name = "learning/simple_delete_confirmation.html"
 
