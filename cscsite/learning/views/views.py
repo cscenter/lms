@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
+import re
 import datetime
 import itertools
 import logging
@@ -62,6 +59,10 @@ logger = logging.getLogger(__name__)
 
 DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
+
+term_types = "|".join(slug for slug, _ in SEMESTER_TYPES)
+semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
+                              term_types + ")$")
 
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
@@ -432,17 +433,15 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                 user in obj.course_offering.teachers.all())
 
     def get_course_offering(self):
-        course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
-        qs = CourseOffering.custom.in_city(self.request.city_code)
-        if not self.request.user.is_curator:
-            qs = qs.filter(teachers=self.request.user)
-        return get_object_or_404(qs.filter(course__slug=course_slug,
-                                           semester__year=term_year,
-                                           semester__type=term_type))
+        return _get_co_from_query_params(self.kwargs, self.request.city_code,
+                                         self.request.user)
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        kwargs["course_offering"] = self.get_course_offering()
+        co = kwargs.get("course_offering", self.get_course_offering())
+        if not co:
+            raise Http404('Course offering not found')
+        kwargs["course_offering"] = co
         kwargs["initial"] = self.get_initial(**kwargs)
         return form_class(**kwargs)
 
@@ -500,11 +499,16 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
         return super(CourseClassCreateView, self).get_success_url()
 
     def post(self, request, *args, **kwargs):
+        """Teachers can't add new classes if course already completed"""
         is_curator = self.request.user.is_curator
-        # FIXME: queryset call duplicated
-        if not is_curator and self.get_course_offering().is_completed:
+        co = self.get_course_offering()
+        if not co or (not is_curator and co.is_completed):
             return HttpResponseForbidden()
-        return super().post(request, *args, **kwargs)
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             course_offering=co)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
 
 class CourseClassUpdateView(CourseClassCreateUpdateMixin, UpdateView):
@@ -959,6 +963,29 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
         return reverse('a_s_detail_teacher', args=[pk])
 
 
+def _get_co_from_query_params(query_params, city_code, authenticated_teacher):
+    """
+    Returns course offering based on GET-parameters if authenticated teacher
+    has permissions.
+
+    We already parsed `city_code` query-param in middleware and attached it
+    to request object, so pass it as parameter.
+    """
+    match = semester_slug_re.search(query_params.get("semester_slug", ""))
+    if not match:
+        return None
+    term_year, term_type = match.group("term_year"), match.group("term_type")
+    course_slug = query_params.get("course_slug", "")
+    qs = CourseOffering.custom.in_city(city_code)
+    if not authenticated_teacher.is_curator:
+        qs = qs.filter(teachers=authenticated_teacher)
+    try:
+        return qs.get(course__slug=course_slug, semester__year=term_year,
+                      semester__type=term_type)
+    except qs.model.DoesNotExist:
+        return None
+
+
 # FIXME: Merge permission check?
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
     model = Assignment
@@ -970,18 +997,15 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, ProtectedFormMixin):
                 user in obj.course_offering.teachers.all())
 
     def get_course_offering(self):
-        # FIXME: replace co_from_kwargs with serializer.
-        course_slug, term_year, term_type = utils.co_from_kwargs(self.kwargs)
-        queryset = CourseOffering.custom.in_city(self.request.city_code)
-        if not self.request.user.is_curator:
-            queryset = queryset.filter(teachers=self.request.user)
-        return get_object_or_404(queryset.filter(course__slug=course_slug,
-                                                 semester__year=term_year,
-                                                 semester__type=term_type))
+        return _get_co_from_query_params(self.kwargs, self.request.city_code,
+                                         self.request.user)
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        kwargs["course_offering"] = self.get_course_offering()
+        co = self.get_course_offering()
+        if not co:
+            raise Http404('Course offering not found')
+        kwargs["course_offering"] = co
         return form_class(**kwargs)
 
     def get_success_url(self):
