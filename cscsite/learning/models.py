@@ -198,8 +198,7 @@ def next_term_starts_at(term_pair=None):
 
 @python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
-    objects = models.Manager()
-    custom = CustomCourseOfferingQuerySet.as_manager()
+    objects = CustomCourseOfferingQuerySet.as_manager()
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),

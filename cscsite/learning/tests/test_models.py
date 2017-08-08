@@ -419,9 +419,9 @@ def test_course_offering_manager_completed():
     today = now().date()
     semester = SemesterFactory.create_current()
     co = CourseOfferingFactory(completed_at=today, semester=semester)
-    assert CourseOffering.custom.completed(True).count() == 1
+    assert CourseOffering.objects.completed(True).count() == 1
     timedelta_1day = datetime.timedelta(days=1)
     CourseOfferingFactory.create_batch(2, completed_at=today + timedelta_1day,
                                        semester=semester)
-    assert CourseOffering.custom.completed(True).count() == 1
-    assert CourseOffering.custom.completed(False).count() == 2
+    assert CourseOffering.objects.completed(True).count() == 1
+    assert CourseOffering.objects.completed(False).count() == 2
