@@ -949,7 +949,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
                 a_s.save()
                 messages.success(self.request, _("Grade successfully saved"),
                                  extra_tags='timeout')
-                return redirect(reverse('a_s_detail_teacher', args=[pk]))
+                return redirect(a_s.get_teacher_url())
             else:
                 # not sure if we can do anything more meaningful here.
                 # it shoudn't happen, after all.
@@ -961,6 +961,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
 
     def get_success_url(self):
         pk = self.kwargs.get('pk')
+        # TODO: get_teacher_url
         return reverse('a_s_detail_teacher', args=[pk])
 
 

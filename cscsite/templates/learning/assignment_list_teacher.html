@@ -92,7 +92,7 @@
         </thead>
         {% for s_a in student_assignment_list %}
         <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
-          <td><a href="{% url 'a_s_detail_teacher' s_a.pk %}">{{ s_a.student.get_short_name }}</a></td>
+          <td><a href="{{ s_a.get_teacher_url }}">{{ s_a.student.get_short_name }}</a></td>
             <td>
                 <span class="assignment-status {{ s_a.state|to_css }}">{{ s_a.state_short }}</span>
             </td>

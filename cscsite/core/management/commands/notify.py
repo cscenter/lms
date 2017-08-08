@@ -139,12 +139,8 @@ class Command(BaseCommand):
         for notification in notifications_assignments:
             base_url = get_base_url(notification)
             a_s = notification.student_assignment
-            context = {'a_s_link_student':
-                           base_url + reverse('a_s_detail_student',
-                                              args=[a_s.pk]),
-                       'a_s_link_teacher':
-                           base_url + reverse('a_s_detail_teacher',
-                                              args=[a_s.pk]),
+            context = {'a_s_link_student': base_url + a_s.get_student_url(),
+                       'a_s_link_teacher': base_url + a_s.get_teacher_url(),
                        'assignment_link':
                            base_url + reverse('assignment_detail_teacher',
                                               args=[a_s.assignment.pk]),

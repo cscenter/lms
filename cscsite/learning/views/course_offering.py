@@ -275,7 +275,7 @@ class CourseOfferingDetailView(generic.DetailView):
                             not a_s.student_comments_cnt and
                             (a_s.grade is None or a_s.grade == 0)):
                         continue
-                    to_details = reverse("a_s_detail_student", args=[a_s.pk])
+                    to_details = a_s.get_student_url()
                 else:
                     logger.error("can't find StudentAssignment for "
                                  "student ID {0}, assignment ID {1}"

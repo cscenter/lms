@@ -1002,13 +1002,23 @@ class StudentAssignment(TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.assignment),
                                   smart_text(self.student.get_full_name()))
 
-    # TODO: replace all {% url ... %} with this method
-    def get_teacher_url(self):
-        return reverse('a_s_detail_teacher', self.pk)
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
 
-    # TODO: replace all {% url ... %} with this method
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.assignment.field.name
+
+    def get_teacher_url(self):
+        return reverse('a_s_detail_teacher', kwargs={"pk": self.pk})
+
     def get_student_url(self):
-        return reverse('a_s_detail_student', self.pk)
+        return reverse('a_s_detail_student', kwargs={"pk": self.pk})
 
     def has_unread(self):
         cache = get_unread_notifications_cache()
@@ -1101,11 +1111,26 @@ class AssignmentComment(TimeStampedModel):
         verbose_name_plural = _("Assignment-comments")
 
     def __str__(self):
-        return ("Comment to {0} by {1}"
-                .format(smart_text(self.student_assignment
-                                   .assignment),
-                        smart_text(self.student_assignment
-                                   .student.get_full_name())))
+        return ("Comment to {0} by {1}".format(
+            smart_text(self.student_assignment.assignment),
+            smart_text(self.student_assignment.student.get_full_name())))
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.student_assignment.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
 
     @property
     def attached_file_name(self):

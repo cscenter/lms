@@ -37,7 +37,7 @@
             </div>
           </td>
           <td>
-            <a href="{% url 'a_s_detail_student' a_s.pk %}">
+            <a href="{{ a_s.get_student_url }}">
               {{ a_s.assignment.title }}
             </a>
           </td>
@@ -88,7 +88,7 @@
             {{ a_s.assignment.deadline_at|time:"H:i" }}
           </td>
           <td>
-            <a href="{% url 'a_s_detail_student' a_s.pk %}">
+            <a href="{{ a_s.get_student_url }}">
               {{ a_s.assignment.title }}
             </a>
           </td>

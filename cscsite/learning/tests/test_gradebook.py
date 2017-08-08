@@ -174,10 +174,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         for student in students:
             EnrollmentFactory.create(student=student,
                                      course_offering=co)
-        as_online = AssignmentFactory.create_batch(
-            2, course_offering=co)
-        as_offline = AssignmentFactory.create_batch(
-            3, course_offering=co, is_online=False)
+        as_online = AssignmentFactory.create_batch(2, course_offering=co)
+        as_offline = AssignmentFactory.create_batch(3, course_offering=co,
+                                                    is_online=False)
         url = reverse('markssheet_teacher', args=[co.get_city(),
                                                   co.course.slug,
                                                   co.semester.year,
@@ -190,16 +189,13 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             self.assertContains(resp, name)
         for as_ in as_online:
             self.assertContains(resp, as_.title)
-            for student in students:
-                a_s = StudentAssignment.objects.get(student=student,
-                                                    assignment=as_)
-                a_s_url = reverse('a_s_detail_teacher', args=[a_s.pk])
-                self.assertContains(resp, a_s_url)
+            for s in students:
+                a_s = StudentAssignment.objects.get(student=s, assignment=as_)
+                self.assertContains(resp, a_s.get_teacher_url())
         for as_ in as_offline:
             self.assertContains(resp, as_.title)
-            for student in students:
-                a_s = StudentAssignment.objects.get(student=student,
-                                                    assignment=as_)
+            for s in students:
+                a_s = StudentAssignment.objects.get(student=s, assignment=as_)
                 self.assertIn('a_s_{}'.format(a_s.pk),
                               resp.context['form'].fields)
 

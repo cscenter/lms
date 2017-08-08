@@ -69,7 +69,7 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
         a_s = kwargs.get("a_s")
         user = self.request.user
         if user in a_s.assignment.course_offering.teachers.all():
-            raise Redirect(to=reverse("a_s_detail_teacher", args=[a_s.pk]))
+            raise Redirect(to=a_s.get_teacher_url())
         # This should guard against reading other's assignments. Not generic
         # enough, but can't think of better way
         if not a_s.student == user and not user.is_curator:
@@ -78,6 +78,7 @@ class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
 
     def get_success_url(self):
         pk = self.kwargs.get('pk')
+        # TODO: replace with get_student_url
         return reverse('a_s_detail_student', args=[pk])
 
 

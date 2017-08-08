@@ -7,14 +7,15 @@ from django.forms import model_to_dict
 
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
-    AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory
+    AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
+    StudentAssignmentFactory
 from learning.models import StudentAssignment, Assignment, CourseOffering
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
@@ -22,9 +23,6 @@ from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.utils import get_current_semester_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
-
-
-# TODO: test localization!
 
 
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
@@ -118,14 +116,13 @@ class TestCompletedCourseOfferingBehaviour(object):
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
         a_s = StudentAssignment.objects.get(student=student, assignment=a)
-        url = reverse('a_s_detail_student', args=[a_s.pk])
+        url = a_s.get_student_url()
         client.login(student)
         response = client.get(url)
         assert response.status_code == 403
         # Teacher still can view student assignment
-        url = reverse('a_s_detail_teacher', args=[a_s.pk])
         client.login(teacher)
-        response = client.get(url)
+        response = client.get(a_s.get_teacher_url())
         assert response.status_code == 200
 
     def test_security_courseoffering_detail(self, client):
@@ -172,9 +169,8 @@ def test_assignment_contents(client):
     a_s = (StudentAssignment.objects
            .filter(assignment=a, student=student)
            .get())
-    url = reverse('a_s_detail_teacher', args=[a_s.pk])
     client.login(teacher)
-    assert smart_bytes(a.text) in client.get(url).content
+    assert smart_bytes(a.text) in client.get(a_s.get_teacher_url()).content
 
 
 @pytest.mark.django_db
@@ -638,4 +634,40 @@ def test_assignment_public_form_for_teachers(settings, client):
     tz_diff = datetime.timedelta(hours=7)  # UTC+7 for nsk timezone
     assert assignment_last.deadline_at_local().utcoffset() == tz_diff
     assert assignment_last.deadline_at.hour == 17
+
+
+@pytest.mark.django_db
+def test_assignment_deadline_display(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    teacher = TeacherCenterFactory()
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course_offering__city_id='spb',
+                                   course_offering__teachers=[teacher])
+    url_for_teacher = reverse("assignment_detail_teacher",
+                              kwargs={"pk": assignment.pk})
+    client.login(teacher)
+    response = client.get(url_for_teacher)
+    html = BeautifulSoup(response.content, "html.parser")
+    # Note: On this page used `naturalday` filter, so use passed datetime
+    deadline_str = formats.date_format(assignment.deadline_at_local(),
+                                       'd E Y H:i')
+    assert deadline_str == "01 января 2017 18:00"
+    assert any(deadline_str in s.string for s in html.find_all('p'))
+    # Test student submission page
+    sa = StudentAssignmentFactory(assignment=assignment)
+    # student = sa.student
+    # client.login(student)
+    response = client.get(sa.get_teacher_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    # Note: On this page used `naturalday` filter, so use passed datetime
+    deadline_str = formats.date_format(assignment.deadline_at_local(),
+                                       'd E Y H:i')
+    assert deadline_str == "01 января 2017 18:00"
+    assert any(deadline_str in s.string for s in
+               html.find_all('span', {"class": "nowrap"}))
+
+
+# TODO: assignment submission page - comments localisation, assignment created localization
+# TODO: Преподавание -> Задания, добавить тест для deadline_local
 
