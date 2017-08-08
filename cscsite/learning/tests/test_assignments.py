@@ -24,6 +24,9 @@ from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 
 
+# TODO: test localization!
+
+
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'

@@ -135,8 +135,7 @@ if settings.DEBUG:
         url(r'^404/$', page_not_found,
             kwargs={'exception': Exception("Page not Found"),
                     'template_name': "errors/404.html"}),
-        url(r'^500/$', server_error,
-            kwargs={'exception': Exception("Page not Found")}),
+        url(r'^500/$', server_error),
     ]
 
 # Required `is_staff` only. Mb restrict to `is_superuser`?

@@ -130,8 +130,7 @@ if settings.DEBUG:
             kwargs={'exception': Exception("Page not Found")}),
         url(r'^404/$', page_not_found,
             kwargs={'exception': Exception("Page not Found")}),
-        url(r'^500/$', server_error,
-            kwargs={'exception': Exception("Page not Found")}),
+        url(r'^500/$', server_error),
     ]
 
 # Note: htmlpages should be the last one
