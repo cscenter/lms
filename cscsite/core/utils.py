@@ -100,7 +100,7 @@ def city_aware_reverse(viewname, urlconf=None, args=None, kwargs=None,
                        current_app=None):
     assert "city_code" in kwargs
     kwargs["city_delimiter"] = ""
-    if kwargs["city_code"] == settings.DEFAULT_CITY_CODE:
+    if kwargs["city_code"] == settings.DEFAULT_CITY_CODE or is_club_site():
         kwargs["city_code"] = ""
     if kwargs["city_code"]:
         kwargs["city_delimiter"] = "/"

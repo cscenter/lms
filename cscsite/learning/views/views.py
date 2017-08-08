@@ -966,7 +966,7 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
 
 def _get_co_from_query_params(query_params, city_code, authenticated_teacher):
     """
-    Returns course offering based on GET-parameters if authenticated teacher
+    Returns course offering based on URL-parameters if authenticated teacher
     has permissions.
 
     We already parsed `city_code` query-param in middleware and attached it
