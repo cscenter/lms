@@ -321,7 +321,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         # Get all student enrollments and split them
         # FIXME: Наверное, я хочу сразу получить все COurseOffering!
         # Сначала id всех активных записей юзера, а там уже CourseOffering! Это будет легче в плане запросов.
-        enrolled_on = (Enrollment.active.site_related(self.request)
+        enrolled_on = (Enrollment.active
                        .filter(student=self.request.user)
                        .order_by('course_offering__semester__year',
                                  '-course_offering__semester__type',
@@ -337,8 +337,13 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
                        and e.course_offering.semester.type == current_term))
 
         current_term_index = get_term_index(current_year, current_term)
+        try:
+            city_code = get_student_city_code(self.request)
+        except ValueError as e:
+            messages.error(self.request, e.args[0])
+            raise Redirect(to="/")
         available = (CourseOffering.objects
-                     .in_city(self.request.city_code)
+                     .in_city(city_code)
                      .filter(semester__index=current_term_index)
                      .select_related('course', 'semester')
                      .order_by('semester__year', '-semester__type',
