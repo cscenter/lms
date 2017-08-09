@@ -21,7 +21,7 @@ from learning.models import CourseOffering, Semester, \
     CourseClass
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
 from learning.utils import get_current_semester_pair, now_local
-from learning.views import CalendarGenericView
+from learning.views.generic import CalendarGenericView
 
 
 class AsyncEmailRegistrationView(RegistrationView):

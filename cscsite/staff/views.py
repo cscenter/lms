@@ -22,7 +22,7 @@ from django.utils.translation import ugettext_lazy as _
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
 from learning.models import Semester, CourseOffering, StudyProgram, \
-    StudyProgramCourseGroup
+    StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
@@ -408,38 +408,44 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
     template_name = "staff/courses_intersection.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         year, term = get_current_semester_pair()
         current_term_index = get_term_index(year, term)
-        context['course_offerings'] = (
-            CourseOffering.objects
-            .filter(semester__index=current_term_index)
-            .select_related("course"))
+        all_courses_in_term = (CourseOffering.objects
+                               .filter(semester__index=current_term_index)
+                               .select_related("course"))
         # Get participants
-        course_offerings = self.request.GET.getlist('course_offerings[]', [])
-        course_offerings = [int(t) for t in course_offerings if t]
+        query_courses = self.request.GET.getlist('course_offerings[]', [])
+        query_courses = [int(t) for t in query_courses if t]
         results = list(
             CourseOffering.objects
-            .filter(pk__in=course_offerings)
+            .filter(pk__in=query_courses)
             .select_related("course")
             .prefetch_related(
-                Prefetch(
-                    "enrolled_students",
-                    queryset=(CSCUser.objects.get_queryset()
-                              .only("pk", "username", "first_name",
-                                    "last_name", "patronymic")),
-                )
+                Prefetch("enrollment_set",
+                         queryset=(Enrollment.active
+                                   .select_related("student")
+                                   .only("pk",
+                                         "course_offering_id",
+                                         "student_id",
+                                         "student__username",
+                                         "student__first_name",
+                                         "student__last_name",
+                                         "student__patronymic")))
             ))
         if len(results) > 1:
             first_course, second_course = (
-                {s.pk for s in co.enrolled_students.all()} for co in results)
-            context["intersection"] = first_course.intersection(second_course)
+                {e.student_id for e in co.enrollment_set.all()} for co in results)
+            intersection = first_course.intersection(second_course)
         else:
-            context["intersection"] = set()
-        context["current_term"] = "{} {}".format(_(term), year)
-        context["results"] = results
-        context["query"] = {
-            "course_offerings": course_offerings
+            intersection = set()
+        context = {
+            'course_offerings': all_courses_in_term,
+            'intersection': intersection,
+            'current_term': "{} {}".format(_(term), year),
+            'results': results,
+            'query': {
+                'course_offerings': query_courses
+            }
         }
         return context
 

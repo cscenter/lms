@@ -250,8 +250,10 @@ class EnrollmentAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         }
     }
-    list_display = ['student', 'course_offering', 'grade', 'grade_changed_local']
-    list_filter = ['course_offering__semester', 'course_offering__course']
+    list_display = ['student', 'course_offering', 'is_deleted', 'grade',
+                    'grade_changed_local']
+    list_filter = ['course_offering__semester']
+    search_fields = ['course_offering__course__name']
     exclude = ['grade_changed']
 
     def get_readonly_fields(self, request, obj=None):

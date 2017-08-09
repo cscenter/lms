@@ -95,14 +95,13 @@ class NonCourseEventQuerySet(query.QuerySet):
         return self.filter(date__gte=date_start, date__lte=date_end)
 
 
-class CustomCourseOfferingQuerySet(models.QuerySet):
+class CourseOfferingQuerySet(models.QuerySet):
     def in_city(self, city_code):
         return self.filter(city_id=city_code)
 
-    def open_only(self, restrict: bool):
-        if restrict:
-            return self.filter(is_open=True)
-        return self
+    def in_center_branches(self):
+        # FIXME: Move to settings
+        return self.filter(city_id__in=['spb', 'nsk'])
 
     # FIXME: respect timezones!
     def completed(self, is_completed):
@@ -110,6 +109,19 @@ class CustomCourseOfferingQuerySet(models.QuerySet):
             return self.filter(completed_at__lte=now().date())
         else:
             return self.filter(completed_at__gt=now().date())
+
+
+class _CourseOfferingDefaultManager(models.Manager):
+    """On compsciclub.ru always restrict selection by open reading"""
+    def get_queryset(self):
+        # TODO: add test
+        if is_club_site():
+            return super().get_queryset().filter(is_open=True)
+        else:
+            return super().get_queryset()
+
+CourseOfferingDefaultManager = _CourseOfferingDefaultManager.from_queryset(
+    CourseOfferingQuerySet)
 
 
 class _EnrollmentDefaultManager(models.Manager):

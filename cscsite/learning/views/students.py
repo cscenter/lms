@@ -136,7 +136,6 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
         course_offering = get_object_or_404(
             CourseOffering.objects
                 .in_city(self.request.city_code)
-                .open_only(is_club_site())
                 .filter(pk=form.cleaned_data['course_offering_pk'])
                 .select_related("semester"))
         # CourseOffering enrollment should be active
