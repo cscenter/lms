@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import logging
 import os
 import posixpath
@@ -260,7 +259,6 @@ class CoursesListView(generic.ListView):
     def get_queryset(self):
         co_queryset = (CourseOffering.objects
                        .in_city(self.request.city_code)
-                       .open_only(is_club_site())
                        .select_related('course')
                        .prefetch_related('teachers')
                        .order_by('course__name'))
@@ -341,7 +339,6 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         current_term_index = get_term_index(current_year, current_term)
         available = (CourseOffering.objects
                      .in_city(self.request.city_code)
-                     .open_only(is_club_site())
                      .filter(semester__index=current_term_index)
                      .select_related('course', 'semester')
                      .order_by('semester__year', '-semester__type',
@@ -396,10 +393,16 @@ class CourseDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['offerings'] = (CourseOffering.objects
-                                .in_city(self.request.city_code)
-                                .open_only(is_club_site())
-                                .filter(course=self.object))
+        qs = (CourseOffering.objects
+              .select_related("course", "semester", "city")
+              .filter(course=self.object))
+        # Separate by city only on compsciclub.ru
+        if is_club_site():
+            qs = qs.in_city(self.request.city_code)
+        else:
+            qs = qs.in_center_branches()
+        context['offerings'] = qs
+        context["show_city"] = not is_club_site()
         return context
 
 

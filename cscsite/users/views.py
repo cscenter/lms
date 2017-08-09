@@ -129,7 +129,6 @@ class TeacherDetailView(DetailView):
     def get_queryset(self, *args, **kwargs):
         co_queryset = (CourseOffering.objects
                        .in_city(self.request.city_code)
-                       .open_only(is_club_site())
                        .select_related('semester', 'course'))
         return (auth.get_user_model()._default_manager
             .prefetch_related(
@@ -163,7 +162,6 @@ class UserDetailView(generic.DetailView):
                 classes_total=Count('course_offering__courseclass'))
         co_queryset = (CourseOffering.objects
                        .in_city(self.request.city_code)
-                       .open_only(is_club_site())
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),

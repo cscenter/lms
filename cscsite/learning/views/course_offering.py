@@ -83,7 +83,6 @@ class CourseOfferingDetailView(generic.DetailView):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         return (CourseOffering.objects
                 .in_city(self.request.city_code)
-                .open_only(is_club_site())
                 .filter(semester__type=semester_type,
                         semester__year=year,
                         course__slug=self.kwargs['course_slug'])
@@ -320,7 +319,7 @@ class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
         return user.is_curator or user in obj.teachers.all()
 
     def get_queryset(self):
-        return self.model.objects.in_city(self.request.city_code).open_only(is_club_site())
+        return CourseOffering.objects.in_city(self.request.city_code)
 
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin, CreateView):

@@ -59,9 +59,7 @@ def get_co_from_query_params(query_params, city_code):
         return None
     term_year, term_type = match.group("term_year"), match.group("term_type")
     course_slug = query_params.get("course_slug", "")
-    qs = (CourseOffering.objects
-          .in_city(city_code)
-          .open_only(is_club_site()))
+    qs = CourseOffering.objects.in_city(city_code)
     try:
         return qs.get(course__slug=course_slug, semester__year=term_year,
                       semester__type=term_type)

@@ -3,39 +3,46 @@
 {% load markdown from core_tags %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        {{ course.name }}
-      </h2>
-      {% if user.is_curator %}
-      <div class="btn-toolbar">
-        <a href="{% url 'course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-      </div>
-      {% endif %}
-      <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 h2-and-buttons">
+                <h2>{{ course.name }}</h2>
+                {% if user.is_curator %}
+                    <div class="btn-toolbar">
+                        <a href="{% url 'course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+                    </div>
+                {% endif %}
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="ubertext">
+                    {% markdown 3600 "course_description" course.pk course.modified %}
+                        {{ course.description }}
+                    {% endmarkdown %}
+                </div>
+                <h4>{% trans 'Course offerings' %}</h4>
+                {% if offerings %}
+                    <table class="table" width="100%">
+                        <tr class="active">
+                            <th>{% trans "Semester" %}</th>
+                            {% if show_city %}<th width="20%">{% trans "City" %}</th>{% endif %}
+                        </tr>
+                        {% for offering in offerings %}
+                            <tr>
+                                <td>
+                                    <a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a>
+                                </td>
+                                {% if show_city %}<td>{{ offering.city }}</td>{% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    </ul>
+                {% else %}
+                    Прочтений данного курса пока не было.
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="ubertext">
-        {% markdown 3600 "course_description" course.pk course.modified %}
-        {{ course.description }}
-        {% endmarkdown %}
-      </div>
-      <hr>
-      <h4>{% trans 'Course offerings:|course-singular' %}</h4>
-        {% if offerings %}
-          <ul>
-          {% for offering in offerings %}
-          <li><a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a></li>
-          {% endfor %}
-          </ul>
-        {% else %}
-            Прочтений данного курса пока не было.
-        {% endif %}
-    </div>
-  </div>
-</div>
 {% endblock content %}

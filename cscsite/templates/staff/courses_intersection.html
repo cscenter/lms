@@ -55,10 +55,10 @@
                     <div class="row">
                     {% for co in results %}
                         <div class="col-xs-6">
-                            {% if co.enrolled_students.all %}
+                            {% if co.enrollment_set.all %}
                                 <ul class="list-group list-group-dividered">
-                                    {% for student in co.enrolled_students.all %}
-                                        <li class="list-group-item {% if student.pk in intersection %}text-danger{% endif %}">{{ student }}</li>
+                                    {% for e in co.enrollment_set.all %}
+                                        <li class="list-group-item {% if e.student_id in intersection %}text-danger{% endif %}">{{ e.student }}</li>
                                     {% endfor %}
                                 </ul>
                             {% endif %}

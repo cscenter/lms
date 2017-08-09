@@ -30,7 +30,7 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
 from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
-    CustomCourseOfferingQuerySet, EnrollmentDefaultManager, \
+    CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
@@ -196,9 +196,8 @@ def next_term_starts_at(term_pair=None):
     return get_term_start(year, next_term).date()
 
 
-@python_2_unicode_compatible
 class CourseOffering(TimeStampedModel):
-    objects = CustomCourseOfferingQuerySet.as_manager()
+    objects = CourseOfferingDefaultManager()
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
@@ -246,13 +245,6 @@ class CourseOffering(TimeStampedModel):
         help_text=_("Consider the course as completed from the specified "
                     "day (inclusive).")
     )
-    # TODO: rename or delete?
-    enrolled_students = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Enrolled students"),
-        related_name='enrolled_on_set',
-        blank=True,
-        through='Enrollment')
     city = models.ForeignKey(City, verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
@@ -1155,7 +1147,6 @@ class AssignmentComment(TimeStampedModel):
         return (now() - self.created).total_seconds() > 600
 
 
-@python_2_unicode_compatible
 class Enrollment(TimeStampedModel):
     GRADES = GRADES
     objects = EnrollmentDefaultManager()
@@ -1228,7 +1219,6 @@ class Enrollment(TimeStampedModel):
         return SHORT_GRADES[self.grade]
 
 
-@python_2_unicode_compatible
 class AssignmentNotification(TimeStampedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
