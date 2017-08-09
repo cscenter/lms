@@ -18,10 +18,22 @@ from testfixtures import LogCapture
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
 from learning.settings import GRADES, STUDENT_STATUS
+from learning.tests.utils import check_group_security
 from users.factories import TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 from .mixins import *
 from ..factories import *
+
+
+
+
+# TODO: Написать тест, который проверяет, что по-умолчанию в форму
+# редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
+
+# TODO: test redirects on course offering page if tab exists but user has no access
+
+
+
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
@@ -159,45 +171,6 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
     groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
-
-
-class CourseListStudentTests(GroupSecurityCheckMixin,
-                             MyUtilitiesMixin, TestCase):
-    url_name = 'course_list_student'
-    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
-
-    def test_student_course_list(self):
-        student = StudentCenterFactory()
-        other_student = StudentCenterFactory()
-        self.doLogin(student)
-        resp = self.client.get(reverse(self.url_name))
-        self.assertEqual(0, len(resp.context['course_list_available']))
-        self.assertEqual(0, len(resp.context['enrollments_ongoing']))
-        self.assertEqual(0, len(resp.context['enrollments_archive']))
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        cos = CourseOfferingFactory.create_batch(4, semester=s)
-        cos_available = cos[:2]
-        cos_enrolled = cos[2:]
-        enrollments_ongoing = []
-        enrollments_archive = []
-        cos_archived = CourseOfferingFactory.create_batch(
-            3, semester__year=now_year-1)
-        for co in cos_enrolled:
-            enrollments_ongoing.append(
-                EnrollmentFactory.create(student=student,
-                                         course_offering=co))
-        for co in cos_archived:
-            enrollments_archive.append(
-                EnrollmentFactory.create(student=student,
-                                         course_offering=co))
-        resp = self.client.get(reverse(self.url_name))
-        self.assertSameObjects(enrollments_ongoing,
-                               resp.context['enrollments_ongoing'])
-        self.assertSameObjects(enrollments_archive,
-                               resp.context['enrollments_archive'])
-        self.assertSameObjects(cos_available,
-                               resp.context['course_list_available'])
 
 
 class CourseDetailTests(MyUtilitiesMixin, TestCase):
@@ -437,15 +410,15 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         # Note: Club related tests in csclub app
 
     def test_student_list_center_site(self):
-        s = StudentCenterFactory()
+        s = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
         self.doLogin(s)
         current_semester = SemesterFactory.create_current()
         co = CourseOfferingFactory.create(semester=current_semester,
                                           city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="kzn")
-        resp = self.client.get(reverse('course_list_student'))
-        self.assertEqual(len(resp.context['course_list_available']), 1)
+                                              city="kzn")
+        response = self.client.get(reverse('course_list_student'))
+        self.assertEqual(len(response.context['course_list_available']), 1)
 
 
 class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
@@ -1029,7 +1002,40 @@ def test_course_class_form(client, curator, settings):
     # FIXME: добавить тест на is_form_available и посмотреть, можно ли удалить эту часть, по-моему это лишняя логика
 
 
-# TODO: Написать тест, который проверяет, что по-умолчанию в форму
-# редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
-
-# TODO: test redirects on course offering page if tab exists but user has no access
+@pytest.mark.django_db
+def test_student_courses_list(client, settings):
+    url = reverse('course_list_student')
+    check_group_security(client, settings,
+                         groups_allowed=[PARTICIPANT_GROUPS.STUDENT_CENTER],
+                         url=url)
+    student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context['course_list_available']) == 0
+    assert len(response.context['enrollments_ongoing']) == 0
+    assert len(response.context['enrollments_archive']) == 0
+    now_year, now_season = get_current_semester_pair()
+    s = SemesterFactory.create(year=now_year, type=now_season)
+    cos = CourseOfferingFactory.create_batch(4, semester=s,
+                                             city_id=settings.DEFAULT_CITY_CODE)
+    cos_available = cos[:2]
+    cos_enrolled = cos[2:]
+    enrollments_ongoing = []
+    enrollments_archive = []
+    cos_archived = CourseOfferingFactory.create_batch(3,
+        semester__year=now_year - 1)
+    for co in cos_enrolled:
+        enrollments_ongoing.append(
+            EnrollmentFactory.create(student=student, course_offering=co))
+    for co in cos_archived:
+        enrollments_archive.append(
+            EnrollmentFactory.create(student=student, course_offering=co))
+    response = client.get(url)
+    context = response.context
+    assert len(enrollments_ongoing) == len(context['enrollments_ongoing'])
+    assert set(enrollments_ongoing) == set(context['enrollments_ongoing'])
+    assert len(enrollments_archive) == len(context['enrollments_archive'])
+    assert set(enrollments_archive) == set(context['enrollments_archive'])
+    assert len(cos_available) == len(context['course_list_available'])
+    assert set(cos_available) == set(context['course_list_available'])

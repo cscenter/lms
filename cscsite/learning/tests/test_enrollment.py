@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.test import SimpleTestCase
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
@@ -11,6 +10,7 @@ from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, CourseOfferingNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseOfferingNewsNotification
+from learning.tests.utils import assert_redirects
 from users.factories import UserFactory, StudentCenterFactory
 
 
@@ -18,8 +18,7 @@ from users.factories import UserFactory, StudentCenterFactory
 # TODO: Добавить тест о том, что не могут записаться в чужом городе
 
 
-# Workaround to use Django's assertRedirects()
-STS = SimpleTestCase()
+
 
 
 @pytest.mark.skip('not implemented')
@@ -77,8 +76,8 @@ def test_unenrollment(client):
     assert len(response.context['enrollments_archive']) == 0
     # Check `back` url on unenroll action
     url = co.get_unenroll_url() + "?back=course_list_student"
-    STS.assertRedirects(client.post(url, form),
-                        reverse('course_list_student'))
+    assert_redirects(client.post(url, form),
+                     reverse('course_list_student'))
     assert set(a_ss) == set(StudentAssignment.objects
                                   .filter(student=s,
                                           assignment__course_offering=co))

@@ -326,13 +326,6 @@ class CourseOffering(TimeStampedModel):
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
 
-    # FIXME(Dmitry): refactor this to use Semester object
-    @classmethod
-    def by_semester(cls, semester):
-        (year, season) = semester
-        return cls.objects.filter(semester__type=season,
-                                  semester__year=year)
-
     @property
     def is_completed(self):
         # FIXME: respect timezone!
@@ -725,15 +718,6 @@ class CourseClass(TimeStampedModel, object):
     def slides_iframe(self):
         return get_oembed_html(self.slides_url, 'slides_oembed',
                                use_default=False)
-
-    # TODO: test this
-    # Note(lebedev): should be a manager, not a class method.
-    @classmethod
-    def by_semester(cls, semester):
-        (year, season) = semester
-        return cls.objects.filter(
-            course_offering__semester__type=season,
-            course_offering__semester__year=year)
 
     @property
     def slides_file_name(self):

@@ -124,18 +124,6 @@ def test_semester_cmp():
 
 
 class CourseOfferingTests(TestCase):
-    def test_by_semester(self):
-        course = CourseFactory.create()
-        for year in range(2013, 2018):
-            CourseOfferingFactory.create(course=course,
-                                         semester__year=year,
-                                         semester__type='spring')
-        self.assertEqual(CourseOffering.by_semester((2014, 'spring')).get(),
-                         CourseOffering.objects
-                         .filter(semester__year=2014,
-                                 semester__type='spring')
-                         .get())
-
     def test_in_current_term(self):
         """
         In near future only one course should be "ongoing".
@@ -193,18 +181,6 @@ class CourseClassTests(TestCase):
         cc = CourseClassFactory.create(type='lecture')
         self.assertEqual("Lecture", cc.type_display)
 
-    def test_by_semester(self):
-        c = CourseFactory.create()
-        for year in range(2013, 2018):
-            CourseClassFactory.create(course_offering__course=c,
-                                      course_offering__semester__year=year,
-                                      course_offering__semester__type='spring',
-                                      slides=None)
-        self.assertEqual(CourseClass.by_semester((2014, 'spring')).get(),
-                         CourseClass.objects
-                         .filter(course_offering__semester__year=2014,
-                                 course_offering__semester__type='spring')
-                         .get())
     # TODO: refactor with pytest tmp file, fuck this patching
     @patch('slides.slideshare.upload_slides')
     @patch('slides.yandex_disk.upload_slides')

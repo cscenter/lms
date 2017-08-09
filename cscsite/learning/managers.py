@@ -125,24 +125,28 @@ CourseOfferingDefaultManager = _CourseOfferingDefaultManager.from_queryset(
 
 
 class _EnrollmentDefaultManager(models.Manager):
-    pass
+    """On compsciclub.ru always restrict selection by open reading"""
+    def get_queryset(self):
+        if is_club_site():
+            return super().get_queryset().filter(course_offering__is_open=True)
+        else:
+            return super().get_queryset()
 
 
 class _EnrollmentActiveManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
+        if is_club_site():
+            return super().get_queryset().filter(course_offering__is_open=True,
+                                                 is_deleted=False)
+        else:
+            return super().get_queryset().filter(is_deleted=False)
 
 
-class EnrollmentDefaultQuerySet(models.QuerySet):
-    def site_related(self, request):
-        qs = (self.select_related("course_offering")
-                  .filter(course_offering__city_id=request.city_code))
-        if request.site.domain == settings.CLUB_DOMAIN:
-            qs = qs.filter(course_offering__is_open=True)
-        return qs
+class EnrollmentQuerySet(models.QuerySet):
+    pass
 
 
 EnrollmentDefaultManager = _EnrollmentDefaultManager.from_queryset(
-    EnrollmentDefaultQuerySet)
+    EnrollmentQuerySet)
 EnrollmentActiveManager = _EnrollmentActiveManager.from_queryset(
-    EnrollmentDefaultQuerySet)
+    EnrollmentQuerySet)

@@ -11,10 +11,8 @@ from django.utils.encoding import force_bytes
 from mock import patch, MagicMock
 
 from learning.management.imports import ImportGradesByStepicID
-from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
-                               SEMESTER_TYPES)
-from learning.utils import split_list, get_term_index, get_term_by_index, \
-    get_term_index_academic
+from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR)
+from learning.utils import split_list, get_term_index, get_term_index_academic
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 

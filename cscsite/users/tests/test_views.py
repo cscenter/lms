@@ -386,17 +386,18 @@ def test_club_students_profiles_on_cscenter_site(client):
 
 
 @pytest.mark.django_db
-def test_expelled(client):
+def test_expelled(client, settings):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
-    student = StudentCenterFactory(status=STUDENT_STATUS.expelled)
+    student = StudentCenterFactory(status=STUDENT_STATUS.expelled,
+                                   city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     url = reverse('course_list_student')
     response = client.get(url)
     assert response.status_code == 302
     assert "login" in response["Location"]
     # active student
-    active_student = StudentCenterFactory()
+    active_student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
