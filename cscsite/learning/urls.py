@@ -22,12 +22,12 @@ from .views import \
     AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
-    MarksSheetTeacherView, MarksSheetTeacherCSVView, \
-    MarksSheetTeacherImportCSVFromStepicView, \
-    MarksSheetTeacherImportCSVFromYandexView, \
-    GradebookTeacherDispatchView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+from learning.views.gradebook import GradeBookTeacherView, \
+    GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
+    GradeBookTeacherImportCSVFromStepicView, \
+    GradeBookTeacherImportCSVFromYandexView
 from learning.views.course_offering import CourseOfferingEditView, \
     CourseOfferingNewsCreateView, CourseOfferingNewsUpdateView, \
     CourseOfferingNewsDeleteView
@@ -140,19 +140,19 @@ teaching_section_patterns = url(
         ])),
         url(r'^marks/', include([
             url(r'^$',
-                GradebookTeacherDispatchView.as_view(),
+                GradeBookTeacherDispatchView.as_view(),
                 name='markssheet_teacher_dispatch'),
             url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
-                MarksSheetTeacherView.as_view(),
+                GradeBookTeacherView.as_view(),
                 name='markssheet_teacher'),
             url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)\.csv$',
-                MarksSheetTeacherCSVView.as_view(),
+                GradeBookTeacherCSVView.as_view(),
                 name='markssheet_teacher_csv'),
             url(r'^(?P<course_offering_pk>\d+)/import/stepic$',
-                MarksSheetTeacherImportCSVFromStepicView.as_view(),
+                GradeBookTeacherImportCSVFromStepicView.as_view(),
                 name='markssheet_teacher_csv_import_stepic'),
             url(r'^(?P<course_offering_pk>\d+)/import/yandex$',
-                MarksSheetTeacherImportCSVFromYandexView.as_view(),
+                GradeBookTeacherImportCSVFromYandexView.as_view(),
                 name='markssheet_teacher_csv_import_yandex'),
         ])),
     ]))

@@ -18,7 +18,7 @@
             {% for semester in semester_list %}
                 {% for co in semester.courseofferings %}
                   <tr>
-                    <td><a href="{% url 'markssheet_teacher' co.get_city co.course.slug co.semester.year co.semester.type %}">{{ co.course.name }}</a></td>
+                    <td><a href="{{ co.get_gradebook_url }}">{{ co.course.name }}</a></td>
                     <td>{{ co.semester }}</td>
                   </tr>
                 {% endfor %}
