@@ -312,6 +312,14 @@ class CourseOffering(TimeStampedModel):
         return city_aware_reverse('course_offering_unenroll',
                                   kwargs=self._get_url_kwargs())
 
+    def get_gradebook_url(self):
+        return reverse("markssheet_teacher", kwargs={
+            "course_slug": self.course.slug,
+            "city": self.get_city(),
+            "semester_type": self.semester.type,
+            "semester_year": self.semester.year,
+        })
+
     def get_city(self):
         return self.city_id
 

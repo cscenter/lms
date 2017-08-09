@@ -29,10 +29,7 @@ def test_gradebook_recalculate_grading_type(client):
                                                  course_offering=co,
                                                  is_online=True)
     client.login(teacher)
-    url = reverse('markssheet_teacher', args=[co.get_city(),
-                                              co.course.slug,
-                                              co.semester.year,
-                                              co.semester.type])
+    url = co.get_gradebook_url()
     form = {}
     for s in students:
         enrollment = EnrollmentFactory.create(student=s, course_offering=co)
@@ -145,10 +142,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             EnrollmentFactory.create(student=student, course_offering=co1)
             EnrollmentFactory.create(student=student,
                                      course_offering=co2)
-        url = reverse('markssheet_teacher', args=[co1.get_city(),
-                                                  co1.course.slug,
-                                                  co1.semester.year,
-                                                  co1.semester.type])
+        url = co1.get_gradebook_url()
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
@@ -160,11 +154,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             field = 'final_grade_{}'.format(enrollment.pk)
             self.assertIn(field, resp.context['form'].fields)
         for co in [co1, co2]:
-            url = reverse('markssheet_teacher',
-                          args=[co.get_city(),
-                                co.course.slug,
-                                co.semester.year,
-                                co.semester.type])
+            url = co.get_gradebook_url()
             self.assertContains(resp, url)
 
     def test_nonempty_markssheet(self):
@@ -177,10 +167,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         as_online = AssignmentFactory.create_batch(2, course_offering=co)
         as_offline = AssignmentFactory.create_batch(3, course_offering=co,
                                                     is_online=False)
-        url = reverse('markssheet_teacher', args=[co.get_city(),
-                                                  co.course.slug,
-                                                  co.semester.year,
-                                                  co.semester.type])
+        url = co.get_gradebook_url()
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
@@ -216,10 +203,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             a_s.grade = default_grade
             a_s.save()
         expected_total_score = as_cnt * default_grade
-        url = reverse('markssheet_teacher', args=[co.get_city(),
-                                                  co.course.slug,
-                                                  co.semester.year,
-                                                  co.semester.type])
+        url = co.get_gradebook_url()
         self.doLogin(teacher)
         resp = self.client.get(url)
         head_student = next(iter(resp.context['students'].items()))
@@ -234,10 +218,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                      course_offering=co)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                                 is_online=False)
-        url = reverse('markssheet_teacher', args=[co.get_city(),
-                                                  co.course.slug,
-                                                  co.semester.year,
-                                                  co.semester.type])
+        url = co.get_gradebook_url()
         self.doLogin(teacher)
         form = {}
         pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
@@ -298,11 +279,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         resp = self.client.post(url, {'assignment': assignments[0].pk})
         self.assertEqual(resp.status_code, 404)
         # Check redirects
-        redirect_url = reverse('markssheet_teacher',
-                               args=[co.get_city(),
-                                     co.course.slug,
-                                     co.semester.year,
-                                     co.semester.type])
+        redirect_url = co.get_gradebook_url()
         url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
         resp = self.client.post(url, {'assignment': assignments[0].pk})
         self.assertRedirects(resp, redirect_url)
