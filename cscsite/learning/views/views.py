@@ -53,6 +53,24 @@ logger = logging.getLogger(__name__)
 DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
 
+__all__ = [
+    # mixins
+    'StudentAssignmentDetailMixin',
+    # views
+    'TimetableTeacherView', 'TimetableStudentView', 'CalendarStudentFullView',
+    'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
+    'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
+    'CourseVideoListView', 'CourseDetailView', 'CourseUpdateView',
+    'CourseClassDetailView', 'CourseClassCreateView', 'CourseClassUpdateView',
+    'CourseClassAttachmentDeleteView', 'CourseClassDeleteView',
+     'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
+    'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
+    'AssignmentCreateView', 'AssignmentUpdateView', 'AssignmentDeleteView',
+    'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
+    'NonCourseEventDetailView', 'OnlineCoursesListView',
+    'InternationalSchoolsListView', 'AssignmentAttachmentDownloadView',
+]
+
 
 class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
     user_type = 'teacher'
@@ -282,22 +300,20 @@ class CoursesListView(generic.ListView):
         return context
 
 
-class CourseTeacherListView(TeacherOnlyMixin,
-                            generic.ListView):
+class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
     model = CourseOffering
     context_object_name = 'course_list'
     template_name = "learning/courses/teaching_list.html"
 
     def get_queryset(self):
-        return (self.model.objects
+        return (CourseOffering.objects
                 .filter(teachers=self.request.user)
                 .select_related('course', 'semester')
                 .prefetch_related('teachers')
                 .order_by('-semester__year', '-semester__type', 'course__name'))
 
 
-class CourseStudentListView(StudentOnlyMixin,
-                            generic.TemplateView):
+class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
     model = CourseOffering
     context_object_name = 'course_list'
     template_name = "learning/courses/learning_my_courses.html"
@@ -379,13 +395,11 @@ class CourseDetailView(generic.DetailView):
     context_object_name = 'course'
 
     def get_context_data(self, **kwargs):
-        context = (super(CourseDetailView, self)
-                   .get_context_data(**kwargs))
-
+        context = super().get_context_data(**kwargs)
         context['offerings'] = (CourseOffering.objects
                                 .in_city(self.request.city_code)
                                 .open_only(is_club_site())
-                                .filter(course=self.object).all())
+                                .filter(course=self.object))
         return context
 
 
@@ -461,7 +475,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin):
         elif "_addanother" in self.request.POST:
             return self.object.course_offering.get_create_class_url()
         else:
-            return super(CourseClassCreateUpdateMixin, self).get_success_url()
+            return super().get_success_url()
 
 
 class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
@@ -488,7 +502,7 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
         msg = _("The class '%s' was successfully created.")
         messages.success(self.request, msg % self.object.name,
                          extra_tags='timeout')
-        return super(CourseClassCreateView, self).get_success_url()
+        return super().get_success_url()
 
     def post(self, request, *args, **kwargs):
         """Teachers can't add new classes if course already completed"""
@@ -508,7 +522,7 @@ class CourseClassUpdateView(CourseClassCreateUpdateMixin, UpdateView):
         msg = _("The class '%s' was successfully updated.")
         messages.success(self.request, msg % self.object.name,
                          extra_tags='timeout')
-        return super(CourseClassUpdateView, self).get_success_url()
+        return super().get_success_url()
 
 
 class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
@@ -517,8 +531,8 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     template_name = "learning/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
-        return (user.is_authenticated and user.is_curator) or \
-               (user in obj.course_class.course_offering.teachers.all())
+        return (user.is_curator or
+                user in obj.course_class.course_offering.teachers.all())
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
