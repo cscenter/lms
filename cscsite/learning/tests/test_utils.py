@@ -12,7 +12,7 @@ from mock import patch, MagicMock
 
 from learning.management.imports import ImportGradesByStepicID
 from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR)
-from learning.utils import split_list, get_term_index, get_term_index_academic
+from learning.utils import split_on_condition, get_term_index, get_term_index_academic
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 
@@ -32,9 +32,9 @@ class UtilTests(TestCase):
     def test_split_list(self):
         xs = [1, 2, 3, 4]
         self.assertEquals(([1, 3], [2, 4]),
-                          split_list(xs, lambda x: x % 2 != 0))
-        self.assertEquals((xs, []), split_list(xs, lambda x: True))
-        self.assertEquals(([], xs), split_list(xs, lambda x: False))
+                          split_on_condition(xs, lambda x: x % 2 != 0))
+        self.assertEquals((xs, []), split_on_condition(xs, lambda x: True))
+        self.assertEquals(([], xs), split_on_condition(xs, lambda x: False))
 
     @patch('django.contrib.messages.api.add_message')
     def test_import_stepic(self, mock_messages):

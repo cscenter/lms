@@ -115,7 +115,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
             course_offering__semester=self.current_semester,
             student=self.request.user).values_list("course_offering",
                                                    flat=True))
-        open_, archive = utils.split_list(
+        open_, archive = utils.split_on_condition(
             context['assignment_list'],
             lambda
                 a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)

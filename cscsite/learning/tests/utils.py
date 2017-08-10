@@ -11,7 +11,7 @@ def assert_redirects(*args, **kwargs):
     _STS.assertRedirects(*args, **kwargs)
 
 
-def check_group_security(client, settings, groups_allowed, url):
+def check_url_security(client, settings, groups_allowed, url):
     """
     Checks if only users in groups listed in `groups_allowed` can
     access the page which url is stored in `url`.

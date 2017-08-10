@@ -45,7 +45,7 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
                                           city="kzn")
         resp = self.client.get(reverse('course_list_student'))
-        self.assertEqual(len(resp.context['course_list_available']), 1)
+        self.assertEqual(len(resp.context['ongoing_rest']), 1)
 
     @unittest.skip('not implemented yet')
     def test_show_news_to_all(self):
