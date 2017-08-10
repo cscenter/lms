@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load tz %}
 {% load humanize %}
 {% load core_tags %}
 
 {% block content %}
+{% localtime off %}
 <div class="container">
   {% if assignment_list_open %}
   <div class="row">
@@ -11,29 +13,20 @@
       <h3>{% trans "Open assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th width="10%">
-            {% trans "Deadline" %}
-          </th>
+          <th width="10%">{% trans "Deadline" %}</th>
           <th></th>
-          <th width="20%">
-            {% trans "Course" %}
-          </th>
-          <th width="15%">
-            {% trans "State" %}
-          </th>
-          <th width="5%">
-            {% trans "Online" %}
-          </th>
+          <th width="20%">{% trans "Course" %}</th>
+          <th width="15%">{% trans "State" %}</th>
+          <th width="5%">{% trans "Online" %}</th>
         </thead>
         {% for a_s in assignment_list_open %}
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
           <td>
-            <div class="assignment-date
-                        {{ a_s.assignment.deadline_at|date_soon_css }}">
-              <span style="white-space: nowrap;">
-                {{ a_s.assignment.deadline_at|naturalday:"d E Y" }}
+            <div class="assignment-date {{ a_s.assignment.deadline_at_local|date_soon_css }}">
+              <span class="nowrap">
+                {{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }}
               </span><br>
-              {{ a_s.assignment.deadline_at|time:"H:i" }}
+              {{ a_s.assignment.deadline_at_local|time:"H:i" }}
             </div>
           </td>
           <td>
@@ -67,30 +60,22 @@
       <h3>{% trans "Archive" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th width="10%">
-            {% trans "Deadline" %}
-          </th>
+          <th width="10%">{% trans "Deadline" %}</th>
           <th></th>
-          <th width="20%">
-            {% trans "Course" %}
-          </th>
-          <th width="15%">
-            {% trans "State" %}
-          </th>
-          <th width="5%">
-            {% trans "Online" %}
-          </th>
+          <th width="20%">{% trans "Course" %}</th>
+          <th width="15%">{% trans "State" %}</th>
+          <th width="5%">{% trans "Online" %}</th>
         </thead>
         {% for a_s in assignment_list_archive %}
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
           <td>
-            <span style="white-space: nowrap;">{{ a_s.assignment.deadline_at|naturalday:"d E Y" }}</span><br>
-            {{ a_s.assignment.deadline_at|time:"H:i" }}
+              <div class="assignment-date">
+                    <span class="nowrap">{{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }}</span><br>
+                    {{ a_s.assignment.deadline_at_local|time:"H:i" }}
+              </div>
           </td>
           <td>
-            <a href="{{ a_s.get_student_url }}">
-              {{ a_s.assignment.title }}
-            </a>
+            <a href="{{ a_s.get_student_url }}">{{ a_s.assignment.title }}</a>
           </td>
           <td>
             <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">
@@ -125,4 +110,5 @@
   </div>
 </div>
 {% endif %}
+{% endlocaltime %}
 {% endblock content %}

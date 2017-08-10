@@ -831,6 +831,11 @@ class Assignment(TimeStampedModel):
             tz = self.get_city_timezone()
         return timezone.localtime(self.deadline_at, timezone=tz)
 
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
+
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
             "course_slug": self.course_offering.course.slug,

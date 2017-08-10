@@ -656,8 +656,6 @@ def test_assignment_deadline_display(settings, client):
     assert any(deadline_str in s.string for s in html.find_all('p'))
     # Test student submission page
     sa = StudentAssignmentFactory(assignment=assignment)
-    # student = sa.student
-    # client.login(student)
     response = client.get(sa.get_teacher_url())
     html = BeautifulSoup(response.content, "html.parser")
     # Note: On this page used `naturalday` filter, so use passed datetime
@@ -667,6 +665,48 @@ def test_assignment_deadline_display(settings, client):
     assert any(deadline_str in s.string for s in
                html.find_all('span', {"class": "nowrap"}))
 
+
+@pytest.mark.django_db
+def test_deadline_l10n_on_student_assignments_page(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    format_date_part = 'd E Y'
+    format_time_part = 'H:i'
+    # This day will be in archive block
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    current_term = SemesterFactory.create_current()
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course_offering__city_id='spb',
+                                   course_offering__semester_id=current_term.pk)
+    sa = StudentAssignmentFactory(assignment=assignment)
+    url = reverse('assignment_list_student')
+    student = sa.student
+    client.login(student)
+    response = client.get(url)
+    html = BeautifulSoup(response.content, "html.parser")
+    # Note: On this page used `naturalday` filter, so use passed datetime
+    year_part = formats.date_format(assignment.deadline_at_local(),
+                                    format_date_part)
+    assert year_part == "01 января 2017"
+    time_part = formats.date_format(assignment.deadline_at_local(),
+                                    format_time_part)
+    assert time_part == "18:00"
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Test `upcoming` block
+    now_year, _ = get_current_semester_pair()
+    dt = dt.replace(year=now_year + 1, month=2, hour=14)
+    assignment.deadline_at = dt
+    assignment.save()
+    year_part = formats.date_format(assignment.deadline_at_local(),
+                                    format_date_part)
+    assert year_part == "01 февраля {}".format(now_year + 1)
+    time_part = formats.date_format(assignment.deadline_at_local(),
+                                    format_time_part)
+    assert time_part == "17:00"
+    response = client.get(url)
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
 
 # TODO: assignment submission page - comments localisation, assignment created localization
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
