@@ -178,7 +178,8 @@ class AssignmentAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         },
     }
-    list_display = ['id', 'title', 'course_offering', 'created', 'deadline_at']
+    list_display = ['id', 'title', 'course_offering', 'created_local',
+                    'deadline_at_local']
     search_fields = ['course_offering__course__name']
 
     def get_readonly_fields(self, request, obj=None):
@@ -213,6 +214,16 @@ class AssignmentAdmin(admin.ModelAdmin):
             co_teachers = form.cleaned_data['course_offering'].courseofferingteacher_set.all()
             form.cleaned_data['notify_teachers'] = [t.pk for t in co_teachers if t.notify_by_default]
         return super().save_related(request, form, formsets, change)
+
+    def created_local(self, obj):
+        return admin_datetime(obj.created_local())
+    created_local.admin_order_field = 'created'
+    created_local.short_description = _("Created")
+
+    def deadline_at_local(self, obj):
+        return admin_datetime(obj.deadline_at_local())
+    deadline_at_local.admin_order_field = 'deadline_at'
+    deadline_at_local.short_description = _("Assignment|deadline")
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
