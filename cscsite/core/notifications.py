@@ -53,7 +53,6 @@ class UnreadNotificationsCache(object):
 
 
 class UnreadNotificationsCacheMiddleware(object):
-    """Set `city_code` based on sub domain for request object."""
     def __init__(self, get_response):
         self.get_response = get_response
         global _installed_middleware

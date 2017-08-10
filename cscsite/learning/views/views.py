@@ -317,50 +317,50 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
     template_name = "learning/courses/learning_my_courses.html"
 
     def get_context_data(self, **kwargs):
-        current_year, current_term = get_current_semester_pair()
-        # Get all student enrollments and split them
-        # FIXME: Наверное, я хочу сразу получить все COurseOffering!
-        # Сначала id всех активных записей юзера, а там уже CourseOffering! Это будет легче в плане запросов.
-        enrolled_on = (Enrollment.active
-                       .filter(student=self.request.user)
-                       .order_by('course_offering__semester__year',
-                                 '-course_offering__semester__type',
-                                 'course_offering__course__name')
-                       .select_related('course_offering',
-                                       'course_offering__course',
-                                       'course_offering__semester')
-                       .prefetch_related('course_offering__teachers'))
-        # FIXME: remove split_list
-        enrolled_ongoing, enrolled_archive = utils.split_list(
-            enrolled_on,
-            lambda e: (e.course_offering.semester.year == current_year
-                       and e.course_offering.semester.type == current_term))
-
-        current_term_index = get_term_index(current_year, current_term)
         try:
             city_code = get_student_city_code(self.request)
         except ValueError as e:
             messages.error(self.request, e.args[0])
             raise Redirect(to="/")
-        available = (CourseOffering.objects
-                     .in_city(city_code)
-                     .filter(semester__index=current_term_index)
-                     .select_related('course', 'semester')
-                     .order_by('semester__year', '-semester__type',
-                               'course__name')
-                     .prefetch_related('teachers'))
-        # Show summer courses in available on center site only
-        if (settings.SITE_ID != settings.CENTER_SITE_ID and
-                current_term == SEMESTER_TYPES.summer):
-            available = available.exclude(semester__type=SEMESTER_TYPES.summer)
-        enrolled_in_current_term = {e.course_offering_id for e in
-                                    enrolled_ongoing}
-        available = [co for co in available if co.pk not in
-                     enrolled_in_current_term]
+        # Get all student enrollments
+        enrollments = (Enrollment.active
+                       .filter(student_id=self.request.user)
+                       .select_related("course_offering")
+                       .only('id', 'grade', 'course_offering_id',
+                             'course_offering__grading_type'))
+        student_co_enrolled_in = {e.course_offering_id: e for e in enrollments}
+        # 1. Get all courses from current term and which student enrolled in
+        enrolled_in = Q(id__in=list(student_co_enrolled_in))
+        current_year, current_term = get_current_semester_pair(city_code)
+        current_term_index = get_term_index(current_year, current_term)
+        in_current_term = Q(semester__index=current_term_index)
+        if is_club_site():
+            # Hide summer courses on compsciclub.ru
+            in_current_term &= ~Q(semester__type=SEMESTER_TYPES.summer)
+        course_offerings = (CourseOffering.objects
+                            .in_city(city_code)
+                            .filter(in_current_term | enrolled_in)
+                            .select_related('course', 'semester')
+                            .order_by('semester__year', '-semester__type',
+                                      'course__name')
+                            .prefetch_related('teachers'))
+        # 2. And split them by type.
+        ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
+        for co in course_offerings:
+            if co.semester.index == current_term_index:
+                if co.pk in student_co_enrolled_in:
+                    # TODO: add `enrollments` to context and get grades explicitly in tmpl
+                    co.enrollment = student_co_enrolled_in[co.pk]
+                    ongoing_enrolled.append(co)
+                else:
+                    ongoing_rest.append(co)
+            else:
+                co.enrollment = student_co_enrolled_in[co.pk]
+                archive_enrolled.append(co)
         context = {
-            "course_list_available": available,
-            "enrollments_ongoing": enrolled_ongoing,
-            "enrollments_archive": enrolled_archive,
+            "ongoing_rest": ongoing_rest,
+            "ongoing_enrolled": ongoing_enrolled,
+            "archive_enrolled": archive_enrolled,
             # FIXME: what about custom template tag for this?
             # TODO: Add util method
             "current_term": "{} {}".format(SEMESTER_TYPES[current_term],

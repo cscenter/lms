@@ -10,7 +10,7 @@
             <li class="active" role="presentation">
                 <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{{ current_term }}</a>
             </li>
-            {% if enrollments_archive %}
+            {% if archive_enrolled %}
             <li role="presentation">
                 <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">Пройденные курсы</a>
             </li>
@@ -18,7 +18,7 @@
         </ul>
         <div class="tab-content">
           <div class="tab-pane active" id="current" role="tabpanel">
-            {% if enrollments_ongoing or course_list_available %}
+            {% if ongoing_enrolled or ongoing_rest %}
 
           <table class="table" width="100%">
             <thead>
@@ -26,20 +26,20 @@
                 <th class="actions"></th>
             </thead>
             <tbody>
-            {% for e in enrollments_ongoing %}
-            <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
+            {% for course_offering in ongoing_enrolled %}
+            <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
                 <td>
-                <a href="{{ e.course_offering.get_absolute_url }}" class="title">{{ e.course_offering.course.name }}</a> &nbsp;
-                  <span class="badge assignment-status {{ e.course_offering.grading_type_css_mixin }} {{ e.grade }}">{{ e.grade_honest }}</span><br>
+                <a href="{{ course_offering.get_absolute_url }}" class="title">{{ course_offering.course.name }}</a> &nbsp;
+                  <span class="badge assignment-status {{ course_offering.grading_type_css_mixin }} {{ course_offering.enrollment.grade }}">{{ course_offering.enrollment.grade_honest }}</span><br>
               {% trans "Professors" %}:
-                {% for teacher in e.course_offering.teachers.all %}
+                {% for teacher in course_offering.teachers.all %}
                 <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
                 </td>
                 <td>
-                    {% if e.course_offering.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ e.course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
-                    {% if e.course_offering.enrollment_is_open %}
-                    <a href="{{ e.course_offering.get_unenroll_url }}?back=course_list_student"
+                    {% if course_offering.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ course_offering.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
+                    {% if course_offering.enrollment_is_open %}
+                    <a href="{{ course_offering.get_unenroll_url }}?back=course_list_student"
                        class=" btn btn-sm btn-block btn-warning">{% trans "Leave course" %}
                     </a>
                     {% endif %}
@@ -47,7 +47,7 @@
             </tr>
             {% endfor %}
 
-            {% for course_offering in course_list_available %}
+            {% for course_offering in ongoing_rest %}
             <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
               <td>
                 <a class="title" href="{{ course_offering.get_absolute_url }}">
@@ -79,7 +79,7 @@
             {% endif %}
           </div>
 
-      {% if enrollments_archive %}
+      {% if archive_enrolled %}
           <div class="tab-pane" id="archive" role="tabpanel">
           <table class="table _archive" width="100%">
             <thead>
@@ -88,14 +88,13 @@
               <th width="15%">{% trans "Semester" %}</th>
             </thead>
             <tbody>
-            {% for e in enrollments_archive %}
-                <tr class="{{ e.course_offering.has_unread|yesno:"unread,noop" }}">
+            {% for course_offering in archive_enrolled %}
+                <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
                   <td>
-                    <a href="{{ e.course_offering.get_absolute_url }}">
-                      {{ e.course_offering.course.name }}</a>
+                    <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
                   </td>
-                  <td><span class="badge assignment-status {{ e.course_offering.grading_type_css_mixin }} {{ e.grade }}">{{ e.grade_honest }}</span></td>
-                  <td>{{ e.course_offering.semester }}</td>
+                  <td><span class="badge assignment-status {{ course_offering.grading_type_css_mixin }} {{ course_offering.enrollment.grade }}">{{ course_offering.enrollment.grade_honest }}</span></td>
+                  <td>{{ course_offering.semester }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -103,7 +102,7 @@
           </div>
       {% endif %}
 
-        {% if not enrollments_ongoing and not enrollments_archive and not course_list_available %}
+        {% if not ongoing_enrolled and not archive_enrolled and not ongoing_rest %}
             <div class="container center-aligned"><h5>{% trans "No courses yet" %}</h5></div>
         {% endif %}
     </div>

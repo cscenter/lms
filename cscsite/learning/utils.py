@@ -19,10 +19,13 @@ def now_local(city_code) -> datetime.datetime:
     return timezone.localtime(timezone.now(), timezone=tz)
 
 
-def get_current_semester_pair():
+def get_current_semester_pair(city_code=None):
     # FIXME: respect timezone?
-    date = timezone.now()
-    return date_to_term_pair(date)
+    if city_code:
+        dt = now_local(city_code)
+    else:
+        dt = timezone.now()
+    return date_to_term_pair(dt)
 
 
 def convert_term_parts_to_datetime(year, term_start):
@@ -134,7 +137,7 @@ def is_positive_grade(grade):
     return grade in POSITIVE_GRADES
 
 
-def split_list(iterable, predicate):
+def split_on_condition(iterable, predicate):
     true_lst, false_lst = [], []
     for x in iterable:
         if predicate(x):

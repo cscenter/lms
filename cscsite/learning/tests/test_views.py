@@ -6,6 +6,7 @@ import os
 import unittest
 
 import pytest
+import pytz
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -18,9 +19,9 @@ from testfixtures import LogCapture
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
 from learning.settings import GRADES, STUDENT_STATUS
-from learning.tests.utils import check_group_security
+from learning.tests.utils import check_url_security
 from users.factories import TeacherCenterFactory, StudentFactory, \
-    StudentCenterFactory
+    StudentCenterFactory, StudentClubFactory
 from .mixins import *
 from ..factories import *
 
@@ -418,7 +419,7 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
                                               city="kzn")
         response = self.client.get(reverse('course_list_student'))
-        self.assertEqual(len(response.context['course_list_available']), 1)
+        self.assertEqual(len(response.context['ongoing_rest']), 1)
 
 
 class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
@@ -1005,37 +1006,123 @@ def test_course_class_form(client, curator, settings):
 @pytest.mark.django_db
 def test_student_courses_list(client, settings):
     url = reverse('course_list_student')
-    check_group_security(client, settings,
-                         groups_allowed=[PARTICIPANT_GROUPS.STUDENT_CENTER],
-                         url=url)
-    student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
-    client.login(student)
+    check_url_security(client, settings,
+                       groups_allowed=[PARTICIPANT_GROUPS.STUDENT_CENTER],
+                       url=url)
+    student_spb = StudentCenterFactory(city_id='spb')
+    client.login(student_spb)
     response = client.get(url)
     assert response.status_code == 200
-    assert len(response.context['course_list_available']) == 0
-    assert len(response.context['enrollments_ongoing']) == 0
-    assert len(response.context['enrollments_archive']) == 0
-    now_year, now_season = get_current_semester_pair()
-    s = SemesterFactory.create(year=now_year, type=now_season)
-    cos = CourseOfferingFactory.create_batch(4, semester=s,
-                                             city_id=settings.DEFAULT_CITY_CODE)
+    assert len(response.context['ongoing_rest']) == 0
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['archive_enrolled']) == 0
+    now_year, now_season = get_current_semester_pair(student_spb.city_id)
+    current_term = SemesterFactory.create(year=now_year, type=now_season)
+    cos = CourseOfferingFactory.create_batch(4, semester=current_term,
+                                             city_id='spb', is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
-    enrollments_ongoing = []
-    enrollments_archive = []
-    cos_archived = CourseOfferingFactory.create_batch(3,
-        semester__year=now_year - 1)
+    prev_year = now_year - 1
+    cos_archived = CourseOfferingFactory.create_batch(
+        3, semester__year=prev_year, is_open=False)
     for co in cos_enrolled:
-        enrollments_ongoing.append(
-            EnrollmentFactory.create(student=student, course_offering=co))
+        EnrollmentFactory.create(student=student_spb, course_offering=co)
     for co in cos_archived:
-        enrollments_archive.append(
-            EnrollmentFactory.create(student=student, course_offering=co))
+        EnrollmentFactory.create(student=student_spb, course_offering=co)
     response = client.get(url)
-    context = response.context
-    assert len(enrollments_ongoing) == len(context['enrollments_ongoing'])
-    assert set(enrollments_ongoing) == set(context['enrollments_ongoing'])
-    assert len(enrollments_archive) == len(context['enrollments_archive'])
-    assert set(enrollments_archive) == set(context['enrollments_archive'])
-    assert len(cos_available) == len(context['course_list_available'])
-    assert set(cos_available) == set(context['course_list_available'])
+    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
+    assert set(cos_enrolled) == set(response.context['ongoing_enrolled'])
+    assert len(cos_archived) == len(response.context['archive_enrolled'])
+    assert set(cos_archived) == set(response.context['archive_enrolled'])
+    assert len(cos_available) == len(response.context['ongoing_rest'])
+    assert set(cos_available) == set(response.context['ongoing_rest'])
+    # Add co from other city
+    co_nsk = CourseOfferingFactory.create(semester=current_term, city_id='nsk',
+                                          is_open=False)
+    response = client.get(url)
+    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
+    assert len(cos_available) == len(response.context['ongoing_rest'])
+    assert len(cos_archived) == len(response.context['archive_enrolled'])
+    # Test for student from nsk
+    student_nsk = StudentCenterFactory(city_id='nsk')
+    client.login(student_nsk)
+    CourseOfferingFactory.create(semester__year=prev_year, city_id='nsk',
+                                 is_open=False)
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 1
+    assert set(response.context['ongoing_rest']) == {co_nsk}
+    assert len(response.context['archive_enrolled']) == 0
+    # Add open reading, it should be available on compscicenter.ru
+    co_open = CourseOfferingFactory.create(semester=current_term, city_id='nsk',
+                                           is_open=True)
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 2
+    assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
+    assert len(response.context['archive_enrolled']) == 0
+
+
+@pytest.mark.django_db
+def test_student_courses_list_csclub(client, settings, mocker):
+    settings.SITE_ID = settings.CLUB_SITE_ID
+    # Fix year and term
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    now_fixed = datetime.datetime(2016, month=3, day=8, tzinfo=pytz.utc)
+    mocked_timezone.return_value = now_fixed
+    now_year, now_season = get_current_semester_pair()
+    assert now_season == "spring"
+    url = reverse('course_list_student')
+    student = StudentClubFactory()
+    client.login(student)
+    # We didn't set city_id for student, but it's OK for compsciclub.ru, we
+    # rely on city code from request.city_code
+    response = client.get(url)
+    assert response.status_code == 200
+    # Make sure in tests we fallback to default city which is 'spb'
+    assert response.context['request'].city_code == 'spb'
+    # Show only open courses
+    current_term = SemesterFactory.create_current()
+    assert current_term.type == "spring"
+    co = CourseOfferingFactory.create(semester__type=now_season,
+                                      semester__year=now_year, city_id='nsk',
+                                      is_open=False)
+    # compsciclub.ru can't see center courses with default manager
+    assert CourseOffering.objects.count() == 0
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 0
+    assert len(response.context['archive_enrolled']) == 0
+    co.is_open = True
+    co.save()
+    assert CourseOffering.objects.count() == 1
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 0
+    assert len(response.context['archive_enrolled']) == 0
+    co.city_id = 'spb'
+    co.save()
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 1
+    assert set(response.context['ongoing_rest']) == {co}
+    assert len(response.context['archive_enrolled']) == 0
+    # Summer courses are hidden for compsciclub.ru
+    summer_semester = SemesterFactory.create(year=now_year - 1, type='summer')
+    co.semester = summer_semester
+    co.save()
+    co_active = CourseOfferingFactory.create(semester__type=now_season,
+                                             semester__year=now_year,
+                                             city_id='spb',
+                                             is_open=True)
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 1
+    assert set(response.context['ongoing_rest']) == {co_active}
+    assert len(response.context['archive_enrolled']) == 0
+    # But student can see them in list if they already enrolled
+    EnrollmentFactory.create(student=student, course_offering=co)
+    response = client.get(url)
+    assert len(response.context['ongoing_rest']) == 1
+    assert len(response.context['archive_enrolled']) == 1
+    assert set(response.context['archive_enrolled']) == {co}
