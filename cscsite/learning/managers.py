@@ -39,6 +39,7 @@ class StudyProgramQuerySet(query.QuerySet):
 
 
 class CourseClassQuerySet(query.QuerySet):
+    # FIXME: Tests for club part!!!
     def for_calendar(self, user):
         q = (self
              .select_related('venue',
@@ -48,14 +49,17 @@ class CourseClassQuerySet(query.QuerySet):
              .order_by('date', 'starts_at'))
         # Hide summer classes on compsciclub.ru if user not enrolled in
         if is_club_site():
+            # XXX: On join enrollment table we get duplicates in results.
+            # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(
                 course_offering__is_open=True,
                 course_offering__semester__type=SEMESTER_TYPES.summer,
                 course_offering__enrollment__student_id=user.pk,
                 course_offering__enrollment__is_deleted=False)
-            others = ~Q(course_offering__semester__type=SEMESTER_TYPES.summer)
+            others = (Q(course_offering__is_open=True) &
+                      ~Q(course_offering__semester__type=SEMESTER_TYPES.summer))
             if user.is_authenticated:
-                q = q.filter(summer_classes_enrolled_in | others)
+                q = q.filter(summer_classes_enrolled_in | others).distinct()
             else:
                 q = q.filter(others)
         return q
