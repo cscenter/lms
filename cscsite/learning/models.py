@@ -1013,6 +1013,10 @@ class StudentAssignment(TimeStampedModel):
         cache = get_unread_notifications_cache()
         return self in cache.assignments
 
+    def has_comments(self, user):
+        return any(c.author_id == user.pk for c in
+                   self.assignmentcomment_set.all())
+
     @cached_property
     def state(self):
         grade_min = self.assignment.grade_min

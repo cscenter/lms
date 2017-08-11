@@ -7,6 +7,7 @@ from collections import OrderedDict
 from vanilla import DetailView
 
 from core.utils import is_club_site
+from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 
 try:
@@ -36,7 +37,7 @@ from icalendar import Calendar, Event, vText, vUri
 from icalendar.prop import vInline
 from six.moves import zip
 
-from core.views import ProtectedFormMixin, SuperUserOnlyMixin
+from core.views import ProtectedFormMixin
 from learning.models import CourseClass, Assignment, StudentAssignment, \
     CourseOffering, NonCourseEvent, Semester, Enrollment, StudyProgram
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
@@ -253,7 +254,7 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
         return user.is_curator
 
 
-class UserReferenceDetailView(SuperUserOnlyMixin, generic.DetailView):
+class UserReferenceDetailView(CuratorOnlyMixin, generic.DetailView):
     model = CSCUserReference
     template_name = "users/reference_detail.html"
 

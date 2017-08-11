@@ -20,6 +20,7 @@ from learning.models import StudentAssignment, Assignment, CourseOffering
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
+from learning.tests.utils import assert_login_redirect
 from learning.utils import get_current_semester_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
@@ -102,56 +103,55 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
 
 
 @pytest.mark.django_db
-class TestCompletedCourseOfferingBehaviour(object):
-    def test_security_assignmentstudent_detail(self, client):
-        """
-        Students can't see assignments from completed course, which they failed
-        """
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
-        past_year = datetime.datetime.now().year - 3
-        past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
-        enrollment = EnrollmentFactory(student=student, course_offering=co,
-                                       grade=GRADES.unsatisfactory)
-        a = AssignmentFactory(course_offering=co)
-        a_s = StudentAssignment.objects.get(student=student, assignment=a)
-        url = a_s.get_student_url()
-        client.login(student)
-        response = client.get(url)
-        assert response.status_code == 403
-        # Teacher still can view student assignment
-        client.login(teacher)
-        response = client.get(a_s.get_teacher_url())
-        assert response.status_code == 200
+def test_security_assignmentstudent_detail(client, settings):
+    """
+    Students can't see assignments from completed course, which they failed
+    """
+    teacher = TeacherCenterFactory()
+    student = StudentCenterFactory()
+    past_year = datetime.datetime.now().year - 3
+    past_semester = SemesterFactory.create(year=past_year)
+    co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
+    enrollment = EnrollmentFactory(student=student, course_offering=co,
+                                   grade=GRADES.unsatisfactory)
+    a = AssignmentFactory(course_offering=co)
+    a_s = StudentAssignment.objects.get(student=student, assignment=a)
+    url = a_s.get_student_url()
+    client.login(student)
+    assert_login_redirect(client, settings, url)
+    # Teacher still can view student assignment
+    client.login(teacher)
+    response = client.get(a_s.get_teacher_url())
+    assert response.status_code == 200
 
-    def test_security_courseoffering_detail(self, client):
-        """Student can't watch news from completed course which they failed"""
-        teacher = TeacherCenterFactory()
-        student = StudentFactory()
-        past_year = datetime.datetime.now().year - 3
-        past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
-        enrollment = EnrollmentFactory(student=student, course_offering=co,
-                                       grade=GRADES.unsatisfactory)
-        a = AssignmentFactory(course_offering=co)
-        co.refresh_from_db()
-        assert co.failed_by_student(student)
-        client.login(student)
-        url = co.get_absolute_url()
-        response = client.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        assert soup.find(text=_("News")) is None
-        # Change student co mark
-        enrollment.grade = GRADES.excellent
-        enrollment.save()
-        response = client.get(url)
-        assert not co.failed_by_student(student)
-        # Change course offering state to not completed
-        co.completed_at = now().date() + datetime.timedelta(days=1)
-        co.save()
-        response = client.get(url)
-        assert not co.failed_by_student(student)
+
+@pytest.mark.django_db
+def test_security_courseoffering_detail(client):
+    """Student can't watch news from completed course which they failed"""
+    teacher = TeacherCenterFactory()
+    student = StudentFactory()
+    past_year = datetime.datetime.now().year - 3
+    co = CourseOfferingFactory(teachers=[teacher], semester__year=past_year)
+    enrollment = EnrollmentFactory(student=student, course_offering=co,
+                                   grade=GRADES.unsatisfactory)
+    a = AssignmentFactory(course_offering=co)
+    co.refresh_from_db()
+    assert co.failed_by_student(student)
+    client.login(student)
+    url = co.get_absolute_url()
+    response = client.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=_("News")) is None
+    # Change student co mark
+    enrollment.grade = GRADES.excellent
+    enrollment.save()
+    response = client.get(url)
+    assert not co.failed_by_student(student)
+    # Change course offering state to not completed
+    co.completed_at = now().date() + datetime.timedelta(days=1)
+    co.save()
+    response = client.get(url)
+    assert not co.failed_by_student(student)
 
 
 @pytest.mark.django_db

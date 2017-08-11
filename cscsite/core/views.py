@@ -9,7 +9,7 @@ import datetime
 from abc import abstractmethod, ABCMeta
 
 import unicodecsv
-from braces.views import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -48,17 +48,6 @@ class ReadOnlyFieldsMixin(object):
         for field in self.readonly_fields:
             cleaned_data[field] = getattr(self.instance, field)
         return cleaned_data
-
-
-class LoginRequiredMixin(LoginRequiredMixin):
-    raise_exception = False
-
-
-class SuperUserOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return user.is_superuser
 
 
 class ProtectedFormMixin(object):
@@ -112,10 +101,6 @@ class MarkdownRenderView(LoginRequiredMixin, generic.base.View):
 
     def __str__(self):
         return ''
-
-    # @method_decorator(requires_csrf_token)
-    # def dispatch(self, *args, **kwargs):
-    #     return super(MarkdownRenderView, self).dispatch(*args, **kwargs)
 
 
 class ReportFileOutput(object):

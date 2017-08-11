@@ -78,13 +78,13 @@
           {% endif %}
         {% endwith %}
       </div>
-      {% if not comments %}
+      {% if not a_s.assignmentcomment_set.all %}
         <div class="csc-well">
             {% crispy form form.helper %}
         </div>
       {% else %}
         <ul class="comment-list">
-        {% for comment in comments %}
+        {% for comment in a_s.assignmentcomment_set.all %}
             {# Should be ok for comparing python int type with None #}
             {% if comment.pk == first_comment_after_deadline %}
                 <li><hr class="deadline"></li>

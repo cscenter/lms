@@ -674,7 +674,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = a_s.get_student_url()
-        self.assertLoginRedirect(url)
+        assert self.client.get(url).status_code == 404
         test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -682,7 +682,10 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            self.assertLoginRedirect(url)
+            if not groups:
+                assert self.client.get(url).status_code == 404
+            else:
+                self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(student)
         self.assertEquals(200, self.client.get(url).status_code)
@@ -710,7 +713,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(student)
         url = s_a.get_student_url()
         response = self.client.get(url)
-        assert response.status_code == 403
+        self.assertLoginRedirect(url)
+        # assert response.status_code == 403
         # Student discussed the assignment, so has access
         ac = AssignmentCommentFactory.create(student_assignment=s_a,
                                              author=student)
@@ -733,7 +737,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         enrollment.grade = GRADES.unsatisfactory
         enrollment.save()
         response = self.client.get(url)
-        assert response.status_code == 403
+        self.assertLoginRedirect(url)
         ac = AssignmentCommentFactory.create(student_assignment=s_a,
                                              author=student)
         response = self.client.get(url)
@@ -784,7 +788,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
 
     def test_comment(self):
         student = StudentCenterFactory()
-        co = CourseOfferingFactory.create()
+        # Create open reading to make sure student has access to CO
+        co = CourseOfferingFactory.create(is_open=True)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -815,7 +820,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = a_s.get_teacher_url()
-        self.assertLoginRedirect(url)
+        assert self.client.get(url).status_code == 404
+        # Test GET
         test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -824,18 +830,18 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
             if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
-                self.assertEquals(403, self.client.get(url).status_code)
-            else:
                 self.assertLoginRedirect(url)
+            else:
+                assert self.client.get(url).status_code == 404
             self.doLogout()
         self.doLogin(teacher)
         self.assertEquals(200, self.client.get(url).status_code)
         self.doLogout()
         self.doLogin(student)
-        self.assertLoginRedirect(url)
+        assert self.client.get(url).status_code == 404
         self.doLogout()
-        grade_dict = {'grading_form': True,
-                      'grade': 3}
+        # Test POST
+        grade_dict = {'grading_form': True, 'grade': 3}
         test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -844,24 +850,10 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
             if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
-                resp = self.client.post(url, grade_dict)
-                self.assertEquals(403, resp.status_code)
-            else:
                 self.assertPOSTLoginRedirect(url, grade_dict)
+            else:
+                assert self.client.get(url).status_code == 404
             self.doLogout()
-
-    # def test_assignment_contents(self):
-    #     teacher = TeacherCenterFactory()
-    #     student = StudentCenterFactory()
-    #     co = CourseOfferingFactory.create(teachers=[teacher])
-    #     EnrollmentFactory.create(student=student, course_offering=co)
-    #     a = AssignmentFactory.create(course_offering=co)
-    #     a_s = (StudentAssignment.objects
-    #            .filter(assignment=a, student=student)
-    #            .get())
-    #     url = reverse('a_s_detail_teacher', args=[a_s.pk])
-    #     self.doLogin(teacher)
-    #     self.assertContains(self.client.get(url), a.text)
 
     def test_comment(self):
         teacher = TeacherCenterFactory()
