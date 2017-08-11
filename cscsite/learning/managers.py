@@ -48,8 +48,9 @@ class CourseClassQuerySet(query.QuerySet):
                              'course_offering__semester')
              .order_by('date', 'starts_at'))
         # Hide summer classes on compsciclub.ru if user not enrolled in
+        # FIXME: Performance issue.
         if is_club_site():
-            # XXX: On join enrollment table we get duplicates in results.
+            # XXX: On join enrollment table we get a lot of duplicates.
             # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(
                 course_offering__is_open=True,
@@ -58,10 +59,7 @@ class CourseClassQuerySet(query.QuerySet):
                 course_offering__enrollment__is_deleted=False)
             others = (Q(course_offering__is_open=True) &
                       ~Q(course_offering__semester__type=SEMESTER_TYPES.summer))
-            if user.is_authenticated:
-                q = q.filter(summer_classes_enrolled_in | others).distinct()
-            else:
-                q = q.filter(others)
+            q = q.filter(others)
         return q
 
     def for_city(self, city_code):
