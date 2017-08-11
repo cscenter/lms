@@ -1,28 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+from io import StringIO
+
 import pytest
-import logging
-import os
+import pytz
 
-from bs4 import BeautifulSoup
-from dateutil.relativedelta import relativedelta
-from testfixtures import LogCapture
-
-from django.conf import settings
-from django.conf.urls.static import static
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
-from django.forms.models import model_to_dict
-from django.test.utils import override_settings
+from django.core import mail, management
 from django.test import TestCase
-from django.utils.encoding import smart_text
 
-import cscenter.urls
 from learning.admin import AssignmentAdmin
 from learning.settings import GRADES
-from learning.utils import get_current_semester_pair
-from learning.models import AssignmentNotification
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 from .mixins import *
@@ -113,8 +101,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
 
 @pytest.mark.django_db
 def test_notification_teachers_list_for_assignment(client):
-    """After assignment creation we must be sure that `notify_teachers`
-    m2m prepopulated with course offering teachers whom notify_by_default flag is set.
+    """On assignment creation we have to ensure that `notify_teachers`
+    m2m prepopulated by course offering teachers with `notify_by_default=True`
     """
     student = StudentCenterFactory()
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
@@ -201,3 +189,63 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 2
     assert co_t3.pk not in Assignment.objects.order_by('id').all()[1].notify_teachers.all()
+    
+
+@pytest.mark.django_db
+def test_new_assignment(settings):
+    settings.LANGUAGE_CODE = 'ru'
+    sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
+    assignment = sa.assignment
+    dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    assignment.deadline_at = dt
+    assignment.save()
+    dt_local = assignment.deadline_at_local()
+    assert dt_local.hour == 18
+    dt_str = "18:00 04 февраля"
+    AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
+                                  student_assignment=sa)
+    out = StringIO()
+    mail.outbox = []
+    management.call_command("notify", stdout=out)
+    assert len(mail.outbox) == 1
+    assert dt_str in mail.outbox[0].body
+    # Test with other timezone
+    sa.assignment.course_offering.city_id = 'nsk'
+    sa.assignment.course_offering.save()
+    AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
+                                  student_assignment=sa)
+    out = StringIO()
+    mail.outbox = []
+    management.call_command("notify", stdout=out)
+    assert len(mail.outbox) == 1
+    assert "22:00 04 февраля" in mail.outbox[0].body
+
+
+@pytest.mark.django_db
+def test_deadline_changed(settings):
+    settings.LANGUAGE_CODE = 'ru'
+    sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
+    assignment = sa.assignment
+    dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    assignment.deadline_at = dt
+    assignment.save()
+    dt_local = assignment.deadline_at_local()
+    assert dt_local.hour == 18
+    dt_str = "18:00 04 февраля"
+    AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
+                                  student_assignment=sa)
+    out = StringIO()
+    mail.outbox = []
+    management.call_command("notify", stdout=out)
+    assert len(mail.outbox) == 1
+    assert dt_str in mail.outbox[0].body
+    # Test with other timezone
+    sa.assignment.course_offering.city_id = 'nsk'
+    sa.assignment.course_offering.save()
+    AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
+                                  student_assignment=sa)
+    out = StringIO()
+    mail.outbox = []
+    management.call_command("notify", stdout=out)
+    assert len(mail.outbox) == 1
+    assert "22:00 04 февраля" in mail.outbox[0].body
