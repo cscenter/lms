@@ -1250,6 +1250,23 @@ class AssignmentNotification(TimeStampedModel):
                 .format(smart_text(self.user.get_full_name()),
                         smart_text(self.student_assignment)))
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.student_assignment.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
+
 
 @python_2_unicode_compatible
 class CourseOfferingNewsNotification(TimeStampedModel):

@@ -48,10 +48,6 @@ EMAILS = {
         'title': "Появилось новое домашнее задание",
         'template': "emails/new_assignment.html"
     },
-    'enrollment_application': {
-        'title': "Спасибо за заполнение заявки на поступление в CSC",
-        'template': "emails/enrollment_application.html"
-    }
 }
 
 # Student and teacher groups which can access center site.
@@ -139,17 +135,17 @@ class Command(BaseCommand):
         for notification in notifications_assignments:
             base_url = get_base_url(notification)
             a_s = notification.student_assignment
-            context = {'a_s_link_student': base_url + a_s.get_student_url(),
-                       'a_s_link_teacher': base_url + a_s.get_teacher_url(),
-                       'assignment_link':
-                           base_url + reverse('assignment_detail_teacher',
-                                              args=[a_s.assignment.pk]),
-                       'notification_created': notification.created,
-                       'assignment_name': smart_text(a_s.assignment),
-                       'assignment_text': smart_text(a_s.assignment.text),
-                       'student_name': smart_text(a_s.student),
-                       'deadline_at': a_s.assignment.deadline_at,
-                       'course_name': smart_text(a_s.assignment.course_offering.course)}
+            context = {
+                'a_s_link_student': base_url + a_s.get_student_url(),
+                'a_s_link_teacher': base_url + a_s.get_teacher_url(),
+                'assignment_link': base_url + reverse('assignment_detail_teacher', args=[a_s.assignment.pk]),
+                'notification_created': notification.created_local(),
+                'assignment_name': smart_text(a_s.assignment),
+                'assignment_text': smart_text(a_s.assignment.text),
+                'student_name': smart_text(a_s.student),
+                'deadline_at': a_s.assignment.deadline_at_local(),
+                'course_name': smart_text(a_s.assignment.course_offering.course)
+            }
             if notification.is_about_creation:
                 name = 'new_assignment'
             elif notification.is_about_deadline:
@@ -179,16 +175,18 @@ class Command(BaseCommand):
             base_url = get_base_url(notification)
             course_offering = notification.course_offering_news.course_offering
             name = 'new_courseoffering_news'
-            context = {'courseoffering_link':
-                           base_url + course_offering.get_absolute_url(),
-                       'courseoffering_name':
-                       smart_text(course_offering.course),
-                       'courseoffering_news_name':
-                       notification.course_offering_news.title,
-                       'courseoffering_news_text':
-                       notification.course_offering_news.text,
-                       'course_name':
-                       smart_text(course_offering.course)}
+            context = {
+                'courseoffering_link':
+                    base_url + course_offering.get_absolute_url(),
+                'courseoffering_name':
+                    smart_text(course_offering.course),
+                'courseoffering_news_name':
+                    notification.course_offering_news.title,
+                'courseoffering_news_text':
+                    notification.course_offering_news.text,
+                'course_name':
+                    smart_text(course_offering.course)
+            }
 
             notify(notification, name, context, self.stdout)
 
@@ -199,6 +197,7 @@ class Command(BaseCommand):
                                 .filter(public=True, emailed=False)
                                 .select_related("recipient"))
 
+        # FIXME: I was wrong. It's hard to understand and debug. Refactor
         # id => code
         types_map = {v: k for k, v in
                      apps.get_app_config('notifications').type_map.items()}

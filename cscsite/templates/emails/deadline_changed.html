@@ -1,3 +1,3 @@
-Крайний срок сдачи домашнего задания «<a href="{{ a_s_link_student }}">{{ assignment_name }}</a>» изменился: его необходимо сдать до {{ deadline_at|time:"H:i" }} <span style="white-space: nowrap;">{{ deadline_at|date:"d E" }}</span>.
+{% load tz %}{% localtime off %}Крайний срок сдачи домашнего задания «<a href="{{ a_s_link_student }}">{{ assignment_name }}</a>» изменился: его необходимо сдать до {{ deadline_at|time:"H:i" }} <span style="white-space: nowrap;">{{ deadline_at|date:"d E" }}</span>.
 
-Это письмо отправлено автоматически и не требует ответа.
+Это письмо отправлено автоматически и не требует ответа.{% endlocaltime %}

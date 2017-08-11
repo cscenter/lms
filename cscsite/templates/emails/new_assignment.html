@@ -1,5 +1,5 @@
-На сайте опубликовано новое задание «<a href="{{ a_s_link_student }}">{{ assignment_name }}</a>», его необходимо сдать до {{ deadline_at|time:"H:i" }} <span style="white-space: nowrap;">{{ deadline_at|date:"d E" }}</span>. Описание домашнего задания ниже, в письме может отображаться некорректно.
+{% load tz %}{% localtime off %}На сайте опубликовано новое задание «<a href="{{ a_s_link_student }}">{{ assignment_name }}</a>», его необходимо сдать до {{ deadline_at|time:"H:i" }} <span style="white-space: nowrap;">{{ deadline_at|date:"d E" }}</span>. Описание домашнего задания ниже, в письме может отображаться некорректно.
 
 {{ assignment_text|safe }}
 
-Это письмо отправлено автоматически и не требует ответа.
+Это письмо отправлено автоматически и не требует ответа.{% endlocaltime %}
