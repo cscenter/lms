@@ -3,15 +3,19 @@ import logging
 import os
 import posixpath
 from collections import OrderedDict
+from typing import Optional
 from urllib.parse import urlencode
 
 import nbconvert
+from braces.views._access import UserPassesTestMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.mixins import AccessMixin
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q, Prefetch, When, Value, Case
+from django.db.models import Q, Prefetch, When, Value, Case, \
+    prefetch_related_objects
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.http.response import JsonResponse
@@ -54,7 +58,7 @@ DROP_ATTACHMENT_LINK = """
 
 __all__ = [
     # mixins
-    'StudentAssignmentDetailMixin',
+    'AssignmentProgressBaseView',
     # views
     'TimetableTeacherView', 'TimetableStudentView', 'CalendarStudentFullView',
     'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
@@ -835,117 +839,110 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
         return context
 
 
-# FIXME: rewrite with vanilla view
-class StudentAssignmentDetailMixin(object):
+class AssignmentProgressBaseView(AccessMixin):
     model = AssignmentComment
     template_name = "learning/assignment_submission_detail.html"
     form_class = AssignmentCommentForm
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        pk = self.kwargs.get('pk')
-        a_s = get_object_or_404(
-            StudentAssignment
-                .objects
-                .filter(pk=pk)
-                .select_related('assignment',
-                                'student',
+    def dispatch(self, request, *args, **kwargs):
+        # Fail-fast without DB hit if request user hasn't enough permissions
+        if not self.has_permissions_coarse(request.user):
+            raise Http404
+        self.student_assignment = self.get_student_assignment()
+        if not self.student_assignment:
+            raise Http404
+        if not self.has_permissions_precise(request.user):
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_student_assignment(self) -> Optional[StudentAssignment]:
+        return (StudentAssignment.objects
+                .filter(pk=self.kwargs['pk'])
+                .select_related('student',
+                                'assignment',
                                 'assignment__course_offering',
                                 'assignment__course_offering__course',
                                 'assignment__course_offering__semester')
-                .prefetch_related('assignment__course_offering__teachers',
-                                  'assignment__assignmentattachment_set'))
+                .first())
 
+    @staticmethod
+    def _prefetch_data(student_assignment):
+        prefetch_comments = Prefetch('assignmentcomment_set',
+                                     queryset=(AssignmentComment.objects
+                                               .select_related('author')
+                                               .order_by('created')))
+        prefetch_related_objects([student_assignment],
+                                 prefetch_comments,
+                                 'assignment__course_offering__teachers',
+                                 'assignment__assignmentattachment_set')
+
+    def get_context_data(self, form, **kwargs):
+        sa = self.student_assignment
+        # Since no need to prefetch data for POST-action, do it only here.
+        self._prefetch_data(sa)
         # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
-         .filter(student_assignment=a_s, user=self.request.user)
+         .filter(student_assignment=sa, user=self.request.user)
          .update(is_unread=False))
-
-        self._additional_permissions_check(a_s=a_s)
-
-        context['a_s'] = a_s
-        context['course_offering'] = a_s.assignment.course_offering
-        context['user_type'] = self.user_type
-
-        comments = (AssignmentComment.objects.filter(student_assignment=a_s)
-                    .select_related('author')
-                    .order_by('created'))
-        first_comment_after_deadline = None
-        assignment_deadline = (a_s.assignment.deadline_at +
-                               datetime.timedelta(minutes=1))
-        for c in comments:
-            if first_comment_after_deadline is None \
-                    and c.created >= assignment_deadline:
-                first_comment_after_deadline = c.pk
-        # Dynamically replace label
-        if (not comments and context['user_type'] == 'student' and
-                not a_s.assignment.is_online):
-            context['form'].fields.get('text').label = _("Add solution")
-
-        context['first_comment_after_deadline'] = first_comment_after_deadline
-        context['comments'] = comments
-        context['one_teacher'] = (a_s
-                                  .assignment
-                                  .course_offering
-                                  .teachers
-                                  .count() == 1)
-        context['hashes_json'] = comment_persistence.get_hashes_json()
+        deadline_at = sa.assignment.deadline_at
+        cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
+                             c.created >= deadline_at)
+        first_comment_after_deadline = next(cs_after_deadline, None)
+        context = {
+            'user_type': self.user_type,
+            'a_s': sa,
+            'form': form,
+            'first_comment_after_deadline': first_comment_after_deadline,
+            'one_teacher': (sa.assignment.course_offering.teachers.count() == 1),
+            'hashes_json': comment_persistence.get_hashes_json()
+        }
         return context
 
-    def _additional_permissions_check(self, *args, **kwargs):
-        pass
-
     def form_valid(self, form):
-        pk = self.kwargs.get('pk')
-        a_s = get_object_or_404(StudentAssignment.objects.filter(pk=pk))
         comment = form.save(commit=False)
-        comment.student_assignment = a_s
+        comment.student_assignment = self.student_assignment
         comment.author = self.request.user
         comment.save()
         comment_persistence.report_saved(comment.text)
         return redirect(self.get_success_url())
 
 
-class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
-                                         StudentAssignmentDetailMixin,
-                                         generic.CreateView):
+class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
+                                         CreateView):
     user_type = 'teacher'
 
-    def get_context_data(self, *args, **kwargs):
-        context = (super(StudentAssignmentTeacherDetailView, self)
-                   .get_context_data(*args, **kwargs))
-        a_s = context['a_s']
+    def has_permissions_coarse(self, user):
+        return user.is_curator or user.is_teacher
+
+    def has_permissions_precise(self, user):
+        co = self.student_assignment.assignment.course_offering
+        return user.is_curator or user in co.teachers.all()
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        a_s = self.student_assignment
         co = a_s.assignment.course_offering
-        initial = {'grade': a_s.grade}
-        is_actual_teacher = (
-            self.request.user in (a_s
-                                  .assignment
-                                  .course_offering
-                                  .teachers.all()))
-        if not is_actual_teacher and not self.request.user.is_curator:
-            raise PermissionDenied
-        context['is_actual_teacher'] = is_actual_teacher
-        context['grade_form'] = AssignmentGradeForm(
-            initial, grade_max=a_s.assignment.grade_max)
-        # TODO: Replace with 1 query
-        base = (
-            StudentAssignment.objects
+        # Get next unchecked assignment
+        base = (StudentAssignment.objects
                 .filter(grade__isnull=True,
                         first_submission_at__isnull=False,
                         assignment__course_offering=co,
                         assignment__course_offering__teachers=self.request.user)
-                .order_by('assignment__deadline_at',
-                          'assignment__course_offering__course__name',
-                          'pk'))
+                .order_by('assignment__deadline_at', 'pk')
+                .only('pk'))
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
+        context['is_actual_teacher'] = self.request.user in co.teachers.all()
+        context['grade_form'] = AssignmentGradeForm(
+            initial={'grade': a_s.grade},
+            grade_max=a_s.assignment.grade_max)
         return context
 
     def post(self, request, *args, **kwargs):
+        # TODO: separate to update view
         if 'grading_form' in request.POST:
-            pk = self.kwargs.get('pk')
-            a_s = get_object_or_404(StudentAssignment.objects.filter(pk=pk))
+            a_s = self.student_assignment
             form = AssignmentGradeForm(request.POST,
                                        grade_max=a_s.assignment.grade_max)
 
@@ -969,13 +966,10 @@ class StudentAssignmentTeacherDetailView(TeacherOnlyMixin,
                 return HttpResponseBadRequest(_("Grading form is invalid") +
                                               "{}".format(form.errors))
         else:
-            return (super(StudentAssignmentTeacherDetailView, self)
-                    .post(request, *args, **kwargs))
+            return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
-        pk = self.kwargs.get('pk')
-        # TODO: get_teacher_url
-        return reverse('a_s_detail_teacher', args=[pk])
+        return self.student_assignment.get_teacher_url()
 
 
 class AssignmentCreateUpdateMixin(TeacherOnlyMixin):

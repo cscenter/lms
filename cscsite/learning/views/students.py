@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+from vanilla import CreateView
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
@@ -16,7 +17,7 @@ from learning.models import Useful, Internship, StudentAssignment, Semester, \
     Enrollment, CourseOffering
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
-from learning.views import StudentAssignmentDetailMixin
+from learning.views import AssignmentProgressBaseView
 from learning.views.utils import get_student_city_code
 
 
@@ -38,48 +39,38 @@ class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
                 .order_by("sort"))
 
 
-# TODO: Refactor without generic view
-class StudentAssignmentStudentDetailView(ParticipantOnlyMixin,
-                                         StudentAssignmentDetailMixin,
-                                         generic.CreateView):
-    """
-    ParticipantOnlyMixin here for 2 reasons - we should redirect teachers
-    to there own view and show submissions to graduates and expelled students
-    """
+class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
+                                         CreateView):
     user_type = 'student'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        co = context['course_offering']
-        co_failed_by_student = co.failed_by_student(self.request.user)
-        sa = context['a_s']
-        if co_failed_by_student:
-            # After student failed course, deny access if he hasn't submissions
-            # TODO: move logic to context to avoid additional loop over comments
-            has_comments = False
-            for c in context['comments']:
-                if c.author == self.request.user:
-                    has_comments = True
-                    break
-            if not has_comments and (sa.grade is None or sa.grade == 0):
-                raise PermissionDenied
+    def has_permissions_coarse(self, user):
+        return (user.is_student or user.is_curator or user.is_graduate or
+                user.is_teacher)
+
+    def has_permissions_precise(self, user):
+        sa = self.student_assignment
+        # Redirect actual course teacher to teaching/ section
+        if user in sa.assignment.course_offering.teachers.all():
+            raise Redirect(to=sa.get_teacher_url())
+        # If student failed course, deny access when he has no submissions
+        # or positive grade
+        if sa.student == user:
+            co = sa.assignment.course_offering
+            if co.failed_by_student(self.request.user):
+                if not sa.has_comments(user) and not sa.grade:
+                    return False
+        return sa.student == user or user.is_curator
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        # Update `text` label if student has no submissions yet
+        sa = self.student_assignment
+        if sa.assignment.is_online and not sa.has_comments(self.request.user):
+            context['form'].fields.get('text').label = _("Add solution")
         return context
 
-    def _additional_permissions_check(self, *args, **kwargs):
-        a_s = kwargs.get("a_s")
-        user = self.request.user
-        if user in a_s.assignment.course_offering.teachers.all():
-            raise Redirect(to=a_s.get_teacher_url())
-        # This should guard against reading other's assignments. Not generic
-        # enough, but can't think of better way
-        if not a_s.student == user and not user.is_curator:
-            raise Redirect(to="{}?next={}".format(settings.LOGIN_URL,
-                                                  self.request.get_full_path()))
-
     def get_success_url(self):
-        pk = self.kwargs.get('pk')
-        # TODO: replace with get_student_url
-        return reverse('a_s_detail_student', args=[pk])
+        return self.student_assignment.get_student_url()
 
 
 class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):

@@ -20,6 +20,7 @@ from django.utils.encoding import smart_text
 
 import cscenter.urls
 from learning.admin import AssignmentAdmin
+from learning.settings import GRADES
 from learning.utils import get_current_semester_pair
 from learning.models import AssignmentNotification
 from users.factories import TeacherCenterFactory, StudentCenterFactory
@@ -38,7 +39,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         teacher1 = TeacherCenterFactory()
         teacher2 = TeacherCenterFactory()
         co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course_offering=co,
+                                 grade=GRADES.good)
         # Notify_teachers m2m populated only from view action
         self.doLogin(teacher1)
         a = AssignmentFactory.build()
@@ -67,6 +69,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         teacher_comment_dict = {'text': "Test teacher comment without file"}
 
         # Post first comment on assignment
+        assert not co.failed_by_student(student)
         self.doLogin(student)
         self.client.post(student_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
@@ -120,7 +123,8 @@ def test_notification_teachers_list_for_assignment(client):
     co_teacher1 = CourseOfferingTeacher.objects.get(course_offering=co, teacher=t1)
     co_teacher1.notify_by_default = False
     co_teacher1.save()
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course_offering=co,
+                             grade=GRADES.good)
     # Create first assignment
     client.login(t1)
     a = AssignmentFactory.build()
@@ -147,6 +151,7 @@ def test_notification_teachers_list_for_assignment(client):
     assert response.status_code == 200
     assert len(assignment.notify_teachers.all()) == 3
     # Leave a comment from student
+    assert not co.failed_by_student(student)
     client.login(student)
     sa = StudentAssignment.objects.get(assignment=assignment, student=student)
     sa_url = sa.get_student_url()
