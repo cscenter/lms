@@ -55,6 +55,7 @@ const fn = {
     },
 
     initUberEditors: function () {
+        UberEditor.cleanLocalStorage($ubereditors);
         $ubereditors.each(function (i, textarea) {
             const editor = UberEditor.init(textarea);
             CSC.config.uberEditors.push(editor);
@@ -63,7 +64,6 @@ const fn = {
             $('a[data-toggle="tab"]').on('shown.bs.tab',
                                          UberEditor.reflowOnTabToggle);
         }
-        UberEditor.cleanLocalStorage($ubereditors);
     },
 
     courseOfferingTabs: function() {
