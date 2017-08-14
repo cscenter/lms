@@ -46,11 +46,17 @@ class CSCUserChangeForm(UserChangeForm):
         """XXX: we can't validate m2m like `groups` in Model.clean() method"""
         cleaned_data = super(CSCUserChangeForm, self).clean()
         enrollment_year = cleaned_data.get('enrollment_year')
-        groups = [x.pk for x in cleaned_data.get('groups', [])]
-        if self.instance.group.STUDENT_CENTER in groups \
-           and enrollment_year is None:
-            self.add_error('enrollment_year', ValidationError(
-                _("CSCUser|enrollment year should be provided for students")))
+        groups = {x.pk for x in cleaned_data.get('groups', [])}
+        if self.instance.group.STUDENT_CENTER in groups:
+            if enrollment_year is None:
+                self.add_error('enrollment_year', ValidationError(
+                    _("Enrollment year should be provided for students")))
+        if groups.intersection({PARTICIPANT_GROUPS.STUDENT_CENTER,
+                                PARTICIPANT_GROUPS.VOLUNTEER,
+                                PARTICIPANT_GROUPS.GRADUATE_CENTER}):
+            if not cleaned_data.get('city', ''):
+                self.add_error('city', ValidationError(
+                    _("Provide city for student")))
 
         if self.instance.group.VOLUNTEER in groups \
            and enrollment_year is None:
