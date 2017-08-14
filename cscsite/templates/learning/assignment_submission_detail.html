@@ -166,7 +166,7 @@
                 <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
-                {{ a_s.assignment.created|date:"d E Y" }}
+                {{ a_s.assignment.created_local|date:"d E Y" }}
                 {% if a_s.assignment.is_online %}
                 <h4>{% trans "Can be passed online "%}</h4>
                 {% endif %}
