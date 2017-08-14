@@ -9,7 +9,7 @@
   with_items:
     - 'ppa:nginx/stable'
     - 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
-    - 'ppa:fkrull/deadsnakes'
+    - 'ppa:deadsnakes/ppa'
 
 - name: Upgrade all packages to the latest version
   apt: upgrade=dist
