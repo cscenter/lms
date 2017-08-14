@@ -76,7 +76,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertIn('enrollment_year', form.errors.keys())
         user_data.update({'enrollment_year': 2010})
         form = CSCUserChangeForm(user_data, instance=user)
-        self.assertTrue(form.is_valid())
+        assert not form.is_valid()
+        assert 'city' in form.errors.keys()
+        user_data.update({'city': 'spb'})
+        form = CSCUserChangeForm(user_data, instance=user)
+        assert form.is_valid()
 
     def test_graduate_should_have_graduation_year(self):
         """
@@ -90,11 +94,15 @@ class UserTests(MyUtilitiesMixin, TestCase):
             'groups': [user.group.GRADUATE_CENTER],
         })
         form = CSCUserChangeForm(user_data, instance=user)
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         self.assertIn('graduation_year', form.errors.keys())
         user_data.update({'graduation_year': 2015})
         form = CSCUserChangeForm(user_data, instance=user)
-        self.assertTrue(form.is_valid())
+        assert not form.is_valid()
+        assert 'city' in form.errors.keys()
+        user_data.update({'city': 'spb'})
+        form = CSCUserChangeForm(user_data, instance=user)
+        assert form.is_valid()
 
     def test_full_name_contains_patronymic(self):
         """
