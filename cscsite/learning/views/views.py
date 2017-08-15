@@ -44,7 +44,7 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
     OnlineCourse, InternationalSchool
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
-from learning.utils import get_current_semester_pair, get_term_index, now_local
+from learning.utils import get_current_term_pair, get_term_index, now_local
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView
@@ -335,7 +335,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         student_co_enrolled_in = {e.course_offering_id: e for e in enrollments}
         # 1. Get all courses from current term and which student enrolled in
         enrolled_in = Q(id__in=list(student_co_enrolled_in))
-        current_year, current_term = get_current_semester_pair(city_code)
+        current_year, current_term = get_current_term_pair(city_code)
         current_term_index = get_term_index(current_year, current_term)
         in_current_term = Q(semester__index=current_term_index)
         if is_club_site():

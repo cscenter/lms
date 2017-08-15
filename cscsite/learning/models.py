@@ -7,6 +7,7 @@ import logging
 import os.path
 import time
 
+import pytz
 from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -35,7 +36,8 @@ from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
-from .utils import get_current_semester_pair, \
+from learning.utils import get_current_term_index
+from .utils import get_current_term_pair, \
     get_term_index, convert_term_parts_to_datetime, get_term_start, \
     get_term_by_index
 
@@ -68,7 +70,6 @@ class Course(TimeStampedModel):
         return reverse('course_detail', args=[self.slug])
 
 
-@python_2_unicode_compatible
 class Semester(models.Model):
     TYPES = SEMESTER_TYPES
 
@@ -145,33 +146,25 @@ class Semester(models.Model):
 
         Now helps to validate class date range in `CourseClassForm`
         """
-        return get_term_start(self.year, self.type)
+        return get_term_start(self.year, self.type, pytz.UTC)
 
     @cached_property
     def ends_at(self):
-        if self.type == 'spring':
-            next_start_str = learn_conf.SUMMER_TERM_START
-            next_year = self.year
-        elif self.type == 'summer':
-            next_start_str = learn_conf.AUTUMN_TERM_START
-            next_year = self.year
-        else:
-            next_start_str = learn_conf.SPRING_TERM_START
-            next_year = self.year + 1
-        return convert_term_parts_to_datetime(next_year, next_start_str) \
-               - datetime.timedelta(days=1)
+        return next_term_starts_at(self.index) - datetime.timedelta(days=1)
 
     @classmethod
     def get_current(cls):
-        year, season = get_current_semester_pair()
+        # FIXME: Respect timezone. Hard coded city code
+        year, term_type = get_current_term_pair('spb')
         obj, created = cls.objects.get_or_create(year=year,
-                                                 type=season)
+                                                 type=term_type)
         if created:
             obj.save()
         return obj
 
     def is_current(self):
-        year, term = get_current_semester_pair()
+        # FIXME: Respect timezone. Hard coded city code
+        year, term = get_current_term_pair('spb')
         return year == self.year and term == self.type
 
     def save(self, *args, **kwargs):
@@ -186,14 +179,11 @@ class Semester(models.Model):
             return self.year - 1
 
 
-def next_term_starts_at(term_pair=None):
-    if not term_pair:
-        year, term_type = get_current_semester_pair()
-    else:
-        year, term_type = term_pair
-    term_index = get_term_index(year, term_type)
-    _, next_term = get_term_by_index(term_index + 1)
-    return get_term_start(year, next_term).date()
+def next_term_starts_at(term_index=None, tz_aware=pytz.UTC):
+    if not term_index:
+        term_index = get_current_term_index(tz_aware)
+    year, next_term = get_term_by_index(term_index + 1)
+    return get_term_start(year, next_term, tz_aware)
 
 
 class CourseOffering(TimeStampedModel):
@@ -333,32 +323,29 @@ class CourseOffering(TimeStampedModel):
 
     @property
     def in_current_term(self):
-        year, term_type = get_current_semester_pair()
-        return year == self.semester.year and term_type == self.semester.type
+        current_term_index = get_current_term_index(self.get_city())
+        return self.semester.index == current_term_index
 
     @property
     def enrollment_is_open(self):
-        # FIXME: respect timezone!
         if self.is_open:
             return True
-        if self.is_completed:  # or not self.in_current_term:
+        if self.is_completed:
             return False
         today = now()
+        city_tz = self.get_city_timezone()
         if self.semester.enroll_before:
-            enroll_before_date = self.semester.enroll_before
-            enroll_before = datetime.datetime(
-                year=enroll_before_date.year,
-                month=enroll_before_date.month,
-                day=enroll_before_date.day,
-                tzinfo=utc
-            )
-            enroll_before += datetime.timedelta(days=1)
+            date_naive = self.semester.enroll_before + datetime.timedelta(days=1)
+            dt_naive = datetime.datetime(year=date_naive.year,
+                                         month=date_naive.month,
+                                         day=date_naive.day)
+            enroll_before_local = city_tz.localize(dt_naive)
         else:
-            year, term_type = get_current_semester_pair()
-            current_term_start = get_term_start(year, term_type)
-            enroll_before = current_term_start + datetime.timedelta(
-                days=learn_conf.ENROLLMENT_DURATION)
-        if today > enroll_before:
+            year, term_type = get_current_term_pair(self.get_city())
+            current_term_start = get_term_start(year, term_type, city_tz)
+            lifetime = datetime.timedelta(days=learn_conf.ENROLLMENT_DURATION)
+            enroll_before_local = current_term_start + lifetime
+        if today > enroll_before_local:
             return False
         return True
 

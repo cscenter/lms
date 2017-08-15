@@ -14,7 +14,7 @@ from learning.projects.factories import ProjectFactory, ReportFactory, \
 from learning.projects.forms import ReportReviewForm
 from learning.projects.models import Report, ProjectStudent, Review
 from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
-from learning.utils import get_current_semester_pair
+from learning.utils import get_current_term_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
@@ -84,7 +84,7 @@ def test_project_reviewer_only_mixin_security(client, curator):
 def test_reviewer_list(client, curator):
     """Test GET-filter `show` works"""
     reviewer = ProjectReviewerFactory.create()
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     client.login(reviewer)
@@ -138,7 +138,7 @@ def test_create_project_presentations(client):
 def test_project_detail_unauth(client):
     """Make sure unauth user never see report form with any status"""
     student = StudentCenterFactory()
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory.create(students=[student], reviewers=[reviewer],
@@ -164,7 +164,7 @@ def test_project_detail_unauth(client):
 def test_project_detail_student_participant(client):
     from datetime import timedelta
     student = StudentCenterFactory()
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     reviewer = ProjectReviewerFactory()
@@ -229,7 +229,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     curator2 = UserFactory(is_superuser=True, is_staff=True)
     today = now().date()
     student = StudentCenterFactory()
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester.report_starts_at = today
     semester.report_ends_at = today + timedelta(days=1)
@@ -248,7 +248,7 @@ def test_project_detail_student_participant_notifications(client, curator):
 def test_project_detail_reviewer(client, curator):
     reviewer = ProjectReviewerFactory()
     client.login(reviewer)
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     student = StudentCenterFactory()
@@ -278,7 +278,7 @@ def test_project_detail_reviewer(client, curator):
 
 @pytest.mark.django_db
 def test_reviewer_project_enroll(client, curator):
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     student = StudentCenterFactory()
@@ -358,7 +358,7 @@ def test_reportpage_notifications(client, curator):
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     student1, student2 = StudentCenterFactory.create_batch(2)
     project = ProjectFactory(students=[student1, student2],
@@ -459,7 +459,7 @@ def test_reportpage_summarize_notifications(client, curator):
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
-    year, term_type = get_current_semester_pair()
+    year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     student1, student2 = StudentCenterFactory.create_batch(2)
     project = ProjectFactory(students=[student1, student2],

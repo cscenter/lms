@@ -20,7 +20,7 @@ from django.test import TestCase
 from django.utils.encoding import smart_text
 
 import cscenter.urls
-from learning.utils import get_current_semester_pair
+from learning.utils import get_current_term_pair
 from learning.models import StudentAssignment
 from ..factories import *
 from .mixins import *

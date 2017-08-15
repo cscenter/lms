@@ -398,26 +398,25 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
 class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
     def test_list_center_site(self):
         """Center students can see club CO only from SPB"""
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester,
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(semester=s,
                                           city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=current_semester,
+        co_kzn = CourseOfferingFactory.create(semester=s,
                                               city="kzn")
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
-        if current_semester.type != Semester.TYPES.summer:
+        if s.type != Semester.TYPES.summer:
             self.assertContains(resp, co.course.name)
             self.assertNotContains(resp, co_kzn.course.name)
         # Note: Club related tests in csclub app
 
     def test_student_list_center_site(self):
-        s = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
-        self.doLogin(s)
-        current_semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=current_semester,
+        student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
+        self.doLogin(student)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(semester=s,
                                           city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                              city="kzn")
+        co_kzn = CourseOfferingFactory.create(semester=s, city="kzn")
         response = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(response.context['ongoing_rest']), 1)
 
@@ -461,10 +460,11 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_create(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
-        co_other = CourseOfferingFactory.create(semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
+        co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                                semester=s)
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk})
         del form['slides']
@@ -485,10 +485,11 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_create_and_add(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
-        co_other = CourseOfferingFactory.create(semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
+        co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                                semester=s)
         form = CourseClassFactory.attributes(create=True)
         form.update({'venue': VenueFactory.create().pk, '_addanother': True})
         del form['slides']
@@ -518,9 +519,9 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_update(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
@@ -535,9 +536,9 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_update_and_add(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
@@ -555,9 +556,9 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_delete(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_delete_url()
         self.assertLoginRedirect(url)
@@ -570,8 +571,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_back_variable(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         base_url = cc.get_update_url()
@@ -588,9 +588,9 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_attachment_links(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         cca1 = CourseClassAttachmentFactory.create(
             course_class=cc, material__filename="foobar1.pdf")
@@ -611,9 +611,9 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 
     def test_attachments(self):
         teacher = TeacherCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                          teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
         f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
@@ -665,8 +665,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        now_year, now_season = get_current_semester_pair()
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -1008,7 +1007,7 @@ def test_student_courses_list(client, settings):
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
-    now_year, now_season = get_current_semester_pair(student_spb.city_id)
+    now_year, now_season = get_current_term_pair(student_spb.city_id)
     current_term = SemesterFactory.create(year=now_year, type=now_season)
     cos = CourseOfferingFactory.create_batch(4, semester=current_term,
                                              city_id='spb', is_open=False)
@@ -1062,7 +1061,7 @@ def test_student_courses_list_csclub(client, settings, mocker):
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     now_fixed = datetime.datetime(2016, month=3, day=8, tzinfo=pytz.utc)
     mocked_timezone.return_value = now_fixed
-    now_year, now_season = get_current_semester_pair()
+    now_year, now_season = get_current_term_pair(settings.DEFAULT_CITY_CODE)
     assert now_season == "spring"
     url = reverse('course_list_student')
     student = StudentClubFactory()
@@ -1074,7 +1073,8 @@ def test_student_courses_list_csclub(client, settings, mocker):
     # Make sure in tests we fallback to default city which is 'spb'
     assert response.context['request'].city_code == 'spb'
     # Show only open courses
-    current_term = SemesterFactory.create_current()
+    current_term = SemesterFactory.create_current(
+        city_code=settings.DEFAULT_CITY_CODE)
     assert current_term.type == "spring"
     co = CourseOfferingFactory.create(semester__type=now_season,
                                       semester__year=now_year, city_id='nsk',

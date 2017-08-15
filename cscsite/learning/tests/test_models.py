@@ -69,6 +69,7 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 
 
+@pytest.mark.django_db
 def test_semester_starts_ends():
     import datetime
     from django.utils import timezone
@@ -81,10 +82,10 @@ def test_semester_starts_ends():
                         .replace(tzinfo=timezone.utc))
     spring_2016_date = (datetime.datetime(2016, 4, 8, 0, 0, 0)
                         .replace(tzinfo=timezone.utc))
-    spring_2015 = Semester(type='spring', year=2015)
-    summer_2015 = Semester(type='summer', year=2015)
-    autumn_2015 = Semester(type='autumn', year=2015)
-    spring_2016 = Semester(type='spring', year=2016)
+    spring_2015 = SemesterFactory(type='spring', year=2015)
+    summer_2015 = SemesterFactory(type='summer', year=2015)
+    autumn_2015 = SemesterFactory(type='autumn', year=2015)
+    spring_2016 = SemesterFactory(type='spring', year=2016)
     # Check starts < ends
     assert spring_2015.starts_at < spring_2015.ends_at
     assert summer_2015.starts_at < summer_2015.ends_at

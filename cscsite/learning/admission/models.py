@@ -26,7 +26,7 @@ from post_office.utils import get_email_template
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Venue
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
-from learning.utils import get_current_semester_pair
+from learning.utils import get_current_term_pair
 from users.models import CSCUser
 
 
@@ -41,8 +41,8 @@ WITH_ASSIGNMENTS_TEXT = """
 
 
 def current_year():
-    year, _ = get_current_semester_pair()
-    return year
+    # Don't care about inaccuracy and use UTC timezone here
+    return now().year
 
 
 @python_2_unicode_compatible

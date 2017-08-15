@@ -21,7 +21,7 @@ from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
-from learning.utils import get_current_semester_pair
+from learning.utils import get_current_term_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 
@@ -33,7 +33,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
 
     def test_list(self):
         u = StudentCenterFactory()
-        now_year, now_season = get_current_semester_pair()
+        now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseOfferingFactory.create(semester=s)
         as1 = AssignmentFactory.create_batch(2, course_offering=co)
@@ -83,7 +83,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         which student already leave
         """
         u = StudentCenterFactory()
-        now_year, now_season = get_current_semester_pair()
+        now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # Create open co to pass enrollment limit
         co = CourseOfferingFactory.create(semester=s, is_open=True)
@@ -178,9 +178,10 @@ def test_studentassignment_last_comment_from():
     """`last_comment_from` attribute is updated by signal"""
     teacher = TeacherCenterFactory.create()
     student = StudentCenterFactory.create()
-    now_year, now_season = get_current_semester_pair()
+    now_year, now_season = get_current_term_pair('spb')
     s = SemesterFactory.create(year=now_year, type=now_season)
-    co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+    co = CourseOfferingFactory.create(city_id='spb', semester=s,
+                                      teachers=[teacher])
     EnrollmentFactory.create(student=student, course_offering=co)
     assignment = AssignmentFactory.create(course_offering=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
@@ -349,9 +350,10 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
     def test_details(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        now_year, now_season = get_current_semester_pair()
+        now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+        co = CourseOfferingFactory.create(city='spb', semester=s,
+                                          teachers=[teacher])
         a = AssignmentFactory.create(course_offering=co)
         self.doLogin(teacher)
         url = reverse('assignment_detail_teacher', args=[a.pk])
@@ -397,17 +399,18 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         TEACHER_ASSIGNMENTS_PAGE = reverse(self.url_name)
         teacher = TeacherCenterFactory()
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
-        now_year, now_season = get_current_semester_pair()
+        now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
-        co_other = CourseOfferingFactory.create(semester=s)
+        co_other = CourseOfferingFactory.create(city='spb', semester=s)
         AssignmentFactory.create_batch(2, course_offering=co_other)
         self.doLogin(teacher)
         # no course offerings yet, return 302
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         self.assertEquals(302, resp.status_code)
         # Create co, assignments and enroll students
-        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+        co = CourseOfferingFactory.create(city='spb', semester=s,
+                                          teachers=[teacher])
         for student1 in students:
             EnrollmentFactory.create(student=student1, course_offering=co)
         assignment = AssignmentFactory.create(course_offering=co)
@@ -693,7 +696,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year, _ = get_current_semester_pair()
+    now_year, _ = get_current_term_pair('spb')
     dt = dt.replace(year=now_year + 1, month=2, hour=14)
     assignment.deadline_at = dt
     assignment.save()

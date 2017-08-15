@@ -18,10 +18,10 @@ from django.utils.timezone import now
 from django.views import generic
 
 from core.models import Faq
-from learning.models import Semester, CourseOffering, CourseOfferingTeacher, \
-    OnlineCourse, AreaOfStudy, StudyProgram, StudyProgramCourseGroup
-from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
-from learning.utils import get_current_semester_pair, get_term_index, \
+from learning.models import CourseOffering, CourseOfferingTeacher, \
+    OnlineCourse, AreaOfStudy, StudyProgram
+from learning.settings import CENTER_FOUNDATION_YEAR
+from learning.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic
 from stats.views import StudentsDiplomasStats
 from users.models import CSCUser
@@ -34,7 +34,8 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         pool = cache.get('index_page_spb_courses_with_video')
         if pool is None:
-            year, term_type = get_current_semester_pair()
+            # Note: Show courses based on SPB timezone
+            year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
             current_term_index = get_term_index(year, term_type)
             term_index = get_term_index_academic(year, term_type,
                                                  rewind_years=2)
@@ -150,7 +151,7 @@ class TeachersView(generic.ListView):
         context = super(TeachersView, self).get_context_data(**kwargs)
         # Consider the last 3 academic years. Teacher is active, if he read
         # course in this period or will in the future.
-        year, term_type = get_current_semester_pair()
+        year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
         term_index = get_term_index_academic(year, term_type, rewind_years=3)
         active_lecturers = Counter(
             CourseOffering.objects.filter(semester__index__gte=term_index)

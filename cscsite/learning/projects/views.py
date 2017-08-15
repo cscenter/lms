@@ -33,7 +33,7 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.settings import PARTICIPANT_GROUPS
-from learning.utils import get_current_semester_pair, get_term_index
+from learning.utils import get_current_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin
 from notifications import types
@@ -58,8 +58,8 @@ class ReportListViewMixin(object):
     template_name = "learning/projects/reports.html"
 
     def get_queryset(self):
-        current_year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(current_year, term_type)
+        # FIXME: respect timezone. Hard coded city code
+        current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
                     .select_related("semester")
                     .filter(semester__index=current_term_index,
@@ -188,8 +188,8 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
     template_name = "learning/projects/available.html"
 
     def get_queryset(self):
-        current_year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(current_year, term_type)
+        # FIXME: Respect timezone, hard coded city code
+        current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
                     .filter(semester__index=current_term_index,
                             canceled=False)
@@ -418,8 +418,8 @@ class ProjectPrevNextView(generic.RedirectView):
     direction = None
     # TODO: add tests
     def get_queryset(self):
-        current_year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(current_year, term_type)
+        # FIXME: Respect timezone, hard coded city code
+        current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
                     .filter(semester__index=current_term_index,
                             canceled=False)

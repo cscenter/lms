@@ -22,8 +22,8 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
-from learning.utils import get_current_semester_pair, get_term_index
-
+from learning.utils import get_current_term_pair, get_term_index, \
+    get_current_term_index
 
 # Calculate mean scores for these fields when review has been completed
 REVIEW_SCORE_FIELDS = [
@@ -220,8 +220,8 @@ class Project(TimeStampedModel):
 
     def is_active(self):
         """Check project is from current term"""
-        year, term_type = get_current_semester_pair()
-        current_term_index = get_term_index(year, term_type)
+        # FIXME: Respect timezone. Now city_code is hard coded
+        current_term_index = get_current_term_index('spb')
         return not self.canceled and self.semester.index == current_term_index
 
     def report_period_started(self):

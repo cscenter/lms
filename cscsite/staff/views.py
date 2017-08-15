@@ -3,10 +3,10 @@
 from __future__ import absolute_import, unicode_literals
 
 from collections import OrderedDict, defaultdict
-from io import StringIO
 
 import itertools
 from braces.views import JSONResponseMixin
+from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
@@ -27,7 +27,7 @@ from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
     GRADES, CENTER_FOUNDATION_YEAR
-from learning.utils import get_current_semester_pair, get_term_index, get_term_by_index
+from learning.utils import get_current_term_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
 from users.models import CSCUser, CSCUserStatusLog
@@ -82,7 +82,7 @@ class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
 class ExportsView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExportsView, self).get_context_data(**kwargs)
-        year, term = get_current_semester_pair()
+        year, term = get_current_term_pair(settings.DEFAULT_CITY_CODE)
         current_term_index = get_term_index(year, term)
         context["current_term"] = {"year": year, "type": term}
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
@@ -113,7 +113,6 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         most_courses_in_term_students = set()
         most_open_courses_students = set()
         enrolled_on_first_course = set()
-        current_year, _ = get_current_semester_pair()
         by_enrollment_year = defaultdict(set)
         finished_two_or_more_programs = set()
         all_three_practicies_are_internal = set()
@@ -370,7 +369,7 @@ class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
         queue.enqueue(debug_test_job, 1660)
         context = super(StudentFacesView, self).get_context_data(**kwargs)
         enrollment_year = self.request.GET.get("year", None)
-        year, current_term = get_current_semester_pair()
+        year, current_term = get_current_term_pair('spb')
         try:
             enrollment_year = int(enrollment_year)
         except (TypeError, ValueError):
@@ -408,7 +407,7 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
     template_name = "staff/courses_intersection.html"
 
     def get_context_data(self, **kwargs):
-        year, term = get_current_semester_pair()
+        year, term = get_current_term_pair('spb')
         current_term_index = get_term_index(year, term)
         all_courses_in_term = (CourseOffering.objects
                                .filter(semester__index=current_term_index)
@@ -451,11 +450,12 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
 
 
 # XXX: Not implemented
+# TODO: remove
 class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        current_year, season = get_current_semester_pair()
+        current_year, season = get_current_term_pair('spb')
         start_semester_index = get_term_index(2011, Semester.TYPES.autumn)
         end_semester_index = get_term_index(current_year, season)
         semesters = Semester.objects.filter(index__gte=start_semester_index, index__lte=end_semester_index)

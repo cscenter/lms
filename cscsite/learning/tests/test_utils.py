@@ -21,13 +21,13 @@ class UtilTests(TestCase):
     @override_settings(TIME_ZONE='Etc/UTC')
     @patch('django.utils.timezone.now')
     def test_get_current_semester_pair(self, now_mock):
-        utc_tz = pytz.timezone("Etc/UTC")
-        now_mock.return_value \
-            = utc_tz.localize(datetime.datetime(2014, 4, 1, 12, 0))
-        self.assertEquals((2014, 'spring'), get_current_semester_pair())
-        now_mock.return_value \
-            = utc_tz.localize(datetime.datetime(2015, 11, 1, 12, 0))
-        self.assertEquals((2015, 'autumn'), get_current_semester_pair())
+        msk_tz = pytz.timezone("Europe/Moscow")
+        now_mock.return_value = msk_tz.localize(
+            datetime.datetime(2014, 4, 1, 12, 0))
+        self.assertEquals((2014, 'spring'), get_current_term_pair('spb'))
+        now_mock.return_value = msk_tz.localize(
+            datetime.datetime(2015, 11, 1, 12, 0))
+        self.assertEquals((2015, 'autumn'), get_current_term_pair('spb'))
 
     def test_split_list(self):
         xs = [1, 2, 3, 4]
