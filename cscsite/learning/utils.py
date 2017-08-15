@@ -1,42 +1,42 @@
 import datetime
 from collections import namedtuple
+from typing import Union, NewType
 
+import pytz
 from django.conf import settings
 from six.moves import zip_longest
 
 import dateutil.parser as dparser
-from django.http import Http404
 from django.utils import timezone
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
     SPRING_TERM_START, GRADES, POSITIVE_GRADES
 
+
+CityCode = NewType('CityCode', str)
+Timezone = NewType('Timezone', datetime.tzinfo)
+
 CurrentSemester = namedtuple('CurrentSemester', ['year', 'type'])
 
 
-def now_local(city_code) -> datetime.datetime:
-    tz = settings.TIME_ZONES[city_code]
-    return timezone.localtime(timezone.now(), timezone=tz)
+def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
+    if not isinstance(tz_aware, datetime.tzinfo):
+        tz_aware = settings.TIME_ZONES[tz_aware]
+    return timezone.localtime(timezone.now(), timezone=tz_aware)
 
 
-def get_current_semester_pair(city_code=None):
-    # FIXME: respect timezone?
-    if city_code:
-        dt = now_local(city_code)
-    else:
-        dt = timezone.now()
-    return date_to_term_pair(dt)
+def get_current_term_pair(tz_aware: Union[Timezone, CityCode]):
+    dt_local = now_local(tz_aware)
+    return date_to_term_pair(dt_local)
 
 
-def convert_term_parts_to_datetime(year, term_start):
-    return (dparser
-            .parse(term_start)
-            .replace(tzinfo=timezone.utc,
-                     year=year))
+def convert_term_parts_to_datetime(year, term_start, tz=pytz.UTC):
+    dt_naive = dparser.parse(term_start).replace(year=year)
+    return tz.localize(dt_naive)
 
 
-def get_term_start(year, term_type):
-    """Returns term start point in datetime format"""
+def get_term_start(year, term_type, tz: Timezone):
+    """Returns term start point in datetime format."""
     if term_type == SEMESTER_TYPES.spring:
         term_start_str = SPRING_TERM_START
     elif term_type == SEMESTER_TYPES.summer:
@@ -45,16 +45,16 @@ def get_term_start(year, term_type):
         term_start_str = AUTUMN_TERM_START
     else:
         raise ValueError("get_term_start: unknown term type")
-    return convert_term_parts_to_datetime(year, term_start_str)
+    return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
 def date_to_term_pair(date):
     assert timezone.is_aware(date)
-
     year = date.year
-    spring_term_start = convert_term_parts_to_datetime(year, SPRING_TERM_START)
-    autumn_term_start = convert_term_parts_to_datetime(year, AUTUMN_TERM_START)
-    summer_term_start = convert_term_parts_to_datetime(year, SUMMER_TERM_START)
+    _convert = convert_term_parts_to_datetime
+    spring_term_start = _convert(year, SPRING_TERM_START, date.tzinfo)
+    autumn_term_start = _convert(year, AUTUMN_TERM_START, date.tzinfo)
+    summer_term_start = _convert(year, SUMMER_TERM_START, date.tzinfo)
 
     if spring_term_start <= date < summer_term_start:
         current_term = SEMESTER_TYPES.spring
@@ -82,6 +82,10 @@ def get_term_index(target_year, target_term_type):
         if t == target_term_type:
             term_portion += index
     return year_portion + term_portion
+
+
+def get_current_term_index(tz_aware: Union[Timezone, CityCode]):
+    return get_term_index(*get_current_term_pair(tz_aware))
 
 
 def get_term_index_academic(year, term_type, rewind_years):

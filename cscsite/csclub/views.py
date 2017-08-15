@@ -20,7 +20,7 @@ from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
     CourseClass
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
-from learning.utils import get_current_semester_pair, now_local
+from learning.utils import get_current_term_pair, now_local
 from learning.views.generic import CalendarGenericView
 
 
@@ -62,7 +62,8 @@ class IndexView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         try:
-            year, term_type = get_current_semester_pair()
+            # All club courses in MSK timezone
+            year, term_type = get_current_term_pair('spb')
             if term_type == SEMESTER_TYPES.summer:
                 term_type = SEMESTER_TYPES.autumn
             featured_term = Semester.objects.get(year=year, type=term_type)

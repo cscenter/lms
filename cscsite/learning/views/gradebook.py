@@ -21,7 +21,7 @@ from learning.models import Semester, CourseOffering, StudentAssignment, \
     Enrollment
 from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
     GRADING_TYPES, GRADES
-from learning.utils import get_current_semester_pair, get_term_index
+from learning.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 
 __all__ = [
@@ -41,14 +41,15 @@ class _GradeBookDispatchView(generic.ListView):
                 .order_by("course__name"))
 
     def get_queryset(self):
-        current_year, term_type = get_current_semester_pair()
-        semester_index = get_term_index(current_year, term_type)
+        # FIXME: Is it ok to use 'spb' here?
+        current_year, term_type = get_current_term_pair('spb')
+        term_index = get_term_index(current_year, term_type)
         # Skip to spring semester
         # FIXME: why?!
         if term_type == Semester.TYPES.autumn:
-            semester_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
+            term_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
         return (Semester.objects
-                .filter(index__lte=semester_index)
+                .filter(index__lte=term_index)
                 .exclude(type=Semester.TYPES.summer)
                 .prefetch_related(
                     Prefetch(
@@ -91,7 +92,8 @@ class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_year, term_type = get_current_semester_pair()
+        # FIXME: Is it ok to use 'spb' here?
+        current_year, term_type = get_current_term_pair('spb')
         current_term_index = get_term_index(current_year, term_type)
         co_count = 0
         for semester in context["semester_list"]:

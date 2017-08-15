@@ -16,7 +16,7 @@ from learning.models import Course, Semester, CourseOffering, \
     AreaOfStudy, next_term_starts_at
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory
-from .utils import get_current_semester_pair, get_term_by_index
+from .utils import get_current_term_pair, get_term_by_index
 
 
 class CourseFactory(factory.DjangoModelFactory):
@@ -39,7 +39,8 @@ class SemesterFactory(factory.DjangoModelFactory):
     @classmethod
     def create_current(cls, **kwargs):
         """Get or create semester for current term"""
-        year, type = get_current_semester_pair()
+        city_code = kwargs.pop('city_code', 'spb')
+        year, type = get_current_term_pair(city_code)
         kwargs.pop('year', None)
         kwargs.pop('type', None)
         return cls.create(year=year, type=type, **kwargs)
