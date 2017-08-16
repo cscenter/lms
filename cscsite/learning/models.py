@@ -36,7 +36,7 @@ from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
-from learning.utils import get_current_term_index
+from learning.utils import get_current_term_index, now_local
 from .utils import get_current_term_pair, \
     get_term_index, convert_term_parts_to_datetime, get_term_start, \
     get_term_by_index
@@ -318,12 +318,11 @@ class CourseOffering(TimeStampedModel):
 
     @property
     def is_completed(self):
-        # FIXME: respect timezone!
-        return self.completed_at <= now().date()
+        return self.completed_at <= now_local(self.get_city_timezone()).date()
 
     @property
     def in_current_term(self):
-        current_term_index = get_current_term_index(self.get_city())
+        current_term_index = get_current_term_index(self.get_city_timezone())
         return self.semester.index == current_term_index
 
     @property
@@ -341,7 +340,7 @@ class CourseOffering(TimeStampedModel):
                                          day=date_naive.day)
             enroll_before_local = city_tz.localize(dt_naive)
         else:
-            year, term_type = get_current_term_pair(self.get_city())
+            year, term_type = get_current_term_pair(city_tz)
             current_term_start = get_term_start(year, term_type, city_tz)
             lifetime = datetime.timedelta(days=learn_conf.ENROLLMENT_DURATION)
             enroll_before_local = current_term_start + lifetime

@@ -44,7 +44,7 @@ class CalendarClubScheduleView(CalendarGenericView):
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
 
-    def get_events(self, year, month, city_code):
+    def get_events(self, year, month, **kwargs):
         classes = (CourseClass.objects
                    .for_calendar(self.request.user)
                    .in_month(year, month)
@@ -52,7 +52,7 @@ class CalendarClubScheduleView(CalendarGenericView):
                    .open_only())
         return [classes]
 
-    def get_city_code(self):
+    def get_user_city(self):
         return self.request.city_code
 
 

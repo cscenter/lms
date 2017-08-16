@@ -1,3 +1,5 @@
+from typing import List
+
 from django.conf import settings
 from django.db import models
 from django.db.models import query, Manager, Prefetch, Q
@@ -65,6 +67,9 @@ class CourseClassQuerySet(query.QuerySet):
     def for_city(self, city_code):
         return self.filter(course_offering__city_id=city_code)
 
+    def in_cities(self, city_codes: List[str]):
+        return self.filter(course_offering__city_id__in=city_codes)
+
     def in_month(self, year, month):
         date_start, date_end = get_bounds_for_calendar_month(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
@@ -92,6 +97,9 @@ class NonCourseEventQuerySet(query.QuerySet):
     def for_city(self, city_code):
         return self.filter(venue__city_id=city_code)
 
+    def in_cities(self, city_codes: List[str]):
+        return self.filter(venue__city_id__in=city_codes)
+
     def in_month(self, year, month):
         date_start, date_end = get_bounds_for_calendar_month(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
@@ -105,12 +113,8 @@ class CourseOfferingQuerySet(models.QuerySet):
         # FIXME: Move to settings
         return self.filter(city_id__in=['spb', 'nsk'])
 
-    # FIXME: respect timezones!
-    def completed(self, is_completed):
-        if is_completed:
-            return self.filter(completed_at__lte=now().date())
-        else:
-            return self.filter(completed_at__gt=now().date())
+    def for_teacher(self, user):
+        return self.filter(teachers=user)
 
 
 class _CourseOfferingDefaultManager(models.Manager):
