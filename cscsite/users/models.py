@@ -1,6 +1,8 @@
 from __future__ import unicode_literals, absolute_import
 
 import logging
+from random import choice
+from string import ascii_lowercase, digits
 from typing import Optional
 
 from django.conf import settings
@@ -10,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
@@ -314,6 +317,80 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
         super(CSCUser, self).save(**kwargs)
+
+    @staticmethod
+    def create_student_from_applicant(applicant):
+        """
+        Create new model or override existent with data from applicant form.
+        """
+        from learning.admission.models import Applicant
+        try:
+            user = CSCUser.objects.get(email=applicant.email)
+        except CSCUser.DoesNotExist:
+            username = applicant.email.split("@", maxsplit=1)[0]
+            if CSCUser.objects.filter(username=username).exists():
+                username = CSCUser.generate_random_username(attempts=5)
+            if not username:
+                raise RuntimeError(
+                    "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
+                    "не удалось".format(username))
+            random_password = CSCUser.objects.make_random_password()
+            user = CSCUser.objects.create_user(username=username,
+                                               email=applicant.email,
+                                               password=random_password)
+        groups = []
+        if applicant.status == Applicant.VOLUNTEER:
+            groups.append(CSCUser.group.VOLUNTEER)
+        else:
+            groups.append(CSCUser.group.STUDENT_CENTER)
+        user.groups.add(*groups)
+        # Migrate data from application form to user profile
+        same_attrs = [
+            "first_name",
+            "patronymic",
+            "stepic_id",
+            "phone"
+        ]
+        for attr_name in same_attrs:
+            setattr(user, attr_name, getattr(applicant, attr_name))
+        user.last_name = applicant.surname
+        user.enrollment_year = user.curriculum_year = timezone.now().year
+        # Looks like the same fields below
+        user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
+        # For github store part after github.com/
+        if applicant.github_id:
+            user.github_id = applicant.github_id.split("github.com/",
+                                                       maxsplit=1)[-1]
+        user.workplace = applicant.workplace if applicant.workplace else ""
+        user.uni_year_at_enrollment = applicant.course
+        user.city_id = applicant.campaign.city_id
+        user.university = applicant.university.name
+        user.save()
+        return user
+
+    @staticmethod
+    def generate_random_username(length=30,
+                                 chars=ascii_lowercase + digits,
+                                 split=4,
+                                 delimiter='-',
+                                 attempts=10):
+        if not attempts:
+            return None
+
+        username = ''.join([choice(chars) for _ in range(length)])
+
+        if split:
+            username = delimiter.join(
+                [username[start:start + split] for start in
+                 range(0, len(username), split)])
+
+        try:
+            CSCUser.objects.get(username=username)
+            return CSCUser.generate_random_username(
+                length=length, chars=chars, split=split, delimiter=delimiter,
+                attempts=attempts - 1)
+        except CSCUser.DoesNotExist:
+            return username
 
     def __str__(self):
         return smart_text(self.get_full_name(True))
