@@ -693,6 +693,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 
     @atomic
     def post(self, request, *args, **kwargs):
+        # TODO: add tests
         applicant_pk = kwargs.get("pk")
         back_url = reverse("admission_applicants")
         try:
@@ -701,88 +702,23 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
             messages.error(self.request, "Анкета не найдена",
                            extra_tags='timeout')
             return HttpResponseRedirect(reverse("admission_applicants"))
-
         try:
-            user = CSCUser.objects.get(email=applicant.email)
+            user = CSCUser.create_student_from_applicant(applicant)
         except CSCUser.MultipleObjectsReturned:
             messages.error(
                 self.request,
                 "Всё плохо. Найдено несколько пользователей "
                 "с email {}".format(applicant.email))
             return HttpResponseRedirect(back_url)
-        except CSCUser.DoesNotExist:
-            username = applicant.email.split("@", maxsplit=1)[0]
-            if CSCUser.objects.filter(username=username).exists():
-                username = self.generate_random_username(attempts=5)
-            if not username:
-                messages.error(
-                    self.request,
-                    "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
-                    "не удалось".format(username))
-                return HttpResponseRedirect(back_url)
-            random_password = CSCUser.objects.make_random_password()
-            user = CSCUser.objects.create_user(username=username,
-                                               email=applicant.email,
-                                               password=random_password)
-        groups = []
-        if applicant.status == Applicant.VOLUNTEER:
-            groups.append(CSCUser.group.VOLUNTEER)
-        else:
-            groups.append(CSCUser.group.STUDENT_CENTER)
-        user.groups.add(*groups)
-        # Migrate data from application form to user profile
-        same_attrs = [
-            "first_name",
-            "patronymic",
-            "stepic_id",
-            "phone"
-        ]
-        for attr_name in same_attrs:
-            setattr(user, attr_name, getattr(applicant, attr_name))
-        user.last_name = applicant.surname
-        user.enrollment_year = user.curriculum_year = timezone.now().year
-        # Looks like the same fields below
-        user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
-        # For github left part after github.com/ only
-        if applicant.github_id:
-            user.github_id = applicant.github_id.split("github.com/",
-                                                       maxsplit=1)[-1]
-        user.workplace = applicant.workplace if applicant.workplace else ""
-        user.uni_year_at_enrollment = applicant.course
-        user.city_id = applicant.campaign.city_id
-        user.university = applicant.university.name
-        user.save()
+        except RuntimeError as e:
+            # username already taken, failed to create the new unique one
+            messages.error(self.request, e.args[0])
+            return HttpResponseRedirect(back_url)
         # Link applicant and user
         applicant.user = user
         applicant.save()
-
-        return HttpResponseRedirect(reverse("admin:users_cscuser_change",
-                                            args=[user.pk]))
-
-    @staticmethod
-    def generate_random_username(length=30,
-                                 chars=ascii_lowercase + digits,
-                                 split=4,
-                                 delimiter='-',
-                                 attempts=10):
-        if not attempts:
-            return None
-
-        username = ''.join([choice(chars) for _ in range(length)])
-
-        if split:
-            username = delimiter.join(
-                [username[start:start + split] for start in
-                 range(0, len(username), split)])
-
-        try:
-            CSCUser.objects.get(username=username)
-            attempts -= 1
-            return ApplicantCreateUserView.generate_random_username(
-                length=length, chars=chars, split=split, delimiter=delimiter,
-                attempts=attempts)
-        except CSCUser.DoesNotExist:
-            return username
+        url = reverse("admin:users_cscuser_change", args=[user.pk])
+        return HttpResponseRedirect(url)
 
 
 class InterviewAppointmentView(generic.TemplateView):
