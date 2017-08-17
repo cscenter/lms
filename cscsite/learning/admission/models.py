@@ -131,7 +131,7 @@ class Applicant(TimeStampedModel):
         max_length=42,
         help_text=_("Applicant|phone"))
     stepic_id = models.PositiveIntegerField(
-        _("Stepic ID"),
+        _("Stepik ID"),
         help_text=_("Applicant|stepic_id"),
         blank=True,
         null=True)

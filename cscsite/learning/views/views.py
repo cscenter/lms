@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
-from vanilla import CreateView, UpdateView, DeleteView
+from vanilla import CreateView, UpdateView, DeleteView, ListView
 
 from core import comment_persistence
 from core.exceptions import Redirect
@@ -45,7 +45,7 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_current_term_pair, get_term_index, now_local, \
-    get_terms_for_calendar_month
+    get_terms_for_calendar_month, grouper
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView
@@ -391,25 +391,21 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         return context
 
 
-class CourseVideoListView(generic.ListView):
+class CourseVideoListView(ListView):
     model = CourseOffering
     template_name = "learning/courses_video_list.html"
     context_object_name = 'course_list'
 
     def get_queryset(self):
-        return (self.model.objects
+        return (CourseOffering.objects
                 .filter(is_published_in_video=True)
                 .order_by('-semester__year', 'semester__type')
                 .select_related('course', 'semester'))
 
     def get_context_data(self, **kwargs):
-        context = (super(CourseVideoListView, self)
-                   .get_context_data(**kwargs))
+        context = super().get_context_data(**kwargs)
         full = context[self.context_object_name]
-        chunks = []
-        for i in range(0, len(full), 3):
-            chunks.append(full[i:i + 3])
-        context['course_list_chunks'] = chunks
+        context['course_list_chunks'] = grouper(full, 3)
         return context
 
 

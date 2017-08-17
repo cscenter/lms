@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(max_length=255, verbose_name='Last name')),
                 ('email', models.EmailField(help_text='Applicant|email', max_length=254, verbose_name='Email')),
                 ('phone', models.CharField(help_text='Applicant|phone', max_length=42, verbose_name='Contact phone')),
-                ('stepic_id', models.PositiveIntegerField(blank=True, help_text='Applicant|stepic_id', null=True, verbose_name='Stepic ID')),
+                ('stepic_id', models.PositiveIntegerField(blank=True, help_text='Applicant|stepic_id', null=True, verbose_name='Stepik ID')),
                 ('yandex_id', models.CharField(blank=True, help_text='Applicant|yandex_id', max_length=80, null=True, validators=[django.core.validators.RegexValidator(message='Only the part before "@yandex.ru" is expected', regex='^[^@]*$')], verbose_name='Yandex ID')),
                 ('yandex_id_normalize', models.CharField(blank=True, help_text='Applicant|yandex_id_normalization', max_length=80, null=True, verbose_name='Yandex ID normalisation')),
                 ('github_id', models.CharField(blank=True, help_text='Applicant|github_id', max_length=255, null=True, verbose_name='Github ID')),
