@@ -7,6 +7,7 @@
 {% load core_tags %}
 
 {% block content %}
+    {% with book=stock.book %}
     <div class="container">
         <div id="library" class="row">
             <div class="col-xs-3">
@@ -25,7 +26,7 @@
                     {% endfor %}
                 </p>
 
-                {% if book.read_by.exists %}
+                {% if stock.borrows.exists %}
                     <p>
                         {% trans "Book|read by"|capfirst %}:
                         {% include "library/_borrowed_by.html" %}
@@ -36,7 +37,7 @@
                 <h4>
                     <em>{{ book.author }}</em> {{ book.title }}
                     {% if user.is_authenticated and user.is_curator %}
-                        <a href="{% admin_url book %}" target="_blank" class="btn btn-mini btn-link">
+                        <a href="{% admin_url stock %}" target="_blank" class="btn btn-mini btn-link">
                             <i class="fa fa-pencil"></i>
                         </a>
                     {% endif %}
@@ -51,4 +52,5 @@
             </div>
         </div>
     </div>
+    {% endwith %}
 {% endblock %}

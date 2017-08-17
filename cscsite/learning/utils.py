@@ -9,6 +9,7 @@ from six.moves import zip_longest
 import dateutil.parser as dparser
 from django.utils import timezone
 
+from core.utils import is_club_site
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
     SPRING_TERM_START, GRADES, POSITIVE_GRADES
@@ -223,7 +224,7 @@ class LearningPermissionsMixin(object):
 
     @property
     def is_active_student(self):
-        if settings.SITE_ID == settings.CLUB_SITE_ID:
+        if is_club_site():
             return self.is_student_club
         return self.is_student and not self.is_expelled
 

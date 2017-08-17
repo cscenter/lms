@@ -187,7 +187,7 @@
                             <ul>
                                 {% for borrow in borrows %}
                                     <li>
-                                        <a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a>
+                                        <a href="{{ borrow.stock.get_absolute_url }}">{{ borrow.stock.book.title }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
