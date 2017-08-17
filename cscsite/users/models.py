@@ -237,7 +237,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         validators=[GITHUB_ID_VALIDATOR],
         blank=True)
     stepic_id = models.PositiveIntegerField(
-        _("Stepic ID"),
+        _("stepik.org ID"),
         blank=True,
         null=True)
     csc_review = models.TextField(

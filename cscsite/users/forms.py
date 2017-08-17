@@ -110,7 +110,7 @@ class UserProfileForm(forms.ModelForm):
                         _("will be shown only to logged-in users"))),
             'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
             'github_id': "github.com/<b>GITHUB-ID</b>",
-            'stepic_id': _("stepic.org/users/<b>STEPIC-ID</b>")
+            'stepic_id': _("stepik.org/users/<b>USER_ID</b>")
         }
 
     def clean_csc_review(self):

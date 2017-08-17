@@ -8,48 +8,52 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-23 15:44+0300\n"
-"PO-Revision-Date: 2017-06-23 15:44+0230\n"
+"POT-Creation-Date: 2017-08-17 12:14+0000\n"
+"PO-Revision-Date: 2017-08-17 12:06+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.7.13\n"
 
 #: cscsite/learning/admission/admin.py:39
 #: cscsite/learning/admission/filters.py:28
-#: cscsite/learning/admission/filters.py:132
-#: cscsite/learning/admission/models.py:66
+#: cscsite/learning/admission/filters.py:128
+#: cscsite/learning/admission/models.py:69
 msgid "Campaign"
 msgstr "Набор"
 
-#: cscsite/learning/admission/admin.py:155
-#: cscsite/learning/admission/models.py:485
-#: cscsite/learning/admission/models.py:515
-#: cscsite/learning/admission/models.py:600
-#: cscsite/learning/admission/models.py:654
+#: cscsite/learning/admission/admin.py:142
+#: cscsite/learning/admission/filters.py:85
+msgid "Date"
+msgstr "Дата"
+
+#: cscsite/learning/admission/admin.py:167
+#: cscsite/learning/admission/models.py:505
+#: cscsite/learning/admission/models.py:556
+#: cscsite/learning/admission/models.py:650
+#: cscsite/learning/admission/models.py:704
 msgid "Interview"
 msgstr "Интервью"
 
-#: cscsite/learning/admission/admin.py:160
-#: cscsite/learning/admission/models.py:520
+#: cscsite/learning/admission/admin.py:172
+#: cscsite/learning/admission/models.py:561
 msgid "Interviewer"
 msgstr "Собеседующий"
 
-#: cscsite/learning/admission/admin.py:206
+#: cscsite/learning/admission/admin.py:225
 msgid "Yes"
 msgstr "Да"
 
-#: cscsite/learning/admission/admin.py:206
-#| msgid "Note"
+#: cscsite/learning/admission/admin.py:225
 msgid "No"
 msgstr "Нет"
 
-#: cscsite/learning/admission/admin.py:207
-#| msgid "Accept"
+#: cscsite/learning/admission/admin.py:226
 msgid "Accepted"
 msgstr "Принято"
 
@@ -58,18 +62,18 @@ msgid "Admission"
 msgstr "Поступление"
 
 #: cscsite/learning/admission/filters.py:33
-#: cscsite/learning/admission/filters.py:80
+#: cscsite/learning/admission/filters.py:81
 msgid "Status"
 msgstr "Статус"
 
 #: cscsite/learning/admission/filters.py:35
-#: cscsite/learning/admission/models.py:113
+#: cscsite/learning/admission/models.py:124
 msgid "Surname"
 msgstr "Фамилия"
 
 #: cscsite/learning/admission/filters.py:58
-#: cscsite/learning/admission/filters.py:117
-#: cscsite/learning/admission/filters.py:154
+#: cscsite/learning/admission/filters.py:113
+#: cscsite/learning/admission/filters.py:150
 msgid "Filter"
 msgstr "Фильтровать"
 
@@ -77,421 +81,416 @@ msgstr "Фильтровать"
 msgid "Approved and completed"
 msgstr "Согласованные и завершенные"
 
-#: cscsite/learning/admission/filters.py:84
-msgid "Date"
-msgstr "Дата"
-
-#: cscsite/learning/admission/forms.py:40
+#: cscsite/learning/admission/forms.py:43
 msgid "St Petersburg"
 msgstr "Санкт-Петербург"
 
-#: cscsite/learning/admission/forms.py:41
+#: cscsite/learning/admission/forms.py:44
 msgid "Novosibirsk"
 msgstr "Новосибирск"
 
-#: cscsite/learning/admission/forms.py:348
+#: cscsite/learning/admission/forms.py:351
 msgid "Create interview"
 msgstr "Создать собеседование"
 
-#: cscsite/learning/admission/forms.py:356
-#: cscsite/learning/admission/models.py:565
-#: cscsite/learning/admission/models.py:609
-#: cscsite/learning/admission/models.py:643
+#: cscsite/learning/admission/forms.py:370
+#: cscsite/learning/admission/models.py:606
+#: cscsite/learning/admission/models.py:659
+#: cscsite/learning/admission/models.py:693
 msgid "Interview stream"
 msgstr "Поток собеседований"
 
-#: cscsite/learning/admission/forms.py:389
+#: cscsite/learning/admission/forms.py:402
 msgid "Send"
 msgstr "Отправить"
 
-#: cscsite/learning/admission/forms.py:415
+#: cscsite/learning/admission/forms.py:428
 msgid "Update assignments list"
 msgstr "Обновить список заданий"
 
-#: cscsite/learning/admission/forms.py:448
+#: cscsite/learning/admission/forms.py:461
 msgid "Save"
 msgstr "Сохранить"
 
-#: cscsite/learning/admission/forms.py:468
+#: cscsite/learning/admission/forms.py:481
 msgid ""
 "Sorry, but you should be in interviewers list to create or update comment."
 msgstr ""
 "Вы не входите в список собеседующих данное интервью и не можете оставить "
 "комментарий."
 
-#: cscsite/learning/admission/forms.py:509
+#: cscsite/learning/admission/forms.py:522
 msgid "Update"
 msgstr "Обновить"
 
-#: cscsite/learning/admission/models.py:48
+#: cscsite/learning/admission/models.py:51
 msgid "Campaign|Year"
 msgstr "Год набора"
 
-#: cscsite/learning/admission/models.py:52
+#: cscsite/learning/admission/models.py:55
 msgid "City"
 msgstr "Город"
 
-#: cscsite/learning/admission/models.py:54
+#: cscsite/learning/admission/models.py:57
 msgid "Campaign|Test_max_score"
 msgstr "Максимальный балл по тесту"
 
-#: cscsite/learning/admission/models.py:56
+#: cscsite/learning/admission/models.py:59
 msgid "Campaign|Test_passing_score"
 msgstr "Проходной балл по тестированию"
 
-#: cscsite/learning/admission/models.py:57
+#: cscsite/learning/admission/models.py:60
 msgid "Campaign|Test_passing_score-help"
 msgstr "Все результаты >= указанного числа проходят в следующий этап."
 
-#: cscsite/learning/admission/models.py:59
+#: cscsite/learning/admission/models.py:62
 msgid "Campaign|Exam_max_score"
 msgstr "Максимальный балл по экзамену"
 
-#: cscsite/learning/admission/models.py:61
+#: cscsite/learning/admission/models.py:64
 msgid "Campaign|Exam_passing_score"
 msgstr "Проходной балл по экзамену"
 
-#: cscsite/learning/admission/models.py:62
+#: cscsite/learning/admission/models.py:65
 msgid "Campaign|Exam_passing_score-help"
 msgstr ""
-"Все результаты >= указанного порога гарантированно пройдут на следующий "
-"этап."
+"Все результаты >= указанного порога гарантированно пройдут на следующий этап."
 
-#: cscsite/learning/admission/models.py:63
-#: cscsite/learning/admission/views.py:411
+#: cscsite/learning/admission/models.py:66
+#: cscsite/learning/admission/views.py:419
 msgid "Current campaign"
 msgstr "Текущий набор"
 
-#: cscsite/learning/admission/models.py:67
+#: cscsite/learning/admission/models.py:70
 msgid "Campaigns"
 msgstr "Кампании по набору"
 
-#: cscsite/learning/admission/models.py:70
-#: cscsite/learning/admission/models.py:73
+#: cscsite/learning/admission/models.py:80
+#: cscsite/learning/admission/models.py:83
 msgid "{}, {}"
 msgstr "{}, {}"
 
-#: cscsite/learning/admission/models.py:93
+#: cscsite/learning/admission/models.py:103
 msgid "Rejected by test"
 msgstr "Отказ по результатам теста"
 
-#: cscsite/learning/admission/models.py:94
+#: cscsite/learning/admission/models.py:104
 msgid "Permitted to the exam"
 msgstr "Допущен к экзамену"
 
-#: cscsite/learning/admission/models.py:95
+#: cscsite/learning/admission/models.py:105
 msgid "Rejected by exam"
 msgstr "Отказ по результатам экзамена"
 
-#: cscsite/learning/admission/models.py:96
+#: cscsite/learning/admission/models.py:106
 msgid "Cheating"
 msgstr "Читер (списывание и т.д.)"
 
-#: cscsite/learning/admission/models.py:97
+#: cscsite/learning/admission/models.py:107
 msgid "Pending"
 msgstr "Ожидает решения"
 
-#: cscsite/learning/admission/models.py:98
+#: cscsite/learning/admission/models.py:108
 msgid "Can be interviewed"
 msgstr "Прошёл на собеседование (ещё не назначено)"
 
-#: cscsite/learning/admission/models.py:99
+#: cscsite/learning/admission/models.py:109
 msgid "Interview assigned"
 msgstr "Назначено собеседование"
 
-#: cscsite/learning/admission/models.py:100
+#: cscsite/learning/admission/models.py:110
 msgid "Interview completed"
 msgstr "Собеседование завершено"
 
-#: cscsite/learning/admission/models.py:101
+#: cscsite/learning/admission/models.py:111
 msgid "Rejected by interview"
 msgstr "Отказ по результатам интервью"
 
-#: cscsite/learning/admission/models.py:102
+#: cscsite/learning/admission/models.py:112
 msgid "Accept"
 msgstr "Принимаем"
 
-#: cscsite/learning/admission/models.py:103
+#: cscsite/learning/admission/models.py:113
 msgid "Accept with condition"
 msgstr "Принимаем с условием"
 
-#: cscsite/learning/admission/models.py:104
+#: cscsite/learning/admission/models.py:114
 msgid "Applicant|Volunteer"
 msgstr "Берем в вольные слушатели"
 
-#: cscsite/learning/admission/models.py:105
+#: cscsite/learning/admission/models.py:115
 msgid "He or she refused"
 msgstr "Отказался"
 
-#: cscsite/learning/admission/models.py:109
+#: cscsite/learning/admission/models.py:120
 msgid "Applicant|Campaign"
 msgstr "Набор"
 
-#: cscsite/learning/admission/models.py:112
+#: cscsite/learning/admission/models.py:123
 msgid "First name"
 msgstr "Имя"
 
-#: cscsite/learning/admission/models.py:114
+#: cscsite/learning/admission/models.py:125
 msgid "Patronymic"
 msgstr "Отчество"
 
-#: cscsite/learning/admission/models.py:116
+#: cscsite/learning/admission/models.py:127
 msgid "Email"
 msgstr "Email"
 
-#: cscsite/learning/admission/models.py:117
+#: cscsite/learning/admission/models.py:128
 msgid "Applicant|email"
 msgstr "Адрес электронной почты"
 
-#: cscsite/learning/admission/models.py:119
+#: cscsite/learning/admission/models.py:130
 msgid "Contact phone"
 msgstr "Контактный телефон"
 
-#: cscsite/learning/admission/models.py:121
+#: cscsite/learning/admission/models.py:132
 msgid "Applicant|phone"
 msgstr "Телефон для связи"
 
-#: cscsite/learning/admission/models.py:123
-msgid "Stepic ID"
-msgstr "Stepic ID"
+#: cscsite/learning/admission/models.py:134
+msgid "Stepik ID"
+msgstr "stepik.org ID"
 
-#: cscsite/learning/admission/models.py:124
+#: cscsite/learning/admission/models.py:135
 msgid "Applicant|stepic_id"
 msgstr "ID на stepic.org"
 
-#: cscsite/learning/admission/models.py:128
+#: cscsite/learning/admission/models.py:139
 msgid "Yandex ID"
 msgstr "Логин на Яндексе"
 
-#: cscsite/learning/admission/models.py:131
+#: cscsite/learning/admission/models.py:142
 msgid "Only the part before \"@yandex.ru\" is expected"
 msgstr "Нужно указать XXX, если адрес почты  XXX@yandex.ru"
 
-#: cscsite/learning/admission/models.py:133
+#: cscsite/learning/admission/models.py:144
 msgid "Applicant|yandex_id"
 msgstr "Логин на Яндексе"
 
-#: cscsite/learning/admission/models.py:137
+#: cscsite/learning/admission/models.py:148
 msgid "Yandex ID normalisation"
 msgstr "Нормализация Yandex #ID"
 
-#: cscsite/learning/admission/models.py:139
+#: cscsite/learning/admission/models.py:150
 msgid "Applicant|yandex_id_normalization"
 msgstr "Нормализация яндекс логина для поиска анкет"
 
-#: cscsite/learning/admission/models.py:143
+#: cscsite/learning/admission/models.py:154
 msgid "Github ID"
 msgstr "Github ID"
 
-#: cscsite/learning/admission/models.py:145
+#: cscsite/learning/admission/models.py:156
 msgid "Applicant|github_id"
 msgstr "Ссылка на github-аккаунт"
 
-#: cscsite/learning/admission/models.py:151
+#: cscsite/learning/admission/models.py:162
 msgid "Applicant|University"
 msgstr "Университет (и иногда факультет)"
 
-#: cscsite/learning/admission/models.py:155
+#: cscsite/learning/admission/models.py:166
 #, fuzzy
 #| msgid "University"
 msgid "University_legacy"
 msgstr "Вуз"
 
-#: cscsite/learning/admission/models.py:156
+#: cscsite/learning/admission/models.py:167
 #, fuzzy
 #| msgid "Applicant|university"
 msgid "Applicant|university_legacy"
 msgstr "Вуз, в котором учился или который закончил"
 
-#: cscsite/learning/admission/models.py:161
+#: cscsite/learning/admission/models.py:172
 msgid "University (Other)"
 msgstr "Университет"
 
-#: cscsite/learning/admission/models.py:162
+#: cscsite/learning/admission/models.py:173
 msgid "Applicant|university_other"
 msgstr "Университет (другое)"
 
-#: cscsite/learning/admission/models.py:167
+#: cscsite/learning/admission/models.py:178
 msgid "Faculty"
 msgstr "Факультет"
 
-#: cscsite/learning/admission/models.py:168
+#: cscsite/learning/admission/models.py:179
 msgid "Applicant|faculty"
 msgstr ""
 "На каком факультете (кафедре/специализации) Вы учитесь или какой факультет "
 "закончили?"
 
-#: cscsite/learning/admission/models.py:170
+#: cscsite/learning/admission/models.py:181
 msgid "Course"
 msgstr "Курс"
 
-#: cscsite/learning/admission/models.py:172
+#: cscsite/learning/admission/models.py:183
 msgid "Applicant|course"
 msgstr "На каком курсе Вы сейчас учитесь?"
 
-#: cscsite/learning/admission/models.py:175
+#: cscsite/learning/admission/models.py:186
 msgid "Graduate work"
 msgstr "Выпускная работа"
 
-#: cscsite/learning/admission/models.py:176
+#: cscsite/learning/admission/models.py:187
 msgid "Applicant|graduate_work_or_dissertation"
 msgstr ""
 "Название текущей курсовой, дипломной работы или диссертации (если есть), "
 "руководитель"
 
-#: cscsite/learning/admission/models.py:180
+#: cscsite/learning/admission/models.py:191
 msgid "Experience"
 msgstr "Опыт программирования или научной работы"
 
-#: cscsite/learning/admission/models.py:181
+#: cscsite/learning/admission/models.py:192
 msgid "Applicant|work_or_study_experience"
 msgstr "Опишите Ваш опыт программирования или научной работы"
 
-#: cscsite/learning/admission/models.py:185
+#: cscsite/learning/admission/models.py:196
 msgid "Do you work?"
 msgstr "Работает"
 
-#: cscsite/learning/admission/models.py:186
+#: cscsite/learning/admission/models.py:197
 msgid "Applicant|has_job"
 msgstr "Работает ли в данный момент"
 
-#: cscsite/learning/admission/models.py:191
+#: cscsite/learning/admission/models.py:202
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/learning/admission/models.py:192
+#: cscsite/learning/admission/models.py:203
 msgid "Applicant|workplace"
 msgstr "Место работы"
 
-#: cscsite/learning/admission/models.py:197
+#: cscsite/learning/admission/models.py:208
 msgid "Position"
 msgstr "Должность"
 
-#: cscsite/learning/admission/models.py:198
+#: cscsite/learning/admission/models.py:209
 msgid "Applicant|position"
 msgstr "Должность"
 
-#: cscsite/learning/admission/models.py:204
+#: cscsite/learning/admission/models.py:215
 msgid "Your motivation"
 msgstr "Мотивация поступающего"
 
-#: cscsite/learning/admission/models.py:205
+#: cscsite/learning/admission/models.py:216
 msgid "Applicant|motivation_why"
 msgstr "Почему Вы хотели бы обучаться в Computer Science Center?"
 
-#: cscsite/learning/admission/models.py:209
+#: cscsite/learning/admission/models.py:220
 msgid "Additional info from applicant about himself"
 msgstr "Дополнительно о себе"
 
-#: cscsite/learning/admission/models.py:210
+#: cscsite/learning/admission/models.py:221
 msgid "Applicant|additional_info"
 msgstr ""
 "Если хотите, напишите о себе любую дополнительную информацию, которая могла "
 "бы помочь Вам поступить в центр"
 
-#: cscsite/learning/admission/models.py:214
+#: cscsite/learning/admission/models.py:225
 msgid "Study program"
 msgstr "Предполагаемые направления обучения"
 
-#: cscsite/learning/admission/models.py:215
+#: cscsite/learning/admission/models.py:226
 msgid "Applicant|study_program"
 msgstr "Выберите направления обучения, которые Вам интересны в CS центре"
 
-#: cscsite/learning/admission/models.py:218
+#: cscsite/learning/admission/models.py:229
 msgid "Study program (DM note)"
 msgstr "Направление \"Анализ данных\" (подробнее)"
 
-#: cscsite/learning/admission/models.py:219
+#: cscsite/learning/admission/models.py:230
 msgid "Applicant|study_program_dm"
 msgstr ""
 "Почему вам интересен анализ данных? Какие повседневные задачи решаются с "
 "помощью анализа данных?"
 
-#: cscsite/learning/admission/models.py:223
+#: cscsite/learning/admission/models.py:234
 msgid "Study program (SE note)"
 msgstr "Направление \"Разработка ПО\" (подробнее)"
 
-#: cscsite/learning/admission/models.py:224
+#: cscsite/learning/admission/models.py:235
 msgid "Applicant|study_program_se"
 msgstr ""
 "В разработке какого приложения, которым вы пользуетесь каждый день, вы "
 "хотели бы принять участие? Почему? Каких знаний вам для этого не хватает?"
 
-#: cscsite/learning/admission/models.py:228
+#: cscsite/learning/admission/models.py:239
 msgid "Study program (CS note)"
 msgstr "Какие области Computer Science вам интересно было бы изучить?"
 
-#: cscsite/learning/admission/models.py:229
+#: cscsite/learning/admission/models.py:240
 msgid "Applicant|study_program_cs"
 msgstr ""
 "Вы можете посмотреть список возможных тем и руководителей НИРов у нас на "
 "сайте: https://compscicenter.ru/pages/projects/#research-curators"
 
-#: cscsite/learning/admission/models.py:233
+#: cscsite/learning/admission/models.py:244
 msgid "Where did you learn?"
 msgstr "Где и как Вы узнали о CS центре и о наборе?"
 
-#: cscsite/learning/admission/models.py:234
+#: cscsite/learning/admission/models.py:245
 msgid "Applicant|where_did_you_learn_about_cs_center"
 msgstr "Где и как Вы узнали о CS центре и о наборе?"
 
-#: cscsite/learning/admission/models.py:238
+#: cscsite/learning/admission/models.py:249
 msgid "Where did you learn? (other)"
 msgstr "Откуда вы узнали о CS центре? (другое)"
 
-#: cscsite/learning/admission/models.py:243
+#: cscsite/learning/admission/models.py:254
 msgid "Future plans"
 msgstr "Планы после обучения"
 
-#: cscsite/learning/admission/models.py:244
+#: cscsite/learning/admission/models.py:255
 msgid "Applicant|future_plans"
 msgstr "Чем вы планируете заниматься после окончания обучения?"
 
-#: cscsite/learning/admission/models.py:248
+#: cscsite/learning/admission/models.py:259
 msgid "Admin note"
 msgstr "Заметка о поступающем"
 
-#: cscsite/learning/admission/models.py:249
+#: cscsite/learning/admission/models.py:260
 msgid "Applicant|admin_note"
 msgstr "Например, вопросы по заявке"
 
-#: cscsite/learning/admission/models.py:254
+#: cscsite/learning/admission/models.py:265
 msgid "Applicant|Status"
 msgstr "Статус"
 
-#: cscsite/learning/admission/models.py:267
-#: cscsite/learning/admission/models.py:345
-#: cscsite/learning/admission/models.py:380
-#: cscsite/learning/admission/models.py:461
-#: cscsite/learning/admission/models.py:638
+#: cscsite/learning/admission/models.py:278
+#: cscsite/learning/admission/models.py:364
+#: cscsite/learning/admission/models.py:399
+#: cscsite/learning/admission/models.py:481
+#: cscsite/learning/admission/models.py:688
 msgid "Applicant"
 msgstr "Поступающий"
 
-#: cscsite/learning/admission/models.py:268
+#: cscsite/learning/admission/models.py:279
 msgid "Applicants"
 msgstr "Анкеты"
 
-#: cscsite/learning/admission/models.py:313
+#: cscsite/learning/admission/models.py:332
 msgid "Contest|Campaign"
 msgstr "Кампания по набору"
 
-#: cscsite/learning/admission/models.py:317
-#: cscsite/learning/admission/models.py:356
-#: cscsite/learning/admission/models.py:391
+#: cscsite/learning/admission/models.py:336
+#: cscsite/learning/admission/models.py:375
+#: cscsite/learning/admission/models.py:410
 msgid "Contest #ID"
 msgstr "#ID Контеста"
 
-#: cscsite/learning/admission/models.py:318
-#: cscsite/learning/admission/models.py:357
-#: cscsite/learning/admission/models.py:392
+#: cscsite/learning/admission/models.py:337
+#: cscsite/learning/admission/models.py:376
+#: cscsite/learning/admission/models.py:411
 msgid "Applicant|yandex_contest_id"
 msgstr "ID Яндекс.Контеста"
 
-#: cscsite/learning/admission/models.py:324
+#: cscsite/learning/admission/models.py:343
 msgid "Assignments in pdf format"
 msgstr "Pdf-файл с заданиями"
 
-#: cscsite/learning/admission/models.py:326
+#: cscsite/learning/admission/models.py:345
 msgid ""
 "Make sure file does not include solutions due to it visible with direct url "
 "link"
@@ -499,204 +498,204 @@ msgstr ""
 "Файлы не должны включать в себя решения, т.к. доступны по прямой ссылке "
 "любому желающему."
 
-#: cscsite/learning/admission/models.py:331
+#: cscsite/learning/admission/models.py:350
 msgid "Contest"
 msgstr "Контест"
 
-#: cscsite/learning/admission/models.py:332
+#: cscsite/learning/admission/models.py:351
 msgid "Contests"
 msgstr "Контесты"
 
-#: cscsite/learning/admission/models.py:349
-#: cscsite/learning/admission/models.py:384
+#: cscsite/learning/admission/models.py:368
+#: cscsite/learning/admission/models.py:403
 msgid "Details"
 msgstr "Детали"
 
-#: cscsite/learning/admission/models.py:362
-#: cscsite/learning/admission/models.py:397
-#: cscsite/learning/admission/models.py:528
+#: cscsite/learning/admission/models.py:381
+#: cscsite/learning/admission/models.py:416
+#: cscsite/learning/admission/models.py:569
 msgid "Score"
 msgstr "Оценка"
 
-#: cscsite/learning/admission/models.py:365
+#: cscsite/learning/admission/models.py:384
 msgid "Testing"
 msgstr "Онлайн-тестирование"
 
-#: cscsite/learning/admission/models.py:366
+#: cscsite/learning/admission/models.py:385
 msgid "Testings"
 msgstr "Результаты тестирования"
 
-#: cscsite/learning/admission/models.py:401
+#: cscsite/learning/admission/models.py:420
 msgid "Exam"
 msgstr "Экзамен"
 
-#: cscsite/learning/admission/models.py:402
+#: cscsite/learning/admission/models.py:421
 msgid "Exams"
 msgstr "Результаты экзамена"
 
-#: cscsite/learning/admission/models.py:421
+#: cscsite/learning/admission/models.py:440
 msgid "InterviewAssignments|Campaign"
 msgstr "Кампания по набору"
 
-#: cscsite/learning/admission/models.py:424
+#: cscsite/learning/admission/models.py:443
 msgid "InterviewAssignments|name"
 msgstr "Название"
 
-#: cscsite/learning/admission/models.py:426
+#: cscsite/learning/admission/models.py:445
 msgid "Assignment description"
 msgstr "Описание"
 
-#: cscsite/learning/admission/models.py:427
-#: cscsite/learning/admission/models.py:430
+#: cscsite/learning/admission/models.py:446
+#: cscsite/learning/admission/models.py:449
 msgid "TeX support"
 msgstr "Поддерживается TeX"
 
-#: cscsite/learning/admission/models.py:429
+#: cscsite/learning/admission/models.py:448
 msgid "Assignment solution"
 msgstr "Решение"
 
-#: cscsite/learning/admission/models.py:435
+#: cscsite/learning/admission/models.py:454
 msgid "Interview assignment"
 msgstr "Задание для интервью"
 
-#: cscsite/learning/admission/models.py:436
+#: cscsite/learning/admission/models.py:455
 msgid "Interview assignments"
 msgstr "Задания для интервью"
 
-#: cscsite/learning/admission/models.py:450
+#: cscsite/learning/admission/models.py:469
 msgid "Approval"
 msgstr "Согласование"
 
-#: cscsite/learning/admission/models.py:451
+#: cscsite/learning/admission/models.py:470
 msgid "Deferred"
 msgstr "Отложено"
 
-#: cscsite/learning/admission/models.py:452
+#: cscsite/learning/admission/models.py:471
 msgid "Canceled"
 msgstr "Отменено"
 
-#: cscsite/learning/admission/models.py:453
+#: cscsite/learning/admission/models.py:472
 msgid "Approved"
 msgstr "Согласовано"
 
-#: cscsite/learning/admission/models.py:454
+#: cscsite/learning/admission/models.py:473
 msgid "Completed"
 msgstr "Завершено"
 
-#: cscsite/learning/admission/models.py:458
+#: cscsite/learning/admission/models.py:478
 msgid "When"
 msgstr "Дата интервью"
 
-#: cscsite/learning/admission/models.py:466
-#: cscsite/learning/admission/models.py:561
+#: cscsite/learning/admission/models.py:486
+#: cscsite/learning/admission/models.py:602
 msgid "Interview|Interviewers"
 msgstr "Собеседующие"
 
-#: cscsite/learning/admission/models.py:471
+#: cscsite/learning/admission/models.py:491
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: cscsite/learning/admission/models.py:477
+#: cscsite/learning/admission/models.py:497
 msgid "Interview|Status"
 msgstr "Статус собеседования"
 
-#: cscsite/learning/admission/models.py:480
+#: cscsite/learning/admission/models.py:500
 msgid "Note"
 msgstr "Доп. информация"
 
-#: cscsite/learning/admission/models.py:486
+#: cscsite/learning/admission/models.py:506
 msgid "Interviews"
 msgstr "Собеседования"
 
-#: cscsite/learning/admission/models.py:524
+#: cscsite/learning/admission/models.py:565
 msgid "Text"
 msgstr "Комментарий"
 
-#: cscsite/learning/admission/models.py:532
+#: cscsite/learning/admission/models.py:573
 msgid "Comment"
 msgstr "Комментарий"
 
-#: cscsite/learning/admission/models.py:533
+#: cscsite/learning/admission/models.py:574
 msgid "Comments"
 msgstr "Комментарии к собеседованию"
 
-#: cscsite/learning/admission/models.py:542
+#: cscsite/learning/admission/models.py:583
 msgid "Interview day"
 msgstr "День проведения"
 
-#: cscsite/learning/admission/models.py:543
+#: cscsite/learning/admission/models.py:584
 msgid "Period start"
 msgstr "Начинается"
 
-#: cscsite/learning/admission/models.py:544
+#: cscsite/learning/admission/models.py:585
 msgid "Period end"
 msgstr "Заканчивается"
 
-#: cscsite/learning/admission/models.py:546
+#: cscsite/learning/admission/models.py:587
 msgid "Slot duration"
 msgstr "Длительность слота (мин)"
 
-#: cscsite/learning/admission/models.py:552
+#: cscsite/learning/admission/models.py:593
 msgid "Interview venue"
 msgstr "Место"
 
-#: cscsite/learning/admission/models.py:556
+#: cscsite/learning/admission/models.py:597
 msgid "Has assignments"
 msgstr "С заданиями"
 
-#: cscsite/learning/admission/models.py:557
+#: cscsite/learning/admission/models.py:598
 msgid "Based on this flag, student should arrive 30 min before or not"
 msgstr ""
-"Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
-" раньше."
+"Если отмечено, то в уведомлении будет указано время собеседования на полчаса "
+"раньше."
 
-#: cscsite/learning/admission/models.py:566
+#: cscsite/learning/admission/models.py:607
 msgid "Interview streams"
 msgstr "Потоки собеседований"
 
-#: cscsite/learning/admission/models.py:585
+#: cscsite/learning/admission/models.py:635
 msgid "Stream duration can't be less than slot duration"
 msgstr ""
 "Длительность потока должна быть больше, чем длительность хотя бы одного "
 "слота."
 
-#: cscsite/learning/admission/models.py:605
+#: cscsite/learning/admission/models.py:655
 msgid "Interview start"
 msgstr "Начало"
 
-#: cscsite/learning/admission/models.py:606
+#: cscsite/learning/admission/models.py:656
 msgid "Interview end"
 msgstr "Окончание"
 
-#: cscsite/learning/admission/models.py:615
+#: cscsite/learning/admission/models.py:665
 msgid "Interview slot"
 msgstr "Слот для собеседования"
 
-#: cscsite/learning/admission/models.py:616
+#: cscsite/learning/admission/models.py:666
 msgid "Interview slots"
 msgstr "Слоты для собеседований"
 
-#: cscsite/learning/admission/models.py:647
+#: cscsite/learning/admission/models.py:697
 msgid "Secret code"
 msgstr "Секретный код"
 
-#: cscsite/learning/admission/models.py:649
+#: cscsite/learning/admission/models.py:699
 msgid "Expired at"
 msgstr "Истекает"
 
-#: cscsite/learning/admission/models.py:651
+#: cscsite/learning/admission/models.py:701
 msgid "Estimated interview day"
 msgstr "Предполагаемая дата собеседования"
 
-#: cscsite/learning/admission/models.py:661
+#: cscsite/learning/admission/models.py:711
 msgid "Interview invitation"
 msgstr "Приглашение на собеседование"
 
-#: cscsite/learning/admission/models.py:662
+#: cscsite/learning/admission/models.py:712
 msgid "Interview invitations"
 msgstr "Приглашения на собеседования"
 
-#: cscsite/learning/admission/views.py:420
+#: cscsite/learning/admission/views.py:429
 msgid "All campaigns"
 msgstr "Все наборы"
 

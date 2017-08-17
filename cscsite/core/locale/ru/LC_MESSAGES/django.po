@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-16 13:14+0000\n"
-"PO-Revision-Date: 2017-08-16 17:13+0000\n"
+"POT-Creation-Date: 2017-08-17 12:14+0000\n"
+"PO-Revision-Date: 2017-08-17 12:16+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -59,14 +59,12 @@ msgid "City name"
 msgstr "Название города"
 
 #: cscsite/core/models.py:77
-#, fuzzy
-#| msgid "University abbreviation"
 msgid "Abbreviation"
-msgstr "Аббревиатура (если есть)"
+msgstr "Аббревиатура"
 
 #: cscsite/core/models.py:82 cscsite/core/models.py:134
 #: cscsite/learning/models.py:238 cscsite/learning/models.py:1343
-#: cscsite/library/models.py:45
+#: cscsite/library/models.py:37
 #: cscsite/templates/learning/courses/detail.html:30
 msgid "City"
 msgstr "Город"
@@ -122,7 +120,7 @@ msgid "Questions&Answers"
 msgstr "FAQ"
 
 #: cscsite/core/models.py:127 cscsite/core/models.py:138
-#: cscsite/templates/users/user_detail.html:203 cscsite/users/models.py:255
+#: cscsite/templates/users/user_detail.html:207 cscsite/users/models.py:255
 msgid "University"
 msgstr "Университет"
 
@@ -404,7 +402,7 @@ msgstr "Имя пользователя"
 #: cscsite/learning/gallery/models.py:51 cscsite/learning/models.py:246
 #: cscsite/learning/models.py:437 cscsite/learning/models.py:589
 #: cscsite/learning/models.py:759 cscsite/learning/models.py:1137
-#: cscsite/templates/users/user_detail.html:311
+#: cscsite/templates/users/user_detail.html:315
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -494,7 +492,7 @@ msgstr ""
 
 #: cscsite/learning/management/imports.py:113
 msgid "User with stepic_id {} not found"
-msgstr "Пользователь со Stepik ID {} не найден"
+msgstr "Пользователь со stepik.org ID {} не найден"
 
 #: cscsite/learning/management/imports.py:116
 #, fuzzy
@@ -810,7 +808,7 @@ msgstr "Поддерживаются ссылки на YouTube и Яндекс.�
 msgid "CourseClass|Other materials"
 msgstr "Другие материалы"
 
-#: cscsite/learning/models.py:622 cscsite/templates/users/user_detail.html:444
+#: cscsite/learning/models.py:622 cscsite/templates/users/user_detail.html:448
 msgid "Classes"
 msgstr "Занятия"
 
@@ -846,12 +844,12 @@ msgstr ""
 "пустым"
 
 #: cscsite/learning/models.py:795 cscsite/learning/models.py:876
-#: cscsite/templates/users/user_detail.html:312
+#: cscsite/templates/users/user_detail.html:316
 msgid "Assignment"
 msgstr "Задание"
 
-#: cscsite/learning/models.py:796 cscsite/templates/users/user_detail.html:302
-#: cscsite/templates/users/user_detail.html:451
+#: cscsite/learning/models.py:796 cscsite/templates/users/user_detail.html:306
+#: cscsite/templates/users/user_detail.html:455
 msgid "Assignments"
 msgstr "Задания"
 
@@ -907,7 +905,7 @@ msgstr "Студент"
 #: cscsite/templates/learning/assignment_list_teacher.html:90
 #: cscsite/templates/learning/assignment_submission_detail.html:133
 #: cscsite/templates/learning/courses/learning_my_courses.html:87
-#: cscsite/templates/users/user_detail.html:313
+#: cscsite/templates/users/user_detail.html:317
 msgid "Grade"
 msgstr "Оценка"
 
@@ -1140,7 +1138,7 @@ msgid "Online course"
 msgstr "Онлайн-курс"
 
 #: cscsite/learning/models.py:1400
-#: cscsite/templates/users/user_detail.html:402
+#: cscsite/templates/users/user_detail.html:406
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -1394,53 +1392,53 @@ msgstr "Вы уверены, что хотите отказаться от \"%(c
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: cscsite/learning/views/views.py:532
+#: cscsite/learning/views/views.py:528
 #, python-format
 msgid "The class '%s' was successfully created."
 msgstr "Занятие '%s' успешно создано."
 
-#: cscsite/learning/views/views.py:552
+#: cscsite/learning/views/views.py:548
 #, python-format
 msgid "The class '%s' was successfully updated."
 msgstr "Занятие '%s' успешно обновлено."
 
-#: cscsite/learning/views/views.py:611
+#: cscsite/learning/views/views.py:607
 msgid "All"
 msgstr "Все"
 
-#: cscsite/learning/views/views.py:612
+#: cscsite/learning/views/views.py:608
 msgid "Without grades"
 msgstr "Без оценки"
 
-#: cscsite/learning/views/views.py:613
+#: cscsite/learning/views/views.py:609
 msgid "With grades"
 msgstr "С оценкой"
 
-#: cscsite/learning/views/views.py:616
+#: cscsite/learning/views/views.py:612
 msgid "No matter"
 msgstr "Неважно"
 
-#: cscsite/learning/views/views.py:617
+#: cscsite/learning/views/views.py:613
 msgid "From student"
 msgstr "От студента"
 
-#: cscsite/learning/views/views.py:618
+#: cscsite/learning/views/views.py:614
 msgid "From teacher"
 msgstr "От преподавателя"
 
-#: cscsite/learning/views/views.py:619
+#: cscsite/learning/views/views.py:615
 msgid "Without comments"
 msgstr "Нет комментариев"
 
-#: cscsite/learning/views/views.py:820
+#: cscsite/learning/views/views.py:816
 msgid "You were redirected from Assignments due to empty course list."
 msgstr "Вы были перенаправлены. Список заданий пуст на данный момент."
 
-#: cscsite/learning/views/views.py:978
+#: cscsite/learning/views/views.py:974
 msgid "Grade successfully saved"
 msgstr "Оценка успешно сохранена."
 
-#: cscsite/learning/views/views.py:984
+#: cscsite/learning/views/views.py:980
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -1448,13 +1446,7 @@ msgstr "Неправильная форма оценки"
 msgid "Format"
 msgstr "Формат"
 
-#: cscsite/library/admin.py:26 cscsite/library/admin.py:45
-#: cscsite/library/models.py:27 cscsite/library/models.py:51
-msgid "read by"
-msgstr "Читают"
-
-#: cscsite/library/admin.py:41
-#| msgid "No places available"
+#: cscsite/library/admin.py:40
 msgid "Copies available"
 msgstr "Доступно"
 
@@ -1463,12 +1455,12 @@ msgid "Library"
 msgstr "Библиотека"
 
 #: cscsite/library/models.py:16
-#: cscsite/library/templates/library/book_list.html:28
+#: cscsite/library/templates/library/stock_list.html:29
 msgid "Book|author"
 msgstr "Автор"
 
 #: cscsite/library/models.py:17
-#: cscsite/library/templates/library/book_list.html:29
+#: cscsite/library/templates/library/stock_list.html:28
 msgid "Book|title"
 msgstr "Заголовок"
 
@@ -1480,56 +1472,56 @@ msgstr "Описание"
 msgid "Book|cover"
 msgstr "Обложка"
 
-#: cscsite/library/models.py:23 cscsite/library/models.py:47
-msgid "Book|number of copies"
-msgstr "Количество копий"
-
-#: cscsite/library/models.py:33
+#: cscsite/library/models.py:27
 msgid "book"
 msgstr "Книга"
 
-#: cscsite/library/models.py:34 cscsite/templates/users/user_detail.html:185
+#: cscsite/library/models.py:28 cscsite/templates/users/user_detail.html:189
 msgid "books"
 msgstr "Книги"
 
-#: cscsite/library/models.py:44
+#: cscsite/library/models.py:35
 msgid "Book"
 msgstr "Книга"
 
-#: cscsite/library/models.py:54
+#: cscsite/library/models.py:39
+msgid "Book|number of copies"
+msgstr "Количество копий"
+
+#: cscsite/library/models.py:44
 msgid "Stock"
 msgstr "Резерв"
 
-#: cscsite/library/models.py:55
+#: cscsite/library/models.py:45
 msgid "Stocks"
 msgstr "Резервы"
 
-#: cscsite/library/models.py:81
+#: cscsite/library/models.py:66
 msgid "Borrow|student"
 msgstr "Студент"
 
-#: cscsite/library/models.py:82
+#: cscsite/library/models.py:67
 msgid "Borrow|borrowed on"
 msgstr "Взято"
 
-#: cscsite/library/models.py:85
+#: cscsite/library/models.py:70
 msgid "borrow"
 msgstr "Взятие"
 
-#: cscsite/library/models.py:86
+#: cscsite/library/models.py:71
 msgid "borrows"
 msgstr "Взятия"
 
-#: cscsite/library/templates/library/book_detail.html:30
-#: cscsite/library/templates/library/book_list.html:30
+#: cscsite/library/templates/library/stock_detail.html:31
+#: cscsite/library/templates/library/stock_list.html:30
 msgid "Book|read by"
 msgstr "Читают"
 
-#: cscsite/library/templates/library/book_list.html:11
+#: cscsite/library/templates/library/stock_list.html:11
 msgid "library"
 msgstr "Библиотека"
 
-#: cscsite/library/templates/library/book_list.html:20
+#: cscsite/library/templates/library/stock_list.html:20
 msgid ""
 "\n"
 "                    HOWTO instructions. Do we even need i18n here?\n"
@@ -1538,7 +1530,7 @@ msgstr ""
 "\n"
 "Чтобы взять книгу, нужно написать на <a href=\"mailto:curators@compscicenter.ru\">curators@compscicenter.ru</a> письмо о своём желании с указанием автора книги и её названия. Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты."
 
-#: cscsite/library/templates/library/book_list.html:31
+#: cscsite/library/templates/library/stock_list.html:31
 msgid "Book|number of copies left"
 msgstr "Количество оставшихся копий"
 
@@ -2041,8 +2033,8 @@ msgid "No videos yet"
 msgstr "Список видео пуст"
 
 #: cscsite/templates/learning/gradebook/_modal_stepic.html:7
-msgid "Import stepic statements"
-msgstr "Импортировать баллы по Stepic ID"
+msgid "Import stepik statements"
+msgstr "Импортировать баллы по stepik.org ID"
 
 #: cscsite/templates/learning/gradebook/_modal_stepic.html:14
 #: cscsite/templates/learning/gradebook/_modal_yandex.html:14
@@ -2080,12 +2072,13 @@ msgid "Marks sheet"
 msgstr "Ведомость"
 
 #: cscsite/templates/learning/gradebook/form.html:35
-msgid "From Stepic"
-msgstr "По Stepic ID"
+#| msgid "stepik.org ID"
+msgid "By stepik.org ID"
+msgstr "По stepik.org ID"
 
 #: cscsite/templates/learning/gradebook/form.html:36
-msgid "From Yandex"
-msgstr "По Yandex-логину"
+msgid "By Yandex login"
+msgstr "По yandex логину"
 
 #: cscsite/templates/learning/gradebook/form.html:66
 msgid "Students"
@@ -2257,7 +2250,7 @@ msgid "Groups"
 msgstr "Группы"
 
 #: cscsite/templates/staff/student_search.html:51
-#: cscsite/templates/users/user_detail.html:238 cscsite/users/models.py:139
+#: cscsite/templates/users/user_detail.html:242 cscsite/users/models.py:139
 #: cscsite/users/models.py:285
 msgid "Status"
 msgstr "Статус"
@@ -2347,7 +2340,7 @@ msgid "Reference|Detail|info"
 msgstr "Информация"
 
 #: cscsite/templates/users/teacher_detail.html:25
-#: cscsite/templates/users/user_detail.html:504 cscsite/users/models.py:248
+#: cscsite/templates/users/user_detail.html:508 cscsite/users/models.py:248
 msgid "Contact information"
 msgstr "Контактная информация"
 
@@ -2390,65 +2383,65 @@ msgstr "Отзыв о центре"
 msgid "Create reference"
 msgstr "Выдать справку"
 
-#: cscsite/templates/users/user_detail.html:171
+#: cscsite/templates/users/user_detail.html:175
 #: cscsite/users/tests/test_views.py:609 cscsite/users/tests/test_views.py:614
 msgid "Student references"
 msgstr "Справки студента"
 
-#: cscsite/templates/users/user_detail.html:200 cscsite/users/admin.py:156
+#: cscsite/templates/users/user_detail.html:204 cscsite/users/admin.py:157
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: cscsite/templates/users/user_detail.html:207 cscsite/users/models.py:259
+#: cscsite/templates/users/user_detail.html:211 cscsite/users/models.py:259
 msgid "Phone"
 msgstr "Телефон"
 
-#: cscsite/templates/users/user_detail.html:211
+#: cscsite/templates/users/user_detail.html:215
 msgid "Email"
 msgstr "Email"
 
-#: cscsite/templates/users/user_detail.html:217 cscsite/users/models.py:263
+#: cscsite/templates/users/user_detail.html:221 cscsite/users/models.py:263
 msgid "StudentInfo|University year"
 msgstr "Курс"
 
-#: cscsite/templates/users/user_detail.html:222 cscsite/users/models.py:270
+#: cscsite/templates/users/user_detail.html:226 cscsite/users/models.py:270
 msgid "Comment"
 msgstr "Комментарий"
 
-#: cscsite/templates/users/user_detail.html:242
+#: cscsite/templates/users/user_detail.html:246
 msgid "Non-degree student"
 msgstr "Вольнослушатель"
 
-#: cscsite/templates/users/user_detail.html:247
+#: cscsite/templates/users/user_detail.html:251
 msgid "Curriculum year"
 msgstr "Год программы обучения"
 
-#: cscsite/templates/users/user_detail.html:276
+#: cscsite/templates/users/user_detail.html:280
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: cscsite/templates/users/user_detail.html:292 cscsite/users/models.py:303
+#: cscsite/templates/users/user_detail.html:296 cscsite/users/models.py:303
 msgid "Workplace"
 msgstr "Место работы"
 
-#: cscsite/templates/users/user_detail.html:385
+#: cscsite/templates/users/user_detail.html:389
 msgctxt "Project"
 msgid "Canceled"
 msgstr "Отменен"
 
-#: cscsite/templates/users/user_detail.html:438
+#: cscsite/templates/users/user_detail.html:442
 msgid ".iCal calendar"
 msgstr ".iCal-календарь"
 
-#: cscsite/templates/users/user_detail.html:439
+#: cscsite/templates/users/user_detail.html:443
 msgid "Link"
 msgstr "Ссылка"
 
-#: cscsite/templates/users/user_detail.html:458
+#: cscsite/templates/users/user_detail.html:462
 msgid "Events"
 msgstr "События"
 
-#: cscsite/templates/users/user_detail.html:470
+#: cscsite/templates/users/user_detail.html:474
 msgid "Social accounts"
 msgstr "Аккаунты"
 
@@ -2482,23 +2475,23 @@ msgstr ""
 "Пользователь не должен быть одновременно Выпускником и Студентом "
 "центра/Вольнослушателем"
 
-#: cscsite/users/admin.py:148
+#: cscsite/users/admin.py:149
 msgid "Personal info"
 msgstr "Персональная информация"
 
-#: cscsite/users/admin.py:152
+#: cscsite/users/admin.py:153
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: cscsite/users/admin.py:154
+#: cscsite/users/admin.py:155
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: cscsite/users/admin.py:161
+#: cscsite/users/admin.py:162
 msgid "Curator's note"
 msgstr "Заметка куратора"
 
-#: cscsite/users/admin.py:163
+#: cscsite/users/admin.py:164
 msgid "Important dates"
 msgstr "Важные даты"
 
@@ -2540,8 +2533,8 @@ msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
 #: cscsite/users/forms.py:113
-msgid "stepic.org/users/<b>STEPIC-ID</b>"
-msgstr "stepic.org/users/<b>STEPIC-ID</b>"
+msgid "stepik.org/users/<b>USER_ID</b>"
+msgstr "stepik.org/users/<b>ID пользователя</b>"
 
 #: cscsite/users/models.py:133
 msgid "created"
@@ -2642,8 +2635,8 @@ msgid "Github ID"
 msgstr "Github ID"
 
 #: cscsite/users/models.py:240
-msgid "Stepic ID"
-msgstr "Stepic ID"
+msgid "stepik.org ID"
+msgstr "stepik.org ID"
 
 #: cscsite/users/models.py:244
 msgid "CSC review"
@@ -2717,6 +2710,15 @@ msgstr "Справка пользователя"
 #: cscsite/users/models.py:632
 msgid "User reference records"
 msgstr "Справки пользователей"
+
+#~ msgid "From stepik.org"
+#~ msgstr "По stepik.org ID"
+
+#~ msgid "From Yandex"
+#~ msgstr "По Yandex-логину"
+
+#~ msgid "read by"
+#~ msgstr "Читают"
 
 #~ msgid "Enrolled students"
 #~ msgstr "Записавшиеся студенты"
