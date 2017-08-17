@@ -89,7 +89,7 @@ INSTALLED_APPS = [
     'htmlpages',
     'learning',
     'staff',
-    'library',
+    'library.apps.LibraryConfig',
     'loginas',
     'import_export',
     'pipeline',

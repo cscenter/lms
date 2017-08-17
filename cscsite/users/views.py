@@ -175,7 +175,8 @@ class UserDetailView(generic.DetailView):
         select_list = []
         if self.request.user.is_curator:
             prefetch_list += ['borrows',
-                              'borrows__book',
+                              'borrows__stock',
+                              'borrows__stock__book',
                               'onlinecourserecord_set',
                               'areas_of_study',
                               'cscuserreference_set']

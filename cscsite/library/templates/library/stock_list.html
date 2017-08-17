@@ -10,7 +10,7 @@
             <h2 class="content-title">
                 {% trans "library"|capfirst %}
                 {% if user.is_authenticated and user.is_curator %}
-                    <a href="{% admin_url books %}" target="_blank" class="btn btn-link">
+                    <a href="{% admin_url stocks %}" target="_blank" class="btn btn-link">
                         <i class="fa fa-pencil"></i>
                     </a>
                 {% endif %}
@@ -25,28 +25,31 @@
             <table class="table table-bordered">
                 <thead>
                 <tr class="active">
-                    <th>{% trans "Book|author"|capfirst %}</th>
                     <th>{% trans "Book|title"|capfirst %}</th>
+                    <th>{% trans "Book|author"|capfirst %}</th>
                     <th>{% trans "Book|read by"|capfirst %}</th>
                     <th>{% trans "Book|number of copies left"|capfirst %}</th>
+                    {% if user.is_curator %}<th>Город</th>{% endif %}
                 </tr>
                 </thead>
                 <tbody>
-                {% for book in books %}
-                    <tr{% if book.borrowed_by %} class="warning"{% endif %}>
-                        <td><em>{{ book.author }}</em></td>
+                {% for stock in stocks %}
+                    <tr{% if stock.pk in borrowed %} class="warning"{% endif %}>
                         <td>
-                            <a href="{{ book.get_absolute_url }}">
-                                {{ book.title }}
+                            <a href="{{ stock.get_absolute_url }}">
+                                {{ stock.book.title }}
                             </a>
+                        </td>
+                        <td><em>{{ stock.book.author }}</em></td>
                         <td>
-                            {% if book.read_by.exists %}
+                            {% if stock.borrows.exists %}
                                 <p>
                                     {% include "library/_borrowed_by.html" %}
                                 </p>
                             {% endif %}
                         </td>
-                        <td>{{ book.available_copies }}</td>
+                        <td>{{ stock.available_copies }}</td>
+                        {% if user.is_curator %}<td>{{ stock.city.abbr }}</td>{% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
