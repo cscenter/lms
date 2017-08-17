@@ -136,8 +136,9 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
                CSCUserStatusLogAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
                        'last_login', 'date_joined']
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name',
-        'is_staff')
+    list_display = ['id', 'username', 'email', 'first_name', 'last_name',
+                    'is_staff']
+    list_filter = ['is_staff', 'is_superuser', 'is_active', 'city', 'groups']
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
