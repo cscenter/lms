@@ -19,6 +19,7 @@ TEMPLATES = [{
     "APP_DIRS": False,
     'DIRS': [
         str(PROJECT_DIR / "templates"),
+        str(BASE_DIR / "templates")
     ],
     "NAME": "jinja2",
     "OPTIONS": {
