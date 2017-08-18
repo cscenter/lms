@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'django_rq',
     'django_js_reverse',
     'webpack_loader',
+    'django_filters',
 ]
 
 # django-js-reverse settings
