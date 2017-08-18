@@ -18,7 +18,9 @@ from django.http.response import HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
+from vanilla import TemplateView
 
+from core.models import City
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
 from learning.models import Semester, CourseOffering, StudyProgram, \
@@ -31,7 +33,7 @@ from learning.utils import get_current_term_pair, get_term_index, get_term_by_in
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
 from users.models import CSCUser, CSCUserStatusLog
-from users.filters import CSCUserFilter
+from users.filters import UserFilter
 
 
 class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
@@ -40,7 +42,7 @@ class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
 
     def get(self, request, *args, **kwargs):
         qs = CSCUser.objects.values('first_name', 'last_name', 'pk')
-        filter_set = CSCUserFilter(request.GET, qs)
+        filter_set = UserFilter(request.GET, qs)
         if filter_set.empty_query:
             return JsonResponse({
                 "total": 0,
@@ -57,25 +59,28 @@ class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
         })
 
 
-class StudentSearchView(CuratorOnlyMixin, generic.TemplateView):
+class StudentSearchView(CuratorOnlyMixin, TemplateView):
     template_name = "staff/student_search.html"
 
     def get_context_data(self, **kwargs):
-        context = super(StudentSearchView, self).get_context_data(**kwargs)
-        context['json_api_uri'] = reverse('staff:student_search_json')
-        context['curriculum_years'] = (CSCUser.objects
-                                       .values_list('curriculum_year',
-                                                    flat=True)
-                                       .filter(curriculum_year__isnull=False)
-                                       .order_by('curriculum_year')
-                                       .distinct())
-        context['groups'] = CSCUserFilter.FILTERING_GROUPS
-        context['groups'] = {gid: CSCUser.group[gid] for gid in
-                             context["groups"]}
-        context['status'] = CSCUser.STATUS
-        context["status"] = {sid: name for sid, name in context["status"]}
-        context["cnt_enrollments"] = range(
-            CSCUserFilter.ENROLLMENTS_CNT_LIMIT + 1)
+        # TODO: rewrite with django-filters
+        context = {
+            'json_api_uri': reverse('staff:student_search_json'),
+            'cities': OrderedDict({
+                'spb': 'Санкт-Петербург',
+                'nsk': 'Новосибирск'
+            }),
+            'curriculum_years': (CSCUser.objects
+                                 .values_list('curriculum_year',
+                                              flat=True)
+                                 .filter(curriculum_year__isnull=False)
+                                 .order_by('curriculum_year')
+                                 .distinct()),
+            'groups': {gid: CSCUser.group[gid] for gid in
+                       UserFilter.FILTERING_GROUPS},
+            "status": {sid: name for sid, name in CSCUser.STATUS},
+            "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
+        }
         return context
 
 
