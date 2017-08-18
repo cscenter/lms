@@ -2,8 +2,10 @@ from __future__ import unicode_literals, absolute_import
 
 from django.db.models import Count, Case, When, Q, Value, F
 from django.http import QueryDict
-from django_filters import BaseInFilter, NumberFilter, FilterSet, CharFilter, \
-    DateTimeFromToRangeFilter
+
+from django_filters.rest_framework import BaseInFilter, NumberFilter, \
+    FilterSet, CharFilter, DateTimeFromToRangeFilter
+
 
 from learning.models import Enrollment
 from users.models import CSCUser, SHADCourseRecord
@@ -45,29 +47,23 @@ class UserFilter(FilterSet):
         fields = ["name", "cities", "curriculum_year", "groups", "status",
                   "cnt_enrollments", "cscuserstatuslog__created"]
 
-    def __init__(self, *args, **kwargs):
-        self.empty_query = False
-        super().__init__(*args, **kwargs)
-        # Remove empty values
-        cleaned_data = QueryDict(mutable=True)
-        if self.data:
-            for filter_name in self.data:
-                filter_values = self.data.getlist(filter_name)
-                if not isinstance(filter_values, list):
-                    filter_values = [filter_values]
-                values = [v for v in filter_values if v]
-                if values:
-                    cleaned_data.setlist(filter_name, set(values))
-        self.data = cleaned_data
-        # Set default groups
-        if "groups" not in self.data:
-            if not self.data:
-                self.empty_query = True
+    def __init__(self, data, **kwargs):
+        self.empty_query = not data or all(not v for v in data.values())
+        # Specify superset for `groups` filter field if no values provided
+        if not self.empty_query and data and not data.get("groups", False):
+            data = data.copy()
             groups = self.FILTERING_GROUPS[:]
-            if "status" in self.data and "studying" in self.data["status"]:
+            if "status" in data and "studying" in data["status"]:
                 groups.remove(CSCUser.group.GRADUATE_CENTER)
-            # FIXME: BaseInFilter don't understand foo[]=&foo[]=
-            self.data.setlist("groups", [",".join(str(g) for g in groups)])
+            # FIXME: BaseInFilter doesn't understand foo[]=&foo[]=
+            data.setlist("groups", [",".join(str(g) for g in groups)])
+        super().__init__(data, **kwargs)
+
+    @property
+    def qs(self):
+        if self.empty_query:
+            return self.queryset.none()
+        return super().qs
 
     def cnt_enrollments_filter(self, queryset, name, value):
         value_list = value.split(u',')

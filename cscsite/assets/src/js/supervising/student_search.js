@@ -43,19 +43,20 @@ const fn = {
                 },
                 dataType: "json",
                 traditional: true
-            }).done(function (msg) {
-                const numStr = msg.users.length.toString() + (msg.there_is_more ? "+" : "");
-                $("#user-num-container").show();
-                $("#user-num").text(numStr);
-                let h = "<table class='table table-condensed'>";
-                msg.users.map((user) => {
-                    h += "<tr><td><a href=\"" + user.url + "\">";
-                    h += user.last_name + " " + user.first_name;
-                    h += "</a></td></tr>";
-                });
-                if (msg.there_is_more) {
-                    h += "<tr><td>…</td></tr>";
+            }).done(function (data) {
+                let found;
+                if (data.next !== null) {
+                    found = `Показано: 500 из ${data.count}`;
+                } else {
+                    found = `Найдено ${data.count}`;
                 }
+                $("#user-num-container").html(found).show();
+                let h = "<table class='table table-condensed'>";
+                data.results.map((user, index) => {
+                    h += `<tr><td>${index + 1}. `;
+                    h += `<a href="${user.pk}">${user.short_name}</a>`;
+                    h += "</td></tr>";
+                });
                 h += "</table>";
                 $("#user-table-container").html(h);
             });
@@ -68,6 +69,12 @@ const fn = {
             });
 
         $('.user-search')
+            .on("keydown", function (e) {
+                // Supress Enter
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                }
+            })
             .on('input paste', '#name', function (e) {
                 queryName = $(this).val();
                 query();

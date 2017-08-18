@@ -12,6 +12,9 @@ from users.factories import StudentCenterFactory, StudentClubFactory, \
 
 SEARCH_URL = reverse('staff:student_search_json')
 
+# TODO: Добавить тест для магистров
+# TODO: Добавить тесты по городу
+
 
 @pytest.mark.django_db
 def test_student_search(client, curator):
@@ -35,36 +38,36 @@ def test_student_search(client, curator):
     volunteer = VolunteerFactory(enrollment_year=2011, status="")
 
     response = client.get(SEARCH_URL)
-    assert response.status_code == 302
+    assert response.status_code == 403
     client.login(curator)
     # Empty results by default
     response = client.get(SEARCH_URL)
     assert response.status_code == 200
-    assert response.json()["total"] == 0
+    assert response.json()["count"] == 0
     response = client.get("{}?{}".format(SEARCH_URL, "curriculum_year=2011"))
     # Club users not included
-    assert response.json()["total"] == 3
+    assert response.json()["count"] == 3
     # 2011 | 2012 years
     response = client.get("{}?{}".format(SEARCH_URL,
                                          "curriculum_year=2011%2C2012"))
-    assert response.json()["total"] == 4
+    assert response.json()["count"] == 4
     # Now test groups filter
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.MASTERS_DEGREE)
     ))
-    assert response.json()["total"] == 0
+    assert response.json()["count"] == 0
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.STUDENT_CENTER)
     ))
-    assert response.json()["total"] == 2
+    assert response.json()["count"] == 2
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups={}".format(PARTICIPANT_GROUPS.VOLUNTEER)
     ))
-    assert response.json()["total"] == 1
-    assert response.json()["users"][0]["first_name"] == volunteer.first_name
+    assert response.json()["count"] == 1
+    assert response.json()["results"][0]["short_name"] == volunteer.get_short_name()
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups[]={}&groups[]={}".format(
@@ -72,7 +75,7 @@ def test_student_search(client, curator):
             PARTICIPANT_GROUPS.VOLUNTEER
         )
     ))
-    assert response.json()["total"] == 3
+    assert response.json()["count"] == 3
     volunteer.status = STUDENT_STATUS.expelled
     volunteer.save()
     response = client.get("{}?{}".format(
@@ -83,7 +86,7 @@ def test_student_search(client, curator):
             STUDENT_STATUS.expelled
         )
     ))
-    assert response.json()["total"] == 1
+    assert response.json()["count"] == 1
     student.status = STUDENT_STATUS.reinstated
     student.save()
     response = client.get("{}?{}".format(
@@ -95,7 +98,7 @@ def test_student_search(client, curator):
             STUDENT_STATUS.reinstated
         )
     ))
-    assert response.json()["total"] == 2
+    assert response.json()["count"] == 2
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
@@ -106,7 +109,7 @@ def test_student_search(client, curator):
             "cnt_enrollments=2"
         )
     ))
-    assert response.json()["total"] == 0
+    assert response.json()["count"] == 0
     # Check multi values still works for cnt_enrollments
     response = client.get("{}?{}".format(
         SEARCH_URL,
@@ -118,7 +121,7 @@ def test_student_search(client, curator):
             "cnt_enrollments=0,2"
         )
     ))
-    assert response.json()["total"] == 2
+    assert response.json()["count"] == 2
 
 
 @pytest.mark.django_db
@@ -137,9 +140,9 @@ def test_student_search_enrollments(client, curator):
         )
     )
     response = client.get(ENROLLMENTS_URL.format("2"))
-    assert response.json()["total"] == 0
+    assert response.json()["count"] == 0
     response = client.get(ENROLLMENTS_URL.format("0,2"))
-    assert response.json()["total"] == 1
+    assert response.json()["count"] == 1
     s1 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.spring)
     s2 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.autumn)
     c1, c2 = CourseFactory.create_batch(2)
@@ -150,15 +153,15 @@ def test_student_search_enrollments(client, curator):
     e2 = EnrollmentFactory.create(student=student, course_offering=co2,
                                   grade=GRADES.not_graded)
     response = client.get(ENROLLMENTS_URL.format("1"))
-    assert response.json()["total"] == 1
+    assert response.json()["count"] == 1
     e2.grade = GRADES.good
     response = client.get(ENROLLMENTS_URL.format("1"))
-    assert response.json()["total"] == 1
+    assert response.json()["count"] == 1
     co3 = CourseOfferingFactory.create(course=c2)
     EnrollmentFactory.create(student=student, grade=GRADES.good,
                              course_offering=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))
-    assert response.json()["total"] == 1
+    assert response.json()["count"] == 1
 
 
 # TODO: test when `expelled` and `studying` statuses set simultaneously in one query

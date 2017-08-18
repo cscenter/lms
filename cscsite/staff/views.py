@@ -18,8 +18,12 @@ from django.http.response import HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from django.utils.translation import ugettext_lazy as _
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
+from api.permissions import CuratorAccessPermission
 from core.models import City
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
@@ -32,31 +36,25 @@ from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
 from learning.utils import get_current_term_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
+from staff.serializers import UserSearchSerializer
 from users.models import CSCUser, CSCUserStatusLog
 from users.filters import UserFilter
 
 
-class StudentSearchJSONView(CuratorOnlyMixin, JSONResponseMixin, generic.View):
-    content_type = "application/json"
-    limit = 500
+class StudentOffsetPagination(LimitOffsetPagination):
+    default_limit = 500
 
-    def get(self, request, *args, **kwargs):
-        qs = CSCUser.objects.values('first_name', 'last_name', 'pk')
-        filter_set = UserFilter(request.GET, qs)
-        if filter_set.empty_query:
-            return JsonResponse({
-                "total": 0,
-                "users": [],
-                "there_is_more": False,
-            })
-        filtered_users = list(filter_set.qs[:self.limit])
-        for u in filtered_users:
-            u['url'] = reverse('user_detail', args=[u['pk']])
-        return JsonResponse({
-            "total": len(filtered_users),
-            "users": filtered_users,
-            "there_is_more": len(filtered_users) > self.limit
-        })
+
+class StudentSearchJSONView(ListAPIView):
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = UserSearchSerializer
+    pagination_class = StudentOffsetPagination
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = UserFilter
+
+    def get_queryset(self):
+        return (CSCUser.objects
+                .only('username', 'first_name', 'last_name', 'pk'))
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
