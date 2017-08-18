@@ -54,7 +54,7 @@ const fn = {
                 let h = "<table class='table table-condensed'>";
                 data.results.map((user, index) => {
                     h += `<tr><td>${index + 1}. `;
-                    h += `<a href="${user.pk}">${user.short_name}</a>`;
+                    h += `<a href="/users/${user.pk}/">${user.short_name}</a>`;
                     h += "</td></tr>";
                 });
                 h += "</table>";
