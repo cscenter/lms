@@ -44,7 +44,7 @@ def test_student_search(client, curator):
     response = client.get("{}?{}".format(SEARCH_URL, "curriculum_year=2011"))
     # Club users not included
     assert response.json()["total"] == 3
-    # 2011 & 2012 years
+    # 2011 | 2012 years
     response = client.get("{}?{}".format(SEARCH_URL,
                                          "curriculum_year=2011%2C2012"))
     assert response.json()["total"] == 4
@@ -67,7 +67,7 @@ def test_student_search(client, curator):
     assert response.json()["users"][0]["first_name"] == volunteer.first_name
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}".format(
+        "curriculum_year=2011&groups[]={}&groups[]={}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER
         )
@@ -77,7 +77,7 @@ def test_student_search(client, curator):
     volunteer.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}&status={}".format(
+        "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled
@@ -88,7 +88,7 @@ def test_student_search(client, curator):
     student.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}&status={},{}".format(
+        "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,
@@ -98,7 +98,7 @@ def test_student_search(client, curator):
     assert response.json()["total"] == 2
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,
@@ -110,7 +110,7 @@ def test_student_search(client, curator):
     # Check multi values still works for cnt_enrollments
     response = client.get("{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
             STUDENT_STATUS.expelled,
@@ -131,7 +131,7 @@ def test_student_search_enrollments(client, curator):
                                    last_name='Иванов', first_name='Иван')
     ENROLLMENTS_URL = "{}?{}".format(
         SEARCH_URL,
-        "curriculum_year=2011&groups={}&groups={}&cnt_enrollments={{}}".format(
+        "curriculum_year=2011&groups={},{}&cnt_enrollments={{}}".format(
             PARTICIPANT_GROUPS.STUDENT_CENTER,
             PARTICIPANT_GROUPS.VOLUNTEER,
         )

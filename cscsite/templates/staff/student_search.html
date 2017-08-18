@@ -3,6 +3,7 @@
 {% load thumbnail %}
 {% load core_tags %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 
 {% block content %}
 <div class="container">
@@ -22,6 +23,18 @@
           <label for="name">{% trans "Name, full or partial" %}</label>
           <input type="text" class="form-control" id="name"
                  autofocus autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Город</label><br>
+          <div class="btn-group btn-group-sm" data-toggle="buttons">
+            {% for city_code, city_name in cities.items %}
+              <label class="btn btn-default">
+                <input type="checkbox" name="cities"
+                       value="{{ city_code }}"
+                       autocomplete="off">{{ city_name }}
+              </label>
+            {% endfor %}
+          </div>
         </div>
         <div class="form-group">
           <label>{% trans "CSCUser|Curriculum year" %}</label><br>
@@ -96,6 +109,5 @@
 {% endblock content %}
 
 {% block javascripts %}
-    <script type="text/javascript" src="//yastatic.net/underscore/1.6.0/underscore-min.js"></script>
-    <script type="text/javascript" src="{% static "js/student_search.js" %}"></script>
+    {% render_bundle 'supervising' 'js' %}
 {% endblock javascripts %}
