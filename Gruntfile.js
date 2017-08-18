@@ -22,10 +22,6 @@ module.exports = function (grunt) {
             }
         },
         concat: {
-            staff_student_search: {
-                src: ['<%= JS_SRC %>/staff/student_search.js'],
-                dest: '<%= JS_RUNTIME %>/student_search.js'
-            },
             club_teacher_gallery: {
                 src: [
                     '<%= JS_VENDOR %>/jquery.magnific-popup/jquery.magnific-popup.min.js',
@@ -96,11 +92,6 @@ module.exports = function (grunt) {
             alumni: {
                 files: {
                     '<%= JS_DEST %>/alumni.js': ['<%= JS_RUNTIME %>/alumni.js']
-                }
-            },
-            staff_student_search: {
-                files: {
-                    '<%= JS_DEST %>/student_search.js': ['<%= JS_RUNTIME %>/student_search.js']
                 }
             },
             club_teacher_gallery: {
