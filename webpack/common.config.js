@@ -102,7 +102,9 @@ const common = {
     plugins: [
         new webpack.optimize.ModuleConcatenationPlugin(),
         new BundleTracker({filename: './webpack/webpack-stats.json'}),
-        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+        // Fixes warning in moment-with-locales.min.js
+        //   Module not found: Error: Can't resolve './locale' in ...
+        new webpack.IgnorePlugin(/^\.\/locale$/),
         // TODO: Prevent autoload jquery for now
         // new webpack.ProvidePlugin({
         //     '$': 'jquery',
