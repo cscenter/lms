@@ -60,13 +60,8 @@ function initFilter() {
     });
 }
 
-function initCourses() {
+export function initPlots() {
     let courseSessionId = json_data.course_session_id;
     initFilter();
     renderPlots(courseSessionId);
 }
-
-
-module.exports = {
-     init: initCourses,
-};

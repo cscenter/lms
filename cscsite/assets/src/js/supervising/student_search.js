@@ -48,12 +48,12 @@ const fn = {
                 if (data.next !== null) {
                     found = `Показано: 500 из ${data.count}`;
                 } else {
-                    found = `Найдено ${data.count}`;
+                    found = `Найдено: ${data.count}`;
                 }
                 $("#user-num-container").html(found).show();
                 let h = "<table class='table table-condensed'>";
-                data.results.map((user, index) => {
-                    h += `<tr><td>${index + 1}. `;
+                data.results.map((user) => {
+                    h += `<tr><td>`;
                     h += `<a href="/users/${user.pk}/">${user.short_name}</a>`;
                     h += "</td></tr>";
                 });

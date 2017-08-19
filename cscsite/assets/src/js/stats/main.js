@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import {init as initLearningStats}  from './learning/main';
-import {init as initAdmissionStats}  from './admission/main';
+import {initPlots as initLearningStats}  from './learning/main';
+import {initPlots as initAdmissionStats}  from './admission/main';
 // TODO: How explicitly import global variables like window.URLS and json_data?
 
 const statsPage = $('#stats-page');

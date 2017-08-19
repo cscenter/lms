@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const ChunkManifestPlugin = require("chunk-manifest-webpack-plugin");
 const WebpackChunkHash = require('webpack-chunk-hash');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     output: {
@@ -15,7 +16,7 @@ module.exports = {
             },
             '__DEVELOPMENT__': false
         }),
-        new webpack.optimize.UglifyJsPlugin({
+        new UglifyJSPlugin({
             compress: {
                 warnings: false
             }
