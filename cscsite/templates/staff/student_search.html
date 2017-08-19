@@ -62,11 +62,10 @@
         </div>
         <div class="form-group">
           <label>{% trans "Status" %}</label><br>
-          <div class="btn-group btn-group-sm" data-toggle="buttons">
+          <div class="btn-group btn-group-sm" data-toggle="buttons" >
                 <label class="btn btn-default">
                 <input type="checkbox" name="status"
-                       value="studying"
-                       autocomplete="off">Учится
+                       value="studying" autocomplete="off">Учится
               </label>
             {% for status_id, status_name in status.items %}
               <label class="btn btn-default">
