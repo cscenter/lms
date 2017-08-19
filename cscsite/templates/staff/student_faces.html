@@ -10,9 +10,11 @@
         <ul class="nav nav-tabs square" style="margin-top: 0">
             {% for year in years %}
                 <li {% if year == current_year %}class="active"{% endif %}>
-                    <a href="{% url "staff:student_faces" %}?year={{ year }}">{{ year }}</a>
+                    <a href="{% url "staff:student_faces" %}?year={{ year }}&city={{ current_city }}">{{ year }}</a>
                 </li>
             {% endfor %}
+                <li class="pull-right{% if current_city == "spb" %} active{% endif %}"><a href="{% url "staff:student_faces" %}?city=spb&year={{ current_year }}">СПб</a></li>
+                <li class="pull-right{% if current_city == "nsk" %} active{% endif %}"><a href="{% url "staff:student_faces" %}?city=nsk&year={{ current_year }}">Нcк</a></li>
         </ul>
         <div class="c-student-faces">
         {% if students %}
