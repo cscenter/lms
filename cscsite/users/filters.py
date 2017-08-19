@@ -1,11 +1,6 @@
-from __future__ import unicode_literals, absolute_import
-
 from django.db.models import Count, Case, When, Q, Value, F
-from django.http import QueryDict
-
 from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter, DateTimeFromToRangeFilter
-
 
 from learning.models import Enrollment
 from users.models import CSCUser, SHADCourseRecord
@@ -20,43 +15,52 @@ class CharInFilter(BaseInFilter, CharFilter):
 
 
 class UserFilter(FilterSet):
-    FILTERING_GROUPS = [CSCUser.group.VOLUNTEER,
-                        CSCUser.group.STUDENT_CENTER,
-                        CSCUser.group.GRADUATE_CENTER,
-                        CSCUser.group.MASTERS_DEGREE]
+    FILTERING_GROUPS = [
+        CSCUser.group.VOLUNTEER,
+        CSCUser.group.STUDENT_CENTER,
+        CSCUser.group.GRADUATE_CENTER,
+        CSCUser.group.MASTERS_DEGREE,
+    ]
 
     ENROLLMENTS_MAX = 12
 
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
 
     name = CharFilter(method='name_filter')
-    cnt_enrollments = CharFilter(method='cnt_enrollments_filter')
-    curriculum_year = NumberInFilter(name='curriculum_year')
     cities = CharInFilter(name='city_id')
+    curriculum_year = NumberInFilter(name='curriculum_year')
     # TODO: Restrict choices
     groups = NumberInFilter(name='groups', distinct=True)
     # TODO: TypedChoiceFilter?
     status = CharFilter(method='status_filter')
-    status_log = CharFilter(method='status_log_filter')
-    # FIXME: set cscuserstatuslog__created_0 and cscuserstatuslog__created_1 EXAMPLE: 2015-01-01%208:00
-    cscuserstatuslog__created = DateTimeFromToRangeFilter()
+    cnt_enrollments = CharFilter(method='cnt_enrollments_filter')
 
     class Meta:
         model = CSCUser
         fields = ["name", "cities", "curriculum_year", "groups", "status",
-                  "cnt_enrollments", "cscuserstatuslog__created"]
+                  "cnt_enrollments",]
 
     def __init__(self, data, **kwargs):
         self.empty_query = not data or all(not v for v in data.values())
-        # Specify superset for `groups` filter field if no values provided
         # FIXME: what about groups[] ?
-        if not self.empty_query and data and not data.get("groups", False):
+        if not self.empty_query and data:
             data = data.copy()
-            groups = self.FILTERING_GROUPS[:]
-            if "status" in data and "studying" in data["status"]:
-                groups.remove(CSCUser.group.GRADUATE_CENTER)
-            # FIXME: BaseInFilter doesn't understand foo[]=&foo[]=
-            data.setlist("groups", [",".join(str(g) for g in groups)])
+            # Skip invalid values
+            query = {int(g) for g in data.get("groups", "").split(",") if g}
+            # Note: can failed with ValueError. Should validate values first
+            groups = set(self.FILTERING_GROUPS) & query
+            # Specify superset for `groups` filter field if no values provided
+            if not groups:
+                groups = self.FILTERING_GROUPS[:]
+                if "studying" in data.get("status", []):
+                    groups.remove(CSCUser.group.GRADUATE_CENTER)
+            # Special case - show `studying` among graduated
+            only_graduate_selected = (groups == {CSCUser.group.GRADUATE_CENTER})
+            if "studying" in data.get("status", []) and only_graduate_selected:
+                self.empty_query = True
+            else:
+                # FIXME: BaseInFilter doesn't understand foo[]=&foo[]=
+                data.setlist("groups", [",".join(str(g) for g in groups)])
         super().__init__(data, **kwargs)
 
     @property
@@ -103,6 +107,7 @@ class UserFilter(FilterSet):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
+            print(queryset.query)
             return queryset
         elif "studying" in value_list:
             return queryset.exclude(status=CSCUser.STATUS.expelled)

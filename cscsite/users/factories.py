@@ -80,6 +80,10 @@ class VolunteerFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.VOLUNTEER]
 
 
+class GraduateFactory(UserFactory):
+    groups = [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+
+
 class ProjectReviewerFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
 
