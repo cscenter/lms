@@ -14,7 +14,7 @@ COVERAGE_USE_STDOUT = True
 COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'common.views.test', '__init__', 'django',
                             'migrations', '^sorl', '__pycache__']
-COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures']
+COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 
 # In-memory test database
 

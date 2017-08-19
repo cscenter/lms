@@ -19,7 +19,6 @@ class CharInFilter(BaseInFilter, CharFilter):
     pass
 
 
-# TODO: Rewrite with DRF
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [CSCUser.group.VOLUNTEER,
                         CSCUser.group.STUDENT_CENTER,
@@ -50,6 +49,7 @@ class UserFilter(FilterSet):
     def __init__(self, data, **kwargs):
         self.empty_query = not data or all(not v for v in data.values())
         # Specify superset for `groups` filter field if no values provided
+        # FIXME: what about groups[] ?
         if not self.empty_query and data and not data.get("groups", False):
             data = data.copy()
             groups = self.FILTERING_GROUPS[:]
@@ -128,7 +128,7 @@ class UserFilter(FilterSet):
             return qs
 
     def _form_name_tsquery(self, qstr):
-        if qstr is None or not (2 < len(qstr) < 100):
+        if qstr is None or not (2 <= len(qstr) < 100):
             return
         lexems = []
         for s in qstr.split(' '):

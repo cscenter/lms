@@ -51,11 +51,7 @@ function initFilter() {
     });
 }
 
-function initPlots() {
+export function initPlots() {
     initFilter();
     renderPlots(jsonData);
 }
-
-module.exports = {
-     init: initPlots
-};
