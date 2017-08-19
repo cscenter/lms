@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
-from vanilla import TemplateView
+from vanilla import TemplateView, ListView
 
 from api.permissions import CuratorAccessPermission
 from core.models import City
@@ -36,7 +36,7 @@ from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
 from learning.utils import get_current_term_pair, get_term_index, get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
-from staff.serializers import UserSearchSerializer
+from staff.serializers import UserSearchSerializer, FacesQueryParams
 from users.models import CSCUser, CSCUserStatusLog
 from users.filters import UserFilter
 
@@ -349,45 +349,51 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
         return Hint.objects.order_by("sort")
 
 
-def debug_test_job(id):
-    from django.apps import apps
-    CourseClass = apps.get_model('learning', 'CourseClass')
-    instance = CourseClass.objects.get(pk=1660)
-    return instance.pk
-
-
-class StudentFacesView(CuratorOnlyMixin, generic.TemplateView):
+class StudentFacesView(CuratorOnlyMixin, TemplateView):
     """Show students faces with names to memorize newbies"""
     template_name = "staff/student_faces.html"
+
+    def get(self, request, *args, **kwargs):
+        query_params = FacesQueryParams(data=request.GET)
+        if not query_params.is_valid():
+            return HttpResponseRedirect(request.path)
+        city_code = query_params.validated_data.get('city')
+        if not city_code:
+            # FIXME: add to util
+            city_code = getattr(self.request.user, "city_id",
+                                settings.DEFAULT_CITY_CODE)
+        enrollment_year = query_params.validated_data.get('year')
+        if not enrollment_year:
+            enrollment_year, _ = get_current_term_pair(city_code)
+        context = self.get_context_data(city_code, enrollment_year, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, city_code, enrollment_year, **kwargs):
+        current_year, _ = get_current_term_pair(city_code)
+        context = {
+            'students': self.get_queryset(city_code, enrollment_year),
+            "years": reversed(range(CENTER_FOUNDATION_YEAR, current_year + 1)),
+            "current_year": enrollment_year,
+            "current_city": city_code
+        }
+        return context
 
     def get_template_names(self):
         if "print" in self.request.GET:
             self.template_name = "staff/student_faces_printable.html"
         return super(StudentFacesView, self).get_template_names()
 
-    def get_context_data(self, **kwargs):
-        # FIXME: add test job, remove after debug!
-        import django_rq
-        queue = django_rq.get_queue('default')
-        queue.enqueue(debug_test_job, 1660)
-        context = super(StudentFacesView, self).get_context_data(**kwargs)
-        enrollment_year = self.request.GET.get("year", None)
-        year, current_term = get_current_term_pair('spb')
-        try:
-            enrollment_year = int(enrollment_year)
-        except (TypeError, ValueError):
-            # TODO: make redirect
-            enrollment_year = year
-        qs = (CSCUser.objects.filter(
-            groups__in=[CSCUser.group.STUDENT_CENTER,
-                        CSCUser.group.VOLUNTEER],
-            enrollment_year=enrollment_year).distinct())
+    def get_queryset(self, city_code, enrollment_year):
+        groups = [CSCUser.group.STUDENT_CENTER, CSCUser.group.VOLUNTEER]
+        qs = (CSCUser.objects
+              .filter(groups__in=groups,
+                      city_id=city_code,
+                      enrollment_year=enrollment_year)
+              .distinct()
+              .prefetch_related("groups"))
         if "print" in self.request.GET:
             qs = qs.exclude(status=CSCUser.STATUS.expelled)
-        context['students'] = qs
-        context["years"] = reversed(range(CENTER_FOUNDATION_YEAR, year + 1))
-        context["current_year"] = enrollment_year
-        return context
+        return qs
 
 
 class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
