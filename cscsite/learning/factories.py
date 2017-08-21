@@ -81,7 +81,6 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
             else:
                 self.city = City.objects.get(pk=extracted)
 
-    # TODO: add "enrolled students" here
     # TODO: create course offering for current semester by default
 
     @factory.post_generation

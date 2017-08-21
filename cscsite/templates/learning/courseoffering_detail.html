@@ -203,7 +203,7 @@
               <a href="{{ course_offering.get_create_class_url }}" class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
               <a href="{{ course_offering.get_update_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
             {% endif %}
-            {% if request.user.is_active_student and course_offering.enrollment_is_open %}
+            {% if request.user.is_active_student and course_offering.enrollment_is_open and course_offering.get_city == user_city %}
                 {% if is_enrolled %}
                     <a href="{{ course_offering.get_unenroll_url }}"
                        class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}

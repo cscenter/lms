@@ -91,11 +91,12 @@ def test_unenrollment(client):
 @pytest.mark.django_db
 def test_enrollment_capacity(client):
     s = StudentCenterFactory(city_id='spb')
+    client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory.create(semester=current_semester,
+    co = CourseOfferingFactory.create(city_id='spb',
+                                      semester=current_semester,
                                       is_open=True)
     co_url = co.get_absolute_url()
-    client.login(s)
     response = client.get(co_url)
     assert smart_bytes(_("Places available")) not in response.content
     assert smart_bytes(_("No places available")) not in response.content
@@ -108,7 +109,7 @@ def test_enrollment_capacity(client):
     assert 1 == (Enrollment.active.filter(student=s, course_offering=co)
                  .count())
     # Capacity reached, show to second student nothing
-    s2 = StudentCenterFactory()
+    s2 = StudentCenterFactory(city_id='spb')
     client.login(s2)
     response = client.get(co_url)
     assert smart_bytes(_("No places available")) in response.content
