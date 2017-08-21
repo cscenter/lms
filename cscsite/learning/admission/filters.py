@@ -92,6 +92,7 @@ class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     def filter_by_date(self, queryset, name, value):
         day_start = value
         day_end = day_start + datetime.timedelta(days=1)
+        # FIXME: Looks like this code throws Warning about naive dates
         return queryset.filter(
             date__range=(day_start, day_end)
         )
