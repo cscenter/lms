@@ -1,9 +1,11 @@
 import logging
 import re
+from typing import Optional
 
 from core.utils import is_club_site
 from learning.models import CourseOffering
 from learning.settings import SEMESTER_TYPES
+from learning.utils import CityCode
 
 logger = logging.getLogger(__name__)
 
@@ -13,21 +15,30 @@ semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               term_types + ")$")
 
 
+def get_user_city_code(request) -> Optional[CityCode]:
+    """Returns city code for authenticated user"""
+    if is_club_site():
+        # On compsciclub.ru we have no concept of `user city`.
+        # For compatibility let student city will be equal to sub domain city.
+        # For kzn.compsciclub.ru it will be `kzn` and so on.
+        city_code = request.city_code
+    else:
+        city_code = getattr(request.user, "city_id", None)
+    return city_code if city_code else None
+
+
 def get_student_city_code(request) -> str:
     """
     Returns city code for authenticated student.
 
     Note: For student is critical to have valid city value in settings.
     """
-    if is_club_site():
-        city_code = request.city_code
-    else:
-        city_code = request.user.city_id
-        if not city_code:
-            logger.error("Empty city code for "
-                         "student {}".format(request.user.pk))
-            raise ValueError("Для вашего профиля не был указан "
-                             "город. Обратитесь к куратору.")
+    city_code = get_user_city_code(request)
+    if city_code is None:
+        logger.error("Empty city code for "
+                     "student {}".format(request.user.pk))
+        raise ValueError("Для вашего профиля не был указан "
+                         "город. Обратитесь к куратору.")
     return city_code
 
 
@@ -39,11 +50,10 @@ def get_teacher_city_code(request) -> str:
     100% sure in which one he is located right now.
     Let's get location from user settings. It should be OK in most cases.
     """
-    city_code = request.user.city_id
-    # All club branches in msk timezone. If we forgot to provide city
-    # for center teacher, fallback to default timezone.
-    if is_club_site() or not city_code:
-        city_code = request.city_code
+    city_code = get_user_city_code(request)
+    if city_code is None:
+        # Fallback to default timezone
+        return request.city_code
     return city_code
 
 

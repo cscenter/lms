@@ -1,45 +1,40 @@
 {% extends "base.html" %}
 {% load i18n %}
-{# TODO: нужно убрать деление на семестр и архив целиком, сейчас отдельные if для этого, куча лишнего кода дублирующегося.#}
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-    {% if course_list %}
-      <table class="table" width="100%">
-        <thead>
-          <th>Курс</th>
-          <th>{% trans "Semester" %}</th>
-          <th width="30%">{% trans "Professors" %}</th>
-          <th width="15%"></th>
-        </thead>
-        {% for course_offering in course_list %}
-        <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
-          <td>
-            <a href="{{ course_offering.get_absolute_url }}">
-              {{ course_offering.course.name }}
-            </a>
-          </td>
-            <td>{{ course_offering.semester }}</td>
-          <td>
-            <ul class="list-unstyled">
-            {% for teacher in course_offering.teachers.all %}
-            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
-            {% endfor %}
-            </ul>
-          </td>
-          <td>
-            <a href="{{ course_offering.get_create_news_url }}" class="btn btn-link" role="button">
-              {% trans "Add news" %}
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    {% else %}
-      <h4>Список прочтений пуст... :(</h4>
-    {% endif %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                {% if course_list %}
+                    <table class="table table-bordered">
+                        <tr class="active">
+                            <th>Курс</th>
+                            <th>{% trans "Semester" %}</th>
+                            <th width="30%">{% trans "Professors" %}</th>
+                            <th width="15%"></th>
+                        </tr>
+                        {% for course_offering in course_list %}
+                            <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
+                                <td>
+                                    <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                                </td>
+                                <td>{{ course_offering.semester }}</td>
+                                <td>
+                                    <ul class="list-unstyled margin-bottom-0">
+                                        {% for teacher in course_offering.teachers.all %}
+                                            <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>
+                                    <a href="{{ course_offering.get_create_news_url }}">{% trans "Add news" %}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <h4>Список прочтений пуст... :(</h4>
+                {% endif %}
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 {% endblock content %}

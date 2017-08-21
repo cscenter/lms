@@ -329,7 +329,7 @@ class CourseOffering(TimeStampedModel):
     def enrollment_is_open(self):
         if self.is_open:
             return True
-        if self.is_completed:
+        if not self.in_current_term or self.is_completed:
             return False
         today = now()
         city_tz = self.get_city_timezone()

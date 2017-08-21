@@ -39,9 +39,11 @@ def test_simple_interviews_list(client, curator):
     assert response.status_code == 200
     assert "InterviewsCuratorFilter" in str(response.context['form'].__class__)
     client.login(interviewer)
-    response = client.get(url)
-    assert response.status_code == 200
-    assert "InterviewsFilter" in str(response.context['form'].__class__)
+    # FIXME: InterviewsBaseFilter.filter_by_date throws warning
+    with pytest.warns(RuntimeWarning) as record:
+        response = client.get(url)
+        assert response.status_code == 200
+        assert "InterviewsFilter" in str(response.context['form'].__class__)
 
 
 @pytest.mark.django_db

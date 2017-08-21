@@ -25,7 +25,8 @@ from learning.models import CourseOffering, CourseOfferingTeacher, \
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
-from learning.views.utils import get_co_from_query_params
+from learning.views.utils import get_co_from_query_params, \
+    get_student_city_code, get_user_city_code
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
            'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',
@@ -59,13 +60,8 @@ class CourseOfferingDetailView(generic.DetailView):
                 url = reverse("course_offering_detail", kwargs=url_params)
             return HttpResponseRedirect(url)
         self.object = self.get_object()
-        try:
-            context = self.get_context_data(object=self.object)
-        except Redirect as e:
-            if e.kwargs.get("to") == settings.LOGIN_URL:
-                return redirect_to_login(request.get_full_path(),
-                                         settings.LOGIN_URL)
-
+        # Can redirect to login if tab not available for authenticated user
+        context = self.get_context_data(object=self.object)
         # Redirect to club if course was created before center establishment.
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
@@ -123,8 +119,10 @@ class CourseOfferingDetailView(generic.DetailView):
         # Aggregate teachers contacts
         contacts = [ct for g in teachers_by_role.values() for ct in g
                     if len(ct.teacher.private_contacts.strip()) > 0]
+        # Course available for enrollment based on student city
         context = {
             'course_offering': co,
+            'user_city': get_user_city_code(self.request),
             'co_failed_by_student': co_failed_by_student,
             'is_enrolled': is_enrolled,
             'is_actual_teacher': is_actual_teacher,
@@ -142,7 +140,7 @@ class CourseOfferingDetailView(generic.DetailView):
         if not active_tab.exist():
             raise Http404
         elif not active_tab.visible:
-            raise Redirect(to=settings.LOGIN_URL)
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         context["tabs"] = pane
         context["active_tab"] = active_tab_name
         return context

@@ -279,16 +279,14 @@ class CoursesListView(generic.ListView):
     template_name = "learning/courses/list.html"
 
     def get_queryset(self):
-        co_queryset = (CourseOffering.objects
-                       .in_city(self.request.city_code)
-                       .select_related('course')
-                       .prefetch_related('teachers')
-                       .order_by('course__name'))
-        q = (Semester.objects
-            .prefetch_related(
-                Prefetch('courseoffering_set',
-                         queryset=co_queryset,
-                         to_attr='courseofferings')))
+        prefetch_cos = Prefetch('courseoffering_set',
+                                queryset=(CourseOffering.objects
+                                          .in_center_branches()
+                                          .select_related('course')
+                                          .prefetch_related('teachers')
+                                          .order_by('course__name')),
+                                to_attr='courseofferings')
+        q = (Semester.objects.prefetch_related(prefetch_cos))
         # Courses in CS Center started at 2011 year
         if not is_club_site():
             q = (q.filter(year__gte=2011)
