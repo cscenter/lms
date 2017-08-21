@@ -11,8 +11,37 @@ from core.settings.base import DEFAULT_CITY_CODE
 from learning.admission.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
+from learning.admission.filters import InterviewsCuratorFilter
 from learning.admission.models import Applicant, Interview
 from users.factories import UserFactory
+
+
+# TODO: создание из потока  + слот - убедиться, что не можем создать приглашение для уже занятого слота. Если слот не занят ещё - то создаётся собесед и не отправляется приглашение.
+# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
+# TODO: Проверить время отправки напоминания, время/дату собеседования
+
+
+@pytest.mark.django_db
+def test_simple_interviews_list(client, curator):
+    url = reverse('admission_interviews')
+    client.login(curator)
+    interviewer = InterviewerFactory()
+    interview = InterviewFactory(
+        interviewers=[interviewer],
+        applicant__status=Applicant.INTERVIEW_SCHEDULED,
+        applicant__campaign__current=True)
+    response = client.get(url)
+    # For curator set default filters and redirect
+    assert response.status_code == 302
+    assert "campaign={}".format(interview.applicant.campaign_id) in response.url
+    assert "status=agreed" in response.url
+    response = client.get(response.url)
+    assert response.status_code == 200
+    assert "InterviewsCuratorFilter" in str(response.context['form'].__class__)
+    client.login(interviewer)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert "InterviewsFilter" in str(response.context['form'].__class__)
 
 
 @pytest.mark.django_db
@@ -90,7 +119,6 @@ def test_autoupdate_applicant_status_completed():
 @pytest.mark.django_db
 def test_autoupdate_applicant_status_completed():
     """Automatically switch applicant status if interview completed"""
-
 
 
 @pytest.mark.django_db
@@ -179,7 +207,3 @@ def test_invitation(curator, client, settings):
     html = BeautifulSoup(response.content, "html.parser")
     assert any("13:30" in s.string for s in
                html.find_all('input', {"name": "time"}))
-
-# TODO: создание из потока  + слот - убедиться, что не можем создать приглашение для уже занятого слота. Если слот не занят ещё - то создаётся собесед и не отправляется приглашение.
-# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
-# TODO: Проверить время отправки напоминания, время/дату собеседования

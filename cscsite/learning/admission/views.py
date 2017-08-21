@@ -392,6 +392,32 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     paginate_by = 50
     template_name = "learning/admission/interviews.html"
 
+    def get(self, request, *args, **kwargs):
+        """
+        Redirects curator to appropriate campaign if no any provided.
+        """
+        user = self.request.user
+        if user.is_curator and "campaign" not in self.request.GET:
+            # Try to find user preferred current campaign id
+            current = list(Campaign.objects.filter(current=True)
+                           .only("pk", "city_id"))
+            try:
+                c = next(c.pk for c in current if c.city_id == user.city_id)
+            except StopIteration:
+                # We didn't find active campaign for user city. Try to get
+                # any current campaign or show all if no active at all.
+                c = next((c.pk for c in current), "")
+            if not c:
+                messages.error(self.request, "Нет активных кампаний по набору.")
+            # Duplicate initial values from filterset
+            status = InterviewStatusFilter.AGREED
+            date = timezone.now().strftime("%d.%m.%Y")
+            url = "{}?campaign={}&status={}&date={}".format(
+                reverse("admission_interviews"),
+                c, status, date)
+            return HttpResponseRedirect(redirect_to=url)
+        return super().get(request, *args, **kwargs)
+
     def get_filterset_class(self):
         if self.request.user.is_curator:
             return InterviewsCuratorFilter
@@ -428,32 +454,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             except ValueError:
                 context["results_title"] = _("All campaigns")
         return context
-
-    def get(self, request, *args, **kwargs):
-        """
-        Redirects curator to appropriate campaign if no any provided.
-        """
-        user = self.request.user
-        if user.is_curator and "campaign" not in self.request.GET:
-            # Try to find user preferred current campaign id
-            current = list(Campaign.objects.filter(current=True)
-                           .only("pk", "city_id"))
-            try:
-                c = next(c.pk for c in current if c.city_id == user.city_id)
-            except StopIteration:
-                # We didn't find active campaign for user city. Try to get
-                # any current campaign or show all if no active at all.
-                c = next((c.pk for c in current), "")
-            if not c:
-                messages.error(self.request, "Нет активных кампаний по набору.")
-            # Duplicate initial values from filterset
-            status = InterviewStatusFilter.AGREED
-            date = timezone.now().strftime("%d.%m.%Y")
-            url = "{}?campaign={}&status={}&date={}".format(
-                reverse("admission_interviews"),
-                c, status, date)
-            return HttpResponseRedirect(redirect_to=url)
-        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         q = (Interview.objects
