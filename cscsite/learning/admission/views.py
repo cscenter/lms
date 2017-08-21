@@ -404,7 +404,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         if not kwargs["data"]:
             kwargs["data"] = {
                 "status": InterviewStatusFilter.AGREED,
-                "date": now().date()
+                "date": timezone.now().date()
             }
         return kwargs
 
