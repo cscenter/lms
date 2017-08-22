@@ -380,23 +380,27 @@ class InterviewFromStreamForm(forms.Form):
 
     def clean(self):
         slot = self.cleaned_data.get("slot")
+        stream = self.cleaned_data.get('stream')
         if slot:
-            stream = self.cleaned_data['stream']
             if not stream or slot.stream.pk != stream.pk:
                 raise ValidationError("Выбранный слот должен соответствовать "
                                       "выбранному потоку.")
+        elif not stream or not stream.slots.filter(interview__isnull=True).count():
+            raise ValidationError("Все слоты заняты.")
+        # TODO: Limit active invitations by slots
 
     def __init__(self, city_code, stream_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         stream_field = self.prefix + "-stream"
-        if 'data' in kwargs and kwargs['data'][stream_field]:
+        if 'data' in kwargs and kwargs['data'].get(stream_field):
             stream_id = kwargs['data'][stream_field]
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id=stream_id))
+        # TODO: respect timezone
         self.fields['stream'].queryset = InterviewStream.objects.filter(
             venue__city_id=city_code,
-            date__gte=now().date()).select_related("venue")
+            date__gt=now().date()).select_related("venue")
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(Submit('create', _('Send')),

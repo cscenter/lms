@@ -7,9 +7,6 @@ import json
 import re
 import uuid
 from collections import Counter
-from random import choice
-from string import ascii_lowercase
-from string import digits
 
 from django.apps import apps
 from django.contrib import messages
@@ -49,6 +46,7 @@ from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewStream, \
     InterviewInvitation
 from learning.admission.serializers import InterviewSlotSerializer
+from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
     calculate_time
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
@@ -290,12 +288,13 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             city_code=applicant.campaign.city_id,
             data=self.request.POST)
         if not stream_form.is_valid():
-            messages.error(self.request, "Действие было отменено.",
-                           extra_tags='timeout')
+            msg = "Действие было отменено"
+            messages.error(self.request, msg, extra_tags='timeout')
             return self.form_invalid(stream_form)
         slot = stream_form.cleaned_data.get('slot')
         if slot:
-            response = self.create_interview(applicant, stream_form, slot)
+            response = self.create_interview_from_slot(applicant, stream_form,
+                                                       slot)
         else:
             response = self.create_invitation(applicant, stream_form)
         return response
@@ -305,13 +304,13 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                          extra_tags='timeout')
         return reverse("admission_interview_detail", args=[self.object.pk])
 
-    def create_interview(self, applicant, stream_form, slot):
+    def create_interview_from_slot(self, applicant, stream_form, slot):
         data = InterviewForm.build_data(applicant, slot)
         form = InterviewForm(data=data)
         if form.is_valid():
             with transaction.atomic():
-                interview = self.object = form.save()
                 sid = transaction.savepoint()
+                interview = self.object = form.save()
                 slot_has_taken = InterviewSlot.objects.take(slot, interview)
                 generate_interview_reminder(interview, slot)
                 if not slot_has_taken:
@@ -323,6 +322,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                         "href='{}'>Перейти в админ-панель</a>".format(
                             reverse("admin:admission_interviewstream_change",
                                     args=[slot.stream.pk])))
+                    return self.form_invalid(stream_form)
                 else:
                     transaction.savepoint_commit(sid)
             return super(ModelFormMixin, self).form_valid(form)
@@ -335,22 +335,9 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
     def create_invitation(self, applicant, stream_form):
         stream = stream_form.cleaned_data['stream']
-        tz = stream.get_city_timezone()
-        interview_day = datetime.datetime(stream.date.year, stream.date.month,
-                                          stream.date.day, tzinfo=tz)
-        # Calculate deadline for invitation
-        expired_in_hours = ADMISSION_SETTINGS.INVITATION_EXPIRED_IN_HOURS
-        expired_at = timezone.now() + datetime.timedelta(hours=expired_in_hours)
-        # 00:00 of interview day is deadline, respect this
-        expired_at = min(expired_at, interview_day)
-        invitation = InterviewInvitation(applicant=applicant,
-                                         date=stream.date,
-                                         expired_at=expired_at,
-                                         stream=stream)
         try:
-            with transaction.atomic():
-                invitation.save()
-                invitation.send_email(self.request)
+            create_invitation(stream, applicant,
+                              uri_builder=self.request.build_absolute_uri)
             messages.success(
                 self.request,
                 "Приглашение успешно создано и должно быть отправлено в "
@@ -358,7 +345,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 extra_tags='timeout')
         except IntegrityError:
             messages.error(self.request, "Приглашение не было создано.")
-        url = reverse("admission_applicant_detail", args=[applicant.pk])
+        url = applicant.get_absolute_url()
         return HttpResponseRedirect("{}#create".format(url))
 
 

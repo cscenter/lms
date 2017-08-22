@@ -3,6 +3,8 @@ from django.conf import settings
 
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
+from post_office.models import EmailTemplate
+
 from notifications.models import Type
 from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
@@ -111,4 +113,17 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
                 defaults={
                     "code": t.name
                 }
+            )
+
+        # Create email templates
+        from learning.admission.models import Interview, InterviewInvitation
+
+        template_names = [
+            Interview.FEEDBACK_TEMPLATE,
+            Interview.REMINDER_TEMPLATE,
+            InterviewInvitation.EMAIL_TEMPLATE
+        ]
+        for template_name in template_names:
+            EmailTemplate.objects.update_or_create(
+                name=template_name
             )

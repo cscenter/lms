@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from django.apps import apps
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timezone import now
+from post_office.models import Email
 
 from core.factories import CityFactory
 from core.settings.base import DEFAULT_CITY_CODE
@@ -12,13 +14,9 @@ from learning.admission.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from learning.admission.filters import InterviewsCuratorFilter
-from learning.admission.models import Applicant, Interview
+from learning.admission.forms import InterviewFromStreamForm
+from learning.admission.models import Applicant, Interview, InterviewInvitation
 from users.factories import UserFactory
-
-
-# TODO: создание из потока  + слот - убедиться, что не можем создать приглашение для уже занятого слота. Если слот не занят ещё - то создаётся собесед и не отправляется приглашение.
-# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
-# TODO: Проверить время отправки напоминания, время/дату собеседования
 
 
 @pytest.mark.django_db
@@ -184,7 +182,7 @@ def test_interview_results_dispatch_view(curator, client):
 
 
 @pytest.mark.django_db
-def test_invitation(curator, client, settings):
+def test_invitation_slots(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
     admission_settings = apps.get_app_config("admission")
     expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
@@ -209,3 +207,83 @@ def test_invitation(curator, client, settings):
     html = BeautifulSoup(response.content, "html.parser")
     assert any("13:30" in s.string for s in
                html.find_all('input', {"name": "time"}))
+
+
+@pytest.mark.django_db
+def test_invitation_creation(curator, client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    applicant = ApplicantFactory(campaign__city_id='nsk')
+    tomorrow = now() + datetime.timedelta(days=1)
+    stream_nsk = InterviewStreamFactory(date=tomorrow.date(),
+                                        with_assignments=False,
+                                        venue__city_id='nsk')
+    assert stream_nsk.slots.count() > 0
+    client.login(curator)
+    response = client.post(applicant.get_absolute_url(), {})
+    assert response.status_code == 200
+    assert len(response.context['form'].errors) > 0
+    form_data = {
+        InterviewFromStreamForm.prefix + "-stream": stream_nsk.pk
+    }
+    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'success' in message.tags
+    assert Email.objects.count() == 1
+    invitation_qs = (Email.objects
+                     .filter(template__name=InterviewInvitation.EMAIL_TEMPLATE))
+    assert invitation_qs.count() == 1
+    assert Interview.objects.count() == 0
+    assert InterviewInvitation.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_interview_from_slot(curator, client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    admission_settings = apps.get_app_config("admission")
+    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
+    applicant = ApplicantFactory(campaign__city_id='nsk')
+    tomorrow = now() + datetime.timedelta(days=1)
+    interviewer = InterviewerFactory()
+    stream_nsk = InterviewStreamFactory(date=tomorrow.date(),
+                                        start_at=datetime.time(hour=12),
+                                        end_at=datetime.time(hour=15),
+                                        with_assignments=False,
+                                        venue__city_id='nsk',
+                                        interviewers=[interviewer])
+    assert stream_nsk.slots.count() > 0
+    # Make slot busy
+    slot = stream_nsk.slots.order_by("start_at").first()
+    interview = InterviewFactory()
+    slot.interview_id = interview.pk
+    slot.save()
+    # Try to create interview from busy slot
+    client.login(curator)
+    form_data = {
+        InterviewFromStreamForm.prefix + "-stream": stream_nsk.pk,
+        InterviewFromStreamForm.prefix + "-slot": slot.pk
+    }
+    assert Interview.objects.count() == 1
+    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
+    assert response.status_code == 200
+    message = list(response.context['messages'])[0]
+    assert 'error' in message.tags
+    assert Interview.objects.count() == 1
+    # Empty slot and repeat
+    slot.interview_id = None
+    slot.save()
+    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'success' in message.tags
+    assert InterviewInvitation.objects.count() == 0
+    assert Interview.objects.count() == 2
+    # Check interview date
+    interview = Interview.objects.get(applicant=applicant)
+    assert interview.date.hour == 5  # UTC +7 for nsk
+    assert interview.date_local().hour == slot.start_at.hour
+    assert interview.date_local().minute == slot.start_at.minute
+
+
+
+
+# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
+# TODO: Проверить время отправки напоминания, время/дату собеседования

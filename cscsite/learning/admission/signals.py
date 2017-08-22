@@ -8,7 +8,8 @@ from post_office.utils import get_email_template
 
 from learning.admission.models import Applicant, Interview, Comment, Campaign, \
     InterviewStream, InterviewSlot
-from learning.admission.utils import slot_range
+from learning.admission.utils import slot_range, \
+    generate_interview_feedback_email
 
 APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
                           Applicant.VOLUNTEER,
@@ -35,6 +36,9 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
     __sync_applicant_status(interview)
     if interview.status in [Interview.CANCELED, Interview.DEFERRED]:
         interview.delete_reminder()
+        interview.delete_feedback()
+    elif interview.status == Interview.COMPLETED:
+        generate_interview_feedback_email(interview)
 
 
 # TODO: add tests
@@ -45,6 +49,7 @@ def post_delete_interview(sender, instance, *args, **kwargs):
     Applicant.objects.filter(pk=applicant.pk).update(
         status=Applicant.INTERVIEW_TOBE_SCHEDULED)
     interview.delete_reminder()
+    interview.delete_feedback()
 
 
 @receiver(m2m_changed, sender=Interview.interviewers.through)
@@ -80,6 +85,8 @@ def post_save_interview_comment(sender, instance, created, *args, **kwargs):
     interview = comment.interview
     interviewers = interview.interviewers.all()
     __sync_applicant_status(interview, check_comments=True)
+    if interview.status == Interview.COMPLETED:
+        generate_interview_feedback_email(interview)
     if comment.interviewer not in interviewers and comment.interviewer.is_curator:
         interview.interviewers.add(comment.interviewer)
 
