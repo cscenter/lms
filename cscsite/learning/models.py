@@ -491,14 +491,14 @@ class CourseOfferingNews(TimeStampedModel):
         if not created:
             return
         co_id = self.course_offering_id
-        active_enrollments = Enrollment.active.filter(course_offering_id=co_id)
-        teachers = CourseOfferingTeacher.objects.filter(course_offering=co_id)
-        # Replace cached queryset with .bulk_create() + .iterator()
         notifications = []
+        active_enrollments = Enrollment.active.filter(course_offering_id=co_id)
+        # Replace cached queryset with .bulk_create() + .iterator()
         for e in active_enrollments.iterator():
             notifications.append(
                 CourseOfferingNewsNotification(user_id=e.student_id,
                                                course_offering_news_id=self.pk))
+        teachers = CourseOfferingTeacher.objects.filter(course_offering=co_id)
         for co_t in teachers.iterator():
             notifications.append(
                 CourseOfferingNewsNotification(user_id=co_t.teacher_id,

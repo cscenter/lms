@@ -68,8 +68,8 @@ class CourseOfferingDetailView(generic.DetailView):
             index = get_term_index(CENTER_FOUNDATION_YEAR,
                                    SEMESTER_TYPES.autumn)
             if co.semester.index < index:
-                return HttpResponseRedirect(
-                    get_club_domain(co.city.code) + co.get_absolute_url())
+                url = get_club_domain(co.city.code) + co.get_absolute_url()
+                return HttpResponseRedirect(url)
         return self.render_to_response(context)
 
     def get_object(self, queryset=None):
@@ -150,15 +150,18 @@ class CourseOfferingDetailView(generic.DetailView):
         pane = TabbedPane()
         u = self.request.user
         co = self.object
-        unread_news_cnt = c.get("is_enrolled") and c.get("news") and (
-            CourseOfferingNewsNotification.unread
-                .filter(course_offering_news__course_offering=co, user=u)
-                .count())
+
+        def get_news_cnt():
+            return (CourseOfferingNewsNotification.unread
+                    .filter(course_offering_news__course_offering=co, user=u)
+                    .count())
+        unread_news_cnt = ((c.get("is_enrolled") or c.get('is_actual_teacher'))
+                           and c.get("news") and get_news_cnt())
         can_view_assignments = (u.is_student or u.is_graduate or u.is_curator or
                                 c['is_actual_teacher'] or c['is_enrolled'])
         can_view_news = (not c['co_failed_by_student'] and
                          ((u.is_authenticated and not u.is_expelled) or
-                          settings.SITE_ID == settings.CLUB_SITE_ID))
+                          is_club_site()))
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
                 exist=lambda: True, visible=True),
