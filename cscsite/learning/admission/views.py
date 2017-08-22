@@ -739,7 +739,7 @@ class InterviewAppointmentView(generic.TemplateView):
                 for slot in slots:
                     slot.start_at = calculate_time(slot.start_at, time_diff)
             context["slots"] = slots
-        # TODO: What if slots are all busy? Is it possible?
+        # FIXME: What if slots are all busy? Is it possible?
         return context
 
     def get_invitation(self):
