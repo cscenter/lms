@@ -1,17 +1,10 @@
-from __future__ import absolute_import, unicode_literals
-
-import itertools
-
-from django.apps import apps
-
 import django_rq
 from django.db.models.signals import post_save, post_init
 from django.dispatch import receiver
-from django.utils import timezone
 from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification, \
-    Assignment, CourseClass, CourseOfferingNews, Enrollment, \
+    Assignment, StudentAssignment, CourseClass, CourseOfferingNews, Enrollment, \
     CourseOfferingTeacher, CourseOfferingNewsNotification
 from learning.tasks import (maybe_upload_slides_yandex,
                             maybe_upload_slides_slideshare)
@@ -22,8 +15,6 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
                                                   *args, **kwargs):
     if not created:
         return
-    AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
-    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     course_offering = instance.course_offering
     active_enrollments = Enrollment.active.filter(
         course_offering=course_offering)
@@ -47,8 +38,6 @@ def create_deadline_change_notification(sender, instance, created,
                                         *args, **kwargs):
     if created:
         return
-    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
-    AssignmentNotification = apps.get_model('learning', 'AssignmentNotification')
     if 'deadline_at' in instance.tracker.changed():
         active_enrollments = Enrollment.active.filter(
             course_offering=instance.course_offering)
@@ -131,7 +120,6 @@ def populate_assignments_for_new_enrolled_student(sender, instance, created,
                                                   *args, **kwargs):
     if not created:
         return
-    StudentAssignment = apps.get_model('learning', 'StudentAssignment')
     assignments = instance.course_offering.assignment_set.all()
     for a in assignments:
         (StudentAssignment.objects.get_or_create(assignment=a,
