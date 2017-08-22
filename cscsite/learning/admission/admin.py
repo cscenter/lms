@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportActionModelAdmin, ExportMixin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField
+    CityAwareSplitDateTimeField, meta
 from core.forms import AdminRichTextAreaWidget
 from core.utils import admin_datetime
 from learning.admission.forms import InterviewStreamChangeForm
@@ -162,14 +162,13 @@ class InterviewCommentAdmin(admin.ModelAdmin):
                              "interviewer")
         return q
 
+    @meta(_("Interview"), admin_order_field="interview__applicant__surname")
     def get_interview(self, obj):
         return obj.interview.applicant.get_full_name()
-    get_interview.short_description = _("Interview")
-    get_interview.admin_order_field = "interview__applicant__surname"
 
+    @meta(_("Interviewer"))
     def get_interviewer(self, obj):
         return obj.interviewer.get_full_name()
-    get_interviewer.short_description = _("Interviewer")
 
 
 class InterviewSlotAdmin(admin.ModelAdmin):
@@ -217,13 +216,22 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
         }
     }
     model = InterviewInvitation
-    list_display = ['date', 'applicant', 'get_accepted']
+    list_select_related = ["applicant", "applicant__campaign__city"]
+    list_display = ['date', 'get_applicant', 'get_campaign_city', 'get_accepted']
     raw_id_fields = ("interview", "applicant")
     readonly_fields = ("secret_code",)
 
+    @meta(_("Accepted"))
     def get_accepted(self, obj):
         return _("Yes") if obj.is_accepted else _("No")
-    get_accepted.short_description = _("Accepted")
+
+    @meta(_("Applicant"))
+    def get_applicant(self, obj):
+        return obj.applicant.get_full_name()
+
+    @meta(_("City"))
+    def get_campaign_city(self, obj):
+        return obj.applicant.campaign.city
 
 
 admin.site.register(Campaign, CampaignAdmin)

@@ -143,6 +143,14 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
                        datetime.datetime(2011, 1, 1, 17, 0, 0))
     with_assignments = random.choice([True, False])
 
+    @factory.post_generation
+    def interviewers(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for interviewer in extracted:
+                self.interviewers.add(interviewer)
+
 
 class InterviewSlotFactory(factory.DjangoModelFactory):
     class Meta:

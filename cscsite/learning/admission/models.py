@@ -20,7 +20,7 @@ from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from post_office import mail
-from post_office.models import Email, EmailTemplate
+from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
@@ -474,6 +474,7 @@ class Interview(TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
     REMINDER_TEMPLATE = "admission-interview-reminder"
+    FEEDBACK_TEMPLATE = "admission-interview-feedback"
 
     date = models.DateTimeField(_("When"))
     applicant = models.OneToOneField(
@@ -539,8 +540,20 @@ class Interview(TimeStampedModel):
     def delete_reminder(self):
         try:
             template = get_email_template(Interview.REMINDER_TEMPLATE)
-            Email.objects.filter(template=template,
-                                 to=self.applicant.email).delete()
+            (Email.objects
+             .filter(template=template, to=self.applicant.email)
+             .exclude(status=EMAIL_STATUS.sent)
+             .delete())
+        except EmailTemplate.DoesNotExist:
+            pass
+
+    def delete_feedback(self):
+        try:
+            template = get_email_template(Interview.FEEDBACK_TEMPLATE)
+            (Email.objects
+             .filter(template=template, to=self.applicant.email)
+             .exclude(status=EMAIL_STATUS.sent)
+             .delete())
         except EmailTemplate.DoesNotExist:
             pass
 
@@ -683,6 +696,8 @@ class InterviewInvitationQuerySet(query.QuerySet):
 
 
 class InterviewInvitation(TimeStampedModel):
+    EMAIL_TEMPLATE = "admission-interview-invitation"
+
     applicant = models.ForeignKey(
         Applicant,
         verbose_name=_("Applicant"),
@@ -718,6 +733,10 @@ class InterviewInvitation(TimeStampedModel):
         # self.stream.venue.get_city_timezone()
         return next_in_city_aware_mro.get_city_timezone()
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
     @property
     def city_aware_field_name(self):
         return self.__class__.stream.field.name
@@ -731,7 +750,7 @@ class InterviewInvitation(TimeStampedModel):
 
     @property
     def is_accepted(self):
-        return bool(self.interview)
+        return bool(self.interview_id)
 
     def get_absolute_url(self):
         return reverse("admission_interview_appointment", kwargs={
@@ -739,9 +758,9 @@ class InterviewInvitation(TimeStampedModel):
             "secret_code": str(self.secret_code).replace("-", "")
         })
 
-    def send_email(self, request=None):
-        if request:
-            secret_link = request.build_absolute_uri(self.get_absolute_url())
+    def send_email(self, uri_builder=None):
+        if uri_builder:
+            secret_link = uri_builder(self.get_absolute_url())
         else:
             secret_link = "https://compscicenter.ru{}".format(
                 self.get_absolute_url())
@@ -756,7 +775,7 @@ class InterviewInvitation(TimeStampedModel):
         return mail.send(
             [self.applicant.email],
             sender='info@compscicenter.ru',
-            template="admission-interview-invitation",
+            template=self.EMAIL_TEMPLATE,
             context=context,
             # Render on delivery, we have no really big amount of
             # emails to think about saving CPU time
