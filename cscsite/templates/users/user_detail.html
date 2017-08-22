@@ -122,7 +122,6 @@
                                         <i class="fa fa-list"></i>&nbsp;Задания
                                     </a>
                                 </li>
-                                <li role="presentation"><a href="{% url 'user_reference_add' profile_user.pk %}" role="tab"><i class="fa fa-file-text-o"></i> {% trans "Create reference" %}</a></li>
                             {% endif %}
                         {% endif %}
                     </ul>
@@ -170,19 +169,20 @@
                         </tr>
                     </table>
 
-                    {% if profile_user.cscuserreference_set.count > 0 %}
-                        {% if profile_user.is_student or profile_user.is_graduate %}
-                            <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
+                    {% if profile_user.is_student or profile_user.is_graduate %}
+                        <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
+                        {% if profile_user.cscuserreference_set.count > 0 %}
                             <ul>
                                 {% for reference in profile_user.cscuserreference_set.all %}
                                     <li>
-                                        <a href="{% url 'user_reference_detail' profile_user.id reference.id %}">
+                                        <a target="_blank" href="{% url 'user_reference_detail' profile_user.id reference.id %}">
                                             {{ reference.created|date:"d.m.Y" }}
                                         </a>
                                     </li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
+                        <a href="{% url 'user_reference_add' profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
                     {% endif %}
 
                     {% with borrows=profile_user.borrows.all %}
