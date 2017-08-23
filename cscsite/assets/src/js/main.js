@@ -79,7 +79,11 @@ const fn = {
                     }
                 }
                 if (target === undefined) {
-                    target = '#course-about';
+                    if (window.location.hash.indexOf("#news-") !== -1) {
+                        target = "#course-news";
+                    } else {
+                        target = "#course-about";
+                    }
                 }
                 tabList.find('li').removeClass('active').find('a').blur();
                 tabList.find('a[data-target="' + target + '"]').tab('show').hover();
@@ -90,7 +94,8 @@ const fn = {
             }
             tabList.on('click', 'a', function(e) {
                 e.preventDefault();
-                $(this).tab('show');
+                if ($(this).parent('li').hasClass('active')) return;
+
                 const targetTab = $(this).data("target");
                 if (targetTab === '#course-news') {
                     fn.markNewsAsRead(course_offering, this);
