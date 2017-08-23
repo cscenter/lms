@@ -107,7 +107,6 @@ class UserFilter(FilterSet):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
         if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
-            print(queryset.query)
             return queryset
         elif "studying" in value_list:
             return queryset.exclude(status=CSCUser.STATUS.expelled)
