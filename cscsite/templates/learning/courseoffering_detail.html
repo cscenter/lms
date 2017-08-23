@@ -32,6 +32,7 @@
                             <a role="tab"
                                aria-expanded="{% if tab.target == active_tab %}true{% else %}false{% endif %}"
                                aria-controls="course-{{ tab.target }}"
+                               data-toggle="tab"
                                data-target="#course-{{ tab.target }}"
                                data-has-unread="{% if tab.unread_cnt > 0 %}true{% else %}false{% endif %}"
                                href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
