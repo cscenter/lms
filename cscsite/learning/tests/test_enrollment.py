@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from bs4 import BeautifulSoup
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
@@ -11,20 +12,31 @@ from learning.factories import SemesterFactory, CourseOfferingFactory, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseOfferingNewsNotification
 from learning.tests.utils import assert_redirects
-from users.factories import UserFactory, StudentCenterFactory
+from learning.utils import now_local
+from users.factories import StudentCenterFactory, StudentClubFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
-# TODO: Добавить тест о том, что не могут записаться в чужом городе
 
 
-
-
-
-@pytest.mark.skip('not implemented')
-def test_enrollment_for_club_students(self):
+@pytest.mark.django_db
+def test_enrollment_for_club_students(client):
     """ Club Student can enroll only on open courses """
-    pass
+    tomorrow = now_local('spb') + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(city_code='spb',
+                                          enroll_before=tomorrow)
+    co = CourseOfferingFactory.create(city='spb', semester=term, is_open=False)
+    assert co.enrollment_is_open
+    student_center = StudentCenterFactory(city_id='spb')
+    student_club = StudentClubFactory(city_id='spb')
+    form = {'course_offering_pk': co.pk}
+    client.login(student_center)
+    response = client.post(co.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert Enrollment.objects.count() == 1
+    client.login(student_club)
+    response = client.post(co.get_enroll_url(), form)
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -132,8 +144,6 @@ def test_enrollment(client):
     form = {'course_offering_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
-    # FIXME: Find how to assert redirects with pytest and Django
-    # assert response.url == client.request.get_absolute_uri(co.get_absolute_url())
     assert 1 == (Enrollment.active
                       .filter(student=student, course_offering=co)
                       .count())
@@ -197,3 +207,40 @@ def test_assignments(client):
     assert CourseOfferingNewsNotification.objects.count() == 0
     CourseOfferingNewsFactory.create(course_offering=co)
     assert CourseOfferingNewsNotification.objects.count() == active_students
+
+
+@pytest.mark.django_db
+def test_enrollment_in_other_city(client):
+    tomorrow = now_local('spb') + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(city_code='spb',
+                                          enroll_before=tomorrow)
+    co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False)
+    assert co_spb.enrollment_is_open
+    student_spb = StudentCenterFactory(city_id='spb')
+    student_nsk = StudentCenterFactory(city_id='nsk')
+    form = {'course_offering_pk': co_spb.pk}
+    client.login(student_spb)
+    response = client.post(co_spb.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert Enrollment.objects.count() == 1
+    client.login(student_nsk)
+    response = client.post(co_spb.get_enroll_url(), form)
+    assert response.status_code == 403
+    assert Enrollment.objects.count() == 1
+    student = StudentCenterFactory(city_id=None)
+    client.login(student)
+    response = client.post(co_spb.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert response.url == '/'
+    assert Enrollment.objects.count() == 1
+    # Check button visibility
+    Enrollment.objects.all().delete()
+    client.login(student_spb)
+    response = client.get(co_spb.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    buttons = html.find("div", {"class": "o-buttons-vertical"}).find_all('button')
+    assert any("Enroll in" in s.text for s in buttons)
+    for user in [student_nsk, student]:
+        client.login(user)
+        response = client.get(co_spb.get_absolute_url())
+        assert smart_bytes("Enroll in") not in response.content

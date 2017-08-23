@@ -1,23 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
+import json
 from collections import OrderedDict
-
-from vanilla import DetailView
-
-from core.utils import is_club_site
-from learning.viewmixins import CuratorOnlyMixin
-from users.models import SHADCourseRecord
-
-try:
-    import json
-except ImportError:
-    from django.utils import simplejson as json
-
 from datetime import datetime, time
 from itertools import chain, repeat
 
+from vanilla import DetailView
 from braces.views import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -37,6 +25,9 @@ from icalendar import Calendar, Event, vText, vUri
 from icalendar.prop import vInline
 from six.moves import zip
 
+from core.utils import is_club_site
+from learning.viewmixins import CuratorOnlyMixin
+from users.models import SHADCourseRecord
 from core.views import ProtectedFormMixin
 from learning.models import CourseClass, Assignment, StudentAssignment, \
     CourseOffering, NonCourseEvent, Semester, Enrollment, StudyProgram
