@@ -14,9 +14,9 @@ from htmlpages import views
 from learning.views.students import UsefulListView, InternshipListView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
-    UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView, \
-    UserReferenceCreateView, UserReferenceDetailView
+    UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
+from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
+    ICalEventsView
 
 admin.autodiscover()
 
