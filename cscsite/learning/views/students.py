@@ -133,7 +133,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
         if not course_offering.enrollment_is_open:
             return HttpResponseForbidden()
         # Club students can't enroll on center courses
-        if not request.user.is_student_center and not course_offering.is_open:
+        if is_club_site() and not course_offering.is_open:
             return HttpResponseForbidden()
         # Students can enroll in only on courses from their city
         try:

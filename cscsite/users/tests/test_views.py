@@ -501,15 +501,15 @@ def test_login_restrictions(client, settings):
 
 class ICalTests(MyUtilitiesMixin, TestCase):
     def test_classes(self):
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
-        user.save()
+        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
+                                   CSCUser.group.TEACHER_CENTER])
+        self.doLogin(user)
         fname = 'csc_classes.ics'
         # Empty calendar
-        resp = self.client.get(reverse('user_ical_classes', args=[user.pk]))
-        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
-        self.assertIn(fname, resp['content-disposition'])
-        cal = Calendar.from_ical(resp.content)
+        response = self.client.get(reverse('user_ical_classes', args=[user.pk]))
+        assert response['content-type'] == "text/calendar; charset=UTF-8"
+        self.assertIn(fname, response['content-disposition'])
+        cal = Calendar.from_ical(response.content)
         self.assertEquals("Занятия CSC", cal['X-WR-CALNAME'])
         # Create some content
         ccs_teaching = (CourseClassFactory
@@ -519,9 +519,9 @@ class ICalTests(MyUtilitiesMixin, TestCase):
         ccs_learning = (CourseClassFactory
                         .create_batch(3, course_offering=co_learning))
         ccs_other = CourseClassFactory.create_batch(5)
-        resp = self.client.get(reverse('user_ical_classes', args=[user.pk]),
-                               HTTP_HOST = 'test.com')
-        cal = Calendar.from_ical(resp.content)
+        response = self.client.get(reverse('user_ical_classes', args=[user.pk]),
+                               HTTP_HOST='test.com')
+        cal = Calendar.from_ical(response.content)
         self.assertSameObjects([cc.name
                                 for cc in chain(ccs_teaching, ccs_learning)],
                                [evt['SUMMARY']
@@ -529,9 +529,9 @@ class ICalTests(MyUtilitiesMixin, TestCase):
                                 if isinstance(evt, Event)])
 
     def test_assignments(self):
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
-        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
-        user.save()
+        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
+                                   CSCUser.group.TEACHER_CENTER])
+        self.doLogin(user)
         fname = 'csc_assignments.ics'
         # Empty calendar
         resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]))
@@ -548,7 +548,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
                        .create_batch(3, course_offering=co_learning))
         as_other = AssignmentFactory.create_batch(5)
         resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]),
-                               HTTP_HOST = 'test.com')
+                               HTTP_HOST='test.com')
         cal = Calendar.from_ical(resp.content)
         self.assertSameObjects(["{} ({})".format(a.title,
                                                  a.course_offering.course.name)
@@ -557,7 +557,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
                                 for evt in cal.subcomponents
                                 if isinstance(evt, Event)])
 
-    def test_assignments(self):
+    def test_events(self):
         fname = 'csc_events.ics'
         # Empty calendar
         resp = self.client.get(reverse('ical_events'))

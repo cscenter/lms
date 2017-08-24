@@ -11,8 +11,9 @@ from htmlpages import views
 
 from core.views import MarkdownHowToHelpView, robots
 from users.views import LoginView, LogoutView, \
-    UserDetailView, UserUpdateView, ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView, UserReferenceCreateView, UserReferenceDetailView
+    UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
+from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
+    ICalEventsView
 from learning.views import InternationalSchoolsListView
 from learning.urls import course_patterns, course_offering_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns

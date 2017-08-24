@@ -17,6 +17,7 @@ from users.factories import StudentCenterFactory, StudentClubFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
+# TODO: Test volunteer can enroll!
 
 
 @pytest.mark.django_db
@@ -36,7 +37,8 @@ def test_enrollment_for_club_students(client):
     assert Enrollment.objects.count() == 1
     client.login(student_club)
     response = client.post(co.get_enroll_url(), form)
-    assert response.status_code == 403
+    # Ok, club student can't login on center site
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db

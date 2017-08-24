@@ -92,8 +92,9 @@ rest-pandas==0.5.0
 django-js-reverse==0.7.3
 
 # iCalendar support
-icalendar==3.11.3
+icalendar==3.11.6
 django-ical==1.4
+python-dateutil==2.6.1
 
 django-jinja==2.3.1
 
@@ -115,7 +116,6 @@ django-extra-views==0.8.0
 django-braces==1.11.0
 django-sitemetrics==0.6.1
 django-taggit==0.22.0
-python-dateutil==2.5.3
 sqlparse==0.2.2
 django-pipeline==1.6.12
 django-loginas==0.2.3
