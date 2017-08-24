@@ -144,6 +144,8 @@ class VenueAdminForm(forms.ModelForm):
 
 class VenueAdmin(admin.ModelAdmin):
     form = VenueAdminForm
+    list_display = ['name', 'city']
+    list_select_related = ["city"]
 
 
 class AssignmentAdminForm(CityAwareModelForm):

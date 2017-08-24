@@ -130,7 +130,7 @@ class CourseForm(forms.ModelForm):
 
 class CourseClassForm(forms.ModelForm):
     venue = forms.ModelChoiceField(
-        Venue.objects.all(),
+        queryset=Venue.objects.all(),
         label=_("Venue"),
         empty_label=None)
     type = forms.ChoiceField(
@@ -216,6 +216,8 @@ class CourseClassForm(forms.ModelForm):
             )
         )
         super(CourseClassForm, self).__init__(*args, **kwargs)
+        self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
+            city_id=course_offering.city_id)
         self.instance.course_offering = course_offering
 
     class Meta:

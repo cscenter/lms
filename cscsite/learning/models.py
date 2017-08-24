@@ -518,6 +518,7 @@ class Venue(models.Model):
     UNSPECIFIED = 0  # BitField uses BigIntegerField internal
 
     city = models.ForeignKey(City, null=True, blank=True,
+                             verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)
     sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
