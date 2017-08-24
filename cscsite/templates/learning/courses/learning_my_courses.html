@@ -16,6 +16,7 @@
             </li>
             {% endif %}
         </ul>
+
         <div class="tab-content">
           <div class="tab-pane active" id="current" role="tabpanel">
             {% if ongoing_enrolled or ongoing_rest %}
@@ -101,10 +102,6 @@
           </table>
           </div>
       {% endif %}
-
-        {% if not ongoing_enrolled and not archive_enrolled and not ongoing_rest %}
-            <div class="container center-aligned"><h5>{% trans "No courses yet" %}</h5></div>
-        {% endif %}
     </div>
     </div>
 </div>
