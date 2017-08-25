@@ -17,9 +17,9 @@
             </h2>
 
             <p>
-                {% blocktrans %}
-                    HOWTO instructions. Do we even need i18n here?
-                {% endblocktrans %}
+                Чтобы взять книгу, нужно написать на {% if user.city_id == 'nsk' %}<a href="mailto:curators-nsk@compscicenter.ru">curators-nsk@compscicenter.ru</a>{% else %}<a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a>{% endif %} письмо
+                о своём желании с указанием автора книги и её названия.<br>
+                Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты.
             </p>
 
             <table class="table table-bordered">
