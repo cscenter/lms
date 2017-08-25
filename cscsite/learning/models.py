@@ -78,8 +78,14 @@ class Semester(models.Model):
         validators=[MinValueValidator(1990)])
     type = StatusField(verbose_name=_("Semester|type"),
                        choices_name='TYPES')
-    enroll_before = models.DateField(
-        _("Enroll before"),
+    enrollment_start_at = models.DateField(
+        _("Enrollment start at"),
+        blank=True,
+        null=True,
+        help_text=_("Leave blank to fill in with the date of the beginning "
+                    "of the term"))
+    enrollment_end_at = models.DateField(
+        _("Enrollment end at"),
         blank=True,
         null=True,
         help_text=_("Students can enroll on or leave the course "
@@ -169,7 +175,28 @@ class Semester(models.Model):
 
     def save(self, *args, **kwargs):
         self.index = get_term_index(self.year, self.type)
+        # Enrollment period starts from the beginning of the term by default
+        if not self.enrollment_start_at:
+            start_at = get_term_start(self.year, self.type, pytz.UTC).date()
+            self.enrollment_start_at = start_at
+        if not self.enrollment_end_at:
+            lifetime = datetime.timedelta(days=learn_conf.ENROLLMENT_DURATION)
+            self.enrollment_end_at = self.enrollment_start_at + lifetime
         super(Semester, self).save(*args, **kwargs)
+
+    def clean(self):
+        if self.year and self.type and self.enrollment_end_at:
+            start_at = self.enrollment_start_at
+            if not start_at:
+                start_at = get_term_start(self.year, self.type, pytz.UTC).date()
+            if start_at > self.enrollment_end_at:
+                if not self.enrollment_start_at:
+                    msg = _("Enrollment period end should be later "
+                            "than expected term start ({})").format(start_at)
+                else:
+                    msg = _("Enrollment period end should be later than "
+                            "the beginning")
+                raise ValidationError(msg)
 
     def get_academic_year(self):
         """Academic year starts from autumn term"""
@@ -329,24 +356,12 @@ class CourseOffering(TimeStampedModel):
     def enrollment_is_open(self):
         if self.is_open:
             return True
-        if not self.in_current_term or self.is_completed:
+        if self.is_completed:
             return False
-        today = now()
         city_tz = self.get_city_timezone()
-        if self.semester.enroll_before:
-            date_naive = self.semester.enroll_before + datetime.timedelta(days=1)
-            dt_naive = datetime.datetime(year=date_naive.year,
-                                         month=date_naive.month,
-                                         day=date_naive.day)
-            enroll_before_local = city_tz.localize(dt_naive)
-        else:
-            year, term_type = get_current_term_pair(city_tz)
-            current_term_start = get_term_start(year, term_type, city_tz)
-            lifetime = datetime.timedelta(days=learn_conf.ENROLLMENT_DURATION)
-            enroll_before_local = current_term_start + lifetime
-        if today > enroll_before_local:
-            return False
-        return True
+        today = now_local(city_tz).date()
+        start_at = self.semester.enrollment_start_at
+        return start_at <= today <= self.semester.enrollment_end_at
 
     @property
     def is_capacity_limited(self):

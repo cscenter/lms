@@ -7,6 +7,7 @@ import datetime
 import unittest
 
 import pytest
+import pytz
 from django.utils.timezone import now
 from mock import patch
 
@@ -23,6 +24,7 @@ from learning.factories import CourseFactory, CourseOfferingFactory, \
 from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
     StudentAssignment
 from learning.settings import SEMESTER_TYPES
+from learning.utils import get_term_start
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
 
@@ -359,29 +361,98 @@ class AssignmentNotificationTests(TestCase):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(reason="Monkey patching is totally broken")
-# FIXME: We  need monkey patch timezone.now, but for that we should use utc, which use datetime. What a mess, fuck. I'll try to fix this later, now skip test
-def test_course_offering_enrollment_expired(mocker, monkeypatch):
-    current_year = 2015
-    current_term_type = SEMESTER_TYPES.spring
-    semester = SemesterFactory(year=current_year, type=current_term_type)
-    co = CourseOfferingFactory.create(semester=semester)
-    # Fixate spring semester term start
-    enrollment_duration = 8
-    monkeypatch.setattr("learning.settings.ENROLLMENT_DURATION", enrollment_duration)
-    monkeypatch.setattr("learning.settings.SPRING_TERM_START", "10 jan")
-    # Mock today time
+def test_semester_enrollment_period(mocker):
+    year = 2016
+    term_type = SEMESTER_TYPES.autumn
+    # Fix year and term
     mocked_timezone = mocker.patch('django.utils.timezone.now')
-    import pytz
-    start_datetime = datetime.datetime(current_year, month=1, day=10, tzinfo=pytz.utc)  # should be equal to term start
-    mocked_timezone.return_value = start_datetime
-    assert co.enrollment_is_open
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration - 1)
-    assert co.enrollment_is_open
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration)
-    assert co.enrollment_is_open
-    mocked_timezone.return_value = start_datetime + datetime.timedelta(days=enrollment_duration + 1)
-    assert not co.enrollment_is_open
-    # Back to the future
-    mocked_timezone.return_value = start_datetime - datetime.timedelta(days=enrollment_duration + 1)
-    assert co.enrollment_is_open
+    now_fixed = datetime.datetime(year, month=9, day=8, tzinfo=pytz.UTC)
+    mocked_timezone.return_value = now_fixed
+    # Default start is the beginning of the term
+    term = SemesterFactory(year=year, type=term_type)
+    term_start_dt = get_term_start(year, term_type, pytz.UTC)
+    assert term.enrollment_start_at == term_start_dt.date()
+    # Start/End of the enrollment period always non-empty value, even
+    # without calling .clean() method
+    assert term.enrollment_end_at is not None
+    # When we have only one day to enroll in the course
+    Semester.objects.all().delete()
+    term = SemesterFactory.build(year=year, type=term_type,
+                                 enrollment_start_at=term_start_dt.date(),
+                                 enrollment_end_at=term_start_dt.date())
+    try:
+        term.clean()
+        term.save()
+    except ValidationError:
+        pytest.fail("Enrollment period should be valid")
+    # Values didn't overridden
+    assert term.enrollment_start_at == term_start_dt.date()
+    assert term.enrollment_end_at == term_start_dt.date()
+    # End > Start
+    Semester.objects.all().delete()
+    with pytest.raises(ValidationError) as e:
+        end_at = term_start_dt.date() - datetime.timedelta(days=1)
+        term = SemesterFactory.build(year=year, type=term_type,
+                                     enrollment_start_at=term_start_dt.date(),
+                                     enrollment_end_at=end_at)
+        term.clean()
+    # Empty start, none-empty end, but value < than `expected` start
+    # enrollment period
+    Semester.objects.all().delete()
+    with pytest.raises(ValidationError) as e:
+        end_at = term_start_dt.date() - datetime.timedelta(days=1)
+        term = SemesterFactory.build(year=year, type=term_type,
+                                     enrollment_end_at=end_at)
+        term.clean()
+    # Do not validate that start/end inside term bounds
+    Semester.objects.all().delete()
+    start_at = term_start_dt.date() + datetime.timedelta(weeks=42)
+    term = SemesterFactory.build(year=year, type=term_type,
+                                 enrollment_start_at=start_at,
+                                 enrollment_end_at=start_at)
+    term.clean()
+
+
+@pytest.mark.django_db
+def test_course_offering_enrollment_is_open(settings, mocker):
+    settings.ENROLLMENT_DURATION = 45
+    year = 2016
+    term_type = SEMESTER_TYPES.autumn
+    # timezone.now() should return some date from autumn 2016
+    # but less than settings.ENROLLMENT_DURATION
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    now_fixed = datetime.datetime(year, month=9, day=8, tzinfo=pytz.UTC)
+    mocked_timezone.return_value = now_fixed
+    term = SemesterFactory.create_current()
+    assert term.type == term_type
+    assert term.year == year
+    term_start_dt = get_term_start(year, term_type, pytz.UTC)
+    assert term.enrollment_start_at == term_start_dt.date()
+    co_spb = CourseOfferingFactory.create(semester=term, city_id='spb',
+                                          is_open=False)
+    # We are inside enrollment period right now
+    assert co_spb.enrollment_is_open
+    # `completed_at` has more priority than term settings
+    default_completed_at = co_spb.completed_at
+    co_spb.completed_at = now_fixed.date()
+    co_spb.save()
+    assert co_spb.is_completed
+    assert not co_spb.enrollment_is_open
+    co_spb.completed_at = default_completed_at
+    co_spb.save()
+    # Test boundaries
+    assert co_spb.enrollment_is_open
+    term.enrollment_end_at = now_fixed.date()
+    term.save()
+    assert co_spb.enrollment_is_open
+    term.enrollment_end_at = now_fixed.date() - datetime.timedelta(days=1)
+    term.save()
+    co_spb.refresh_from_db()
+    assert not co_spb.enrollment_is_open
+    term.enrollment_start_at = now_fixed.date()
+    term.enrollment_end_at = now_fixed.date() + datetime.timedelta(days=1)
+    term.save()
+    co_spb.refresh_from_db()
+    assert co_spb.enrollment_is_open
+
+
