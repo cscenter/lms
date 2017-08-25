@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.AlterField(
             model_name='semester',
             name='enrollment_start_at',
             field=models.DateField(blank=True, help_text='Leave blank to fill in with the date of the beginning of the term', null=True, verbose_name='Enrollment start at'),
