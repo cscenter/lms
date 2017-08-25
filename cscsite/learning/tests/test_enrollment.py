@@ -25,7 +25,7 @@ def test_enrollment_for_club_students(client):
     """ Club Student can enroll only on open courses """
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code='spb',
-                                          enroll_before=tomorrow)
+                                          enrollment_end_at=tomorrow.date())
     co = CourseOfferingFactory.create(city='spb', semester=term, is_open=False)
     assert co.enrollment_is_open
     student_center = StudentCenterFactory(city_id='spb')
@@ -52,11 +52,11 @@ def test_unenrollment(client):
     form = {'course_offering_pk': co.pk}
     # Enrollment already closed
     today = timezone.now()
-    current_semester.enroll_before = (today - datetime.timedelta(days=1)).date()
+    current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
     current_semester.save()
     response = client.post(co.get_enroll_url(), form)
     assert response.status_code == 403
-    current_semester.enroll_before = (today + datetime.timedelta(days=1)).date()
+    current_semester.enrollment_end_at = (today + datetime.timedelta(days=1)).date()
     current_semester.save()
     response = client.post(co.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
@@ -139,7 +139,7 @@ def test_enrollment(client):
     client.login(student)
     today = timezone.now()
     current_semester = SemesterFactory.create_current()
-    current_semester.enroll_before = today.date()
+    current_semester.enrollment_end_at = today.date()
     current_semester.save()
     co = CourseOfferingFactory.create(semester=current_semester)
     url = co.get_enroll_url()
@@ -215,7 +215,7 @@ def test_assignments(client):
 def test_enrollment_in_other_city(client):
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code='spb',
-                                          enroll_before=tomorrow)
+                                          enrollment_end_at=tomorrow.date())
     co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False)
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
@@ -246,3 +246,48 @@ def test_enrollment_in_other_city(client):
         client.login(user)
         response = client.get(co_spb.get_absolute_url())
         assert smart_bytes("Enroll in") not in response.content
+
+
+@pytest.mark.django_db
+def test_enrollment_is_enrollment_open(client):
+    today = now_local('spb')
+    yesterday = today - datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(city_code='spb',
+                                          enrollment_end_at=today.date())
+    co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False,
+                                   completed_at=tomorrow.date())
+    assert co_spb.enrollment_is_open
+    student_spb = StudentCenterFactory(city_id='spb')
+    client.login(student_spb)
+    response = client.get(co_spb.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    buttons = html.find("div", {"class": "o-buttons-vertical"}).find_all('button')
+    assert any("Enroll in" in s.text for s in buttons)
+    default_completed_at = co_spb.completed_at
+    co_spb.completed_at = today.date()
+    co_spb.save()
+    response = client.get(co_spb.get_absolute_url())
+    assert smart_bytes("Enroll in") not in response.content
+    co_spb.completed_at = default_completed_at
+    co_spb.save()
+    assert co_spb.enrollment_is_open
+    term.enrollment_start_at = today.date()
+    term.save()
+    assert co_spb.enrollment_is_open
+    response = client.get(co_spb.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    # What if enrollment not stated yet
+    term.enrollment_start_at = tomorrow.date()
+    term.enrollment_end_at = tomorrow.date()
+    term.save()
+    response = client.get(co_spb.get_absolute_url())
+    assert smart_bytes("Enroll in") not in response.content
+    # Already completed
+    term.enrollment_start_at = yesterday.date()
+    term.enrollment_end_at = yesterday.date()
+    term.save()
+    response = client.get(co_spb.get_absolute_url())
+    assert smart_bytes("Enroll in") not in response.content
+
+
