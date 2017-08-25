@@ -13,11 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='semester',
-            old_name='enroll_before',
-            new_name='enrollment_end_at',
-        ),
         migrations.AlterField(
             model_name='venue',
             name='city',

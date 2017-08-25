@@ -337,7 +337,7 @@ class Migration(migrations.Migration):
                 ('year', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1990)], verbose_name='Year')),
                 ('type', model_utils.fields.StatusField(choices=[('spring', 'spring'), ('summer', 'summer'), ('autumn', 'autumn')], default='spring', max_length=100, no_check_for_status=True, verbose_name='Semester|type')),
                 ('enrollment_start_at', models.DateField(blank=True, help_text='Try to fix travis', null=True, verbose_name='Enroll before')),
-                ('enroll_before', models.DateField(blank=True, help_text='Students can enroll on or leave the course before this date (inclusive)', null=True, verbose_name='Enroll before')),
+                ('enrollment_end_at', models.DateField(blank=True, help_text='Students can enroll on or leave the course before this date (inclusive)', null=True, verbose_name='Enroll before')),
                 ('report_starts_at', models.DateField(blank=True, help_text='Start point of project report period.', null=True, verbose_name='Report start')),
                 ('report_ends_at', models.DateField(blank=True, help_text='End point of project report period.', null=True, verbose_name='Report end')),
                 ('projects_grade_excellent', models.SmallIntegerField(blank=True, help_text='Semester|projects_grade_excellent', null=True, verbose_name='Projects|Border for excellent')),
