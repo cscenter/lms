@@ -92,7 +92,7 @@ class TeamView(generic.TemplateView):
             617: "kristina_smolnikova",
             1213: "katya_artamonova",
             2605: "mojina_alina",
-            2607: "avdushenko_alexandr",
+            3173: "komissarov_alexander",
         }
         tech = {
             1780: "aleksey_belozerov",
