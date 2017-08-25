@@ -146,10 +146,10 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
-        (_('Personal info'), {'fields': ['last_name', 'first_name',
-                                         'patronymic', 'gender', 'city',
-                                         'photo', 'note', 'private_contacts',
-                                         'csc_review']}),
+        (_('Personal info'), {
+            'fields': ['last_name', 'first_name', 'patronymic', 'workplace',
+                       'gender', 'city', 'photo', 'note', 'private_contacts',
+                       'csc_review']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions']}),
         (_('External services'), {'fields': ['yandex_id', 'stepic_id',
@@ -157,8 +157,7 @@ class CSCUserAdmin(AdminImageMixin, UserAdmin):
         (_('Student info record'),
          {'fields': ['status', 'enrollment_year',
                      'graduation_year', 'curriculum_year', 'areas_of_study',
-                     'university', 'workplace', 'uni_year_at_enrollment',
-                     'phone']}),
+                     'university', 'uni_year_at_enrollment', 'phone']}),
         (_("Curator's note"),
          {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
