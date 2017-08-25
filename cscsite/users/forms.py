@@ -66,11 +66,11 @@ class UserProfileForm(forms.ModelForm):
 
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
-            show_fields = ['phone', 'note', 'csc_review',
+            show_fields = ['phone', 'workplace', 'note', 'csc_review',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
         else:
-            show_fields = ['phone', 'note',
+            show_fields = ['phone', 'workplace', 'note',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
 
@@ -91,7 +91,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = CSCUser
-        fields = ['phone', 'note', 'yandex_id', 'github_id',
+        fields = ['phone', 'workplace', 'note', 'yandex_id', 'github_id',
                   'stepic_id', 'csc_review', 'private_contacts',
                   'first_name', 'last_name', 'patronymic']
         widgets = {
@@ -110,7 +110,8 @@ class UserProfileForm(forms.ModelForm):
                         _("will be shown only to logged-in users"))),
             'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
             'github_id': "github.com/<b>GITHUB-ID</b>",
-            'stepic_id': _("stepik.org/users/<b>USER_ID</b>")
+            'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
+            'workplace': _("Specify one or more jobs (comma-separated)")
         }
 
     def clean_csc_review(self):
