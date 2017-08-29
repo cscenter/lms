@@ -7,7 +7,6 @@ from typing import Optional
 from urllib.parse import urlencode
 
 import nbconvert
-from braces.views._access import UserPassesTestMixin
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -276,7 +275,7 @@ class CalendarTeacherView(CalendarTeacherFullView):
 
 class CoursesListView(generic.ListView):
     model = Semester
-    template_name = "learning/courses/list.html"
+    template_name = "learning/courses/offerings.html"
 
     def get_queryset(self):
         cos_qs = (CourseOffering.objects
@@ -300,7 +299,7 @@ class CoursesListView(generic.ListView):
         return q
 
     def get_context_data(self, **kwargs):
-        context = super(CoursesListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         semester_list = [s for s in context["semester_list"]
                          if s.type != Semester.TYPES.summer]
         if not semester_list:
