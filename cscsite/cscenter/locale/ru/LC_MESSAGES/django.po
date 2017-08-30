@@ -8,96 +8,102 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-06 16:35+0300\n"
-"PO-Revision-Date: 2016-09-06 16:46+0230\n"
-"Last-Translator: b'  <>'\n"
+"POT-Creation-Date: 2017-08-30 13:57+0000\n"
+"PO-Revision-Date: 2017-08-30 13:58+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "%100>=20) ? 1 : 2);\n"
-"X-Translated-Using: django-rosetta 0.7.11\n"
+"X-Translated-Using: django-rosetta 0.7.13\n"
 
-#: cscsite/cscenter/templates/base.html:52
-msgid "Computer Science Center, 2011–16 гг."
+#: cscsite/cscenter/filters.py:13
+msgid ""
+"Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."
 msgstr ""
 
-#: cscsite/cscenter/templates/base.html:79
-msgid "close all"
-msgstr "закрыть все"
+#: cscsite/cscenter/filters.py:18
+msgid "Saint Petersburg"
+msgstr "Санкт-Петербург"
 
-#: cscsite/cscenter/templates/base_menu.html:45
-#: cscsite/cscenter/templates/top_menu.html:33
-msgid "Admin page"
-msgstr "Админка"
+#: cscsite/cscenter/filters.py:19
+msgid "Novosibirsk"
+msgstr "Новосибирск"
 
-#: cscsite/cscenter/templates/base_menu.html:47
+#: cscsite/cscenter/templates/_top_menu.html:39
 msgid "Profile"
 msgstr "Профиль"
 
-#: cscsite/cscenter/templates/base_menu.html:48
-#| msgid "logout"
+#: cscsite/cscenter/templates/_top_menu.html:40
 msgid "Logout"
 msgstr "Выйти"
 
-#: cscsite/cscenter/templates/base_menu.html:53
-#: cscsite/cscenter/templates/top_menu.html:44
+#: cscsite/cscenter/templates/_top_menu.html:44
 msgid "Login"
 msgstr "Войти"
 
-#: cscsite/cscenter/templates/center_teacher_list.html:29
-#: cscsite/cscenter/templates/center_teacher_list.html:54
+#: cscsite/cscenter/templates/base.html:63
+msgid "Computer Science Center, 2011–17 гг."
+msgstr ""
+
+#: cscsite/cscenter/templates/base.html:91
+msgid "close all"
+msgstr "закрыть все"
+
+#: cscsite/cscenter/templates/center_teacher_list.html:28
+#: cscsite/cscenter/templates/center_teacher_list.html:53
 #, fuzzy
 #| msgid "No news yet"
 msgid "No professors yet"
 msgstr "Список новостей пуст"
 
-#: cscsite/cscenter/templates/index.html:16
+#: cscsite/cscenter/templates/index.html:39
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscsite/cscenter/templates/index.html:17
+#: cscsite/cscenter/templates/index.html:40
 msgid "All online courses"
 msgstr "Все онлайн-курсы"
 
-#: cscsite/cscenter/templates/index.html:30
+#: cscsite/cscenter/templates/index.html:53
 #: cscsite/cscenter/templates/testimonials.html:14
 msgid "Graduates about CS Center"
 msgstr "Выпускники о CS центре"
 
-#: cscsite/cscenter/templates/index.html:31
+#: cscsite/cscenter/templates/index.html:54
 #: cscsite/cscenter/templates/testimonials.html:15
 msgid "All graduates"
 msgstr "Все выпускники"
 
-#: cscsite/cscenter/templates/index.html:48
+#: cscsite/cscenter/templates/index.html:71
 #: cscsite/cscenter/templates/testimonials.html:32
 msgid "Graduation"
 msgstr "Выпуск"
 
-#: cscsite/cscenter/templates/index.html:62
+#: cscsite/cscenter/templates/index.html:85
 msgid "Full-time courses on video"
 msgstr "Видео очных курсов"
 
-#: cscsite/cscenter/templates/index.html:63
+#: cscsite/cscenter/templates/index.html:86
 msgid "All courses"
 msgstr "Все курсы"
 
-#: cscsite/cscenter/templates/index.html:63
+#: cscsite/cscenter/templates/index.html:86
 msgid "All video courses"
 msgstr "Все курсы с видео"
 
-#: cscsite/cscenter/templates/index.html:78
+#: cscsite/cscenter/templates/index.html:101
 msgid "Semester"
 msgstr "Семестр"
 
-#: cscsite/cscenter/templates/index.html:81
+#: cscsite/cscenter/templates/index.html:104
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: cscsite/cscenter/templates/index.html:86
+#: cscsite/cscenter/templates/index.html:109
 #, python-format
 msgid "%(counter)s class"
 msgid_plural "%(counter)s classes"
@@ -105,34 +111,48 @@ msgstr[0] "%(counter)s занятие"
 msgstr[1] "%(counter)s занятия"
 msgstr[2] "%(counter)s занятий"
 
-#: cscsite/cscenter/templates/index.html:87
+#: cscsite/cscenter/templates/index.html:110
 msgid "Completed course"
 msgstr "Полный курс"
 
-#: cscsite/cscenter/templates/index.html:87
+#: cscsite/cscenter/templates/index.html:110
 msgid "Lectures video"
 msgstr "Есть видео"
 
-#: cscsite/cscenter/templates/index.html:102
+#: cscsite/cscenter/templates/index.html:125
 msgid "Supported by"
 msgstr "При поддержке"
 
-#: cscsite/cscenter/templates/index.html:107
+#: cscsite/cscenter/templates/index.html:130
 msgid "Yandex School of Data Analysis"
 msgstr "Яндекс ШАД"
 
-#: cscsite/cscenter/templates/index.html:112
-msgid "JetBrains"
-msgstr ""
-
-#: cscsite/cscenter/templates/index.html:117
+#: cscsite/cscenter/templates/index.html:140
 msgid "FML #239"
 msgstr "ФМЛ №239"
 
-#: cscsite/cscenter/templates/index.html:122
+#: cscsite/cscenter/templates/index.html:145
 msgid "Computer Science Club"
 msgstr ""
 
-#: cscsite/cscenter/templates/top_menu.html:41
-msgid "logout"
-msgstr "выйти"
+#: cscsite/cscenter/templates/learning/courses/offerings.html:78
+#, fuzzy
+#| msgid "No news yet"
+msgid "No courses yet"
+msgstr "Список новостей пуст"
+
+#: cscsite/cscenter/views.py:329
+msgctxt "adjective"
+msgid "autumn"
+msgstr "осенний"
+
+#: cscsite/cscenter/views.py:330
+msgctxt "adjective"
+msgid "spring"
+msgstr "весенний"
+
+#~ msgid "Admin page"
+#~ msgstr "Админка"
+
+#~ msgid "logout"
+#~ msgstr "выйти"

@@ -18,8 +18,8 @@ TEMPLATES = [{
     "BACKEND": "django_jinja.backend.Jinja2",
     "APP_DIRS": False,
     'DIRS': [
+        str(BASE_DIR / "templates"),
         str(PROJECT_DIR / "templates"),
-        str(BASE_DIR / "templates")
     ],
     "NAME": "jinja2",
     "OPTIONS": {

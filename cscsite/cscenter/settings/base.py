@@ -28,7 +28,7 @@ INSTALLED_APPS += [
 ]
 
 # Add site specific templates
-TEMPLATES[0]['DIRS'] += [str(BASE_DIR / "templates")]
+TEMPLATES[0]['DIRS'] = [str(BASE_DIR / "templates")] + TEMPLATES[0]['DIRS']
 
 LOCALE_PATHS += [
     str(BASE_DIR / "locale"),
