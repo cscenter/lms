@@ -1,5 +1,6 @@
 from typing import List
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import query, Manager, Prefetch, Q
@@ -110,11 +111,27 @@ class CourseOfferingQuerySet(models.QuerySet):
         return self.filter(city_id=city_code)
 
     def in_center_branches(self):
-        # FIXME: Move to settings
-        return self.filter(city_id__in=['spb', 'nsk'])
+        return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)
 
     def for_teacher(self, user):
         return self.filter(teachers=user)
+
+    def get_offerings_queryset(self):
+        """Base queryset for courses list"""
+        CSCUser = apps.get_model('users', 'CSCUser')
+        Semester = apps.get_model('learning', 'Semester')
+        prefetch_teachers = Prefetch(
+            'teachers',
+            queryset=CSCUser.objects.only(
+                "id", "first_name", "last_name", "patronymic"))
+        return (self
+                .select_related('course', 'semester')
+                .exclude(semester__type=Semester.TYPES.summer)
+                .prefetch_related(prefetch_teachers)
+                .only("pk", "city_id", "is_open",
+                      "course__name", "course__slug",
+                      "semester__year", "semester__type")
+                .order_by('-semester__year', '-semester__index', 'course__name'))
 
 
 class _CourseOfferingDefaultManager(models.Manager):

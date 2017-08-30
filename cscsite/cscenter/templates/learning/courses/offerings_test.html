@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load lookup dictkey from core_tags %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        var data = {{ json|safe }};
+    </script>
+{% endblock javascripts %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="content-title">Очные курсы в CS центре</h1>
+
+        <p>Центр предлагает очное обучение для студентов и аспирантов технических направлений вузов и молодых специалистов.<br> Главное — интерес к учёбе, возможность приходить на занятия по будним вечерам и время для самостоятельной работы.
+        </p>
+
+        <ul class="nav nav-tabs square" role="tablist">
+            {% for city_code, city_name in cities %}
+            <li role="presentation" {% if city_code == active_city %}class="active"{% endif %}>
+                <a data-target="#courses-{{ city_code }}" aria-expanded="{% if city_code == active_city %}true{% else %}false{% endif %}"
+                   aria-controls="courses-{{ city_code }}"
+                   href="/courses/test/?city={{ city_code }}">{{ city_name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% if terms %}
+            <form action="" class="form-inline __courses-filter">
+                <div class="form-group">
+                    Учебный год: <select name="academic_year" class="bootstrap-select form-control">
+                        {% for term_year in terms %}
+                        <option value="{{ term_year }}"{% if term_year == active_year %}selected{% endif %}>{{ term_year }}/{{ term_year|add:"1" }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    {% with types=terms|lookup:active_year %}
+                        Семестр: {% for term_type in types reversed %}
+                            <a href="#{{ term_type }}"{% if term_type == active_type %}class="active"{% endif %}>{{ TERM_TYPES|dictkey:term_type }}</a>{% endfor %}
+                    {% endwith %}
+                </div>
+            </form>
+        {% endif %}
+
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="courses">
+                {% if by_slug|lookup:active_slug %}
+                    <table class="table __courses-test">
+                        <thead>
+                            <tr>
+                                <th style="width:470px;">Название</th>
+                                <th style="width:200px;">Материалы курса</th>
+                                <th>Преподаватели</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for co in by_slug|lookup:active_slug %}
+                                <tr>
+                                    <td>{% if co.is_open %}<span class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
+                                    <td>
+                                        <a class="icon __video" href="{{ co.get_absolute_url }}classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
+                                    </td>
+                                    <td>
+                                        {% for teacher in co.teachers %}
+                                            <a class="__teacher text-nowrap" href="{{ teacher.url }}">{{ teacher.name }}</a>{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h4 class="text-center">{% trans "No courses yet" %}</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

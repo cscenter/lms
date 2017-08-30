@@ -5,14 +5,9 @@ from typing import Optional
 from core.utils import is_club_site
 from learning.models import CourseOffering
 from learning.settings import SEMESTER_TYPES
-from learning.utils import CityCode
+from learning.utils import CityCode, semester_slug_re
 
 logger = logging.getLogger(__name__)
-
-
-term_types = "|".join(slug for slug, _ in SEMESTER_TYPES)
-semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
-                              term_types + ")$")
 
 
 def get_user_city_code(request) -> Optional[CityCode]:

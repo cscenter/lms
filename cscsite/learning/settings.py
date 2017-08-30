@@ -75,6 +75,8 @@ SEMESTER_TYPES = getattr(settings, 'SEMESTER_TYPES',
                                  ('summer', _("summer")),
                                  ('autumn', _("autumn"))))
 
+TERMS_IN_ACADEMIC_YEAR = len(SEMESTER_TYPES)
+
 # don't know what will happen if we change this when there are models in DB
 AUTUMN_TERM_START = '1 sep'
 # XXX: spring semester must be later than 1 jan

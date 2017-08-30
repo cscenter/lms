@@ -1,4 +1,5 @@
 import datetime
+import re
 from collections import namedtuple
 from typing import Union, NewType, List
 
@@ -19,6 +20,10 @@ CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', datetime.tzinfo)
 
 TermTuple = namedtuple('TermTuple', ['year', 'type'])
+
+term_types = "|".join(slug for slug, _ in SEMESTER_TYPES)
+semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
+                              term_types + ")$")
 
 
 def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
@@ -91,21 +96,16 @@ def get_current_term_index(tz_aware: Union[Timezone, CityCode]):
     return get_term_index(*get_current_term_pair(tz_aware))
 
 
-def get_term_index_academic(year, term_type, rewind_years):
+def get_term_index_academic_year_starts(year, term_type):
     """
-    Subtracts N academic years from `end_year` and returns term index
-    of the beginning of calculated academic year.
-    Academic year starts from autumn.
+    Returns term index of the beginning of academic year.
 
-    Not properly works for FOUNDATION_YEAR spring and summer, but I believe
-    it's not really necessary.
+    Academic year starts from autumn. Term should be greater than
+    autumn of `FOUNDATION_YEAR`.
     """
-    assert rewind_years > 0
-    if term_type == SEMESTER_TYPES.autumn:
-        target_year = year - rewind_years + 1
-    else:
-        target_year = year - rewind_years
-    return get_term_index(target_year, SEMESTER_TYPES.autumn)
+    if term_type != SEMESTER_TYPES.autumn:
+        year -= 1
+    return get_term_index(year, SEMESTER_TYPES.autumn)
 
 
 def get_term_by_index(term_index):

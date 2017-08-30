@@ -1,30 +1,34 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
+import itertools
 import random
 
-from collections import Counter
+from collections import Counter, OrderedDict
 
-import itertools
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.http.response import HttpResponseRedirect, HttpResponseNotFound
 from django.urls import reverse
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, Count, Prefetch, Case, When, Value
 from django.http import Http404
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
+from django_filters.views import FilterView
+from rest_framework.renderers import JSONRenderer
 
+from core.exceptions import Redirect
 from core.models import Faq
+from cscenter.serializers import CourseOfferingSerializer
 from learning.models import CourseOffering, CourseOfferingTeacher, \
-    OnlineCourse, AreaOfStudy, StudyProgram
-from learning.settings import CENTER_FOUNDATION_YEAR
+    OnlineCourse, AreaOfStudy, StudyProgram, Semester
+from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
 from learning.utils import get_current_term_pair, get_term_index, \
-    get_term_index_academic
+    get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
 from users.models import CSCUser
+from .filters import CourseFilter
 
 
 class IndexView(generic.TemplateView):
@@ -37,8 +41,9 @@ class IndexView(generic.TemplateView):
             # Note: Show courses based on SPB timezone
             year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
             current_term_index = get_term_index(year, term_type)
-            term_index = get_term_index_academic(year, term_type,
-                                                 rewind_years=2)
+            term_index = get_term_index_academic_year_starts(year, term_type)
+            # Subtract 1 academic year
+            term_index -= TERMS_IN_ACADEMIC_YEAR
             pool = list(CourseOffering.objects
                         .in_city(self.request.city_code)
                         .filter(is_published_in_video=True,
@@ -152,7 +157,8 @@ class TeachersView(generic.ListView):
         # Consider the last 3 academic years. Teacher is active, if he read
         # course in this period or will in the future.
         year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
-        term_index = get_term_index_academic(year, term_type, rewind_years=3)
+        term_index = get_term_index_academic_year_starts(year, term_type)
+        term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
         active_lecturers = Counter(
             CourseOffering.objects.filter(semester__index__gte=term_index)
             .values_list("teachers__pk", flat=True)
@@ -293,3 +299,56 @@ class SyllabusView(generic.TemplateView):
 
 class OpenNskView(generic.TemplateView):
     template_name = "open_nsk.html"
+
+
+class TestCoursesListView(FilterView):
+    model = CourseOffering
+    context_object_name = "courses"
+    filterset_class = CourseFilter
+    template_name = "learning/courses/offerings_test.html"
+
+    def get_queryset(self):
+        return CourseOffering.objects.get_offerings_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # TODO: remove `dictkey` templatetag?
+        context["TERM_TYPES"] = {
+            Semester.TYPES.autumn: pgettext_lazy("adjective", "autumn"),
+            Semester.TYPES.spring: pgettext_lazy("adjective", "spring"),
+        }
+        # FIXME: Нужно решить, что делать, если список курсов пустой. Пока не знаю, завтра с утра подумать надо бы.
+        # if not self.filterset.form.is_valid():
+        #     raise Redirect(to=reverse("course_list"))
+        context["cities"] = self.filterset.form.fields['city'].choices
+        # FIXME: replace courses with serializer?
+        context["terms"] = self.get_terms_by_academic_year(context["courses"])
+        serializer = CourseOfferingSerializer(context["courses"])
+        context["by_slug"] = serializer.data
+        # FIXME: replace with json.dumps
+        context["json"] = JSONRenderer().render(serializer.data)
+        context["active_city"] = self.filterset.data['city']
+        # FIXME: What if form is invalid?
+        year, term_type = self.filterset.get_term()
+        context["active_year"] = year
+        context["active_type"] = term_type
+        context["active_slug"] = "{}-{}".format(year, term_type)
+        return context
+
+    @staticmethod
+    def get_terms_by_academic_year(courses):
+        """
+        Group terms by academic year for provided list of courses
+
+        Courses have to be sorted  by (-year, -semester__index) to make it work
+        """
+        terms = OrderedDict()
+        prev_visited = object()
+        for course in courses:
+            term = course.semester
+            if term != prev_visited:
+                idx = get_term_index_academic_year_starts(term.year, term.type)
+                academic_year, _ = get_term_by_index(idx)
+                terms.setdefault(academic_year, []).append(term.type)
+                prev_visited = term
+        return terms
