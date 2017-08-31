@@ -1005,8 +1005,8 @@ def test_student_courses_list(client, settings):
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
     now_year, now_season = get_current_term_pair(student_spb.city_id)
-    current_term = SemesterFactory.create(year=now_year, type=now_season)
-    cos = CourseOfferingFactory.create_batch(4, semester=current_term,
+    current_term_spb = SemesterFactory.create(year=now_year, type=now_season)
+    cos = CourseOfferingFactory.create_batch(4, semester=current_term_spb,
                                              city_id='spb', is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
@@ -1025,8 +1025,10 @@ def test_student_courses_list(client, settings):
     assert len(cos_available) == len(response.context['ongoing_rest'])
     assert set(cos_available) == set(response.context['ongoing_rest'])
     # Add co from other city
-    co_nsk = CourseOfferingFactory.create(semester=current_term, city_id='nsk',
-                                          is_open=False)
+    now_year, now_season = get_current_term_pair('nsk')
+    current_term_nsk = SemesterFactory.create(year=now_year, type=now_season)
+    co_nsk = CourseOfferingFactory.create(semester=current_term_nsk,
+                                          city_id='nsk', is_open=False)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
@@ -1042,8 +1044,8 @@ def test_student_courses_list(client, settings):
     assert set(response.context['ongoing_rest']) == {co_nsk}
     assert len(response.context['archive_enrolled']) == 0
     # Add open reading, it should be available on compscicenter.ru
-    co_open = CourseOfferingFactory.create(semester=current_term, city_id='nsk',
-                                           is_open=True)
+    co_open = CourseOfferingFactory.create(semester=current_term_nsk,
+                                           city_id='nsk', is_open=True)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 2

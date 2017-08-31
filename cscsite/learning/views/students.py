@@ -83,10 +83,9 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
     def get_queryset(self):
         current_semester = Semester.get_current()
         self.current_semester = current_semester
-        return (self.model.objects
-                .filter(
-            student=self.request.user,
-            assignment__course_offering__semester=current_semester)
+        return (StudentAssignment.objects
+                .filter(student=self.request.user,
+                        assignment__course_offering__semester=current_semester)
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
@@ -99,17 +98,15 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
                                 'student'))
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(StudentAssignmentListView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         # Get student enrollments from current term and then related co's
-        actual_co = (Enrollment.active.filter(
-            course_offering__semester=self.current_semester,
-            student=self.request.user).values_list("course_offering",
-                                                   flat=True))
+        actual_co = (Enrollment.active
+                     .filter(course_offering__semester=self.current_semester,
+                             student=self.request.user)
+                     .values_list("course_offering", flat=True))
         open_, archive = utils.split_on_condition(
             context['assignment_list'],
-            lambda
-                a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
+            lambda a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive

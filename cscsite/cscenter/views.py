@@ -23,6 +23,7 @@ from vanilla import TemplateView
 from core.exceptions import Redirect
 from core.models import Faq
 from cscenter.serializers import CourseOfferingSerializer
+from cscenter.utils import group_terms_by_academic_year
 from learning.models import CourseOffering, CourseOfferingTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
@@ -310,6 +311,7 @@ class TestCoursesListView(FilterMixin, TemplateView):
     def get_queryset(self):
         return CourseOffering.objects.get_offerings_queryset()
 
+    # TODO: add tests!
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
         filterset = self.get_filterset(filterset_class)
@@ -320,9 +322,14 @@ class TestCoursesListView(FilterMixin, TemplateView):
             Semester.TYPES.spring: pgettext_lazy("adjective", "spring"),
         }
         courses = filterset.qs
-        terms = self.get_terms_by_academic_year(courses)
+        terms = group_terms_by_academic_year(courses)
         serializer = CourseOfferingSerializer(courses)
-        term_pair = filterset.get_term()
+        active_academic_year, active_type = self.get_term(filterset)
+        if active_type == Semester.TYPES.spring:
+            active_year = active_academic_year + 1
+        else:
+            active_year = active_academic_year
+        active_slug = "{}-{}".format(active_year, active_type)
         context = {
             "TERM_TYPES": TERM_TYPES,
             "cities": filterset.form.fields['city'].choices,
@@ -334,28 +341,25 @@ class TestCoursesListView(FilterMixin, TemplateView):
                 "courses": serializer.data
             }),
             "active_city": filterset.data['city'],
-            "active_year": term_pair.year,
-            "active_type": term_pair.type,
-            "active_slug": "{0.year}-{0.type}".format(term_pair)
+            "active_academic_year": active_academic_year,
+            "active_type": active_type,
+            "active_slug": active_slug
         }
         return context
 
-    @staticmethod
-    def get_terms_by_academic_year(courses):
-        """
-        Group terms by academic year for provided list of courses
-
-        Courses have to be sorted  by (-year, -semester__index) to make it work.
-        Note: terms in reversed order.
-        TODO: fix reversed?
-        """
-        terms = OrderedDict()
-        prev_visited = object()
-        for course in courses:
-            term = course.semester
-            if term != prev_visited:
-                idx = get_term_index_academic_year_starts(term.year, term.type)
-                academic_year, _ = get_term_by_index(idx)
-                terms.setdefault(academic_year, []).append(term.type)
-                prev_visited = term
-        return terms
+    def get_term(self, filters):
+        if "semester" in filters.data:
+            valid_slug = filters.data["semester"]
+            term_year, term_type = valid_slug.split("-")
+        else:
+            # By default, return academic year and term type for latest
+            # available CO.
+            if filters.qs:
+                term = filters.qs[0].semester
+                term_year = term.year
+                term_type = term.type
+            else:
+                return None
+        idx = get_term_index_academic_year_starts(term_year, term_type)
+        academic_year, _ = get_term_by_index(idx)
+        return academic_year, term_type

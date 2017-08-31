@@ -2,30 +2,35 @@ from typing import Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
-from django.forms import SlugField, MultiWidget, Select
+from django.forms import SlugField
 from django.http import QueryDict
-from django_filters import FilterSet, CharFilter, Filter, ChoiceFilter
+from django_filters import FilterSet, CharFilter, Filter, ChoiceFilter, \
+    STRICTNESS
 from django.utils.translation import ugettext_lazy as _
 
 from learning.models import CourseOffering, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import semester_slug_re, \
-    get_term_index_academic_year_starts, get_term_by_index, \
-    get_current_term_pair, TermTuple
+    get_term_index_academic_year_starts, get_term_by_index, TermTuple, \
+    get_term_index
 from learning.views.utils import get_user_city_code
 
-validate_semester_slug = RegexValidator(
-    semester_slug_re,
-    _("Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."),
-    'invalid'
-)
 
+def validate_semester_slug(value):
+    match = semester_slug_re.search(value)
+    if not match:
+        raise ValidationError("Semester slug should be YEAR-TERM_TYPE format")
+    term_year = int(match.group("term_year"))
+    term_type = match.group("term_type")
+    # More strict rules for term types
+    if term_type not in [Semester.TYPES.autumn, Semester.TYPES.spring]:
+        raise ValidationError("Supported semester types: [autumn, spring]")
+    term_index = get_term_index(term_year, term_type)
+    first_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
+                                      Semester.TYPES.autumn)
+    if term_index < first_term_index:
+        raise ValidationError("CS Center has no offerings for this period")
 
-def validate_semester_year(slug):
-    match = semester_slug_re.search(slug)
-    if not match or int(match.group("term_year")) < CENTER_FOUNDATION_YEAR:
-        raise ValidationError("")
 
 CITIES = [
     ('spb', _("Saint Petersburg")),
@@ -37,9 +42,7 @@ class SemesterSlugField(SlugField):
     def __init__(self, *args, **kwargs):
         validators = kwargs.pop("validators", [])
         validators.append(validate_semester_slug)
-        validators.append(validate_semester_year)
         kwargs["validators"] = validators
-        # TODO: validate year > FOUNDATION_YEAR
         super().__init__(*args, **kwargs)
 
 
@@ -48,14 +51,29 @@ class SemesterSlugFilter(Filter):
 
 
 class CourseFilter(FilterSet):
+    """
+    CourseFilter used on /courses/ page.
+
+    Note, that we only validate `semester` query value. Later it's used in
+    filtering on client side.
+    """
     city = ChoiceFilter(name="city_id", empty_label=None, choices=CITIES)
     semester = SemesterSlugFilter(method='semester_slug_filter')
 
     class Meta:
         model = CourseOffering
         fields = ['city', 'semester']
+        # Return empty queryset if not all fields are valid
+        strict = STRICTNESS.RETURN_NO_RESULTS
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
+        """
+        Since we always should have some value for `city`, resolve it in
+        next order:
+            * query value
+            * valid city code from user settings
+            * default city code (spb)
+        """
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
@@ -66,32 +84,12 @@ class CourseFilter(FilterSet):
             user_city = get_user_city_code(request)
             if user_city in settings.CENTER_BRANCHES_CITY_CODES:
                 city_code = [user_city]
-        # Fallback to spb
+        # Show default for unauthenticated users or users without valid
+        # city code in their settings
         if not city_code:
             city_code = [settings.DEFAULT_CITY_CODE]
         data.setlist("city", city_code)
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
 
     def semester_slug_filter(self, queryset, name, value):
-        """Queryset will be empty if semester slug is invalid."""
-        # TODO: Эта ситуация может возникнуть, только если неправильно кинуть линк. Хитить базу в этом случае или ломать поведение?
         return queryset
-
-    def get_term(self) -> Optional[TermTuple]:
-        match = semester_slug_re.search(self.data.get("semester", ""))
-        if not match:
-            # By default, return academic year and term type for latest
-            # available CO.
-            print(self.qs)
-            if self.qs:
-                term = self.qs[0].semester
-                term_year = term.year
-                term_type = term.type
-            else:
-                return None
-        else:
-            term_year = int(match.group("term_year"))
-            term_type = match.group("term_type")
-        idx = get_term_index_academic_year_starts(term_year, term_type)
-        academic_year, _ = get_term_by_index(idx)
-        return TermTuple(academic_year, term_type)

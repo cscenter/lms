@@ -8,6 +8,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import jsonfield.fields
+
+import learning.permissions
 import learning.utils
 import model_utils.fields
 import sorl.thumbnail.fields
@@ -72,7 +74,7 @@ class Migration(migrations.Migration):
                 'ordering': ['last_name', 'first_name'],
                 'verbose_name_plural': 'CSCUser|users',
             },
-            bases=(learning.utils.LearningPermissionsMixin, models.Model),
+            bases=(learning.permissions.LearningPermissionsMixin, models.Model),
         ),
         migrations.CreateModel(
             name='CSCUserReference',
