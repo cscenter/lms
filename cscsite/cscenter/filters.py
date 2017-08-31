@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -6,12 +8,11 @@ from django.http import QueryDict
 from django_filters import FilterSet, CharFilter, Filter, ChoiceFilter
 from django.utils.translation import ugettext_lazy as _
 
-from core.settings.base import CENTER_BRANCHES_CITY_CODES
 from learning.models import CourseOffering, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import semester_slug_re, \
     get_term_index_academic_year_starts, get_term_by_index, \
-    get_current_term_pair
+    get_current_term_pair, TermTuple
 from learning.views.utils import get_user_city_code
 
 validate_semester_slug = RegexValidator(
@@ -76,22 +77,21 @@ class CourseFilter(FilterSet):
         # TODO: Эта ситуация может возникнуть, только если неправильно кинуть линк. Хитить базу в этом случае или ломать поведение?
         return queryset
 
-    def get_term(self):
+    def get_term(self) -> Optional[TermTuple]:
         match = semester_slug_re.search(self.data.get("semester", ""))
         if not match:
             # By default, return academic year and term type for latest
-            # available CO
+            # available CO.
+            print(self.qs)
             if self.qs:
                 term = self.qs[0].semester
                 term_year = term.year
                 term_type = term.type
             else:
-                # FIXME: What if queryset is empty???
-                city_code = settings.DEFAULT_CITY_CODE
-                term_year, term_type = get_current_term_pair(city_code)
+                return None
         else:
             term_year = int(match.group("term_year"))
             term_type = match.group("term_type")
         idx = get_term_index_academic_year_starts(term_year, term_type)
         academic_year, _ = get_term_by_index(idx)
-        return academic_year, term_type
+        return TermTuple(academic_year, term_type)

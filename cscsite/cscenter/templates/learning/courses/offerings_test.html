@@ -1,16 +1,34 @@
 {% extends "base.html" %}
 
 {% load i18n %}
-{% load lookup dictkey from core_tags %}
+{% load lookup from core_tags %}
 
 {% block javascripts %}
     <script type="text/javascript">
-        var data = {{ json|safe }};
+        var courseOfferingsData = {{ json|safe }};
+    </script>
+
+    <script type="text/template" id="courses-list-table-row">
+        <tr>
+            <td><% if (co.is_open) { %><span class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
+            <td>
+                <a class="icon __video" href="<%-co.url%>classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
+            </td>
+            <td>
+                <% for (var i = 0; i < co.teachers.length; i++) { %>
+                    <a class="__teacher text-nowrap" href="<%=co.teachers[i].url%>"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
+                <% } %>
+            </td>
+        </tr>
+    </script>
+
+    <script type="text/template" id="courses-term-filter-option">
+        <a data-type="<%=term.type%>" href="#<%=term.type%>"<% if (term.type == activeType) { %>class="active"<% } %>><%=term.name%></a>
     </script>
 {% endblock javascripts %}
 
 {% block content %}
-    <div class="container">
+    <div class="container" id="courses-list">
         <h1 class="content-title">Очные курсы в CS центре</h1>
 
         <p>Центр предлагает очное обучение для студентов и аспирантов технических направлений вузов и молодых специалистов.<br> Главное — интерес к учёбе, возможность приходить на занятия по будним вечерам и время для самостоятельной работы.
@@ -28,17 +46,17 @@
         </ul>
         {% if terms %}
             <form action="" class="form-inline __courses-filter">
-                <div class="form-group">
+                <div class="form-group __courses-filter--academic-year">
                     Учебный год: <select name="academic_year" class="bootstrap-select form-control">
                         {% for term_year in terms %}
                         <option value="{{ term_year }}"{% if term_year == active_year %}selected{% endif %}>{{ term_year }}/{{ term_year|add:"1" }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group __courses-filter--term">
                     {% with types=terms|lookup:active_year %}
                         Семестр: {% for term_type in types reversed %}
-                            <a href="#{{ term_type }}"{% if term_type == active_type %}class="active"{% endif %}>{{ TERM_TYPES|dictkey:term_type }}</a>{% endfor %}
+                            <a data-type="{{ term_type }}" href="#{{ term_type }}"{% if term_type == active_type %}class="active"{% endif %}>{{ TERM_TYPES|lookup:term_type }}</a>{% endfor %}
                     {% endwith %}
                 </div>
             </form>
@@ -46,7 +64,7 @@
 
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="courses">
-                {% if by_slug|lookup:active_slug %}
+                {% if courses|lookup:active_slug %}
                     <table class="table __courses-test">
                         <thead>
                             <tr>
@@ -56,11 +74,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for co in by_slug|lookup:active_slug %}
+                            {% for co in courses|lookup:active_slug %}
                                 <tr>
                                     <td>{% if co.is_open %}<span class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
                                     <td>
-                                        <a class="icon __video" href="{{ co.get_absolute_url }}classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
+                                        <a class="icon __video" href="{{ co.url }}classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
                                     </td>
                                     <td>
                                         {% for teacher in co.teachers %}

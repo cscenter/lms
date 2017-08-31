@@ -8,7 +8,6 @@ import {csrfSafeMethod} from './utils';
 
 const CSC = window.CSC;
 
-
 // Replace textarea with EpicEditor
 const $ubereditors = $("textarea.ubereditor");
 
@@ -16,6 +15,7 @@ const $ubereditors = $("textarea.ubereditor");
 const $ubertexts = $("div.ubertext");
 
 let ends_at_touched = false;
+let template = require('lodash.template');
 
 $(document).ready(function () {
     fn.configureCSRFAjax();
@@ -24,6 +24,7 @@ $(document).ready(function () {
     fn.courseClassSpecificCode();
     fn.applicationForm();
     fn.courseOfferingTabs();
+    fn.courseOfferingsList();
     fn.syllabusTabs();
 });
 
@@ -192,5 +193,76 @@ const fn = {
             $(this).tab('show');
         });
         $(' ')
+    },
+
+    courseOfferingsList: function () {
+        if (document.getElementById('courses-list') !== null) {
+            // TODO: move to EventData
+            let yearsFilter = $('.__courses-filter--academic-year');
+            let termsFilter = $('.__courses-filter--term');
+            const offeringsData = window.courseOfferingsData;
+            const tableRowTemplate = template(document.getElementById('courses-list-table-row').innerHTML);
+            const termOptionTemplate = template(document.getElementById('courses-term-filter-option').innerHTML);
+            let eventData = {
+                yearsFilter: yearsFilter,
+                termsFilter: termsFilter,
+                offeringsData: offeringsData,
+                courseRowTemplate: tableRowTemplate,
+                termOptionTemplate: termOptionTemplate
+            };
+            yearsFilter.on('change', 'select[name="academic_year"]', eventData,
+                fn._filterCourseOfferings);
+            termsFilter.on('click',  'a',  eventData,
+                fn._filterTermAction);
+        }
+    },
+
+    _filterTermAction: function(event) {
+        event.preventDefault();
+        if ($(this).hasClass('active')) {
+            return;
+        } else {
+            event.data.termsFilter.find('a').removeClass('active');
+            $(this).addClass('active');
+            fn._filterCourseOfferings(event);
+        }
+    },
+
+    _filterCourseOfferings: function (event) {
+        event.preventDefault();
+        let selectedYear = event.data.yearsFilter.find('select').val();
+        let selectedTerm = event.data.termsFilter.find('.active').data("type");
+
+        // Make sure termType available for selected academic year
+        let slug = `${selectedYear}-${selectedTerm}`;
+        let terms = event.data.offeringsData.terms[selectedYear];
+        if (!slug in event.data.offeringsData.courses) {
+            // Note: terms in reversed order
+            selectedTerm = terms[terms.length - 1];
+        }
+        slug = `${selectedYear}-${selectedTerm}`;
+        if (slug in event.data.offeringsData.courses) {
+            // Update table content
+            let rows = "";
+            event.data.offeringsData.courses[slug].forEach((course) => {
+                rows += event.data.courseRowTemplate({co: course});
+            });
+            $('.__courses-test tbody').html(rows);
+            // Update term types list
+            let termOptions = terms.reduceRight((acc, termType) => {
+                acc += event.data.termOptionTemplate({
+                    activeType: selectedTerm,
+                    term: {
+                        type: termType,
+                        name: event.data.offeringsData.termOptions[termType]
+                    }
+                });
+                return acc;
+            }, "Семестр: ");
+            event.data.termsFilter.html(termOptions);
+        } else {
+            // throw an error? Should be impossible.
+        }
+        // Pick available term and update term types list
     }
 };
