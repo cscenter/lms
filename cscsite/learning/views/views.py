@@ -357,8 +357,8 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         current_year, current_term = get_current_term_pair(city_code)
         current_term_index = get_term_index(current_year, current_term)
         in_current_term = Q(semester__index=current_term_index)
+        # Hide summer courses on compsciclub.ru
         if is_club_site():
-            # Hide summer courses on compsciclub.ru
             in_current_term &= ~Q(semester__type=SEMESTER_TYPES.summer)
         course_offerings = (CourseOffering.objects
                             .in_city(city_code)

@@ -49,12 +49,12 @@
                 <div class="form-group __courses-filter--academic-year">
                     Учебный год: <select name="academic_year" class="bootstrap-select form-control">
                         {% for term_year in terms %}
-                        <option value="{{ term_year }}"{% if term_year == active_year %}selected{% endif %}>{{ term_year }}/{{ term_year|add:"1" }}</option>
+                        <option value="{{ term_year }}"{% if term_year == active_academic_year %}selected{% endif %}>{{ term_year }}/{{ term_year|add:"1" }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-group __courses-filter--term">
-                    {% with types=terms|lookup:active_year %}
+                    {% with types=terms|lookup:active_academic_year %}
                         Семестр: {% for term_type in types reversed %}
                             <a data-type="{{ term_type }}" href="#{{ term_type }}"{% if term_type == active_type %}class="active"{% endif %}>{{ TERM_TYPES|lookup:term_type }}</a>{% endfor %}
                     {% endwith %}

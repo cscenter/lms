@@ -28,7 +28,8 @@ from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
-from learning.utils import LearningPermissionsMixin, is_positive_grade
+from learning.utils import is_positive_grade
+from learning.permissions import LearningPermissionsMixin
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.

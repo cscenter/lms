@@ -4,7 +4,7 @@ import $ from 'jquery';
 import "jgrowl/jquery.jgrowl.js";
 import "mathjax_config";
 import UberEditor from "./editor";
-import {csrfSafeMethod} from './utils';
+import {csrfSafeMethod, getTemplate} from './utils';
 
 const CSC = window.CSC;
 
@@ -15,7 +15,6 @@ const $ubereditors = $("textarea.ubereditor");
 const $ubertexts = $("div.ubertext");
 
 let ends_at_touched = false;
-let template = require('lodash.template');
 
 $(document).ready(function () {
     fn.configureCSRFAjax();
@@ -197,18 +196,14 @@ const fn = {
 
     courseOfferingsList: function () {
         if (document.getElementById('courses-list') !== null) {
-            // TODO: move to EventData
-            let yearsFilter = $('.__courses-filter--academic-year');
-            let termsFilter = $('.__courses-filter--term');
-            const offeringsData = window.courseOfferingsData;
-            const tableRowTemplate = template(document.getElementById('courses-list-table-row').innerHTML);
-            const termOptionTemplate = template(document.getElementById('courses-term-filter-option').innerHTML);
+            const yearsFilter = $('.__courses-filter--academic-year');
+            const termsFilter = $('.__courses-filter--term');
             let eventData = {
                 yearsFilter: yearsFilter,
                 termsFilter: termsFilter,
-                offeringsData: offeringsData,
-                courseRowTemplate: tableRowTemplate,
-                termOptionTemplate: termOptionTemplate
+                offeringsData: window.courseOfferingsData,
+                courseRowTemplate: getTemplate('courses-list-table-row'),
+                termOptionTemplate: getTemplate('courses-term-filter-option')
             };
             yearsFilter.on('change', 'select[name="academic_year"]', eventData,
                 fn._filterCourseOfferings);
@@ -219,28 +214,33 @@ const fn = {
 
     _filterTermAction: function(event) {
         event.preventDefault();
-        if ($(this).hasClass('active')) {
-            return;
-        } else {
-            event.data.termsFilter.find('a').removeClass('active');
-            $(this).addClass('active');
-            fn._filterCourseOfferings(event);
-        }
+        if ($(this).hasClass('active')) return;
+
+        event.data.termsFilter.find('a').removeClass('active');
+        $(this).addClass('active');
+        fn._filterCourseOfferings(event);
     },
 
     _filterCourseOfferings: function (event) {
         event.preventDefault();
-        let selectedYear = event.data.yearsFilter.find('select').val();
+        let academicYear = parseInt(event.data.yearsFilter.find('select').val());
         let selectedTerm = event.data.termsFilter.find('.active').data("type");
-
-        // Make sure termType available for selected academic year
-        let slug = `${selectedYear}-${selectedTerm}`;
-        let terms = event.data.offeringsData.terms[selectedYear];
-        if (!slug in event.data.offeringsData.courses) {
-            // Note: terms in reversed order
-            selectedTerm = terms[terms.length - 1];
+        let year = academicYear;
+        if (selectedTerm === 'spring') {
+            year += 1;
         }
-        slug = `${selectedYear}-${selectedTerm}`;
+        // Make sure termType available for selected year
+        let slug = `${year}-${selectedTerm}`;
+        let availableTerms = event.data.offeringsData.terms[academicYear];
+        if (!(slug in event.data.offeringsData.courses)) {
+            year = academicYear;
+            // Note: terms in reversed order
+            selectedTerm = availableTerms[availableTerms.length - 1];
+            if (selectedTerm === 'spring') {
+                year += 1;
+            }
+            slug = `${year}-${selectedTerm}`;
+        }
         if (slug in event.data.offeringsData.courses) {
             // Update table content
             let rows = "";
@@ -249,7 +249,7 @@ const fn = {
             });
             $('.__courses-test tbody').html(rows);
             // Update term types list
-            let termOptions = terms.reduceRight((acc, termType) => {
+            let termOptions = availableTerms.reduceRight((acc, termType) => {
                 acc += event.data.termOptionTemplate({
                     activeType: selectedTerm,
                     term: {

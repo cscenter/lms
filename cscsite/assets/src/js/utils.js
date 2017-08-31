@@ -1,14 +1,15 @@
-function getLocalStorageKey(textarea) {
+let template = require('lodash.template');
+
+export function getLocalStorageKey(textarea) {
     return (window.location.pathname.replace(/\//g, "_")
     + "_" + textarea.name);
 }
 
-function csrfSafeMethod(method) {
+export function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
-export {
-    getLocalStorageKey,
-    csrfSafeMethod
+export function getTemplate (id) {
+    return template(document.getElementById(id).innerHTML);
 }
