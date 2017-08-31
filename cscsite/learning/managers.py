@@ -8,7 +8,8 @@ from django.utils.timezone import now
 
 from core.utils import is_club_site
 from learning.calendar import EventsCalendar, get_bounds_for_calendar_month
-from learning.settings import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
+from learning.utils import get_term_index
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -120,12 +121,14 @@ class CourseOfferingQuerySet(models.QuerySet):
         """Base queryset for courses list"""
         CSCUser = apps.get_model('users', 'CSCUser')
         Semester = apps.get_model('learning', 'Semester')
+        term_idx = get_term_index(CENTER_FOUNDATION_YEAR, Semester.TYPES.autumn)
         prefetch_teachers = Prefetch(
             'teachers',
             queryset=CSCUser.objects.only(
                 "id", "first_name", "last_name", "patronymic"))
         return (self
                 .select_related('course', 'semester')
+                .filter(semester__index__gte=term_idx)
                 .exclude(semester__type=Semester.TYPES.summer)
                 .prefetch_related(prefetch_teachers)
                 .only("pk", "city_id", "is_open",

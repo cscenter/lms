@@ -3,8 +3,6 @@ from itertools import groupby
 from rest_framework import serializers
 
 from learning.models import CourseOffering
-from learning.utils import get_term_index_academic_year_starts, \
-    get_term_by_index
 from users.models import CSCUser
 
 
@@ -40,7 +38,7 @@ class CourseSerializer(serializers.ModelSerializer):
 class CourseOfferingSerializer(serializers.Serializer):
     def to_representation(self, obj):
         by_year = OrderedDict()
-        # Group courses by (academic_year, term_type)
+        # Group courses by (year, term_type)
         for term, courses in groupby(obj, key=lambda x: x.semester):
             slug = "{0.year}-{0.type}".format(term)
             by_year[slug] = CourseSerializer(courses, many=True).data

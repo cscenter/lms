@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import json
 import random
 
 from collections import Counter, OrderedDict
@@ -15,8 +16,9 @@ from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
-from django_filters.views import FilterView
+from django_filters.views import FilterView, FilterMixin
 from rest_framework.renderers import JSONRenderer
+from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.models import Faq
@@ -301,9 +303,7 @@ class OpenNskView(generic.TemplateView):
     template_name = "open_nsk.html"
 
 
-class TestCoursesListView(FilterView):
-    model = CourseOffering
-    context_object_name = "courses"
+class TestCoursesListView(FilterMixin, TemplateView):
     filterset_class = CourseFilter
     template_name = "learning/courses/offerings_test.html"
 
@@ -311,28 +311,33 @@ class TestCoursesListView(FilterView):
         return CourseOffering.objects.get_offerings_queryset()
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # TODO: remove `dictkey` templatetag?
-        context["TERM_TYPES"] = {
+        filterset_class = self.get_filterset_class()
+        filterset = self.get_filterset(filterset_class)
+        if not filterset.form.is_valid():
+            raise Redirect(to=reverse("course_list"))
+        TERM_TYPES = {
             Semester.TYPES.autumn: pgettext_lazy("adjective", "autumn"),
             Semester.TYPES.spring: pgettext_lazy("adjective", "spring"),
         }
-        # FIXME: Нужно решить, что делать, если список курсов пустой. Пока не знаю, завтра с утра подумать надо бы.
-        # if not self.filterset.form.is_valid():
-        #     raise Redirect(to=reverse("course_list"))
-        context["cities"] = self.filterset.form.fields['city'].choices
-        # FIXME: replace courses with serializer?
-        context["terms"] = self.get_terms_by_academic_year(context["courses"])
-        serializer = CourseOfferingSerializer(context["courses"])
-        context["by_slug"] = serializer.data
-        # FIXME: replace with json.dumps
-        context["json"] = JSONRenderer().render(serializer.data)
-        context["active_city"] = self.filterset.data['city']
-        # FIXME: What if form is invalid?
-        year, term_type = self.filterset.get_term()
-        context["active_year"] = year
-        context["active_type"] = term_type
-        context["active_slug"] = "{}-{}".format(year, term_type)
+        courses = filterset.qs
+        terms = self.get_terms_by_academic_year(courses)
+        serializer = CourseOfferingSerializer(courses)
+        term_pair = filterset.get_term()
+        context = {
+            "TERM_TYPES": TERM_TYPES,
+            "cities": filterset.form.fields['city'].choices,
+            "terms": terms,
+            "courses": serializer.data,
+            "json": JSONRenderer().render({
+                "terms": terms,
+                "termOptions": TERM_TYPES,
+                "courses": serializer.data
+            }),
+            "active_city": filterset.data['city'],
+            "active_year": term_pair.year,
+            "active_type": term_pair.type,
+            "active_slug": "{0.year}-{0.type}".format(term_pair)
+        }
         return context
 
     @staticmethod
@@ -340,7 +345,9 @@ class TestCoursesListView(FilterView):
         """
         Group terms by academic year for provided list of courses
 
-        Courses have to be sorted  by (-year, -semester__index) to make it work
+        Courses have to be sorted  by (-year, -semester__index) to make it work.
+        Note: terms in reversed order.
+        TODO: fix reversed?
         """
         terms = OrderedDict()
         prev_visited = object()

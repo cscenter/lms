@@ -68,12 +68,6 @@ def date_soon_css(d):
 
 
 @register.filter
-def dictkey(value, arg):
-    if arg in value:
-        return value[arg]
-
-
-@register.filter
 def lookup(value, arg):
     """Gets an attribute of an object dynamically from a string name"""
     if hasattr(value, str(arg)):
