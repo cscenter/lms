@@ -132,6 +132,7 @@ class CourseOfferingQuerySet(models.QuerySet):
                 .exclude(semester__type=Semester.TYPES.summer)
                 .prefetch_related(prefetch_teachers)
                 .only("pk", "city_id", "is_open",
+                      "materials_video", "materials_slides", "materials_files",
                       "course__name", "course__slug",
                       "semester__year", "semester__type")
                 .order_by('-semester__year', '-semester__index', 'course__name'))
