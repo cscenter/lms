@@ -1,21 +1,21 @@
-"use strict";
-
 import Cookies from 'js-cookie';
 import Cropper from 'cropperjs';
 import $ from 'jquery';
-const template = require('lodash.template');
+import {getTemplate} from './utils';
+
 // profileAppInit - global dependency :<
-let profileAppInit = window.profileAppInit;
+const profileAppInit = window.profileAppInit;
 // TODO: How to resolve FileAPI dependency?
 
 
-var templates = {
-    upload: $("#templateUpload").html(),
-    thumb: $("#templateThumb").html()
+const templates = {
+    upload: getTemplate('templateUpload'),
+    thumb: getTemplate('templateThumb')
 };
 
-var MESSAGE = {
+const MESSAGE = {
     unknownError: "Неизвестная ошибка.",
+    imgValidationError: "Изображение не удовлетворяет требованиям.",
     badRequest: "Неверный запрос.",
     uploadError: "Ошибка загрузки файла на сервер. Код: ",
     thumbDoneFail: "Ошибка создания превью. Код: ",
@@ -35,7 +35,7 @@ var photoValidation = {
 
 };
 
-var xhrOpts = {
+const xhrOpts = {
     url: '/profile-update-image/',
     data: {"user_id": profileAppInit.user_id},
     headers: {
@@ -44,17 +44,17 @@ var xhrOpts = {
 };
 
 // DOM elements
-var uploadContainer = $("#user-photo-upload");
-var modalHeader = $('.modal-header', uploadContainer);
-var modalBody = $('.modal-body', uploadContainer);
+const uploadContainer = $("#user-photo-upload");
+const modalHeader = $('.modal-header', uploadContainer);
+const modalBody = $('.modal-body', uploadContainer);
 
-var fn = {
+let fn = {
     init: function() {
         if (profileAppInit.user_id === undefined) {
             return;
         }
 
-        var deferred = $.Deferred(),
+        let deferred = $.Deferred(),
             chained = deferred;
         $.each(profileAppInit.preload, function(i, url) {
              chained = chained.then(function() {
@@ -87,6 +87,7 @@ var fn = {
         deferred.resolve();
     },
 
+    // TODO: move to util
     showError: function(msg) {
         $.jGrowl(msg, { theme: 'error', position: 'bottom-right' });
     },
@@ -96,16 +97,16 @@ var fn = {
     },
 
     uploadInit: function () {
-        var uploadBtn = document.getElementById('simple-btn');
+        let uploadBtn = document.getElementById('simple-btn');
         // Should I remove it manually?
         FileAPI.event.off(uploadBtn, 'change', fn.uploadValidate);
-        modalBody.html(templates.upload);
+        modalBody.html(templates.upload());
         uploadBtn = document.getElementById('simple-btn');
         FileAPI.event.on(uploadBtn, 'change', fn.uploadValidate);
     },
 
     uploadValidate: function (evt) {
-        var files = FileAPI.getFiles(evt);
+        let files = FileAPI.getFiles(evt);
 
         FileAPI.filterFiles(files, function (file, info) {
             if (/^image/.test(file.type) && info) {
@@ -117,7 +118,8 @@ var fn = {
             if (list.length) {
                 fn.uploadProgress(files[0]);
             } else {
-                // silently fail. Let them read restrictions again.
+                // Let them read restrictions again.
+                fn.showError(MESSAGE.imgValidationError);
             }
         });
     },
@@ -204,7 +206,7 @@ var fn = {
         const modalWidth = modalBody.width() - 40; // 40px for padding
         const propWidth = Math.min(data.width, modalWidth);
         const propHeight = Math.round((propWidth / data.width) * data.height);
-        modalBody.html(template(templates.thumb)({
+        modalBody.html(templates.thumb({
             url: data.url,
             width: propWidth,
             height: propHeight
