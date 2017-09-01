@@ -219,7 +219,6 @@ class CourseOffering(TimeStampedModel):
         Course,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
-    # TODO: hide in admin?
     grading_type = models.SmallIntegerField(
         verbose_name=_("CourseOffering|grading_type"),
         choices=GRADING_TYPES,
@@ -251,6 +250,11 @@ class CourseOffering(TimeStampedModel):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
+    # Composite fields, depends on course class materials only
+    materials_video = models.BooleanField(default=False, editable=False)
+    materials_slides = models.BooleanField(default=False, editable=False)
+    materials_files = models.BooleanField(default=False, editable=False)
+
     is_open = models.BooleanField(
         _("Open course offering"),
         help_text=_("This course offering will be available on Computer"
@@ -342,6 +346,18 @@ class CourseOffering(TimeStampedModel):
     def has_unread(self):
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
+
+    @property
+    def has_classes_with_video(self):
+        return self.materials_video
+
+    @property
+    def has_classes_with_slides(self):
+        return self.materials_slides
+
+    @property
+    def has_classes_with_files(self):
+        return self.materials_files
 
     @property
     def is_completed(self):

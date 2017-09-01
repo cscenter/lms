@@ -312,6 +312,12 @@ class TestCoursesListView(FilterMixin, TemplateView):
         return CourseOffering.objects.get_offerings_queryset()
 
     # TODO: add tests!
+    """
+    2. Команда для пересчета
+    3. Нужно поддерживать актуальные значения :<
+    4. tooltip's
+    5. select view
+    """
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
         filterset = self.get_filterset(filterset_class)
@@ -348,6 +354,7 @@ class TestCoursesListView(FilterMixin, TemplateView):
         return context
 
     def get_term(self, filters):
+        # Not sure this is the best place for this method
         if "semester" in filters.data:
             valid_slug = filters.data["semester"]
             term_year, term_type = valid_slug.split("-")
@@ -355,6 +362,7 @@ class TestCoursesListView(FilterMixin, TemplateView):
             # By default, return academic year and term type for latest
             # available CO.
             if filters.qs:
+                # Note: may hit db if `filters.qs` not cached
                 term = filters.qs[0].semester
                 term_year = term.year
                 term_type = term.type

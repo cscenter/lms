@@ -12,7 +12,9 @@
         <tr>
             <td><% if (co.is_open) { %><span class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
             <td>
-                <a class="icon __video" href="<%-co.url%>classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
+                <% if (co.with_video) { %><a class="icon __video" href="<%-co.url%>classes/"></a><%
+                } %><% if (co.with_slides) { %><a class="icon __image" href="<%-co.url%>classes/"></a><%
+                } %><% if (co.with_files) { %><a class="icon __file" href="<%-co.url%>classes/"></a><% } %>
             </td>
             <td>
                 <% for (var i = 0; i < co.teachers.length; i++) { %>
@@ -78,7 +80,11 @@
                                 <tr>
                                     <td>{% if co.is_open %}<span class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
                                     <td>
-                                        <a class="icon __video" href="{{ co.url }}classes/"></a><a class="icon __image"></a><a class="icon __file"></a>
+                                        {% spaceless %}
+                                        {% if co.has_classes_with_video %}<a class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.has_classes_with_slides %}<a class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.has_classes_with_files %}<a class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% endspaceless %}
                                     </td>
                                     <td>
                                         {% for teacher in co.teachers %}

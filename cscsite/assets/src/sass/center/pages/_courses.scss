@@ -29,6 +29,12 @@
 .__courses-filter {
   .form-group {
     padding-left: 20px;
+    display: inline-block;
+  }
+
+  .form-control {
+    width:auto;
+    display: inline-block;
   }
 
   a {

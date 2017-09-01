@@ -23,10 +23,14 @@ class CourseSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     teachers = TeacherSerializer(many=True)
     is_open = serializers.BooleanField()
+    with_video = serializers.BooleanField(source="materials_video")
+    with_slides = serializers.BooleanField(source="materials_slides")
+    with_files = serializers.BooleanField(source="materials_files")
 
     class Meta:
         model = CourseOffering
-        fields = ["name", "url", "is_open", "teachers"]
+        fields = ["name", "url", "is_open", "teachers", "with_video",
+                  "with_slides", "with_files"]
 
     def get_name(self, obj):
         return obj.course.name
