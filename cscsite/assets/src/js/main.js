@@ -194,6 +194,7 @@ const fn = {
         $(' ')
     },
 
+    // TODO: move to separated module
     courseOfferingsList: function () {
         if (document.getElementById('courses-list') !== null) {
             const yearsFilter = $('.__courses-filter--academic-year');
