@@ -30,7 +30,14 @@ def generate_vtimezone(tz: pytz.timezone):
     return tzc
 
 
+# TODO: add secret link for each student?
 class ICalView(generic.base.View):
+    """
+    Base view for student *.ics files
+
+    Make sure, all calendars are visible to all users since you can add
+    calendar by link.
+    """
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -90,7 +97,7 @@ class ICalView(generic.base.View):
         return calendar
 
 
-class ICalClassesView(UserPassesTestMixin, ICalView):
+class ICalClassesView(ICalView):
     ical_file_name = "csc_classes.ics"
     ical_name = "Занятия CSC"
 
@@ -98,10 +105,6 @@ class ICalClassesView(UserPassesTestMixin, ICalView):
     def ical_description(self):
         return "Календарь занятий {} ({})".format(
             self.request.site.name, self.request.user.get_full_name())
-
-    def test_func(self):
-        user = self.request.user
-        return user.is_curator or user.pk == int(self.kwargs['pk'])
 
     def get_events(self):
         tz = self.get_timezone()
@@ -148,7 +151,7 @@ class ICalClassesView(UserPassesTestMixin, ICalView):
             yield event
 
 
-class ICalAssignmentsView(UserPassesTestMixin, ICalView):
+class ICalAssignmentsView(ICalView):
     ical_file_name = "csc_assignments.ics"
     ical_name = "Задания CSC"
 
@@ -156,10 +159,6 @@ class ICalAssignmentsView(UserPassesTestMixin, ICalView):
     def ical_description(self):
         return "Календарь сроков выполнения заданий {} ({})".format(
             self.request.site.name, self.request.user.get_full_name())
-
-    def test_func(self):
-        user = self.request.user
-        return user.is_curator or user.pk == int(self.kwargs['pk'])
 
     def get_events(self):
         user = self.request.user
