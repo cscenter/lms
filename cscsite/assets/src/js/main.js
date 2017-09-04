@@ -4,7 +4,8 @@ import $ from 'jquery';
 import "jgrowl/jquery.jgrowl.js";
 import "mathjax_config";
 import UberEditor from "./editor";
-import {csrfSafeMethod, getTemplate} from './utils';
+import {csrfSafeMethod} from './utils';
+import courseOfferingsList from './main/course_offerings';
 
 const CSC = window.CSC;
 
@@ -23,7 +24,9 @@ $(document).ready(function () {
     fn.courseClassSpecificCode();
     fn.applicationForm();
     fn.courseOfferingTabs();
-    fn.courseOfferingsList();
+    // TODO: make it generic with `webpack-entry-module` script attribute
+    // Now it checks `id` attr existence in each peace of code ;<
+    courseOfferingsList();
     fn.syllabusTabs();
 });
 
@@ -193,77 +196,4 @@ const fn = {
         });
         $(' ')
     },
-
-    // TODO: move to separated module
-    courseOfferingsList: function () {
-        if (document.getElementById('courses-list') !== null) {
-            const yearsFilter = $('.__courses-filter--academic-year');
-            const termsFilter = $('.__courses-filter--term');
-            let eventData = {
-                yearsFilter: yearsFilter,
-                termsFilter: termsFilter,
-                offeringsData: window.courseOfferingsData,
-                courseRowTemplate: getTemplate('courses-list-table-row'),
-                termOptionTemplate: getTemplate('courses-term-filter-option')
-            };
-            yearsFilter.on('change', 'select[name="academic_year"]', eventData,
-                fn._filterCourseOfferings);
-            termsFilter.on('click',  'a',  eventData,
-                fn._filterTermAction);
-        }
-    },
-
-    _filterTermAction: function(event) {
-        event.preventDefault();
-        if ($(this).hasClass('active')) return;
-
-        event.data.termsFilter.find('a').removeClass('active');
-        $(this).addClass('active');
-        fn._filterCourseOfferings(event);
-    },
-
-    _filterCourseOfferings: function (event) {
-        event.preventDefault();
-        let academicYear = parseInt(event.data.yearsFilter.find('select').val());
-        let selectedTerm = event.data.termsFilter.find('.active').data("type");
-        let year = academicYear;
-        if (selectedTerm === 'spring') {
-            year += 1;
-        }
-        // Make sure termType available for selected year
-        let slug = `${year}-${selectedTerm}`;
-        let availableTerms = event.data.offeringsData.terms[academicYear];
-        if (!(slug in event.data.offeringsData.courses)) {
-            year = academicYear;
-            // Note: terms in reversed order
-            selectedTerm = availableTerms[availableTerms.length - 1];
-            if (selectedTerm === 'spring') {
-                year += 1;
-            }
-            slug = `${year}-${selectedTerm}`;
-        }
-        if (slug in event.data.offeringsData.courses) {
-            // Update table content
-            let rows = "";
-            event.data.offeringsData.courses[slug].forEach((course) => {
-                rows += event.data.courseRowTemplate({co: course});
-            });
-            $('.__courses-test tbody').html(rows);
-            // Update term types list
-            let termOptions = availableTerms.reduceRight((acc, termType) => {
-                acc += event.data.termOptionTemplate({
-                    activeType: selectedTerm,
-                    term: {
-                        type: termType,
-                        name: event.data.offeringsData.termOptions[termType]
-                    }
-                });
-                return acc;
-            }, "Семестр: ");
-            event.data.termsFilter.html(termOptions);
-        } else {
-            // throw an error? Should be impossible.
-        }
-        // Pick available term and update term types list
-    }
 };

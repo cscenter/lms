@@ -6,7 +6,7 @@ import {getLocalStorageKey} from './utils';
 let _escape = require("lodash/escape");
 let _unescape = require("lodash/unescape");
 
-class UberEditor {
+export default class UberEditor {
     static init(textarea) {
         const $textarea = $(textarea);
         const $container = $("<div/>").insertAfter($textarea);
@@ -226,5 +226,3 @@ class UberEditor {
         }
     }
 }
-
-export default UberEditor;
