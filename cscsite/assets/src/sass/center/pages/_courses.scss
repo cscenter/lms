@@ -32,10 +32,23 @@
     display: inline-block;
   }
 
-  .form-control {
-    width:auto;
-    display: inline-block;
+
+}
+
+.__courses-filter--academic-year {
+  .btn {
+    border-radius: 4px;
   }
+  
+  .form-control {
+    display: inline-block;
+    width: 118px;
+  }
+}
+
+.__courses-filter--term {
+
+  display: inline-block;
 
   a {
     margin-right: 4px;
