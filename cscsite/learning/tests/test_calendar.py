@@ -18,6 +18,14 @@ from users.factories import UserFactory, StudentCenterFactory, \
 # TODO: add test: kzn courses not shown on center site and spb on kzn
 # TODO: add test: summer courses not shown on club site on main page
 
+# TODO: убедиться, что город берётся из настроек для студента (get_student_city_code
+# TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
+# TODO: тестировать CourseClassQuerySet manager
+# TODO: тестировать границы для месяца
+# TODO: тестировать now_local?
+# TODO: тестировать CalendarData
+# TODO: test Icalendar - that unauthenticated user can add calendar by link
+
 
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
@@ -139,11 +147,4 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
         url = 'calendar_full_teacher'
         self.assertStatusCode(200, url)
 
-
-# TODO: убедиться, что город берётся из настроек для студента (get_student_city_code
-# TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
-# TODO: тестировать CourseClassQuerySet manager
-# TODO: тестировать границы для месяца
-# TODO: тестировать now_local?
-# TODO: тестировать CalendarData
 

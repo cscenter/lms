@@ -4,8 +4,8 @@ from itertools import chain, repeat
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 from icalendar import vText, vUri, Calendar, Event, Timezone, TimezoneStandard
@@ -14,6 +14,7 @@ from icalendar.prop import vInline
 from learning.models import CourseClass, StudentAssignment, Assignment, \
     NonCourseEvent
 from learning.views.utils import get_user_city_code
+from users.models import CSCUser
 
 
 def generate_vtimezone(tz: pytz.timezone):
@@ -30,6 +31,14 @@ def generate_vtimezone(tz: pytz.timezone):
     return tzc
 
 
+# TODO: move to manager
+def get_user_for_icalendar(user_id):
+    return get_object_or_404(CSCUser.objects
+                             .filter(pk=user_id)
+                             .only("first_name", "last_name",
+                                   "patronymic", "pk"))
+
+
 # TODO: add secret link for each student?
 class ICalView(generic.base.View):
     """
@@ -41,6 +50,7 @@ class ICalView(generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        self.context = self.get_context_data()
         cal = self.init_calendar()
         cal = self.add_events(cal)
         response = HttpResponse(cal.to_ical(),
@@ -48,6 +58,9 @@ class ICalView(generic.base.View):
         response['Content-Disposition'] = "attachment; filename=\"{}\"".format(
             self.ical_file_name)
         return response
+
+    def get_context_data(self):
+        return {}
 
     def get_timezone(self):
         city_code = get_user_city_code(self.request)
@@ -101,14 +114,20 @@ class ICalClassesView(ICalView):
     ical_file_name = "csc_classes.ics"
     ical_name = "Занятия CSC"
 
+    def get_context_data(self):
+        return {
+            "user": get_user_for_icalendar(self.kwargs['pk'])
+        }
+
     @property
     def ical_description(self):
+        user = self.context["user"]
         return "Календарь занятий {} ({})".format(
-            self.request.site.name, self.request.user.get_full_name())
+            self.request.site.name, user.get_full_name())
 
     def get_events(self):
         tz = self.get_timezone()
-        user = self.request.user
+        user = self.context["user"]
         cc_related = ['venue',
                       'course_offering',
                       'course_offering__semester',
@@ -155,13 +174,19 @@ class ICalAssignmentsView(ICalView):
     ical_file_name = "csc_assignments.ics"
     ical_name = "Задания CSC"
 
+    def get_context_data(self):
+        return {
+            "user": get_user_for_icalendar(self.kwargs['pk'])
+        }
+
     @property
     def ical_description(self):
+        user = self.context["user"]
         return "Календарь сроков выполнения заданий {} ({})".format(
-            self.request.site.name, self.request.user.get_full_name())
+            self.request.site.name, user.get_full_name())
 
     def get_events(self):
-        user = self.request.user
+        user = self.context["user"]
         as_student = (StudentAssignment.objects
                       .filter(student=user,
                               assignment__deadline_at__gt=timezone.now())
