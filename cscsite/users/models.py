@@ -426,13 +426,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     def get_abbreviated_name(self):
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        sign = "."
-        # By the decree of Alexander, added additional whitespace for club site
-        if settings.SITE_ID == settings.CLUB_SITE_ID:
-            sign = ". "
-        abbrev_name = smart_text(str(sign)
-                                 .join(part for part in parts if part)
-                                 .strip())
+        abbrev_name = smart_text(". ".join(p for p in parts if p).strip())
         return abbrev_name or self.username
 
     @property

@@ -5,7 +5,7 @@
 
 {% block javascripts %}
     <script type="text/javascript">
-        var courseOfferingsData = {{ json|safe }};
+        window.courseOfferingsData = {{ json|safe }};
     </script>
 
     <script type="text/template" id="courses-list-table-row">
