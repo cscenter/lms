@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{# Note: Templates are duplicated in python and js code. Make sure to edit in both place. #}
 {% load i18n %}
 {% load lookup from core_tags %}
 
@@ -10,11 +10,11 @@
 
     <script type="text/template" id="courses-list-table-row">
         <tr>
-            <td><% if (co.is_open) { %><span class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
+            <td><% if (co.is_open) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
             <td>
-                <% if (co.with_video) { %><a class="icon __video" href="<%-co.url%>classes/"></a><%
-                } %><% if (co.with_slides) { %><a class="icon __image" href="<%-co.url%>classes/"></a><%
-                } %><% if (co.with_files) { %><a class="icon __file" href="<%-co.url%>classes/"></a><% } %>
+                <% if (co.with_video) { %><a data-title="{% trans "Video" %}" class="icon __video" href="<%-co.url%>classes/"></a><%
+                } %><% if (co.with_slides) { %><a data-title="{% trans "Slides" %}" class="icon __image" href="<%-co.url%>classes/"></a><%
+                } %><% if (co.with_files) { %><a data-title="{% trans "Files" %}" class="icon __file" href="<%-co.url%>classes/"></a><% } %>
             </td>
             <td>
                 <% for (var i = 0; i < co.teachers.length; i++) { %>
@@ -78,12 +78,12 @@
                         <tbody>
                             {% for co in courses|lookup:active_slug %}
                                 <tr>
-                                    <td>{% if co.is_open %}<span class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
+                                    <td>{% if co.is_open %}<span data-title="{% trans "CS club course" %}" class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
                                     <td>
                                         {% spaceless %}
-                                        {% if co.has_classes_with_video %}<a class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.has_classes_with_slides %}<a class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.has_classes_with_files %}<a class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.has_classes_with_video %}<a data-title="{% trans "Video" %}"  class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.has_classes_with_slides %}<a data-title="{% trans "Slides" %}" class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.has_classes_with_files %}<a data-title="{% trans "Files" %}" class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
                                         {% endspaceless %}
                                     </td>
                                     <td>

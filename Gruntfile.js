@@ -42,7 +42,7 @@ module.exports = function (grunt) {
                     '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput.min.js',
                     '<%= JS_VENDOR %>/bootstrap-fileinput/fileinput_locale_ru.js',
                     '<%= JS_VENDOR %>/jquery.arrow-increment.min.js',
-                    '<%= JS_SRC %>/gradebook.js'
+                    '<%= JS_SRC %>/teaching/gradebook.js'
                 ],
                 dest: '<%= JS_RUNTIME %>/gradebook.js'
             },
@@ -57,10 +57,6 @@ module.exports = function (grunt) {
                     '<%= JS_SRC %>/alumni.js'
                 ],
                 dest: '<%= JS_RUNTIME %>/alumni.js'
-            },
-            assignment_submission: {
-                src: ['<%= JS_SRC %>/assignment-submission.js'],
-                dest: '<%= JS_DEST %>/assignment-submission.js'
             },
             assignment_submissions: {
                 src: ['<%= JS_SRC %>/assignment-submissions.js'],

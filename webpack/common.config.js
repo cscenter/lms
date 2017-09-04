@@ -15,6 +15,7 @@ process.env.BABEL_ENV = TARGET;
 
 const __assetsdir = path.join(__dirname, '../cscsite/assets');
 
+// TODO: analyze bundles size and concat
 const PATHS = {
     common: path.join(__assetsdir, '/src/js/main.js'),
     profile: path.join(__assetsdir, '/src/js/profile.js'),

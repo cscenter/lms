@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-30 13:57+0000\n"
-"PO-Revision-Date: 2017-08-30 13:58+0000\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2017-09-04 10:10+0000\n"
+"PO-Revision-Date: 2017-09-04 10:13+0000\n"
+"Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -20,16 +20,11 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.7.13\n"
 
-#: cscsite/cscenter/filters.py:13
-msgid ""
-"Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."
-msgstr ""
-
-#: cscsite/cscenter/filters.py:18
+#: cscsite/cscenter/filters.py:36
 msgid "Saint Petersburg"
 msgstr "Санкт-Петербург"
 
-#: cscsite/cscenter/filters.py:19
+#: cscsite/cscenter/filters.py:37
 msgid "Novosibirsk"
 msgstr "Новосибирск"
 
@@ -135,18 +130,39 @@ msgstr "ФМЛ №239"
 msgid "Computer Science Club"
 msgstr ""
 
-#: cscsite/cscenter/templates/learning/courses/offerings.html:78
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:13
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:81
+#| msgid "All courses"
+msgid "CS club course"
+msgstr "Курс CS клуба"
+
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:15
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:84
+msgid "Video"
+msgstr ""
+
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:16
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:85
+msgid "Slides"
+msgstr ""
+
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:17
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:86
+msgid "Files"
+msgstr ""
+
+#: cscsite/cscenter/templates/learning/courses/offerings_test.html:99
 #, fuzzy
 #| msgid "No news yet"
 msgid "No courses yet"
 msgstr "Список новостей пуст"
 
-#: cscsite/cscenter/views.py:329
+#: cscsite/cscenter/views.py:327
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: cscsite/cscenter/views.py:330
+#: cscsite/cscenter/views.py:328
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
