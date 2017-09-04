@@ -2,34 +2,50 @@ import {getTemplate} from 'utils';
 
 // Maybe need to translate those strings in the future.
 const MESSAGES = {
-    tooltip_club: 'Курс CS клуба',
-    video: 'Видео',
-    files: 'Файлы',
-    slides: 'Слайды'
+    term: 'Семестр: ',
 };
+
+// TODO: add assert for `window.courseOfferingsData`
 
 
 export default function courseOfferingsList() {
     const wrapper = document.getElementById('courses-list');
     if (wrapper === null) return;
-    // init filters
+    // Filters
     const yearsFilter = $('.__courses-filter--academic-year');
     const termsFilter = $('.__courses-filter--term');
     let eventData = {
         yearsFilter: yearsFilter,
         termsFilter: termsFilter,
         offeringsData: window.courseOfferingsData,
-        courseRowTemplate: getTemplate('courses-list-table-row'),
-        termOptionTemplate: getTemplate('courses-term-filter-option')
+        templates: {
+            courseRow: getTemplate('courses-list-table-row'),
+            termOption: getTemplate('courses-term-filter-option')
+        }
     };
     yearsFilter.on('change', 'select[name="academic_year"]', eventData,
         filterCourseOfferings);
     termsFilter.on('click', 'a', eventData,
         filterTermAction);
+    // Tooltips
     $(wrapper).tooltip({
         // Internally use `$().on` if `selector` provided
         selector: '.__club, .__image, .__file, .__video'
     });
+    // Restore filter
+    window.onpopstate = function(event) {
+        let filterState;
+        if (event.state !== null) {
+            if ('filterState' in event.state) {
+                filterState = event.state.filterState;
+            }
+        }
+        if (filterState === undefined) {
+            filterState = eventData.offeringsData.initialFilterState;
+        }
+        updateDOM(eventData, filterState.termSlug, filterState.academicYear,
+            filterState.selectedTerm);
+    };
 }
 
 function filterTermAction(event) {
@@ -43,6 +59,7 @@ function filterTermAction(event) {
 
 function filterCourseOfferings(event) {
     event.preventDefault();
+    let currentCity = event.data.offeringsData.city;
     let academicYear = parseInt(event.data.yearsFilter.find('select').val());
     let selectedTerm = event.data.termsFilter.find('.active').data("type");
     let year = academicYear;
@@ -51,8 +68,8 @@ function filterCourseOfferings(event) {
     }
     // Make sure termType available for selected year
     let slug = `${year}-${selectedTerm}`;
-    let availableTerms = event.data.offeringsData.terms[academicYear];
     if (!(slug in event.data.offeringsData.courses)) {
+        let availableTerms = event.data.offeringsData.terms[academicYear];
         year = academicYear;
         // Note: terms in reversed order
         selectedTerm = availableTerms[availableTerms.length - 1];
@@ -62,26 +79,48 @@ function filterCourseOfferings(event) {
         slug = `${year}-${selectedTerm}`;
     }
     if (slug in event.data.offeringsData.courses) {
-        // Update table content
-        let rows = "";
-        event.data.offeringsData.courses[slug].forEach((course) => {
-            rows += event.data.courseRowTemplate({co: course});
-        });
-        $('.__courses-test tbody').html(rows);
-        // Update term types list
-        let termOptions = availableTerms.reduceRight((acc, termType) => {
-            acc += event.data.termOptionTemplate({
-                activeType: selectedTerm,
-                term: {
-                    type: termType,
-                    name: event.data.offeringsData.termOptions[termType]
-                }
-            });
-            return acc;
-        }, "Семестр: ");
-        event.data.termsFilter.html(termOptions);
+        updateDOM(event.data, slug, academicYear, selectedTerm);
+        // Update history
+        if (!!(window.history && history.pushState)) {
+            let path = `${location.protocol}//${location.host}${location.pathname}`;
+            let href = `${path}?city=${currentCity}&semester=${slug}`;
+            history.pushState(
+                {
+                    filterState: {
+                        termSlug: slug,
+                        academicYear: academicYear,
+                        selectedTerm: selectedTerm
+                    }
+                },
+                "",
+                href
+            );
+        }
     } else {
         // throw an error? Should be impossible.
     }
-    // Pick available term and update term types list
+}
+
+function updateDOM(eventData, termSlug, academicYear, selectedTerm) {
+    let availableTerms = eventData.offeringsData.terms[academicYear];
+    // Update table content
+    let rows = "";
+    eventData.offeringsData.courses[termSlug].forEach((course) => {
+        rows += eventData.templates.courseRow({co: course});
+    });
+    $('.__courses-test tbody').html(rows);
+    // Update term types list
+    let termOptions = availableTerms.reduceRight((acc, termType) => {
+        acc += eventData.templates.termOption({
+            activeType: selectedTerm,
+            term: {
+                type: termType,
+                name: eventData.offeringsData.termOptions[termType]
+            }
+        });
+        return acc;
+    }, MESSAGES.term);
+    eventData.termsFilter.html(termOptions);
+    // Update select value. Need it for browser history
+    eventData.yearsFilter.find('select').val(academicYear);
 }

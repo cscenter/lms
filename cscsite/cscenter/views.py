@@ -336,17 +336,24 @@ class TestCoursesListView(FilterMixin, TemplateView):
         else:
             active_year = active_academic_year
         active_slug = "{}-{}".format(active_year, active_type)
+        active_city = filterset.data['city']
         context = {
             "TERM_TYPES": TERM_TYPES,
             "cities": filterset.form.fields['city'].choices,
             "terms": terms,
             "courses": serializer.data,
             "json": JSONRenderer().render({
+                "city": filterset.data['city'],
+                "initialFilterState": {
+                    "academicYear": active_academic_year,
+                    "selectedTerm": active_type,
+                    "termSlug": active_slug
+                },
                 "terms": terms,
                 "termOptions": TERM_TYPES,
                 "courses": serializer.data
             }),
-            "active_city": filterset.data['city'],
+            "active_city": active_city,
             "active_academic_year": active_academic_year,
             "active_type": active_type,
             "active_slug": active_slug
@@ -358,6 +365,7 @@ class TestCoursesListView(FilterMixin, TemplateView):
         if "semester" in filters.data:
             valid_slug = filters.data["semester"]
             term_year, term_type = valid_slug.split("-")
+            term_year = int(term_year)
         else:
             # By default, return academic year and term type for latest
             # available CO.
