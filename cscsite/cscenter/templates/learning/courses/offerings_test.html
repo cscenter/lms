@@ -81,9 +81,9 @@
                                     <td>{% if co.is_open %}<span data-title="{% trans "CS club course" %}" class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
                                     <td>
                                         {% spaceless %}
-                                        {% if co.has_classes_with_video %}<a data-title="{% trans "Video" %}"  class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.has_classes_with_slides %}<a data-title="{% trans "Slides" %}" class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.has_classes_with_files %}<a data-title="{% trans "Files" %}" class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.with_video %}<a data-title="{% trans "Video" %}"  class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.with_slides %}<a data-title="{% trans "Slides" %}" class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
+                                        {% if co.with_files %}<a data-title="{% trans "Files" %}" class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
                                         {% endspaceless %}
                                     </td>
                                     <td>

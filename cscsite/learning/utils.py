@@ -93,7 +93,7 @@ def get_current_term_index(tz_aware: Union[Timezone, CityCode]):
     return get_term_index(*get_current_term_pair(tz_aware))
 
 
-def get_term_index_academic_year_starts(year, term_type):
+def get_term_index_academic_year_starts(year: int, term_type):
     """
     Returns term index of the beginning of academic year.
 
