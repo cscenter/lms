@@ -3,7 +3,21 @@
 {% load i18n %}
 {% load lookup from core_tags %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+{% endblock stylesheets %}
+
 {% block javascripts %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js" charset="utf-8"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
+    <script type="text/javascript" defer>
+        $('.__courses-filter--academic-year select').selectpicker({
+            showTick: false,
+            iconBase: 'fa',
+            tickIcon: 'fa-check',
+            width: 'fit',
+        });
+    </script>
     <script type="text/javascript">
         window.courseOfferingsData = {{ json|safe }};
     </script>
@@ -49,7 +63,7 @@
         {% if terms %}
             <form action="" class="form-inline __courses-filter">
                 <div class="form-group __courses-filter--academic-year">
-                    Учебный год: <select name="academic_year" class="bootstrap-select form-control">
+                    Учебный год: <select name="academic_year" class="form-control">
                         {% for term_year in terms %}
                         <option value="{{ term_year }}"{% if term_year == active_academic_year %}selected{% endif %}>{{ term_year }}/{{ term_year|add:"1" }}</option>
                         {% endfor %}
