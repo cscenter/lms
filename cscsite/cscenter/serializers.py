@@ -2,41 +2,21 @@ from collections import OrderedDict
 from itertools import groupby
 from rest_framework import serializers
 
-from learning.models import CourseOffering
-from users.models import CSCUser
 
-
-class TeacherSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
+class CourseSerializer(serializers.Serializer):
+    def to_representation(self, obj):
+        teachers = [{"url": u.teacher_profile_url(),
+                     "name": u.get_abbreviated_name()} for u in
+                    obj.teachers.all()]
         return {
-            "url": instance.teacher_profile_url(),
-            "name": instance.get_abbreviated_name()
+            "name": obj.course.name,
+            "url": obj.get_absolute_url(),
+            "is_open": obj.is_open,
+            "with_video": obj.materials_video,
+            "with_slides": obj.materials_slides,
+            "with_files": obj.materials_files,
+            "teachers": teachers
         }
-
-    class Meta:
-        model = CSCUser
-        fields = ["name", "url"]
-
-
-class CourseSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-    teachers = TeacherSerializer(many=True)
-    is_open = serializers.BooleanField()
-    with_video = serializers.BooleanField(source="materials_video")
-    with_slides = serializers.BooleanField(source="materials_slides")
-    with_files = serializers.BooleanField(source="materials_files")
-
-    class Meta:
-        model = CourseOffering
-        fields = ["name", "url", "is_open", "teachers", "with_video",
-                  "with_slides", "with_files"]
-
-    def get_name(self, obj):
-        return obj.course.name
-
-    def get_url(self, obj):
-        return obj.get_absolute_url()
 
 
 class CourseOfferingSerializer(serializers.Serializer):
