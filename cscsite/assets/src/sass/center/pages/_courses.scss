@@ -24,7 +24,7 @@
 
   a {
     margin-right: 4px;
-    text-decoration: dashed;
+    text-decoration: none;
     border-bottom: 1px dashed transparentize($link-color, .7);
 
     &.active {

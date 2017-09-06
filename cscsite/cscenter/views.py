@@ -326,19 +326,20 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         }
         courses = filterset.qs
         terms = group_terms_by_academic_year(courses)
-        serializer = CourseOfferingSerializer(courses)
-        active_academic_year, active_type = self.get_term(filterset)
+        active_academic_year, active_type = self.get_term(filterset, courses)
         if active_type == Semester.TYPES.spring:
             active_year = active_academic_year + 1
         else:
             active_year = active_academic_year
         active_slug = "{}-{}".format(active_year, active_type)
         active_city = filterset.data['city']
+        serializer = CourseOfferingSerializer(courses)
+        courses = serializer.data
         context = {
             "TERM_TYPES": TERM_TYPES,
             "cities": filterset.form.fields['city'].choices,
             "terms": terms,
-            "courses": serializer.data,
+            "courses": courses,
             "active_city": active_city,
             "active_academic_year": active_academic_year,
             "active_type": active_type,
@@ -352,13 +353,14 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 },
                 "terms": terms,
                 "termOptions": TERM_TYPES,
-                "courses": serializer.data
+                "courses": courses
             }),
         }
         return context
 
-    def get_term(self, filters):
+    def get_term(self, filters, courses):
         # Not sure this is the best place for this method
+        assert filters.form.is_valid()
         if "semester" in filters.data:
             valid_slug = filters.data["semester"]
             term_year, term_type = valid_slug.split("-")
@@ -366,9 +368,9 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         else:
             # By default, return academic year and term type for latest
             # available CO.
-            if filters.qs:
+            if courses:
                 # Note: may hit db if `filters.qs` not cached
-                term = filters.qs[0].semester
+                term = courses[0].semester
                 term_year = term.year
                 term_type = term.type
             else:
