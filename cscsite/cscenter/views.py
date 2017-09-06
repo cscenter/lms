@@ -304,19 +304,16 @@ class OpenNskView(generic.TemplateView):
     template_name = "open_nsk.html"
 
 
-class TestCoursesListView(FilterMixin, TemplateView):
+class CourseOfferingsView(FilterMixin, TemplateView):
     filterset_class = CourseFilter
-    template_name = "learning/courses/offerings_test.html"
+    template_name = "learning/courses/offerings.html"
 
     def get_queryset(self):
         return CourseOffering.objects.get_offerings_queryset()
 
     # TODO: add tests!
     """
-    2. Команда для пересчета
     3. Нужно поддерживать актуальные значения :<
-    4. tooltip's
-    5. select view
     """
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
@@ -342,6 +339,10 @@ class TestCoursesListView(FilterMixin, TemplateView):
             "cities": filterset.form.fields['city'].choices,
             "terms": terms,
             "courses": serializer.data,
+            "active_city": active_city,
+            "active_academic_year": active_academic_year,
+            "active_type": active_type,
+            "active_slug": active_slug,
             "json": JSONRenderer().render({
                 "city": filterset.data['city'],
                 "initialFilterState": {
@@ -353,10 +354,6 @@ class TestCoursesListView(FilterMixin, TemplateView):
                 "termOptions": TERM_TYPES,
                 "courses": serializer.data
             }),
-            "active_city": active_city,
-            "active_academic_year": active_academic_year,
-            "active_type": active_type,
-            "active_slug": active_slug
         }
         return context
 

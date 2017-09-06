@@ -9,8 +9,10 @@ from loginas import urls as loginas_urls
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter.views import IndexView, QAListView, TestimonialsListView, \
-    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, OpenNskView
+    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, \
+    OpenNskView, CourseOfferingsView
 from htmlpages import views
+from learning.views import CoursesListView
 from learning.views.students import UsefulListView, InternshipListView
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
@@ -106,6 +108,7 @@ urlpatterns = [
     url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(),
         name='render_markdown'),
 
+    url(r"^courses/$", CourseOfferingsView.as_view(), name="course_list"),
     url(r'^', include('learning.urls')),
     url(r'^', include('learning.admission.urls')),
     url(r'^', include('learning.projects.urls')),

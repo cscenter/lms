@@ -10,7 +10,7 @@
 {% block javascripts %}
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js" charset="utf-8"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
-    <script type="text/javascript" defer>
+    <script type="text/javascript">
         $('.__courses-filter--academic-year select').selectpicker({
             showTick: false,
             iconBase: 'fa',
@@ -47,15 +47,15 @@
     <div class="container" id="courses-list">
         <h1 class="content-title">Очные курсы в CS центре</h1>
 
-        <p>Центр предлагает очное обучение для студентов и аспирантов технических направлений вузов и молодых специалистов.<br> Главное — интерес к учёбе, возможность приходить на занятия по будним вечерам и время для самостоятельной работы.
-        </p>
+        <p>Центр предлагает обучение для студентов и аспирантов технических направлений вузов и молодых специалистов.<br> Главное — интерес к учёбе, возможность приходить на занятия по будним вечерам и время для самостоятельной работы.</p>
+        <p>Чтобы попасть на курсы, нужно поступить по конкурсу.</p>
 
         <ul class="nav nav-tabs square" role="tablist">
             {% for city_code, city_name in cities %}
             <li role="presentation" {% if city_code == active_city %}class="active"{% endif %}>
                 <a data-target="#courses-{{ city_code }}" aria-expanded="{% if city_code == active_city %}true{% else %}false{% endif %}"
                    aria-controls="courses-{{ city_code }}"
-                   href="/courses/test/?city={{ city_code }}">{{ city_name }}
+                   href="{% url 'course_list' %}?city={{ city_code }}">{{ city_name }}
                 </a>
             </li>
             {% endfor %}
@@ -81,7 +81,7 @@
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="courses">
                 {% if courses|lookup:active_slug %}
-                    <table class="table __courses-test">
+                    <table class="table __courses">
                         <thead>
                             <tr>
                                 <th style="width:470px;">Название</th>
