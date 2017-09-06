@@ -4,10 +4,6 @@
 {% load static %}
 {% load thumbnail %}
 
-{% block stylesheets %}
-    <link href="{% static "css/magnific-popup.css" %}" rel="stylesheet">
-{% endblock stylesheets %}
-
 {% block gallery %}
     {% if teacher.images.all %}
         <h4>{% trans "Photos" %}</h4>
