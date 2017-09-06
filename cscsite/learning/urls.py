@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 
-from cscenter.views import TestCoursesListView
 from learning.settings import LEARNING_BASE, TEACHING_BASE
 from learning.views import CalendarTeacherFullView
 from learning.views.views import CalendarStudentFullView
@@ -38,8 +37,6 @@ from learning.views.students import StudentAssignmentStudentDetailView, \
 
 course_patterns = url(
     r"^courses/", include([
-        url(r"^$", CoursesListView.as_view(), name="course_list"),
-        url(r"^test/$", TestCoursesListView.as_view(), name="course_list_test"),
         url(r"^(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
             name="course_detail"),
         url(r"^(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),

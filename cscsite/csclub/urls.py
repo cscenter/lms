@@ -14,7 +14,7 @@ from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
-from learning.views import InternationalSchoolsListView
+from learning.views import InternationalSchoolsListView, CoursesListView
 from learning.urls import course_patterns, course_offering_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView
@@ -27,6 +27,7 @@ urlpatterns = i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='commenting_the_right_way'),
+    url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
     course_patterns,
     course_offering_patterns,
 
