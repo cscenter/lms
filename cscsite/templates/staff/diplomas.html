@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load core_tags %}
+{% load render_bundle from webpack_loader %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/github.min.css">
@@ -39,6 +40,5 @@
 {% block javascripts %}
     <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/highlight.min.js"></script>
     <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/languages/tex.min.js"></script>
-    <script type="text/javascript" src="{% static "js/vendor/zero_clipboard/ZeroClipboard.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/diplomas.js" %}"></script>
+    {% render_bundle 'supervising' 'js' %}
 {% endblock javascripts %}
