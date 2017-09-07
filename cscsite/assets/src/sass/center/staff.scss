@@ -1,6 +1,6 @@
 // Staff related css will be included here
 @import "variables";
-@import "../bootstrap/mixins.scss";
+@import "./node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins.scss";
 @import "../bourbon/bourbon.scss"; // sass mixins lib
 
 @import "pages/reference-detail.scss";
