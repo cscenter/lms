@@ -1,6 +1,6 @@
 
 @import "variables";
-@import "../bourbon/bourbon.scss"; // sass mixins lib
+@import "./node_modules/bourbon/app/assets/stylesheets/bourbon"; // sass mixins lib
 @import "../bootstrap.custom.scss";
 @import "../jgrowl.customize.scss";
 @import "../bootstrap.sweetalerts/sweet-alert-combine.scss";

@@ -1,7 +1,7 @@
 // Staff related css will be included here
 @import "variables";
 @import "./node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins.scss";
-@import "../bourbon/bourbon.scss"; // sass mixins lib
+@import "./node_modules/bourbon/app/assets/stylesheets/bourbon"; // sass mixins lib
 
 @import "pages/reference-detail.scss";
 @import "pages/student_faces";
