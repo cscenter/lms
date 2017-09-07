@@ -89,7 +89,6 @@
 
     {% if profile_user.note %}
         <div class="about-me">
-            <h4>{% trans "About me" %}</h4>
             <div class="ubertext">
               {% markdown 3600 "user_note" profile_user.pk profile_user.modified %}
                 {{ profile_user.note }}
