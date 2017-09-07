@@ -34,6 +34,7 @@
     "bootstrap-sass": "^3.3.7",
     "bootstrap-select": "^1.12.2",
     "bootstrap-sweetalert": "^1.0.1",
+    "bourbon": "^4.3.4",
     "c3": "^0.4.17",
     "chunk-manifest-webpack-plugin": "^1.1.0",
     "clean-webpack-plugin": "^0.1.14",
