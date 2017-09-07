@@ -9,7 +9,7 @@
 <div class="row" id="teachers-detail">
 <div class="col-xs-9 profile-body">
     <h2 class="content-title">{{ teacher.get_full_name }}</h2>
-    <p>{{ teacher.workplace }}</p>
+    {% if teacher.workplace %}<p>{{ teacher.workplace }}</p>{% endif %}
     {% if teacher.note %}
         <div class="about-me">
             <div class="ubertext">
