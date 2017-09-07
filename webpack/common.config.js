@@ -14,8 +14,14 @@ const TARGET = process.env.npm_lifecycle_event;
 process.env.BABEL_ENV = TARGET;
 
 const __assetsdir = path.join(__dirname, '../cscsite/assets');
+const __nodemodulesdir = path.join(__dirname, '../node_modules');
+let bundlesDirRelative = './js/dist/';
+// All dependencies will be copied to path, relative to bundles output
+const STATIC_PATH = path.join('/static/', bundlesDirRelative);
 
 // TODO: analyze bundles size and concat
+
+
 const PATHS = {
     common: path.join(__assetsdir, '/src/js/main.js'),
     profile: path.join(__assetsdir, '/src/js/profile.js'),
@@ -23,9 +29,10 @@ const PATHS = {
     admission: path.join(__assetsdir, '/src/js/center/admission.js'),
     supervising: path.join(__assetsdir, '/src/js/supervising/index.js'),
     learning: path.join(__assetsdir, '/src/js/learning/index.js'),
-    dist: path.join(__assetsdir, '/js/dist'),
+    dist: path.join(__assetsdir, bundlesDirRelative),
     stats: path.join(__assetsdir, "/src/js/stats/main.js")
 };
+
 
 const VENDOR = [
     // 'history',
@@ -73,7 +80,7 @@ const common = {
         extensions: ['.jsx', '.js'],
         modules: [
             path.join(__assetsdir, '/src/js'),
-            'node_modules',
+            __nodemodulesdir,
         ],
         alias: {
 
@@ -89,14 +96,28 @@ const common = {
                         loader: 'babel-loader'
                     }
                 ],
-                exclude: '/node_modules/',
+                exclude: __nodemodulesdir,
             },
             {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
                     use: ['css-loader']
                 })
-            }
+            },
+            {
+                test: /\.swf$/,
+                include: __nodemodulesdir,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            context: __nodemodulesdir,
+                            publicPath: STATIC_PATH,
+                            name: '[path][name].[ext]'
+                        }
+                    }
+                ],
+            },
         ]
     },
 

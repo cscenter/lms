@@ -80,7 +80,8 @@
     "webpack-dev-middleware": "^1.11.0",
     "webpack-dev-server": "^2.5.0",
     "webpack-hot-middleware": "^2.13.2",
-    "webpack-merge": "^1.1.2"
+    "webpack-merge": "^1.1.2",
+    "zeroclipboard": "^2.3.0"
   },
   "license": "ISC",
   "bugs": {

@@ -20,9 +20,7 @@
             {% endif %}{% endspaceless %}
             <div class="ubertext">
                 <a class="h4" href="{% url 'teacher_detail' user.pk %}">{{ user.get_full_name }}</a>
-                {% markdown 3600 "user_note" user.pk user.note %}
-                    {{ user.get_short_note }}
-                {% endmarkdown %}
+                <p>{{ user.workplace }}</p>
             </div>
         </div>{% if not forloop.counter0|divisibleby:2 or forloop.last %}</div>{% endif %}
         {% empty %}
