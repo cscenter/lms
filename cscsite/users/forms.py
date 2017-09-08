@@ -1,9 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
+import django_rq
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.urls import reverse
 from django.forms import ValidationError
+from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
@@ -14,6 +16,7 @@ from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
+from users import tasks
 from .models import CSCUser, CSCUserReference
 
 
@@ -134,3 +137,22 @@ class CSCUserReferenceCreateForm(forms.ModelForm):
     class Meta:
         model = CSCUserReference
         fields = ['signature', 'note']
+
+
+class UserPasswordResetForm(PasswordResetForm):
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        ctx = {
+            'site_name': context['site_name'],
+            'email': context['email'],
+            'protocol': context['protocol'],
+            'domain': context['domain'],
+            'uid': context['uid'],
+            'token': context['token'],
+        }
+        queue = django_rq.get_queue('high')
+        queue.enqueue(tasks.send_restore_password_email,
+                      from_email=from_email,
+                      to_email=to_email,
+                      context=ctx,
+                      language_code=translation.get_language())

@@ -10,6 +10,9 @@ from ajaxuploader.views import AjaxProfileImageUploader
 from htmlpages import views
 
 from core.views import MarkdownHowToHelpView, robots
+from users.forms import UserPasswordResetForm
+from users.tasks import subject_template_name, email_template_name, \
+    html_email_template_name
 from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
@@ -59,10 +62,16 @@ urlpatterns = i18n_patterns(
     url(r'^users/password_change/done$',
         auth_views.password_change_done,
         name='password_change_complete'),
+    # Django 1.11: rewrite with class, this function based view is deprecated
     url(r'^users/password_reset$',
         auth_views.password_reset,
-        {'post_reset_redirect': 'password_reset_done',
-         'email_template_name': 'emails/password_reset.html'},
+        {
+            'password_reset_form': UserPasswordResetForm,
+            'post_reset_redirect': 'password_reset_done',
+            'html_email_template_name': html_email_template_name,
+            'email_template_name': email_template_name,
+            'subject_template_name': subject_template_name
+        },
         name='password_reset'),
     url(r'^users/password_reset/done$',
         auth_views.password_reset_done,

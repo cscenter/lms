@@ -14,6 +14,9 @@ from cscenter.views import IndexView, QAListView, TestimonialsListView, \
 from htmlpages import views
 from learning.views import CoursesListView
 from learning.views.students import UsefulListView, InternshipListView
+from users.forms import UserPasswordResetForm
+from users.tasks import html_email_template_name, email_template_name, \
+    subject_template_name
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
     UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
@@ -90,10 +93,16 @@ urlpatterns = [
     url(r'^users/password_change/done$',
         auth_views.password_change_done,
         name='password_change_complete'),
+    # Django 1.11: rewrite with class, this function based view is deprecated
     url(r'^users/password_reset$',
         auth_views.password_reset,
-        {'post_reset_redirect': 'password_reset_done',
-         'email_template_name': 'emails/password_reset.html'},
+        {
+            'password_reset_form': UserPasswordResetForm,
+            'post_reset_redirect': 'password_reset_done',
+            'html_email_template_name': html_email_template_name,
+            'email_template_name': email_template_name,
+            'subject_template_name': subject_template_name
+        },
         name='password_reset'),
     url(r'^users/password_reset/done$',
         auth_views.password_reset_done,
