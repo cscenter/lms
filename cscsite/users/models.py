@@ -319,6 +319,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 self.yandex_id = username
         super(CSCUser, self).save(**kwargs)
 
+    @property
+    def city_code(self):
+        city_code = getattr(self, "city_id")
+        return city_code if city_code else None
+
     @staticmethod
     def create_student_from_applicant(applicant):
         """
@@ -639,6 +644,7 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     is_student_center = False
     is_teacher_center = False
     is_volunteer = False
+    city_code = None
 
     def __str__(self):
         return 'NotAuthenticatedUser'

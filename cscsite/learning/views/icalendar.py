@@ -63,7 +63,8 @@ class ICalView(generic.base.View):
         return {}
 
     def get_timezone(self):
-        city_code = get_user_city_code(self.request)
+        user = self.context['user']
+        city_code = user.city_code
         if not city_code:
             city_code = settings.DEFAULT_CITY_CODE
         return settings.TIME_ZONES[city_code]
