@@ -63,8 +63,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
 def post_save_project(sender, instance, created, *args, **kwargs):
     from learning.projects.tasks import (
         download_presentation_from_yandex_disk_supervisor as job_ya_supervisor,
-        download_presentation_from_yandex_disk_students as job_ya_students,
-        upload_presentation_to_slideshare as job_slideshare)
+        download_presentation_from_yandex_disk_students as job_ya_students)
     if created:
         save = False
         if hasattr(instance, _UNSAVED_FILE_SUPERVISOR_PRESENTATION):
@@ -88,29 +87,9 @@ def post_save_project(sender, instance, created, *args, **kwargs):
     if (instance.supervisor_presentation_url and
             instance.supervisor_presentation == ''):
         transaction.on_commit(lambda: job_ya_supervisor.delay(instance.pk))
-    elif instance.supervisor_presentation != '':
-        # Try uploading to slideshare. Skip if no local copy of presentation.
-        old_path, new_path = "", instance.supervisor_presentation
-        if hasattr(instance, "_loaded_values"):
-            old_path = instance._loaded_values.get("supervisor_presentation")
-        if (new_path != old_path or
-                not instance.supervisor_presentation_slideshare_url):
-            transaction.on_commit(lambda: job_slideshare.delay(
-                instance.pk,
-                "supervisor_presentation",
-                "supervisor_presentation_slideshare_url"))
     # Same logic for participants presentation
     if instance.presentation_url and instance.presentation == '':
         transaction.on_commit(lambda: job_ya_students.delay(instance.pk))
-    elif instance.presentation != '':
-        old_path, new_path = "", instance.presentation
-        if hasattr(instance, "_loaded_values"):
-            old_path = instance._loaded_values.get("presentation")
-        if new_path != old_path or not instance.presentation_slideshare_url:
-            transaction.on_commit(lambda: job_slideshare.delay(
-                instance.pk,
-                "presentation",
-                "presentation_slideshare_url"))
 
 
 @receiver(post_save, sender=Report)
