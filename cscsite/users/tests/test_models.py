@@ -31,8 +31,8 @@ def test_user_city_code(client, settings):
     client.login(student)
     response = client.get('/')
     assert response.context['request'].user.city_code == 'kzn'
-    student.city_id = ''
-    student.save()
+    student_empty_city = StudentFactory()
+    client.login(student_empty_city)
     response = client.get('/')
     assert response.context['request'].user.city_code is None
 
