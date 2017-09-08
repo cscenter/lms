@@ -24,7 +24,6 @@ from users.factories import UserFactory, StudentCenterFactory, \
 # TODO: тестировать границы для месяца
 # TODO: тестировать now_local?
 # TODO: тестировать CalendarData
-# TODO: test Icalendar - that unauthenticated user can add calendar by link
 
 
 class CalendarTeacherTests(GroupSecurityCheckMixin,
