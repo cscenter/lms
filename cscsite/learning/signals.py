@@ -4,10 +4,9 @@ from django.dispatch import receiver
 from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification, \
-    Assignment, StudentAssignment, CourseClass, CourseOfferingNews, Enrollment, \
-    CourseOfferingTeacher, CourseOfferingNewsNotification
-from learning.tasks import (maybe_upload_slides_yandex,
-                            maybe_upload_slides_slideshare)
+    Assignment, StudentAssignment, CourseClass, CourseOfferingNews, Enrollment
+from learning.tasks import maybe_upload_slides_yandex
+
 
 
 @receiver(post_save, sender=Assignment)
@@ -112,7 +111,6 @@ def add_upload_slides_job(sender, instance, **kwargs):
     if instance.slides and not instance.slides_url:
         queue = django_rq.get_queue('default')
         queue.enqueue(maybe_upload_slides_yandex, instance.pk)
-        queue.enqueue(maybe_upload_slides_slideshare, instance.pk)
 
 
 @receiver(post_save, sender=Enrollment)

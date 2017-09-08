@@ -187,11 +187,6 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # use dummy values to avoid accidental messing of real data
-SLIDESHARE_API_KEY = "dummy_ss_key"
-SLIDESHARE_SECRET = "dummy_ss_secret"
-SLIDESHARE_USERNAME = "dummy_ss_username"
-SLIDESHARE_PASSWORD = "dummy_ss_password"
-
 YANDEX_DISK_USERNAME = "dummy_ya_username"
 YANDEX_DISK_PASSWORD = "dummy_ya_password"
 YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
