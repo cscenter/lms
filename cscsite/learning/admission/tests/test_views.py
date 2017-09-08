@@ -198,15 +198,15 @@ def test_invitation_slots(curator, client, settings):
     client.login(curator)
     response = client.get(invitation.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    assert any("14:40" in s.string for s in
-               html.find_all('input', {"name": "time"}))
+    assert any("14:40" in s.text for s in
+               html.find_all('label', {"class": "btn"}))
     # 30 min diff if stream with assignments
     stream.with_assignments = True
     stream.save()
     response = client.get(invitation.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    assert any("13:30" in s.string for s in
-               html.find_all('input', {"name": "time"}))
+    assert any("13:30" in s.text for s in
+               html.find_all('label', {"class": "btn"}))
 
 
 @pytest.mark.django_db
