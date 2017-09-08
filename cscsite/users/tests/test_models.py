@@ -23,6 +23,21 @@ def test_enrolled_on_the_course():
 
 
 @pytest.mark.django_db
+def test_user_city_code(client, settings):
+    student = StudentFactory.create(city_id='kzn')
+    response = client.get('/')
+    request = response.context['request']
+    assert request.user.city_code is None
+    client.login(student)
+    response = client.get('/')
+    assert response.context['request'].user.city_code == 'kzn'
+    student.city_id = ''
+    student.save()
+    response = client.get('/')
+    assert response.context['request'].user.city_code is None
+
+
+@pytest.mark.django_db
 def test_cached_groups(settings):
     user = UserFactory.create()
     user.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER,
