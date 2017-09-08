@@ -243,6 +243,13 @@ class ICalEventsView(ICalView):
     def ical_description(self):
         return "Календарь общих событий {}".format(self.request.site.name)
 
+    def get_timezone(self):
+        # FIXME: Should depends on events city? Mb change url?
+        city_code = get_user_city_code(self.request)
+        if not city_code:
+            city_code = settings.DEFAULT_CITY_CODE
+        return settings.TIME_ZONES[city_code]
+
     def get_events(self):
         tz = self.get_timezone()
         qs = (NonCourseEvent.objects

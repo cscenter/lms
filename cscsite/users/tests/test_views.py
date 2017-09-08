@@ -2,38 +2,32 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import re
 import unittest
-import copy
 
-from itertools import chain
-
+import factory
 import pytest
-from django.test import TestCase
+from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_text, force_text
+from django.test import TestCase
+from django.urls import reverse
 from django.utils import translation
+from django.utils.encoding import smart_text, force_text
 from django.utils.translation import ugettext as _
 
-from bs4 import BeautifulSoup
-import factory
-from icalendar import Calendar, Event
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.factories import SemesterFactory, \
-    CourseOfferingFactory, CourseClassFactory, EnrollmentFactory, \
-    AssignmentFactory, NonCourseEventFactory, CourseFactory, AreaOfStudyFactory
+    CourseOfferingFactory, EnrollmentFactory, \
+    CourseFactory, AreaOfStudyFactory
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
-
 from users.admin import CSCUserCreationForm, CSCUserChangeForm
-from users.models import CSCUser, CSCUserReference
 from users.factories import UserFactory, SHADCourseRecordFactory, \
     CSCUserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
+from users.models import CSCUser
 
 
 class CustomSemesterFactory(SemesterFactory):
@@ -497,82 +491,6 @@ def test_login_restrictions(client, settings):
     assert response.context["request"].user.is_authenticated
     # Just to make sure we have no super user permissions
     assert not response.context["request"].user.is_curator
-
-
-class ICalTests(MyUtilitiesMixin, TestCase):
-    def test_classes(self):
-        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
-                                   CSCUser.group.TEACHER_CENTER])
-        self.doLogin(user)
-        fname = 'csc_classes.ics'
-        # Empty calendar
-        response = self.client.get(reverse('user_ical_classes', args=[user.pk]))
-        assert response['content-type'] == "text/calendar; charset=UTF-8"
-        self.assertIn(fname, response['content-disposition'])
-        cal = Calendar.from_ical(response.content)
-        self.assertEquals("Занятия CSC", cal['X-WR-CALNAME'])
-        # Create some content
-        ccs_teaching = (CourseClassFactory
-                        .create_batch(2, course_offering__teachers=[user]))
-        co_learning = CourseOfferingFactory.create()
-        EnrollmentFactory.create(student=user, course_offering=co_learning)
-        ccs_learning = (CourseClassFactory
-                        .create_batch(3, course_offering=co_learning))
-        ccs_other = CourseClassFactory.create_batch(5)
-        response = self.client.get(reverse('user_ical_classes', args=[user.pk]),
-                               HTTP_HOST='test.com')
-        cal = Calendar.from_ical(response.content)
-        self.assertSameObjects([cc.name
-                                for cc in chain(ccs_teaching, ccs_learning)],
-                               [evt['SUMMARY']
-                                for evt in cal.subcomponents
-                                if isinstance(evt, Event)])
-
-    def test_assignments(self):
-        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
-                                   CSCUser.group.TEACHER_CENTER])
-        self.doLogin(user)
-        fname = 'csc_assignments.ics'
-        # Empty calendar
-        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]))
-        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
-        self.assertIn(fname, resp['content-disposition'])
-        cal = Calendar.from_ical(resp.content)
-        self.assertEquals("Задания CSC", cal['X-WR-CALNAME'])
-        # Create some content
-        as_teaching = (AssignmentFactory
-                       .create_batch(2, course_offering__teachers=[user]))
-        co_learning = CourseOfferingFactory.create()
-        EnrollmentFactory.create(student=user, course_offering=co_learning)
-        as_learning = (AssignmentFactory
-                       .create_batch(3, course_offering=co_learning))
-        as_other = AssignmentFactory.create_batch(5)
-        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]),
-                               HTTP_HOST='test.com')
-        cal = Calendar.from_ical(resp.content)
-        self.assertSameObjects(["{} ({})".format(a.title,
-                                                 a.course_offering.course.name)
-                                for a in chain(as_teaching, as_learning)],
-                               [evt['SUMMARY']
-                                for evt in cal.subcomponents
-                                if isinstance(evt, Event)])
-
-    def test_events(self):
-        fname = 'csc_events.ics'
-        # Empty calendar
-        resp = self.client.get(reverse('ical_events'))
-        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
-        self.assertIn(fname, resp['content-disposition'])
-        cal = Calendar.from_ical(resp.content)
-        self.assertEquals("События CSC", cal['X-WR-CALNAME'])
-        # Create some content
-        nces = NonCourseEventFactory.create_batch(3)
-        resp = self.client.get(reverse('ical_events'), HTTP_HOST = 'test.com')
-        cal = Calendar.from_ical(resp.content)
-        self.assertSameObjects([nce.name for nce in nces],
-                               [evt['SUMMARY']
-                                for evt in cal.subcomponents
-                                if isinstance(evt, Event)])
 
 
 class UserReferenceTests(MyUtilitiesMixin, TestCase):

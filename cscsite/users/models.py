@@ -404,6 +404,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     def get_absolute_url(self):
         return reverse('user_detail', args=[self.pk])
 
+    def get_classes_icalendar_url(self):
+        # Returns relative path
+        return reverse('user_ical_classes', args=[self.pk])
+
+    def get_assignments_icalendar_url(self):
+        return reverse('user_ical_assignments', args=[self.pk])
+
     def teacher_profile_url(self):
         return reverse('teacher_detail', args=[self.pk])
 
