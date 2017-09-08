@@ -80,14 +80,13 @@ tablib==0.11.4
 
 # Redis-based task manager
 rq-scheduler==0.7.0
-# XXX: Double check before update package below due to layman pushing to this repo
-django-rq==0.9.5
-rq==0.7.1
+django-rq==0.9.6
+rq==0.8.2
 
 # ipython notebook
 nbconvert==5.1.1
 
-djangorestframework==3.6.2
+djangorestframework==3.6.4
 rest-pandas==0.5.0
 django-js-reverse==0.7.3
 
