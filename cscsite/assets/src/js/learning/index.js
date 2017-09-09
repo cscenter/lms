@@ -33,7 +33,7 @@ const fn = {
                 modalFormWrapper.css('opacity', '0');
                 $('.inner', modalFormWrapper).html(data);
                 modalFormWrapper.modal('toggle');
-            }).error(function (data) {
+            }).fail(function (data) {
                 if (data.status === 403) {
                     $.jGrowl(
                         'Доступ запрещён. Вероятно, время редактирования комментария истекло.',
@@ -72,7 +72,7 @@ const fn = {
                     { position: 'bottom-right', theme: 'error' });
             }
         })
-        .error(function () {
+        .fail(function () {
                 $.jGrowl('Комментарий не был сохранён.',
                     { position: 'bottom-right', theme: 'error' });
         });

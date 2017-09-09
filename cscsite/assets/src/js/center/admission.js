@@ -62,7 +62,7 @@ import 'jquery-bar-rating';
                     modalBody.html(data.description);
                     UberEditor.render(modalBody.get(0));
                     assignmentPreviewWrapper.modal('toggle');
-                }).error(function (data) {
+                }).fail(function (data) {
                 });
             });
         },
