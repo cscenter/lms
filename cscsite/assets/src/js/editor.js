@@ -95,7 +95,7 @@ export default class UberEditor {
                                 });
                         });
                     }
-                }).error(function (data) {
+                }).fail(function (data) {
                     let text;
                     if (data.status === 403) {
                         // csrf token wrong?

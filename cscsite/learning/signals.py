@@ -8,7 +8,7 @@ from learning.models import AssignmentComment, AssignmentNotification, \
 from learning.tasks import maybe_upload_slides_yandex
 
 
-
+# TODO: send notification to other teachers
 @receiver(post_save, sender=Assignment)
 def create_student_assignments_for_new_assignment(sender, instance, created,
                                                   *args, **kwargs):
