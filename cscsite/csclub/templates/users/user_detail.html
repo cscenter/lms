@@ -70,11 +70,6 @@
 </div>
 <div class="col-xs-9 profile-body">
     <h2>{{ profile_user.get_full_name }}</h2>
-    {% if profile_user.is_graduate %}
-      {% blocktrans with year=profile_user.graduation_year %}graduated in {{ year }}{% endblocktrans %} ({% trans "enrolled in" %} {{ profile_user.enrollment_year }})
-    {% elif profile_user.is_student %}
-        {% trans "student"|title %}{% if profile_user.enrollment_year %}, {% trans "enrolled in" %} {{ profile_user.enrollment_year }}{% endif %}
-    {% endif %}
 
     {% if profile_user.workplace %}
         <p>{{ profile_user.workplace }}</p>
