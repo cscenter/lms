@@ -76,15 +76,8 @@
         {% trans "student"|title %}{% if profile_user.enrollment_year %}, {% trans "enrolled in" %} {{ profile_user.enrollment_year }}{% endif %}
     {% endif %}
 
-    {% if has_curator_permissions %}
-        <br><br>
-        <div class="panel panel-default">
-            <div class="panel-heading panel-title">Информация для куратора</div>
-            <ul class="list-group">
-                <li class="list-group-item"><b>Статус</b>: {{ profile_user.get_status_display|default:"—" }}</li>
-                <li class="list-group-item"><b>Группы</b>: {% for group in profile_user.groups.all %}{% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп{% endfor %}</li>
-            </ul>
-        </div>
+    {% if profile_user.workplace %}
+        <p>{{ profile_user.workplace }}</p>
     {% endif %}
 
     {% if profile_user.note %}
