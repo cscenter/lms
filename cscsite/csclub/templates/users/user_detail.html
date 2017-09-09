@@ -5,6 +5,7 @@
 {% load staticfiles %}
 {% load markdown from core_tags %}
 {% load render_bundle from webpack_loader %}
+{% block title %}{{ profile_user.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Club{% endblock title %}
 
 
 {% block javascripts %}
