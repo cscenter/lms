@@ -1196,6 +1196,19 @@ class Enrollment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Only students can enroll to courses"))
 
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        self._populate_assignments_for_new_enrolled_student(created)
+
+    def _populate_assignments_for_new_enrolled_student(self, created):
+        if self.is_deleted:
+            return
+        assignments = self.course_offering.assignment_set.all()
+        for a in assignments:
+            StudentAssignment.objects.get_or_create(assignment=a,
+                                                    student_id=self.student_id)
+
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
