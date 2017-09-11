@@ -331,7 +331,7 @@ class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
                 .filter(teachers=self.request.user)
                 .select_related('course', 'semester')
                 .prefetch_related('teachers')
-                .order_by('-semester__year', '-semester__type', 'course__name'))
+                .order_by('-semester__index', 'course__name'))
 
 
 class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
