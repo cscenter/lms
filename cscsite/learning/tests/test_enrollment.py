@@ -212,6 +212,28 @@ def test_assignments(client):
 
 
 @pytest.mark.django_db
+def test_reenrollment(client):
+    """Create assignments for student if they left the course and come back"""
+    s = StudentCenterFactory(city_id='spb')
+    assignment = AssignmentFactory(course_offering__is_open=True,
+                                   course_offering__city_id='spb')
+    co = assignment.course_offering
+    e = EnrollmentFactory(student=s, course_offering=co)
+    assert not e.is_deleted
+    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
+    e.is_deleted = True
+    e.save()
+    assignment2 = AssignmentFactory(course_offering=co)
+    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
+    client.login(s)
+    form = {'course_offering_pk': co.pk}
+    response = client.post(co.get_enroll_url(), form, follow=True)
+    assert response.status_code == 200
+    e.refresh_from_db()
+    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 2
+
+
+@pytest.mark.django_db
 def test_enrollment_in_other_city(client):
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code='spb',

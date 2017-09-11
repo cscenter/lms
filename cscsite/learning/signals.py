@@ -111,14 +111,3 @@ def add_upload_slides_job(sender, instance, **kwargs):
     if instance.slides and not instance.slides_url:
         queue = django_rq.get_queue('default')
         queue.enqueue(maybe_upload_slides_yandex, instance.pk)
-
-
-@receiver(post_save, sender=Enrollment)
-def populate_assignments_for_new_enrolled_student(sender, instance, created,
-                                                  *args, **kwargs):
-    if not created:
-        return
-    assignments = instance.course_offering.assignment_set.all()
-    for a in assignments:
-        (StudentAssignment.objects.get_or_create(assignment=a,
-                                                 student=instance.student))
