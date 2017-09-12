@@ -358,10 +358,7 @@
                                 <ul>
                                     {% for enrollment in profile_user.enrollment_set.all %}
                                         <li>
-                                            <a href="{{ enrollment.course_offering.get_absolute_url }}">
-                                                {{ enrollment.course_offering }}
-                                            </a>
-                                            /{{ enrollment.grade_honest|lower }}/
+                                            <a href="{{ enrollment.course_offering.get_absolute_url }}">{{ enrollment.course_offering }}</a> /{{ enrollment.grade_honest|lower }}/
                                         </li>
                                     {% endfor %}
                                     {% for shad in profile_user.shadcourserecord_set.all %}
@@ -381,8 +378,7 @@
                                 <ul>
                                     {% for ps in student_projects %}
                                         <li>
-                                            <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a>
-                                            /{% spaceless %}
+                                            <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a> /{% spaceless %}
                                             {% if not ps.project.canceled %}
                                                 {{ ps.final_grade_display|lower }}
                                             {% elif ps.final_grade == "not_graded" %}
@@ -424,9 +420,7 @@
                             <ul class="">
                                 {% for courseoffering in profile_user.teaching_set.all %}
                                     <li>
-                                        <a href="{{ courseoffering.get_absolute_url }}">
-                                            {{ courseoffering }}
-                                        </a>
+                                        <a href="{{ courseoffering.get_absolute_url }}">{{ courseoffering }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
