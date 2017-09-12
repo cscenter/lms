@@ -380,16 +380,22 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
             = 'attachment; filename="{}"'.format(filename)
 
         writer = csv.writer(response)
-        writer.writerow(['Фамилия',
-                         'Имя',
-                         'Яндекс ID'] +
+        # Write headers
+        common_headers = ['Фамилия', 'Имя', 'Яндекс ID']
+        if request.user.is_curator:
+            common_headers.append("Электронный адрес")
+        writer.writerow(common_headers +
                         [a.title for a in header] +
                         ['Итоговая оценка'])
+
         for student, by_assignment in structured.items():
+            common_columns = [student.last_name, student.first_name,
+                              student.yandex_id]
+            if request.user.is_curator:
+                common_columns.append(student.email)
             writer.writerow(
                 [(x if x is not None else '') for x in
-                 itertools.chain([student.last_name, student.first_name,
-                                  student.yandex_id],
+                 itertools.chain(common_columns,
                                  by_assignment.values(),
                                  [enrollment_grades[student]])])
         return response
