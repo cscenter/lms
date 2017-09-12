@@ -149,7 +149,7 @@ class ICalClassesView(ICalView):
                    .format(cc.pk, cc_type))
             url = self.request.build_absolute_uri(cc.get_absolute_url())
             if cc.description.strip():
-                description = "{} ({})".format(cc.description, url)
+                description = "{}\n\n{}".format(cc.description, url)
             else:
                 description = url
             categories = 'CSC,CLASS,{}'.format(cc_type.upper())
@@ -259,7 +259,7 @@ class ICalEventsView(ICalView):
             uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
             url = self.request.build_absolute_uri(nce.get_absolute_url())
             if nce.name.strip():
-                description = "{} ({})".format(nce.name, url)
+                description = "{}\n\n{}".format(nce.name, url)
             else:
                 description = url
             dtstart = tz.localize(datetime.combine(nce.date, nce.starts_at))
