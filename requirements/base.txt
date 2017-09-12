@@ -53,8 +53,8 @@ webdavclient==1.0.5
 git+https://github.com/pacahon/slideshare.git
 
 # Monitoring
-raven==6.0.0
-newrelic==2.82.0.62
+raven==6.1.0
+newrelic==2.92.0.78
 
 # Localization
 
@@ -63,9 +63,6 @@ newrelic==2.82.0.62
 git+https://github.com/pacahon/Hoep.git@0d4c0507dcb34d1b63a099c8b08656b66394bc37
 # whitelist-based HTML sanitization
 bleach==2.0.0
-
-# Admin theme
-django-flat-theme==1.1.4
 
 # Oembed staff
 micawber==0.3.4
