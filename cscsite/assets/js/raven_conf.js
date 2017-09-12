@@ -40,7 +40,9 @@ var ravenOptions = {
         // Other plugins
             /127\.0\.0\.1:4001\/isrunning/i,  // Cacaoweb
             /webappstoolbarba\.texthelp\.com\//i,
-            /metrics\.itunes\.apple\.com\.edgesuite\.net\//i
+            /metrics\.itunes\.apple\.com\.edgesuite\.net\//i,
+        // Kaspersky Protection browser extension
+            /kaspersky-labs\.com/i
     ]
 };
 Raven.config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763', ravenOptions).install();
