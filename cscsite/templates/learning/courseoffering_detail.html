@@ -7,7 +7,7 @@
 
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
-{% block content %}
+{% block content %}{% localtime off %}
 <div class="container" id="course-offering-detail-page" data-id="{{ course_offering.pk }}">
     <div class="row">
         <div class="col-xs-9">
@@ -137,8 +137,8 @@
                             <tr>
                                 <td>
                                     <div class="assignment-deadline">
-                                        {{ assignment.deadline_at|date:"d E" }}<br>
-                                        <span class="text-muted">{{ assignment.deadline_at|time:"H:i" }}</span>
+                                        {{ assignment.deadline_at_local|date:"d E" }}<br>
+                                        <span class="text-muted">{{ assignment.deadline_at_local|time:"H:i" }}</span>
                                     </div>
                                 </td>
                                 <td>
@@ -164,7 +164,6 @@
                 {% endwith %}
 
                 {% with tab=tabs.news %}
-                    {% localtime off %}
                     {% if tab.visible %}
                         <div class="tab-pane {% if tab.target == active_tab %}active{% endif %}" role="tabpanel" id="course-news">
                         {% with course_news=news %}
@@ -190,7 +189,6 @@
                         {% endwith %}
                         </div>
                     {% endif %}
-                    {% endlocaltime %}
                 {% endwith %}
             </div>
     </div>
@@ -273,4 +271,5 @@
   </div>
 
 </div>
+{% endlocaltime off %}
 {% endblock content %}
