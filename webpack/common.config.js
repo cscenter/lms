@@ -150,21 +150,6 @@ const common = {
             allChunks: true
         }),
     ],
-
-    // sassLoader: {
-    //     data: `@import "${__dirname}/../src/static/styles/config/_variables.scss";`
-    // },
-
-    // postcss: (param) => {
-    //     return [
-    //         autoprefixer({
-    //             browsers: ['last 2 versions']
-    //         }),
-    //         postcssImport({
-    //             addDependencyTo: param
-    //         }),
-    //     ];
-    // },
 };
 
 if (['dev', 'start'].includes(TARGET) || !TARGET) {
