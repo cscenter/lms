@@ -86,7 +86,7 @@
         <ul class="comment-list">
         {% for comment in a_s.assignmentcomment_set.all %}
             {# Should be ok for comparing python int type with None #}
-            {% if comment.pk == first_comment_after_deadline %}
+            {% if comment.pk == first_comment_after_deadline.pk %}
                 <li><hr class="deadline"></li>
             {% endif %}
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
