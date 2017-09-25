@@ -499,8 +499,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return self.status == STUDENT_STATUS.expelled
 
     def has_access_to_gradebook_emails(self):
-        """Now it looks more like a crunch, but still better than nothing"""
-        return self.pk in [1, 865, 32]  # admin, zherevchuk, avsmal
+        """Looks more like a crunch, but still better than nothing"""
+        return self.pk == 865  # zherevchuk
 
     # TODO: Move to manager?
     def projects_qs(self):
