@@ -324,10 +324,11 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
             semester_year = int(semester_year)
         except (ValueError, TypeError):
             raise Http404('Course offering not found')
-        if request.user.is_authenticated and request.user.is_curator:
+        user = request.user
+        if user.is_authenticated and user.is_curator:
             base_qs = CourseOffering.objects
         else:
-            base_qs = CourseOffering.objects.filter(teachers=request.user)
+            base_qs = CourseOffering.objects.filter(teachers=user)
 
         # TODO: add tests
         city_code = self.kwargs['city'].lower()
@@ -382,7 +383,7 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
         writer = csv.writer(response)
         # Write headers
         common_headers = ['Фамилия', 'Имя', 'Яндекс ID']
-        if request.user.is_curator:
+        if user.has_access_to_gradebook_emails():
             common_headers.append("Электронный адрес")
         writer.writerow(common_headers +
                         [a.title for a in header] +
@@ -391,7 +392,7 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
         for student, by_assignment in structured.items():
             common_columns = [student.last_name, student.first_name,
                               student.yandex_id]
-            if request.user.is_curator:
+            if user.has_access_to_gradebook_emails():
                 common_columns.append(student.email)
             writer.writerow(
                 [(x if x is not None else '') for x in
