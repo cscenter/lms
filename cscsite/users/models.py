@@ -498,6 +498,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         """We remove student group from expelled users on login action"""
         return self.status == STUDENT_STATUS.expelled
 
+    def has_access_to_gradebook_emails(self):
+        """Now it looks more like a crunch, but still better than nothing"""
+        return self.pk in [1, 865, 32]  # admin, zherevchuk, avsmal
+
     # TODO: Move to manager?
     def projects_qs(self):
         """Returns projects through ProjectStudent intermediate model"""
@@ -658,3 +662,6 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
 
     def enrollment_in_the_course(self, course_offering_id: int) -> Optional[Enrollment]:
         return None
+
+    def has_access_to_gradebook_emails(self):
+        return False

@@ -7,6 +7,21 @@
     <link href="{% static "css/vendor/fileinput/fileinput.min.css" %}" rel="stylesheet">
 {% endblock stylesheets %}
 
+
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
+    {% if request.user.has_access_to_gradebook_emails %}
+        <script>
+            $(function () {
+                $('.marks-sheet-csv-link').tooltip({
+                    title: "Поле email доступно только кураторам."
+                })
+            });
+        </script>
+    {% endif %}
+{% endblock javascripts %}
+
+
 {% block content %}
 <div class="container container-wide">
   <form method="post" id="gradebook-form">{% csrf_token %}
@@ -27,7 +42,7 @@
         <div class="btn-group">
           <a href="{% url 'markssheet_teacher_csv' course_offering.get_city course_offering.course.slug course_offering.semester.slug %}"
              target="_blank"
-             class="btn btn-default marks-sheet-csv-link" role="button"><i class="fa fa-download"></i> Сохранить .csv</a>
+             class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
         </div>
         <div class="btn-group">
           <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
@@ -134,6 +149,3 @@
 
 {% endblock content %}
 
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
-{% endblock javascripts %}
