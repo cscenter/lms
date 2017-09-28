@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import raven
+
 from .base import *
 
 DEBUG = False
@@ -16,7 +18,8 @@ MEDIA_ROOT = str(Path('/shared', 'media'))
 RAVEN_CONFIG = {
     # Note(lebedev): see https://app.getsentry.com/cscenter/cscenter/docs/django
     # for instructions.
-    "dsn": "https://8e585e0a766b4a8786870813ed7a4be4:143a5566340f4955a257151f2199c3e5@app.getsentry.com/13763"
+    "dsn": "https://8e585e0a766b4a8786870813ed7a4be4:143a5566340f4955a257151f2199c3e5@app.getsentry.com/13763",
+    'release': raven.fetch_git_sha(ROOT_DIR),
 }
 
 CACHES = {
@@ -62,11 +65,6 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': True,
         },
-        'raven': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
         "rq.worker": {
             "handlers": ["console"],
             "level": "WARNING",
@@ -76,6 +74,11 @@ LOGGING = {
             "handlers": ["console"],
             "level": "ERROR",
             "propagate": False,
+        },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
         'sentry.errors': {
             'level': 'DEBUG',
