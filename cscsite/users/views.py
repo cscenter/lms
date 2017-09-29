@@ -130,27 +130,28 @@ class UserDetailView(generic.DetailView):
     context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
-        enrollment_queryset = Enrollment.active.select_related(
+        enrollments_queryset = Enrollment.active.select_related(
             'course_offering',
             'course_offering__semester',
             'course_offering__course'
         )
+        shad_courses_queryset = (SHADCourseRecord.objects
+                                 .select_related("semester"))
         if not self.request.user.is_authenticated:
-            enrollment_queryset = enrollment_queryset.exclude(
+            enrollments_queryset = enrollments_queryset.exclude(
+                grade__in=['not_graded', 'unsatisfactory'])
+            shad_courses_queryset = shad_courses_queryset.exclude(
                 grade__in=['not_graded', 'unsatisfactory'])
         elif self.request.user.is_curator:
-            enrollment_queryset = enrollment_queryset.annotate(
+            enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course_offering__courseclass'))
         co_queryset = (CourseOffering.objects
                        .in_city(self.request.city_code)
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
-            Prefetch('shadcourserecord_set',
-                     queryset=(SHADCourseRecord
-                               .objects
-                               .select_related("semester"))),
-            Prefetch('enrollment_set', queryset=enrollment_queryset)
+            Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
+            Prefetch('enrollment_set', queryset=enrollments_queryset)
         ]
         select_list = []
         if self.request.user.is_curator:
