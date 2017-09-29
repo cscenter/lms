@@ -15,13 +15,13 @@ from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import translation
-from django.utils.encoding import smart_text, force_text
+from django.utils.encoding import smart_text, force_text, smart_bytes
 from django.utils.translation import ugettext as _
 
 from learning.factories import SemesterFactory, \
     CourseOfferingFactory, EnrollmentFactory, \
     CourseFactory, AreaOfStudyFactory
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import CSCUserCreationForm, CSCUserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
@@ -332,14 +332,22 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_shads(self):
         """
-        Students should have "shad courses" in profile page
+        Students should have "shad courses" on profile page
         """
-        user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER],
-                           enrollment_year='2013')
-        sc = SHADCourseRecordFactory(student=user)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertContains(resp, sc.name)
-        self.assertContains(resp, sc.teachers)
+        student = StudentCenterFactory()
+        sc = SHADCourseRecordFactory(student=student, grade=GRADES.good)
+        response = self.client.get(student.get_absolute_url())
+        assert smart_bytes(sc.name) in response.content
+        assert smart_bytes(sc.teachers) in response.content
+        # Bad grades should be visible for authenticated users only
+        sc.grade = GRADES.unsatisfactory
+        sc.save()
+        response = self.client.get(student.get_absolute_url())
+        assert smart_bytes(sc.name) not in response.content
+        student2 = StudentCenterFactory()
+        self.doLogin(student2)
+        response = self.client.get(student.get_absolute_url())
+        assert smart_bytes(sc.name) in response.content
 
     @unittest.skip("not implemented")
     def test_completed_courses(self):
