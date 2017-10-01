@@ -972,8 +972,14 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
             if form.is_valid():
                 a_s.grade = form.cleaned_data['grade']
                 a_s.save()
-                messages.success(self.request, _("Grade successfully saved"),
-                                 extra_tags='timeout')
+                if a_s.grade is None:
+                    messages.info(self.request,
+                                  _("Grade was deleted"),
+                                  extra_tags='timeout')
+                else:
+                    messages.success(self.request,
+                                     _("Grade successfully saved"),
+                                     extra_tags='timeout')
                 return redirect(a_s.get_teacher_url())
             else:
                 # not sure if we can do anything more meaningful here.

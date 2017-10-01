@@ -330,7 +330,7 @@ class AssignmentGradeForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(AssignmentGradeForm, self).clean()
-        if cleaned_data['grade'] > self.grade_max:
+        if cleaned_data['grade'] and cleaned_data['grade'] > self.grade_max:
             raise forms.ValidationError(_("Grade can't be larger than "
                                           "maximum one ({0})")
                                         .format(self.grade_max))
