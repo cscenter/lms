@@ -638,7 +638,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
                    "assignment__course_offering__course__description",
                    "assignment__course_offering__course__description_ru",
                    "assignment__course_offering__course__description_en", )
-            .order_by('assignment__deadline_at', 'modified'))
+            .order_by('student__last_name', 'student__first_name'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
