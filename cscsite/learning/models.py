@@ -1000,7 +1000,7 @@ class StudentAssignment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
-        if self.grade > self.assignment.grade_max:
+        if self.grade and self.grade > self.assignment.grade_max:
             raise ValidationError(_("Grade can't be larger than maximum "
                                     "one ({0})")
                                   .format(self.assignment.grade_max))
