@@ -15,6 +15,7 @@ from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
+from core.settings.base import TIME_ZONES
 from csclub import tasks
 from learning.gallery.models import Image
 from learning.models import CourseOffering, Semester, \
@@ -198,11 +199,11 @@ class ClubClassesFeed(ICalFeed):
         return item.get_absolute_url()
 
     def item_start_datetime(self, item):
-        tz = get_current_timezone()
+        tz = TIME_ZONES['spb']
         return tz.localize(datetime.datetime.combine(item.date, item.starts_at))
 
     def item_end_datetime(self, item):
-        tz = get_current_timezone()
+        tz = TIME_ZONES['spb']
         return tz.localize(datetime.datetime.combine(item.date, item.ends_at))
 
     def item_created(self, item):
