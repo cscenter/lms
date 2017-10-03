@@ -1029,7 +1029,7 @@ class StudentAssignment(TimeStampedModel):
 
     def has_unread(self):
         cache = get_unread_notifications_cache()
-        return self in cache.assignments
+        return self.pk in cache.assignments
 
     def has_comments(self, user):
         return any(c.author_id == user.pk for c in

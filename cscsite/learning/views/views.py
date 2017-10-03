@@ -599,7 +599,7 @@ class VenueDetailView(generic.DetailView):
 
 
 # Note: Looks like shit
-class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
+class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
@@ -622,22 +622,18 @@ class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
         return (
             StudentAssignment.objects
             .filter(**filters)
-            .select_related('assignment',
-                            'assignment__course_offering',
-                            'assignment__course_offering__course',
-                            'assignment__course_offering__semester',
-                            'student')
-            # Hide fat fields
-            # FIXME: This is shit. With .values() I can retrieve only fields that I need and without .select_related
-            .defer("assignment__text",
-                   "student__university",
-                   "student__comment",
-                   "assignment__course_offering__description",
-                   "assignment__course_offering__description_ru",
-                   "assignment__course_offering__description_en",
-                   "assignment__course_offering__course__description",
-                   "assignment__course_offering__course__description_ru",
-                   "assignment__course_offering__course__description_en", )
+            .select_related("assignment", "student",)
+            .only("id",
+                  "grade",
+                  "first_submission_at",
+                  "student__first_name",
+                  "student__last_name",
+                  "assignment__id",
+                  "assignment__course_offering_id",
+                  "assignment__is_online",
+                  "assignment__grade_min",
+                  "assignment__grade_max",)
+            .prefetch_related("student__groups",)
             .order_by('student__last_name', 'student__first_name'))
 
     def get_context_data(self, **kwargs):
@@ -666,7 +662,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
         """
         We process GET-query in optimistic way - assume that invalid data 
         comes very rarely.
-        Process order of GET-params:
+        Processing order of GET-params:
             term -> course -> assignment -> grade -> comment
         If query value invalid -> redirect to entry page.
         Also, we collect data for filter widgets.
@@ -678,7 +674,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, generic.ListView):
         4. Get courses for resulting term (used in filter widget)
         5. Get course offering by `course` GET-param if valid or get one from 
         list of courses for resulting term (step 4)
-        6. Get assignments for resulting course (used in filter)
+        6. Collect assignments for resulting course (used in filter)
         7. Get assignment by `assignment` GET-param or latest from step 6.
         8. Set filters by resulting assignment, grade and last comment.
         """

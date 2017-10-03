@@ -27,7 +27,7 @@ class UnreadNotificationsCache(object):
 
     @cached_property
     def assignments(self):
-        return {obj.student_assignment: obj
+        return {obj.student_assignment_id: obj
                 for obj in self.assignments_qs.all()}
 
     @cached_property
