@@ -24,7 +24,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
-from vanilla import CreateView, UpdateView, DeleteView, ListView
+from vanilla import CreateView, UpdateView, DeleteView, ListView, TemplateView
 
 from core import comment_persistence
 from core.exceptions import Redirect
@@ -599,11 +599,12 @@ class VenueDetailView(generic.DetailView):
 
 
 # Note: Looks like shit
-class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
+class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
+    # FIXME: rename
     filter_by_grades = (
         ("all", _("All")),  # Default
         ("no", _("Without grades")),
@@ -616,9 +617,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
         ("empty", _("Without comments")),
     )
 
-    def get_queryset(self):
+    def get_queryset(self, filters):
         # TODO: Show cs center courses on club site?
-        filters = self.prepare_queryset_filters()
         return (
             StudentAssignment.objects
             .filter(**filters)
@@ -637,12 +637,20 @@ class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
             .order_by('student__last_name', 'student__first_name'))
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["terms"] = self.all_terms
-        context["course_offerings"] = self.course_offerings
-        context["assignments"] = self.assignments
-        context["filter_by_grades"] = self.filter_by_grades
-        context["filter_by_comments"] = self.filter_by_comments
+        context = {
+            "filter_by_grades": self.filter_by_grades,
+            "filter_by_comments": self.filter_by_comments
+        }
+        filters = self.prepare_queryset_filters(context)
+        if "assignment" in filters:
+            course_offering_id = filters["assignment"].course_offering_id
+            # TODO: select `deleted` instead?
+            # TODO: move to separated method and return set
+            qs = (Enrollment.active
+                  .filter(course_offering_id=course_offering_id)
+                  .values_list("student_id", flat=True))
+            context["enrollments"] = set(qs)
+        context["student_assignment_list"] = self.get_queryset(filters)
         # Url for assignment filter
         query_tuple = [
             ('term', self.query["term"]),
@@ -658,7 +666,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
         context["query"] = self.query
         return context
 
-    def prepare_queryset_filters(self):
+    def prepare_queryset_filters(self, context):
         """
         We process GET-query in optimistic way - assume that invalid data 
         comes very rarely.
@@ -708,9 +716,9 @@ class AssignmentTeacherListView(TeacherOnlyMixin, ListView):
             filters[filter_name] = filter_value
 
         # Cache to avoid additional queries to DB
-        self.all_terms = all_terms
-        self.course_offerings = course_offerings
-        self.assignments = assignments
+        context["all_terms"] = all_terms
+        context["course_offerings"] = course_offerings
+        context["assignments"] = assignments
         self.query = {
             "course_slug": query_co.course.slug,
             "term": query_co.semester.slug,
