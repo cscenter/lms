@@ -25,6 +25,8 @@ from learning.utils import get_current_term_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 
+# TODO: first_comment_after_deadline написать тест, раз был баг
+
 
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):

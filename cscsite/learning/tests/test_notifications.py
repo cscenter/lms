@@ -192,7 +192,7 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     
 
 @pytest.mark.django_db
-def test_new_assignment(settings):
+def test_new_assignment_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
     assignment = sa.assignment
@@ -222,7 +222,7 @@ def test_new_assignment(settings):
 
 
 @pytest.mark.django_db
-def test_deadline_changed(settings):
+def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
     assignment = sa.assignment
