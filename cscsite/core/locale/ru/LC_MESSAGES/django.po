@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-01 08:55+0000\n"
-"PO-Revision-Date: 2017-10-01 08:56+0000\n"
+"PO-Revision-Date: 2017-10-03 12:00+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1231,7 +1231,7 @@ msgstr "Выпускник"
 #: cscsite/templates/learning/assignment_submission_detail.html:156
 #: cscsite/templates/learning/projects/report.html:222
 msgid "Volunteer"
-msgstr "Вольнослушатель"
+msgstr "Вольный слушатель"
 
 #: cscsite/learning/settings.py:24
 msgid "Student [CLUB]"
@@ -2415,7 +2415,7 @@ msgstr "Комментарий"
 
 #: cscsite/templates/users/user_detail.html:246
 msgid "Non-degree student"
-msgstr "Вольнослушатель"
+msgstr "Вольный слушатель"
 
 #: cscsite/templates/users/user_detail.html:251
 msgid "Curriculum year"
