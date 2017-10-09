@@ -25,8 +25,6 @@ from learning.utils import get_current_term_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 
-# TODO: first_comment_after_deadline написать тест, раз был баг
-
 
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
@@ -642,7 +640,7 @@ def test_assignment_public_form_for_teachers(settings, client):
 
 
 @pytest.mark.django_db
-def test_assignment_deadline_display(settings, client):
+def test_assignment_deadline_display_for_teacher(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherCenterFactory()
@@ -669,6 +667,28 @@ def test_assignment_deadline_display(settings, client):
     assert deadline_str == "01 января 2017 18:00"
     assert any(deadline_str in s.string for s in
                html.find_all('span', {"class": "nowrap"}))
+
+
+@pytest.mark.django_db
+def test_assignment_deadline_l10n_on_course_offering_detail(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    teacher = TeacherCenterFactory()
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course_offering__city_id='spb',
+                                   course_offering__teachers=[teacher])
+    co = assignment.course_offering
+    client.login(teacher)
+    response = client.get(co.get_url_for_tab('assignments'))
+    html = BeautifulSoup(response.content, "html.parser")
+    deadline_date_str = formats.date_format(assignment.deadline_at_local(), 'd E')
+    assert deadline_date_str == "01 января"
+    assert any(deadline_date_str in s.text for s in
+               html.find_all('div', {"class": "assignment-deadline"}))
+    deadline_time_str = formats.date_format(assignment.deadline_at_local(), 'H:i')
+    assert deadline_time_str == "18:00"
+    assert any(deadline_time_str in s.string for s in
+               html.find_all('span', {"class": "text-muted"}))
 
 
 @pytest.mark.django_db
@@ -716,3 +736,25 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
 # TODO: assignment submission page - comments localisation, assignment created localization
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
 
+
+@pytest.mark.django_db
+def test_first_comment_after_deadline(client):
+    dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course_offering__city_id='spb')
+    sa = StudentAssignmentFactory(assignment=assignment)
+    student = sa.student
+    comment = AssignmentCommentFactory.create(student_assignment=sa,
+                                              author=student,
+                                              created=dt)
+    client.login(student)
+    response = client.get(sa.get_student_url())
+    assert response.status_code == 200
+    # Consider last min in favor of student
+    assert response.context['first_comment_after_deadline'] is None
+    assert smart_bytes('<hr class="deadline">') not in response.content
+    comment.created = dt + datetime.timedelta(minutes=1)
+    comment.save()
+    response = client.get(sa.get_student_url())
+    assert response.context['first_comment_after_deadline'] == comment
+    assert smart_bytes('<hr class="deadline">') in response.content
