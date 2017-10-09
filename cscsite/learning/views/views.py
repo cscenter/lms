@@ -903,7 +903,8 @@ class AssignmentProgressBaseView(AccessMixin):
         (AssignmentNotification.unread
          .filter(student_assignment=sa, user=self.request.user)
          .update(is_unread=False))
-        deadline_at = sa.assignment.deadline_at
+        # Let's consider last minute of deadline in favor of the student
+        deadline_at = sa.assignment.deadline_at + datetime.timedelta(minutes=1)
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
