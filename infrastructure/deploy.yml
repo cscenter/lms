@@ -15,7 +15,7 @@
   - name: Set variables for better readability
     set_fact:
       site_src: "/home/{{ app_user }}/site/repo"
-      venv_dir: "/home/{{ app_user }}/site/env"
+      venv_dir: "/home/{{ app_user }}/site/env_354"
       requirements_prev_md5_file: ".requirements_prev_deploy_md5"
       # Default value if file didn't fetched from remote server
       requirements_md5: ""

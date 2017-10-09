@@ -8,7 +8,7 @@
     version: "{{ item.version }}"
   with_items:
     - name: ipython
-      version: "4.0.0"
+      version: "5.5.0"
     - name: virtualenv
       version: "15.1.0"
 # Psycopg used by db.yml to make sure user exists
