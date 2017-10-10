@@ -66,17 +66,17 @@ LOGGING = {
             'propagate': True,
         },
         "rq.worker": {
-            "handlers": ["console"],
             "level": "WARNING",
+            "handlers": ["console"],
             'propagate': False,
         },
         "post_office": {
-            "handlers": ["console"],
             "level": "ERROR",
+            "handlers": ["console"],
             "propagate": False,
         },
         'raven': {
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'handlers': ['console'],
             'propagate': False,
         },
