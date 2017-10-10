@@ -613,7 +613,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = a_s.get_student_url()
-        assert self.client.get(url).status_code == 404
+        assert self.client.get(url).status_code == 302
+        self.assertLoginRedirect(url)
         test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -622,7 +623,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
             if not groups:
-                assert self.client.get(url).status_code == 404
+                assert self.client.get(url).status_code == 302
             else:
                 self.assertLoginRedirect(url)
             self.doLogout()
@@ -759,7 +760,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                .filter(assignment=a, student=student)
                .get())
         url = a_s.get_teacher_url()
-        assert self.client.get(url).status_code == 404
+        assert self.client.get(url).status_code == 302
+        self.assertLoginRedirect(url)
         # Test GET
         test_groups = [
             [],
@@ -771,13 +773,14 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
             if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
                 self.assertLoginRedirect(url)
             else:
-                assert self.client.get(url).status_code == 404
+                assert self.client.get(url).status_code == 302
             self.doLogout()
         self.doLogin(teacher)
         self.assertEquals(200, self.client.get(url).status_code)
         self.doLogout()
         self.doLogin(student)
-        assert self.client.get(url).status_code == 404
+        assert self.client.get(url).status_code == 302
+        self.assertLoginRedirect(url)
         self.doLogout()
         # Test POST
         grade_dict = {'grading_form': True, 'grade': 3}
@@ -791,7 +794,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
             if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
                 self.assertPOSTLoginRedirect(url, grade_dict)
             else:
-                assert self.client.get(url).status_code == 404
+                assert self.client.get(url).status_code == 302
             self.doLogout()
 
     def test_comment(self):
