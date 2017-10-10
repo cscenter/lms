@@ -1,3 +1,3 @@
-{{ student_name }} послал(а) решение задания «<a href="{{ assignment_link }}">{{ assignment_name }}</a>» в {{ notification_created|time:"H:i" }}. Решение доступно по ссылке: <a href="{{ a_s_link_teacher }}">{{ a_s_link_teacher }}</a>
+{% load tz %}{% localtime off %}{{ student_name }} послал(а) решение задания «<a href="{{ assignment_link }}">{{ assignment_name }}</a>» в {{ notification_created|time:"H:i" }}. Решение доступно по ссылке: <a href="{{ a_s_link_teacher }}">{{ a_s_link_teacher }}</a>
 
-Это письмо отправлено автоматически и не требует ответа.
+Это письмо отправлено автоматически и не требует ответа.{% endlocaltime %}
