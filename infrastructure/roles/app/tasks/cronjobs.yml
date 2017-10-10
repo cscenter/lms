@@ -64,22 +64,6 @@
   with_items:
     - "{{ cscenter_user }}"
 
-- name: Each night try to mark completed courses (set `is_completed` to True)
-  sudo_user: "{{ item }}"
-  cron:
-    name: Mark center courses as completed from prev terms if necessary
-    user: "{{ item }}"
-    hour: "3"
-    minute: "0"
-    job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py mark_completed_courses
-      --settings={{ item }}.settings.production
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscnotifier.log
-  with_items:
-    - "{{ cscenter_user }}"
-
 - name: Once a day remove expired sessions
   sudo_user: "{{ item }}"
   cron:
