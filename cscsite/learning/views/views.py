@@ -866,7 +866,7 @@ class AssignmentProgressBaseView(AccessMixin):
     def dispatch(self, request, *args, **kwargs):
         # Fail-fast without DB hit if request user hasn't enough permissions
         if not self.has_permissions_coarse(request.user):
-            raise Http404
+            return self.handle_no_permission()
         self.student_assignment = self.get_student_assignment()
         if not self.student_assignment:
             raise Http404
