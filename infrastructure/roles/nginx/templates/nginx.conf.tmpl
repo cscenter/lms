@@ -1,39 +1,38 @@
-upstream django_{{ cscenter_user }} {
-    server unix:///tmp/uwsgi_{{ cscenter_user }}.socket;
+upstream django_{{ item.site_user }} {
+    server unix:///tmp/uwsgi_{{ item.site_user }}.socket;
 }
 
 server {
     listen 80;
-    server_name compscicenter.ru www.compscicenter.ru;
+    server_name {{ item.site_domain }} www.{{ item.site_domain }};
 
-    return 301 https://compscicenter.ru$request_uri;
+    return 301 https://{{ item.site_domain }}$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name www.compscicenter.ru;
+    server_name www.{{ item.site_domain }};
 
-    ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
-    ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
+    ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
+    ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
     # Fetch OCSP records from URL in ssl_certificate and cache them
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    return 301 https://compscicenter.ru$request_uri;
+    return 301 https://{{ item.site_domain }}$request_uri;
 }
 
 server {
-    listen 443 ssl default_server;
-    # TODO: remove underscore? Why it is here?
-    server_name compscicenter.ru _;
+    listen 443 ssl{% if item.site_domain == "compscicenter.ru" %} default_server{% endif %};
+    server_name {{ item.site_domain }};
     charset utf-8;
     client_max_body_size 42m;
 
     # ssl config by Mozilla https://wiki.mozilla.org/Security/Server_Side_TLS
 
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
-    ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
-    ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
+    ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
+    ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
     ssl_session_timeout 10m;
     ssl_session_cache shared:SSL:10m;
 
@@ -45,32 +44,38 @@ server {
     ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
     ssl_prefer_server_ciphers on;
 
+    # FIXME: Enable hsts for compsciclub.ru after manual testing https!
+    {% if item.site_domain == "compscicenter.ru" -%}
     # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
     add_header Strict-Transport-Security max-age=15768000;
+    {% endif %}
 
-    # OCSP Stapling ---
-    # fetch OCSP records from URL in ssl_certificate and cache them
+    # Fetch OCSP records from URL in ssl_certificate and cache them
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    ## verify chain of trust of OCSP response using Root CA and Intermediate certs
+    # Verify chain of trust of OCSP response using Root CA and Intermediate certs
     # We don't need to specify ssl_trusted_certificate, because Let's Encrypt
     # creates fullchain.pem containing all certificates and we use that
     # for ssl_certificate already.
-    # ssl_trusted_certificate {{ certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
+    # ssl_trusted_certificate {{ item.certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
 
     resolver 8.8.8.8;
 
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root /home/{{ cscenter_user }}/site/repo/cscsite/templates/;
+        root /home/{{ item.site_user }}/site/repo/cscsite/templates/;
         try_files /errors/404.html =404;
     }
 
     location /.well-known/acme-challenge/ {
-        alias /home/{{ cscenter_user }}/site/repo/.well-known/acme-challenge/;
+        alias /home/{{ item.site_user }}/site/repo/.well-known/acme-challenge/;
     }
+
+    {% if item.site_domain == "compscicenter.ru" -%}
+    rewrite ^/lectures/$ http://open.compscicenter.ru/ permanent;
+    {% endif %}
 
     location /media  {
         alias /shared/media;
@@ -83,12 +88,12 @@ server {
     }
 
     location /static {
-        alias /home/{{ cscenter_user }}/site/repo/cscsite/static;
+        alias /home/{{ item.site_user }}/site/repo/cscsite/static;
         access_log off;
         tcp_nodelay off;
         gzip_static on;
         gzip on;
-        gzip_min_length  1100;
+        gzip_min_length 1100;
         gzip_types text/css text/javascript application/javascript;
         expires 1M;
         add_header Cache-Control public,max-age=2592000;
@@ -96,17 +101,20 @@ server {
 
     # Django
     location / {
+        {% if item.site_domain == "compscicenter.ru" -%}
         set $frame_options '';
         if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
             set $frame_options 'SAMEORIGIN';
         }
         add_header X-Frame-Options $frame_options;
+        {% endif %}
+
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
 
         gzip on;
         # Serve 30x statuses with nginx
         uwsgi_intercept_errors on;
-        uwsgi_pass django_{{ cscenter_user }};
+        uwsgi_pass django_{{ item.site_user }};
         include uwsgi_params;
     }
 }

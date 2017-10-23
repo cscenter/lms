@@ -13,7 +13,7 @@
       version: "15.1.0"
 # Psycopg used by db.yml to make sure user exists
     - name: psycopg2
-      version: "2.6.1"
+      version: "2.7.3.1"
 
 - name: install global Python stuff
   pip:

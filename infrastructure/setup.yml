@@ -79,6 +79,3 @@
 #          process_name: fatalmailbatch
 
     - role: nginx
-# TODO: move email to var
-      certbot_admin_email: webmaster@compscicenter.ru
-      certbot_domain: compscicenter.ru

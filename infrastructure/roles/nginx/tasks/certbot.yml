@@ -1,33 +1,27 @@
 ---
 
-- name: Download certbot
+- name: Download and install certbot
   get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
-
-- name: Site dir path
-  set_fact:
-    site_root: "/home/{{ cscenter_user }}/site/repo"
 
 - name: LetsEncrypt Certbot directory exists
   file:
-    path: "{{ site_root }}/.well-known/acme-challenge"
+    path: "{{ item.site_root }}/.well-known/acme-challenge"
     state: directory
     recurse: yes
-    owner: "{{ cscenter_user }}"
-    group: "{{ cscenter_user }}"
+    owner: "{{ item.site_user }}"
+    group: "{{ item.site_user }}"
+  with_items: "{{ available_sites }}"
 
-- name: Certificates and keys will be installed to directory
-  debug:
-    msg: "{{ certbot_config_dir }}"
-
-- name: Install certbot and generate cert
+- name: Generate certificates
   command: >
     {{ certbot_script }} certonly --webroot
     --noninteractive --agree-tos
-    --email {{ certbot_admin_email }}
-    -w {{ site_root }}
-    -d {{ certbot_domains|join(' -d ') }}
+    --email {{ item.admin_email }}
+    -w {{ item.site_root }}
+    -d {{ item.certbot_domains|join(' -d ') }}
   args:
-    creates: "{{ certbot_config_dir }}"
+    creates: "{{ item.certbot_config_dir }}"
+  with_items: "{{ available_sites }}"
 
 - name: Ensure Nginx is started
   service: name=nginx state=started
@@ -35,15 +29,16 @@
 
 - name: Ensure a cron job to auto-renew the cert exists
   cron:
-    name: "daily auto renew cert"
+    name: "daily auto renew cert for {{ item.site_domain }}"
     special_time: daily
     job: >
       {{ certbot_script }} certonly --webroot
       --noninteractive --agree-tos --quiet
-      --email {{ certbot_admin_email }}
-      -w {{ site_root }}
-      -d {{ certbot_domains|join(' -d ') }}
+      --email {{ item.admin_email }}
+      -w {{ item.site_root }}
+      -d {{ item.certbot_domains|join(' -d ') }}
       --deploy-hook 'service nginx reload'
       --no-self-upgrade
     state: present
+  with_items: "{{ available_sites }}"
   when: certbot_auto_renew

@@ -6,7 +6,7 @@
   tags:
     - tls
 
-- name: Ensure all nginx crypto material is present
+- name: Ensure all nginx crypto materials are present
   copy:
     src: "{{ item.from }}"
     dest: "{{ nginx_tls_path }}/{{ item.to }}"
@@ -19,25 +19,26 @@
 
 - name: Copy nginx config
   template:
-    src: "{{ item }}.conf.tmpl"
-    dest: "/etc/nginx/sites-available/{{ item }}.conf"
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
+    src: nginx.conf.tmpl
+    dest: "/etc/nginx/sites-available/{{ item.site_user }}.conf"
+  with_items: "{{ available_sites }}"
+  tags:
+    - nginx
 
 - name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
 
+# FIXME: I'm not sure this is restarting nginx!
 - name: Symlink nginx config
   file:
-    src: "/etc/nginx/sites-available/{{ item }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+    src: "/etc/nginx/sites-available/{{ item.site_user }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.site_user }}.conf"
     state: link
   notify: restart nginx
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
+  with_items: "{{ available_sites }}"
+  tags:
+    - nginx
 
 - name: Nginx status
   stat: path=/etc/init.d/nginx
