@@ -20,6 +20,7 @@ available_sites:
     certbot_domains:
       - "compsciclub.ru"
       - "www.compsciclub.ru"
+      - "kzn.compsciclub.ru"
     certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
 certbot_cert_filename: fullchain.pem
 certbot_privkey_filename: privkey.pem

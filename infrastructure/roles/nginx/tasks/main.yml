@@ -29,7 +29,6 @@
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
 
-# FIXME: I'm not sure this is restarting nginx!
 - name: Symlink nginx config
   file:
     src: "/etc/nginx/sites-available/{{ item.site_user }}.conf"

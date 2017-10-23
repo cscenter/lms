@@ -4,9 +4,15 @@ upstream django_{{ item.site_user }} {
 
 server {
     listen 80;
-    server_name {{ item.site_domain }} www.{{ item.site_domain }};
+    server_name {{ item.certbot_domains|join(' ') }};
 
-    return 301 https://{{ item.site_domain }}$request_uri;
+    location /.well-known/acme-challenge/ {
+        alias /home/{{ item.site_user }}/site/repo/.well-known/acme-challenge/;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
 }
 
 server {
@@ -24,7 +30,10 @@ server {
 
 server {
     listen 443 ssl{% if item.site_domain == "compscicenter.ru" %} default_server{% endif %};
-    server_name {{ item.site_domain }};
+    server_name{% for domain in item.certbot_domains -%}
+        {% if not domain.startswith("www") %} {{ domain }}{% endif %}
+    {%- endfor %};
+
     charset utf-8;
     client_max_body_size 42m;
 
@@ -67,10 +76,6 @@ server {
     location @show_404 {
         root /home/{{ item.site_user }}/site/repo/cscsite/templates/;
         try_files /errors/404.html =404;
-    }
-
-    location /.well-known/acme-challenge/ {
-        alias /home/{{ item.site_user }}/site/repo/.well-known/acme-challenge/;
     }
 
     {% if item.site_domain == "compscicenter.ru" -%}
