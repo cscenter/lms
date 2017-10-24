@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
 
-from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
@@ -184,6 +184,8 @@ class Project(TimeStampedModel):
     presentation_slideshare_url = models.URLField(
         _("SlideShare URL for participants presentation"),
         null=True, blank=True)
+    city = models.ForeignKey(City, verbose_name=_("City"),
+                             default=settings.DEFAULT_CITY_CODE)
     is_external = models.BooleanField(
         _("External project"),
         default=False)
