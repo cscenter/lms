@@ -2,7 +2,7 @@
 - name: install pip
   easy_install: name=pip
 
-- name: install global Python stuff
+- name: install global Python 2 stuff
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"
