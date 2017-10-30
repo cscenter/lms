@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.urls import reverse, reverse_lazy
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
 from django.forms import modelformset_factory
@@ -21,6 +19,7 @@ from django.views import generic
 from django.views.generic.edit import FormMixin, BaseUpdateView
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
+from vanilla.model_views import CreateView
 
 from core import comment_persistence
 from core.utils import hashids
@@ -255,11 +254,51 @@ class StudentProjectsView(StudentOnlyMixin, generic.ListView):
                 .order_by("-project__semester__index", "project__name"))
 
 
-class ProjectDetailView(generic.CreateView):
+class ProjectDetailView(CreateView):
     model = Report
     form_class = ReportForm
     context_object_name = "report"
     template_name = "learning/projects/project_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        project = self.get_project()
+        project_student = self.get_authenticated_project_student(project)
+        # Try to redirect student participant to report page if it exists
+        if project_student:
+            try:
+                _ = project_student.report
+                return HttpResponseRedirect(project_student.get_report_url())
+            except Report.DoesNotExist:
+                pass
+        form = self.get_form()
+        context = self.get_context_data(project=project,
+                                        project_student=project_student,
+                                        form=form)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        project = self.get_project()
+        if not project.is_active() or not project.report_period_started():
+            return HttpResponseForbidden()
+        project_student = self.get_authenticated_project_student(project)
+        if project_student is None or not project_student.can_send_report():
+            return HttpResponseForbidden()
+        try:
+            # Redirect to report page if user sent it before.
+            _ = project_student.report
+            return HttpResponseRedirect(project_student.get_report_url())
+        except Report.DoesNotExist:
+            pass
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             project_student=project_student)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            # Inline `form_invalid` to pass `project` for context
+            context = self.get_context_data(project=project,
+                                            project_student=project_student,
+                                            form=form)
+            return self.render_to_response(context)
 
     def get_project(self):
         queryset = Project.objects.select_related("semester").prefetch_related(
@@ -271,19 +310,15 @@ class ProjectDetailView(generic.CreateView):
             ),
             "reviewers"
         )
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            queryset = queryset.filter(pk=pk)
-        if pk is None:
-            raise AttributeError("Create view %s must be called with "
-                                 "either an object pk."
-                                 % self.__class__.__name__)
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
         try:
-            obj = queryset.get()
-        except queryset.model.DoesNotExist:
-            raise Http404(_("No %(verbose_name)s found matching the query") %
-                          {'verbose_name': queryset.model._meta.verbose_name})
-        return obj
+            lookup = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        except KeyError:
+            msg = "Lookup field '%s' was not provided in view kwargs to '%s'"
+            raise ImproperlyConfigured(msg % (lookup_url_kwarg,
+                                              self.__class__.__name__))
+        return get_object_or_404(queryset, **lookup)
 
     def get_authenticated_project_student(self, project):
         """
@@ -295,95 +330,36 @@ class ProjectDetailView(generic.CreateView):
                 return ps
         return None
 
-    def get(self, request, *args, **kwargs):
-        self.object = None
-        self.project = self.get_project()
-        # Redirect student participant to report page if report exists
-        project_student = self.get_authenticated_project_student(self.project)
-        try:
-            _ = project_student.report
-            return self.response_redirect_to_report(project_student)
-        except (AttributeError, Report.DoesNotExist):
-            pass
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    @staticmethod
-    def response_redirect_to_report(project_student):
-        return HttpResponseRedirect(
-            reverse(
-                "projects:student_project_report",
-                kwargs={
-                    "project_pk": project_student.project.pk,
-                    "student_pk": project_student.student.pk
-                }
-            )
-        )
-
-    def post(self, request, *args, **kwargs):
-        """Check user permissions before create new report"""
-        self.object = None
-        self.project = self.get_project()
-        project_student = self.get_authenticated_project_student(self.project)
-        try:
-            _ = project_student.report
-            return self.response_redirect_to_report(project_student)
-        except Report.DoesNotExist:
-            # DoesNotExist is subclass of AttributeError
-            pass
-        except AttributeError as e:
-            # It is not student participant
-            return HttpResponseForbidden()
-        # Prevent action if reporting period not started yet or stale or
-        # student already has some grade
-        if (not self.project.is_active() or
-                not self.project.report_period_started() or
-                not project_student.can_send_report()):
-            # TODO: redirect with appropriate message?
-            return HttpResponseForbidden()
-        form_kwargs = self.get_form_kwargs()
-        form_kwargs["project_student"] = project_student
-        form = self.form_class(**form_kwargs)
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
     def get_success_url(self):
         messages.success(self.request,
                          _("Report successfully sended"),
                          extra_tags="timeout")
         report = self.object
-        return reverse(
-            "projects:project_report",
-            kwargs={
-                "project_pk": report.project_student.project.pk,
-                "student_pk": report.project_student.student.pk
-            }
-        )
+        return report.project_student.get_report_url()
 
-    def get_context_data(self, **kwargs):
-        context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        # Permissions block
+    def get_context_data(self, project, project_student, form, **kwargs):
         user = self.request.user
-        context["project"] = project = self.project
-        project_student = self.get_authenticated_project_student(self.project)
-        # Student participant should already have been redirected to
-        # report page if his report exists
-        context["has_sending_report_permissions"] = (
-            self.project.is_active() and
-            user in self.project.students.all() and
-            project_student.can_send_report()
-        )
-        context["you_enrolled"] = user in self.project.reviewers.all()
-        context["has_enroll_permissions"] = (
-            (user.is_project_reviewer or user.is_curator)
-            and self.project.is_active())
-        context["can_view_report"] = user.is_curator or (
-            user.is_project_reviewer and context["you_enrolled"])
-        context["results_formset"] = ResultsFormSet(
-            queryset=self.project.projectstudent_set.select_related("report",
-                                                                    "student"))
+        # Note: Student participant should already have been redirected to
+        # report page if it exists
+        you_enrolled = user in project.reviewers.all()
+        context = {
+            "project": project,
+            "form": form,
+            "can_send_report": (
+                project.is_active() and
+                user in project.students.all() and
+                project_student.can_send_report()
+            ),
+            "you_enrolled": you_enrolled,
+            "can_enroll": (
+                (user.is_project_reviewer or user.is_curator)
+                and project.is_active()),
+            "can_view_report": you_enrolled or user.is_curator,
+            "results_formset": ResultsFormSet(
+                queryset=project.projectstudent_set.select_related("report",
+                                                                    "student")
+            )
+        }
         return context
 
 

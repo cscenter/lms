@@ -146,10 +146,10 @@ def test_project_detail_unauth(client):
     response = client.get(project.get_absolute_url())
     assert smart_bytes("Отзывы руководителей") not in response.content
     assert smart_bytes("Следить за проектом") not in response.content
-    assert "has_enroll_permissions" in response.context
-    assert response.context["has_enroll_permissions"] is False
-    assert "has_sending_report_permissions" in response.context
-    assert response.context["has_sending_report_permissions"] is False
+    assert "can_enroll" in response.context
+    assert response.context["can_enroll"] is False
+    assert "can_send_report" in response.context
+    assert response.context["can_send_report"] is False
     assert "can_view_report" in response.context
     assert response.context["can_view_report"] is False
     assert "you_enrolled" in response.context
@@ -172,8 +172,8 @@ def test_project_detail_student_participant(client):
                                     semester=semester)
     client.login(student)
     response = client.get(project.get_absolute_url())
-    assert "has_enroll_permissions" in response.context
-    assert response.context["has_enroll_permissions"] is False
+    assert "can_enroll" in response.context
+    assert response.context["can_enroll"] is False
     assert smart_bytes("Отзывы руководителей") not in response.content
     form = {"send_report_form-text": "report text content"}
     today = now().date()
@@ -202,12 +202,12 @@ def test_project_detail_student_participant(client):
     Report.objects.get_queryset().delete()  # delete reports to skip redirect
     response = client.get(project.get_absolute_url())
     assert response.status_code == 200
-    assert "has_sending_report_permissions" in response.context
-    assert response.context["has_sending_report_permissions"] is True
+    assert "can_send_report" in response.context
+    assert response.context["can_send_report"] is True
     project.semester = semester_prev
     project.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["has_sending_report_permissions"] is False
+    assert response.context["can_send_report"] is False
     project.semester = semester
     project.save()
     # If report_starts_at not specified, allow sending report while project
@@ -216,7 +216,7 @@ def test_project_detail_student_participant(client):
     semester.report_ends_at = None
     semester.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["has_sending_report_permissions"] is True
+    assert response.context["can_send_report"] is True
 
 
 @pytest.mark.django_db
@@ -256,13 +256,13 @@ def test_project_detail_reviewer(client, curator):
     url = project.get_absolute_url()
     response = client.get(url)
     # hide enrollment button for past projects
-    assert "has_enroll_permissions" in response.context
-    assert response.context["has_enroll_permissions"] is False
+    assert "can_enroll" in response.context
+    assert response.context["can_enroll"] is False
     current_project = ProjectFactory(students=[student], semester=semester)
     url = reverse("projects:project_detail",
                   args=[current_project.pk])
     response = client.get(url)
-    assert response.context["has_enroll_permissions"] is True
+    assert response.context["can_enroll"] is True
     assert smart_bytes("Смотреть отчет") not in response.content
     # Also, hide button for already enrolled projects
     current_project.reviewers.add(reviewer)
