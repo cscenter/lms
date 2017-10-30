@@ -32,7 +32,7 @@ class Command(BaseCommand):
         today = now()
         notification_type_map = apps.get_app_config('notifications').type_map
         remind_about_start_today = (
-            today.date() == current_term.report_starts_at - timedelta(days=3))
+            today.date() == current_term.report_starts_at - timedelta(days=0))
         remind_about_end_today = (
             today.date() == current_term.report_ends_at - timedelta(days=1))
         if remind_about_start_today:
