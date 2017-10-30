@@ -77,6 +77,15 @@ class ProjectStudent(models.Model):
         return "{0} [{1}]".format(smart_text(self.project),
                                   smart_text(self.student))
 
+    def get_report_url(self):
+        return reverse(
+            "projects:student_project_report",
+            kwargs={
+                "project_pk": self.project.pk,
+                "student_pk": self.student.pk
+            }
+        )
+
     @property
     def total_score(self):
         acc = 0
@@ -222,8 +231,7 @@ class Project(TimeStampedModel):
 
     def is_active(self):
         """Check project is from current term"""
-        # FIXME: Respect timezone. Now city_code is hard coded
-        current_term_index = get_current_term_index('spb')
+        current_term_index = get_current_term_index(self.city_id)
         return not self.canceled and self.semester.index == current_term_index
 
     def report_period_started(self):

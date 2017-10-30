@@ -56,7 +56,7 @@
                     {% endcache %}
                 {% endif %}
 
-                {% if has_sending_report_permissions %}
+                {% if can_send_report %}
                     {% if not project.report_period_started %}
                         <div class="card o-send-report-timetable">
                             <div class="card-header ch-alt">Сроки отправки отчета</div>
@@ -139,7 +139,7 @@
             </div>
             <div class="col-xs-4">
                 <div class="links">
-                    {% if has_enroll_permissions %}
+                    {% if can_enroll %}
                         {% if project.is_active and not you_enrolled %}
                             <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
                                 {% csrf_token %}
