@@ -278,10 +278,11 @@ class ProjectDetailView(CreateView):
 
     def post(self, request, *args, **kwargs):
         project = self.get_project()
+        # Save the ability to send report even after deadline
         if not project.is_active() or not project.report_period_started():
             return HttpResponseForbidden()
         project_student = self.get_authenticated_project_student(project)
-        if project_student is None or not project_student.can_send_report():
+        if project_student is None or project_student.has_final_grade():
             return HttpResponseForbidden()
         try:
             # Redirect to report page if user sent it before.
@@ -345,10 +346,9 @@ class ProjectDetailView(CreateView):
         context = {
             "project": project,
             "form": form,
-            "can_send_report": (
-                project.is_active() and
+            "has_send_permissions": (
                 user in project.students.all() and
-                project_student.can_send_report()
+                not project_student.has_final_grade()
             ),
             "you_enrolled": you_enrolled,
             "can_enroll": (
