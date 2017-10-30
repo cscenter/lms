@@ -148,8 +148,8 @@ def test_project_detail_unauth(client):
     assert smart_bytes("Следить за проектом") not in response.content
     assert "can_enroll" in response.context
     assert response.context["can_enroll"] is False
-    assert "can_send_report" in response.context
-    assert response.context["can_send_report"] is False
+    assert "has_send_permissions" in response.context
+    assert response.context["has_send_permissions"] is False
     assert "can_view_report" in response.context
     assert response.context["can_view_report"] is False
     assert "you_enrolled" in response.context
@@ -187,7 +187,7 @@ def test_project_detail_student_participant(client):
     project.save()
     response = client.post(project.get_absolute_url(), form)
     assert response.status_code == 403
-    # Sending period ended, but it still Ok
+    # Sending period ended, but they are still can send reports
     project.semester = semester
     project.save()
     semester.report_starts_at = today - timedelta(days=7)
@@ -202,12 +202,13 @@ def test_project_detail_student_participant(client):
     Report.objects.get_queryset().delete()  # delete reports to skip redirect
     response = client.get(project.get_absolute_url())
     assert response.status_code == 200
-    assert "can_send_report" in response.context
-    assert response.context["can_send_report"] is True
+    assert "has_send_permissions" in response.context
+    assert response.context["has_send_permissions"] is True
     project.semester = semester_prev
     project.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["can_send_report"] is False
+    assert response.context["has_send_permissions"] is True
+    assert project.is_active() is False
     project.semester = semester
     project.save()
     # If report_starts_at not specified, allow sending report while project
@@ -216,7 +217,7 @@ def test_project_detail_student_participant(client):
     semester.report_ends_at = None
     semester.save()
     response = client.get(project.get_absolute_url())
-    assert response.context["can_send_report"] is True
+    assert response.context["has_send_permissions"] is True
 
 
 @pytest.mark.django_db

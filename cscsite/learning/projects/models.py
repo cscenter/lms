@@ -23,7 +23,7 @@ from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.utils import get_current_term_pair, get_term_index, \
-    get_current_term_index
+    get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed
 REVIEW_SCORE_FIELDS = [
@@ -100,8 +100,8 @@ class ProjectStudent(models.Model):
             pass
         return acc
 
-    def can_send_report(self):
-        return self.final_grade == ProjectStudent.GRADES.not_graded
+    def has_final_grade(self):
+        return self.final_grade != ProjectStudent.GRADES.not_graded
 
     def final_grade_display(self):
         """
@@ -236,13 +236,20 @@ class Project(TimeStampedModel):
 
     def report_period_started(self):
         if not self.semester.report_starts_at:
-            return self.is_active()
-        today = now().date()
+            return False
+        today = now_local(self.city_id).date()
         return today >= self.semester.report_starts_at
 
     def report_period_ended(self):
-        today = now().date()
+        today = now_local(self.city_id).date()
         return self.semester.report_ends_at > today
+
+    def report_period_active(self):
+        semester = self.semester
+        if not semester.report_starts_at or not semester.report_ends_at:
+            return False
+        today = now_local(self.city_id).date()
+        return semester.report_starts_at <= today <= semester.report_ends_at
 
 
 class ReviewCriteria(TimeStampedModel):

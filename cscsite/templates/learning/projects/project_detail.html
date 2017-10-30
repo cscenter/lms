@@ -56,7 +56,7 @@
                     {% endcache %}
                 {% endif %}
 
-                {% if can_send_report %}
+                {% if project.is_active and has_send_permissions %}
                     {% if not project.report_period_started %}
                         <div class="card o-send-report-timetable">
                             <div class="card-header ch-alt">Сроки отправки отчета</div>
