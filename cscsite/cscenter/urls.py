@@ -8,9 +8,7 @@ from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
-from cscenter.views import IndexView, QAListView, TestimonialsListView, \
-    TeachersView, AlumniView, AlumniByYearView, TeamView, SyllabusView, \
-    OpenNskView, CourseOfferingsView
+from cscenter import views as cscenter_views
 from htmlpages import views
 from learning.views import CoursesListView
 from learning.views.students import UsefulListView, InternshipListView
@@ -26,16 +24,16 @@ from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^open-nsk/$', OpenNskView.as_view(), name='open_nsk'),
+    url(r'^open-nsk/$', cscenter_views.OpenNskView.as_view(), name='open_nsk'),
     url(r'^api/', include('api.urls')),
-    url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^$', cscenter_views.IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', robots, name='robotstxt'),
     # Redirect from old url `/pages/questions/` to more appropriate
     url(r'^pages/questions/$',
         RedirectView.as_view(url='/enrollment/program/',
                              permanent=True)),
-    url(r'^orgs/$', TeamView.as_view(), name='orgs'),
-    url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
+    url(r'^orgs/$', cscenter_views.TeamView.as_view(), name='orgs'),
+    url(r'^syllabus/$', cscenter_views.SyllabusView.as_view(), name='syllabus'),
     url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='commenting_the_right_way'),
 
@@ -47,7 +45,9 @@ urlpatterns = [
         name='learning_internships'),
 
 
-    url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
+    url(r'^teachers/$', cscenter_views.TeachersView.as_view(), name='teachers'),
+    url(r'^teachers/test/$', cscenter_views.TeachersTestView.as_view(),
+        name='teachers_test'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
         name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
@@ -68,10 +68,10 @@ urlpatterns = [
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
     # Alumni
-    url(r'^alumni/$', AlumniView.as_view(), name='alumni'),
-    url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', AlumniView.as_view(),
+    url(r'^alumni/$', cscenter_views.AlumniView.as_view(), name='alumni'),
+    url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(),
         name='alumni_by_area_of_study'),
-    url(r'^(?P<year>[0-9]{4})/$', AlumniByYearView.as_view(),
+    url(r'^(?P<year>[0-9]{4})/$', cscenter_views.AlumniByYearView.as_view(),
         name='alumni_memory'),
 
     url(r'^notifications/', include("notifications.urls")),
@@ -80,8 +80,9 @@ urlpatterns = [
     url(r'^stats/', include("stats.urls")),
 
     url(r'^library/', include("library.urls")),
-    url(r'^faq/$', QAListView.as_view(), name='faq'),
-    url(r'^testimonials/$', TestimonialsListView.as_view(), name='testimonials'),
+    url(r'^faq/$', cscenter_views.QAListView.as_view(), name='faq'),
+    url(r'^testimonials/$', cscenter_views.TestimonialsListView.as_view(),
+        name='testimonials'),
 
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
@@ -117,7 +118,7 @@ urlpatterns = [
     url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(),
         name='render_markdown'),
 
-    url(r"^courses/$", CourseOfferingsView.as_view(), name="course_list"),
+    url(r"^courses/$", cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
     url(r'^', include('learning.urls')),
     url(r'^', include('learning.admission.urls')),
     url(r'^', include('learning.projects.urls')),
