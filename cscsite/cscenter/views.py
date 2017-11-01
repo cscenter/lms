@@ -156,7 +156,7 @@ class TeachersView(generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        context = super(TeachersView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         # Consider the last 3 academic years. Teacher is active, if he read
         # course in this period or will in the future.
         year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
@@ -164,6 +164,36 @@ class TeachersView(generic.ListView):
         term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
         active_lecturers = Counter(
             CourseOffering.objects.filter(semester__index__gte=term_index)
+            .values_list("teachers__pk", flat=True)
+        )
+        context["active"] = filter(lambda t: t.pk in active_lecturers,
+                                   context[self.context_object_name])
+        context["other"] = filter(lambda t: t.pk not in active_lecturers,
+                                  context[self.context_object_name])
+        return context
+
+
+class TeachersTestView(generic.ListView):
+    template_name = "center_teacher_list_test.html"
+    context_object_name = "teachers"
+
+    def get_queryset(self):
+        qs = (CSCUser.objects
+              .filter(groups=CSCUser.group.TEACHER_CENTER,
+                      courseofferingteacher__roles=CourseOfferingTeacher.roles.lecturer)
+              .distinct())
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Consider the last 3 academic years. Teacher is active, if he read
+        # course in this period or will in the future.
+        year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
+        term_index = get_term_index_academic_year_starts(year, term_type)
+        term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
+        active_lecturers = Counter(
+            CourseOffering.objects
+            .filter(semester__index__gte=term_index)
             .values_list("teachers__pk", flat=True)
         )
         context["active"] = filter(lambda t: t.pk in active_lecturers,
