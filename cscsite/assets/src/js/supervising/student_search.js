@@ -1,4 +1,4 @@
-const _debounce = require('lodash/debounce');
+import _debounce from 'lodash-es/debounce';
 
 const ENTRY_POINT = $('.user-search #ajax-uri').val();
 let queryName = "";

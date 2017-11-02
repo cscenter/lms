@@ -1,6 +1,6 @@
 import i18n from "./i18n";
 
-let template = require('lodash.template');
+import template from 'lodash-es/template';
 
 export const GROUPS = {
     1: i18n.groups.STUDENT_CENTER,

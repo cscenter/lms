@@ -1,20 +1,20 @@
-import $ from 'jquery';
+import $ from "jquery";
 import md5 from "blueimp-md5";
 import swal from "bootstrap-sweetalert";
-import {getLocalStorageKey} from './utils';
+import {getLocalStorageKey} from "./utils";
 
-let _escape = require("lodash/escape");
-let _unescape = require("lodash/unescape");
+import _escape from "lodash-es/escape";
+import _unescape from "lodash-es/unescape";
 
 export default class UberEditor {
     static init(textarea) {
         const $textarea = $(textarea);
         const $container = $("<div/>").insertAfter($textarea);
-        $container.css('border', '1px solid #f2f2f2');
-        const autoSaveEnabled = $textarea.data('local-persist') === true;
+        $container.css("border", "1px solid #f2f2f2");
+        const autoSaveEnabled = $textarea.data("local-persist") === true;
         let buttonFullscreen = true;
-        if ($textarea.data('button-fullscreen') !== undefined) {
-            buttonFullscreen = $textarea.data('button-fullscreen');
+        if ($textarea.data("button-fullscreen") !== undefined) {
+            buttonFullscreen = $textarea.data("button-fullscreen");
         }
         $textarea.hide();
         $textarea.removeProp("required");
@@ -64,11 +64,11 @@ export default class UberEditor {
         previewer.body.appendChild(mathjax);
 
         editor.on('preview', function () {
-            var contentDocument
+            const contentDocument
                 = editor.getElement('previewerIframe').contentDocument;
-            var target = $("#epiceditor-preview", contentDocument).get(0);
+            let target = $("#epiceditor-preview", contentDocument).get(0);
 
-            var text = _unescape(target.innerHTML);
+            const text = _unescape(target.innerHTML);
             if (text.length > 0) {
                 $.ajax({
                     method: "POST",
@@ -132,7 +132,7 @@ export default class UberEditor {
 
         editor.on('edit', function () {
             if (!editor.is('fullscreen')) {
-                var height = Math.max(
+                const height = Math.max(
                     $(editor.getElement('editor').body).height() + 20,
                     editor.settings.autogrow.minHeight
                 );
@@ -144,8 +144,8 @@ export default class UberEditor {
         // Ctrl+Enter to send form
         // Submit button value won't be attached to form data, be aware
         // if your form process logic depends on prefix, for example
-        if ($textarea[0].dataset.quicksend == 'true') {
-            var editorBody = editor.getElement('editor').body;
+        if ($textarea[0].dataset.quicksend === 'true') {
+            let editorBody = editor.getElement('editor').body;
             // FIXME: use .on here
             editorBody.addEventListener('keydown', function (e) {
                 if (e.keyCode === 13 && (e.metaKey || e.ctrlKey)) {
