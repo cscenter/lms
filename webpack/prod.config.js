@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const ChunkManifestPlugin = require("chunk-manifest-webpack-plugin");
+// const ChunkManifestPlugin = require("chunk-manifest-webpack-plugin");
 const WebpackChunkHash = require('webpack-chunk-hash');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 

@@ -12,9 +12,9 @@
   }
 
   .graduates-list {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 
     .empty {
       padding: 20px 0;

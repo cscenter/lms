@@ -15,7 +15,7 @@
     <title>{% block title %}Computer Science Club{% endblock title %}</title>
     <link rel="shortcut icon" href="{% static "img/club/favicon.ico" %}" >
     {% comment %} Bootstrap inside style.css {% endcomment %}
-    <link href="{% static "css/club/style.css" %}" rel="stylesheet">
+    {% render_bundle 'club_styles' 'css' %}
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
     {% block hightlight_styles %}
     <link href="{% static "css/vendor/highlight-styles/tomorrow.css" %}" rel="stylesheet">
@@ -110,6 +110,7 @@
     {% render_bundle 'manifest' 'js' %}
     {% render_bundle 'vendor' 'js' %}
     {% render_bundle 'main' 'js' %}
+    {% if debug %}{% render_bundle 'club_styles' 'js' %}{% endif %}
 
     {% if messages %}
       <script type="text/javascript">

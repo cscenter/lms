@@ -1,4 +1,4 @@
-let template = require('lodash.template');
+import template from 'lodash-es/template';
 
 export function getLocalStorageKey(textarea) {
     return (window.location.pathname.replace(/\//g, "_")
