@@ -5,6 +5,15 @@
 {% load thumbnail %}
 {% load markdown from core_tags %}
 
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "src/js/vendor/jquery.lazyload.min.js" %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("img.lazy").lazyload({});
+        });
+    </script>
+{% endblock javascripts %}
+
 {% block content %}
     <div class="container">
         <div class="teachers-list">
@@ -13,7 +22,14 @@
                 <a href="{% url 'teacher_detail' user.pk %}">
                     {% if user.photo %}
                           {% thumbnail user.photo "220x308" crop="center top" cropbox=user.photo_thumbnail_cropbox as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            <img width="{{ im.width }}" height="{{ im.height }}"
+                                    {% if forloop.counter < 12 %}
+                                        src="{{ im.url }}"
+                                    {% else %}
+                                        class="lazy"
+                                        src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}"
+                                        data-original="{{ im.url }}"
+                                    {% endif %}>
                           {% endthumbnail %}
                     {% else %}
                         <img src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}" width="220" height="308" alt="">
@@ -34,7 +50,14 @@
                 <a href="{% url 'teacher_detail' user.pk %}">
                     {% if user.photo %}
                           {% thumbnail user.photo "220x308" crop="center top" cropbox=user.photo_thumbnail_cropbox as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                            <img width="{{ im.width }}" height="{{ im.height }}"
+                                    {% if forloop.counter < 12 %}
+                                        src="{{ im.url }}"
+                                    {% else %}
+                                        class="lazy"
+                                        src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}"
+                                        data-original="{{ im.url }}"
+                                    {% endif %}>
                           {% endthumbnail %}
                     {% else %}
                         <img src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}" width="220" height="308" alt="">
