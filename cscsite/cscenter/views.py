@@ -177,6 +177,12 @@ class TeachersTestView(generic.ListView):
     template_name = "center_teacher_list_test.html"
     context_object_name = "teachers"
 
+    def get_template_names(self):
+        if self.request.GET.get('v2'):
+            return ["center_teacher_list_test2.html"]
+        else:
+            return [self.template_name]
+
     def get_queryset(self):
         qs = (CSCUser.objects
               .filter(groups=CSCUser.group.TEACHER_CENTER,

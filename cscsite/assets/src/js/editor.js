@@ -1,6 +1,6 @@
 import $ from "jquery";
 import md5 from "blueimp-md5";
-import swal from "bootstrap-sweetalert";
+import SweetAlert from "bootstrap-sweetalert";
 import {getLocalStorageKey} from "./utils";
 
 import _escape from "lodash-es/escape";
@@ -103,7 +103,7 @@ export default class UberEditor {
                     } else {
                         text = "Unknown error. Please, save results of your work first, then try to reload page.";
                     }
-                    swal({
+                    SweetAlert({
                         title: "Error",
                         text: text,
                         type: "error"
