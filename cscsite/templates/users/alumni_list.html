@@ -5,6 +5,10 @@
 {% load markdown from core_tags %}
 {% load staticfiles %}
 
+{% block javascripts %}
+    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
+{% endblock javascripts %}
+
 {% block content %}
     {% regroup object_list by graduation_year as alumni_list %}
     <div id="graduates">
@@ -51,7 +55,3 @@
         </div>
     </div>
 {% endblock content %}
-
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
-{% endblock javascripts %}
