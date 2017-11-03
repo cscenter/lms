@@ -46,8 +46,6 @@ urlpatterns = [
 
 
     url(r'^teachers/$', cscenter_views.TeachersView.as_view(), name='teachers'),
-    url(r'^teachers/test/$', cscenter_views.TeachersTestView.as_view(),
-        name='teachers_test'),
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
         name='teacher_detail'),
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
