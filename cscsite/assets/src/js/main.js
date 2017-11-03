@@ -152,7 +152,7 @@ const fn = {
             }
 
             if (!ends_at_touched) {
-                var string_time = $(this).val();
+                const string_time = $(this).val();
                 var matches = string_time.match(
                     "([0-9]{2})([:\-])([0-9]{2})([:0-9\-]*)");
                 if (matches !== null) {
