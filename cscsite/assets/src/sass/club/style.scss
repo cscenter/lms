@@ -12,6 +12,7 @@
 @import "../center/pages/gradebook.scss";
 @import "../center/pages/course_offering";
 @import "../center/pages/student_submission_comments";
+@import "../center/pages/teachers_list";
 @import "../center/components/buttons";
 @import "../center/components/labels";
 @import "../center/components/toolbars";
@@ -98,6 +99,13 @@ table {
         }
       }
     }
+  }
+}
+
+// teachers list customization
+.teachers-list {
+  .teachers-list-item {
+    flex: 0 0 242px;
   }
 }
 
