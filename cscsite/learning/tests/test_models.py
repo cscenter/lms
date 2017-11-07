@@ -24,7 +24,7 @@ from learning.factories import CourseFactory, CourseOfferingFactory, \
 from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
     StudentAssignment
 from learning.settings import SEMESTER_TYPES
-from learning.utils import get_term_start
+from learning.utils import get_term_start, next_term_starts_at
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
 
@@ -159,6 +159,15 @@ class CourseOfferingTests(TestCase):
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = old_now
+
+    def test_completed_at_default(self):
+        semester = SemesterFactory(year=2017, type=Semester.TYPES.autumn)
+        course = CourseFactory()
+        co = CourseOfferingFactory.build(course=course, semester=semester)
+        assert not co.completed_at
+        co.save()
+        assert co.completed_at == next_term_starts_at(semester.index,
+                                                      co.get_city_timezone())
 
 
 class CourseClassTests(TestCase):

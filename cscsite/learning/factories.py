@@ -13,7 +13,7 @@ from learning.models import Course, Semester, CourseOffering, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, \
-    AreaOfStudy, next_term_starts_at
+    AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory
 from .utils import get_current_term_pair, get_term_by_index

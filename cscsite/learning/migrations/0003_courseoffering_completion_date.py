@@ -6,6 +6,7 @@ import pytz
 from django.db import migrations, models
 
 import learning.models
+import learning.utils
 
 
 class Migration(migrations.Migration):
@@ -18,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courseoffering',
             name='completion_date',
-            field=models.DateField(default=learning.models.next_term_starts_at, help_text='Consider the course as completed from the specified day (inclusive).', verbose_name='Date of completion'),
+            field=models.DateField(default=learning.utils.next_term_starts_at, help_text='Consider the course as completed from the specified day (inclusive).', verbose_name='Date of completion'),
         ),
     ]
