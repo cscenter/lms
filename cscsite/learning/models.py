@@ -34,6 +34,7 @@ from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
+from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
     next_term_starts_at
 from .utils import get_current_term_pair, \
@@ -611,7 +612,7 @@ def courseclass_slides_file_name(self, filename):
 
 
 @python_2_unicode_compatible
-class CourseClass(TimeStampedModel, object):
+class CourseClass(TimeStampedModel):
     TYPES = Choices(('lecture', _("Lecture")),
                     ('seminar', _("Seminar")))
 
@@ -653,6 +654,10 @@ class CourseClass(TimeStampedModel, object):
         verbose_name_plural = _("Classes")
 
     objects = CourseClassQuerySet.as_manager()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update_track_fields()
 
     def __str__(self):
         return smart_text(self.name)
@@ -711,13 +716,12 @@ class CourseClass(TimeStampedModel, object):
             raise ValidationError(_("Class should end after it started"))
 
     def save(self, *args, **kwargs):
-        # It's worth mentioning that logic with tracked fields and post save really complicated
-        # TODO: Delegate upload slides logic to task manager
+        created = self.pk is None
         if self.slides != self.get_track_field("slides"):
-            # TODO: Maybe we should try to delete old slides from slideshare
-            # TODO: Add tags to uploaded slides and we can do it
             self.slides_url = ""
-        super(CourseClass, self).save()
+        super().save(*args, **kwargs)
+        if self.slides and not self.slides_url:
+            maybe_upload_slides_yandex.delay(self.pk)
         self.update_track_fields()
 
     # this is needed to properly set up fields for admin page
