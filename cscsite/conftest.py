@@ -17,12 +17,6 @@ CENTER_SITE_ID = settings.CENTER_SITE_ID
 CLUB_SITE_ID = settings.CLUB_SITE_ID
 
 
-def pytest_report_header(config):
-    return "Run py.test --ds=csclub.settings.test cscsite/csclub/ for " \
-           "club site specific tests. I's impossible to change django " \
-           "settings with pytest.ini and not loose this conftest.py"
-
-
 class CustomDjangoTestClient(Client):
     def login(self, user_model):
         """
