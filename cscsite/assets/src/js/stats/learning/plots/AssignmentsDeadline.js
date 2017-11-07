@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import * as c3 from "c3";
 import $ from 'jquery';
-import * as moment from 'moment';
+import {createDuration} from 'moment/src/lib/duration/duration';
 import mix from '../../MixinBuilder';
 import PlotOptions from 'stats/PlotOptions';
 import AssignmentsFilterMixin from './AssignmentsFilterMixin';
@@ -55,7 +55,7 @@ class AssignmentsDeadline extends mix(PlotOptions).with(AssignmentsFilterMixin) 
         if (diff_ms <= 0) {
             return this.types.get("after");
         } else {
-            let diff = new moment.duration(diff_ms),
+            let diff = new createDuration(diff_ms),
                 inDays = diff.asDays();
             if (inDays >= 7) {
                 return this.types.get("gte7days");
