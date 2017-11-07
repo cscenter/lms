@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import os
 import math
 
@@ -13,7 +11,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
@@ -76,6 +74,18 @@ class ProjectStudent(models.Model):
     def __str__(self):
         return "{0} [{1}]".format(smart_text(self.project),
                                   smart_text(self.student))
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.project.field.name
 
     def get_report_url(self):
         return reverse(
@@ -222,6 +232,16 @@ class Project(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.name)
+
+    def get_city(self):
+        return self.city_id
+
+    def get_city_timezone(self):
+        return settings.TIME_ZONES[self.city_id]
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.city.field.name
 
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
@@ -432,6 +452,18 @@ class Report(ReviewCriteria):
     def __str__(self):
         return smart_text(self.project_student.student)
 
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.project_student.field.name
+
     def get_absolute_url(self):
         """May been inefficient if `project_student` not prefetched """
         return reverse("projects:project_report", kwargs={
@@ -558,6 +590,23 @@ class ReportComment(TimeStampedModel):
         return ("Comment to {0} by {1}"
                 .format(smart_text(self.report),
                         smart_text(self.author.get_full_name())))
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.report.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
 
     @property
     def attached_file_name(self):
