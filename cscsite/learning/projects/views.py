@@ -467,7 +467,7 @@ class ReportView(FormMixin, generic.DetailView):
     template_name = "learning/projects/report.html"
 
     def __init__(self, **kwargs):
-        super(ReportView, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.is_author = None
         self.is_project_reviewer = None
         self.is_curator = None

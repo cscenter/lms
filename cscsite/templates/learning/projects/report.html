@@ -6,6 +6,7 @@
 {% load core_tags %}
 {% load projects_tags %}
 {% load staticfiles %}
+{% load tz %}
 
 {% block hightlight_styles %}
 <link href="{% static "css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
@@ -15,7 +16,7 @@
     <script type="text/javascript" src="{% static "js/projects_report.js" %}"></script>
 {% endblock javascripts %}
 
-{% block content %}
+{% block content %}{% localtime off %}
     {% with student=report.project_student.student project=report.project_student.project %}
 
 <div class="container" id="project-report-detail-page">
@@ -73,7 +74,7 @@
                       <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
 
                   {% endif %}
-                  <span class="metainfo pull-right">{{ comment.created|date:"d.m.Y H:i" }}</span>
+                  <span class="metainfo pull-right">{{ comment.created|timezone:project.get_city_timezone|date:"d.m.Y H:i" }}</span>
                 </div>
               </div>
             </li>
@@ -258,4 +259,4 @@
 {#    TODO: append instead of replace #}
         CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
     </script>
-{% endblock content %}
+{% endlocaltime off %}{% endblock content %}
