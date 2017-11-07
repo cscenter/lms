@@ -170,6 +170,23 @@ class CourseOfferingTests(TestCase):
                                                       co.get_city_timezone())
 
 
+@pytest.mark.django_db
+def test_course_offering_composite_fields():
+    co = CourseOfferingFactory()
+    assert not co.materials_files
+    assert not co.materials_slides
+    assert not co.materials_video
+    cc = CourseClassFactory(course_offering=co,
+                            video_url="https://link/to/youtube")
+    co.refresh_from_db()
+    assert not co.materials_files
+    assert not co.materials_slides
+    assert co.materials_video
+    _ = CourseClassAttachmentFactory(course_class=cc)
+    co.refresh_from_db()
+    assert co.materials_files
+
+
 class CourseClassTests(TestCase):
     def test_slides_file_name(self):
         slide_fname = "foobar.pdf"
@@ -191,7 +208,7 @@ class CourseClassTests(TestCase):
 
     def test_display_prop(self):
         cc = CourseClassFactory.create(type='lecture')
-        self.assertEqual("Lecture", cc.type_display)
+        self.assertEqual("Lecture", cc.get_type_display())
 
     # TODO: refactor with pytest tmp file, fuck this patching
     @patch('slides.slideshare.upload_slides')

@@ -657,7 +657,7 @@ class CourseClass(TimeStampedModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.update_track_fields()
+        self._update_track_fields()
 
     def __str__(self):
         return smart_text(self.name)
@@ -699,15 +699,27 @@ class CourseClass(TimeStampedModel):
         })
 
     @property
-    def track_fields(self):
+    def _track_fields(self):
         return "slides",
 
-    def update_track_fields(self):
-        for field in self.track_fields:
+    def _update_track_fields(self):
+        for field in self._track_fields:
             setattr(self, '_original_%s' % field, getattr(self, field))
 
-    def get_track_field(self, field):
+    def _get_track_field(self, field):
         return getattr(self, '_original_{}'.format(field))
+
+    def refresh_composite_fields(self):
+        """Composite fields used on courses list page"""
+        has_class_slides = bool(self.slides)
+        has_class_video = self.video_url.strip() != ""
+        has_class_materials_files = self.courseclassattachment_set.exists()
+        if any([has_class_slides, has_class_video, has_class_materials_files]):
+            CourseOffering.objects.filter(pk=self.course_offering_id).update(
+                materials_slides=has_class_slides,
+                materials_video=has_class_video,
+                materials_files=has_class_materials_files
+            )
 
     def clean(self):
         super(CourseClass, self).clean()
@@ -717,20 +729,13 @@ class CourseClass(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         created = self.pk is None
-        if self.slides != self.get_track_field("slides"):
+        if self.slides != self._get_track_field("slides"):
             self.slides_url = ""
         super().save(*args, **kwargs)
         if self.slides and not self.slides_url:
             maybe_upload_slides_yandex.delay(self.pk)
-        self.update_track_fields()
-
-    # this is needed to properly set up fields for admin page
-    def type_display_prop(self):
-        return self.TYPES[self.type]
-
-    type_display_prop.short_description = _("Type")
-    type_display_prop.admin_order_field = 'type'
-    type_display = property(type_display_prop)
+        self._update_track_fields()
+        self.refresh_composite_fields()
 
     def video_iframe(self):
         return get_oembed_html(self.video_url, 'video_oembed',
@@ -760,6 +765,12 @@ class CourseClassAttachment(TimeStampedModel, object):
 
     def __str__(self):
         return "{0}".format(smart_text(self.material_file_name))
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if created:
+            CourseClass.refresh_composite_fields(self.course_class)
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
