@@ -94,20 +94,3 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
     sa.__class__.objects.filter(pk=sa.pk).update(**sa_update_dict)
     for attr_name in sa_update_dict:
         setattr(sa, attr_name, sa_update_dict[attr_name])
-
-
-# FIXME: redesign with `from_db` method!
-@receiver(post_init,
-          sender=CourseClass,
-          dispatch_uid='learning.signals.course_class_post_init')
-def track_fields_post_init(sender, instance, **kwargs):
-    instance.__class__.update_track_fields(instance)
-
-
-@receiver(post_save,
-          sender=CourseClass,
-          dispatch_uid='learning.signals.course_class_add_upload_slides_job')
-def add_upload_slides_job(sender, instance, **kwargs):
-    if instance.slides and not instance.slides_url:
-        queue = django_rq.get_queue('default')
-        queue.enqueue(maybe_upload_slides_yandex, instance.pk)
