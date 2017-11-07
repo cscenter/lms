@@ -73,6 +73,13 @@ def get_term_start(year, term_type, tz: Timezone):
     return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
+def next_term_starts_at(term_index=None, tz_aware=pytz.UTC):
+    if not term_index:
+        term_index = get_current_term_index(tz_aware)
+    year, next_term = get_term_by_index(term_index + 1)
+    return get_term_start(year, next_term, tz_aware)
+
+
 def get_term_index(target_year, target_term_type):
     """Calculate consecutive term number from spring term of FOUNDATION_YEAR"""
     if target_year < FOUNDATION_YEAR:

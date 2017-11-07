@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
-from django.utils.timezone import utc, now
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
@@ -34,10 +34,10 @@ from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
-from learning.utils import get_current_term_index, now_local
+from learning.utils import get_current_term_index, now_local, \
+    next_term_starts_at
 from .utils import get_current_term_pair, \
-    get_term_index, convert_term_parts_to_datetime, get_term_start, \
-    get_term_by_index
+    get_term_index, get_term_start
 
 logger = logging.getLogger(__name__)
 
@@ -204,13 +204,6 @@ class Semester(models.Model):
             return self.year - 1
 
 
-def next_term_starts_at(term_index=None, tz_aware=pytz.UTC):
-    if not term_index:
-        term_index = get_current_term_index(tz_aware)
-    year, next_term = get_term_by_index(term_index + 1)
-    return get_term_start(year, next_term, tz_aware)
-
-
 class CourseOffering(TimeStampedModel):
     objects = CourseOfferingDefaultManager()
     course = models.ForeignKey(
@@ -234,6 +227,12 @@ class CourseOffering(TimeStampedModel):
         Semester,
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
+    completed_at = models.DateField(
+        _("Date of completion"),
+        blank=True,
+        help_text=_("Consider the course as completed from the specified "
+                    "day (inclusive).")
+    )
     description = models.TextField(
         _("Description"),
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
@@ -258,12 +257,6 @@ class CourseOffering(TimeStampedModel):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
-    completed_at = models.DateField(
-        _("Date of completion"),
-        default=next_term_starts_at,
-        help_text=_("Consider the course as completed from the specified "
-                    "day (inclusive).")
-    )
     city = models.ForeignKey(City, verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
@@ -278,6 +271,14 @@ class CourseOffering(TimeStampedModel):
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.course),
                                  smart_text(self.semester))
+
+    def save(self, *args, **kwargs):
+        # Make sure `self.completed_at` always has value
+        if self.semester_id and not self.completed_at:
+            index = get_term_index(self.semester.year, self.semester.type)
+            self.completed_at = next_term_starts_at(index,
+                                                    self.get_city_timezone())
+        super().save(*args, **kwargs)
 
     def _get_url_kwargs(self) -> dict:
         """
