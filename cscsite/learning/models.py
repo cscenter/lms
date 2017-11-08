@@ -505,6 +505,14 @@ class CourseOfferingNews(TimeStampedModel):
             "pk": self.pk
         })
 
+    def get_stats_url(self):
+        return city_aware_reverse('course_offering_news_unread', kwargs={
+            "course_slug": self.course_offering.course.slug,
+            "semester_slug": self.course_offering.semester.slug,
+            "city_code": self.get_city(),
+            "news_pk": self.pk
+        })
+
     def get_delete_url(self):
         return city_aware_reverse('course_offering_news_delete', kwargs={
             "course_slug": self.course_offering.course.slug,
