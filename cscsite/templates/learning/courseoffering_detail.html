@@ -3,7 +3,12 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load markdown from core_tags %}
+{% load render_bundle from webpack_loader %}
 {% load userpreview from custom_thumbnail %}
+
+{% block javascripts %}
+    {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
+{% endblock javascripts %}
 
 {% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
 
@@ -179,9 +184,10 @@
                                     </div>
                                 </div>
                                 {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-                                    <div class="panel-footer text-right">
-                                        <a class="__pr5" href="{{ news.get_update_url }}">{% trans "edit" %}</a>
-                                        <a href="{{ news.get_delete_url }}">{% trans "delete" %}</a>
+                                    <div class="panel-footer">
+                                        {% if user.is_curator %}<a class="show_unread_notifications" title="Показать, кто не прочитал новость на сайте" href="{{ news.get_stats_url }}"><i class="fa fa-table" aria-hidden="true"></i></a>{% endif %}
+                                        <a class="pull-right" href="{{ news.get_delete_url }}">{% trans "delete" %}</a>
+                                        <a class="__pr5 pull-right" href="{{ news.get_update_url }}">{% trans "edit" %}</a>
                                     </div>
                                 {% endif %}
                             </div>
@@ -269,7 +275,8 @@
         {% endif %}
     </div>
   </div>
-
 </div>
+
+{% include "_modal.html" %}
 {% endlocaltime off %}
 {% endblock content %}

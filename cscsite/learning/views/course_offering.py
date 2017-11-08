@@ -12,8 +12,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
+from rest_framework.generics import ListAPIView
 from vanilla import DeleteView, UpdateView, CreateView
 
+from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
@@ -22,9 +24,10 @@ from learning.forms import CourseOfferingEditDescrForm, CourseOfferingNewsForm
 from learning.models import CourseOffering, CourseOfferingTeacher, \
     CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
     CourseOfferingNews
+from learning.serializers import CourseOfferingNewsNotificationSerializer
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
-from learning.viewmixins import TeacherOnlyMixin
+from learning.viewmixins import TeacherOnlyMixin, CuratorOnlyMixin
 from learning.views.utils import get_co_from_query_params, \
     get_student_city_code, get_user_city_code
 
@@ -385,3 +388,14 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 
     def is_form_allowed(self, user, obj):
         return user.is_curator or user in obj.course_offering.teachers.all()
+
+
+class CourseOfferingNewsUnreadNotificationsView(ListAPIView):
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = CourseOfferingNewsNotificationSerializer
+
+    def get_queryset(self):
+        return (CourseOfferingNewsNotification.unread
+                .filter(course_offering_news_id=self.kwargs.get('news_pk'))
+                .select_related("user")
+                .order_by("user__last_name"))
