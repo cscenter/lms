@@ -15,7 +15,7 @@ from django.utils.translation import ugettext as _
 from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
-    StudentAssignmentFactory
+    StudentAssignmentFactory, CourseOfferingTeacherFactory
 from learning.models import StudentAssignment, Assignment, CourseOffering
 from learning.settings import GRADES, PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
@@ -758,3 +758,28 @@ def test_first_comment_after_deadline(client):
     response = client.get(sa.get_student_url())
     assert response.context['first_comment_after_deadline'] == comment
     assert smart_bytes('<hr class="deadline">') in response.content
+
+
+@pytest.mark.django_db
+def test_studentassignment_submission_grade(client):
+    """Make sure we can remove zeroed grade for student assignment"""
+    sa = StudentAssignmentFactory()
+    teacher = TeacherCenterFactory.create()
+    CourseOfferingTeacherFactory(course_offering=sa.assignment.course_offering,
+                                 teacher=teacher)
+    sa.assignment.grade_min = 1
+    sa.assignment.grade_max = 10
+    sa.assignment.save()
+    assert sa.grade is None
+    student = sa.student
+    form = {"grade": 0, "grading_form": True}
+    client.login(teacher)
+    response = client.post(sa.get_teacher_url(), form, follow=True)
+    assert response.status_code == 200
+    sa.refresh_from_db()
+    assert sa.grade == 0
+    form = {"grade": "", "grading_form": True}
+    response = client.post(sa.get_teacher_url(), form, follow=True)
+    assert response.status_code == 200
+    sa.refresh_from_db()
+    assert sa.grade is None
