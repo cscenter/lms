@@ -168,6 +168,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
             Enrollment.objects
             .filter(
                 student=self.request.user,
+                course_offering__city_id=self.request.city_code,
                 course_offering__semester__type=semester_type,
                 course_offering__semester__year=year,
                 course_offering__course__slug=self.kwargs['course_slug'])
