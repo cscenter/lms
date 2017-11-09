@@ -8,7 +8,7 @@
             {% if request.user.is_curator %}<span class="text-muted">{{ ps.report.get_status_display }}</span><br>{% endif %}
             <a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
         {% elif project.is_active %}<span class="text-muted">Начало отчетного периода<br> {{ project.semester.report_starts_at|default:"не установлено" }}</span>
-        {% elif not project.is_active or project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
+        {% elif project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
         {% endif %}
     {% endif %}
 </div>
