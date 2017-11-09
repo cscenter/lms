@@ -49,7 +49,7 @@ class CalendarClubScheduleView(CalendarGenericView):
         classes = (CourseClass.objects
                    .for_calendar(self.request.user)
                    .in_month(year, month)
-                   .for_city(self.request.city_code)
+                   .in_city(self.request.city_code)
                    .open_only())
         return [classes]
 

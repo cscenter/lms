@@ -200,7 +200,7 @@ class CalendarStudentFullView(StudentOnlyMixin, CalendarGenericView):
         return (CourseClass.objects
                 .for_calendar(self.request.user)
                 .in_month(year, month)
-                .for_city(student_city_code))
+                .in_city(student_city_code))
 
 
 class CalendarStudentView(CalendarStudentFullView):
@@ -443,6 +443,14 @@ class CourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
 class CourseClassDetailView(generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
+
+    def get_queryset(self):
+        return (CourseClass.objects
+                .select_related("course_offering",
+                                "course_offering__course",
+                                "course_offering__semester",
+                                "venue")
+                .in_city(self.request.city_code))
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

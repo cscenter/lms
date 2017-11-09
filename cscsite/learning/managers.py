@@ -66,7 +66,7 @@ class CourseClassQuerySet(query.QuerySet):
             q = q.filter(others)
         return q
 
-    def for_city(self, city_code):
+    def in_city(self, city_code):
         return self.filter(course_offering__city_id=city_code)
 
     def in_cities(self, city_codes: List[str]):
