@@ -464,6 +464,11 @@ class Report(ReviewCriteria):
     def city_aware_field_name(self):
         return self.__class__.project_student.field.name
 
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
+
     def get_absolute_url(self):
         """May been inefficient if `project_student` not prefetched """
         return reverse("projects:project_report", kwargs={

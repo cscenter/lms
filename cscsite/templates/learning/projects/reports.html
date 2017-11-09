@@ -2,10 +2,12 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
+{% load tz %}
 
 {% block body_class %} gray{% endblock body_class %}
 
 {% block content %}
+{% localtime off %}
 <div class="projects-list-page">
     <ol class="breadcrumb projects">
       <li class="active">Отчеты, {{ current_term }}</li>
@@ -51,14 +53,18 @@
                                 {% endspaceless %}{% endif %}</td>
                             <td>
                                 {% if ps.report and ps.report.status == 'sent' %}
-                                    {% if not request.user.is_curator %}<span class="text-muted">Проверка куратором</span>
-                                    {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Оценить отчет</a>{% endif %}
+                                    {% if not request.user.is_curator %}
+                                        <span class="text-muted">Проверка куратором</span>
+                                    {% else %}
+                                        <a {% if ps.report.created_local.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
+                                           href="{% url "projects:project_report" project.pk ps.student.pk %}">Оценить отчет</a>
+                                    {% endif %}
                                 {% elif ps.report %}
                                     <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
                                        href="{% url "projects:project_report" project.pk ps.student.pk %}">Перейти к отчету
                                     </a>
                                 {% elif project.is_active %}<span class="text-muted">Не&nbsp;отправлен</span>
-                                {% elif not project.is_active or project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
+                                {% elif project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -77,4 +83,5 @@
         </div>
     </div>
 </div>
+{% endlocaltime off %}
 {% endblock content %}
