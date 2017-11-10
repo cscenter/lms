@@ -7,7 +7,7 @@ unicodecsv==0.14.1
 six==1.10.0
 
 # Time zones support
-pytz==2017.2
+pytz==2017.3
 
 # Db support
 psycopg2==2.7.1
