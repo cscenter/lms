@@ -1,11 +1,10 @@
-import django_rq
-from django.db.models.signals import post_save, post_init
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
+from learning.settings import STUDENT_STATUS
 from learning.models import AssignmentComment, AssignmentNotification, \
-    Assignment, StudentAssignment, CourseClass, CourseOfferingNews, Enrollment
-from learning.tasks import maybe_upload_slides_yandex
+    Assignment, StudentAssignment, Enrollment
 
 
 # TODO: send notification to other teachers
@@ -15,18 +14,21 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
     if not created:
         return
     course_offering = instance.course_offering
-    active_enrollments = Enrollment.active.filter(
-        course_offering=course_offering)
-    for e in active_enrollments:
+    # Skip those who already been expelled
+    active_students = (Enrollment.active
+                       .filter(course_offering=course_offering)
+                       .exclude(student__status=STUDENT_STATUS.expelled)
+                       .values_list("student_id", flat=True))
+    for student_id in active_students:
         a_s = StudentAssignment.objects.create(assignment=instance,
-                                               student_id=e.student_id)
+                                               student_id=student_id)
         # Note(Dmitry): we create notifications here instead of a separate
         #               receiver because it's much more efficient than getting
         #               StudentAssignment objects back one by one. It seems
         #               reasonable that 2*N INSERTs are better than bulk_create
         #               + N SELECTs + N INSERTs.
         # bulk_create doesn't return pks, that's the main reason
-        (AssignmentNotification(user_id=e.student_id,
+        (AssignmentNotification(user_id=student_id,
                                 student_assignment=a_s,
                                 is_about_creation=True)
          .save())

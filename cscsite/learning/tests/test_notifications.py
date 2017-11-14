@@ -10,7 +10,7 @@ from django.core import mail, management
 from django.test import TestCase
 
 from learning.admin import AssignmentAdmin
-from learning.settings import GRADES
+from learning.settings import GRADES, STUDENT_STATUS
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 from .mixins import *
@@ -189,7 +189,29 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 2
     assert co_t3.pk not in Assignment.objects.order_by('id').all()[1].notify_teachers.all()
-    
+
+
+@pytest.mark.django_db
+def test_new_assignment_notifications(settings):
+    co = CourseOfferingFactory()
+    enrollments = EnrollmentFactory.create_batch(5, course_offering=co)
+    assignment = AssignmentFactory(course_offering=co)
+    assert AssignmentNotification.objects.count() == 5
+    enrollment = enrollments[0]
+    enrollment.is_deleted = True
+    enrollment.save()
+    AssignmentNotification.objects.all().delete()
+    assert AssignmentNotification.objects.count() == 0
+    assignment = AssignmentFactory(course_offering=co)
+    assert AssignmentNotification.objects.count() == 4
+    # Don't create new assignment for expelled students
+    student = enrollments[1].student
+    student.status = STUDENT_STATUS.expelled
+    student.save()
+    AssignmentNotification.objects.all().delete()
+    assignment = AssignmentFactory(course_offering=co)
+    assert AssignmentNotification.objects.count() == 3
+
 
 @pytest.mark.django_db
 def test_new_assignment_timezone(settings):
