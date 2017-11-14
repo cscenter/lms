@@ -78,11 +78,7 @@
           {% endif %}
         {% endwith %}
       </div>
-      {% if not a_s.assignmentcomment_set.all %}
-        <div class="csc-well">
-            {% crispy form form.helper %}
-        </div>
-      {% else %}
+      {% if a_s.assignmentcomment_set.all %}
         <ul class="comment-list">
         {% for comment in a_s.assignmentcomment_set.all %}
             {# Should be ok for comparing python int type with None #}
@@ -116,10 +112,10 @@
         </li>
         {% endfor %}
         </ul>
-
-        <div class="csc-well">{% crispy form %}</div>
-
       {% endif %}
+        {% if request.user.is_active_student or is_actual_teacher or request.user.is_curator %}
+            <div class="csc-well">{% crispy form %}</div>
+        {% endif %}
     </div>
 
         <div class="col-xs-3">

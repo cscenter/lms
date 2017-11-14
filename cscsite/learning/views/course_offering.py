@@ -25,7 +25,8 @@ from learning.models import CourseOffering, CourseOfferingTeacher, \
     CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
     CourseOfferingNews
 from learning.serializers import CourseOfferingNewsNotificationSerializer
-from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
+from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
+    STUDENT_STATUS
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin, CuratorOnlyMixin
 from learning.views.utils import get_co_from_query_params, \
@@ -163,7 +164,8 @@ class CourseOfferingDetailView(generic.DetailView):
         can_view_assignments = (u.is_student or u.is_graduate or u.is_curator or
                                 c['is_actual_teacher'] or c['is_enrolled'])
         can_view_news = (not c['co_failed_by_student'] and
-                         ((u.is_authenticated and not u.is_expelled) or
+                         ((u.is_authenticated and
+                           u.status != STUDENT_STATUS.expelled) or
                           is_club_site()))
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),

@@ -8,7 +8,8 @@ from django.core.exceptions import ValidationError
 from learning.factories import CourseOfferingFactory, EnrollmentFactory, \
     CourseFactory, SemesterFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
-from users.factories import StudentFactory, CuratorFactory, UserFactory
+from users.factories import StudentFactory, CuratorFactory, UserFactory, \
+    StudentCenterFactory
 
 
 @pytest.mark.django_db
@@ -61,6 +62,67 @@ def test_cached_groups(settings):
     settings.SITE_ID = settings.CLUB_SITE_ID
     assert set(user._cached_groups) == {PARTICIPANT_GROUPS.STUDENT_CENTER,
                                         PARTICIPANT_GROUPS.STUDENT_CLUB}
+
+@pytest.mark.django_db
+def test_permissions(client):
+    # Unauthenticated user
+    response = client.get("/")
+    request_user = response.context['request'].user
+    assert not request_user.is_authenticated
+    assert not request_user.is_student_center
+    assert not request_user.is_student_club
+    assert not request_user.is_student
+    assert not request_user.is_volunteer
+    assert not request_user.is_active_student
+    assert not request_user.is_master_student
+    assert not request_user.is_teacher_center
+    assert not request_user.is_teacher_club
+    assert not request_user.is_teacher
+    assert not request_user.is_graduate
+    assert not request_user.is_curator
+    assert not request_user.is_curator_of_projects
+    assert not request_user.is_interviewer
+    assert not request_user.is_project_reviewer
+    # Active student
+    student = StudentCenterFactory(status='')
+    client.login(student)
+    response = client.get("/")
+    request_user = response.context['request'].user
+    assert request_user.is_authenticated
+    assert request_user.is_student_center
+    assert not request_user.is_student_club
+    assert request_user.is_student
+    assert not request_user.is_volunteer
+    assert request_user.is_active_student
+    assert not request_user.is_master_student
+    assert not request_user.is_teacher_center
+    assert not request_user.is_teacher_club
+    assert not request_user.is_teacher
+    assert not request_user.is_graduate
+    assert not request_user.is_curator
+    assert not request_user.is_curator_of_projects
+    assert not request_user.is_interviewer
+    assert not request_user.is_project_reviewer
+    # Expelled student
+    student.status = STUDENT_STATUS.expelled
+    student.save()
+    response = client.get("/")
+    request_user = response.context['request'].user
+    assert request_user.is_authenticated
+    assert request_user.is_student_center
+    assert not request_user.is_student_club
+    assert request_user.is_student
+    assert not request_user.is_volunteer
+    assert not request_user.is_active_student
+    assert not request_user.is_master_student
+    assert not request_user.is_teacher_center
+    assert not request_user.is_teacher_club
+    assert not request_user.is_teacher
+    assert not request_user.is_graduate
+    assert not request_user.is_curator
+    assert not request_user.is_curator_of_projects
+    assert not request_user.is_interviewer
+    assert not request_user.is_project_reviewer
 
 
 @pytest.mark.django_db

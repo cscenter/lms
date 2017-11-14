@@ -1,4 +1,5 @@
 from core.utils import is_club_site
+from learning.settings import STUDENT_STATUS
 
 
 class LearningPermissionsMixin(object):
@@ -27,7 +28,7 @@ class LearningPermissionsMixin(object):
     def is_active_student(self):
         if is_club_site():
             return self.is_student_club
-        return self.is_student and not self.is_expelled
+        return self.is_student and self.status != STUDENT_STATUS.expelled
 
     @property
     def is_teacher(self):

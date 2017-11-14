@@ -69,7 +69,7 @@
                 </div>
                 {% elif profile_user.is_student %}
                 <div class="progress-info">
-                    {% trans "student"|title %}{% if profile_user.enrollment_year %} {{ profile_user.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if profile_user.is_expelled %}, {{ profile_user.get_status_display|lower }}{% endif %}
+                    {% trans "student"|title %}{% if profile_user.enrollment_year %} {{ profile_user.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if profile_user.status == "expelled" %}, {{ profile_user.get_status_display|lower }}{% endif %}
                 </div>
                 {% elif profile_user.is_teacher %}
                 <div class="progress-info">
