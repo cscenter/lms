@@ -171,7 +171,7 @@ student_section_patterns = url(
         url(r'^assignments/(?P<pk>\d+)/$', StudentAssignmentStudentDetailView.as_view(),
             name='a_s_detail_student'),
         # TODO: learning/assignments/attachments/?
-        url(r'^attachments/(?P<sid>[-\w]+)/$',
+        url(r'^attachments/(?P<sid>[-\w]+)/(?P<file_name>.+)$',
             AssignmentAttachmentDownloadView.as_view(),
             name='assignment_attachments_download'),
         url(r'^timetable/$', TimetableStudentView.as_view(),
