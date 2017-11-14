@@ -953,7 +953,8 @@ class AssignmentAttachment(TimeStampedModel, object):
 
     def file_url(self):
         return reverse("assignment_attachments_download", kwargs={
-            "sid": hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk)
+            "sid": hashids.encode(learn_conf.ASSIGNMENT_TASK_ATTACHMENT, self.pk),
+            "file_name": self.file_name
         })
 
     def get_delete_url(self):
@@ -1172,7 +1173,8 @@ class AssignmentComment(TimeStampedModel):
     def attached_file_url(self):
         return reverse("assignment_attachments_download", kwargs={
             "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
-                                  self.pk)
+                                  self.pk),
+            "file_name": self.attached_file_name
         })
 
     def is_stale_for_edit(self):
