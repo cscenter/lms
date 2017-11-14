@@ -26,8 +26,9 @@ class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
     template_name = "useful.html"
 
     def get_queryset(self):
-        return Useful.objects.filter(site=settings.CENTER_SITE_ID).order_by(
-            "sort")
+        return (Useful.objects
+                .filter(site=settings.CENTER_SITE_ID)
+                .order_by("sort"))
 
 
 class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
@@ -44,7 +45,12 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
     user_type = 'student'
 
     def has_permissions_coarse(self, user):
-        return (user.is_student or user.is_curator or user.is_graduate or
+        # Expelled students can't send new submissions or comments
+        if self.request.method == "POST":
+            is_student = user.is_active_student
+        else:
+            is_student = user.is_student
+        return (is_student or user.is_curator or user.is_graduate or
                 user.is_teacher)
 
     def has_permissions_precise(self, user):

@@ -231,8 +231,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
             self.course_offering.save()
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(GradeBookTeacherView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         context['course_offering'] = self.course_offering
         context['course_offering_list'] = self.course_offering_list
         context['user_type'] = self.user_type
@@ -302,6 +301,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
         for assignment in assignments.values():
             # we should check for "assignment consistency": that all
             # student assignments are presented
+            # FIXME: what about (923, None)? Is it ok?
             assert any(s is not None for s in assignment["students"])
 
         context['students'] = students
@@ -371,6 +371,8 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
             # we should check for "assignment consistency": that all
             # assignments are similar for all students in particular
             # course offering
+            continue
+            # FIXME: wtf?
             assert by_assignment.keys() == header
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')

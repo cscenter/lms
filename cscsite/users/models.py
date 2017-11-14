@@ -26,6 +26,7 @@ from sorl.thumbnail import ImageField
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
+from core.utils import is_club_site
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import is_positive_grade
@@ -482,7 +483,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                           self.group.VOLUNTEER in user_groups or
                           self.group.GRADUATE_CENTER in user_groups)
         if (center_student and self.group.STUDENT_CLUB not in user_groups
-                and settings.SITE_ID == settings.CLUB_SITE_ID):
+                and is_club_site()):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
@@ -493,21 +494,15 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             return enrollment_qs.first()
         return None
 
-    @property
-    def is_expelled(self):
-        """We remove student group from expelled users on login action"""
-        return self.status == STUDENT_STATUS.expelled
-
     def has_access_to_gradebook_emails(self):
         """Looks more like a crunch, but still better than nothing"""
         return self.pk == 865  # zherevchuk
 
-    # TODO: Move to manager?
-    def projects_qs(self):
+    # TODO: move to Project manager?
+    def get_projects_queryset(self):
         """Returns projects through ProjectStudent intermediate model"""
         return (self.projectstudent_set
-                .select_related('project',
-                                'project__semester')
+                .select_related('project', 'project__semester')
                 .order_by('project__semester__index'))
 
     def stats(self, term):
@@ -648,13 +643,6 @@ class CSCUserReference(TimeStampedModel):
 
 class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     group = PARTICIPANT_GROUPS
-    is_expelled = True
-    # TODO: Write tests for permissions and then remove attrs below
-    # TODO: They should work fine, but I need to be sure.
-    is_curator = False
-    is_student_center = False
-    is_teacher_center = False
-    is_volunteer = False
     city_code = None
 
     def __str__(self):

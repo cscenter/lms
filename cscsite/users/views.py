@@ -177,7 +177,7 @@ class UserDetailView(generic.DetailView):
                 raise Http404
 
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
-        context['student_projects'] = profile_user.projects_qs()
+        context['student_projects'] = profile_user.get_projects_queryset()
         context['current_semester'] = Semester.get_current()
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects

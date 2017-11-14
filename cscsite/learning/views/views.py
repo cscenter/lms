@@ -872,7 +872,6 @@ class AssignmentProgressBaseView(AccessMixin):
     form_class = AssignmentCommentForm
 
     def dispatch(self, request, *args, **kwargs):
-        # Fail-fast without DB hit if request user hasn't enough permissions
         if not self.has_permissions_coarse(request.user):
             return self.handle_no_permission()
         self.student_assignment = self.get_student_assignment()
@@ -921,7 +920,7 @@ class AssignmentProgressBaseView(AccessMixin):
             'a_s': sa,
             'form': form,
             'first_comment_after_deadline': first_comment_after_deadline,
-            'one_teacher': (sa.assignment.course_offering.teachers.count() == 1),
+            'one_teacher': sa.assignment.course_offering.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()
         }
         return context
