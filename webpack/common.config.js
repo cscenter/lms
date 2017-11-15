@@ -35,9 +35,10 @@ const PATHS = {
     admission: path.join(__assetsdir, '/src/js/center/admission.js'),
     supervising: path.join(__assetsdir, '/src/js/supervising/index.js'),
     learning: path.join(__assetsdir, '/src/js/learning/index.js'),
+    teaching: path.join(__assetsdir, '/src/js/teaching/index.js'),
     dist: path.join(__assetsdir, bundlesDirRelative),
     stats: path.join(__assetsdir, "/src/js/stats/main.js"),
-    center_styles: path.join(__assetsdir, "/src/sass/center/index.js"),
+    center_styles: path.join(__assetsdir, "/src/sass/center/index.js"), // import common here?
     club_styles: path.join(__assetsdir, "/src/sass/club/index.js"),
 };
 
@@ -69,6 +70,7 @@ const common = {
         forms: PATHS.forms,
         admission: PATHS.admission,
         learning: PATHS.learning,
+        teaching: PATHS.teaching,
         stats: PATHS.stats,
         supervising: PATHS.supervising,
         vendor: VENDOR,

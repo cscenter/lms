@@ -158,6 +158,8 @@ export default class UberEditor {
 
     // FIXME: make it callable once!
     static preload(callback = function() {}) {
+        // Stop automatic processing
+        $("body").addClass("tex2jax_ignore");
         const scripts = [CSC.config.JS_SRC.MATHJAX,
                          CSC.config.JS_SRC.HIGHLIGHTJS];
         const deferred = $.Deferred();

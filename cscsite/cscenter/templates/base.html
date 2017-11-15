@@ -44,7 +44,7 @@
     </script>
   </head>
 
-  <body class="tex2jax_ignore{% block body_class %}{% endblock body_class %}">
+  <body {% block body_attrs %}{% endblock body_attrs %}>
     {% include "_top_menu.html" %}
 
     {% block content %}
@@ -73,10 +73,7 @@
       </div>
     </div>
 
-    {# Include all compiled plugins (below), or include individual files as needed #}
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-    {#  TODO: move jquery-migrate to webpack?   #}
-    {% if debug %}<script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>{% endif %}
     <script type="text/javascript">window.jQuery || document.write('<script src="{% static "js/vendor/jquery-3.2.1.min.js" %}"><\/script>')</script>
     <script type="text/javascript" src="{% static "js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js" %}"></script>
     <script type="text/javascript" src="//cdn.ravenjs.com/3.17.0/raven.min.js"></script>

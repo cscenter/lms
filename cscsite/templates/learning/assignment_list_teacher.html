@@ -6,7 +6,16 @@
 {% load static %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_class %} gray{% endblock body_class %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    {% render_bundle 'forms' 'js' %}
+    <script type="text/javascript" src="{% static "js/assignment-submissions.js" %}"></script>
+{% endblock javascripts %}
 
 {% block content %}
 {% localtime off %}
@@ -92,7 +101,10 @@
         </thead>
         {% for s_a in student_assignment_list %}
             <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
-                <td><a{% if s_a.student_id not in enrollments %} style="text-decoration: line-through;"{% endif %} href="{{ s_a.get_teacher_url }}">{{ s_a.student.get_short_name }}</a>{% if s_a.student.is_volunteer %} <span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}</td>
+                <td>
+                    <a{% if s_a.student_id not in enrollments %} style="text-decoration: line-through;"{% endif %} href="{{ s_a.get_teacher_url }}">{{ s_a.student.get_short_name }}</a>{% if s_a.student.is_volunteer %} <span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
+{#                    {% if not s_a.has_unread %}<a href="#" style="color:#777;" class="mark-as-unread pull-right"><i class="fa fa-eye-slash" aria-hidden="true"></i></a>{% endif %}#}
+                </td>
                 <td>
                     <span class="assignment-status {{ s_a.state|to_css }}">{{ s_a.state_short }}</span>
                 </td>
@@ -111,12 +123,3 @@
 </div>
 {% endlocaltime %}
 {% endblock content %}
-
-{% block stylesheets %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
-{% endblock stylesheets %}
-
-{% block javascripts %}
-    {% render_bundle 'forms' 'js' %}
-    <script type="text/javascript" src="{% static "js/assignment-submissions.js" %}"></script>
-{% endblock javascripts %}

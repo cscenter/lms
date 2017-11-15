@@ -1,20 +1,21 @@
-(function ($) {
-    "use strict";
+import "bootstrap-fileinput";
+import "bootstrap-fileinput/js/locales/ru";
+import "vendor/jquery.arrow-increment.min"
 
-    var gradebook = $("#gradebook");
+var gradebook = $("#gradebook");
 
-    var buttonDownloadCSV = $(".marks-sheet-csv-link");
+var buttonDownloadCSV = $(".marks-sheet-csv-link");
 
-    var scrollButtonsWrapper = $(".header", gradebook);
+var scrollButtonsWrapper = $(".header", gradebook);
 
-    var finalGradesWrapper = $("#grades");
+var finalGradesWrapper = $("#grades");
 
-    var totalWrapper = $("#total");
+var totalWrapper = $("#total");
 
-    var assignmentsWrapper = $("#assignments");
+var assignmentsWrapper = $("#assignments");
 
     var fn = {
-        Launch: function () {
+        launch: function () {
             fn.downloadCSVButton();
             fn.finalGradeSelect();
             fn.assignmentGradeInputValidator();
@@ -179,8 +180,4 @@
         }
     };
 
-    $(document).ready(function () {
-        fn.Launch();
-    });
-
-})(jQuery);
+export default fn;

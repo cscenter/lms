@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    devtool: "cheap-eval-source-map",
+    devtool: "cheap-module-source-map",
 
     output: {
         publicPath: 'http://localhost:8081/static/',
@@ -15,10 +15,14 @@ module.exports = {
             },
             '__DEVELOPMENT__': true
         }),
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin()
     ],
 
-      devServer: {
+    devServer: {
         contentBase: path.resolve(__dirname, '../cscsite/assets/js/dist'),
-          port: 8081,
-      },
+        port: 8081,
+        hot: true,
+        headers: { "Access-Control-Allow-Origin": "*" }
+    },
 };

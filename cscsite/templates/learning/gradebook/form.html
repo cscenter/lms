@@ -2,14 +2,16 @@
 
 {% load staticfiles %}
 {% load i18n %}
+{% load render_bundle from webpack_loader %}
+
+{% block body_attrs %} data-init-section="gradebook"{% endblock body_attrs %}
 
 {% block stylesheets %}
     <link href="{% static "css/vendor/fileinput/fileinput.min.css" %}" rel="stylesheet">
 {% endblock stylesheets %}
 
-
 {% block javascripts %}
-    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
+    {% render_bundle "teaching" "js" %}
     {% if request.user.has_access_to_gradebook_emails %}
         <script>
             $(function () {

@@ -9,7 +9,7 @@
 
 {% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
-{% block body_class %} gray{% endblock body_class %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
 
 {% block javascripts %}
     {% render_bundle "admission" "js" %}
