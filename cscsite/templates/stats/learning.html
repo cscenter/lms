@@ -4,7 +4,7 @@
 {% load staticfiles %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_class %} gray{% endblock body_class %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
 
 {% block stylesheets %}
      <link href="{% static "css/vendor/c3.min.css" %}" rel="stylesheet">
