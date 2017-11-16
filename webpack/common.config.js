@@ -110,12 +110,14 @@ const common = {
                         }
                     }
                 ],
-                include: path.resolve(__assetsdir, "src/js")
+                include: path.resolve(__assetsdir, "src/js"),
+                exclude: [
+                    path.resolve(__assetsdir, "src/js/center/index.js"),
+                    path.resolve(__assetsdir, "src/js/club/index.js"),
+                ]
             },
             {
                 test: /\.scss$/,
-                // include: [PATHS.center_styles],
-                // include: path.resolve(__assetsdir, "src/js"),
                 exclude: __nodemodulesdir,
                 use: extractScss.extract({
                     fallback: 'style-loader', // inject CSS to page
