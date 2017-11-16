@@ -55,7 +55,7 @@ const VENDOR = [
     // 'redux',
     // 'react-router-redux',
     // 'jquery',
-    // 'bootstrap-sass',
+    // 'bootstrap-sass', TODO: put bootstra scss here?
     path.join(__assetsdir, '/src/js/editor.js'),
 ];
 
@@ -94,9 +94,7 @@ const common = {
             path.join(__assetsdir, '/src/js'),
             __nodemodulesdir,
         ],
-        alias: {
-
-        }
+        symlinks: false
     },
 
     module: {
@@ -105,14 +103,15 @@ const common = {
                 test: /\.js$/,
                 use: [
                     {
-                        loader: 'babel-loader'
+                        loader: 'babel-loader' // ?cacheDirectory=true
                     }
                 ],
-                exclude: __nodemodulesdir,
+                include: path.resolve(__assetsdir, "src/js"),
             },
             {
                 test: /\.scss$/,
                 // include: [PATHS.center_styles],
+                // include: path.resolve(__assetsdir, "src/js"),
                 exclude: __nodemodulesdir,
                 use: extractScss.extract({
                     fallback: 'style-loader', // inject CSS to page
@@ -152,7 +151,7 @@ const common = {
                             options: {
                                 sourceMap: true, // need this for `resolve-url-loader`
                                 outputStyle: 'expanded',
-                                // includePaths: [...project.paths.client('styles'), './node_modules',]
+                                includePaths: [__nodemodulesdir,]
                             }
                         }
                     ]

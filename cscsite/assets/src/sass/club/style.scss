@@ -26,7 +26,7 @@
 @import "../center/components/editor";
 @import "top_menu.scss";
 // Make sure to run `grunt build` from `csc` dir until we replace grunt with webpack.
-@import "./node_modules/magnific-popup/src/css/main.scss";
+@import "magnific-popup/src/css/main.scss";
 
 .bg-gray {
   background-color: $background-grey;
