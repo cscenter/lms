@@ -11,7 +11,8 @@
 {% endblock stylesheets %}
 
 {% block javascripts %}
-    {% render_bundle "teaching" "js" %}
+    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
+{#    {% render_bundle "teaching" "js" %}#}
     {% if request.user.has_access_to_gradebook_emails %}
         <script>
             $(function () {

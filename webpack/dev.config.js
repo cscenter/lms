@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    devtool: "cheap-module-source-map",
+    devtool: "cheap-eval-source-map",
 
     output: {
         publicPath: 'http://localhost:8081/static/',
