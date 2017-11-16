@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "description": "Webpack",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --progress --config webpack/common.config.js",
-    "dev": "webpack --progress --display-error-details --config webpack/common.config.js --watch --colors",
-    "prod": "cross-env NODE_ENV=production webpack --progress --config webpack/common.config.js --display-error-details --display-modules --display-optimization-bailout"
+    "prod": "NODE_ENV=production webpack --config webpack/common.config.js --progress --display-error-details --display-modules --display-optimization-bailout"
   },
   "repository": {
     "type": "git",
@@ -50,8 +48,7 @@
     "babel-preset-stage-0": "^6.16.0",
     "browserslist": "^2.6.1",
     "clean-webpack-plugin": "^0.1.14",
-    "cross-env": "^5.1.1",
-    "css-loader": "^0.28.7",
+    "css-loader": "^0.14.5",
     "eslint": "^3.11.1",
     "eslint-config-airbnb": "^13.0.0",
     "eslint-plugin-import": "^2.2.0",

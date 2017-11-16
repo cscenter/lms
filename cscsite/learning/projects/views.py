@@ -773,7 +773,7 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
         return qs.select_related("project_student__project")
 
     def form_valid(self, form):
-        response = super(ReportUpdateStatusView, self).form_valid(form)
+        response = super().form_valid(form)
         report = self.object
         project_id = report.project_student.project_id
         if "status" in form.changed_data and report.status == Report.REVIEW:

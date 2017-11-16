@@ -5,7 +5,8 @@ const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-const DEBUG = process.env.NODE_ENV !== 'production';
+const DEBUG = (process.env.NODE_ENV !== "production");
+
 const extractScss = new ExtractTextPlugin({
     filename: "[name].[contenthash].css",
     allChunks: true,
@@ -55,7 +56,7 @@ const VENDOR = [
     // 'redux',
     // 'react-router-redux',
     // 'jquery',
-    // 'bootstrap-sass', TODO: put bootstra scss here?
+    // 'bootstrap-sass',
     path.join(__assetsdir, '/src/js/editor.js'),
 ];
 
@@ -67,7 +68,7 @@ const common = {
         club_styles: PATHS.club_styles,
         main: PATHS.common,
         profile: PATHS.profile,
-        forms: PATHS.forms,
+        forms: PATHS.forms, // TODO: Should it be DLL instead?
         admission: PATHS.admission,
         learning: PATHS.learning,
         teaching: PATHS.teaching,
@@ -103,10 +104,13 @@ const common = {
                 test: /\.js$/,
                 use: [
                     {
-                        loader: 'babel-loader' // ?cacheDirectory=true
+                        loader: 'babel-loader',
+                        options: {
+                            cacheDirectory: true  // Improve performance
+                        }
                     }
                 ],
-                include: path.resolve(__assetsdir, "src/js"),
+                include: path.resolve(__assetsdir, "src/js")
             },
             {
                 test: /\.scss$/,
@@ -141,7 +145,7 @@ const common = {
                         {
                             // All urls must be relative to the entry-file, workaround for this
                             // More about this problem: https://github.com/webpack-contrib/sass-loader#problems-with-url
-                            loader: 'resolve-url-loader', // use url(...) paths relative to source .scss file instead of entry-file
+                            loader: 'resolve-url-loader',
                             options: {
                                 sourceMap: DEBUG
                             }
@@ -153,7 +157,7 @@ const common = {
                                 outputStyle: 'expanded',
                                 includePaths: [__nodemodulesdir,]
                             }
-                        }
+                        },
                     ]
                 }),
             },
