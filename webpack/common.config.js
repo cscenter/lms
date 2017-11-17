@@ -207,7 +207,8 @@ const common = {
         // }),
         // extract all common modules to vendor so we can load multiple apps in one page
         new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor"
+            name: "vendor",
+            // TODO: explicitely remove styles chunks here?
         }),
         new webpack.optimize.CommonsChunkPlugin({
             name: "manifest",
