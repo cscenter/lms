@@ -138,12 +138,12 @@ table {
   }
 
   &._spb {
-    background: url(../../img/club/banner_spbw.jpg) top center no-repeat;
+    background: url("../../img/club/banner_spbw.jpg") top center no-repeat;
     background-size: 100%;
   }
 
   &._kzn {
-    background: url(../../img/club/banner_kazan.jpg) top center no-repeat;
+    background: url("../../img/club/banner_kazan.jpg") top center no-repeat;
     background-size: 100%;
   }
 }
@@ -252,13 +252,6 @@ html {
 .news-metainfo {
   color: #AAA;
   text-align: right;
-}
-
-.index-image-container {
-  margin-top: -40px;
-  background: url("") repeat-x;
-  width: 920px !important;
-  overflow-x: hidden;
 }
 
 .callout h1 {

@@ -1,4 +1,4 @@
-Django==1.10.7
+Django==1.10.8
 
 requests==2.13.0
 unicodecsv==0.14.1
