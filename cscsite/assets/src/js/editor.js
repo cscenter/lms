@@ -22,8 +22,15 @@ export default class UberEditor {
 
         const opts = {
             container: $container[0],
-            textarea: $textarea[0],
-            parser: null,
+            textarea: textarea,
+            parser: function(str) {
+                // EpicEditor inserts "parsed" html, later we do request
+                // to backend in `preview` callback and inserts really
+                // parsed text input.
+                // To avoid text blinking between those two actions,
+                // lets return empty string from here.
+                return "";
+            },
             focusOnLoad: shouldFocus,
             basePath: "/static/js/vendor/EpicEditor-v0.2.2",
             clientSideStorage: autoSaveEnabled,
@@ -48,7 +55,6 @@ export default class UberEditor {
                 autoSave: 200
             };
         }
-
         const editor = new EpicEditor(opts);
         editor.load();
 
@@ -64,11 +70,9 @@ export default class UberEditor {
         previewer.body.appendChild(mathjax);
 
         editor.on('preview', function () {
-            const contentDocument
-                = editor.getElement('previewerIframe').contentDocument;
-            let target = $("#epiceditor-preview", contentDocument).get(0);
-
-            const text = _unescape(target.innerHTML);
+            let text = editor._textareaElement.value;
+            const previewerDocument = editor.getElement('previewer');
+            let target = previewerDocument.getElementById('epiceditor-preview');
             if (text.length > 0) {
                 $.ajax({
                     method: "POST",
@@ -90,8 +94,7 @@ export default class UberEditor {
                                     );
                                     $container.height(height);
                                 }
-                                editor.reflow();
-
+                                editor.reflow('height');
                                 });
                         });
                     }
@@ -109,7 +112,6 @@ export default class UberEditor {
                         type: "error"
                     });
                 });
-
             }
 
         });
