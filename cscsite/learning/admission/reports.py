@@ -11,7 +11,7 @@ from django.utils.numberformat import format
 from django.utils.encoding import force_text
 from collections import OrderedDict
 
-from core.views import ReportFileOutput
+from learning.reports import ReportFileOutput
 from learning.admission.models import Applicant, Interview, Campaign, Comment
 
 

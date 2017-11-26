@@ -1,5 +1,6 @@
 import itertools
 from collections import OrderedDict
+from typing import Optional
 
 import unicodecsv as csv
 from django.contrib import messages
@@ -10,11 +11,12 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+from vanilla import FormView
 
 from core.exceptions import Redirect
 from learning import utils
-from learning.forms import GradeBookFormFactory, \
-    MarksSheetTeacherImportGradesForm
+from learning.forms import MarksSheetTeacherImportGradesForm
+from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.management.imports import ImportGradesByStepicID, \
     ImportGradesByYandexLogin
 from learning.models import Semester, CourseOffering, StudentAssignment, \
@@ -107,9 +109,28 @@ class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
         return context
 
 
+def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
+    # TODO: add tests
+    try:
+        filter_kwargs = dict(
+            city=get_params['city'].lower(),
+            course__slug=get_params['course_slug'],
+            semester__type=get_params['semester_type'],
+            semester__year=int(get_params['semester_year'])
+        )
+        if not user.is_curator:
+            filter_kwargs["teachers"] = user
+        return (CourseOffering.objects
+                .select_related('semester', 'course')
+                .get(**filter_kwargs))
+    except (ValueError, ObjectDoesNotExist):
+        return None
+
+
+
 # TODO: add transaction.atomic
 # TODO: refactor with `gradebook` service
-class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
+class GradeBookTeacherView(TeacherOnlyMixin, FormView):
     is_for_staff = False
     user_type = 'teacher'
     template_name = "learning/gradebook/form.html"
@@ -124,26 +145,12 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get_form_class(self):
-        try:
-            semester_year = int(self.kwargs['semester_year'])
-        except (ValueError, TypeError):
-            raise Http404('Course offering not found')
-
-        co_queryset = CourseOffering.objects
-        if not self.request.user.is_curator:
-            co_queryset = co_queryset.filter(teachers=self.request.user)
-        # TODO: add tests
-        city_code = self.kwargs['city'].lower()
-        co_queryset = co_queryset.filter(city=city_code)
-        try:
-            course_offering = (co_queryset
-                               .select_related('semester', 'course')
-                               .get(course__slug=self.kwargs['course_slug'],
-                                    semester__type=self.kwargs['semester_type'],
-                                    semester__year=semester_year))
-        except ObjectDoesNotExist:
+        course_offering = _get_course_offering(self.kwargs, self.request.user)
+        if course_offering is None:
             raise Http404('Course offering not found')
         self.course_offering = course_offering
+
+        data = gradebook_data(course_offering)
 
         # Sacrifice attributes access for better performance
         student_assignments = (
@@ -168,15 +175,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
                            .select_related("student"))
         self.enrollment_list = enrollment_list
 
-        course_offering_list = (co_queryset
-                                .order_by('-semester__year',
-                                          '-semester__type',
-                                          '-pk')
-                                .select_related('semester', 'course'))
-        self.course_offering_list = course_offering_list
-
-        return (GradeBookFormFactory.build_form_class(student_assignments,
-                                                      enrollment_list))
+        return GradeBookFormFactory.build_form_class(data)
 
     def get_initial(self):
         return (GradeBookFormFactory
@@ -184,17 +183,11 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
                                       self.enrollment_list))
 
     def get_success_url(self):
-        co = self.course_offering
-        if self.is_for_staff:
-            url_name = 'staff:course_markssheet_staff'
-        else:
-            url_name = 'markssheet_teacher'
-        messages.info(self.request, _('Gradebook successfully saved.'),
+        messages.info(self.request,
+                      _('Gradebook successfully saved.'),
                       extra_tags='timeout')
-        return reverse(url_name, args=[co.get_city(),
-                                       co.course.slug,
-                                       co.semester.year,
-                                       co.semester.type])
+        return self.course_offering.get_gradebook_url(
+            for_curator=self.is_for_staff)
 
     def form_valid(self, form):
         a_s_index, enrollment_index = \
@@ -215,25 +208,23 @@ class GradeBookTeacherView(TeacherOnlyMixin, generic.FormView):
                 enrollment.save()
                 continue
         if final_grade_updated:
-            self.recalculate_grading_type()
+            self.course_offering.recalculate_grading_type()
         return redirect(self.get_success_url())
-
-    def recalculate_grading_type(self):
-        """Update grading type for binded course offering if needed"""
-        es = (Enrollment.active
-              .filter(course_offering=self.course_offering)
-              .values_list("grade", flat=True))
-        grading_type = GRADING_TYPES.default
-        if not any(filter(lambda g: g in [GRADES.good, GRADES.excellent], es)):
-            grading_type = GRADING_TYPES.binary
-        if self.course_offering.grading_type != grading_type:
-            self.course_offering.grading_type = grading_type
-            self.course_offering.save()
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['course_offering'] = self.course_offering
-        context['course_offering_list'] = self.course_offering_list
+        # List of user gradebooks
+        filter_kwargs = {}
+        if not self.request.user.is_curator:
+            filter_kwargs["teachers"] = self.request.user
+        course_offering_list = (CourseOffering.objects
+                                .filter(**filter_kwargs)
+                                .order_by('-semester__year',
+                                          '-semester__type',
+                                          '-pk')
+                                .select_related('semester', 'course'))
+        context['course_offering_list'] = course_offering_list
         context['user_type'] = self.user_type
 
         students = OrderedDict()
@@ -317,90 +308,33 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        course_slug = kwargs['course_slug']
-        semester_slug = kwargs['semester_slug']
-        try:
-            semester_year, semester_type = semester_slug.split('-')
-            semester_year = int(semester_year)
-        except (ValueError, TypeError):
+        course_offering = _get_course_offering(self.kwargs, request.user)
+        if course_offering is None:
             raise Http404('Course offering not found')
-        user = request.user
-        if user.is_authenticated and user.is_curator:
-            base_qs = CourseOffering.objects
-        else:
-            base_qs = CourseOffering.objects.filter(teachers=user)
 
-        # TODO: add tests
-        city_code = self.kwargs['city'].lower()
-        base_qs = base_qs.filter(city=city_code)
-
-        try:
-            co = base_qs.get(
-                course__slug=course_slug,
-                semester__type=semester_type,
-                semester__year=semester_year)
-        except ObjectDoesNotExist:
-            raise Http404('Course offering not found')
-        a_ss = (StudentAssignment.objects
-                .filter(assignment__course_offering=co)
-                .order_by('student', 'assignment')
-                .select_related('assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__course',
-                                'assignment__course_offering__semester',
-                                'student'))
-        enrollments = (Enrollment.active
-                       .filter(course_offering=co)
-                       .select_related('course_offering', 'student'))
-        structured = OrderedDict()
-        enrollment_grades = {}
-        for enrollment in enrollments:
-            student = enrollment.student
-            enrollment_grades[student] = enrollment.grade_display
-            if student not in structured:
-                structured[student] = OrderedDict()
-        for a_s in a_ss:
-            if a_s.student not in structured:
-                continue  # student isn't enrolled
-            structured[a_s.student][a_s.assignment] = a_s.grade
-
-        header = structured.values()
-        # FIXME: raise StopIteration if no students found. Add test
-        header = next(iter(header)).keys()
-        for _, by_assignment in structured.items():
-            # we should check for "assignment consistency": that all
-            # assignments are similar for all students in particular
-            # course offering
-            continue
-            # FIXME: wtf?
-            assert by_assignment.keys() == header
+        data = gradebook_data(course_offering)
 
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename \
-            = "{}-{}.csv".format(kwargs['course_slug'],
-                                 kwargs['semester_slug'])
+            = "{}-{}-{}.csv".format(kwargs['course_slug'],
+                                    kwargs['semester_year'],
+                                    kwargs['semester_type'])
         response['Content-Disposition'] \
             = 'attachment; filename="{}"'.format(filename)
 
         writer = csv.writer(response)
-        # Write headers
         common_headers = ['Фамилия', 'Имя', 'Яндекс ID']
-        if user.has_access_to_gradebook_emails():
-            common_headers.append("Электронный адрес")
         writer.writerow(common_headers +
-                        [a.title for a in header] +
+                        [a.title for a in data.assignments.values()] +
                         ['Итоговая оценка'])
 
-        for student, by_assignment in structured.items():
-            common_columns = [student.last_name, student.first_name,
-                              student.yandex_id]
-            if user.has_access_to_gradebook_emails():
-                common_columns.append(student.email)
+        for index, student in enumerate(data.students.values()):
             writer.writerow(
-                [(x if x is not None else '') for x in
-                 itertools.chain(common_columns,
-                                 by_assignment.values(),
-                                 [enrollment_grades[student]])])
+                itertools.chain(
+                    [student.last_name, student.first_name, student.yandex_id],
+                    [(a["score"] if a and a["score"] is not None else '')
+                     for a in data.submissions[index]],
+                    [student.final_grade_display]))
         return response
 
 

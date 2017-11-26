@@ -147,7 +147,7 @@ teaching_section_patterns = url(
             url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
                 GradeBookTeacherView.as_view(),
                 name='markssheet_teacher'),
-            url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_slug>[-\w]+)\.csv$',
+            url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/csv/$',
                 GradeBookTeacherCSVView.as_view(),
                 name='markssheet_teacher_csv'),
             url(r'^(?P<course_offering_pk>\d+)/import/stepic$',

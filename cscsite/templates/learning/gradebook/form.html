@@ -43,7 +43,7 @@
           <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
         </div>
         <div class="btn-group">
-          <a href="{% url 'markssheet_teacher_csv' course_offering.get_city course_offering.course.slug course_offering.semester.slug %}"
+          <a href="{{ course_offering.get_gradebook_csv_url }}"
              target="_blank"
              class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
         </div>
@@ -149,8 +149,8 @@
   </form>
 </div>
 
-{% include "learning/gradebook/_modal_stepic.html" %}
-{% include "learning/gradebook/_modal_yandex.html" %}
+{#{% include "learning/gradebook/_modal_stepic.html" %}#}
+{#{% include "learning/gradebook/_modal_yandex.html" %}#}
 
 {% endblock content %}
 

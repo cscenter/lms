@@ -7,17 +7,13 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, \
-    MinValueValidator, MaxLengthValidator
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import CityAwareSplitDateTimeField, \
-    CityAwareAdminSplitDateTimeWidget, CityAwareModelForm
+    CityAwareModelForm
 from core.forms import Ubereditor
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
-from learning.settings import GRADES, FOUNDATION_YEAR
 from learning.widgets import CityAwareSplitDateTimeWidget, DateInputAsTextInput, \
     TimeInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
@@ -428,43 +424,3 @@ class MarksSheetTeacherImportGradesForm(forms.Form):
             allowed_mimetypes=('text/csv', 'application/vnd.ms-excel')),
         ]
     )
-
-
-class GradeBookFormFactory(object):
-
-    GRADE_PREFIX = "a_s_{0}"
-    FINAL_GRADE_PREFIX = "final_grade_{0}"
-
-    @classmethod
-    def build_form_class(cls, a_s_list, enrollment_list):
-        """New form.Form subclass with StudentAssignment's list and Enrollment's grade
-
-        Note:
-            Django's widget with show_hidden_initial=True is rendered
-            extremely slow. We get all initial values in  .get_form_class method,
-            so it's unceccessary at all to use this feature.
-        """
-        fields = {cls.GRADE_PREFIX.format(a_s["pk"]):
-                  forms.IntegerField(min_value=0,
-                                     max_value=a_s["assignment__grade_max"],
-                                     required=False)
-                  for a_s in a_s_list if not a_s["assignment__is_online"]}
-        fields.update({cls.FINAL_GRADE_PREFIX.format(e.pk):
-                       forms.ChoiceField(GRADES) for e in enrollment_list})
-        return type(str('MarksSheetTeacherForm'), (forms.Form,), fields)
-
-    @classmethod
-    def build_indexes(cls, student_assignments_list, enrollment_list):
-        sas = student_assignments_list
-        a_s_index = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s for a_s in sas}
-        enrollment_index = {cls.FINAL_GRADE_PREFIX.format(e.pk): e for e in
-                            enrollment_list}
-        return a_s_index, enrollment_index
-
-    @classmethod
-    def transform_to_initial(cls, a_s_list, enrollment_list):
-        initial = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s["grade"] for a_s in
-                   a_s_list if not a_s["assignment__is_online"]}
-        initial.update({cls.FINAL_GRADE_PREFIX.format(e.pk): e.grade for e in
-                        enrollment_list})
-        return initial

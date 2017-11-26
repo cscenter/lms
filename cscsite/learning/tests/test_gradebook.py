@@ -1,4 +1,6 @@
+import datetime
 import pytest
+import pytz
 import unicodecsv
 from django.test import TestCase
 from django.urls import reverse
@@ -7,8 +9,10 @@ from django.utils.encoding import smart_bytes
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory
 from learning.forms import MarksSheetTeacherImportGradesForm
+from learning.gradebook import gradebook_data
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS
+from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
+    STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
@@ -83,8 +87,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         co = CourseOfferingFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         EnrollmentFactory.create(student=student, course_offering=co)
-        url = reverse('markssheet_teacher_csv',
-                      args=[co.get_city(), co.course.slug, co.semester.slug])
+        url = co.get_gradebook_url(format="csv")
         self.assertLoginRedirect(url)
         test_groups = [
             [],
@@ -101,14 +104,13 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
 
     def test_csv(self):
         teacher = TeacherCenterFactory()
-        student1, student2 = UserFactory.create_batch(2, groups=['Student [CENTER]'])
+        student1, student2 = StudentCenterFactory.create_batch(2)
         co = CourseOfferingFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
-        [EnrollmentFactory.create(student=s, course_offering=co)
-            for s in [student1, student2]]
-        url = reverse('markssheet_teacher_csv',
-                      args=[co.get_city(), co.course.slug, co.semester.slug])
-        combos = [(a, s, grade+1)
+        for s in [student1, student2]:
+            EnrollmentFactory.create(student=s, course_offering=co)
+        url = co.get_gradebook_url(format="csv")
+        combos = [(a, s, grade + 1)
                   for ((a, s), grade)
                   in zip([(a, s)
                           for a in [a1, a2]
@@ -286,3 +288,73 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertIn('messages', resp.cookies)
         # TODO: provide testing with request.FILES. Move it to test_utils...
     # TODO: write test for user search by stepic id
+
+
+@pytest.mark.django_db
+def test_gradebook_data():
+    co = CourseOfferingFactory()
+    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course_offering=co)
+    a1, a2, a3 = AssignmentFactory.create_batch(3, course_offering=co,
+                                                grade_min=1, grade_max=10)
+    data = gradebook_data(co)
+    assert len(data.assignments) == 3
+    assert len(data.students) == 5
+    e1.is_deleted = True
+    e1.save()
+    data = gradebook_data(co)
+    assert len(data.assignments) == 3
+    assert len(data.students) == 4
+    e1.is_deleted = False
+    e1.save()
+    # Check assignments order (should be sorted by deadline)
+    a1.deadline_at = datetime.datetime(2017, 11, 1, 0, 0, 0, 0, tzinfo=pytz.UTC)
+    a2.deadline_at = datetime.datetime(2017, 11, 9, 0, 0, 0, 0, tzinfo=pytz.UTC)
+    a3.deadline_at = datetime.datetime(2017, 11, 5, 0, 0, 0, 0, tzinfo=pytz.UTC)
+    a1.save()
+    a2.save()
+    a3.save()
+    data = gradebook_data(co)
+    assert list(data.assignments.values()) == [a1, a3, a2]
+    # Check students order (should be sorted by surname)
+    s1 = e1.student
+    s3 = e3.student
+    s1.last_name, s3.last_name = s3.last_name, s1.last_name
+    s1.save()
+    s3.save()
+    data = gradebook_data(co)
+    assert list(data.students) == [e3.student_id, e2.student_id, e1.student_id,
+                                   e4.student_id, e5.student_id]
+    # Check grid values
+    sa = StudentAssignment.objects.get(assignment=a2, student_id=e3.student_id)
+    sa.grade = 3
+    sa.save()
+    data = gradebook_data(co)
+    s3_index = 0
+    a2_index = 2
+    s3_a2_progress = data.submissions[s3_index][a2_index]
+    assert s3_a2_progress is not None
+    assert s3_a2_progress["score"] == 3
+    for row in data.submissions:
+        for cell in row:
+            assert cell is not None
+    # Check total score
+    data = gradebook_data(co)
+    assert data.students[s1.pk].total_score == 0
+    assert data.students[e2.student_id].total_score == 0
+    assert data.students[s3.pk].total_score == 3
+    assert data.students[e4.student_id].total_score == 0
+    assert data.students[e5.student_id].total_score == 0
+    # Check grid with expelled students
+    e5.student.status = STUDENT_STATUS.expelled
+    e5.student.save()
+    a_new = AssignmentFactory(course_offering=co, grade_min=3, grade_max=7)
+    data = gradebook_data(co)
+    s5_index = 4
+    new_a_index = 3
+    for x, row in enumerate(data.submissions):
+        for y, cell in enumerate(row):
+            if x == s5_index and y == new_a_index:
+                assert data.submissions[x][y] is None
+            else:
+                assert data.submissions[x][y] is not None
+
