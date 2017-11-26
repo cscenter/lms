@@ -129,7 +129,9 @@
                             </div>
                             {% spaceless %}
                                 {% for student_id, student_assignment in assignment.students.items %}
-                                    {% if assignment.header.is_online %}
+                                    {% if not student_assignment %}
+                                        <div class="cell score{% if forloop.counter|divisibleby:2 %} even{% endif %}"></div>
+                                    {% elif assignment.header.is_online %}
                                         <div class="cell score{% if forloop.counter|divisibleby:2 %} even{% endif %}">
                                             <a href="{% url 'a_s_detail_teacher' student_assignment.pk %}">{{ student_assignment.state }}</a>
                                         </div>
