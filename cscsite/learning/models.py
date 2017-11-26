@@ -325,8 +325,22 @@ class CourseOffering(TimeStampedModel):
         return city_aware_reverse('course_offering_unenroll',
                                   kwargs=self._get_url_kwargs())
 
-    def get_gradebook_url(self):
-        return reverse("markssheet_teacher", kwargs={
+    def get_gradebook_url(self, for_curator=False, format=None):
+        if for_curator:
+            url_name = "staff:course_markssheet_staff"
+        elif format == "csv":
+            url_name = "markssheet_teacher_csv"
+        else:
+            url_name = "markssheet_teacher"
+        return reverse(url_name, kwargs={
+            "course_slug": self.course.slug,
+            "city": self.get_city(),
+            "semester_type": self.semester.type,
+            "semester_year": self.semester.year,
+        })
+    # TODO: Replace with `get_gradebook_url` after migrating to jinja2
+    def get_gradebook_csv_url(self):
+        return reverse("markssheet_teacher_csv", kwargs={
             "course_slug": self.course.slug,
             "city": self.get_city(),
             "semester_type": self.semester.type,
@@ -396,6 +410,18 @@ class CourseOffering(TimeStampedModel):
         if self.grading_type == GRADING_TYPES.binary:
             return "__binary"
         return ""
+
+    def recalculate_grading_type(self):
+        """Update grading type for binded course offering if needed"""
+        es = (Enrollment.active
+              .filter(course_offering=self)
+              .values_list("grade", flat=True))
+        grading_type = GRADING_TYPES.default
+        if not any(g for g in es if g in [GRADES.good, GRADES.excellent]):
+            grading_type = GRADING_TYPES.binary
+        if self.grading_type != grading_type:
+            self.grading_type = grading_type
+            self.save()
 
     def failed_by_student(self, student, **kwargs) -> bool:
         if (self.is_open or not self.is_completed or

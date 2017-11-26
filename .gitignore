@@ -14,5 +14,6 @@ cscsite/static/
 local/
 .cache/
 .coverage
+package-lock.json
 node_modules/
 *-debug.log

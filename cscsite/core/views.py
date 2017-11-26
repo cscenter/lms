@@ -2,23 +2,15 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import io
 import types
 
-import datetime
-from abc import abstractmethod, ABCMeta
-
-import unicodecsv
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render_to_response
-from django.utils.encoding import smart_text, python_2_unicode_compatible, \
-    force_text
+from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.views import generic
 from vanilla import CreateView
-from xlsxwriter import Workbook
 
 from .utils import render_markdown
 
@@ -101,78 +93,6 @@ class MarkdownRenderView(LoginRequiredMixin, generic.base.View):
 
     def __str__(self):
         return ''
-
-
-class ReportFileOutput(object):
-    """Methods to output csv and xlsx"""
-    headers = None
-    data = None
-    debug = False
-
-    __metaclass__ = ABCMeta
-
-    # TODO: Create base cls for ReportFile?
-    @abstractmethod
-    def export_row(self, row):
-        raise NotImplementedError()
-
-    def output_csv(self):
-        output = io.BytesIO()
-        w = unicodecsv.writer(output, encoding='utf-8')
-
-        w.writerow(self.headers)
-        for data_row in self.data:
-            row = self.export_row(data_row)
-            w.writerow(row)
-        output.seek(0)
-        response = HttpResponse(output.read(),
-                                content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = \
-            'attachment; filename="{}.csv"'.format(self.get_filename())
-
-        if self.debug:
-            return self.debug_response()
-
-        return response
-
-    def output_xlsx(self):
-        output = io.BytesIO()
-        workbook = Workbook(output, {'in_memory': True})
-        worksheet = workbook.add_worksheet()
-
-        format = workbook.add_format()
-
-        format.set_bold()
-        for index, header in enumerate(self.headers):
-            worksheet.write(0, index, header, format)
-
-        format.set_bold(False)
-        for row_index, raw_row in enumerate(self.data, start=1):
-            row = self.export_row(raw_row)
-            for col_index, value in enumerate(row):
-                value = "" if value is None else force_text(value)
-                worksheet.write(row_index, col_index, force_text(value), format)
-
-        workbook.close()
-        output.seek(0)
-        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        response = HttpResponse(output.read(), content_type=content_type)
-        response['Content-Disposition'] = \
-            'attachment; filename="{}.xlsx"'.format(self.get_filename())
-
-        if self.debug:
-            return self.debug_response()
-
-        return response
-
-    def get_filename(self):
-        today = datetime.datetime.now()
-        return "report_{}".format(today.strftime("%d.%m.%Y"))
-
-    def debug_response(self):
-        # TODO: replace with table view
-        return HttpResponse("<html><body></body></html>",
-                            content_type='text/html; charset=utf-8')
 
 
 class MarkdownHowToHelpView(generic.TemplateView):
