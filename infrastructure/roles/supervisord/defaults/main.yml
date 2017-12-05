@@ -1,7 +1,6 @@
 # defaults file for supervisor
 ---
 supervisor_version: latest
-supervisor_state: started
 supervisor_unix_http_server_file: /var/run/supervisor.sock
 supervisor_unix_http_server_chmod: '0700'
 
@@ -13,8 +12,11 @@ supervisor_configuration_file: /etc/supervisor/supervisord.conf
 supervisor_inet_http_server_enabled: false
 supervisor_inet_http_server_port: 9001
 supervisor_inet_http_server_username: admin
-supervisor_inet_http_server_password: 'supervisor_admin_password'
+supervisor_inet_http_server_password: '4ubA&Et=ASPe'
 
+supervisor_supervisord_restart_sec: 5
+
+supervisor_supervisord_nodaemon: false
 supervisor_supervisord_logfile: /var/log/supervisor/supervisord.log
 supervisor_supervisord_pidfile: /var/run/supervisord.pid
 supervisor_supervisord_childlogdir: /var/log/supervisor
@@ -27,7 +29,3 @@ supervisor_programs_present: {}
 supervisor_programs_absent: {}
 supervisor_groups_present: {}
 supervisor_groups_absent: {}
-
-supervisor_superlance: false              # Install superlance (http://superlance.readthedocs.org/
-supervisor_events: []                     # similar to tasks/programs but for eventlisteners like crashmail
-supervisor_events_email_to: "webmaster@localhost.ru"

@@ -2,29 +2,50 @@
 ---
 - include: install.yml
   tags:
+    - configuration
     - supervisor
     - supervisor-install
 
 - include: configure.yml
   tags:
+    - configuration
     - supervisor
     - supervisor-configure
 
+- include: service-initd.yml
+  when: ansible_service_mgr != 'systemd'
+  tags:
+    - configuration
+    - supervisor
+    - supervisor-configure
+    - supervisor-configure-initd
+
+- include: service-systemd.yml
+  when: ansible_service_mgr == 'systemd'
+  tags:
+    - configuration
+    - supervisor
+    - supervisor-configure
+    - supervisor-configure-systemd
+
 - include: programs.yml
   tags:
+    - configuration
     - supervisor
     - supervisor-programs
 
 - include: groups.yml
   tags:
+    - configuration
     - supervisor
     - supervisor-groups
 
 - name: start and enable service
   service:
     name: supervisor
-    state: "{{ supervisor_state }}"
-    enabled: true
+    state: "{{ service_default_state | default('started') }}"
+    enabled: "{{ service_default_enabled | default(true) | bool }}"
   tags:
+    - configuration
     - supervisor
     - supervisor-start-enable-service

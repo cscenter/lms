@@ -1,26 +1,19 @@
 ; {{ ansible_managed }}
 
-; set options for a section
-{% macro set_section(section_label, subsections) %}
-{% for section in subsections %}
-[{{ section_label }}:{{ section.name }}]
-{% for option, value in section.items() %}
-{% if option != 'name' %}
-{% if option == 'environment' and value is iterable and value is not string %}
-{{ option }} ={% for k,v in value.items() %}{{ k }}="{{v}}", {% endfor %}
-{% else %}
-{{ option }} = {{ value }}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% endfor %}
-{% endmacro %}
-
 ; supervisor config file
 
 [unix_http_server]
 file={{ supervisor_unix_http_server_file }} ; (the path to the socket file)
 chmod={{ supervisor_unix_http_server_chmod }} ; sockef file mode (default 0700)
+{% if supervisor_unix_http_server_chown is defined %}
+chown = {{ supervisor_unix_http_server_chown }}
+{% endif %}
+{% if supervisor_unix_http_server_username is defined %}
+username = {{ supervisor_unix_http_server_username }}
+{% endif %}
+{% if supervisor_unix_http_server_password is defined %}
+password = {{ supervisor_unix_http_server_password }}
+{% endif %}
 
 {% if supervisor_inet_http_server_enabled %}
 [inet_http_server]
@@ -30,6 +23,7 @@ password = {{ supervisor_inet_http_server_password }}
 {% endif %}
 
 [supervisord]
+nodaemon={{ supervisor_supervisord_nodaemon | default(false) | bool | to_json }} ; (supervisord nodaemon option;default false)
 logfile={{ supervisor_supervisord_logfile }} ; (main log file;default $CWD/supervisord.log)
 pidfile={{ supervisor_supervisord_pidfile }} ; (supervisord pidfile;default supervisord.pid)
 childlogdir={{ supervisor_supervisord_childlogdir }} ; ('AUTO' child log dir, default $TEMP)
@@ -39,9 +33,6 @@ childlogdir={{ supervisor_supervisord_childlogdir }} ; ('AUTO' child log dir, de
 ; added by defining them in separate rpcinterface: sections
 [rpcinterface:supervisor]
 supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
-
-; events
-{{ set_section('eventlistener', supervisor_events) }}
 
 [supervisorctl]
 serverurl={{ supervisor_supervisorctl_serverurl }} ; use a unix:// URL  for a unix socket

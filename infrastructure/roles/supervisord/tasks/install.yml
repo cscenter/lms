@@ -1,10 +1,20 @@
 # tasks file for supervisor
 ---
+- name: install | dependencies
+  apt:
+    name: "{{ item }}"
+    state: "{{ apt_install_state | default('latest') }}"
+    update_cache: true
+    cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) }}"
+  with_items: "{{ supervisor_dependencies }}"
+  tags:
+    - supervisor-install-dependencies
 
 - name: install | supervisor (specific version)
   pip:
     name: supervisor
     version: "{{ supervisor_version }}"
+    executable: pip2
   when: "supervisor_version != 'latest'"
   tags:
     - supervisor-install-specific
@@ -13,10 +23,7 @@
   pip:
     name: supervisor
     state: "{{ supervisor_version }}"
+    executable: pip2
   when: "supervisor_version == 'latest'"
   tags:
     - supervisor-install-latest
-
-- name: Install superlance
-  pip: name=superlance
-  when: supervisor_superlance
