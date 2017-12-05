@@ -5,6 +5,18 @@ for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 ALLOWED_HOSTS = ["dev.compscicenter.ru"]
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'test_cscdb',
+        'USER': 'csc',
+        'PASSWORD': 'FooBar',
+        'HOST': 'localhost',
+        'PORT': ''
+    }
+}
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
