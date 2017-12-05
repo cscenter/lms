@@ -14,6 +14,7 @@
 * fix certbot default email/domain values! They should be real...
 * Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 uses as system 
 `python3` (now py3.4 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
+* Problem with restarting supervisor after `Nginx status`
 
 TODO (important):
 * Now `venv` named like `env_35x`. Need to rename them to `venv` back or update playbooks to handle this new name. 
@@ -21,6 +22,7 @@ Now only `deploy.yml` edited as a workaround for new naming conv.
 * add `registration` app to cscenter, then remove club worker?
 * restore db from s3
 * add tags. Then use it. E.g. `ansible-playbook -i inventory/ec2.py  provision.yml -v -t lvm` setup lvm only
+* Add check for ansible version
 
 Requirements
 ------------

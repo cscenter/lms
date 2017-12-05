@@ -6,8 +6,11 @@
   vars_files:
     - vars/aws.yml
     - roles/app/vars/main.yml
+  vars:
+    app_environment: dev
   roles:
-    - app
+    - role: app
+      app_environment: dev
 
     - role: DavidWittman.redis
       redis_bind: 127.0.0.1
@@ -49,7 +52,6 @@
           programs:
             - rqworker_default
             - rqworker_high
-            - rqworker_club
           priority: 10
       supervisor_superlance: true
       supervisor_events_email_to: "webmaster@compscicenter.ru"

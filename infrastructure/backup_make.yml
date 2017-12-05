@@ -13,7 +13,7 @@
     when: app_user != "cscenter" and app_user != "csclub"
 
   - name: making a backup for {{ app_user }} site
-    sudo_user: "{{ app_user }}"
+    become_user: "{{ app_user }}"
     django_manage:
       command: "{{ item }}"
       app_path: "/home/{{ app_user }}/site/repo"

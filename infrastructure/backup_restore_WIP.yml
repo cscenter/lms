@@ -6,7 +6,7 @@
 
   tasks:
   - name: fetching backup and applying it
-    sudo_user: "{{ app_user }}"
+    become_user: "{{ app_user }}"
     django_manage:
       command: "{{ item }}"
       app_path: "/home/{{ app_user }}/site/repo"

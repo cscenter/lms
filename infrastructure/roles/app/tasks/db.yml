@@ -7,7 +7,7 @@
   ignore_errors: yes
   shell: "pg_dropcluster --stop {{ pg_version }} main"
 
-- name: Change postgres data storage | Drop cluster if exist
+- name: Change postgres data storage | Create cluster
   sudo: yes
   ignore_errors: yes
   shell: "pg_createcluster -d /shared/db/data/ --start -e UTF-8 {{ pg_version }} main"
@@ -51,7 +51,7 @@
   django_manage:
     command: "migrate"
     app_path: "/home/{{ cscenter_user }}/site/repo"
-    settings: "{{ cscenter_user }}.settings.production"
+    settings: "{{ cscenter_user }}.settings.{{ app_environment }}"
     virtualenv: "/home/{{ cscenter_user }}/site/env/"
 
 - name: ensure folder for file-based cache exists

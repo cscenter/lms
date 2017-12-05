@@ -1,5 +1,6 @@
 ---
 
+enable_https: yes
 nginx_tls_path: /etc/nginx/crypto
 certbot_script: /opt/certbot-auto
 certbot_auto_renew: yes

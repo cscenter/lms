@@ -26,6 +26,8 @@
   with_items:
     - logs
     - env
+  tags:
+    - csclub
 
 - name: clone website repo
   become: yes
@@ -44,6 +46,8 @@
     repo: git@github.com:cscenter/site.git
     dest: "/home/{{ csclub_user }}/site/repo"
     key_file: "/home/{{ csclub_user }}/.ssh/id_rsa"
+  tags:
+    - csclub
 
 - name: install CSC website deps for cscenter
   become: yes
@@ -60,6 +64,8 @@
     requirements: "/home/{{ csclub_user }}/site/repo/requirements.txt"
     virtualenv: "/home/{{ csclub_user }}/site/env/"
     virtualenv_python: python3.5
+  tags:
+    - csclub
 
 - name: Copy upstart uwsgi config
   template:
@@ -83,18 +89,26 @@
   tags:
     - uwsgi
 
-- name: Run collectstatic for both apps
-  sudo_user: "{{ item }}"
+- name: Run collectstatic for cscenter
+  become_user: "{{ cscenter_user }}"
   django_manage:
     command: "collectstatic"
-    app_path: "/home/{{ item }}/site/repo"
-    settings: "{{ item }}.settings.production"
-    virtualenv: "/home/{{ item }}/site/env/"
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
+    app_path: "/home/{{ cscenter_user }}/site/repo"
+    settings: "{{ cscenter_user }}.settings.{{ app_environment }}"
+    virtualenv: "/home/{{ cscenter_user }}/site/env/"
   tags:
     - collectstatic
+
+- name: Run collectstatic for csclub
+  become_user: "{{ csclub_user }}"
+  django_manage:
+    command: "collectstatic"
+    app_path: "/home/{{ csclub_user }}/site/repo"
+    settings: "{{ csclub_user }}.settings.{{ app_environment }}"
+    virtualenv: "/home/{{ csclub_user }}/site/env/"
+  tags:
+    - collectstatic
+    - csclub
 
 - name: Create shared media/ folder
   file:

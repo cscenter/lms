@@ -1,6 +1,6 @@
 ---
 - name: daily late-night backup goes in cron
-  sudo_user: "{{ item }}"
+  become_user: "{{ item }}"
   cron:
     name: backup CSC website to S3
     user: "{{ item }}"
@@ -9,16 +9,15 @@
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py dbbackup
-      --settings={{item}}.settings.production
+      --settings={{item}}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscbackup.log
       2>&1
   with_items:
     - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
 
 - name: notify people every 5 minutes (cronjob)
-  sudo_user: "{{ item }}"
+  become_user: "{{ item }}"
   cron:
     name: CSC mail notifier
     user: "{{ item }}"
@@ -26,7 +25,7 @@
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py notify
-      --settings={{ item }}.settings.production
+      --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
       2>&1
@@ -34,7 +33,7 @@
     - "{{ cscenter_user }}"
 
 - name: remove useless notifications each week (cronjob)
-  sudo_user: "{{ item }}"
+  become_user: "{{ item }}"
   cron:
     name: CSC notification cleanup
     user: "{{ item }}"
@@ -42,14 +41,14 @@
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py notification_cleanup
-      --settings={{ item }}.settings.production
+      --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:
     - "{{ cscenter_user }}"
 
 - name: Project deadlines notification
-  sudo_user: "{{ item }}"
+  become_user: "{{ item }}"
   cron:
     name: Send project notification about deadline if neccessary
     user: "{{ item }}"
@@ -58,14 +57,14 @@
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py projects_notifications
-      --settings={{ item }}.settings.production
+      --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:
     - "{{ cscenter_user }}"
 
 - name: Once a day remove expired sessions
-  sudo_user: "{{ item }}"
+  become_user: "{{ item }}"
   cron:
     name: Remove expired CSC sessions
     user: "{{ item }}"
@@ -73,7 +72,7 @@
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py clearsessions
-      --settings={{ item }}.settings.production
+      --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
       >> /home/{{ item }}/site/logs/cscnotifier.log
   with_items:

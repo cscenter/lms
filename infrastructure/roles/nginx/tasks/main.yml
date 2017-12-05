@@ -4,7 +4,9 @@
     path: "{{ nginx_tls_path }}"
     state: directory
   tags:
+    - nginx
     - tls
+  when: enable_https
 
 - name: Ensure all nginx crypto materials are present
   copy:
@@ -15,7 +17,9 @@
     - from: cscweb_tls_dhparam.pem
       to: dhparam.pem
   tags:
+    - nginx
     - tls
+  when: enable_https
 
 - name: Copy nginx config
   template:
@@ -28,6 +32,8 @@
 - name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
+  tags:
+    - nginx
 
 - name: Symlink nginx config
   file:
@@ -43,10 +49,11 @@
   stat: path=/etc/init.d/nginx
   register: nginx_status
   tags:
-    - tls
+    - nginx
 
-- name: Configure https connection
+- name: Configure certbot and nginx to auto-renew tls certificates
   include: certbot.yml
-  when: nginx_status.stat.exists
   tags:
+    - nginx
     - tls
+  when: nginx_status.stat.exists and enable_https

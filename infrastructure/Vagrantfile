@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "vv"
-    # Copy setup.yml and replace `hosts: xxx` with `hosts: all`, then run `vagrant provision`
+    # Copy setup.yml to `test_setup.yml`, then replace `hosts: xxx` with `hosts: all` and run `vagrant provision`
     ansible.playbook = "test_setup.yml"
   end
 end

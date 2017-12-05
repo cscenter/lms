@@ -1,7 +1,7 @@
 upstream django_{{ item.site_user }} {
     server unix:///tmp/uwsgi_{{ item.site_user }}.socket;
 }
-
+{% if enable_https %}
 server {
     listen 80;
     server_name {{ item.certbot_domains|join(' ') }};
@@ -15,6 +15,7 @@ server {
     }
 }
 
+# Redirect from `www.` to domain without `www`
 server {
     listen 443 ssl;
     server_name www.{{ item.site_domain }};
@@ -27,16 +28,17 @@ server {
 
     return 301 https://{{ item.site_domain }}$request_uri;
 }
+{% endif %}
 
 server {
-    listen 443 ssl{% if item.site_domain == "compscicenter.ru" %} default_server{% endif %};
+    listen {% if enable_https %}443 ssl{% else %}80{% endif %}{% if item.site_domain == "compscicenter.ru" %} default_server{% endif %};
     server_name{% for domain in item.certbot_domains -%}
         {% if not domain.startswith("www") %} {{ domain }}{% endif %}
     {%- endfor %};
 
     charset utf-8;
     client_max_body_size 42m;
-
+    {% if enable_https -%}
     # ssl config by Mozilla https://wiki.mozilla.org/Security/Server_Side_TLS
 
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
@@ -68,7 +70,7 @@ server {
     # creates fullchain.pem containing all certificates and we use that
     # for ssl_certificate already.
     # ssl_trusted_certificate {{ item.certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
-
+    {% endif %}
     resolver 8.8.8.8;
 
     error_page 404 =404 @show_404;

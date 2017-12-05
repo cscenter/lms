@@ -4,7 +4,7 @@ chdir           = /home/{{ item }}/site/repo/cscsite
 module          = {{ item }}.wsgi:application
 virtualenv      = /home/{{ item }}/site/env
 pythonpath      = /home/{{ item }}/site/repo/cscsite
-env             = DJANGO_SETTINGS_MODULE={{ item }}.settings.production
+env             = DJANGO_SETTINGS_MODULE={{ item }}.settings.{{ app_environment }}
 env             = PYTHONIOENCODING=UTF-8
 env             = LC_ALL=en_US.UTF-8
 env             = LANG=en_US.UTF-8

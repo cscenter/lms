@@ -27,11 +27,6 @@
   local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
   when: reboot_file.stat.exists == true
 
-- name: wait for server to come back online
-  sudo: no
-  local_action: wait_for host="{{ inventory_hostname }}" port=22
-  when: reboot_file.stat.exists == true
-
 - name: set default locale LANG to UTF-8
   lineinfile: dest=/etc/default/locale line='LANG="en_US.utf8"' regexp='^LANG=' state=present insertafter=BOF
 

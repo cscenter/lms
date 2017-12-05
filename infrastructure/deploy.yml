@@ -5,6 +5,8 @@
 #  sudo: True
   vars_files:
     - vars/aws.yml
+  vars:
+    app_environment: production
 
   tasks:
   - name: Check app_user value
@@ -74,7 +76,7 @@
     django_manage:
       command: "collectstatic --noinput"
       app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.production"
+      settings: "{{ app_user }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 
   - name: Migrate DB
@@ -83,7 +85,7 @@
     django_manage:
       command: "migrate"
       app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.production"
+      settings: "{{ app_user }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 
   - name: Touch config file to reload uwsgi
