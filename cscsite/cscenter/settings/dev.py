@@ -52,12 +52,19 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        }
+        },
+        'logfile': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(ROOT_DIR / "app.log"),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'backupCount': 2,
+        },
     },
     'loggers': {
         '': {
             'level': 'WARNING',
-            'handlers': ['console'],
+            'handlers': ['logfile'],
         },
         'django.db.backends': {
             'level': 'ERROR',
@@ -78,16 +85,6 @@ LOGGING = {
             "level": "ERROR",
             "handlers": ["console"],
             "propagate": False,
-        },
-        'raven': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
         },
     },
 }
