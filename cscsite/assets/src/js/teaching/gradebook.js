@@ -2,26 +2,31 @@ import "bootstrap-fileinput";
 import "bootstrap-fileinput/js/locales/ru";
 import "vendor/jquery.arrow-increment.min"
 
+var gradebookForm = $("#gradebook-form");
+
 var gradebook = $("#gradebook");
 
 var buttonDownloadCSV = $(".marks-sheet-csv-link");
 
-var scrollButtonsWrapper = $(".header", gradebook);
-
-var finalGradesWrapper = $("#grades");
+var scrollButtonsWrapper = $(".gradebook__controls", gradebook);
 
 var totalWrapper = $("#total");
 
-var assignmentsWrapper = $("#assignments");
-
     var fn = {
         launch: function () {
+            fn.submitForm();
             fn.downloadCSVButton();
             fn.finalGradeSelect();
             fn.assignmentGradeInputValidator();
             fn.assignmentGradeInputIncrementByArrows();
             fn.scrollButtons();
             fn.fileInput();
+        },
+        
+        submitForm: function () {
+            $("#marks-sheet-save").click(function () {
+                gradebookForm.submit();
+            })
         },
 
         downloadCSVButton: function() {
@@ -41,7 +46,7 @@ var assignmentsWrapper = $("#assignments");
 
         finalGradeSelect: function() {
             // Store initial value
-            finalGradesWrapper.find("select").each(function() {
+            gradebook.find("select").each(function() {
                 $(this).data("value",
                              $(this).find('option').filter(function () {
                                 return $(this).prop('defaultSelected');
@@ -54,19 +59,21 @@ var assignmentsWrapper = $("#assignments");
         },
 
         assignmentGradeInputValidator: function() {
-            assignmentsWrapper.on("change", "input", function (e) {
-                var $this = $(this),
-                    $target = $(e.target);
+            gradebook.on("change", "input.__assignment", function (e) {
+                let $this = $(this);
+                let $target = $(e.target);
+                const minGrade = $this.attr("min");
+                const maxGrade = $this.attr("max");
                 // Validate min-max
-                if ($this.val() < 0) {
-                    $this.val(0);
+                if ($this.val() < minGrade) {
+                    $this.val(minGrade);
                 }
-                var maxGrade = $this.closest(".assignment").data("max");
                 if ($this.val() > maxGrade) {
                     $this.val(maxGrade);
                 }
                 // Is it integer value?
-                if ($this.val() != parseInt($this.val(), 10)) {
+                const parsedInt = parseInt($this.val(), 10);
+                if (isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
                     $this.val("");
                 }
 
@@ -91,8 +98,8 @@ var assignmentsWrapper = $("#assignments");
         },
 
         assignmentGradeInputIncrementByArrows: function() {
-            assignmentsWrapper.on("keydown", ".assignment input", function(e) {
-                if (e.keyCode === 38 || e.keyCode == 40) {
+            gradebook.on("keydown", "input.__assignment", function(e) {
+                if (e.keyCode === 38 || e.keyCode === 40) {
                     var that = this; // input object
                     // Mb it's incredibly stupid practice, who cares?
                     if (that.increment === undefined || that.decrement === undefined) {
@@ -111,7 +118,7 @@ var assignmentsWrapper = $("#assignments");
                                 }
                             }
                             // Empty string as 0
-                            if (value.length == 0) {
+                            if (value.length === 0) {
                                 return 0;
                             }
                             return NaN;
@@ -138,7 +145,7 @@ var assignmentsWrapper = $("#assignments");
 
             totalWrapper.css("box-shadow", "5px 0 5px -5px rgba(0, 0, 0, 0.4)");
 
-            if (assignmentsWrapper.width() <= assignmentsWrapper.find('.scrollable').width()) {
+            if (gradebookForm.width() <= gradebook.width()) {
                 scrollButtonsWrapper.css("visibility", "visible");
             }
         },
@@ -148,13 +155,13 @@ var assignmentsWrapper = $("#assignments");
                 rowHeight = 20,
                 xinc = assignmentColumnWidth * parseInt(xdir),
                 yinc = rowHeight * 5 * parseInt(ydir);
-            if (xinc != 0) {
-                var scrollXOffset = assignmentsWrapper.scrollLeft();
-                assignmentsWrapper.scrollLeft(scrollXOffset + xinc);
+            if (xinc !== 0) {
+                var scrollXOffset = gradebookForm.scrollLeft();
+                gradebookForm.scrollLeft(scrollXOffset + xinc);
             }
-            if (yinc != 0) {
-                var scrollYOffset = assignmentsWrapper.scrollTop();
-                assignmentsWrapper.scrollTop(scrollYOffset + yinc);
+            if (yinc !== 0) {
+                var scrollYOffset = gradebookForm.scrollTop();
+                gradebookForm.scrollTop(scrollYOffset + yinc);
             }
         },
 

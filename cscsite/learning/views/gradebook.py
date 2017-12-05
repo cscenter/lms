@@ -127,9 +127,6 @@ def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
         return None
 
 
-
-# TODO: add transaction.atomic
-# TODO: refactor with `gradebook` service
 class GradeBookTeacherView(TeacherOnlyMixin, FormView):
     is_for_staff = False
     user_type = 'teacher'
@@ -137,50 +134,24 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
-        self.student_assignments = None
-        self.enrollment_list = None
-        self.course_offering_list = None
         self.course_offering = None
         super().__init__(*args, **kwargs)
         self.is_for_staff = kwargs.get('is_for_staff', False)
+
+    def get_form(self, data=None, files=None, **kwargs):
+        cls = self.get_form_class()
+        if "initial" not in kwargs:
+            initial = GradeBookFormFactory.transform_to_initial(self.data)
+            kwargs["initial"] = initial
+        return cls(data=data, files=files, **kwargs)
 
     def get_form_class(self):
         course_offering = _get_course_offering(self.kwargs, self.request.user)
         if course_offering is None:
             raise Http404('Course offering not found')
         self.course_offering = course_offering
-
-        data = gradebook_data(course_offering)
-
-        # Sacrifice attributes access for better performance
-        student_assignments = (
-            StudentAssignment.objects
-                .filter(assignment__course_offering=course_offering)
-                .values("pk",
-                        "grade",
-                        "first_submission_at",
-                        "assignment__pk",
-                        "assignment__title",
-                        "assignment__is_online",
-                        "assignment__grade_max",
-                        "assignment__grade_min",
-                        "student__pk")
-                .order_by("assignment__pk",
-                          "student__pk")
-        )
-        self.student_assignments = student_assignments
-
-        enrollment_list = (Enrollment.active
-                           .filter(course_offering=course_offering)
-                           .select_related("student"))
-        self.enrollment_list = enrollment_list
-
-        return GradeBookFormFactory.build_form_class(data)
-
-    def get_initial(self):
-        return (GradeBookFormFactory
-                .transform_to_initial(self.student_assignments,
-                                      self.enrollment_list))
+        self.data = gradebook_data(course_offering)
+        return GradeBookFormFactory.build_form_class(self.data)
 
     def get_success_url(self):
         messages.info(self.request,
@@ -190,31 +161,30 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
             for_curator=self.is_for_staff)
 
     def form_valid(self, form):
-        a_s_index, enrollment_index = \
-            GradeBookFormFactory.build_indexes(self.student_assignments,
-                                               self.enrollment_list)
+        # TODO: add transaction.atomic
         final_grade_updated = False
-        for field in form.changed_data:
-            if field in a_s_index:
-                a_s = a_s_index[field]
-                StudentAssignment.objects.filter(pk=a_s["pk"]).update(
-                    grade=form.cleaned_data[field])
-                continue
-            # Looking for final_grade_*
-            elif field in enrollment_index:
+        for field_name in form.changed_data:
+            if field_name.startswith(form.GRADE_PREFIX):
+                field = form.fields[field_name]
+                (StudentAssignment.objects
+                    .filter(pk=field.student_assignment_id)
+                    .update(grade=form.cleaned_data[field_name]))
+            elif field_name.startswith(form.FINAL_GRADE_PREFIX):
+                field = form.fields[field_name]
                 final_grade_updated = True
-                enrollment = enrollment_index[field]
-                enrollment.grade = form.cleaned_data[field]
-                enrollment.save()
-                continue
+                (Enrollment.objects
+                    .filter(pk=field.enrollment_id)
+                    .update(grade=form.cleaned_data[field_name]))
         if final_grade_updated:
             self.course_offering.recalculate_grading_type()
         return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context["gradebook"] = self.data
         context['course_offering'] = self.course_offering
         # List of user gradebooks
+        # TODO: Move to the model
         filter_kwargs = {}
         if not self.request.user.is_curator:
             filter_kwargs["teachers"] = self.request.user
@@ -226,79 +196,6 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
                                 .select_related('semester', 'course'))
         context['course_offering_list'] = course_offering_list
         context['user_type'] = self.user_type
-
-        students = OrderedDict()
-        assignments = OrderedDict()
-
-        def get_final_grade_widget(enrollment_pk):
-            key = GradeBookFormFactory.FINAL_GRADE_PREFIX.format(enrollment_pk)
-            return context['form'][key]
-
-        for enrollment in self.enrollment_list:
-            student_id = enrollment.student_id
-            if student_id not in students:
-                students[student_id] = OrderedDict({
-                    "student": enrollment.student,
-                    "grade": get_final_grade_widget(enrollment.pk),
-                    "total": 0
-                })
-
-        for a_s in self.student_assignments:
-            student_id = a_s["student__pk"]
-            assignment_id = a_s["assignment__pk"]
-            # The student unsubscribed from the course
-            if student_id not in students:
-                continue
-
-            if assignment_id not in assignments:
-                assignments[assignment_id] = {
-                    "header": {
-                        "pk": a_s["assignment__pk"],
-                        "title": a_s["assignment__title"],
-                        "is_online": a_s["assignment__is_online"],
-                        "grade_min": a_s["assignment__grade_min"],
-                        "grade_max": a_s["assignment__grade_max"],
-                    },
-                    "students": OrderedDict(((sid, None) for sid in students))
-                }
-            assignment = assignments[assignment_id]
-
-            state = None
-            # FIXME: duplicated logic from is_passed method!
-            a_s["is_passed"] = a_s["first_submission_at"] is not None
-            if assignment["header"]["is_online"]:
-                state_value = StudentAssignment.calculate_state(
-                    a_s["grade"],
-                    assignment["header"]["is_online"],
-                    a_s["is_passed"],
-                    assignment["header"]["grade_min"],
-                    assignment["header"]["grade_max"],
-                )
-                if a_s["grade"] is not None:
-                    state = "{0}/{1}".format(a_s["grade"],
-                                             assignment["header"]["grade_max"])
-                else:
-                    state = StudentAssignment.SHORT_STATES[state_value]
-            assignment["students"][student_id] = {
-                "pk": a_s["pk"],
-                "grade": a_s["grade"] if a_s["grade"] is not None else "",
-                "is_passed": a_s["is_passed"],  # FIXME: useless?
-                "state": state
-            }
-
-            if a_s["grade"] is not None:
-                students[student_id]["total"] += int(a_s["grade"])
-
-        for assignment in assignments.values():
-            # we should check for "assignment consistency": that all
-            # student assignments are presented
-            # FIXME: what about (923, None)? Is it ok?
-            assert any(s is not None for s in assignment["students"])
-
-        context['students'] = students
-        context['assignments'] = assignments
-        # Magic "100" constant - width of .assignment column
-        context['assignments_width'] = len(assignments) * 100
 
         return context
 

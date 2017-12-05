@@ -1,4 +1,5 @@
 from collections import OrderedDict
+
 import numpy as np
 
 from django import forms
@@ -9,17 +10,97 @@ from users.models import CSCUser
 
 
 class StudentMeta:
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
+    def __init__(self, enrollment: Enrollment, index: int):
+        self._enrollment = enrollment
+        # Will be filled later based on assignments data
+        self.total_score = None
+        self.index = index
+
+    @property
+    def id(self):
+        return self._enrollment.student_id
+
+    @property
+    def enrollment_id(self):
+        return self._enrollment.pk
+
+    @property
+    def final_grade(self):
+        return self._enrollment.grade
+
+    @property
+    def first_name(self):
+        return self._enrollment.student.first_name
+
+    @property
+    def last_name(self):
+        return self._enrollment.student.last_name
+
+    @property
+    def patronymic(self):
+        return self._enrollment.student.patronymic
+
+    @property
+    def username(self):
+        return self._enrollment.student.username
+
+    @property
+    def yandex_id(self):
+        return self._enrollment.student.yandex_id
+
+    def get_absolute_url(self):
+        return self._enrollment.student.get_absolute_url()
 
     def get_abbreviated_name(self):
-        # noinspection PyCallByClass
-        return CSCUser.get_abbreviated_name(self)
+        return self._enrollment.student.get_abbreviated_name()
 
     @property
     def final_grade_display(self):
         return GRADES[self.final_grade]
+
+
+# TODO: py3.6: rewrite with typing.NamedTuple
+class SubmissionData:
+    def __init__(self, submission: StudentAssignment,
+                 assignment: Assignment):
+        # Make sure assignment model has all attached db values
+        submission.assignment = assignment
+        self._submission = submission
+
+    @property
+    def id(self):
+        return self._submission.id
+
+    @property
+    def score(self):
+        return self._submission.grade
+
+    @property
+    def assignment_id(self):
+        return self._submission.assignment_id
+
+    @property
+    def assignment(self):
+        return self._submission.assignment
+
+    @property
+    def student_id(self):
+        return self._submission.student_id
+
+    def get_state(self):
+        return self._submission.state_short
+
+    def get_widget(self, form: "GradebookForm"):
+        """
+        Based on assignment parameters and student status, we can show
+        three types of widget:
+            * input field (if teacher graded homework assignments offline or
+                on other resource and wants to enter the results
+                into online gradebook)
+            * link to student assignment detail page
+            * nothing (homework was created after student withdrawal)
+        """
+        pass
 
 
 class GradeBookData:
@@ -28,13 +109,23 @@ class GradeBookData:
         X-axis of submissions ndarray is students data.
         We make some assertions on that, but fail in case of NxN array.
     """
+
+    # Magic "100" constant - width of .assignment column
+    ASSIGNMENT_COLUMN_WIDTH = 100
+
     def __init__(self, students, assignments, submissions):
         self.students = students
         self.assignments = assignments
         assert submissions.shape == (len(students), len(assignments))
         self.submissions = submissions
 
+    def get_table_width(self):
+        # First 3 columns in gradebook table, see `pages/_gradebook.scss`
+        magic = 150 + 140 + 56
+        return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
 
+
+# TODO: test without assignments
 def gradebook_data(course_offering):
     """
     Returns:
@@ -76,24 +167,12 @@ def gradebook_data(course_offering):
     """
 
     enrolled_students = OrderedDict()
-    students_id_to_index = {}
     _enrollments_qs = (Enrollment.active
                        .filter(course_offering=course_offering)
                        .select_related("student")
                        .order_by("student__last_name"))
     for index, e in enumerate(_enrollments_qs.iterator()):
-        enrolled_students[e.student_id] = StudentMeta(
-            pk=e.student_id,
-            enrollment_id=e.pk,
-            final_grade=e.grade,
-            first_name=e.student.first_name,
-            last_name=e.student.last_name,
-            patronymic=e.student.patronymic,
-            username=e.student.username,
-            yandex_id=e.student.yandex_id,
-            total_score=None,  # Will be filled later based on assignments data
-        )
-        students_id_to_index[e.student_id] = index
+        enrolled_students[e.student_id] = StudentMeta(e, index)
 
     assignments = OrderedDict()
     assignments_id_to_index = {}
@@ -109,6 +188,7 @@ def gradebook_data(course_offering):
                        .order_by("deadline_at", "pk"))
     for index, a in enumerate(_assignments_qs.iterator()):
         assignments[a.pk] = a
+        # TODO: add idnex to gradebook.assignment directly?
         assignments_id_to_index[a.pk] = index
     submissions = np.empty((len(enrolled_students), len(assignments)),
                            dtype=object)
@@ -117,6 +197,7 @@ def gradebook_data(course_offering):
         .filter(assignment__course_offering_id=course_offering.pk)
         .only("pk",
               "grade",
+              "first_submission_at",  # needs to calculate progress status
               "assignment_id",
               "student_id")
         .order_by("student_id", "assignment_id"))
@@ -124,19 +205,14 @@ def gradebook_data(course_offering):
         student_id = sa.student_id
         if student_id not in enrolled_students:
             continue
-        student_index = students_id_to_index[student_id]
+        student_index = enrolled_students[student_id].index
         assignment_index = assignments_id_to_index[sa.assignment_id]
-        submissions[student_index][assignment_index] = {
-            "id": sa.pk,
-            "score": sa.grade,
-            # Append ids to simplify access in the future
-            "assignment_id": sa.assignment_id,
-            "student_id": student_id,
-        }
+        submissions[student_index][assignment_index] = SubmissionData(
+            sa, assignments[sa.assignment_id])
     for student_id in enrolled_students:
-        student_index = students_id_to_index[student_id]
-        total_score = sum(a["score"] for a in submissions[student_index]
-                          if a is not None and a.get("score") is not None)
+        student_index = enrolled_students[student_id].index
+        total_score = sum(s.score for s in submissions[student_index]
+                          if s is not None and s.score is not None)
         setattr(enrolled_students[student_id], "total_score", total_score)
 
     return GradeBookData(assignments=assignments,
@@ -144,11 +220,19 @@ def gradebook_data(course_offering):
                          submissions=submissions)
 
 
+class BaseGradebookForm(forms.Form):
+
+    GRADE_PREFIX = "sa_"
+    FINAL_GRADE_PREFIX = "final_grade_"
+
+    def get_final_widget(self, enrollment_id):
+        return self[self.FINAL_GRADE_PREFIX + str(enrollment_id)]
+
+    def get_assignment_widget(self, student_assignment_id):
+        return self[self.GRADE_PREFIX + str(student_assignment_id)]
+
+
 class GradeBookFormFactory:
-
-    GRADE_PREFIX = "sa_{0}"
-    FINAL_GRADE_PREFIX = "final_grade_{0}"
-
     @classmethod
     def build_form_class(cls, gradebook: GradeBookData):
         """
@@ -156,34 +240,42 @@ class GradeBookFormFactory:
         Enrollment's grades.
         """
         fields = {}
-
         for student_submissions in gradebook.submissions:
             for submission in student_submissions:
-                assignment = gradebook.assignments[submission["assignment_id"]]
+                # Student have no submissions after withdrawal
+                if not submission:
+                    continue
+                assignment = submission.assignment
                 if not assignment.is_online:
-                    k = cls.GRADE_PREFIX.format(submission["id"])
+                    k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
                     v = forms.IntegerField(min_value=assignment.grade_min,
                                            max_value=assignment.grade_max,
                                            required=False)
+                    # Used to simplify `form_valid` method
+                    v.student_assignment_id = submission.id
                     fields[k] = v
 
-        for student in gradebook.students.values():
-            k = cls.FINAL_GRADE_PREFIX.format(student.enrollment_id)
-            fields[k] = forms.ChoiceField(GRADES)
-        return type('GradebookForm', (forms.Form,), fields)
+        for s in gradebook.students.values():
+            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
+            v = forms.ChoiceField(GRADES)
+            # Used to simplify `form_valid` method
+            v.enrollment_id = s.enrollment_id
+            fields[k] = v
+        return type("GradebookForm", (BaseGradebookForm,), fields)
 
     @classmethod
-    def build_indexes(cls, student_assignments_list, enrollment_list):
-        sas = student_assignments_list
-        a_s_index = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s for a_s in sas}
-        enrollment_index = {cls.FINAL_GRADE_PREFIX.format(e.pk): e for e in
-                            enrollment_list}
-        return a_s_index, enrollment_index
-
-    @classmethod
-    def transform_to_initial(cls, a_s_list, enrollment_list):
-        initial = {cls.GRADE_PREFIX.format(a_s["pk"]): a_s["grade"] for a_s in
-                   a_s_list if not a_s["assignment__is_online"]}
-        initial.update({cls.FINAL_GRADE_PREFIX.format(e.pk): e.grade for e in
-                        enrollment_list})
+    def transform_to_initial(cls, gradebook: GradeBookData):
+        initial = {}
+        for student_submissions in gradebook.submissions:
+            for submission in student_submissions:
+                # Student have no submissions after withdrawal
+                if not submission:
+                    continue
+                assignment = gradebook.assignments[submission.assignment_id]
+                if not assignment.is_online:
+                    k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
+                    initial[k] = submission.score
+        for s in gradebook.students.values():
+            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
+            initial[k] = s.final_grade
         return initial

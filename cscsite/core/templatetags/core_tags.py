@@ -197,3 +197,9 @@ def replace(value, args):
     old, new = args.split(" ")
     return value.replace(old, new)
 # replace.is_safe = True
+
+
+@register.simple_tag
+def call_method(obj, method_name, *args):
+    method = getattr(obj, method_name)
+    return method(*args)
