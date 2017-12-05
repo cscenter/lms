@@ -31,8 +31,9 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Don't use https for dev env
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 
 LOGGING = {
