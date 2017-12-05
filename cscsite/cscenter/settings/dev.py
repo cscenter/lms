@@ -57,7 +57,7 @@ LOGGING = {
     'loggers': {
         '': {
             'level': 'WARNING',
-            'handlers': ['sentry'],
+            'handlers': ['console'],
         },
         'django.db.backends': {
             'level': 'ERROR',

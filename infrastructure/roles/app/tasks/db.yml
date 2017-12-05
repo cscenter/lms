@@ -22,7 +22,7 @@
   become: yes
   become_user: postgres
   postgresql_db:
-    name: cscdb
+    name: "{{ db_name }}"
     encoding: "UTF-8"
     owner: csc
     state: present
@@ -32,7 +32,7 @@
   become: yes
   become_user: postgres
   postgresql_user:
-    db: cscdb
+    db: "{{ db_name }}"
     name: csc
     priv: ALL
     state: present

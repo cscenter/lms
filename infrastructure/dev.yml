@@ -8,6 +8,7 @@
     - roles/app/vars/main.yml
   vars:
     app_environment: dev
+    db_name: test_cscdb
   roles:
     - role: app
       app_environment: dev
