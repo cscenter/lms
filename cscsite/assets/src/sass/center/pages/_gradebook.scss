@@ -1,49 +1,76 @@
 @import "../variables";
 
 $even-color: #f5f5f5;
-$cell-height: 20px;
+$cell-height: 30px;
+$controls-height: 40px;
 $title-border-color: #e1e1e1;
 $students-column-width: 150px;
-$final-grades-column-width: 140px;
-$total-points-column-width: 56px;
+$final-grade-column-width: 140px;
+$total-score-column-width: 56px;
+$assignment-column-width: 100px;
 $unsaved-state-color: #dcf0ff;
+
+.gradebook-wrapper {
+  position: relative;
+}
+
+#gradebook-form {
+  overflow: hidden;
+  overflow-x: auto;
+  min-width: $students-column-width + $final-grade-column-width + $total-score-column-width + 4 * $assignment-column-width;
+}
+
+.gradebook__controls {
+  position: relative;
+  height: $controls-height;
+  margin: 0;
+  visibility: hidden;
+
+  .scroll {
+    color: rgb(128, 128, 128);
+    font-size: 13px;
+    background: rgb(245, 245, 245);
+    padding: 0 14px;
+    line-height: 30px;
+    height: 30px;
+    border: 1px solid rgb(220, 220, 220);
+    position: absolute;
+    cursor: pointer;
+
+    &.left {
+      left: $students-column-width + $final-grade-column-width + $total-score-column-width;
+    }
+
+    &.right {
+      right: 0;
+    }
+  }
+}
 
 #gradebook {
   margin: 0;
-  line-height: $cell-height;
-  background: rgb(255, 255, 255);
+  padding-left: $students-column-width + $final-grade-column-width + $total-score-column-width;
 
-  .header {
-    position: relative;
-    height: 40px;
-    margin: 0;
-    visibility: hidden;
+  .headers {
+    overflow: hidden;
+    height: 90px;
+  }
 
-    .scroll {
-      color: rgb(128, 128, 128);
-      font-size: 13px;
-      background: rgb(245, 245, 245);
-      padding: 0 14px;
-      line-height: 30px;
-      height: 30px;
-      border: 1px solid rgb(220, 220, 220);
-      position: absolute;
-      cursor: pointer;
+  .student {
+    overflow: hidden;
+    height: $cell-height;
+  }
 
-      &.left {
-        left: $students-column-width + $final-grades-column-width + $total-points-column-width;
-      }
-
-      &.right {
-        right: 0;
-      }
-    }
+  .meta {
+    overflow: hidden;
   }
 
   .title {
     display: block;
+    float:left;
     background: #f0f0f0;
     border-bottom: 1px solid $title-border-color;
+    border-right: 1px solid #e6e6e6;
     line-height: 120%;
     color: #555;
     height: 90px;
@@ -56,16 +83,44 @@ $unsaved-state-color: #dcf0ff;
       font-size: 13px;
       text-overflow: ellipsis;
       overflow: hidden;
+    }
 
+    &.__student {
+
+      width: $students-column-width;
+      position: absolute;
+      left: 0;
+    }
+
+    &.__final_grade {
+      width: $final-grade-column-width;
+      position: absolute;
+      left: $students-column-width;
+    }
+
+    &.__total_score {
+      width: $total-score-column-width;
+      position: absolute;
+      left: $students-column-width + $final-grade-column-width;
+    }
+
+    &.__assignment {
+      width: $assignment-column-width;
     }
   }
 
+
+
   .cell {
     display: block;
+    float: left;
     padding: 4px 6px;
-    height: 30px;
+    height: $cell-height;
+    line-height: 20px;
     overflow: hidden;
     border: 1px solid transparent;
+    border-right: 1px solid #e6e6e6;
+    background: #fff;
 
     &.even {
       background: $even-color;
@@ -74,37 +129,20 @@ $unsaved-state-color: #dcf0ff;
     &:focus {
       background: #dcf0ff !important;
     }
-  }
 
-  #students {
-    width: $students-column-width;
-    float: left;
-    overflow: hidden;
+    &.__student {
+      width: $students-column-width;
+      position: absolute;
+      left: 0;
 
-    .title {
-      border-right: 1px solid #fff;
-    }
-    .cell {
-      border-right: 1px solid #fff;
       text-overflow: ellipsis;
       white-space: nowrap;
-
     }
 
-  }
-
-  #grades {
-    width: $final-grades-column-width;
-    float: left;
-    overflow: hidden;
-
-    .title {
-      border-right: 1px solid #fff;
-    }
-
-    .cell {
-      border: 1px solid transparent;
-      border-right: 1px solid #fff;
+    &.__final_grade {
+      width: $final-grade-column-width;
+      position: absolute;
+      left: $students-column-width;
 
       &.__unsaved {
         background: $unsaved-state-color;
@@ -112,118 +150,104 @@ $unsaved-state-color: #dcf0ff;
           background: $unsaved-state-color;
         }
       }
-    }
 
-    select {
-      display: block;
-      width: 100%;
-      color: #555;
-      background: $color-white none;
-      border: 1px solid transparent;
-      border-radius: 0;
-      height: $cell-height;
-      padding: 0;
-    }
-
-    .even {
       select {
-        background: $even-color;
+        display: block;
+        width: 100%;
+        color: #555;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        //height: $cell-height;
+        padding: 0;
       }
     }
-  }
 
-  #total {
-    width: $total-points-column-width;
-    float: left;
-    overflow: hidden;
-    text-align: right;
-    position: relative;
-
-    .title, .cell {
-      border-right: 1px solid #fff;
+    &.__total_score {
+      width: $total-score-column-width;
+      position: absolute;
+      left: $students-column-width + $final-grade-column-width;
+      text-align: right;
     }
-  }
 
-  #assignments {
-    margin-left: $students-column-width + $final-grades-column-width + $total-points-column-width;
-    overflow: hidden;
-    overflow-x: auto;
-    min-width: 400px;
+    &.__assignment {
+      overflow: hidden;
+      width: $assignment-column-width;
 
-    .scrollable {
-      width: 3000px;
-      float: left;
-
-      .titles-box {
-        overflow: hidden;
-
-        a {
-          display: block;
-          width: 100px;
-          float: left;
-          background: #f0f0f0;
-          border-right: 1px solid $title-border-color;
-          border-bottom: 1px solid $title-border-color;
-          line-height: 124%;
-          height: 90px;
-          padding: 5px;
-          text-overflow: ellipsis;
-          overflow: hidden;
+      &.__score {
+        text-align: right;
+        input {
+          text-align: right;
         }
-      }
-
-      .assignment {
-        float: left;
-        width: 100px;
-        border-right: 1px solid #e6e6e6;
 
         input {
-          display: block;
-          cursor: pointer;
+          height: 20px;
+          border: 0;
           width: 100%;
-          border: 1px solid transparent;
-          padding: 4px 6px;
-          height: $cell-height + 10px;
-          text-align: right;
-
-          &.even {
-            background: $even-color;
-          }
-
-          &.__unsaved {
-            background: $unsaved-state-color;
-          }
-
-          &:hover {
-            border-color: $color-gray-90;
-          }
-        }
-
-        &:last-child {
-          border-right: 0;
-        }
-
-        .score {
-          text-align: right;
-          input {
-            text-align: right;
-          }
-
-          input {
-            height: 20px;
-            border: 0;
-            width: 100%;
-            padding: 0;
-          }
-        }
-
-        .meta {
-          @extend .cell;
-          text-align: right;
-          color: #999;
+          padding: 0;
         }
       }
+
+      &.__input {
+        cursor: pointer;
+        height: $cell-height;
+        text-align: right;
+
+        &.even {
+          background: $even-color;
+        }
+
+        &.__unsaved {
+          background: $unsaved-state-color;
+        }
+
+        &:hover {
+          background: $color-gray-90;
+          //border-color: $color-gray-90;
+        }
+      }
+
+      //a {
+      //  display: block;
+      //  width: 100px;
+      //  float: left;
+      //  background: #f0f0f0;
+      //  border-right: 1px solid $title-border-color;
+      //  border-bottom: 1px solid $title-border-color;
+      //  line-height: 124%;
+      //  height: 90px;
+      //  padding: 5px;
+      //  text-overflow: ellipsis;
+      //  overflow: hidden;
+      //}
+    }
+
+    &.__meta {
+      text-align: right;
+      color: #999;
     }
   }
+
+  .shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-shadow: rgba(0, 0, 0, 0.5) 5px 0px 8px -5px;
+    z-index: 1000;
+    width: 20px;
+    // 21px - shadow width + 1px to hide white border
+    left: $students-column-width + $final-grade-column-width + $total-score-column-width - 21px;
+
+  }
+
+
+  #grades {
+    width: $final-grade-column-width;
+    float: left;
+    overflow: hidden;
+
+  }
+
+
 }
 

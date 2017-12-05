@@ -494,10 +494,6 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             return enrollment_qs.first()
         return None
 
-    def has_access_to_gradebook_emails(self):
-        """Looks more like a crunch, but still better than nothing"""
-        return self.pk == 865  # zherevchuk
-
     # TODO: move to Project manager?
     def get_projects_queryset(self):
         """Returns projects through ProjectStudent intermediate model"""
@@ -651,5 +647,3 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     def enrollment_in_the_course(self, course_offering_id: int) -> Optional[Enrollment]:
         return None
 
-    def has_access_to_gradebook_emails(self):
-        return False

@@ -3,6 +3,8 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load render_bundle from webpack_loader %}
+{% load lookup call_method from core_tags %}
+
 
 {% block body_attrs %} data-init-section="gradebook"{% endblock body_attrs %}
 
@@ -11,23 +13,13 @@
 {% endblock stylesheets %}
 
 {% block javascripts %}
-    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>
-{#    {% render_bundle "teaching" "js" %}#}
-    {% if request.user.has_access_to_gradebook_emails %}
-        <script>
-            $(function () {
-                $('.marks-sheet-csv-link').tooltip({
-                    title: "Поле email доступно только id = 865"
-                })
-            });
-        </script>
-    {% endif %}
+{#    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>#}
+    {% render_bundle "teaching" "js" %}
 {% endblock javascripts %}
 
 
 {% block content %}
 <div class="container container-wide">
-  <form method="post" id="gradebook-form">{% csrf_token %}
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
@@ -72,81 +64,74 @@
       <hr>
     </div>
   </div>
-
-        <div id="gradebook">
-            {% if assignments %}
-        	<div class="header">
-                <span class="scroll left">«</span><span class="scroll right">»</span>
-        	</div>
-            {% endif %}
-
-            <div id="students">
-                <div class="title">{% trans "Students" %}</div>
-                <div>
-                    {% for student_id, row in students.items %}
-                        {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
-                          <a class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
-                              {% if student.last_name %}
-                                  {{ student.last_name }}&nbsp;{{ student.first_name|first }}.
-                              {% else %}
-                                  {{ student.username }}
-                              {% endif %}
-                          </a>
-                        {% endwith %}
-                    {% endfor %}
-                    <div class="cell student  gray">{% trans "Students total" %}:&nbsp;{{ students.items|length }}</div>
-                </div>
-            </div>
-
-            <div id="grades">
-                <div class="title">{% trans "Grades" %}</div>
-                <div>
-                    {% for student_id, row in students.items %}
-                        {% with student=row.student by_assignment=row.assignments total_score=row.total final_grade=row.grade %}
-                          <div class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ final_grade }}</div>
-                        {% endwith %}
-                    {% endfor %}
-                    <div class="">&nbsp;</div>
-                </div>
-            </div>
-
-            {% if assignments %}
-            <div id="total">
-                <div class="title">{% trans "Total" %}</div>
-                <div>
-                    {% for student_id, student in students.items %}<div class="cell{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total }}</div>{% endfor %}
-                    <div class="">&nbsp;</div>
-                </div>
-            </div>
-            {% endif %}
-
-            <div id="assignments">
-                <div class="scrollable" style="width: {{ assignments_width }}px;">
-                    {% for assignment_id, assignment in assignments.items %}
-                        <div class="assignment" data-max="{{ assignment.header.grade_max }}">
-                            <div class="title">
-                                <a href="{% url 'assignment_detail_teacher' assignment.header.pk %}" title="{{ assignment.header.title }}">{{ assignment.header.title }}</a>
-                            </div>
-                            {% spaceless %}
-                                {% for student_id, student_assignment in assignment.students.items %}
-                                    {% if not student_assignment %}
-                                        <div class="cell score{% if forloop.counter|divisibleby:2 %} even{% endif %}"></div>
-                                    {% elif assignment.header.is_online %}
-                                        <div class="cell score{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                                            <a href="{% url 'a_s_detail_teacher' student_assignment.pk %}">{{ student_assignment.state }}</a>
-                                        </div>
-                                    {% else %}
-                                        <input type="text" name="a_s_{{ student_assignment.pk }}" max="{{ assignment.header.grade_max }}" min="0" value="{{ student_assignment.grade }}" data-value="{{ student_assignment.grade }}" class="{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                                    {% endif %}
-                                {% endfor %}
-                            {% endspaceless %}
-                            <div class="meta">{{ assignment.header.grade_min }}/{{ assignment.header.grade_max }}</div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
+    {% if gradebook.assignments %}
+        <div class="gradebook__controls">
+            <span class="scroll left">«</span><span class="scroll right">»</span>
         </div>
-  </form>
+    {% endif %}
+    <div class="gradebook-wrapper">
+    <form method="post" id="gradebook-form">{% csrf_token %}
+        <div id="gradebook" style="width: {{ gradebook.get_table_width }}px;">
+
+            <div class="headers">
+                <div class="title __student">{% trans "Students" %}</div>
+                <div class="title __final_grade">{% trans "Grades" %}</div>
+                {% if gradebook.assignments %}
+                    <div class="title __total_score">{% trans "Total" %}</div>
+                {% endif %}
+                {% for assignment in gradebook.assignments.values %}
+                    <div class="title __assignment">
+                        <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="grid">
+                {% for student in gradebook.students.values %}{% spaceless %}
+                    <div class="student">
+                       <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
+                           {% if student.last_name %}{{ student.last_name }}&nbsp;{{ student.first_name|first }}.{% else %}{{ student.username }}{% endif %}
+                       </a>
+                        <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                            {# TODO: replace with `get_final_widget` method call in jinja2 tmpl #}
+                            {% call_method form 'get_final_widget' student.enrollment_id %}
+                        </div>
+                        {% if gradebook.assignments %}
+                            <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
+                        {% endif %}
+                        {% for submission in gradebook.submissions|lookup:student.index %}
+                            {% if submission.assignment.is_online %}
+                                <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
+                                    <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
+                                </div>
+                            {% else %}
+                                <input type="text"
+                                       class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
+                                      {# TODO: replace with method call instead of hardcoding prefix #}
+                                       name="sa_{{ submission.id }}"
+                                       min="{{ submission.assignment.grade_min }}"
+                                       max="{{ submission.assignment.grade_max }}"
+                                       value="{{ submission.score|default:"" }}"
+                                       data-value="{{ submission.score|default:"" }}">
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endspaceless %}{% endfor %}
+            </div>
+
+            <div class="meta">
+                <div class="cell __student gray">{% trans "Students total" %}:&nbsp;{{ gradebook.students|length }}</div>
+                <div class="cell __final_grade"></div>
+                <div class="cell __total_score"></div>
+                {% for assignment in gradebook.assignments.values %}
+                <div class="cell __assignment __meta">{{ assignment.grade_min }}/{{ assignment.grade_max }}</div>
+                {% endfor %}
+            </div>
+
+            {% if gradebook.assignments|length > 8 %}<div class="shadow"></div>{% endif %}
+        </div>
+    </form>
+    </div>
 </div>
 
 {#{% include "learning/gradebook/_modal_stepic.html" %}#}
