@@ -6,7 +6,7 @@ $controls-height: 40px;
 $title-border-color: #e1e1e1;
 $students-column-width: 150px;
 $final-grade-column-width: 140px;
-$total-score-column-width: 56px;
+$total-score-column-width: 66px;
 $assignment-column-width: 100px;
 $unsaved-state-color: #dcf0ff;
 
@@ -202,7 +202,7 @@ $unsaved-state-color: #dcf0ff;
         }
 
         &:hover {
-          background: $color-gray-90;
+          //background: $color-gray-90;
           //border-color: $color-gray-90;
         }
       }
@@ -239,15 +239,42 @@ $unsaved-state-color: #dcf0ff;
     left: $students-column-width + $final-grade-column-width + $total-score-column-width - 21px;
 
   }
-
-
-  #grades {
-    width: $final-grade-column-width;
-    float: left;
-    overflow: hidden;
-
-  }
-
-
 }
 
+//FIXME: styles for sort button
+//.headers {
+//  > div:not(.no-sort) {
+//    cursor: pointer;
+//
+//    &:hover:after {
+//      visibility: visible;
+//      opacity: 1;
+//    }
+//
+//    &:after {
+//      content: '';
+//      float: right;
+//      margin-top: 7px;
+//      border-width: 0 4px 4px;
+//      border-style: solid;
+//      border-color: #404040 transparent;
+//      visibility: hidden;
+//      opacity: 0;
+//      -ms-user-select: none;
+//      -webkit-user-select: none;
+//      -moz-user-select: none;
+//      user-select: none;
+//    }
+//  }
+//
+//  > div[aria-sort=ascending]:not(.no-sort):after {
+//    border-bottom: none;
+//    border-width: 4px 4px 0;
+//  }
+//
+//  > div[aria-sort]:not(.no-sort):after {
+//    visibility: visible;
+//    opacity: 0.4;
+//  }
+//
+//}

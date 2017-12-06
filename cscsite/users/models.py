@@ -437,6 +437,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return (smart_text(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
+    def get_abbreviated_short_name(self, last_name_first=True):
+        if last_name_first:
+            parts = [self.last_name, self.first_name[:1] + "."]
+        else:
+            parts = [self.first_name[:1] + ".", self.last_name]
+        return " ".join(parts).strip() or self.username
+
     def get_abbreviated_name(self):
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
         abbrev_name = smart_text(". ".join(p for p in parts if p).strip())

@@ -90,7 +90,7 @@
                 {% for student in gradebook.students.values %}{% spaceless %}
                     <div class="student">
                        <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
-                           {% if student.last_name %}{{ student.last_name }}&nbsp;{{ student.first_name|first }}.{% else %}{{ student.username }}{% endif %}
+                           {{ student.get_abbreviated_short_name }}
                        </a>
                         <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
                             {# TODO: replace with `get_final_widget` method call in jinja2 tmpl #}
@@ -111,7 +111,7 @@
                                        name="sa_{{ submission.id }}"
                                        min="{{ submission.assignment.grade_min }}"
                                        max="{{ submission.assignment.grade_max }}"
-                                       value="{{ submission.score|default:"" }}"
+                                       value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
                                        data-value="{{ submission.score|default:"" }}">
                             {% endif %}
                         {% endfor %}
@@ -134,8 +134,8 @@
     </div>
 </div>
 
-{#{% include "learning/gradebook/_modal_stepic.html" %}#}
-{#{% include "learning/gradebook/_modal_yandex.html" %}#}
+{% include "learning/gradebook/_modal_stepic.html" %}
+{% include "learning/gradebook/_modal_yandex.html" %}
 
 {% endblock content %}
 
