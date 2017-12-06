@@ -15,6 +15,7 @@ from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
     STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
+from learning.tests.utils import assert_login_redirect
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
@@ -132,34 +133,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
 
 
 class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
-    # TODO(Dmitry): test security
-
-    def test_empty_markssheet(self):
-        """Test marksheet with empty assignments list"""
-        teacher = TeacherCenterFactory()
-        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
-        co1 = CourseOfferingFactory.create(teachers=[teacher])
-        co2 = CourseOfferingFactory.create(teachers=[teacher])
-        for student in students:
-            EnrollmentFactory.create(student=student, course_offering=co1)
-            EnrollmentFactory.create(student=student,
-                                     course_offering=co2)
-        url = co1.get_gradebook_url()
-        self.doLogin(teacher)
-        resp = self.client.get(url)
-        for student in students:
-            name = "{}&nbsp;{}.".format(student.last_name,
-                                        student.first_name[0])
-            self.assertContains(resp, name, 1)
-            enrollment = Enrollment.active.get(student=student,
-                                        course_offering=co1)
-            field = 'final_grade_{}'.format(enrollment.pk)
-            self.assertIn(field, resp.context['form'].fields)
-        for co in [co1, co2]:
-            url = co.get_gradebook_url()
-            self.assertContains(resp, url)
-
-    def test_nonempty_markssheet(self):
+    def test_nonempty_gradebook(self):
         teacher = TeacherCenterFactory()
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co = CourseOfferingFactory.create(teachers=[teacher])
@@ -173,7 +147,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.doLogin(teacher)
         resp = self.client.get(url)
         for student in students:
-            name = "{}&nbsp;{}.".format(student.last_name,
+            name = "{} {}.".format(student.last_name,
                                         student.first_name[0])
             self.assertContains(resp, name)
         for as_ in as_online:
@@ -185,31 +159,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             self.assertContains(resp, as_.title)
             for s in students:
                 a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-                self.assertIn('a_s_{}'.format(a_s.pk),
+                self.assertIn(resp.context['form'].GRADE_PREFIX + str(a_s.pk),
                               resp.context['form'].fields)
-
-    def test_total_score(self):
-        """Calculate total score by assignments for course offering"""
-        teacher = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
-        student = StudentCenterFactory()
-        EnrollmentFactory.create(student=student, course_offering=co)
-        as_cnt = 2
-        assignments = AssignmentFactory.create_batch(as_cnt, course_offering=co)
-        # AssignmentFactory implicitly create StudentAssignment instances
-        # with empty grade value.
-        default_grade = 10
-        for assignment in assignments:
-            a_s = StudentAssignment.objects.get(student=student,
-                                                assignment=assignment)
-            a_s.grade = default_grade
-            a_s.save()
-        expected_total_score = as_cnt * default_grade
-        url = co.get_gradebook_url()
-        self.doLogin(teacher)
-        resp = self.client.get(url)
-        head_student = next(iter(resp.context['students'].items()))
-        self.assertEquals(head_student[1]["total"], expected_total_score)
 
     def test_save_markssheet(self):
         teacher = TeacherCenterFactory()
@@ -333,7 +284,7 @@ def test_gradebook_data():
     a2_index = 2
     s3_a2_progress = data.submissions[s3_index][a2_index]
     assert s3_a2_progress is not None
-    assert s3_a2_progress["score"] == 3
+    assert s3_a2_progress.score == 3
     for row in data.submissions:
         for cell in row:
             assert cell is not None
@@ -357,4 +308,94 @@ def test_gradebook_data():
                 assert data.submissions[x][y] is None
             else:
                 assert data.submissions[x][y] is not None
+
+
+@pytest.mark.django_db
+def test_empty_gradebook_data():
+    """Smoke test for gradebook without assignments"""
+    co = CourseOfferingFactory()
+    data = gradebook_data(co)
+    assert len(data.assignments) == 0
+    assert len(data.students) == 0
+    assert len(data.submissions) == 0
+    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course_offering=co)
+    data = gradebook_data(co)
+    assert len(data.assignments) == 0
+    assert len(data.students) == 5
+    assert len(data.submissions) == 5
+    s1_submissions = data.submissions[0]
+    assert len(s1_submissions) == 0
+
+
+@pytest.mark.django_db
+def test_empty_gradebook_view(client):
+    """Smoke test for gradebook view with empty assignments list"""
+    teacher = TeacherCenterFactory()
+    students = StudentCenterFactory.create_batch(3)
+    co1 = CourseOfferingFactory.create(teachers=[teacher])
+    co2 = CourseOfferingFactory.create(teachers=[teacher])
+    for student in students:
+        EnrollmentFactory.create(student=student, course_offering=co1)
+        EnrollmentFactory.create(student=student, course_offering=co2)
+    client.login(teacher)
+    response = client.get(co1.get_gradebook_url())
+    for student in students:
+        name = "{} {}.".format(student.last_name, student.first_name[0])
+        assert smart_bytes(name) in response.content
+        enrollment = Enrollment.active.get(student=student, course_offering=co1)
+        field = 'final_grade_{}'.format(enrollment.pk)
+        assert field in response.context['form'].fields
+    assert len(students) == len(response.context['form'].fields)
+    for co in [co1, co2]:
+        url = co.get_gradebook_url()
+        assert smart_bytes(url) in response.content
+
+
+@pytest.mark.django_db
+def test_total_score(client):
+    """Calculate total score by assignments for course offering"""
+    teacher = TeacherCenterFactory()
+    client.login(teacher)
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    student = StudentCenterFactory()
+    EnrollmentFactory.create(student=student, course_offering=co)
+    assignments_count = 2
+    assignments = AssignmentFactory.create_batch(assignments_count,
+                                                 course_offering=co)
+    # AssignmentFactory implicitly create StudentAssignment instances
+    # with empty grade value.
+    default_grade = 10
+    for assignment in assignments:
+        a_s = StudentAssignment.objects.get(student=student,
+                                            assignment=assignment)
+        a_s.grade = default_grade
+        a_s.save()
+    expected_total_score = assignments_count * default_grade
+    response = client.get(co.get_gradebook_url())
+    head_student = next(iter(response.context['gradebook'].students.values()))
+    assert head_student.total_score == expected_total_score
+
+
+@pytest.mark.django_db
+def test_security(client, settings):
+    teacher = TeacherCenterFactory()
+    student = StudentCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
+    EnrollmentFactory.create(student=student, course_offering=co)
+    url = co.get_gradebook_url()
+    assert_login_redirect(client, settings, url)
+    test_groups = [
+        [],
+        [PARTICIPANT_GROUPS.STUDENT_CENTER],
+    ]
+    for groups in test_groups:
+        client.login(UserFactory.create(groups=groups))
+    # Raise 404 if teacher not in teaching staff of the course
+    client.login(TeacherCenterFactory())
+    assert client.get(url).status_code == 404
+    client.login(student)
+    assert_login_redirect(client, settings, url)
+    client.login(teacher)
+    assert client.get(url).status_code == 200
 

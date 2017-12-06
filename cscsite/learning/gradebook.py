@@ -3,10 +3,11 @@ from collections import OrderedDict
 import numpy as np
 
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 
-from learning.models import StudentAssignment, Enrollment, Assignment
+from learning.models import StudentAssignment, Enrollment, Assignment, \
+    CourseOffering
 from learning.settings import GRADES
-from users.models import CSCUser
 
 
 class StudentMeta:
@@ -54,16 +55,17 @@ class StudentMeta:
     def get_abbreviated_name(self):
         return self._enrollment.student.get_abbreviated_name()
 
+    def get_abbreviated_short_name(self):
+        return self._enrollment.student.get_abbreviated_short_name()
+
     @property
     def final_grade_display(self):
         return GRADES[self.final_grade]
 
 
-# TODO: py3.6: rewrite with typing.NamedTuple
 class SubmissionData:
     def __init__(self, submission: StudentAssignment,
                  assignment: Assignment):
-        # Make sure assignment model has all attached db values
         submission.assignment = assignment
         self._submission = submission
 
@@ -90,55 +92,41 @@ class SubmissionData:
     def get_state(self):
         return self._submission.state_short
 
-    def get_widget(self, form: "GradebookForm"):
-        """
-        Based on assignment parameters and student status, we can show
-        three types of widget:
-            * input field (if teacher graded homework assignments offline or
-                on other resource and wants to enter the results
-                into online gradebook)
-            * link to student assignment detail page
-            * nothing (homework was created after student withdrawal)
-        """
-        pass
-
 
 class GradeBookData:
-    """
-    Note:
-        X-axis of submissions ndarray is students data.
-        We make some assertions on that, but fail in case of NxN array.
-    """
-
-    # Magic "100" constant - width of .assignment column
+    # Magic "100" constant - width of assignment column
     ASSIGNMENT_COLUMN_WIDTH = 100
 
     def __init__(self, students, assignments, submissions):
+        """
+        X-axis of submissions ndarray is students data.
+        We make some assertions on that, but still can fail in case
+        of NxN array.
+        """
+        assert submissions.shape == (len(students), len(assignments))
         self.students = students
         self.assignments = assignments
-        assert submissions.shape == (len(students), len(assignments))
         self.submissions = submissions
 
     def get_table_width(self):
         # First 3 columns in gradebook table, see `pages/_gradebook.scss`
-        magic = 150 + 140 + 56
+        magic = 150 + 140 + 66
         return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
 
+    # TODO: add link to assignment and reuse in template
+    def get_headers(self):
+        static_headers = [
+            _("Last name"),
+            _("First name"),
+            _("Final grade"),
+            _("Total")
+        ]
+        return static_headers + [a.title for a in self.assignments.values()]
 
-# TODO: test without assignments
-def gradebook_data(course_offering):
+
+def gradebook_data(course_offering: CourseOffering) -> GradeBookData:
     """
     Returns:
-        assignments = OrderedDict(
-            1: {
-                "pk": 1,
-                "title": "HW#1",
-                "is_online": True,
-                "grade_min": 0,
-                "grade_max": 10
-            },
-            ...
-        ),
         students = OrderedDict(
             1: StudentMeta(
                 "pk": 1,
@@ -147,6 +135,16 @@ def gradebook_data(course_offering):
                 "total_score": 23,
                 "enrollment_id": 1,
             ),
+            ...
+        ),
+        assignments = OrderedDict(
+            1: {
+                "pk": 1,
+                "title": "HW#1",
+                "is_online": True,
+                "grade_min": 0,
+                "grade_max": 10
+            },
             ...
         ),
         submissions = [
@@ -165,7 +163,6 @@ def gradebook_data(course_offering):
             [ ... ]
         ]
     """
-
     enrolled_students = OrderedDict()
     _enrollments_qs = (Enrollment.active
                        .filter(course_offering=course_offering)
@@ -188,7 +185,6 @@ def gradebook_data(course_offering):
                        .order_by("deadline_at", "pk"))
     for index, a in enumerate(_assignments_qs.iterator()):
         assignments[a.pk] = a
-        # TODO: add idnex to gradebook.assignment directly?
         assignments_id_to_index[a.pk] = index
     submissions = np.empty((len(enrolled_students), len(assignments)),
                            dtype=object)
@@ -215,13 +211,12 @@ def gradebook_data(course_offering):
                           if s is not None and s.score is not None)
         setattr(enrolled_students[student_id], "total_score", total_score)
 
-    return GradeBookData(assignments=assignments,
-                         students=enrolled_students,
+    return GradeBookData(students=enrolled_students,
+                         assignments=assignments,
                          submissions=submissions)
 
 
 class BaseGradebookForm(forms.Form):
-
     GRADE_PREFIX = "sa_"
     FINAL_GRADE_PREFIX = "final_grade_"
 
@@ -271,7 +266,7 @@ class GradeBookFormFactory:
                 # Student have no submissions after withdrawal
                 if not submission:
                     continue
-                assignment = gradebook.assignments[submission.assignment_id]
+                assignment = submission.assignment
                 if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
                     initial[k] = submission.score

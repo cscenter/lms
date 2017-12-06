@@ -220,18 +220,16 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin,
             = 'attachment; filename="{}"'.format(filename)
 
         writer = csv.writer(response)
-        common_headers = ['Фамилия', 'Имя', 'Яндекс ID']
-        writer.writerow(common_headers +
-                        [a.title for a in data.assignments.values()] +
-                        ['Итоговая оценка'])
-
-        for index, student in enumerate(data.students.values()):
+        writer.writerow(data.get_headers())
+        for student in data.students.values():
             writer.writerow(
                 itertools.chain(
-                    [student.last_name, student.first_name, student.yandex_id],
-                    [(a["score"] if a and a["score"] is not None else '')
-                     for a in data.submissions[index]],
-                    [student.final_grade_display]))
+                    [student.last_name,
+                     student.first_name,
+                     student.final_grade_display,
+                     student.total_score],
+                    [(a.score if a and a.score is not None else '')
+                     for a in data.submissions[student.index]]))
         return response
 
 

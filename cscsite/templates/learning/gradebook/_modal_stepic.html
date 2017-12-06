@@ -6,16 +6,15 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">{% trans "Import stepik statements" %}</h4>
             </div>
-            <form action="{% url 'markssheet_teacher_csv_import_stepic' course_offering.pk %}" 
-                enctype="multipart/form-data" method="POST">
+            <form action="{% url 'markssheet_teacher_csv_import_stepic' course_offering.pk %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-body">
                 <div class="form-group">
                         <label for="csv-assignment-selected">1. {% trans "Select assignment" %}</label>
                         <select name="assignment" class="form-control" id="csv-assignment-selected">
-                        {% for assignment_id, assignment in assignments.items %}
-                            {% if not assignment.header.is_online %}
-                                <option value="{{ assignment.header.pk }}">{{ assignment.header.title}}</option>
+                        {% for assignment in gradebook.assignments.values %}
+                            {% if not assignment.is_online %}
+                                <option value="{{ assignment.pk }}">{{ assignment.title}}</option>
                             {% endif %}
                         {% endfor %}
                         </select>
