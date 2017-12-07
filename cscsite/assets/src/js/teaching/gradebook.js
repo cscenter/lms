@@ -8,7 +8,7 @@ var gradebook = $("#gradebook");
 
 var buttonDownloadCSV = $(".marks-sheet-csv-link");
 
-var scrollButtonsWrapper = $(".gradebook__controls", gradebook);
+var scrollButtonsWrapper = $(".gradebook__controls");
 
 var totalWrapper = $("#total");
 
