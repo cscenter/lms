@@ -87,6 +87,7 @@ jupyter_client==5.1.0
 djangorestframework==3.6.4
 rest-pandas==0.5.0
 django-js-reverse==0.7.3
+numpy==1.13.1
 
 # iCalendar support
 icalendar==3.11.6
