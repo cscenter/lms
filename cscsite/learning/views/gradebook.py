@@ -14,9 +14,8 @@ from vanilla import FormView
 from core.exceptions import Redirect
 from learning import utils
 from learning.forms import GradebookImportCSVForm
-from learning.gradebook import GradeBookFormFactory, gradebook_data
-from learning.management.imports import ImportGradesByStepicID, \
-    ImportGradesByYandexLogin
+from learning.gradebook import GradeBookFormFactory, gradebook_data, \
+    ImportGradesByStepicID, ImportGradesByYandexLogin
 from learning.models import Semester, CourseOffering, StudentAssignment, \
     Enrollment
 from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \

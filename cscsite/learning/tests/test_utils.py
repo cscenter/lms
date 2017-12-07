@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 from django.utils.encoding import force_bytes
 from mock import patch, MagicMock
 
-from learning.management.imports import ImportGradesByStepicID
+from learning.gradebook import ImportGradesByStepicID
 from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR)
 from learning.utils import split_on_condition, get_term_index, \
     get_term_index_academic_year_starts
