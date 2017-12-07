@@ -63,6 +63,7 @@ def test_cached_groups(settings):
     assert set(user._cached_groups) == {PARTICIPANT_GROUPS.STUDENT_CENTER,
                                         PARTICIPANT_GROUPS.STUDENT_CLUB}
 
+
 @pytest.mark.django_db
 def test_permissions(client):
     # Unauthenticated user
@@ -173,3 +174,16 @@ def test_github_id_validation():
     user.clean_fields()
     user.github_id = "m-i-k-h-a-i-l-m"
     user.clean_fields()
+
+
+def test_get_abbreviated_short_name():
+    user = UserFactory.build()
+    user.username = "mikhail"
+    user.first_name = "Misha"
+    user.last_name = "Ivanov"
+    assert user.get_abbreviated_short_name() == "Ivanov M."
+    assert user.get_abbreviated_short_name(last_name_first=False) == "M. Ivanov"
+    user.first_name = ""
+    assert user.get_abbreviated_short_name() == "Ivanov"
+    user.last_name = ""
+    assert user.get_abbreviated_short_name() == "mikhail"
