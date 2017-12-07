@@ -19,11 +19,9 @@ user_model = get_user_model()
 
 
 class ImportGrades(object):
-
-    headers = []
+    headers = None
 
     def __init__(self, request, assignment):
-
         self.assignment = assignment
         self.request = request
         file = request.FILES['csv_file']
@@ -35,23 +33,22 @@ class ImportGrades(object):
             raise ImproperlyConfigured(
                 "subclasses of ImportGrade must provide headers attribute")
 
-    def process(self):
-        if not self.validate_headers():
+    def import_data(self):
+        if not self.headers_are_valid():
+            messages.error(self.request, "<br>".join(self.errors))
             return self.import_results()
 
         for row in self.reader:
             self.total += 1
             try:
                 data = self.clean_data(row)
+                res = self.update_score(data)
+                self.success += int(res)
             except ValidationError as e:
                 logger.debug(e.message)
-                continue
-
-            res = self.update_score(data)
-            self.success += int(res)
         return self.import_results()
 
-    def validate_headers(self):
+    def headers_are_valid(self):
         headers = self.reader.fieldnames
         valid = True
         for header in self.headers:
@@ -62,9 +59,6 @@ class ImportGrades(object):
         return valid
 
     def import_results(self):
-        if self.errors:
-            for error_msg in self.errors:
-                messages.error(self.request, error_msg)
         messages.info(self.request,
                       _("<b>Import results</b>: {}/{} successes").format(
                           self.success, self.total))
@@ -73,15 +67,14 @@ class ImportGrades(object):
 
     def clean_data(self, row):
         raise NotImplementedError(
-            'subclasses of ImportGrade must provide an clean_data() method')
+            'subclasses of ImportGrade must provide clean_data() method')
 
     def update_score(self, data):
         raise NotImplementedError(
-            'subclasses of ImportGrade must provide an update_score() method')
+            'subclasses of ImportGrade must provide update_score() method')
 
 
 class ImportGradesByStepicID(ImportGrades):
-
     headers = ["user_id", "total"]
 
     def clean_data(self, row):
@@ -97,27 +90,9 @@ class ImportGradesByStepicID(ImportGrades):
             msg = _("Can't convert points for user '{}'").format(stepic_id)
             raise ValidationError(msg, code='invalid_score_value')
         if score > self.assignment.grade_max:
-            msg = _("Score greater then max grade for user '{}'").format(stepic_id)
+            msg = _("Score greater than max value for id '{}'").format(stepic_id)
             raise ValidationError(msg, code='invalid_score_value')
         return stepic_id, score
-
-    def _get_user_id(self, stepic_id):
-        ids = (user_model.objects
-               .filter(
-                    stepic_id=stepic_id,
-                    groups__in=[user_model.group.STUDENT_CENTER,
-                                user_model.group.VOLUNTEER])
-               .values_list('id', flat=True)
-               .order_by())
-        if len(ids) == 0:
-            msg = _("User with stepic_id {} not found").format(stepic_id)
-            logger.debug(msg)
-        elif len(ids) > 1:
-            msg = _("Multiple objects for stepic_id {}".format(stepic_id))
-            logger.error(msg)
-            messages.error(self.request, msg)
-        else:
-            return ids[0]
 
     def update_score(self, data):
         stepic_id, score = data
@@ -140,9 +115,26 @@ class ImportGradesByStepicID(ImportGrades):
                      .format(score, user_id, assignment_id))
         return True
 
+    def _get_user_id(self, stepic_id):
+        ids = (user_model.objects
+               .filter(
+                    stepic_id=stepic_id,
+                    groups__in=[user_model.group.STUDENT_CENTER,
+                                user_model.group.VOLUNTEER])
+               .values_list('id', flat=True)
+               .order_by())
+        if len(ids) == 0:
+            msg = _("User with stepic_id {} not found").format(stepic_id)
+            logger.debug(msg)
+        elif len(ids) > 1:
+            msg = _("Multiple objects for stepic_id {}".format(stepic_id))
+            logger.error(msg)
+            messages.error(self.request, msg)
+        else:
+            return ids[0]
+
 
 class ImportGradesByYandexLogin(ImportGrades):
-
     headers = ["login", "total"]
 
     def clean_data(self, row):
@@ -156,6 +148,29 @@ class ImportGradesByYandexLogin(ImportGrades):
             msg = _("Score greater then max grade for user '{}'").format(yandex_id)
             raise ValidationError(msg, code='invalid_score_value')
         return yandex_id, score
+
+    def update_score(self, data):
+        yandex_id, score = data
+        from learning.models import StudentAssignment
+
+        assignment_id = self.assignment.pk
+
+        user_id = self._get_user_id(yandex_id)
+        if not user_id:
+            return False
+
+        updated = (StudentAssignment.objects
+                   .filter(assignment__id=assignment_id,
+                           student_id=user_id)
+                   .update(grade=score))
+        if not updated:
+            msg = "User with id={} and yandex_id={} doesn't have " \
+                  "an assignment".format(user_id, yandex_id)
+            logger.debug(msg)
+            return False
+        logger.debug("Has written {} points for user_id={} on assignment_id={}"
+                     .format(score, user_id, assignment_id))
+        return True
 
     def _get_user_id(self, yandex_id):
         ids = (user_model.objects
@@ -174,26 +189,3 @@ class ImportGradesByYandexLogin(ImportGrades):
             messages.error(self.request, msg)
         else:
             return ids[0]
-
-    def update_score(self, data):
-        yandex_id, score = data
-        from learning.models import StudentAssignment
-
-        assignment_id = self.assignment.pk
-
-        user_id = self._get_user_id(yandex_id)
-        if not user_id:
-            return False
-
-        updated = (StudentAssignment.objects
-                   .filter(assignment__id=assignment_id,
-                           student_id=user_id)
-                   .update(grade=score))
-        if not updated:
-            msg = "User with id={} and yandex_id={} doesn't have " \
-                  "an assignment {}".format(user_id, yandex_id, assignment_id)
-            logger.debug(msg)
-            return False
-        logger.debug("Has written {} points for user_id={} on assignment_id={}"
-                     .format(score, user_id, assignment_id))
-        return True
