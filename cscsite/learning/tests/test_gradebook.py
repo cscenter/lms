@@ -8,7 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory
-from learning.forms import MarksSheetTeacherImportGradesForm
+from learning.forms import GradebookImportCSVForm
 from learning.gradebook import gradebook_data
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
@@ -206,8 +206,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         #                                         assignment=assignment)
         # Import grades allowed only for particular course offering
         form_fields = {'assignment': assignments[0].pk}
-        form = MarksSheetTeacherImportGradesForm(form_fields,
-                                                 course_id=co.course.pk)
+        form = GradebookImportCSVForm(form_fields,
+                                      course_id=co.course.pk)
         self.assertFalse(form.is_valid())
         self.assertListEqual(list(form.errors.keys()), ['csv_file'])
         # Teachers can import grades only for own CO
@@ -218,13 +218,13 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(resp.status_code, 404)
         # Wrong assignment id
         self.doLogin(teacher)
-        form = MarksSheetTeacherImportGradesForm(
+        form = GradebookImportCSVForm(
             {'assignment': max((a.pk for a in assignments)) + 1},
             course_id=co.course.id)
         self.assertFalse(form.is_valid())
         self.assertIn('assignment', form.errors)
         # Wrong course offering id
-        form = MarksSheetTeacherImportGradesForm(form_fields, course_id=-1)
+        form = GradebookImportCSVForm(form_fields, course_id=-1)
         self.assertFalse(form.is_valid())
         self.assertIn('assignment', form.errors)
         # CO not found

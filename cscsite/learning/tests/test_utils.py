@@ -53,7 +53,7 @@ class UtilTests(TestCase):
                                                  expected_grade))
         request = MagicMock()
         request.FILES = {'csv_file': BytesIO(csv_input)}
-        ImportGradesByStepicID(request, assignment).process()
+        ImportGradesByStepicID(request, assignment).import_data()
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
         self.assertEquals(a_s.grade, expected_grade)

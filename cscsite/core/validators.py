@@ -50,22 +50,20 @@ class FileValidator(object):
 
         # Check the extension
         ext = splitext(value.name)[1][1:].lower()
-        if self.allowed_extensions and not ext in self.allowed_extensions:
+        if self.allowed_extensions and ext not in self.allowed_extensions:
             message = self.extension_message % {
-                'extension' : ext,
+                'extension': ext,
                 'allowed_extensions': ', '.join(self.allowed_extensions)
             }
- 
             raise ValidationError(message)
  
         # Check the content type
         mimetype = mimetypes.guess_type(value.name)[0]
-        if self.allowed_mimetypes and not mimetype in self.allowed_mimetypes:
+        if self.allowed_mimetypes and mimetype not in self.allowed_mimetypes:
             message = self.mime_message % {
                 'mimetype': mimetype,
                 'allowed_mimetypes': ', '.join(self.allowed_mimetypes)
             }
- 
             raise ValidationError(message)
  
         # Check the file size
@@ -75,7 +73,6 @@ class FileValidator(object):
                 'size': filesizeformat(filesize),
                 'allowed_size': filesizeformat(self.max_size)
             }
- 
             raise ValidationError(message)
  
         elif filesize < self.min_size:
@@ -83,5 +80,4 @@ class FileValidator(object):
                 'size': filesizeformat(filesize),
                 'allowed_size': filesizeformat(self.min_size)
             }
- 
             raise ValidationError(message)
