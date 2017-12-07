@@ -438,10 +438,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 or self.username)
 
     def get_abbreviated_short_name(self, last_name_first=True):
+        first_letter = self.first_name[:1] + "." if self.first_name else ""
         if last_name_first:
-            parts = [self.last_name, self.first_name[:1] + "."]
+            parts = [self.last_name, first_letter]
         else:
-            parts = [self.first_name[:1] + ".", self.last_name]
+            parts = [first_letter, self.last_name]
         return " ".join(parts).strip() or self.username
 
     def get_abbreviated_name(self):

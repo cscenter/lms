@@ -120,9 +120,11 @@
             </div>
 
             <div class="meta">
-                <div class="cell __student gray">{% trans "Students total" %}:&nbsp;{{ gradebook.students|length }}</div>
+                <div class="cell __student gray">{% trans "Students" %}:&nbsp;{{ gradebook.students|length }}</div>
                 <div class="cell __final_grade"></div>
-                <div class="cell __total_score"></div>
+                {% if gradebook.assignments %}
+                    <div class="cell __total_score"></div>
+                {% endif %}
                 {% for assignment in gradebook.assignments.values %}
                 <div class="cell __assignment __meta">{{ assignment.grade_min }}/{{ assignment.grade_max }}</div>
                 {% endfor %}
