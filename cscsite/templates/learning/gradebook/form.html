@@ -110,7 +110,7 @@
                                            class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
                                           {# TODO: replace with method call instead of hardcoding prefix #}
                                            name="sa_{{ submission.id }}"
-                                           min="{{ submission.assignment.grade_min }}"
+                                           min="0"
                                            max="{{ submission.assignment.grade_max }}"
                                            value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
                                            data-value="{{ submission.score|default:"" }}">

@@ -250,7 +250,7 @@ class GradeBookFormFactory:
                 assignment = submission.assignment
                 if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
-                    v = forms.IntegerField(min_value=assignment.grade_min,
+                    v = forms.IntegerField(min_value=0,
                                            max_value=assignment.grade_max,
                                            required=False)
                     # Used to simplify `form_valid` method
