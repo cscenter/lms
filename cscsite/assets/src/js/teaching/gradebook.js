@@ -61,18 +61,18 @@ var totalWrapper = $("#total");
         assignmentGradeInputValidator: function() {
             gradebook.on("change", "input.__assignment", function (e) {
                 // Is it integer value?
-                const parsedInt = parseInt(this.value, 10);
-                if (isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+                const value = parseInt(this.value, 10);
+                if (isNaN(value) || !Number.isInteger(value)) {
                     this.value = '';
                 } else {
                     // Validate min-max
                     let $this = $(this);
-                    const minGrade = $this.attr("min");
-                    const maxGrade = $this.attr("max");
-                    if (this.value < minGrade) {
+                    const minGrade = parseInt($this.attr("min"));
+                    const maxGrade = parseInt($this.attr("max"));
+                    if (value < minGrade) {
                         this.value = minGrade;
                     }
-                    if (this.value > maxGrade) {
+                    if (value > maxGrade) {
                         this.value = maxGrade;
                     }
                 }

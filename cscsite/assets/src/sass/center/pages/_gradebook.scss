@@ -207,6 +207,10 @@ $unsaved-state-color: #dcf0ff;
         }
       }
 
+      &.__expelled {
+        background: rgba($color-red, .3);
+      }
+
       //a {
       //  display: block;
       //  width: 100px;
