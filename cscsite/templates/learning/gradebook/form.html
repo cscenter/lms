@@ -100,19 +100,23 @@
                             <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
                         {% endif %}
                         {% for submission in gradebook.submissions|lookup:student.index %}
-                            {% if submission.assignment.is_online %}
-                                <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
-                                    <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
-                                </div>
+                            {% if submission %}
+                                {% if submission.assignment.is_online %}
+                                    <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
+                                        <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
+                                    </div>
+                                {% else %}
+                                    <input type="text"
+                                           class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
+                                          {# TODO: replace with method call instead of hardcoding prefix #}
+                                           name="sa_{{ submission.id }}"
+                                           min="{{ submission.assignment.grade_min }}"
+                                           max="{{ submission.assignment.grade_max }}"
+                                           value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
+                                           data-value="{{ submission.score|default:"" }}">
+                                {% endif %}
                             {% else %}
-                                <input type="text"
-                                       class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
-                                      {# TODO: replace with method call instead of hardcoding prefix #}
-                                       name="sa_{{ submission.id }}"
-                                       min="{{ submission.assignment.grade_min }}"
-                                       max="{{ submission.assignment.grade_max }}"
-                                       value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
-                                       data-value="{{ submission.score|default:"" }}">
+                                <div class="cell __assignment __expelled{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"></div>
                             {% endif %}
                         {% endfor %}
                     </div>
