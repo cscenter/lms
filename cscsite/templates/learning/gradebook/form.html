@@ -8,12 +8,7 @@
 
 {% block body_attrs %} data-init-section="gradebook"{% endblock body_attrs %}
 
-{% block stylesheets %}
-    <link href="{% static "css/vendor/fileinput/fileinput.min.css" %}" rel="stylesheet">
-{% endblock stylesheets %}
-
 {% block javascripts %}
-{#    <script type="text/javascript" src="{% static "js/gradebook.js" %}"></script>#}
     {% render_bundle "teaching" "js" %}
 {% endblock javascripts %}
 
@@ -88,12 +83,11 @@
 
                     <div class="grid">
                         {% for student in gradebook.students.values %}{% spaceless %}
-                            <div class="student">
+                            <div class="student{% if forloop.counter|divisibleby:2 %} even{% endif %}">
                                <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
                                    {{ student.get_abbreviated_short_name }}
                                </a>
                                 <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                                    {# TODO: replace with `get_final_widget` method call in jinja2 tmpl #}
                                     {% call_method form 'get_final_widget' student.enrollment_id %}
                                 </div>
                                 {% if gradebook.assignments %}
@@ -102,21 +96,22 @@
                                 {% for submission in gradebook.submissions|lookup:student.index %}
                                     {% if submission %}
                                         {% if submission.assignment.is_online %}
-                                            <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
+                                            <div class="cell __assignment __score">
                                                 <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
                                             </div>
                                         {% else %}
-                                            <input type="text"
-                                                   class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
+                                            {% call_method form 'get_assignment_widget' submission.id %}
+{#                                            <input type="text"#}
+{#                                                   class="cell __assignment __input "#}
                                                   {# TODO: replace with method call instead of hardcoding prefix #}
-                                                   name="sa_{{ submission.id }}"
-                                                   min="0"
-                                                   max="{{ submission.assignment.grade_max }}"
-                                                   value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
-                                                   data-value="{{ submission.score|default:"" }}">
+{#                                                   name="sa_{{ submission.id }}"#}
+{#                                                   min="0"#}
+{#                                                   max="{{ submission.assignment.grade_max }}"#}
+{#                                                   value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"#}
+{#                                                   data-value="{{ submission.score|default:"" }}">#}
                                         {% endif %}
                                     {% else %}
-                                        <div class="cell __assignment __expelled{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"></div>
+                                        <div class="cell __assignment __expelled"></div>
                                     {% endif %}
                                 {% endfor %}
                             </div>

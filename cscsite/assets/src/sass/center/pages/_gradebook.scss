@@ -59,6 +59,10 @@ $unsaved-state-color: #dcf0ff;
   .student {
     overflow: hidden;
     height: $cell-height;
+
+    &.even {
+      background: $even-color;
+    }
   }
 
   .meta {
@@ -120,21 +124,20 @@ $unsaved-state-color: #dcf0ff;
     overflow: hidden;
     border: 1px solid transparent;
     border-right: 1px solid #e6e6e6;
-    background: #fff;
-
-    &.even {
-      background: $even-color;
-    }
 
     &:focus {
       background: #dcf0ff !important;
+    }
+
+    &.even {
+      background: $even-color!important;
     }
 
     &.__student {
       width: $students-column-width;
       position: absolute;
       left: 0;
-
+      background: $color-white;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -143,6 +146,7 @@ $unsaved-state-color: #dcf0ff;
       width: $final-grade-column-width;
       position: absolute;
       left: $students-column-width;
+      background: $color-white;
 
       &.__unsaved {
         background: $unsaved-state-color;
@@ -168,6 +172,7 @@ $unsaved-state-color: #dcf0ff;
       position: absolute;
       left: $students-column-width + $final-grade-column-width;
       text-align: right;
+      background: $color-white;
     }
 
     &.__assignment {
@@ -192,6 +197,7 @@ $unsaved-state-color: #dcf0ff;
         cursor: pointer;
         height: $cell-height;
         text-align: right;
+        background: transparent;
 
         &.even {
           background: $even-color;

@@ -1,8 +1,6 @@
-import "bootstrap-fileinput";
-import "bootstrap-fileinput/js/locales/ru";
 import "vendor/jquery.arrow-increment.min"
 
-var gradebookForm = $("#gradebook-form");
+var gradebookContainer = $("#gradebook-container");
 
 var gradebook = $("#gradebook");
 
@@ -10,23 +8,28 @@ var buttonDownloadCSV = $(".marks-sheet-csv-link");
 
 var scrollButtonsWrapper = $(".gradebook__controls");
 
-var totalWrapper = $("#total");
-
     var fn = {
         launch: function () {
-            fn.submitForm();
+            fn.restoreStates();
             fn.downloadCSVButton();
             fn.finalGradeSelect();
             fn.assignmentGradeInputValidator();
             fn.assignmentGradeInputIncrementByArrows();
             fn.scrollButtons();
-            fn.fileInput();
         },
-        
-        submitForm: function () {
-            $("#marks-sheet-save").click(function () {
-                gradebookForm.submit();
-            })
+
+        restoreStates: function() {
+            // If browser supports html5 `autocomplete` attribute,
+            // we can accidentally hide unsaved state on page reload
+            let inputs = document.querySelectorAll('#gradebook .__input');
+            Array.prototype.forEach.call(inputs, function(input) {
+               if (input.value !== input.defaultValue) {
+                   let classes = input.classList;
+                   if (!classes.contains('__unsaved')) {
+                       classes.add('__unsaved');
+                   }
+               }
+            });
         },
 
         downloadCSVButton: function() {
@@ -47,54 +50,50 @@ var totalWrapper = $("#total");
         finalGradeSelect: function() {
             // Store initial value
             gradebook.find("select").each(function() {
-                $(this).data("value",
-                             $(this).find('option').filter(function () {
-                                return $(this).prop('defaultSelected');
-                             }).val());
+                this.defaultValue = $(this).find('option').filter(function () {
+                    return $(this).prop("defaultSelected");
+                }).val();
             });
             gradebook.on("change", "select", function (e) {
-                var $target = $(e.target);
-                fn.toggleState($target);
+                fn.toggleState(e.target);
             });
         },
 
         assignmentGradeInputValidator: function() {
+            gradebook.on("keypress", "input.__assignment", fn.validateNumber);
             gradebook.on("change", "input.__assignment", function (e) {
-                // Is it integer value?
                 const value = parseInt(this.value, 10);
                 if (!$.isNumeric(this.value) || !Number.isInteger(value)) {
                     this.value = '';
                 } else {
-                    // Validate min-max
-                    let $this = $(this);
-                    const minGrade = parseInt($this.attr("min"));
-                    const maxGrade = parseInt($this.attr("max"));
-                    if (value < minGrade) {
-                        this.value = minGrade;
-                    }
-                    if (value > maxGrade) {
+                    const maxGrade = parseInt($(this).attr("max"));
+                    if (value < 0) {
+                        this.value = 0;
+                    } else if (value > maxGrade) {
                         this.value = maxGrade;
                     }
                 }
-
-                let $target = $(e.target);
-                fn.toggleState($target);
+                fn.toggleState(e.target);
             });
         },
 
+        validateNumber: function(event) {
+            const key = window.event ? event.keyCode : event.which;
+            return !(key > 31 && (key < 48 || key > 57));
+        },
+
         toggleState: function(element) {
-            var current_value = element.val();
-            var saved_value = element.data("value");
-            var gradeWrapper;
-            if ( element[0].nodeName.toLowerCase() === 'input' ) {
+            let gradeWrapper;
+            if ( element.nodeName.toLowerCase() === 'input' ) {
                 gradeWrapper = element;
-            } else if (element[0].nodeName.toLowerCase() === 'select') {
-                gradeWrapper = element.parent();
+            } else if (element.nodeName.toLowerCase() === 'select') {
+                gradeWrapper = element.parentElement;
             }
-            if (current_value != saved_value) {
-                gradeWrapper.addClass("__unsaved");
+            let classes = gradeWrapper.classList;
+            if (element.value !== element.defaultValue) {
+                classes.add("__unsaved");
             } else {
-                gradeWrapper.removeClass("__unsaved");
+                classes.remove("__unsaved");
             }
         },
 
@@ -135,57 +134,27 @@ var totalWrapper = $("#total");
             });
         },
 
-        // TODO: Refactor
         scrollButtons: function() {
-            scrollButtonsWrapper.on("click", ".scroll.left", function() {
-                fn.scroll(-1, 0);
-            });
-            scrollButtonsWrapper.on("click", ".scroll.right", function() {
-                fn.scroll(1, 0);
-            });
-
-            totalWrapper.css("box-shadow", "5px 0 5px -5px rgba(0, 0, 0, 0.4)");
-
-            if (gradebookForm.width() <= gradebook.width()) {
+            if (gradebookContainer.width() <= gradebook.width()) {
+                scrollButtonsWrapper.on("click", ".scroll.left", function() {
+                    fn.scroll(-1);
+                });
+                scrollButtonsWrapper.on("click", ".scroll.right", function() {
+                    fn.scroll(1);
+                });
                 scrollButtonsWrapper.css("visibility", "visible");
             }
         },
 
-        scroll: function (xdir, ydir) {
-            var assignmentColumnWidth = 100,
-                rowHeight = 20,
-                xinc = assignmentColumnWidth * parseInt(xdir),
-                yinc = rowHeight * 5 * parseInt(ydir);
+        scroll: function (xdir) {
+            const assignmentColumnWidth = 100;
+            const xinc = assignmentColumnWidth * parseInt(xdir);
             if (xinc !== 0) {
-                var scrollXOffset = gradebookForm.scrollLeft();
-                gradebookForm.scrollLeft(scrollXOffset + xinc);
-            }
-            if (yinc !== 0) {
-                var scrollYOffset = gradebookForm.scrollTop();
-                gradebookForm.scrollTop(scrollYOffset + yinc);
+                const scrollXOffset = gradebookContainer.scrollLeft();
+                gradebookContainer.scrollLeft(scrollXOffset + xinc);
             }
         },
 
-        fileInput: function () {
-            $("#input-id").fileinput({
-                'showUpload': false,
-                'language': 'ru',
-                'previewFileType': 'text',
-                'allowedFileTypes': ['text'],
-                'allowedFileExtensions': ['txt', 'csv'],
-                'showPreview': false,
-                'showRemove': false,
-                'maxFileCount': 1,
-                browseIcon: '<i class="fa fa-folder-open"></i> &nbsp;',
-                removeIcon: '<i class="fa fa-trash"></i> ',
-                uploadIcon: '<i class="fa fa-upload"></i> ',
-                cancelIcon: '<i class="fa fa-times-circle-o"></i> ',
-                msgValidationErrorIcon: '<i class="fa fa-exclamation-circle"></i> '
-            });
-        },
-
-        restrictGradeInputChars: function() {
-        }
     };
 
 export default fn;

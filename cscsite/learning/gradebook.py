@@ -231,7 +231,10 @@ class BaseGradebookForm(forms.Form):
         return self[self.FINAL_GRADE_PREFIX + str(enrollment_id)]
 
     def get_assignment_widget(self, student_assignment_id):
-        return self[self.GRADE_PREFIX + str(student_assignment_id)]
+        bound_field = self[self.GRADE_PREFIX + str(student_assignment_id)]
+        if bound_field.errors:
+            bound_field.field.widget.attrs["class"] += " __unsaved"
+        return bound_field
 
 
 class GradeBookFormFactory:
@@ -248,11 +251,15 @@ class GradeBookFormFactory:
                 if not submission:
                     continue
                 assignment = submission.assignment
+                widget = forms.TextInput(attrs={
+                    'class': 'cell __assignment __input',
+                    'max': assignment.grade_max})
                 if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
                     v = forms.IntegerField(min_value=0,
                                            max_value=assignment.grade_max,
-                                           required=False)
+                                           required=False,
+                                           widget=widget)
                     # Used to simplify `form_valid` method
                     v.student_assignment_id = submission.id
                     fields[k] = v

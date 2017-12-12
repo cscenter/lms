@@ -176,6 +176,11 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
             self.course_offering.recalculate_grading_type()
         return redirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        msg = _("Gradebook hasn't been saved.")
+        messages.error(self.request, msg)
+        return super().form_invalid(form)
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context["gradebook"] = self.data
