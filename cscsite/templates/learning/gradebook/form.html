@@ -20,124 +20,125 @@
 
 {% block content %}
 <div class="container container-wide">
-  <div class="row">
-    <div class="col-xs-12 h2-and-buttons">
-      <h2>
-        {% if request.resolver_match.url_name == 'markssheet_teacher' %}
-        <a href="{% url 'markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
-        {% else %}
-        <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
-        {% endif %}
-          {% trans "Marks sheet" %}<br><a class="small" href="{{ course_offering.get_absolute_url }}">{{ course_offering }}</a>
-      </h2>
-      <div class="btn-toolbar">
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
-        </div>
-        <div class="btn-group">
-          <a href="{{ course_offering.get_gradebook_csv_url }}"
-             target="_blank"
-             class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
-        </div>
-        <div class="btn-group">
-          <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
-          <ul class="dropdown-menu pull-right" role="menu">
-              <li role="presentation"><a href="#import-marks-csv-stepic" role="menuitem" data-toggle="modal">{% trans "By stepik.org ID" %}</a></li>
-              <li role="presentation"><a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">{% trans "By Yandex login" %}</a></li>
-          </ul>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-              Все ведомости<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu pull-right scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
-              {% regroup course_offering_list by semester as co_by_semester %}
-              {% for cos in co_by_semester %}
-              <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
-              {% for co in cos.list %}
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ co.get_gradebook_url }}">{{ co.course }}</a></li>
-              {% endfor %}
-              {% endfor %}
-            </ul>
-        </div>
-      </div>
-      <hr>
-    </div>
-  </div>
-    {% if gradebook.assignments %}
-        <div class="gradebook__controls">
-            <span class="scroll left">«</span><span class="scroll right">»</span>
-        </div>
-    {% endif %}
-    <div class="gradebook-wrapper">
-    <form method="post" id="gradebook-form">{% csrf_token %}
-        <div id="gradebook" style="width: {{ gradebook.get_table_width }}px;">
-
-            <div class="headers">
-                <div class="title __student">{% trans "Students" %}</div>
-                <div class="title __final_grade">{% trans "Grades" %}</div>
-                {% if gradebook.assignments %}
-                    <div class="title __total_score">{% trans "Total" %}</div>
+    <form method="post">{% csrf_token %}
+        <div class="row">
+            <div class="col-xs-12 h2-and-buttons">
+              <h2>
+                {% if request.resolver_match.url_name == 'markssheet_teacher' %}
+                <a href="{% url 'markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
+                {% else %}
+                <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
                 {% endif %}
-                {% for assignment in gradebook.assignments.values %}
-                    <div class="title __assignment">
-                        <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>
-                    </div>
-                {% endfor %}
+                  {% trans "Marks sheet" %}<br><a class="small" href="{{ course_offering.get_absolute_url }}">{{ course_offering }}</a>
+              </h2>
+              <div class="btn-toolbar">
+                <div class="btn-group">
+                  <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
+                </div>
+                <div class="btn-group">
+                  <a href="{{ course_offering.get_gradebook_csv_url }}"
+                     target="_blank"
+                     class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
+                </div>
+                <div class="btn-group">
+                  <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
+                  <ul class="dropdown-menu pull-right" role="menu">
+                      <li role="presentation"><a href="#import-marks-csv-stepic" role="menuitem" data-toggle="modal">{% trans "By stepik.org ID" %}</a></li>
+                      <li role="presentation"><a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">{% trans "By Yandex login" %}</a></li>
+                  </ul>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                      Все ведомости<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu pull-right scrollable-menu" role="menu" aria-labelledby="dropdownMenu1">
+                      {% regroup course_offering_list by semester as co_by_semester %}
+                      {% for cos in co_by_semester %}
+                      <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
+                      {% for co in cos.list %}
+                      <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ co.get_gradebook_url }}">{{ co.course }}</a></li>
+                      {% endfor %}
+                      {% endfor %}
+                    </ul>
+                </div>
+              </div>
+              <hr>
             </div>
-
-            <div class="grid">
-                {% for student in gradebook.students.values %}{% spaceless %}
-                    <div class="student">
-                       <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
-                           {{ student.get_abbreviated_short_name }}
-                       </a>
-                        <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                            {# TODO: replace with `get_final_widget` method call in jinja2 tmpl #}
-                            {% call_method form 'get_final_widget' student.enrollment_id %}
-                        </div>
+        </div>
+        {% if gradebook.assignments %}
+            <div class="gradebook__controls">
+                <span class="scroll left">«</span><span class="scroll right">»</span>
+            </div>
+        {% endif %}
+        <div class="gradebook-wrapper">
+            <div id="gradebook-container">
+                <div id="gradebook" style="width: {{ gradebook.get_table_width }}px;">
+                    <div class="headers">
+                        <div class="title __student">{% trans "Students" %}</div>
+                        <div class="title __final_grade">{% trans "Grades" %}</div>
                         {% if gradebook.assignments %}
-                            <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
+                            <div class="title __total_score">{% trans "Total" %}</div>
                         {% endif %}
-                        {% for submission in gradebook.submissions|lookup:student.index %}
-                            {% if submission %}
-                                {% if submission.assignment.is_online %}
-                                    <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
-                                        <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
-                                    </div>
-                                {% else %}
-                                    <input type="text"
-                                           class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
-                                          {# TODO: replace with method call instead of hardcoding prefix #}
-                                           name="sa_{{ submission.id }}"
-                                           min="0"
-                                           max="{{ submission.assignment.grade_max }}"
-                                           value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
-                                           data-value="{{ submission.score|default:"" }}">
-                                {% endif %}
-                            {% else %}
-                                <div class="cell __assignment __expelled{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"></div>
-                            {% endif %}
+                        {% for assignment in gradebook.assignments.values %}
+                            <div class="title __assignment">
+                                <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>
+                            </div>
                         {% endfor %}
                     </div>
-                {% endspaceless %}{% endfor %}
-            </div>
 
-            <div class="meta">
-                <div class="cell __student gray">{% trans "Students" %}:&nbsp;{{ gradebook.students|length }}</div>
-                <div class="cell __final_grade"></div>
-                {% if gradebook.assignments %}
-                    <div class="cell __total_score"></div>
-                {% endif %}
-                {% for assignment in gradebook.assignments.values %}
-                <div class="cell __assignment __meta">{{ assignment.grade_min }}/{{ assignment.grade_max }}</div>
-                {% endfor %}
-            </div>
+                    <div class="grid">
+                        {% for student in gradebook.students.values %}{% spaceless %}
+                            <div class="student">
+                               <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
+                                   {{ student.get_abbreviated_short_name }}
+                               </a>
+                                <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                    {# TODO: replace with `get_final_widget` method call in jinja2 tmpl #}
+                                    {% call_method form 'get_final_widget' student.enrollment_id %}
+                                </div>
+                                {% if gradebook.assignments %}
+                                    <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
+                                {% endif %}
+                                {% for submission in gradebook.submissions|lookup:student.index %}
+                                    {% if submission %}
+                                        {% if submission.assignment.is_online %}
+                                            <div class="cell __assignment __score{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}">
+                                                <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
+                                            </div>
+                                        {% else %}
+                                            <input type="text"
+                                                   class="cell __assignment __input {% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"
+                                                  {# TODO: replace with method call instead of hardcoding prefix #}
+                                                   name="sa_{{ submission.id }}"
+                                                   min="0"
+                                                   max="{{ submission.assignment.grade_max }}"
+                                                   value="{% if submission.score is not None %}{{ submission.score }}{% endif %}"
+                                                   data-value="{{ submission.score|default:"" }}">
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="cell __assignment __expelled{% if forloop.parentloop.counter|divisibleby:2 %} even{% endif %}"></div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endspaceless %}{% endfor %}
+                    </div>
 
-            {% if gradebook.assignments|length > 8 %}<div class="shadow"></div>{% endif %}
+                    <div class="meta">
+                        <div class="cell __student gray">{% trans "Students" %}:&nbsp;{{ gradebook.students|length }}</div>
+                        <div class="cell __final_grade"></div>
+                        {% if gradebook.assignments %}
+                            <div class="cell __total_score"></div>
+                        {% endif %}
+                        {% for assignment in gradebook.assignments.values %}
+                        <div class="cell __assignment __meta">{{ assignment.grade_min }}/{{ assignment.grade_max }}</div>
+                        {% endfor %}
+                    </div>
+
+                    {% if gradebook.assignments|length > 8 %}<div class="shadow"></div>{% endif %}
+                </div>
+            </div>
         </div>
     </form>
-    </div>
 </div>
 
 {% include "learning/gradebook/_modal_stepic.html" %}
