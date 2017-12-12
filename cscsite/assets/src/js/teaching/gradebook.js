@@ -62,7 +62,7 @@ var totalWrapper = $("#total");
             gradebook.on("change", "input.__assignment", function (e) {
                 // Is it integer value?
                 const value = parseInt(this.value, 10);
-                if (isNaN(value) || !Number.isInteger(value)) {
+                if (!$.isNumeric(this.value) || !Number.isInteger(value)) {
                     this.value = '';
                 } else {
                     // Validate min-max

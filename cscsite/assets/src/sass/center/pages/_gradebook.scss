@@ -14,7 +14,7 @@ $unsaved-state-color: #dcf0ff;
   position: relative;
 }
 
-#gradebook-form {
+#gradebook-container {
   overflow: hidden;
   overflow-x: auto;
   min-width: $students-column-width + $final-grade-column-width + $total-score-column-width + 4 * $assignment-column-width;
