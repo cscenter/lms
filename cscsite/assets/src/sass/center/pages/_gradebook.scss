@@ -130,16 +130,20 @@ $unsaved-state-color: #dcf0ff;
     }
 
     &.even {
-      background: $even-color!important;
+      background: $even-color;
     }
 
     &.__student {
       width: $students-column-width;
       position: absolute;
       left: 0;
-      background: $color-white;
       text-overflow: ellipsis;
       white-space: nowrap;
+      background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
     }
 
     &.__final_grade {
@@ -147,6 +151,10 @@ $unsaved-state-color: #dcf0ff;
       position: absolute;
       left: $students-column-width;
       background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
 
       &.__unsaved {
         background: $unsaved-state-color;
@@ -173,6 +181,10 @@ $unsaved-state-color: #dcf0ff;
       left: $students-column-width + $final-grade-column-width;
       text-align: right;
       background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
     }
 
     &.__assignment {
