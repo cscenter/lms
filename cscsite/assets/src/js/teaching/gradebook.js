@@ -62,6 +62,7 @@ const fn = {
 
     assignmentGradeInputValidator: function() {
         gradebook.on("keypress", "input.__assignment", fn.validateNumber);
+        // FIXME: instead of implicitly fix user input - highlight this error
         gradebook.on("change", "input.__assignment", function (e) {
             const value = parseInt(this.value, 10);
             if (!$.isNumeric(this.value) || !Number.isInteger(value)) {

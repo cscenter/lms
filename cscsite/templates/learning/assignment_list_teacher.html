@@ -50,10 +50,10 @@
         </div>
     {% endif %}
 
-    {% if terms %}
+    {% if all_terms %}
         <h5>СЕМЕСТР</h5>
         <div class="list-group inverse">
-          {% for term in terms %}
+          {% for term in all_terms %}
             <a href="{% url "assignment_list_teacher" %}?term={{ term.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
                class="list-group-item{% if term.slug == query.term %} active{% endif %}">{{ term }}</a>
           {% endfor %}
