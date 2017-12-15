@@ -43,12 +43,18 @@ def create_deadline_change_notification(sender, instance, created,
         active_enrollments = Enrollment.active.filter(
             course_offering=instance.course_offering)
         for e in active_enrollments:
-            a_s = StudentAssignment.objects.get(student_id=e.student_id,
-                                                assignment=instance)
-            (AssignmentNotification(user_id=e.student_id,
-                                    student_assignment=a_s,
-                                    is_about_deadline=True)
-             .save())
+            try:
+                sa = (StudentAssignment.objects
+                      .only('pk')
+                      .get(student_id=e.student_id,
+                           assignment=instance))
+                (AssignmentNotification(user_id=e.student_id,
+                                        student_assignment_id=sa.pk,
+                                        is_about_deadline=True)
+                 .save())
+            except StudentAssignment.DoesNotExist:
+                # It can occur when student was expelled
+                continue
 
 
 @receiver(post_save, sender=AssignmentComment)

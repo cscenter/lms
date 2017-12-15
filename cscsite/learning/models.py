@@ -1089,13 +1089,14 @@ class StudentAssignment(TimeStampedModel):
         grade_min = self.assignment.grade_min
         grade_max = self.assignment.grade_max
         return self.calculate_state(self.grade, self.assignment.is_online,
-                                    self.is_passed, grade_min, grade_max)
+                                    self.submission_is_received, grade_min, grade_max)
 
     @staticmethod
-    def calculate_state(grade, is_online, is_passed, grade_min, grade_max):
+    def calculate_state(grade, is_online, submission_is_received, grade_min,
+                        grade_max):
         grade_range = grade_max - grade_min
         if grade is None:
-            if not is_online or is_passed:
+            if not is_online or submission_is_received:
                 return 'not_checked'
             else:
                 return 'not_submitted'
@@ -1109,9 +1110,8 @@ class StudentAssignment(TimeStampedModel):
             else:
                 return 'excellent'
 
-    # FIXME: rename
     @property
-    def is_passed(self):
+    def submission_is_received(self):
         """
         Returns true if we have submission from student.
         Makes sense only when assignment can be passed through site.

@@ -270,7 +270,7 @@ class StudentAssignmentTests(TestCase):
         as_.grade = as_.assignment.grade_max
         as_.save()
 
-    def test_is_passed(self):
+    def test_submission_is_sent(self):
         u_student = StudentCenterFactory()
         u_teacher = TeacherCenterFactory()
         as_ = StudentAssignmentFactory(
@@ -278,41 +278,41 @@ class StudentAssignmentTests(TestCase):
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
         # teacher comments first
-        self.assertFalse(as_.is_passed)
+        self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_teacher)
         as_.refresh_from_db()
-        self.assertFalse(as_.is_passed)
+        self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         as_.refresh_from_db()
-        self.assertTrue(as_.is_passed)
+        self.assertTrue(as_.submission_is_received)
         # student comments first
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=True)
         as_.refresh_from_db()
-        self.assertFalse(as_.is_passed)
+        self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         as_.refresh_from_db()
-        self.assertTrue(as_.is_passed)
+        self.assertTrue(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         as_.refresh_from_db()
-        self.assertTrue(as_.is_passed)
+        self.assertTrue(as_.submission_is_received)
         # assignment is offline
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course_offering__teachers=[u_teacher],
             assignment__is_online=False)
         as_.refresh_from_db()
-        self.assertFalse(as_.is_passed)
+        self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
                                         author=u_student)
         as_.refresh_from_db()
-        self.assertFalse(as_.is_passed)
+        self.assertFalse(as_.submission_is_received)
 
     def test_student_assignment_state(self):
         import datetime
