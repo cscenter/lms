@@ -244,6 +244,22 @@ def test_new_assignment_timezone(settings):
 
 
 @pytest.mark.django_db
+def test_create_deadline_change_notification(settings):
+    co = CourseOfferingFactory(city_id='spb')
+    e1, e2 = EnrollmentFactory.create_batch(2, course_offering=co)
+    s1 = e1.student
+    s1.status = STUDENT_STATUS.expelled
+    s1.save()
+    a = AssignmentFactory(course_offering=co)
+    assert AssignmentNotification.objects.count() == 1
+    # Expellee has no StudentAssignment model
+    dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    a.deadline_at = dt
+    a.save()
+    assert AssignmentNotification.objects.count() == 2
+
+
+@pytest.mark.django_db
 def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')

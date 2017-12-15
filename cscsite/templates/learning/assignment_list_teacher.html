@@ -102,7 +102,9 @@
         {% for s_a in student_assignment_list %}
             <tr class="{{ s_a.has_unread|yesno:"unread,noop" }}">
                 <td>
-                    <a{% if s_a.student_id not in enrollments %} style="text-decoration: line-through;"{% endif %} href="{{ s_a.get_teacher_url }}">{{ s_a.student.get_short_name }}</a>{% if s_a.student.is_volunteer %} <span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
+                    <a{% if s_a.student_id not in enrollments %} style="text-decoration: line-through;"{% endif %} href="{{ s_a.get_teacher_url }}">{{ s_a.student.get_short_name }}</a>
+                    {% if s_a.student.is_volunteer %} <span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
+                    {% if s_a.student_id not in enrollments %}<span class="text-muted">покинул{% if s_a.student.gender == 'F' %}а{% endif %} курс</span>{% endif %}
 {#                    {% if not s_a.has_unread %}<a href="#" style="color:#777;" class="mark-as-unread pull-right"><i class="fa fa-eye-slash" aria-hidden="true"></i></a>{% endif %}#}
                 </td>
                 <td>
