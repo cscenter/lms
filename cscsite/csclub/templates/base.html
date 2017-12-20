@@ -46,7 +46,7 @@
       }
     </script>
   </head>
-<body class="tex2jax_ignore">
+<body {% block body_attrs %}{% endblock body_attrs %}>
     <div class="container _top">
       {% if request.user.is_authenticated %}
       <ul>
