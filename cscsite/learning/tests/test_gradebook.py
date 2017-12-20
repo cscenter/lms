@@ -2,6 +2,7 @@ import datetime
 import pytest
 import pytz
 import unicodecsv
+from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
@@ -9,18 +10,43 @@ from django.utils.encoding import smart_bytes
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory
 from learning.forms import GradebookImportCSVForm
-from learning.gradebook import gradebook_data
+from learning.gradebook import gradebook_data, BaseGradebookForm, \
+    GradeBookFormFactory
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
     STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
-from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
+from learning.views.gradebook import _get_course_offering
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
+
+@pytest.mark.django_db
+def test__get_course_offering(client, curator):
+    """Test `_get_course_offering` method in `views.gradebook`"""
+    teacher1, teacher2 = TeacherCenterFactory.create_batch(2)
+    course_offering = CourseOfferingFactory.create(teachers=[teacher1])
+    filters = {}
+    co = _get_course_offering(filters, teacher1)  # KeyError
+    assert co is None
+    filters = {
+        "city": 42,  # Attribute error
+        "course_slug": course_offering.course.slug,
+        "semester_type": course_offering.semester.type,
+        "semester_year": course_offering.semester.year,
+    }
+    co = _get_course_offering(filters, teacher1)  # Attribute error
+    assert co is None
+    filters["city"] = course_offering.city_id
+    co = _get_course_offering(filters, teacher1)
+    assert co == course_offering
+    co = _get_course_offering(filters, teacher2)
+    assert co is None
+    co = _get_course_offering(filters, curator)
+    assert co == course_offering
 
 
 @pytest.mark.django_db
@@ -32,46 +58,60 @@ def test_gradebook_recalculate_grading_type(client):
     assert co.grading_type == GRADING_TYPES.default
     assignments = AssignmentFactory.create_batch(2,
                                                  course_offering=co,
-                                                 is_online=True)
+                                                 is_online=False,
+                                                 grade_min=10, grade_max=20)
     client.login(teacher)
     url = co.get_gradebook_url()
-    form = {}
-    for s in students:
-        enrollment = EnrollmentFactory.create(student=s, course_offering=co)
-        field = 'final_grade_{}'.format(enrollment.pk)
-        form[field] = GRADES.good
-    # Save empty form first
+    # Save empty form first, nothing should been updated
     response = client.post(url, {}, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.default
+    form = {}
+    for s in students:
+        enrollment = EnrollmentFactory.create(student=s, course_offering=co)
+        field = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
+        form["initial-" + field] = GRADES.not_graded
+        form[field] = GRADES.good
     # Update final grades, still should be `default`
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.default
     student = students[0]
-    user_detail_url = reverse('user_detail', args=[student.pk])
+
+    user_detail_url = student.get_absolute_url()
     # Now we should get `binary` type after all final grades
     # will be equal `pass`
     for key in form:
-        form[key] = getattr(GRADES, 'pass')
+        if not key.startswith("initial-"):
+            form["initial-" + key] = GRADES.good
+            form[key] = getattr(GRADES, 'pass')
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
+    e = Enrollment.objects.get(student=student, course_offering=co)
+    assert e.grade == getattr(GRADES, "pass")
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") in response.content
     assert smart_bytes("/satisfactory/") not in response.content
     # Update random submission grade, grading_type shouldn't change
-    submission = StudentAssignment.objects.get(student=student,
-                                               assignment=assignments[0])
+    a1 = assignments[0]
+    submission = StudentAssignment.objects.get(student=student, assignment=a1)
+    # Online assignments are not presented in gradebook form
+    assert not a1.is_online
     form = {
-        'a_s_{}'.format(submission.pk): 2  # random valid grade
+        BaseGradebookForm.GRADE_PREFIX + str(submission.pk): 2
     }
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
+    # If we successfully updated form, it should be unbounded on GET-request
+    assert not response.context['form'].errors
+    assert not response.context['form'].is_bound
     co.refresh_from_db()
+    submission.refresh_from_db()
+    assert submission.grade == 2
     assert co.grading_type == GRADING_TYPES.binary
     # Manually set default grading type and check that grade repr changed
     co.grading_type = GRADING_TYPES.default
@@ -164,7 +204,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
 
     def test_save_markssheet(self):
         teacher = TeacherCenterFactory()
-        students = UserFactory.create_batch(2, groups=['Student [CENTER]'])
+        self.doLogin(teacher)
+        students = StudentCenterFactory.create_batch(2)
         co = CourseOfferingFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student,
@@ -172,7 +213,6 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                                 is_online=False)
         url = co.get_gradebook_url()
-        self.doLogin(teacher)
         form = {}
         pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
                      for student in students
@@ -180,10 +220,12 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             [2, 3, 4, 5])
         for submission, grade in pairs:
             enrollment = Enrollment.active.get(student=submission.student,
-                                                course_offering=co)
-            form['a_s_{}'.format(submission.pk)] = grade
-            field = 'final_grade_{}'.format(enrollment.pk)
-            form[field] = 'good'
+                                               course_offering=co)
+            field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
+            form[field_name] = grade
+            field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
+            form["initial-" + field_name] = GRADES.not_graded
+            form[field_name] = GRADES.good
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
             self.assertEqual(grade, (StudentAssignment.objects
@@ -399,3 +441,195 @@ def test_security(client, settings):
     client.login(teacher)
     assert client.get(url).status_code == 200
 
+
+@pytest.mark.django_db
+def test_save_gradebook_form(client):
+    """Make sure that all fields are optional. Save only sent data"""
+    teacher = TeacherCenterFactory.create()
+    client.login(teacher)
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
+                                            is_online=False,
+                                            grade_min=10, grade_max=20)
+    e1, e2 = EnrollmentFactory.create_batch(2, course_offering=co,
+                                            grade=GRADES.excellent)
+    # We have 2 enrollments with `excellent` final grades. Change one of them.
+    field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e1.pk)
+    form_data = {
+        "initial-" + field_name: GRADES.excellent,
+        field_name: GRADES.good,
+        # Empty value should be discarded
+        BaseGradebookForm.FINAL_GRADE_PREFIX + str(e2.pk): '',
+    }
+    data = gradebook_data(co)
+    form_cls = GradeBookFormFactory.build_form_class(data)
+    form = form_cls(data=form_data)
+    # Initial should be empty since we want to save only sent data
+    assert not form.initial
+    assert form.is_valid()
+    assert len(form.changed_data) == 1
+    assert field_name in form.changed_data
+    conflicts = form.save()
+    assert not conflicts
+    e1.refresh_from_db()
+    e2.refresh_from_db()
+    assert e1.grade == GRADES.good
+    assert e2.grade == GRADES.excellent
+    # Now change one of submission grade
+    sa11 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a1)
+    sa12 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a2)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa11.pk)
+    form_data = {
+        field_name: -5,  # invalid value
+        # Empty value should be discarded
+        BaseGradebookForm.FINAL_GRADE_PREFIX + str(e2.pk): '',
+    }
+    data = gradebook_data(co)
+    form_cls = GradeBookFormFactory.build_form_class(data)
+    form = form_cls(data=form_data)
+    assert not form.is_valid()
+    form_data[field_name] = 2
+    form_cls = GradeBookFormFactory.build_form_class(gradebook_data(co))
+    form = form_cls(data=form_data)
+    assert form.is_valid()
+    form.save()
+    sa11.refresh_from_db(), sa12.refresh_from_db()
+    assert sa11.grade == 2
+    assert sa12.grade is None
+    e1.refresh_from_db(), e2.refresh_from_db()
+    assert e1.grade == GRADES.good
+    assert e2.grade == GRADES.excellent
+
+
+@pytest.mark.django_db
+def test_save_gradebook_less_than_passing_score(client):
+    """
+    Make sure form is valid when score is less than `grade_min` since
+    `grade_min` is passing score, but not the lowest possible value.
+    It's easy to mixed `grade_min` with minimal valid value :<
+    """
+    teacher = TeacherCenterFactory()
+    client.login(teacher)
+    student = StudentCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    e = EnrollmentFactory.create(student=student, course_offering=co)
+    a = AssignmentFactory(course_offering=co, is_online=False,
+                          grade_min=10, grade_max=40)
+    sa = StudentAssignment.objects.get(student=student, assignment=a)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    form_data = {
+        field_name: 1,  # value less than passing score
+    }
+    data = gradebook_data(co)
+    form_cls = GradeBookFormFactory.build_form_class(data)
+    form = form_cls(data=form_data)
+    assert form.is_valid()
+
+
+@pytest.mark.django_db
+def test_gradebook_view_form_invalid(client):
+    teacher = TeacherCenterFactory()
+    client.login(teacher)
+    student = StudentCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    e = EnrollmentFactory.create(student=student, course_offering=co,
+                                 grade=GRADES.excellent)
+    a = AssignmentFactory(course_offering=co, is_online=False,
+                          grade_min=10, grade_max=40)
+    sa = StudentAssignment.objects.get(student=student, assignment=a)
+    sa.grade = 7
+    sa.save()
+    final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    response = client.get(co.get_gradebook_url())
+    assert response.status_code == 200
+    form = response.context['form']
+    assert form[field_name].value() == 7
+    assert form[final_grade_field_name].value() == GRADES.excellent
+    form_data = {
+        field_name: -5  # invalid value
+    }
+    response = client.post(co.get_gradebook_url(), form_data)
+    assert response.status_code == 200
+    form = response.context['form']
+    assert form[field_name].value() == '-5'
+    assert form[final_grade_field_name].value() == GRADES.excellent
+
+
+@pytest.mark.django_db
+def test_gradebook_view_form_conflict(client):
+    teacher1, teacher2 = TeacherCenterFactory.create_batch(2)
+    client.login(teacher1)
+    co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
+    student = StudentCenterFactory()
+    e = EnrollmentFactory.create(student=student, course_offering=co,
+                                 grade=GRADES.not_graded)
+    a = AssignmentFactory(course_offering=co, is_online=False,
+                          grade_min=10, grade_max=40)
+    sa = StudentAssignment.objects.get(student=student, assignment=a, grade=None)
+    final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    response = client.get(co.get_gradebook_url())
+    assert response.status_code == 200
+    form = response.context['form']
+    assert form[field_name].value() is None
+    assert form[final_grade_field_name].value() == GRADES.not_graded
+    form_data = {
+        "initial-" + field_name: None,
+        field_name: 4
+    }
+    response = client.post(co.get_gradebook_url(), form_data, follow=True)
+    assert response.status_code == 200
+    form = response.context['form']
+    assert form[field_name].value() == 4
+    assert form[final_grade_field_name].value() == GRADES.not_graded
+    sa.refresh_from_db()
+    assert sa.grade == 4
+    # Try to update assignment score with another profile
+    client.login(teacher2)
+    form_data[field_name] = 5
+    response = client.post(co.get_gradebook_url(), form_data)
+    assert response.status_code == 200
+    assert response.context['form'].conflicts_on_last_save()
+    message = list(response.context['messages'])[0]
+    assert 'warning' in message.tags
+    # The same have to be for final grade
+    form_data = {
+        "initial-" + final_grade_field_name: GRADES.not_graded,
+        final_grade_field_name: GRADES.good
+    }
+    client.login(teacher1)
+    response = client.post(co.get_gradebook_url(), form_data, follow=True)
+    assert response.status_code == 200
+    form = response.context['form']
+    assert form[field_name].value() == 4
+    assert form[final_grade_field_name].value() == GRADES.good
+    sa.refresh_from_db()
+    assert sa.grade == 4
+    e.refresh_from_db()
+    assert e.grade == GRADES.good
+    client.login(teacher2)
+    form_data[final_grade_field_name] = GRADES.excellent
+    response = client.post(co.get_gradebook_url(), form_data)
+    assert response.status_code == 200
+    assert response.context['form'].conflicts_on_last_save()
+    message = list(response.context['messages'])[0]
+    assert 'warning' in message.tags
+    final_grade_field = response.context['form'][final_grade_field_name]
+    assert final_grade_field.value() == GRADES.excellent
+    # Hidden field should store current value from db
+    hidden_input = BeautifulSoup(final_grade_field.as_hidden(), "html.parser")
+    assert hidden_input.find('input').get('value') == str(e.grade)
+    # Check special case when value was changed during form editing but it's the
+    # same as current user input. Do not treat this case as a conflict.
+    e.refresh_from_db()
+    assert e.grade == GRADES.good
+    sa.refresh_from_db()
+    assert sa.grade == 4
+    form_data[final_grade_field_name] = GRADES.good
+    response = client.post(co.get_gradebook_url(), form_data)
+    assert response.status_code == 302
+    e.refresh_from_db()
+    assert e.grade == GRADES.good
+    sa.refresh_from_db()
+    assert sa.grade == 4

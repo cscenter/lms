@@ -3,16 +3,28 @@ import SweetAlert from "bootstrap-sweetalert";
 
 const buttonDownloadCSV = $(".marks-sheet-csv-link");
 
+let submitButton = $('#marks-sheet-save');
+
 let gradebookContainer = $("#gradebook-container");
 
 let gradebook = $("#gradebook");
 
 let scrollButtonsWrapper = $(".gradebook__controls");
 
+function validateNumber(event) {
+    const key = window.event ? event.keyCode : event.which;
+    return !(key > 31 && (key < 48 || key > 57));
+}
+
+function isChanged(element) {
+    return element.value !== element.getAttribute("initial");
+}
+
 const fn = {
     launch: function () {
-        fn.finalGradeSelects();
         fn.restoreStates();
+        fn.finalGradeSelects();
+        fn.submitForm();
         fn.downloadCSVButton();
         fn.assignmentGradeInputValidator();
         fn.assignmentGradeInputIncrementByArrows();
@@ -22,7 +34,6 @@ const fn = {
     /**
      * If browser supports html5 `autocomplete` attribute,
      * we can accidentally hide unsaved state on page reload.
-     * Make sure set `defaultValue` for selects before calling this method.
      */
     restoreStates: function() {
         let inputs = document.querySelectorAll('#gradebook .__input');
@@ -46,22 +57,31 @@ const fn = {
         });
     },
 
-    /**
-     * Store `defaultSelected` in <select> DOM object for consistency with inputs.
-     */
-    finalGradeSelects: function() {
-        gradebook.find("select").each(function() {
-            this.defaultValue = $(this).find('option').filter(function () {
-                return $(this).prop("defaultSelected");
-            }).val();
+    submitForm: function () {
+        // Form heavily relies on js-behavior. `Disabled` default state
+        // prevents accidental submission if js is not activated.
+        submitButton.removeAttr("disabled");
+
+        $("form[name=gradebook]").submit(function(e) {
+            let elements = this.querySelectorAll('.__input, .__final_grade select');
+            Array.prototype.forEach.call(elements, function (element) {
+                if (!isChanged(element)) {
+                    element.disabled = true;
+                    const inputQuery = `input[name=initial-${element.name}]`;
+                    document.querySelector(inputQuery).disabled = true;
+                }
+            });
         });
+    },
+
+    finalGradeSelects: function() {
         gradebook.on("change", "select", function (e) {
             fn.toggleState(e.target);
         });
     },
 
     assignmentGradeInputValidator: function() {
-        gradebook.on("keypress", "input.__assignment", fn.validateNumber);
+        gradebook.on("keypress", "input.__assignment", validateNumber);
         // FIXME: instead of implicitly fix user input - highlight this error
         gradebook.on("change", "input.__assignment", function (e) {
             const value = parseInt(this.value, 10);
@@ -79,23 +99,17 @@ const fn = {
         });
     },
 
-    validateNumber: function(event) {
-        const key = window.event ? event.keyCode : event.which;
-        return !(key > 31 && (key < 48 || key > 57));
-    },
-
     toggleState: function(element) {
-        let gradeWrapper;
+        let wrapper;
         if ( element.nodeName.toLowerCase() === 'input' ) {
-            gradeWrapper = element;
+            wrapper = element;
         } else if (element.nodeName.toLowerCase() === 'select') {
-            gradeWrapper = element.parentElement;
+            wrapper = element.parentElement;
         }
-        let classes = gradeWrapper.classList;
-        if (element.value !== element.defaultValue) {
-            classes.add("__unsaved");
+        if (isChanged(element)) {
+            wrapper.classList.add("__unsaved");
         } else {
-            classes.remove("__unsaved");
+            wrapper.classList.remove("__unsaved");
         }
     },
 

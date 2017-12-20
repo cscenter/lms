@@ -107,7 +107,6 @@ class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
 
 
 def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
-    # TODO: add tests
     try:
         filter_kwargs = dict(
             city=get_params['city'].lower(),
@@ -120,7 +119,7 @@ def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
         return (CourseOffering.objects
                 .select_related('semester', 'course')
                 .get(**filter_kwargs))
-    except (ValueError, ObjectDoesNotExist):
+    except (ValueError, KeyError, AttributeError, ObjectDoesNotExist):
         return None
 
 
@@ -131,60 +130,73 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
     context_object_name = 'assignment_list'
 
     def __init__(self, *args, **kwargs):
-        self.course_offering = None
         super().__init__(*args, **kwargs)
+        self.data = None
+        self.course_offering = None
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get_form(self, data=None, files=None, **kwargs):
         cls = self.get_form_class()
-        if "initial" not in kwargs:
+        # Set initial data for all GET-requests
+        if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
 
     def get_form_class(self):
-        course_offering = _get_course_offering(self.kwargs, self.request.user)
-        if course_offering is None:
+        if self.course_offering is None:
+            self.course_offering = _get_course_offering(self.kwargs,
+                                                        self.request.user)
+        if self.course_offering is None:
             raise Http404('Course offering not found')
-        self.course_offering = course_offering
-        self.data = gradebook_data(course_offering)
+        self.data = gradebook_data(self.course_offering)
         return GradeBookFormFactory.build_form_class(self.data)
 
-    def get_success_url(self):
-        messages.info(self.request,
-                      _('Gradebook successfully saved.'),
-                      extra_tags='timeout')
-        return self.course_offering.get_gradebook_url(
-            for_curator=self.is_for_staff)
-
     def form_valid(self, form):
-        # TODO: add transaction.atomic
-        final_grade_updated = False
-        for field_name in form.changed_data:
-            if field_name.startswith(form.GRADE_PREFIX):
-                field = form.fields[field_name]
-                (StudentAssignment.objects
-                    .filter(pk=field.student_assignment_id)
-                    .update(grade=form.cleaned_data[field_name]))
-            elif field_name.startswith(form.FINAL_GRADE_PREFIX):
-                field = form.fields[field_name]
-                final_grade_updated = True
-                (Enrollment.objects
-                    .filter(pk=field.enrollment_id)
-                    .update(grade=form.cleaned_data[field_name]))
-        if final_grade_updated:
-            self.course_offering.recalculate_grading_type()
+        conflicts_on_save = form.save()
+        if conflicts_on_save:
+            msg = _("<b>Внимание, часть данных не была сохранена!</b><br>"
+                    "В процессе редактирования данные были "
+                    "изменены другими участниками. Необходимо вручную "
+                    "разрешить конфликты и повторить отправку формы.")
+            messages.warning(self.request, msg)
+            # Replace form data with actual db values and user input
+            # for conflict fields
+            self.data = gradebook_data(self.course_offering)
+            current_data = GradeBookFormFactory.transform_to_initial(self.data)
+            data = form.data.copy()
+            for k, v in current_data.items():
+                if k not in data:
+                    data[k] = v
+            form.data = data
+            return super().form_invalid(form)
         return redirect(self.get_success_url())
 
+    def get_success_url(self):
+        messages.success(self.request,
+                         _('Gradebook successfully saved.'),
+                         extra_tags='timeout')
+        return self.data.course_offering.get_gradebook_url(
+            for_curator=self.is_for_staff)
+
     def form_invalid(self, form):
+        """
+        Append initial to form.data since we didn't sent full image of
+        form data in POST-request, but only changed data
+        """
         msg = _("Gradebook hasn't been saved.")
         messages.error(self.request, msg)
+        initial = GradeBookFormFactory.transform_to_initial(self.data)
+        data = form.data.copy()
+        for k, v in initial.items():
+            if k not in data:
+                data[k] = v
+        form.data = data
         return super().form_invalid(form)
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+        context = super().get_context_data(**kwargs)
         context["gradebook"] = self.data
-        context['course_offering'] = self.course_offering
         # List of user gradebooks
         # TODO: Move to the model
         filter_kwargs = {}
@@ -192,8 +204,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
             filter_kwargs["teachers"] = self.request.user
         course_offering_list = (CourseOffering.objects
                                 .filter(**filter_kwargs)
-                                .order_by('-semester__year',
-                                          '-semester__type',
+                                .order_by('-semester__index',
                                           '-pk')
                                 .select_related('semester', 'course'))
         context['course_offering_list'] = course_offering_list
