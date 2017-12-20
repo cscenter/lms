@@ -180,7 +180,7 @@ def gradebook_data(course_offering: CourseOffering) -> GradeBookData:
     _enrollments_qs = (Enrollment.active
                        .filter(course_offering=course_offering)
                        .select_related("student")
-                       .order_by("student__last_name"))
+                       .order_by("student__last_name", "student_id"))
     for index, e in enumerate(_enrollments_qs.iterator()):
         enrolled_students[e.student_id] = StudentMeta(e, index)
 
