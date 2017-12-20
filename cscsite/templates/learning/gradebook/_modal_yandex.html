@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">{% trans "Import yandex statements" %}</h4>
             </div>
-            <form action="{% url 'markssheet_teacher_csv_import_yandex' course_offering.pk %}" enctype="multipart/form-data" method="POST">
+            <form action="{% url 'markssheet_teacher_csv_import_yandex' gradebook.course_offering.pk %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-body">
                     <div class="form-group">

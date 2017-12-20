@@ -117,7 +117,9 @@
         $(function() {
           $.jGrowl.defaults.closerTemplate = '<div>[{% trans "close all" %}]</div>';
           {% for message in messages %}
-            $.jGrowl("{{ message | safe }}", { position: 'bottom-right'{%  if not message.extra_tags or "timeout" not in message.extra_tags %}, sticky: true{% endif %}{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}, theme: 'error'{% endif %} });
+            $.jGrowl("{{ message | safe }}", { position: 'bottom-right'{%  if not message.extra_tags or "timeout" not in message.extra_tags %}, sticky: true{% endif %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}, theme: 'warning'{% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}, theme: 'error'{% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}, theme: 'info'{% endif %}
+            });
           {% endfor %}
         });
       </script>

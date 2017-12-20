@@ -412,7 +412,6 @@ class CourseOffering(TimeStampedModel):
         return ""
 
     def recalculate_grading_type(self):
-        """Update grading type for binded course offering if needed"""
         es = (Enrollment.active
               .filter(course_offering=self)
               .values_list("grade", flat=True))
@@ -851,6 +850,7 @@ class Assignment(TimeStampedModel):
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    # Min value to pass assignment
     grade_min = models.PositiveSmallIntegerField(
         _("Assignment|grade_min"),
         default=2,
