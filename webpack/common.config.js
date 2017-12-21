@@ -46,7 +46,7 @@ const PATHS = {
 
 const VENDOR = [
     // 'history',
-    // 'babel-polyfill',
+    'babel-polyfill',
     // 'react',
     // 'react-dom',
     // 'react-redux',
