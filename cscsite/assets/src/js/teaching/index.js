@@ -1,5 +1,4 @@
 // Pros & Cons двух подходов: загрузить всё, выполнить одно (можно оптимизировать суммарный вес). Либо загружать динамически куски.
-
 $(document).ready(function () {
     let section = $("body").data("init-section");
     if (section === "gradebook") {
