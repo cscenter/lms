@@ -60,7 +60,7 @@ const fn = {
     submitForm: function () {
         // Form heavily relies on js-behavior. `Disabled` default state
         // prevents accidental submission if js is not activated.
-        submitButton.removeAttr("disabled");
+        // submitButton.removeAttr("disabled");
 
         $("form[name=gradebook]").submit(function(e) {
             let elements = this.querySelectorAll('.__input, .__final_grade select');
