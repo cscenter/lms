@@ -150,6 +150,7 @@ def test_student_search_enrollments(client, curator):
     response = client.get(ENROLLMENTS_URL.format("1"))
     assert response.json()["count"] == 1
     e2.grade = GRADES.good
+    e2.save()
     response = client.get(ENROLLMENTS_URL.format("1"))
     assert response.json()["count"] == 1
     co3 = CourseOfferingFactory.create(course=c2)
@@ -157,6 +158,12 @@ def test_student_search_enrollments(client, curator):
                              course_offering=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))
     assert response.json()["count"] == 1
+    other_student = StudentCenterFactory(curriculum_year=2011)
+    e3 = EnrollmentFactory.create(student=other_student, grade=GRADES.good)
+    response = client.get(ENROLLMENTS_URL.format("2"))
+    assert response.json()["count"] == 1
+    response = client.get(ENROLLMENTS_URL.format("1,2"))
+    assert response.json()["count"] == 2
 
 
 @pytest.mark.django_db
