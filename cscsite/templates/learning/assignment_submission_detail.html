@@ -42,7 +42,7 @@
         {% else %}
         <a href="{% url 'assignment_detail_teacher' a_s.assignment.pk %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.student.get_short_name }} <br>
-        <small>{{ a_s.assignment.title }} ({{ a_s.assignment.course_offering }})</small>
+        <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>)</small>
         {% endif %}
       </h2>
       {% if user.is_curator or user_type == 'teacher' and is_actual_teacher %}
