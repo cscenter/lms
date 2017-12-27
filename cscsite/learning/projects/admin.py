@@ -8,9 +8,10 @@ from django.db.models import Q
 from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
-from import_export import resources, fields, widgets
 from import_export.admin import ExportMixin
 
+from core.admin import meta
+from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment
 from learning.settings import PARTICIPANT_GROUPS
@@ -98,45 +99,11 @@ class ReviewAdmin(admin.ModelAdmin):
     get_project_name.short_description = _("Project")
 
 
-class ProjectStudentAdminRecordResource(resources.ModelResource):
-    semester = fields.Field(column_name='Семестр',
-                            attribute='project__semester')
-    project = fields.Field(column_name='Проект', attribute='project')
-    student = fields.Field(column_name='Студент', attribute='student')
-    total_score = fields.Field(column_name='Суммарный балл',
-                               attribute='total_score')
-    final_grade = fields.Field(column_name='Финальная оценка',
-                               attribute='get_final_grade_display')
-    report_score = fields.Field(column_name='Балл за отчет',
-                                attribute='report__final_score')
-    presentation_grade = fields.Field(column_name='Оценка за презентацию',
-                                      attribute='presentation_grade')
-    supervisor_grade = fields.Field(column_name='Оценка руководителя',
-                                    attribute='supervisor_grade')
-    is_external = fields.Field(column_name='Внешний проект',
-                               attribute='project__get_is_external_display')
-
-    class Meta:
-        model = ProjectStudent
-        skip_unchanged = True
-        fields = (
-            "semester",
-            "student",
-            "project",
-            "total_score",
-            "final_grade",
-            "report_score",
-            "presentation_grade",
-            "supervisor_grade",
-            "is_external",
-        )
-
-
 class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ProjectStudentAdminRecordResource
     list_display = ['student', 'project', 'get_project_semester',
                     'get_total_score', 'final_grade']
-    list_filter = ['project__semester']
+    list_filter = ['project__city', 'project__semester']
     search_fields = ["project__name"]
     readonly_fields = ["report_link"]
 
@@ -145,14 +112,13 @@ class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
         return qs.select_related("report", "student", "project",
                                  "project__semester")
 
+    @meta(_("Сумма"))
     def get_total_score(self, obj):
         return obj.total_score
-    get_total_score.short_description = _("Сумма")
 
+    @meta(_("Semester"), admin_order_field="project__semester")
     def get_project_semester(self, obj):
         return obj.project.semester
-    get_project_semester.short_description = _("Semester")
-    get_project_semester.admin_order_field = 'project__semester'
 
     def report_link(self, instance):
         url = reverse('admin:%s_%s_change' % (instance.report._meta.app_label,
@@ -163,6 +129,7 @@ class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
 
 class ReportCommentAdmin(admin.ModelAdmin):
     list_display = ["report", "author"]
+
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectStudent, ProjectStudentAdmin)

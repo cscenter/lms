@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytz
 
+from django.utils.translation import ugettext_lazy as _
+
 PROJECT_DIR = Path(__file__).parents[2]
 ROOT_DIR = PROJECT_DIR.parent
 
@@ -26,6 +28,10 @@ THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
 CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
+CITIES = {
+    "spb": _("Saint Petersburg"),
+    "nsk": _("Novosibirsk")
+}
 CLUB_DOMAIN = 'compsciclub.ru'
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
