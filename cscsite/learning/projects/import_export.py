@@ -8,7 +8,7 @@ from learning.projects.models import ProjectStudent
 class CityWidget(widgets.Widget):
     def render(self, value, obj=None):
         """Don't forget to `select_related` city_id"""
-        return settings.CITIES.get(value.project.city_id, value)
+        return str(settings.CITIES.get(value.project.city_id, value))
 
 
 class ProjectStudentAdminRecordResource(resources.ModelResource):
