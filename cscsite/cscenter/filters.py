@@ -1,18 +1,13 @@
-from typing import Optional
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import SlugField
 from django.http import QueryDict
-from django_filters import FilterSet, CharFilter, Filter, ChoiceFilter, \
-    STRICTNESS
+from django_filters import FilterSet, Filter, ChoiceFilter, STRICTNESS
 from django.utils.translation import ugettext_lazy as _
 
 from learning.models import CourseOffering, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
-from learning.utils import semester_slug_re, \
-    get_term_index_academic_year_starts, get_term_by_index, TermTuple, \
-    get_term_index
+from learning.utils import semester_slug_re, get_term_index
 from learning.views.utils import get_user_city_code
 
 
