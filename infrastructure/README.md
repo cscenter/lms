@@ -23,6 +23,7 @@ Now only `deploy.yml` edited as a workaround for new naming conv.
 * restore db from s3
 * add tags. Then use it. E.g. `ansible-playbook -i inventory/ec2.py  provision.yml -v -t lvm` setup lvm only
 * Add check for ansible version
+* `# Redirect from `www.` to domain without `www` <--- check first that site domain starts with `www`
 
 Requirements
 ------------

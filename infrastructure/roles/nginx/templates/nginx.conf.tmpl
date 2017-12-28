@@ -20,8 +20,9 @@ server {
     listen 443 ssl;
     server_name www.{{ item.site_domain }};
 
-    ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
-    ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
+    # Make sure to update ansible regexp for uncommenting ssl certificates paths if https enabled.
+    # ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
+    # ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
     # Fetch OCSP records from URL in ssl_certificate and cache them
     ssl_stapling on;
     ssl_stapling_verify on;

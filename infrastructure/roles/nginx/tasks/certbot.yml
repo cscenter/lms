@@ -23,6 +23,18 @@
     creates: "{{ item.certbot_config_dir }}"
   with_items: "{{ available_sites }}"
 
+# Note: the `.` special character matches any character except newlines.
+# Note: Make sure nginx configs were copied to `dest` (see `nginx.yml`)
+- name: Uncomment `ssl_certificate` and `ssl_certificate_key`
+  replace:
+    dest: "/etc/nginx/sites-available/{{ item.site_user }}.conf"
+    regexp: '^(\s*)# ssl_certificate(.*);$'
+    replace: '\1ssl_certificate\2;'
+    backup: no
+  notify: reload nginx
+  with_items:
+    - "{{ available_sites }}"
+
 - name: Ensure Nginx is started
   service: name=nginx state=started
   when: nginx_status.stat.exists
