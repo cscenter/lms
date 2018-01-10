@@ -17,12 +17,11 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from core.forms import Ubereditor
+from core.widgets import UbereditorWidget, DateInputAsTextInput
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from learning.admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
-from learning.widgets import DateInputAsTextInput
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
@@ -451,7 +450,7 @@ class InterviewCommentForm(forms.ModelForm):
                     (1, "можно взять"),
                     (2, "точно нужно взять")),
             ),
-            'text': Ubereditor(attrs={
+            'text': UbereditorWidget(attrs={
                 'data-local-persist': 'true',
             })
         }

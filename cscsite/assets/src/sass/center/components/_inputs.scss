@@ -43,3 +43,7 @@
     }
   }
 }
+
+.clearablefileinput {
+  @extend .form-control;
+}

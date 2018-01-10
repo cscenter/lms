@@ -120,7 +120,7 @@ class UserThumbnailNode(ThumbnailNodeBase):
         return output
 
     def __repr__(self):
-        return "<ThumbnailNode>"
+        return "<UserThumbnailNode>"
 
     def __iter__(self):
         for node in self.nodelist_file:

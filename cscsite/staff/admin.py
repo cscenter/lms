@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.contrib import admin
 from django.db import models
 
-from core.forms import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget
 from staff.models import Hint
 
 

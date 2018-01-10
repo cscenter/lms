@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.forms import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget
 from htmlpages.forms import HtmlpageForm
 from htmlpages.models import HtmlPage
 

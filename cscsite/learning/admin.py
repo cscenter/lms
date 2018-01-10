@@ -14,7 +14,7 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
-from core.forms import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from core.utils import admin_datetime
 from learning.models import InternshipCategory

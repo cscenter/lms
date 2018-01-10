@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 from pathlib import Path
 
+import django
 import pytz
 
 from django.utils.translation import ugettext_lazy as _
@@ -42,6 +43,7 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(PROJECT_DIR / "templates"),
+            django.__path__[0] + '/forms/templates',
         ],
         'OPTIONS': {
             'loaders': [
@@ -65,6 +67,8 @@ TEMPLATES = [
     },
 ]
 
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
+
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin
     'dal',
@@ -82,7 +86,6 @@ INSTALLED_APPS = [
     'menu_extension',
     'sorl.thumbnail',
     'crispy_forms',
-    'floppyforms',
     'formtools',
     'bootstrap3',
     'taggit',

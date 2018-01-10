@@ -18,11 +18,15 @@ TEMPLATES = [{
     "BACKEND": "django_jinja.backend.Jinja2",
     "APP_DIRS": False,
     'DIRS': [
+        django.__path__[0] + '/forms/jinja2',
         str(BASE_DIR / "templates"),
         str(PROJECT_DIR / "templates"),
+        str(PROJECT_DIR / "core" / "templates"),
     ],
     "NAME": "jinja2",
     "OPTIONS": {
+        # TODO: Set `match_extension` to False since `django.forms`
+        # uses jinja2 templates with .html extension
         "match_extension": ".jinja2",
         "match_regex": r"^(?!narnia/).*",
         # Or put filters under templatetags and load with

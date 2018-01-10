@@ -1,6 +1,5 @@
-from __future__ import absolute_import, unicode_literals
-
 import django_rq
+from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.urls import reverse
@@ -10,9 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
 from crispy_forms.bootstrap import FormActions
-import floppyforms.__future__ as forms
 
-from core.forms import Ubereditor
+from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
@@ -98,9 +96,9 @@ class UserProfileForm(forms.ModelForm):
                   'stepic_id', 'csc_review', 'private_contacts',
                   'first_name', 'last_name', 'patronymic']
         widgets = {
-            'note': Ubereditor,
-            'csc_review': Ubereditor,
-            'private_contacts': Ubereditor
+            'note': UbereditorWidget,
+            'csc_review': UbereditorWidget,
+            'private_contacts': UbereditorWidget
         }
         help_texts = {
             'note': "{}. {}".format(
@@ -129,8 +127,8 @@ class CSCUserReferenceCreateForm(forms.ModelForm):
             Div('signature',
                 'note',
                 Div(Div(Submit('save', _('Save'), css_class='pull-right'),
-                    css_class='controls'),
-                css_class="form-group"))
+                        css_class='controls'),
+                    css_class="form-group"))
         )
         super(CSCUserReferenceCreateForm, self).__init__(*args, **kwargs)
 
