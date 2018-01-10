@@ -35,6 +35,7 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
 DEBUG = False
+ALLOWED_HOSTS = [".compscicenter.ru", ".compsciclub.ru"]
 for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 MODELTRANSLATION_DEBUG = False

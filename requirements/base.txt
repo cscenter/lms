@@ -90,7 +90,7 @@ django-js-reverse==0.7.3
 numpy==1.13.1
 
 # iCalendar support
-icalendar==3.11.6
+icalendar==4.0.0
 django-ical==1.4
 python-dateutil==2.6.1
 
