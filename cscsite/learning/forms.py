@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import floppyforms.__future__ as forms
+from django import forms
 from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions, \
     PrependedText
 from crispy_forms.helper import FormHelper
@@ -9,13 +9,11 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import CityAwareSplitDateTimeField, \
-    CityAwareModelForm
-from core.forms import Ubereditor
+from core.admin import CityAwareSplitDateTimeField, CityAwareModelForm
+from core.widgets import UbereditorWidget, DateInputAsTextInput, \
+    TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from core.validators import FileValidator
-from learning.widgets import CityAwareSplitDateTimeWidget, DateInputAsTextInput, \
-    TimeInputAsTextInput
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
 
@@ -55,8 +53,8 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
         model = CourseOffering
         fields = ['description_ru', 'description_en']
         widgets = {
-            'description_ru': Ubereditor,
-            'description_en': Ubereditor,
+            'description_ru': UbereditorWidget,
+            'description_en': UbereditorWidget,
         }
 
 
@@ -70,7 +68,7 @@ class CourseOfferingNewsForm(forms.ModelForm):
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         required=True,
-        widget=Ubereditor)
+        widget=UbereditorWidget)
 
     def __init__(self, *args, **kwargs):
         course_offering = kwargs.pop('course_offering', None)
@@ -97,7 +95,7 @@ class CourseForm(forms.ModelForm):
         label=_("Course|description"),
         required=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor)
+        widget=UbereditorWidget)
 
 
     @property
@@ -139,7 +137,7 @@ class CourseClassForm(forms.ModelForm):
         label=_("Description"),
         required=False,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
+        widget=UbereditorWidget(attrs={'autofocus': 'autofocus'}))
     slides = forms.FileField(
         label=_("Slides"),
         required=False,
@@ -153,7 +151,7 @@ class CourseClassForm(forms.ModelForm):
         label=_("Other materials"),
         required=False,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor)
+        widget=UbereditorWidget)
     date = forms.DateField(
         label=_("Date"),
         help_text=_("Format: dd.mm.yyyy"),
@@ -245,7 +243,7 @@ class AssignmentCommentForm(forms.ModelForm):
         label=_("Add comment"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
-        widget=Ubereditor(attrs={'data-quicksend': 'true',
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true',
                                  'data-local-persist': 'true'}))
     attached_file = forms.FileField(
         label="",
@@ -282,7 +280,7 @@ class AssignmentModalCommentForm(forms.ModelForm):
         label="",
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
-        widget=Ubereditor(attrs={'data-quicksend': 'true'}))
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true'}))
 
     class Meta:
         model = AssignmentComment
@@ -340,7 +338,7 @@ class AssignmentForm(CityAwareModelForm):
     text = forms.CharField(
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=Ubereditor(attrs={'autofocus': 'autofocus'}))
+        widget=UbereditorWidget(attrs={'autofocus': 'autofocus'}))
     deadline_at = CityAwareSplitDateTimeField(
         label=_("Deadline"),
         input_date_formats=["%d.%m.%Y"],

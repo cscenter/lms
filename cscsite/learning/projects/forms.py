@@ -8,7 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from core import comment_persistence
-from core.forms import Ubereditor
+from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.projects.models import ReportComment, Review, Report, \
     ProjectStudent
@@ -33,7 +33,7 @@ class ReportForm(forms.ModelForm):
         label=_("Report content"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=True,
-        widget=Ubereditor(attrs={'data-quicksend': 'true',
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true',
                                  'data-local-persist': 'true'}))
     file = forms.FileField(
         label="",
@@ -105,7 +105,7 @@ class ReportCommentForm(forms.ModelForm):
         label=_("New comment"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
-        widget=Ubereditor(attrs={'data-local-persist': 'true'}))
+        widget=UbereditorWidget(attrs={'data-local-persist': 'true'}))
     attached_file = forms.FileField(
         label="",
         required=False,

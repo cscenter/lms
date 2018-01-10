@@ -9,7 +9,7 @@ from import_export.admin import ExportActionModelAdmin, ExportMixin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, meta
-from core.forms import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget
 from core.utils import admin_datetime
 from learning.admission.forms import InterviewStreamChangeForm
 from learning.admission.import_export import OnlineTestRecordResource, \

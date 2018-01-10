@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail.admin import AdminImageMixin
 from import_export.admin import ImportExportMixin, ImportMixin
 
-from core.forms import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, CSCUserReference, \
