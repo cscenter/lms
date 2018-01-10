@@ -31,8 +31,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
         ccs_learning = (CourseClassFactory
                         .create_batch(3, course_offering=co_learning))
         ccs_other = CourseClassFactory.create_batch(5)
-        response = self.client.get(reverse('user_ical_classes', args=[user.pk]),
-                                   HTTP_HOST='test.com')
+        response = self.client.get(reverse('user_ical_classes', args=[user.pk]))
         cal = Calendar.from_ical(response.content)
         self.assertSameObjects([cc.name
                                 for cc in chain(ccs_teaching, ccs_learning)],
@@ -59,8 +58,7 @@ class ICalTests(MyUtilitiesMixin, TestCase):
         as_learning = (AssignmentFactory
                        .create_batch(3, course_offering=co_learning))
         as_other = AssignmentFactory.create_batch(5)
-        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]),
-                               HTTP_HOST='test.com')
+        resp = self.client.get(reverse('user_ical_assignments', args=[user.pk]))
         cal = Calendar.from_ical(resp.content)
         self.assertSameObjects(["{} ({})".format(a.title,
                                                  a.course_offering.course.name)
@@ -72,15 +70,15 @@ class ICalTests(MyUtilitiesMixin, TestCase):
     def test_events(self):
         file_name = 'csc_events.ics'
         # Empty calendar
-        resp = self.client.get(reverse('ical_events'))
-        self.assertEquals("text/calendar; charset=UTF-8", resp['content-type'])
-        self.assertIn(file_name, resp['content-disposition'])
-        cal = Calendar.from_ical(resp.content)
+        response = self.client.get(reverse('ical_events'))
+        assert "text/calendar; charset=UTF-8" == response['content-type']
+        self.assertIn(file_name, response['content-disposition'])
+        cal = Calendar.from_ical(response.content)
         self.assertEquals("События CSC", cal['X-WR-CALNAME'])
         # Create some content
         nces = NonCourseEventFactory.create_batch(3)
-        resp = self.client.get(reverse('ical_events'), HTTP_HOST='test.com')
-        cal = Calendar.from_ical(resp.content)
+        response = self.client.get(reverse('ical_events'))
+        cal = Calendar.from_ical(response.content)
         self.assertSameObjects([nce.name for nce in nces],
                                [evt['SUMMARY']
                                 for evt in cal.subcomponents
