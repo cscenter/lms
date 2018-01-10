@@ -1204,7 +1204,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                         nb_node, _ = html_exporter.from_filename(ipynb_src_path)
                         with open(converted_path, 'w') as f:
                             f.write(nb_node)
-                    except FileNotFoundError:
+                    except (FileNotFoundError, AttributeError):
                         pass
                 # FIXME: if file doesn't exists - returns 404?
                 file_name += html_ext
