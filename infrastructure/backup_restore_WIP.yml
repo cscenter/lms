@@ -17,4 +17,4 @@
     notify: reload uwsgi
 
   handlers:
-    - include: roles/app/handlers/main.yml
+    - import_tasks: roles/app/handlers/main.yml

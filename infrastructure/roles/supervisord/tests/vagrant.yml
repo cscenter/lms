@@ -4,6 +4,6 @@
   remote_user: vagrant
   become: true
   pre_tasks:
-    - include: pre.yml
+    - import_tasks: pre.yml
   roles:
     - ../../

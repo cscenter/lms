@@ -82,8 +82,8 @@
 
 - name: Setup shared/ Volume
   hosts: "{{ aws_ec2_host_new }}"
-  user: ubuntu
-  sudo: True
+  become: yes
+  become_user: ubuntu
   vars_files:
     - vars/aws.yml
   roles:

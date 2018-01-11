@@ -9,7 +9,6 @@
   with_items:
     - 'ppa:nginx/stable'
     - 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
-    - 'ppa:deadsnakes/ppa'
 
 - name: Upgrade all packages to the latest version
   apt: upgrade=dist
@@ -23,7 +22,6 @@
   when: reboot_file.stat.exists == true
 
 - name: wait for server to go offline (because reboot)
-  sudo: no
   local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
   when: reboot_file.stat.exists == true
 
@@ -38,29 +36,18 @@
     name: "{{ item }}"
     state: present
   with_items:
-    # core items
-    - nginx
-    - postgresql-9.4
-    - libpq-dev
-    - gettext
-    - libpcre3
-    - libpcre3-dev
-    - libxml2-dev
-    - libxslt1-dev
-    - python3.5
+    # stuff for system python
     - python-setuptools
     - python-dev
-    - python3-dev
-    - python3.5-dev
-    - python3-pip
+    # core items
+    - nginx
+    # db
+    - libpq-dev
+    - postgresql-9.4
     - git
-    - build-essential
-    - libjpeg-dev
-    - libpng-dev
-    - libmagic-dev
-    - libcurl4-gnutls-dev
-    - python-pycurl
     # utilities
     - zsh
     - tmux
     - htop
+    # others
+    - build-essential

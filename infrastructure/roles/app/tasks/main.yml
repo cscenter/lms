@@ -1,13 +1,15 @@
 ---
-- include: apt.yml
-- include: pip.yml
+- name: Upgrade system dependencies and install core stuff
+  import_tasks: apt.yml
+
+- import_tasks: pip.yml
 
 - name: Create users and groups
-  include: users.yml
+  import_tasks: users.yml
   tags:
     - users
 
-- include: stuff.yml
+- import_tasks: stuff.yml
 
 - name: create application directory structure for cscenter site
   file:
@@ -16,7 +18,6 @@
     owner: "{{ cscenter_user }}"
   with_items:
     - logs
-    - env
 
 - name: create application directory structure for csclub site
   file:
@@ -25,7 +26,6 @@
     owner: "{{ csclub_user }}"
   with_items:
     - logs
-    - env
   tags:
     - csclub
 
@@ -49,23 +49,12 @@
   tags:
     - csclub
 
-- name: install CSC website deps for cscenter
-  become: yes
-  become_user: "{{ cscenter_user }}"
-  pip:
-    requirements: "/home/{{ cscenter_user }}/site/repo/requirements.txt"
-    virtualenv: "/home/{{ cscenter_user }}/site/env/"
-    virtualenv_python: python3.5
-
-- name: install CSC website deps for csclub
-  become: yes
-  become_user: "{{ csclub_user }}"
-  pip:
-    requirements: "/home/{{ csclub_user }}/site/repo/requirements.txt"
-    virtualenv: "/home/{{ csclub_user }}/site/env/"
-    virtualenv_python: python3.5
+# FIXME: restart doesn't work right now. Touch config or figure out what's wrong
+- name: Install dependencies
+  import_tasks: venv.yml
+  notify: restart uwsgi
   tags:
-    - csclub
+    - venv
 
 - name: Copy upstart uwsgi config
   template:
@@ -127,10 +116,12 @@
     mode: 0775
 
 - name: Process db
-  include: db.yml
+  import_tasks: db.yml
   tags:
     - db
-- include: cronjobs.yml
+
+- name: Set up cron jobs
+  import_tasks: cronjobs.yml
   tags:
     - cronjobs
 

@@ -1,4 +1,5 @@
 ---
 pg_version: 9.4
+python_pkg: python3.6
 app_environment: production
 db_name: cscdb

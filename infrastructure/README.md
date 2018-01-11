@@ -12,9 +12,10 @@
     server ntp1.imvp.ru
 * Problems with restarting supervisor. All programs can be in RUNNING state, but ansible task failed. (??? is it fixed?)
 * fix certbot default email/domain values! They should be real...
-* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 uses as system 
-`python3` (now py3.4 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
+* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 used as system 
+`python3` (now py3.6 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
 * Problem with restarting supervisor after `Nginx status`
+* Think how to update python version without breaking site for updating period (now it does by removing current venv. No idea how to properly rename venv :<)
 
 TODO (important):
 * Now `venv` named like `env_35x`. Need to rename them to `venv` back or update playbooks to handle this new name. 
@@ -29,7 +30,7 @@ Requirements
 ------------
   
 * python3
-* Ansible (>=2.x) `pip install ansible`
+* Ansible (>=2.4.x) `pip install ansible`
 * boto library `pip install boto` (may not work from virtualenv)
 * aws cli (optional) `pip install awscli`
 * For Dynamic inventory in Ansible used [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)

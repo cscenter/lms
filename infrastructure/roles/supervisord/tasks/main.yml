@@ -1,18 +1,18 @@
 # tasks file for supervisor
 ---
-- include: install.yml
+- import_tasks: install.yml
   tags:
     - configuration
     - supervisor
     - supervisor-install
 
-- include: configure.yml
+- import_tasks: configure.yml
   tags:
     - configuration
     - supervisor
     - supervisor-configure
 
-- include: service-initd.yml
+- import_tasks: service-initd.yml
   when: ansible_service_mgr != 'systemd'
   tags:
     - configuration
@@ -20,7 +20,7 @@
     - supervisor-configure
     - supervisor-configure-initd
 
-- include: service-systemd.yml
+- import_tasks: service-systemd.yml
   when: ansible_service_mgr == 'systemd'
   tags:
     - configuration
@@ -28,13 +28,13 @@
     - supervisor-configure
     - supervisor-configure-systemd
 
-- include: programs.yml
+- import_tasks: programs.yml
   tags:
     - configuration
     - supervisor
     - supervisor-programs
 
-- include: groups.yml
+- import_tasks: groups.yml
   tags:
     - configuration
     - supervisor

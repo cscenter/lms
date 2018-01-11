@@ -2,8 +2,10 @@
 
 - name: restart nginx
   service: name=nginx state=restarted
-  sudo: yes
+  become: yes
+  become_method: sudo
 
 - name: reload nginx
   service: name=nginx state=reloaded
-  sudo: yes
+  become: yes
+  become_method: sudo

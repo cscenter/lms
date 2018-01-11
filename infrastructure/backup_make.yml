@@ -1,8 +1,8 @@
 ---
 - name: Make a backup of db and media/ folder for CSCenter website
   hosts: "{{ aws_ec2_host }}"
-  user: ubuntu
-  sudo: True
+  become: yes
+  become_user: ubuntu
   vars_files:
     - vars/aws.yml
 
@@ -24,4 +24,4 @@
     notify: reload uwsgi
 
   handlers:
-    - include: roles/app/handlers/main.yml
+    - import_tasks: roles/app/handlers/main.yml

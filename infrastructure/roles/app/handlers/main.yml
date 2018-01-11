@@ -1,12 +1,15 @@
 ---
 - name: restart uwsgi
   service: name=uwsgi state=restarted
-  sudo: yes
+  become: yes
+  become_method: sudo
 
 - name: reload uwsgi
   service: name=uwsgi state=reloaded
-  sudo: yes
+  become: yes
+  become_method: sudo
 
 - name: restart postgres
   service: name=postgresql state=restarted
-  sudo: yes
+  become: yes
+  become_method: sudo

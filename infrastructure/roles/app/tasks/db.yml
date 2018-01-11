@@ -3,12 +3,14 @@
   service: name=postgresql state=started enabled=yes
 
 - name: Change postgres data storage | Drop cluster if exist
-  sudo: yes
+  become: yes
+  become_method: sudo
   ignore_errors: yes
   shell: "pg_dropcluster --stop {{ pg_version }} main"
 
 - name: Change postgres data storage | Create cluster
-  sudo: yes
+  become: yes
+  become_method: sudo
   ignore_errors: yes
   shell: "pg_createcluster -d /shared/db/data/ --start -e UTF-8 {{ pg_version }} main"
   notify: restart postgres
