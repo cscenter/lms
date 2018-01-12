@@ -64,6 +64,7 @@ git+https://github.com/pacahon/Hoep.git@0d4c0507dcb34d1b63a099c8b08656b66394bc37
 bleach==2.1.2
 
 # Oembed staff
+git+https://github.com/coleifer/micawber.git@6c5acaa2fe19d4a75d47fe2dbad905f4b44507f5
 micawber==0.3.4
 
 # Db and media backup
