@@ -1,7 +1,6 @@
 -r base.txt
 
 colour-runner==0.0.5
-
 pylint-django==0.7.2
 
 # Fixtures
@@ -9,27 +8,19 @@ factory_boy==2.8.1
 testfixtures==4.13.5
 
 # Debug
-django-debug-toolbar-template-timings==0.7
-
-# Shell+
-django-extensions==1.7.6
-
-
-### Python 3.5 support
-
-mock==2.0.0
-coverage==4.4.2
-
-# Nice tracebacks
-Werkzeug==0.11.15
-
-# Debug
-django-debug-toolbar==1.9.1
-
-
-django-coverage==1.2.4
+ipython==6.2.1
 ipdb==0.10.2
 pdbpp==0.9.2
+django-debug-toolbar==1.9.1
+django-debug-toolbar-template-timings==0.7
+Werkzeug==0.11.15
+django-extensions==1.7.6
+djdt-flamegraph==0.2.12
+
+# Tests
+mock==2.0.0
+coverage==4.4.2
+django-coverage==1.2.4
 
 pytest==3.3.2
 pytest-django==3.1.2
@@ -37,5 +28,3 @@ pytest-cov==2.5.1
 pytest-xdist==1.21.0
 pytest-mock==1.6.3
 pytest-pythonpath==0.7.1
-
-djdt-flamegraph==0.2.12
