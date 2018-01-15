@@ -258,16 +258,20 @@ class CourseOffering(TimeStampedModel):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
+    is_correspondence = models.BooleanField(
+        _("Correspondence course"),
+        default=False)
     city = models.ForeignKey(City, verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
 
-    class Meta(object):
+    class Meta:
         ordering = ["-semester", "course__created"]
         verbose_name = _("Course offering")
         verbose_name_plural = _("Course offerings")
+        unique_together = [('course', 'semester', 'city')]
 
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.course),

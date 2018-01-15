@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-12 10:48+0000\n"
-"PO-Revision-Date: 2017-12-12 10:48+0000\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2018-01-15 14:12+0000\n"
+"PO-Revision-Date: 2018-01-15 14:12+0000\n"
+"Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -63,8 +63,8 @@ msgid "Abbreviation"
 msgstr "Аббревиатура"
 
 #: cscsite/core/models.py:82 cscsite/core/models.py:134
-#: cscsite/learning/models.py:261 cscsite/learning/models.py:586
-#: cscsite/learning/models.py:1441 cscsite/library/models.py:37
+#: cscsite/learning/models.py:264 cscsite/learning/models.py:589
+#: cscsite/learning/models.py:1445 cscsite/library/models.py:37
 #: cscsite/templates/learning/courses/detail.html:30
 msgid "City"
 msgstr "Город"
@@ -73,19 +73,19 @@ msgstr "Город"
 msgid "Cities"
 msgstr "Города"
 
-#: cscsite/core/models.py:91 cscsite/learning/models.py:1549
+#: cscsite/core/models.py:91 cscsite/learning/models.py:1553
 msgid "Category name"
 msgstr "Название категории"
 
 #: cscsite/core/models.py:92 cscsite/core/models.py:108
-#: cscsite/core/models.py:132 cscsite/learning/models.py:1535
-#: cscsite/learning/models.py:1550 cscsite/learning/models.py:1566
+#: cscsite/core/models.py:132 cscsite/learning/models.py:1539
+#: cscsite/learning/models.py:1554 cscsite/learning/models.py:1570
 #: cscsite/staff/models.py:17
 msgid "Sort order"
 msgstr "Сортировка"
 
 #: cscsite/core/models.py:93 cscsite/core/models.py:109
-#: cscsite/learning/models.py:1536 cscsite/learning/models.py:1551
+#: cscsite/learning/models.py:1540 cscsite/learning/models.py:1555
 msgid "Site"
 msgstr "Сайт"
 
@@ -97,13 +97,13 @@ msgstr "Раздел для FAQ"
 msgid "FAQ categories"
 msgstr "Разделы для FAQ"
 
-#: cscsite/core/models.py:106 cscsite/learning/models.py:1533
-#: cscsite/learning/models.py:1564 cscsite/staff/models.py:15
+#: cscsite/core/models.py:106 cscsite/learning/models.py:1537
+#: cscsite/learning/models.py:1568 cscsite/staff/models.py:15
 msgid "Question"
 msgstr "Вопрос"
 
-#: cscsite/core/models.py:107 cscsite/learning/models.py:1534
-#: cscsite/learning/models.py:1565 cscsite/staff/models.py:16
+#: cscsite/core/models.py:107 cscsite/learning/models.py:1538
+#: cscsite/learning/models.py:1569 cscsite/staff/models.py:16
 msgid "Answer"
 msgstr "Ответ"
 
@@ -135,6 +135,19 @@ msgstr "Аббревиатура (если есть)"
 #: cscsite/core/models.py:139
 msgid "Universities"
 msgstr "Университеты"
+
+#: cscsite/core/settings/base.py:33
+msgid "Saint Petersburg"
+msgstr ""
+
+#: cscsite/core/settings/base.py:34
+msgid "Novosibirsk"
+msgstr ""
+
+#: cscsite/core/templates/widgets/cite_aware_split_datetime.html:11
+#: cscsite/core/templates/widgets/cite_aware_split_datetime.html:22
+msgid "Format"
+msgstr "Формат"
 
 #: cscsite/core/validators.py:35
 #, python-format
@@ -183,19 +196,19 @@ msgstr ""
 "Перепроверьте список выбранных преподавателей. Кто-то из них не имеет "
 "отношения к выбранному прочтению курса."
 
-#: cscsite/learning/admin.py:228 cscsite/learning/models.py:846
+#: cscsite/learning/admin.py:228 cscsite/learning/models.py:849
 msgid "Assignment|deadline"
 msgstr "Срок сдачи"
 
-#: cscsite/learning/admin.py:250 cscsite/learning/models.py:843
+#: cscsite/learning/admin.py:250 cscsite/learning/models.py:846
 msgid "Assignment|assigned_to"
 msgstr "Задано"
 
-#: cscsite/learning/admin.py:255 cscsite/learning/models.py:850
+#: cscsite/learning/admin.py:255 cscsite/learning/models.py:853
 msgid "Asssignment|name"
 msgstr "Название"
 
-#: cscsite/learning/admin.py:282 cscsite/learning/models.py:1229
+#: cscsite/learning/admin.py:282 cscsite/learning/models.py:1233
 msgid "Enrollment|grade changed"
 msgstr "Оценка изменена"
 
@@ -203,61 +216,61 @@ msgstr "Оценка изменена"
 msgid "Learning"
 msgstr "Обучение"
 
-#: cscsite/learning/forms.py:25
+#: cscsite/learning/forms.py:23
 #: cscsite/templates/learning/simple_delete_confirmation.html:22
 msgid "Cancel"
 msgstr "Отмена"
 
-#: cscsite/learning/forms.py:28 cscsite/learning/forms.py:260
-#: cscsite/templates/learning/gradebook/form.html:36
+#: cscsite/learning/forms.py:26 cscsite/learning/forms.py:258
+#: cscsite/templates/learning/gradebook/form.html:31
 #: cscsite/templates/users/_user_detail_upload_photo.html:42
-#: cscsite/users/forms.py:131
+#: cscsite/users/forms.py:129
 msgid "Save"
 msgstr "Сохранить"
 
-#: cscsite/learning/forms.py:65 cscsite/learning/forms.py:338
+#: cscsite/learning/forms.py:63 cscsite/learning/forms.py:336
 #: cscsite/learning/gallery/models.py:38
 #: cscsite/templates/learning/courseoffering_detail.html:136
 #: cscsite/templates/learning/international_schools.html:16
 msgid "Title"
 msgstr "Название"
 
-#: cscsite/learning/forms.py:70 cscsite/learning/forms.py:341
+#: cscsite/learning/forms.py:68 cscsite/learning/forms.py:339
 msgid "Text"
 msgstr "Текст"
 
-#: cscsite/learning/forms.py:92 cscsite/learning/models.py:48
-#: cscsite/learning/models.py:1474 cscsite/users/models.py:586
+#: cscsite/learning/forms.py:90 cscsite/learning/models.py:48
+#: cscsite/learning/models.py:1478 cscsite/users/models.py:586
 #: cscsite/users/models.py:604
 msgid "Course|name"
 msgstr "Название"
 
-#: cscsite/learning/forms.py:97 cscsite/learning/models.py:57
+#: cscsite/learning/forms.py:95 cscsite/learning/models.py:57
 msgid "Course|description"
 msgstr "Описание"
 
-#: cscsite/learning/forms.py:130 cscsite/learning/models.py:617
+#: cscsite/learning/forms.py:128 cscsite/learning/models.py:620
 msgid "Venue"
 msgstr "Место проведения"
 
-#: cscsite/learning/forms.py:133 cscsite/learning/models.py:662
+#: cscsite/learning/forms.py:131 cscsite/learning/models.py:665
 msgid "Type"
 msgstr "Тип"
 
-#: cscsite/learning/forms.py:136 cscsite/learning/models.py:664
-#: cscsite/learning/models.py:1388
+#: cscsite/learning/forms.py:134 cscsite/learning/models.py:667
+#: cscsite/learning/models.py:1392
 msgid "CourseClass|Name"
 msgstr "Название"
 
-#: cscsite/learning/forms.py:139 cscsite/learning/models.py:238
-#: cscsite/learning/models.py:596 cscsite/learning/models.py:666
-#: cscsite/learning/models.py:1390
+#: cscsite/learning/forms.py:137 cscsite/learning/models.py:238
+#: cscsite/learning/models.py:599 cscsite/learning/models.py:669
+#: cscsite/learning/models.py:1394
 #: cscsite/templates/learning/courseclass_detail.html:46
 #: cscsite/templates/learning/noncourseevent_detail.html:29
 msgid "Description"
 msgstr "Описание"
 
-#: cscsite/learning/forms.py:144 cscsite/learning/models.py:670
+#: cscsite/learning/forms.py:142 cscsite/learning/models.py:673
 #: cscsite/learning/views/course_offering.py:213
 #: cscsite/templates/learning/courseclass_detail.html:39
 #: cscsite/templates/learning/timetable_student.html:79
@@ -265,44 +278,44 @@ msgstr "Описание"
 msgid "Slides"
 msgstr "Слайды"
 
-#: cscsite/learning/forms.py:148
+#: cscsite/learning/forms.py:146
 #: cscsite/templates/learning/assignment_detail_teacher.html:41
 #: cscsite/templates/learning/courseclass_detail.html:74
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
-#: cscsite/learning/forms.py:150 cscsite/learning/forms.py:354
+#: cscsite/learning/forms.py:148 cscsite/learning/forms.py:352
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
-#: cscsite/learning/forms.py:153
+#: cscsite/learning/forms.py:151
 msgid "Other materials"
 msgstr "Материалы"
 
-#: cscsite/learning/forms.py:158 cscsite/learning/models.py:681
-#: cscsite/learning/models.py:1393
+#: cscsite/learning/forms.py:156 cscsite/learning/models.py:684
+#: cscsite/learning/models.py:1397
 msgid "Date"
 msgstr "Дата"
 
-#: cscsite/learning/forms.py:159
+#: cscsite/learning/forms.py:157
 msgid "Format: dd.mm.yyyy"
 msgstr "Формат: дд.мм.гггг"
 
-#: cscsite/learning/forms.py:162 cscsite/learning/models.py:682
-#: cscsite/learning/models.py:1394
+#: cscsite/learning/forms.py:160 cscsite/learning/models.py:685
+#: cscsite/learning/models.py:1398
 msgid "Starts at"
 msgstr "Начало"
 
-#: cscsite/learning/forms.py:163 cscsite/learning/forms.py:167
+#: cscsite/learning/forms.py:161 cscsite/learning/forms.py:165
 msgid "Format: hh:mm"
 msgstr "Формат: чч:мм"
 
-#: cscsite/learning/forms.py:166 cscsite/learning/models.py:683
-#: cscsite/learning/models.py:1395
+#: cscsite/learning/forms.py:164 cscsite/learning/models.py:686
+#: cscsite/learning/models.py:1399
 msgid "Ends at"
 msgstr "Конец"
 
-#: cscsite/learning/forms.py:198
+#: cscsite/learning/forms.py:196
 #: cscsite/templates/learning/courseclass_detail.html:62
 #: cscsite/templates/learning/courseoffering_detail.html:104
 #: cscsite/templates/learning/timetable_student.html:47
@@ -310,36 +323,36 @@ msgstr "Конец"
 msgid "Materials"
 msgstr "Материалы"
 
-#: cscsite/learning/forms.py:208
+#: cscsite/learning/forms.py:206
 msgid "<i class=\"fa fa-plus\"></i> Save and add"
 msgstr "<i class=\"fa fa-plus\"></i> Сохранить и добавить ещё"
 
-#: cscsite/learning/forms.py:235
+#: cscsite/learning/forms.py:233
 #, python-format
 msgid ""
 "Inconsistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: cscsite/learning/forms.py:245
+#: cscsite/learning/forms.py:243
 msgid "Add comment"
 msgstr "Добавить комментарий"
 
-#: cscsite/learning/forms.py:275
+#: cscsite/learning/forms.py:273
 msgid "Either text or file should be non-empty"
 msgstr "Требуется текст либо приложенный файл"
 
-#: cscsite/learning/forms.py:299
+#: cscsite/learning/forms.py:297
 #, fuzzy
 #| msgid "Either text or file should be non-empty"
 msgid "Text should be non-empty"
 msgstr "Требуется текст либо приложенный файл"
 
-#: cscsite/learning/forms.py:330 cscsite/learning/models.py:1053
+#: cscsite/learning/forms.py:328 cscsite/learning/models.py:1057
 #, python-brace-format
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
-#: cscsite/learning/forms.py:345
+#: cscsite/learning/forms.py:343
 #: cscsite/templates/learning/assignment_detail_teacher.html:33
 #: cscsite/templates/learning/assignment_list_student.html:16
 #: cscsite/templates/learning/assignment_list_student.html:63
@@ -349,26 +362,26 @@ msgstr "Оценка не может быть больше максимальн�
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: cscsite/learning/forms.py:352
+#: cscsite/learning/forms.py:350
 msgid "Attached file"
 msgstr "Приложенный файл"
 
-#: cscsite/learning/forms.py:357
+#: cscsite/learning/forms.py:355
 #: cscsite/templates/learning/assignment_detail_teacher.html:37
 msgid "Can be passed online"
 msgstr "Можно сдать через сайт CS центра"
 
-#: cscsite/learning/forms.py:360 cscsite/learning/models.py:855
+#: cscsite/learning/forms.py:358 cscsite/learning/models.py:859
 #: cscsite/templates/learning/assignment_submission_detail.html:161
 msgid "Assignment|grade_min"
 msgstr "Проходной балл"
 
-#: cscsite/learning/forms.py:363 cscsite/learning/models.py:859
+#: cscsite/learning/forms.py:361 cscsite/learning/models.py:863
 #: cscsite/templates/learning/assignment_submission_detail.html:158
 msgid "Assignment|grade_max"
 msgstr "Максимальный балл"
 
-#: cscsite/learning/forms.py:422
+#: cscsite/learning/forms.py:420
 #: cscsite/templates/learning/gradebook/_modal_stepic.html:24
 #: cscsite/templates/learning/gradebook/_modal_yandex.html:24
 msgid "Select csv file"
@@ -391,14 +404,14 @@ msgstr "Сортировка"
 msgid "File"
 msgstr "Файл изображения"
 
-#: cscsite/learning/gallery/models.py:46 cscsite/learning/models.py:1299
-#: cscsite/learning/models.py:1356
+#: cscsite/learning/gallery/models.py:46 cscsite/learning/models.py:1303
+#: cscsite/learning/models.py:1360
 msgid "User"
 msgstr "Имя пользователя"
 
-#: cscsite/learning/gallery/models.py:51 cscsite/learning/models.py:269
-#: cscsite/learning/models.py:494 cscsite/learning/models.py:655
-#: cscsite/learning/models.py:839 cscsite/learning/models.py:1222
+#: cscsite/learning/gallery/models.py:51 cscsite/learning/models.py:272
+#: cscsite/learning/models.py:497 cscsite/learning/models.py:658
+#: cscsite/learning/models.py:842 cscsite/learning/models.py:1226
 #: cscsite/templates/users/user_detail.html:315
 msgid "Course offering"
 msgstr "Прочтение курса"
@@ -468,59 +481,59 @@ msgstr "Альбомы"
 msgid "Empty album"
 msgstr "Пустой альбом"
 
-#: cscsite/learning/gradebook.py:126
+#: cscsite/learning/gradebook.py:132
 #, fuzzy
 #| msgid "Last Page"
 msgid "Last name"
 msgstr "Последняя страница"
 
-#: cscsite/learning/gradebook.py:127
+#: cscsite/learning/gradebook.py:133
 #, fuzzy
 #| msgid "First Page"
 msgid "First name"
 msgstr "Первая страница"
 
-#: cscsite/learning/gradebook.py:128
+#: cscsite/learning/gradebook.py:134
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: cscsite/learning/gradebook.py:129
-#: cscsite/templates/learning/gradebook/form.html:80
+#: cscsite/learning/gradebook.py:135
+#: cscsite/templates/learning/gradebook/form.html:75
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: cscsite/learning/gradebook.py:294
+#: cscsite/learning/gradebook.py:422
 #, fuzzy
 #| msgid "User with stepic_id {} not found"
 msgid "User {} not found"
 msgstr "Пользователь со stepik.org ID {} не найден"
 
-#: cscsite/learning/gradebook.py:297
+#: cscsite/learning/gradebook.py:425
 #, fuzzy
 #| msgid "Multiple objects for Yandex ID: {}"
 msgid "Multiple objects found for {}"
 msgstr "Для Yandex ID '{}' найдено слишком много объектов"
 
-#: cscsite/learning/gradebook.py:346
+#: cscsite/learning/gradebook.py:474
 msgid "<b>Import results</b>: {}/{} successes"
 msgstr "Результаты импорта: {} из {} успешно"
 
-#: cscsite/learning/gradebook.py:368
+#: cscsite/learning/gradebook.py:496
 msgid "Can't convert user_id to int '{}'"
 msgstr "user_id нельзя преобразовать в int. Текущее значение: '{}'"
 
-#: cscsite/learning/gradebook.py:373 cscsite/learning/gradebook.py:410
+#: cscsite/learning/gradebook.py:501 cscsite/learning/gradebook.py:538
 msgid "Can't convert points for user '{}'"
 msgstr "Ошибка конвертирования оценки для пользователя '{}'"
 
-#: cscsite/learning/gradebook.py:376
+#: cscsite/learning/gradebook.py:504
 #, fuzzy
 #| msgid "Score greater then max grade for user '{}'"
 msgid "Score greater than max value for id '{}'"
 msgstr ""
 "Текущая оценка для пользователя '{}' больше максимально возможного значения"
 
-#: cscsite/learning/gradebook.py:413
+#: cscsite/learning/gradebook.py:541
 msgid "Score greater then max grade for user '{}'"
 msgstr ""
 "Текущая оценка для пользователя '{}' больше максимально возможного значения"
@@ -551,7 +564,7 @@ msgstr "Курс"
 msgid "Courses"
 msgstr "Курсы"
 
-#: cscsite/learning/models.py:76 cscsite/learning/models.py:1439
+#: cscsite/learning/models.py:76 cscsite/learning/models.py:1443
 msgid "Year"
 msgstr "Год"
 
@@ -709,232 +722,236 @@ msgstr ""
 "Прочтение курса будет доступно на сайте Computer Science Клуба, кто угодно "
 "сможет присоединиться"
 
-#: cscsite/learning/models.py:270
+#: cscsite/learning/models.py:262
+msgid "Correspondence course"
+msgstr "Заочный курс"
+
+#: cscsite/learning/models.py:273
 #: cscsite/templates/learning/courses/detail.html:25
 #: cscsite/templates/users/teacher_detail.html:35
 msgid "Course offerings"
 msgstr "Прочтения курсов"
 
-#: cscsite/learning/models.py:449
+#: cscsite/learning/models.py:452
 msgid "Lecturer"
 msgstr "Лектор"
 
-#: cscsite/learning/models.py:450
+#: cscsite/learning/models.py:453
 msgid "Reviewer"
 msgstr "Проверяющий ДЗ"
 
-#: cscsite/learning/models.py:453
+#: cscsite/learning/models.py:456
 msgid "Notify by default"
 msgstr "Автоматически подписывать на уведомления"
 
-#: cscsite/learning/models.py:454
+#: cscsite/learning/models.py:457
 msgid "Add teacher to assignment notify settings by default"
 msgstr ""
 "При создании задания автоматически подписывать преподавателя на уведомления,"
 " связанные с ДЗ. Только те задания, на которые он подписан, будут видны ему "
 "в разделе Преподавание - Задания."
 
-#: cscsite/learning/models.py:458
+#: cscsite/learning/models.py:461
 msgid "Course Offering teacher"
 msgstr "Преподаватель прочтения курса"
 
-#: cscsite/learning/models.py:459
+#: cscsite/learning/models.py:462
 msgid "Course Offering teachers"
 msgstr "Преподаватели прочтения курса"
 
-#: cscsite/learning/models.py:496
+#: cscsite/learning/models.py:499
 msgid "CourseNews|title"
 msgstr "Заголовок"
 
-#: cscsite/learning/models.py:499 cscsite/learning/models.py:1162
+#: cscsite/learning/models.py:502 cscsite/learning/models.py:1166
 msgid "Author"
 msgstr "Автор"
 
-#: cscsite/learning/models.py:502
+#: cscsite/learning/models.py:505
 msgid "CourseNews|text"
 msgstr "Текст"
 
-#: cscsite/learning/models.py:507
+#: cscsite/learning/models.py:510
 msgid "Course news-singular"
 msgstr "Новость"
 
-#: cscsite/learning/models.py:508
+#: cscsite/learning/models.py:511
 msgid "Course news-plural"
 msgstr "Новости"
 
-#: cscsite/learning/models.py:589
+#: cscsite/learning/models.py:592
 msgid "Venue|Name"
 msgstr "Название"
 
-#: cscsite/learning/models.py:591
+#: cscsite/learning/models.py:594
 msgid "Venue|Address"
 msgstr "Адрес"
 
-#: cscsite/learning/models.py:592
+#: cscsite/learning/models.py:595
 msgid "Should be resolvable by Google Maps"
 msgstr "Должен находиться на google-картах"
 
-#: cscsite/learning/models.py:599
+#: cscsite/learning/models.py:602
 msgid "Directions"
 msgstr "Как добраться"
 
-#: cscsite/learning/models.py:603
+#: cscsite/learning/models.py:606
 msgid "Flags"
 msgstr "Флаги"
 
-#: cscsite/learning/models.py:605 cscsite/learning/models.py:687
-#: cscsite/learning/models.py:791
+#: cscsite/learning/models.py:608 cscsite/learning/models.py:690
+#: cscsite/learning/models.py:794
 msgid "Class"
 msgstr "Занятие"
 
-#: cscsite/learning/models.py:606
+#: cscsite/learning/models.py:609
 msgid "Interview"
 msgstr "Собеседование"
 
-#: cscsite/learning/models.py:609
+#: cscsite/learning/models.py:612
 msgid "Set purpose of this place"
 msgstr "Отметьте, какие мероприятия проходят в данном месте."
 
-#: cscsite/learning/models.py:611
+#: cscsite/learning/models.py:614
 msgid "Preferred"
 msgstr "Приоритетный"
 
-#: cscsite/learning/models.py:612
+#: cscsite/learning/models.py:615
 msgid "Will be displayed on top of the venue list"
 msgstr "Отображается  в начале списка мест проведения"
 
-#: cscsite/learning/models.py:618
+#: cscsite/learning/models.py:621
 msgid "Venues"
 msgstr "Места проведения"
 
-#: cscsite/learning/models.py:650
+#: cscsite/learning/models.py:653
 #: cscsite/templates/learning/courseoffering_detail.html:112
 #: cscsite/templates/learning/timetable_student.html:69
 #: cscsite/templates/learning/timetable_teacher.html:65
 msgid "Lecture"
 msgstr "Лекция"
 
-#: cscsite/learning/models.py:651
+#: cscsite/learning/models.py:654
 #: cscsite/templates/learning/courseoffering_detail.html:112
 #: cscsite/templates/learning/timetable_student.html:71
 #: cscsite/templates/learning/timetable_teacher.html:67
 msgid "Seminar"
 msgstr "Семинар"
 
-#: cscsite/learning/models.py:659 cscsite/learning/models.py:1386
+#: cscsite/learning/models.py:662 cscsite/learning/models.py:1390
 msgid "CourseClass|Venue"
 msgstr "Место проведения"
 
-#: cscsite/learning/models.py:673
+#: cscsite/learning/models.py:676
 msgid "SlideShare URL"
 msgstr "SlideShare URL"
 
-#: cscsite/learning/models.py:674
+#: cscsite/learning/models.py:677
 msgid "Video URL"
 msgstr "Видео URL"
 
-#: cscsite/learning/models.py:676
+#: cscsite/learning/models.py:679
 msgid "Both YouTube and Yandex Video are supported"
 msgstr "Поддерживаются ссылки на YouTube и Яндекс.Видео"
 
-#: cscsite/learning/models.py:678
+#: cscsite/learning/models.py:681
 msgid "CourseClass|Other materials"
 msgstr "Другие материалы"
 
-#: cscsite/learning/models.py:688 cscsite/templates/users/user_detail.html:442
+#: cscsite/learning/models.py:691 cscsite/templates/users/user_detail.html:442
 msgid "Classes"
 msgstr "Занятия"
 
-#: cscsite/learning/models.py:762
+#: cscsite/learning/models.py:765
 msgid "Class should end after it started"
 msgstr "Конец занятия должен быть позже начала"
 
-#: cscsite/learning/models.py:797
+#: cscsite/learning/models.py:800
 msgid "Class attachment"
 msgstr "Приложение к занятию"
 
-#: cscsite/learning/models.py:798
+#: cscsite/learning/models.py:801
 msgid "Class attachments"
 msgstr "Приложения к занятию"
 
-#: cscsite/learning/models.py:847
+#: cscsite/learning/models.py:850
 msgid "Assignment|can be passed online"
 msgstr "Можно сдать через сайт"
 
-#: cscsite/learning/models.py:852
+#: cscsite/learning/models.py:855
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: cscsite/learning/models.py:866
+#: cscsite/learning/models.py:870
 msgid "Assignment|notify_settings"
 msgstr "Настройки уведомлений"
 
-#: cscsite/learning/models.py:868
+#: cscsite/learning/models.py:872
 msgid ""
 "Leave blank if you want populate teachers from course offering settings"
 msgstr ""
 "Заполняется автоматически из настроек к прочтению курса, если оставить поле "
 "пустым"
 
-#: cscsite/learning/models.py:875 cscsite/learning/models.py:959
+#: cscsite/learning/models.py:879 cscsite/learning/models.py:963
 #: cscsite/templates/users/user_detail.html:316
 msgid "Assignment"
 msgstr "Задание"
 
-#: cscsite/learning/models.py:876 cscsite/templates/users/user_detail.html:306
+#: cscsite/learning/models.py:880 cscsite/templates/users/user_detail.html:306
 #: cscsite/templates/users/user_detail.html:449
 msgid "Assignments"
 msgstr "Задания"
 
-#: cscsite/learning/models.py:927
+#: cscsite/learning/models.py:931
 msgid "Course offering modification is not allowed"
 msgstr "Модификация прочтения запрещена"
 
-#: cscsite/learning/models.py:930
+#: cscsite/learning/models.py:934
 msgid "Mininum grade should be lesser than (or equal to) maximum one"
 msgstr "Минимальная оценка должна быть меньше или равна максимальной"
 
-#: cscsite/learning/models.py:965
+#: cscsite/learning/models.py:969
 msgid "Assignment attachment"
 msgstr "Приложение к заданию"
 
-#: cscsite/learning/models.py:966
+#: cscsite/learning/models.py:970
 msgid "Assignment attachments"
 msgstr "Приложения к заданиям"
 
-#: cscsite/learning/models.py:998
+#: cscsite/learning/models.py:1002
 msgid "Assignment|not submitted"
 msgstr "Не сдано"
 
-#: cscsite/learning/models.py:999
+#: cscsite/learning/models.py:1003
 msgid "Assignment|not checked"
 msgstr "Не проверено"
 
-#: cscsite/learning/models.py:1000
+#: cscsite/learning/models.py:1004
 msgid "Assignment|unsatisfactory"
 msgstr "Неудовлетворительно"
 
-#: cscsite/learning/models.py:1001
+#: cscsite/learning/models.py:1005
 msgid "Assignment|pass"
 msgstr "Удовлетворительно"
 
-#: cscsite/learning/models.py:1002
+#: cscsite/learning/models.py:1006
 msgid "Assignment|good"
 msgstr "Хорошо"
 
-#: cscsite/learning/models.py:1003
+#: cscsite/learning/models.py:1007
 msgid "Assignment|excellent"
 msgstr "Отлично"
 
-#: cscsite/learning/models.py:1018
+#: cscsite/learning/models.py:1022
 msgid "StudentAssignment|assignment"
 msgstr "Задание"
 
-#: cscsite/learning/models.py:1022
+#: cscsite/learning/models.py:1026
 msgid "StudentAssignment|student"
 msgstr "Студент"
 
-#: cscsite/learning/models.py:1026
+#: cscsite/learning/models.py:1030
 #: cscsite/templates/learning/assignment_list_teacher.html:99
 #: cscsite/templates/learning/assignment_submission_detail.html:129
 #: cscsite/templates/learning/courses/learning_my_courses.html:88
@@ -942,60 +959,60 @@ msgstr "Студент"
 msgid "Grade"
 msgstr "Оценка"
 
-#: cscsite/learning/models.py:1030
+#: cscsite/learning/models.py:1034
 msgid "Assignment|grade changed"
 msgstr "Оценка изменена"
 
-#: cscsite/learning/models.py:1033
+#: cscsite/learning/models.py:1037
 #, fuzzy
 #| msgid "Assignment|grade_min"
 msgid "Assignment|first_submission"
 msgstr "Проходной балл"
 
-#: cscsite/learning/models.py:1037
+#: cscsite/learning/models.py:1041
 msgid "Last comment from"
 msgstr "От кого последний комментарий"
 
-#: cscsite/learning/models.py:1038
+#: cscsite/learning/models.py:1042
 msgid "0 - no comments yet, 1 - from student, 2 - from teacher"
 msgstr ""
 "Системное поле. 0 - ещё нет комментариев. 1 - от студента. 2 - от "
 "преподавателя"
 
-#: cscsite/learning/models.py:1044
+#: cscsite/learning/models.py:1048
 msgid "Assignment-student"
 msgstr "Выполнение заданий"
 
-#: cscsite/learning/models.py:1045
+#: cscsite/learning/models.py:1049
 msgid "Assignment-students"
 msgstr "Выполнения заданий"
 
-#: cscsite/learning/models.py:1050
+#: cscsite/learning/models.py:1054
 msgid "Student field should point to an actual student"
 msgstr "Поле \"Студент\" должно указывать на студента"
 
-#: cscsite/learning/models.py:1154
+#: cscsite/learning/models.py:1158
 msgid "AssignmentComment|student_assignment"
 msgstr "Выполнение задания"
 
-#: cscsite/learning/models.py:1157
+#: cscsite/learning/models.py:1161
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: cscsite/learning/models.py:1158 cscsite/users/models.py:208
+#: cscsite/learning/models.py:1162 cscsite/users/models.py:208
 #: cscsite/users/models.py:247 cscsite/users/models.py:252
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
-#: cscsite/learning/models.py:1170
+#: cscsite/learning/models.py:1174
 msgid "Assignment-comment"
 msgstr "Комментарий к заданию"
 
-#: cscsite/learning/models.py:1171
+#: cscsite/learning/models.py:1175
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
-#: cscsite/learning/models.py:1218
+#: cscsite/learning/models.py:1222
 #: cscsite/templates/learning/assignment_detail_teacher.html:64
 #: cscsite/templates/learning/assignment_list_teacher.html:98
 #: cscsite/templates/learning/assignment_submission_detail.html:152
@@ -1005,229 +1022,229 @@ msgstr "Комментарии к заданиям"
 msgid "Student"
 msgstr "Студент"
 
-#: cscsite/learning/models.py:1225 cscsite/users/models.py:612
+#: cscsite/learning/models.py:1229 cscsite/users/models.py:612
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
-#: cscsite/learning/models.py:1232
+#: cscsite/learning/models.py:1236
 msgid "The student left the course"
 msgstr "Студент покинул курс"
 
-#: cscsite/learning/models.py:1238
+#: cscsite/learning/models.py:1242
 msgid "Enrollment"
 msgstr "Запись на курс"
 
-#: cscsite/learning/models.py:1239
+#: cscsite/learning/models.py:1243
 msgid "Enrollments"
 msgstr "Записи на курсы"
 
-#: cscsite/learning/models.py:1247
+#: cscsite/learning/models.py:1251
 msgid "Only students can enroll to courses"
 msgstr "Только студенты могут записываться на курсы"
 
-#: cscsite/learning/models.py:1288
+#: cscsite/learning/models.py:1292
 msgid "Satisfactory"
 msgstr "Удовлетворительно"
 
-#: cscsite/learning/models.py:1303
+#: cscsite/learning/models.py:1307
 msgid "student_assignment"
 msgstr "Выполнение задания"
 
-#: cscsite/learning/models.py:1305
+#: cscsite/learning/models.py:1309
 msgid "About passed assignment"
 msgstr "О сданном задании"
 
-#: cscsite/learning/models.py:1307
+#: cscsite/learning/models.py:1311
 msgid "About created assignment"
 msgstr "О сданном задании"
 
-#: cscsite/learning/models.py:1309
+#: cscsite/learning/models.py:1313
 msgid "About change of deadline"
 msgstr "О смене времени сдачи"
 
-#: cscsite/learning/models.py:1311 cscsite/learning/models.py:1362
+#: cscsite/learning/models.py:1315 cscsite/learning/models.py:1366
 msgid "Unread"
 msgstr "Не прочтено"
 
-#: cscsite/learning/models.py:1313 cscsite/learning/models.py:1364
+#: cscsite/learning/models.py:1317 cscsite/learning/models.py:1368
 msgid "User is notified"
 msgstr "Пользователь оповещён"
 
-#: cscsite/learning/models.py:1321
+#: cscsite/learning/models.py:1325
 msgid "Assignment notification"
 msgstr "Уведомление о заданиях"
 
-#: cscsite/learning/models.py:1322
+#: cscsite/learning/models.py:1326
 msgid "Assignment notifications"
 msgstr "Уведомления о заданиях"
 
-#: cscsite/learning/models.py:1326
+#: cscsite/learning/models.py:1330
 msgid "Only teachers can receive notifications of passed assignments"
 msgstr "Только преподаватели могут получать оповещения о сданных заданиях"
 
-#: cscsite/learning/models.py:1360
+#: cscsite/learning/models.py:1364
 msgid "Course offering news"
 msgstr "Новости прочтений"
 
-#: cscsite/learning/models.py:1372
+#: cscsite/learning/models.py:1376
 msgid "Course offering news notification"
 msgstr "Оповещение о новостях прочтений"
 
-#: cscsite/learning/models.py:1373
+#: cscsite/learning/models.py:1377
 msgid "Course offering news notifications"
 msgstr "Оповещения о новостях прочтений"
 
-#: cscsite/learning/models.py:1399
+#: cscsite/learning/models.py:1403
 msgid "Non-course event"
 msgstr "Событие"
 
-#: cscsite/learning/models.py:1400
+#: cscsite/learning/models.py:1404
 msgid "Non-course events"
 msgstr "События"
 
-#: cscsite/learning/models.py:1409
+#: cscsite/learning/models.py:1413
 msgid "Event should end after it's start"
 msgstr "Конец события должен быть позже начала"
 
-#: cscsite/learning/models.py:1422
+#: cscsite/learning/models.py:1426
 msgid "PK|Code"
 msgstr "Код"
 
-#: cscsite/learning/models.py:1423
+#: cscsite/learning/models.py:1427
 msgid "AreaOfStudy|Name"
 msgstr "Название"
 
-#: cscsite/learning/models.py:1425
+#: cscsite/learning/models.py:1429
 msgid "AreaOfStudy|description"
 msgstr "Описание"
 
-#: cscsite/learning/models.py:1430
+#: cscsite/learning/models.py:1434
 msgid "Area of study"
 msgstr "Направление обучения"
 
-#: cscsite/learning/models.py:1431
+#: cscsite/learning/models.py:1435
 msgid "Areas of study"
 msgstr "Направления обучения"
 
-#: cscsite/learning/models.py:1443
+#: cscsite/learning/models.py:1447
 msgid "Area of Study"
 msgstr "Направление обучения"
 
-#: cscsite/learning/models.py:1445
+#: cscsite/learning/models.py:1449
 msgid "StudyProgram|description"
 msgstr "Доп. описание"
 
-#: cscsite/learning/models.py:1450 cscsite/learning/models.py:1463
+#: cscsite/learning/models.py:1454 cscsite/learning/models.py:1467
 msgid "Study Program"
 msgstr "Учебная программа"
 
-#: cscsite/learning/models.py:1451
+#: cscsite/learning/models.py:1455
 msgid "Study Programs"
 msgstr "Учебные программы"
 
-#: cscsite/learning/models.py:1459
+#: cscsite/learning/models.py:1463
 msgid "StudyProgramCourseGroup|courses"
 msgstr "Курсы"
 
-#: cscsite/learning/models.py:1460
+#: cscsite/learning/models.py:1464
 msgid "Courses will be grouped with boolean OR"
 msgstr "Курсы объединяются логическим ИЛИ."
 
-#: cscsite/learning/models.py:1468
+#: cscsite/learning/models.py:1472
 msgid "Study Program Course"
 msgstr "Курс учебной программы"
 
-#: cscsite/learning/models.py:1469
+#: cscsite/learning/models.py:1473
 msgid "Study Program Courses"
 msgstr "Обязательные курсы"
 
-#: cscsite/learning/models.py:1476
+#: cscsite/learning/models.py:1480
 msgid "Online Course|teachers"
 msgstr "Преподаватели"
 
-#: cscsite/learning/models.py:1479
+#: cscsite/learning/models.py:1483
 msgid "Online Course|description"
 msgstr "Описание онлайн-курса"
 
-#: cscsite/learning/models.py:1482
+#: cscsite/learning/models.py:1486
 msgid "Online Course|Link"
 msgstr "Ссылка на курс"
 
-#: cscsite/learning/models.py:1484
+#: cscsite/learning/models.py:1488
 msgid "Online Course|photo"
 msgstr "Фото"
 
-#: cscsite/learning/models.py:1488
+#: cscsite/learning/models.py:1492
 msgid "Collaboration with AY"
 msgstr "Совместно с АУ"
 
-#: cscsite/learning/models.py:1491
+#: cscsite/learning/models.py:1495
 #: cscsite/templates/learning/_onlinecourse_list__row.html:11
 msgid "Without deadlines"
 msgstr "Без дедлайнов"
 
-#: cscsite/learning/models.py:1497
+#: cscsite/learning/models.py:1501
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: cscsite/learning/models.py:1498
+#: cscsite/learning/models.py:1502
 #: cscsite/templates/users/user_detail.html:402
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: cscsite/learning/models.py:1509
+#: cscsite/learning/models.py:1513
 msgid "InternationalSchool|name"
 msgstr "Название международной школы"
 
-#: cscsite/learning/models.py:1511
+#: cscsite/learning/models.py:1515
 msgid "InternationalSchool|Link"
 msgstr "Ссылка на подробную информацию"
 
-#: cscsite/learning/models.py:1512
+#: cscsite/learning/models.py:1516
 msgid "InternationalSchool|place"
 msgstr "Место проведения"
 
-#: cscsite/learning/models.py:1513
+#: cscsite/learning/models.py:1517
 msgid "InternationalSchool|Deadline"
 msgstr "Крайний срок подачи заявок"
 
-#: cscsite/learning/models.py:1514
+#: cscsite/learning/models.py:1518
 msgid "InternationalSchool|Start"
 msgstr "Начало обучения"
 
-#: cscsite/learning/models.py:1515
+#: cscsite/learning/models.py:1519
 msgid "InternationalSchool|End"
 msgstr "Окончание обучения"
 
-#: cscsite/learning/models.py:1518
+#: cscsite/learning/models.py:1522
 msgid "InternationalSchool|Grants"
 msgstr "Гранты"
 
-#: cscsite/learning/models.py:1524
+#: cscsite/learning/models.py:1528
 msgid "International school"
 msgstr "Международная школа"
 
-#: cscsite/learning/models.py:1525
+#: cscsite/learning/models.py:1529
 msgid "International schools"
 msgstr "Международные школы"
 
-#: cscsite/learning/models.py:1541 cscsite/learning/models.py:1542
+#: cscsite/learning/models.py:1545 cscsite/learning/models.py:1546
 msgid "Useful"
 msgstr "Полезное"
 
-#: cscsite/learning/models.py:1556 cscsite/learning/models.py:1568
+#: cscsite/learning/models.py:1560 cscsite/learning/models.py:1572
 msgid "Internship category"
 msgstr "Стажировка (Категория)"
 
-#: cscsite/learning/models.py:1557
+#: cscsite/learning/models.py:1561
 msgid "Internship categories"
 msgstr "Стажировка (Категории)"
 
-#: cscsite/learning/models.py:1574
+#: cscsite/learning/models.py:1578
 msgid "Internship"
 msgstr "Стажировка"
 
-#: cscsite/learning/models.py:1575
+#: cscsite/learning/models.py:1579
 msgid "Internships"
 msgstr "Стажировки"
 
@@ -1245,7 +1262,7 @@ msgstr "Выпускник"
 
 #: cscsite/learning/settings.py:23
 #: cscsite/templates/learning/assignment_detail_teacher.html:72
-#: cscsite/templates/learning/assignment_list_teacher.html:105
+#: cscsite/templates/learning/assignment_list_teacher.html:106
 #: cscsite/templates/learning/assignment_submission_detail.html:152
 #: cscsite/templates/learning/projects/report.html:223
 msgid "Volunteer"
@@ -1400,17 +1417,23 @@ msgstr "Новость успешно добавлена"
 msgid "News wasn't created. Try again."
 msgstr "Новость не была создана! Неизвестная ошибка."
 
-#: cscsite/learning/views/gradebook.py:155
+#: cscsite/learning/views/gradebook.py:158
+msgid ""
+"<b>Внимание, часть данных не была сохранена!</b><br>В процессе "
+"редактирования данные были изменены другими участниками. Необходимо вручную "
+"разрешить конфликты и повторить отправку формы."
+msgstr ""
+
+#: cscsite/learning/views/gradebook.py:177
 msgid "Gradebook successfully saved."
 msgstr "Ведомость успешно сохранена."
 
-#: cscsite/learning/views/gradebook.py:180
-#| msgid "Gradebook successfully saved."
+#: cscsite/learning/views/gradebook.py:187
 msgid "Gradebook hasn't been saved."
 msgstr "Ведомость не была сохранена."
 
-#: cscsite/learning/views/gradebook.py:250
-#: cscsite/learning/views/gradebook.py:270
+#: cscsite/learning/views/gradebook.py:261
+#: cscsite/learning/views/gradebook.py:281
 msgid "Invalid form."
 msgstr ""
 
@@ -1484,10 +1507,6 @@ msgstr "Оценка успешно сохранена."
 #: cscsite/learning/views/views.py:999
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
-
-#: cscsite/learning/widgets.py:58
-msgid "Format"
-msgstr "Формат"
 
 #: cscsite/library/admin.py:40
 msgid "Copies available"
@@ -1838,12 +1857,12 @@ msgstr ""
 "Cовместно с <a href='http://mit.spbau.ru/'>Академическим университетом</a>."
 
 #: cscsite/templates/learning/admission/interview_results.html:37
-#: cscsite/templates/learning/projects/project_detail.html:104
+#: cscsite/templates/learning/projects/project_detail.html:91
 msgid "Please correct the error below."
 msgstr "Пожалуйста, исправьте ошибку."
 
 #: cscsite/templates/learning/admission/interview_results.html:37
-#: cscsite/templates/learning/projects/project_detail.html:104
+#: cscsite/templates/learning/projects/project_detail.html:91
 msgid "Please correct the errors below."
 msgstr "Пожалуйста, исправьте ошибки."
 
@@ -2100,24 +2119,24 @@ msgid ""
 "score. First row is header. Example:"
 msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
 
-#: cscsite/templates/learning/gradebook/form.html:32
+#: cscsite/templates/learning/gradebook/form.html:27
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: cscsite/templates/learning/gradebook/form.html:46
+#: cscsite/templates/learning/gradebook/form.html:41
 msgid "By stepik.org ID"
 msgstr "По stepik.org ID"
 
-#: cscsite/templates/learning/gradebook/form.html:47
+#: cscsite/templates/learning/gradebook/form.html:42
 msgid "By Yandex login"
 msgstr "По yandex логину"
 
-#: cscsite/templates/learning/gradebook/form.html:77
-#: cscsite/templates/learning/gradebook/form.html:127
+#: cscsite/templates/learning/gradebook/form.html:72
+#: cscsite/templates/learning/gradebook/form.html:114
 msgid "Students"
 msgstr "Студенты"
 
-#: cscsite/templates/learning/gradebook/form.html:78
+#: cscsite/templates/learning/gradebook/form.html:73
 msgid "Grades"
 msgstr "Итоговая оценка"
 
@@ -2165,7 +2184,7 @@ msgstr "нет"
 msgid "No online courses for now"
 msgstr "На текущий момент нет открытых онлайн-курсов."
 
-#: cscsite/templates/learning/projects/project_detail.html:71
+#: cscsite/templates/learning/projects/project_detail.html:58
 msgid "Send report form"
 msgstr "Форма отправки отчета"
 
@@ -2516,24 +2535,24 @@ msgstr "Заметка куратора"
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: cscsite/users/forms.py:26
+#: cscsite/users/forms.py:24
 msgid "Username"
 msgstr "Имя пользователя"
 
-#: cscsite/users/forms.py:30
+#: cscsite/users/forms.py:28
 msgid "Password"
 msgstr "Пароль"
 
-#: cscsite/users/forms.py:37
+#: cscsite/users/forms.py:35
 #, python-brace-format
 msgid "You can also <a href=\"{0}\">restore your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">восстановить ваш пароль</a>"
 
-#: cscsite/users/forms.py:46
+#: cscsite/users/forms.py:44
 msgid "Login"
 msgstr "Войти"
 
-#: cscsite/users/forms.py:59
+#: cscsite/users/forms.py:57
 msgid ""
 "You haven't enough access rights to login on this site. Contact curators if "
 "you think this is wrong."
@@ -2541,23 +2560,23 @@ msgstr ""
 "У вас недостаточно прав для входа на сайт. Свяжитесь с кураторами, если "
 "считаете это ошибкой."
 
-#: cscsite/users/forms.py:107
+#: cscsite/users/forms.py:105
 msgid "Tell something about yourself"
 msgstr "Расскажите что-нибудь о себе"
 
-#: cscsite/users/forms.py:113 cscsite/users/models.py:253
+#: cscsite/users/forms.py:111 cscsite/users/models.py:253
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
-#: cscsite/users/forms.py:114
+#: cscsite/users/forms.py:112
 msgid "<b>YANDEX.ID</b>@yandex.ru"
 msgstr "<b>YANDEX.ID</b>@yandex.ru"
 
-#: cscsite/users/forms.py:116
+#: cscsite/users/forms.py:114
 msgid "stepik.org/users/<b>USER_ID</b>"
 msgstr "stepik.org/users/<b>ID пользователя</b>"
 
-#: cscsite/users/forms.py:117
+#: cscsite/users/forms.py:115
 msgid "Specify one or more jobs (comma-separated)"
 msgstr ""
 "Укажите одно или несколько мест работы через запятую. Пример: JetBrains, "
