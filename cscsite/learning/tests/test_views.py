@@ -141,8 +141,12 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
 class CourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_course_detail(self):
         c = CourseFactory.create()
-        co1, co2 = CourseOfferingFactory.create_batch(
-            2, course=c, city=settings.DEFAULT_CITY_CODE)
+        s1 = SemesterFactory(year=2016)
+        s2 = SemesterFactory(year=2017)
+        co1 = CourseOfferingFactory(semester=s1, course=c,
+                                    city=settings.DEFAULT_CITY_CODE)
+        co2 = CourseOfferingFactory(semester=s2, course=c,
+                                    city=settings.DEFAULT_CITY_CODE)
         response = self.client.get(c.get_absolute_url())
         self.assertContains(response, c.name)
         self.assertContains(response, c.description)
