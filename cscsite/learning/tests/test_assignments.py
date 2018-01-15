@@ -626,7 +626,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00'
     # Clone CO from msk
-    co_in_nsk = CourseOfferingFactory(city='nsk', course=co_in_spb.course,
+    co_in_nsk = CourseOfferingFactory(city_id='nsk', course=co_in_spb.course,
                                       teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
     response = client.post(add_url, form_data, follow=True)
