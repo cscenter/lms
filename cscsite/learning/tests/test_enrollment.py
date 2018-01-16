@@ -236,8 +236,7 @@ def test_reenrollment(client):
 @pytest.mark.django_db
 def test_enrollment_in_other_city(client):
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(city_code='spb',
-                                          enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False)
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
@@ -268,6 +267,29 @@ def test_enrollment_in_other_city(client):
         client.login(user)
         response = client.get(co_spb.get_absolute_url())
         assert smart_bytes("Enroll in") not in response.content
+
+
+@pytest.mark.django_db
+def test_correspondence_courses(client):
+    """Make sure students from any city can enroll in online course"""
+    tomorrow = now_local('spb') + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    co_spb = CourseOfferingFactory(city_id='spb',
+                                   semester=term,
+                                   is_open=False,
+                                   is_correspondence=True)
+    assert co_spb.enrollment_is_open
+    student_spb = StudentCenterFactory(city_id='spb')
+    student_nsk = StudentCenterFactory(city_id='nsk')
+    form = {'course_offering_pk': co_spb.pk}
+    client.login(student_spb)
+    response = client.post(co_spb.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert Enrollment.objects.count() == 1
+    client.login(student_nsk)
+    response = client.post(co_spb.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert Enrollment.objects.count() == 2
 
 
 @pytest.mark.django_db

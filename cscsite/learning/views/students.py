@@ -144,7 +144,8 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
         except ValueError as e:
             messages.error(request, e.args[0])
             raise Redirect(to="/")
-        if city_code != course_offering.get_city():
+        if (not course_offering.is_correspondence
+                and city_code != course_offering.get_city()):
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
         if course_offering.is_capacity_limited:

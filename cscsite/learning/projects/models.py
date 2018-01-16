@@ -156,9 +156,6 @@ class Project(TimeStampedModel):
     students = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Students"),
-        # XXX: Admin view generates duplicates if user has both groups
-        limit_choices_to={'groups__in': [PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                         PARTICIPANT_GROUPS.GRADUATE_CENTER]},
         through=ProjectStudent)
     reviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,

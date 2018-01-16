@@ -31,7 +31,7 @@ from learning.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
 from users.models import CSCUser
-from .filters import CourseFilter
+from .filters import CoursesFilter
 
 
 class IndexView(generic.TemplateView):
@@ -305,16 +305,14 @@ class OpenNskView(generic.TemplateView):
 
 
 class CourseOfferingsView(FilterMixin, TemplateView):
-    filterset_class = CourseFilter
+    filterset_class = CoursesFilter
     template_name = "learning/courses/offerings.html"
 
     def get_queryset(self):
-        return CourseOffering.objects.get_offerings_queryset()
+        return (CourseOffering.objects
+                .get_offerings_base_queryset()
+                .exclude(semester__type=Semester.TYPES.summer))
 
-    # TODO: add tests!
-    """
-    3. Нужно поддерживать актуальные значения :<
-    """
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
         filterset = self.get_filterset(filterset_class)

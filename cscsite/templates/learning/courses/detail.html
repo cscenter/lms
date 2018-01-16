@@ -32,7 +32,7 @@
                         {% for offering in offerings %}
                             <tr>
                                 <td>
-                                    <a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a>
+                                    <a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a> {% if offering.is_correspondence %}<span class="text-muted">{% trans "Online Course" %}</span>{% endif %}
                                 </td>
                                 {% if show_city %}<td>{{ offering.city }}</td>{% endif %}
                             </tr>
