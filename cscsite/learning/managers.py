@@ -109,7 +109,8 @@ class NonCourseEventQuerySet(query.QuerySet):
 
 class CourseOfferingQuerySet(models.QuerySet):
     def in_city(self, city_code):
-        return self.filter(city_id=city_code)
+        return self.filter(Q(city_id=city_code, is_correspondence=False) |
+                           Q(is_correspondence=True))
 
     def in_center_branches(self):
         return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)
@@ -117,25 +118,26 @@ class CourseOfferingQuerySet(models.QuerySet):
     def for_teacher(self, user):
         return self.filter(teachers=user)
 
-    def get_offerings_queryset(self):
-        """Base queryset for courses list"""
+    def get_offerings_base_queryset(self):
+        """Returns list of available courses for CS Center"""
         CSCUser = apps.get_model('users', 'CSCUser')
         Semester = apps.get_model('learning', 'Semester')
-        term_idx = get_term_index(CENTER_FOUNDATION_YEAR, Semester.TYPES.autumn)
+        center_foundation_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
+                                                      Semester.TYPES.autumn)
         prefetch_teachers = Prefetch(
             'teachers',
-            queryset=CSCUser.objects.only(
-                "id", "first_name", "last_name", "patronymic"))
+            queryset=CSCUser.objects.only("id", "first_name", "last_name",
+                                          "patronymic"))
         return (self
                 .select_related('course', 'semester')
-                .filter(semester__index__gte=term_idx)
-                .exclude(semester__type=Semester.TYPES.summer)
-                .prefetch_related(prefetch_teachers)
                 .only("pk", "city_id", "is_open",
                       "materials_video", "materials_slides", "materials_files",
                       "course__name", "course__slug",
-                      "semester__year", "semester__type")
-                .order_by('-semester__year', '-semester__index', 'course__name'))
+                      "semester__year", "semester__index", "semester__type")
+                .filter(semester__index__gte=center_foundation_term_index)
+                .prefetch_related(prefetch_teachers)
+                .order_by('-semester__year', '-semester__index',
+                          'course__name'))
 
 
 class _CourseOfferingDefaultManager(models.Manager):

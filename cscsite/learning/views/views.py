@@ -345,40 +345,38 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         except ValueError as e:
             messages.error(self.request, e.args[0])
             raise Redirect(to="/")
-        # Get all student enrollments
-        enrollments = (Enrollment.active
-                       .filter(student_id=self.request.user)
-                       .select_related("course_offering")
-                       .only('id', 'grade', 'course_offering_id',
-                             'course_offering__grading_type'))
-        student_co_enrolled_in = {e.course_offering_id: e for e in enrollments}
-        # 1. Get all courses from current term and which student enrolled in
-        enrolled_in = Q(id__in=list(student_co_enrolled_in))
+        # Student enrollments
+        student_enrollments = (Enrollment.active
+                               .filter(student_id=self.request.user)
+                               .select_related("course_offering")
+                               .only('id', 'grade', 'course_offering_id',
+                                     'course_offering__grading_type'))
+        student_enrolled_in = {e.course_offering_id: e for e in
+                               student_enrollments}
+        # 1. Union courses from current term and which student enrolled in
         current_year, current_term = get_current_term_pair(city_code)
         current_term_index = get_term_index(current_year, current_term)
         in_current_term = Q(semester__index=current_term_index)
-        # Hide summer courses on compsciclub.ru
+        enrolled_in = Q(id__in=list(student_enrolled_in))
+        # Hide summer courses on CS Club site until student enrolled in
         if is_club_site():
             in_current_term &= ~Q(semester__type=SEMESTER_TYPES.summer)
         course_offerings = (CourseOffering.objects
+                            .get_offerings_base_queryset()
                             .in_city(city_code)
-                            .filter(in_current_term | enrolled_in)
-                            .select_related('course', 'semester')
-                            .order_by('semester__year', '-semester__type',
-                                      'course__name')
-                            .prefetch_related('teachers'))
+                            .filter(in_current_term | enrolled_in))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
         for co in course_offerings:
             if co.semester.index == current_term_index:
-                if co.pk in student_co_enrolled_in:
+                if co.pk in student_enrolled_in:
                     # TODO: add `enrollments` to context and get grades explicitly in tmpl
-                    co.enrollment = student_co_enrolled_in[co.pk]
+                    co.enrollment = student_enrolled_in[co.pk]
                     ongoing_enrolled.append(co)
                 else:
                     ongoing_rest.append(co)
             else:
-                co.enrollment = student_co_enrolled_in[co.pk]
+                co.enrollment = student_enrolled_in[co.pk]
                 archive_enrolled.append(co)
         context = {
             "ongoing_rest": ongoing_rest,

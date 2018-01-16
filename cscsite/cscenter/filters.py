@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import SlugField
 from django.http import QueryDict
 from django_filters import FilterSet, Filter, ChoiceFilter, STRICTNESS
@@ -33,6 +34,18 @@ CITIES = [
 ]
 
 
+class CityChoiceFilter(ChoiceFilter):
+    def filter(self, qs, value):
+        """
+        Returns union of offline courses and all correspondence courses
+        since they are also available in queried city.
+        """
+        if value == self.null_value:
+            value = None
+        qs = qs.in_city(value)
+        return qs.distinct() if self.distinct else qs
+
+
 class SemesterSlugField(SlugField):
     def __init__(self, *args, **kwargs):
         validators = kwargs.pop("validators", [])
@@ -45,14 +58,14 @@ class SemesterSlugFilter(Filter):
     field_class = SemesterSlugField
 
 
-class CourseFilter(FilterSet):
+class CoursesFilter(FilterSet):
     """
-    CourseFilter used on /courses/ page.
+    FilterSet used on /courses/ page.
 
-    Note, that we only validate `semester` query value. Later it's used in
-    filtering on client side.
+    Note: `semester` query value is only validated. This field used in
+    filtering on client side only.
     """
-    city = ChoiceFilter(name="city_id", empty_label=None, choices=CITIES)
+    city = CityChoiceFilter(name="city_id", empty_label=None, choices=CITIES)
     semester = SemesterSlugFilter(method='semester_slug_filter')
 
     class Meta:

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-01-15 14:12+0000\n"
-"PO-Revision-Date: 2018-01-15 14:12+0000\n"
-"Last-Translator: b'  <>'\n"
+"POT-Creation-Date: 2018-01-16 13:44+0000\n"
+"PO-Revision-Date: 2018-01-16 13:45+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -144,8 +144,8 @@ msgstr ""
 msgid "Novosibirsk"
 msgstr ""
 
-#: cscsite/core/templates/widgets/cite_aware_split_datetime.html:11
-#: cscsite/core/templates/widgets/cite_aware_split_datetime.html:22
+#: cscsite/core/templates/widgets/city_aware_split_datetime.html:11
+#: cscsite/core/templates/widgets/city_aware_split_datetime.html:22
 msgid "Format"
 msgstr "Формат"
 
@@ -1351,13 +1351,13 @@ msgstr "Новости"
 #: cscsite/learning/tests/test_enrollment.py:115
 #: cscsite/learning/tests/test_enrollment.py:120
 #: cscsite/learning/tests/test_enrollment.py:133
-#: cscsite/templates/learning/courseoffering_detail.html:226
+#: cscsite/templates/learning/courseoffering_detail.html:227
 msgid "Places available"
 msgstr "Осталось мест"
 
 #: cscsite/learning/tests/test_enrollment.py:116
 #: cscsite/learning/tests/test_enrollment.py:129
-#: cscsite/templates/learning/courseoffering_detail.html:228
+#: cscsite/templates/learning/courseoffering_detail.html:229
 msgid "No places available"
 msgstr "Нет свободных мест"
 
@@ -1441,70 +1441,70 @@ msgstr ""
 msgid "Add solution"
 msgstr "Добавить решение"
 
-#: cscsite/learning/views/students.py:152
+#: cscsite/learning/views/students.py:153
 msgid "No places available, sorry"
 msgstr "Извините, свободных мест не осталось."
 
-#: cscsite/learning/views/students.py:190
+#: cscsite/learning/views/students.py:191
 #, python-format
 msgid "Are you sure you want to unenroll from \"%(course)s\"?"
 msgstr "Вы уверены, что хотите отказаться от \"%(course)s\"?"
 
-#: cscsite/learning/views/students.py:193
+#: cscsite/learning/views/students.py:194
 msgid "Unenroll"
 msgstr "Отказаться"
 
-#: cscsite/learning/views/views.py:537
+#: cscsite/learning/views/views.py:535
 #, python-format
 msgid "The class '%s' was successfully created."
 msgstr "Занятие '%s' успешно создано."
 
-#: cscsite/learning/views/views.py:557
+#: cscsite/learning/views/views.py:555
 #, python-format
 msgid "The class '%s' was successfully updated."
 msgstr "Занятие '%s' успешно обновлено."
 
-#: cscsite/learning/views/views.py:617
+#: cscsite/learning/views/views.py:615
 msgid "All"
 msgstr "Все"
 
-#: cscsite/learning/views/views.py:618
+#: cscsite/learning/views/views.py:616
 msgid "Without grades"
 msgstr "Без оценки"
 
-#: cscsite/learning/views/views.py:619
+#: cscsite/learning/views/views.py:617
 msgid "With grades"
 msgstr "С оценкой"
 
-#: cscsite/learning/views/views.py:622
+#: cscsite/learning/views/views.py:620
 msgid "No matter"
 msgstr "Неважно"
 
-#: cscsite/learning/views/views.py:623
+#: cscsite/learning/views/views.py:621
 msgid "From student"
 msgstr "От студента"
 
-#: cscsite/learning/views/views.py:624
+#: cscsite/learning/views/views.py:622
 msgid "From teacher"
 msgstr "От преподавателя"
 
-#: cscsite/learning/views/views.py:625
+#: cscsite/learning/views/views.py:623
 msgid "Without comments"
 msgstr "Нет комментариев"
 
-#: cscsite/learning/views/views.py:829
+#: cscsite/learning/views/views.py:827
 msgid "You were redirected from Assignments due to empty course list."
 msgstr "Вы были перенаправлены. Список заданий пуст на данный момент."
 
-#: cscsite/learning/views/views.py:989
+#: cscsite/learning/views/views.py:987
 msgid "Grade was deleted"
 msgstr "Оценка была удалена."
 
-#: cscsite/learning/views/views.py:993
+#: cscsite/learning/views/views.py:991
 msgid "Grade successfully saved"
 msgstr "Оценка успешно сохранена."
 
-#: cscsite/learning/views/views.py:999
+#: cscsite/learning/views/views.py:997
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
@@ -1993,6 +1993,12 @@ msgstr "Где"
 msgid "Video"
 msgstr "Видео"
 
+#: cscsite/templates/learning/courseoffering_detail.html:21
+#: cscsite/templates/learning/courses/detail.html:35
+#| msgid "Online course"
+msgid "Online Course"
+msgstr "Заочный курс"
+
 #: cscsite/templates/learning/courseoffering_detail.html:26
 msgid ""
 "\n"
@@ -2046,15 +2052,15 @@ msgstr "Добавить занятие"
 msgid "Edit description"
 msgstr "Редактировать описание"
 
-#: cscsite/templates/learning/courseoffering_detail.html:214
+#: cscsite/templates/learning/courseoffering_detail.html:215
 msgid "Unenroll from the course"
 msgstr "Отписаться от курса"
 
-#: cscsite/templates/learning/courseoffering_detail.html:224
+#: cscsite/templates/learning/courseoffering_detail.html:225
 msgid "Enroll in the course"
 msgstr "Записаться на курс"
 
-#: cscsite/templates/learning/courseoffering_detail.html:238
+#: cscsite/templates/learning/courseoffering_detail.html:240
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
