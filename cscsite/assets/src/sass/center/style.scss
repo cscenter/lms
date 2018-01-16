@@ -5,10 +5,13 @@
 @import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
 @import "top_menu.scss";
 
+@import "utilities/spacing";
+
 // Material design elements based on bootstrap
 @import "components/labels";
 //@import "components/page_aside";
 @import "_material_design.scss";
+
 
 @import "components/inputs";
 @import "components/buttons";
