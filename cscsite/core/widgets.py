@@ -68,9 +68,10 @@ class TimeInputAsTextInput(forms.TimeInput):
 class CityAwareSplitDateTimeWidget(forms.MultiWidget):
     """Using bootstrap datetime picker for assignment form"""
     supports_microseconds = False
-    template_name = "widgets/cite_aware_split_datetime.html"
+    template_name = "widgets/city_aware_split_datetime.html"
 
     def __init__(self, attrs=None, date_format=None, time_format=None):
+        attrs = {"class": "form-control"}
         widgets = (
             DateInputAsTextInput(attrs=attrs, format=date_format),
             TimeInputAsTextInput(attrs=attrs, format=time_format),
