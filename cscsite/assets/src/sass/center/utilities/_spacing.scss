@@ -21,7 +21,10 @@ $spacers: map-merge((
   10: ($spacer * 2),
   15: ($spacer * 3),
   20: ($spacer * 4),
-  25: ($spacer * 5)
+  25: ($spacer * 5),
+  30: ($spacer * 6),
+  40: ($spacer * 8),
+  50: ($spacer * 10)
 ), $spacers);
 
 // Minimum breakpoint width. Null for the smallest (first) breakpoint.
