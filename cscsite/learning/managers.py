@@ -67,7 +67,9 @@ class CourseClassQuerySet(query.QuerySet):
         return q
 
     def in_city(self, city_code):
-        return self.filter(course_offering__city_id=city_code)
+        return self.filter(Q(course_offering__city_id=city_code,
+                             course_offering__is_correspondence=False) |
+                           Q(course_offering__is_correspondence=True))
 
     def in_cities(self, city_codes: List[str]):
         return self.filter(course_offering__city_id__in=city_codes)

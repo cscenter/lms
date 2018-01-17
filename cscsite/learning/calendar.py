@@ -2,6 +2,7 @@ import datetime
 
 from calendar import Calendar, monthrange
 from collections import namedtuple, defaultdict
+from typing import List
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -61,7 +62,7 @@ class EventsCalendar:
     def get_bounds(year, month):
         return get_bounds_for_calendar_month(year, month)
 
-    def as_matrix(self, year, month, today):
+    def as_matrix(self, year, month, today) -> List[Week]:
         """
         Return a matrix representing a month's calendar.
         Each row represents a week; week entries are tuple

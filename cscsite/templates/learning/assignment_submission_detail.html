@@ -9,6 +9,10 @@
 {% load render_bundle from webpack_loader %}
 
 {% block javascripts %}
+    {#    TODO: append instead of replace #}
+    <script type="text/javascript">
+      CSC.config.localStorage.hashes = {{ hashes_json|safe }};
+    </script>
     {% if is_actual_teacher or request.user.is_curator %}
         <script type="text/javascript">
         $('.assignment-attachment a:contains(".ipynb")').each(function() {
@@ -27,10 +31,6 @@
 
 {% block content %}
 {% localtime off %}
-    {#    TODO: append instead of replace #}
-<script type="text/javascript">
-  CSC.config.localStorage.hashes = {{ hashes_json|safe }};
-</script>
 <div class="container" id="student-submission-comments">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
@@ -67,10 +67,7 @@
               {% for aa in aas %}
                 <li>
                   <span class="assignment-attachment">
-                    <i class="fa fa-file"></i>
-                    <a href="{{ aa.file_url }}">
-                      {{ aa.file_name }}
-                    </a>
+                    <i class="fa fa-file"></i> <a href="{{ aa.file_url }}">{{ aa.file_name }}</a>
                   </span>
                 </li>
               {% endfor %}
@@ -130,7 +127,7 @@
                 {% if user_type == 'teacher' and is_actual_teacher %}
                 {% crispy grade_form %}
                 {% else %}
-                <span style="white-space: nowrap;" class="badge assignment-status {{ a_s.state|to_css }}">{{ a_s.state_display }}</span>
+                <span class="nowrap badge assignment-status {{ a_s.state|to_css }}">{{ a_s.state_display }}</span>
                 {% endif %}
 
                 {% if not is_actual_teacher %}
@@ -156,10 +153,10 @@
                 <span class="nowrap">{{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at_local|time:"H:i" }}</span>
 
                 <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
-                <span style="white-space: nowrap;">{{ a_s.assignment.grade_max }}</span>
+                <span class="nowrap">{{ a_s.assignment.grade_max }}</span>
 
                 <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
-                <span style="white-space: nowrap;">{{ a_s.assignment.grade_min }}</span>
+                <span class="nowrap">{{ a_s.assignment.grade_min }}</span>
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}
