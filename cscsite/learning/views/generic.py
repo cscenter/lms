@@ -30,13 +30,13 @@ class CalendarGenericView(generic.TemplateView):
         calendar = EventsCalendar()
         events = self.get_events(year, month, user_city_code=default_city_code)
         calendar.add_events(*events)
-        current = datetime.date(year=year, month=month, day=1)
+        queried_month = datetime.date(year=year, month=month, day=1)
         context = {
-            "current": current,
-            "prev": current + relativedelta(months=-1),
-            "next": current + relativedelta(months=+1),
+            "current": queried_month,
+            "prev": queried_month + relativedelta(months=-1),
+            "next": queried_month + relativedelta(months=+1),
             "calendar_type": self.calendar_type,
-            "month": calendar.as_matrix(year, month, today)
+            "events": calendar.as_matrix(year, month, today)
         }
         return context
 

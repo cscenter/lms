@@ -34,12 +34,6 @@ class MyUtilitiesMixin(object):
     def doLogout(self):
         self.client.logout()
 
-    def calendar_month_to_object_list(self, calendar_month):
-        return [x
-                for week in calendar_month
-                for day in week[1]
-                for x in day[1]]
-
 
 class MediaServingMixin(object):
     def setUp(self):
