@@ -3,6 +3,7 @@ import logging
 import os
 import posixpath
 from collections import OrderedDict
+from time import localtime
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -49,7 +50,8 @@ from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView
 from learning.views.utils import get_student_city_code, get_teacher_city_code, \
-    get_co_from_query_params
+    get_co_from_query_params, get_user_city_code, \
+    get_student_city_code_or_redirect
 
 logger = logging.getLogger(__name__)
 
@@ -178,11 +180,7 @@ class CalendarStudentFullView(StudentOnlyMixin, CalendarGenericView):
     Shows non-course events and classes filtered by authenticated student city.
     """
     def get_user_city(self):
-        try:
-            return get_student_city_code(self.request)
-        except ValueError as e:
-            messages.error(self.request, e.args[0])
-            raise Redirect('/')
+        return get_student_city_code_or_redirect(self.request)
 
     def get_events(self, year, month, **kwargs):
         student_city_code = kwargs.get('user_city_code')
@@ -340,11 +338,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
     template_name = "learning/courses/learning_my_courses.html"
 
     def get_context_data(self, **kwargs):
-        try:
-            city_code = get_student_city_code(self.request)
-        except ValueError as e:
-            messages.error(self.request, e.args[0])
-            raise Redirect(to="/")
+        city_code = get_student_city_code_or_redirect(self.request)
         # Student enrollments
         student_enrollments = (Enrollment.active
                                .filter(student_id=self.request.user)
@@ -913,10 +907,23 @@ class AssignmentProgressBaseView(AccessMixin):
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
+        co = sa.assignment.course_offering
+        if self.user_type == "teacher":
+            # Assert that teacher can't be remote
+            tz = co.get_city_timezone()
+        else:  # student
+            # TODO: move to separated method
+            # For online courses format datetime in student timezone.
+            student_city_code = get_student_city_code_or_redirect(self.request)
+            tz = settings.TIME_ZONES[student_city_code]
+            if not co.is_correspondence:
+                # TODO: redirect instead?
+                assert tz == co.get_city_timezone()
         context = {
             'user_type': self.user_type,
             'a_s': sa,
             'form': form,
+            'timezone': tz,
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course_offering.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()

@@ -2,6 +2,9 @@ import logging
 import re
 from typing import Optional
 
+from django.contrib import messages
+
+from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning.models import CourseOffering
 from learning.settings import SEMESTER_TYPES
@@ -35,6 +38,18 @@ def get_student_city_code(request) -> str:
         raise ValueError("Для вашего профиля не был указан "
                          "город. Обратитесь к куратору.")
     return city_code
+
+
+def get_student_city_code_or_redirect(request):
+    """
+    City code for CS Center student is mandatory. To avoid UB redirect
+    students with broken city setting to main page with alert message.
+    """
+    try:
+        return get_student_city_code(request)
+    except ValueError as e:
+        messages.error(request, e.args[0])
+        raise Redirect(to="/")
 
 
 def get_teacher_city_code(request) -> str:

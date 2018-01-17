@@ -102,8 +102,7 @@
                 </a>
               </span>
               {% endif %}
-                {# Use timezone filter instead of created_local for optimization #}
-              <span class="metainfo pull-right">{{ comment.created|timezone:a_s.assignment.course_offering.get_city_timezone|date:"d.m.Y H:i" }}</span>
+              <span class="metainfo pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
             </div>
           </div>
         </li>
@@ -150,7 +149,7 @@
                 <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
 
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at_local|time:"H:i" }}</span>
+                <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
 
                 <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.grade_max }}</span>
