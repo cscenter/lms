@@ -742,7 +742,7 @@ def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=dt,
                                    course_offering__city_id='spb')
-    sa = StudentAssignmentFactory(assignment=assignment)
+    sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
     student = sa.student
     comment = AssignmentCommentFactory.create(student_assignment=sa,
                                               author=student,

@@ -18,7 +18,8 @@ from learning.models import Useful, Internship, StudentAssignment, Semester, \
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
 from learning.views import AssignmentProgressBaseView
-from learning.views.utils import get_student_city_code
+from learning.views.utils import get_student_city_code, \
+    get_student_city_code_or_redirect
 
 
 class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
@@ -139,11 +140,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
         if is_club_site() and not course_offering.is_open:
             return HttpResponseForbidden()
         # Students can enroll in only on courses from their city
-        try:
-            city_code = get_student_city_code(self.request)
-        except ValueError as e:
-            messages.error(request, e.args[0])
-            raise Redirect(to="/")
+        city_code = get_student_city_code_or_redirect(self.request)
         if (not course_offering.is_correspondence
                 and city_code != course_offering.get_city()):
             return HttpResponseForbidden()

@@ -1,13 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
-from django.contrib import messages
-from django.views import generic
 from vanilla import DetailView, ListView
 
-from core.exceptions import Redirect
 from learning.viewmixins import StudentOnlyMixin
-from learning.views.utils import get_student_city_code
-from .models import Book, Stock, Borrow
+from learning.views.utils import get_student_city_code_or_redirect
+from .models import Stock, Borrow
 
 
 # TODO: filter by city
@@ -22,12 +17,8 @@ class BookListView(StudentOnlyMixin, ListView):
               .prefetch_related("borrows", "borrows__student"))
         # For students show books from the city of learning
         if not self.request.user.is_curator:
-            try:
-                city_code = get_student_city_code(self.request)
-                qs = qs.filter(city_id=city_code)
-            except ValueError as e:
-                messages.error(self.request, e.args[0])
-                raise Redirect(to="/")
+            city_code = get_student_city_code_or_redirect(self.request)
+            qs = qs.filter(city_id=city_code)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -49,10 +40,6 @@ class BookDetailView(StudentOnlyMixin, DetailView):
               .prefetch_related("borrows"))
         # For students show books from the city of learning
         if not self.request.user.is_curator:
-            try:
-                city_code = get_student_city_code(self.request)
-                qs = qs.filter(city_id=city_code)
-            except ValueError as e:
-                messages.error(self.request, e.args[0])
-                raise Redirect(to="/")
+            city_code = get_student_city_code_or_redirect(self.request)
+            qs = qs.filter(city_id=city_code)
         return qs

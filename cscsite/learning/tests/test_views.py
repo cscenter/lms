@@ -606,9 +606,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
 class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        student = StudentCenterFactory(city_id='spb')
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+        co = CourseOfferingFactory(city_id='spb', semester=s,
+                                   teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -630,7 +631,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                 self.assertLoginRedirect(url)
             self.doLogout()
         self.doLogin(student)
-        self.assertEquals(200, self.client.get(url).status_code)
+        assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.clear()
         student.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
@@ -643,10 +644,11 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         he completed course with unsatisfactory grade
         """
         teacher = TeacherCenterFactory()
-        student = StudentFactory()
+        student = StudentFactory(city_id='spb')
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(teachers=[teacher], semester=past_semester)
+        co = CourseOfferingFactory(city_id='spb', teachers=[teacher],
+                                   semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
@@ -698,9 +700,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert response.status_code == 200
 
     def test_assignment_contents(self):
-        student = StudentCenterFactory()
+        student = StudentCenterFactory(city_id='spb')
         semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(semester=semester)
+        co = CourseOfferingFactory.create(city_id='spb', semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -711,10 +713,11 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(url), a.text)
 
     def test_teacher_redirect_to_appropriate_link(self):
-        student = StudentCenterFactory()
+        student = StudentCenterFactory(city_id='spb')
         teacher = TeacherCenterFactory()
         semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=semester)
+        co = CourseOfferingFactory(city_id='spb', teachers=[teacher],
+                                   semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -722,16 +725,16 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                .get())
         url = a_s.get_student_url()
         self.doLogin(student)
-        self.assertEquals(200, self.client.get(url).status_code)
+        assert self.client.get(url).status_code == 200
         self.doLogin(teacher)
         expected_url = a_s.get_teacher_url()
         self.assertEquals(302, self.client.get(url).status_code)
         self.assertRedirects(self.client.get(url), expected_url)
 
     def test_comment(self):
-        student = StudentCenterFactory()
+        student = StudentCenterFactory(city_id='spb')
         # Create open reading to make sure student has access to CO
-        co = CourseOfferingFactory.create(is_open=True)
+        co = CourseOfferingFactory(city_id='spb', is_open=True)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
