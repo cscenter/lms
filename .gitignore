@@ -14,6 +14,5 @@ cscsite/static/
 local/
 .cache/
 .coverage
-package-lock.json
-node_modules/
+# TODO: replace public/ with submodule, add to ignore here
 *-debug.log

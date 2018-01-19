@@ -21,7 +21,7 @@ const TARGET = process.env.npm_lifecycle_event;
 
 process.env.BABEL_ENV = TARGET;
 
-const __assetsdir = path.join(__dirname, '../cscsite/assets');
+const __assetsdir = path.join(__dirname, '../assets');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
 let bundlesDirRelative = './dist/';
 // All dependencies will be copied to path, relative to bundles output
@@ -196,7 +196,7 @@ const common = {
 
     plugins: [
         new webpack.optimize.ModuleConcatenationPlugin(),
-        new BundleTracker({filename: './webpack/webpack-stats.json'}),
+        new BundleTracker({filename: '../webpack-stats.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
         new webpack.IgnorePlugin(/^\.\/locale$/),
