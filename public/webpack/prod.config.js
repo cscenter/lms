@@ -20,6 +20,7 @@ module.exports = {
             '__DEVELOPMENT__': false
         }),
         new UglifyJSPlugin({
+            parallel: true,
             uglifyOptions: {
                 compress: {
                     warnings: false
