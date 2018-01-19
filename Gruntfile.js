@@ -10,21 +10,18 @@ module.exports = function (grunt) {
         sass: {
             dev: {
                 options: {
-                    sourceMap: true
+                    sourceMap: true,
+                    includePaths: ['./node_modules/']
                 },
                 files: '<%= sass_files %>'
             },
             deploy: {
                 options: {
-                    outputStyle: 'compressed'
+                    outputStyle: 'compressed',
+                    includePaths: ['./node_modules/']
                 },
                 files: '<%= sass_files %>'
             }
-        },
-        concat: {
-        },
-        // TODO: Make this task more generic after all src js will be moved to src folder
-        uglify: {
         },
         watch: {
             options: {
@@ -45,6 +42,6 @@ module.exports = function (grunt) {
 
     // Register tasks here.
     grunt.registerTask('default', ['watch']);
-    grunt.registerTask('build', ['sass:deploy', 'concat', 'uglify']);
+    grunt.registerTask('build', ['sass:deploy']);
     // TODO: investigate grunt-concurrent
 };
