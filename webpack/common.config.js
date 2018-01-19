@@ -23,7 +23,7 @@ process.env.BABEL_ENV = TARGET;
 
 const __assetsdir = path.join(__dirname, '../cscsite/assets');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let bundlesDirRelative = './js/dist/';
+let bundlesDirRelative = './dist/';
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_PATH = path.join('/static/', bundlesDirRelative);
 const STATIC_URL = path.join('/static/');
@@ -39,14 +39,14 @@ const PATHS = {
     teaching: path.join(__assetsdir, '/src/js/teaching/index.js'),
     dist: path.join(__assetsdir, bundlesDirRelative),
     stats: path.join(__assetsdir, "/src/js/stats/main.js"),
-    center_styles: path.join(__assetsdir, "/src/sass/center/index.js"), // import common here?
-    club_styles: path.join(__assetsdir, "/src/sass/club/index.js"),
+    center: path.join(__assetsdir, "/src/js/center/index.js"),
+    club: path.join(__assetsdir, "/src/js/club/index.js"),
 };
 
 
 const VENDOR = [
-    // 'history',
     'babel-polyfill',
+    // 'history',
     // 'react',
     // 'react-dom',
     // 'react-redux',
@@ -64,9 +64,9 @@ const common = {
     context: __assetsdir,
 
     entry: {
-        center_styles: PATHS.center_styles,
-        club_styles: PATHS.club_styles,
         main: PATHS.common,
+        center: PATHS.center,
+        club: PATHS.club,
         profile: PATHS.profile,
         forms: PATHS.forms, // TODO: Should it be DLL instead?
         admission: PATHS.admission,
@@ -94,6 +94,7 @@ const common = {
         modules: [
             path.join(__assetsdir, '/src/js'),
             __nodemodulesdir,
+            path.join(__assetsdir, '/src'),  // import scss with `sass` prefix for easy debug
         ],
         symlinks: false
     },
@@ -112,8 +113,8 @@ const common = {
                 ],
                 include: path.resolve(__assetsdir, "src/js"),
                 exclude: [
-                    path.resolve(__assetsdir, "src/js/center/index.js"),
-                    path.resolve(__assetsdir, "src/js/club/index.js"),
+                    path.resolve(__assetsdir, "src/sass/center/styles.scss"),
+                    path.resolve(__assetsdir, "src/sass/club/styles.scss"),
                 ]
             },
             {

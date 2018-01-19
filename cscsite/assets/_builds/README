@@ -1,2 +1,0 @@
-Tmp directory for grunt tasks.
-You can override local django setting `STATICFILES_DIR` for better experience with browser debug toolbar.

@@ -121,7 +121,7 @@ INSTALLED_APPS = [
 # django-js-reverse settings
 JS_REVERSE_JS_VAR_NAME = 'URLS'
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
-JS_REVERSE_OUTPUT_PATH = str(PROJECT_DIR / "assets" / "js" / "urls")
+JS_REVERSE_OUTPUT_PATH = str(PROJECT_DIR / "assets" / "js" / "vendor")
 
 # oEmbed
 MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
@@ -287,7 +287,7 @@ REST_FRAMEWORK = {
 
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'js/dist/',  # relative to STATIC_URL
+        'BUNDLE_DIR_NAME': 'dist/',  # relative to STATIC_URL
         'STATS_FILE': str(ROOT_DIR / "webpack" / "webpack-stats.json"),
     }
 }

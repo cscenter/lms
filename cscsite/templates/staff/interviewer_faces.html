@@ -5,6 +5,8 @@
 {% load staticfiles %}
 {% load userpreview from custom_thumbnail %}
 
+{% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
+
 {% block content %}
     <div class="container">
         <div class="c-student-faces">
@@ -25,8 +27,3 @@
         </div>
     </div>
 {% endblock content %}
-
-{# TODO: customize scripts if neccessary #}
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
-{% endblock javascripts %}

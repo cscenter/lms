@@ -5,9 +5,7 @@
 {% load markdown from core_tags %}
 {% load staticfiles %}
 
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
-{% endblock javascripts %}
+{% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
 
 {% block content %}
     <div id="graduates-by-year">

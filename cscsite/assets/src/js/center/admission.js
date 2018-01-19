@@ -1,5 +1,6 @@
 import UberEditor from "../editor";
 import 'jquery-bar-rating';
+import {createNotification} from "../utils";
 
 (function ($) {
     "use strict";
@@ -94,10 +95,7 @@ import 'jquery-bar-rating';
                         // }, function(){ window.location.reload(); }
                         // );
                         // FIXME: Убрать перезагрузку?
-                        $.jGrowl(
-                            "Комментарий успешно сохранён. Страница будет перезагружена",
-                            { position: 'bottom-right' }
-                        );
+                        createNotification("Комментарий успешно сохранён. Страница будет перезагружена");
                         setTimeout(function() {window.location.reload();}, 500);
                         // FIXME: update #comments block instead of reload!
                     } else {

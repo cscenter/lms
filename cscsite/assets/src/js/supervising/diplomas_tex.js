@@ -1,6 +1,3 @@
-// TODO: На примере данного файла нужно понять
-// как опционально подгружать зависимости, если это требуется
-
 import ZeroClipboard from 'zeroclipboard';
 
 if (document.getElementById('diplomas-code') !== null) {

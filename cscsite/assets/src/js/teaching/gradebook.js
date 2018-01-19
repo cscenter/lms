@@ -1,4 +1,5 @@
-import "vendor/jquery.arrow-increment.min"
+// TODO: remove arrow-increment
+import "components/jquery.arrow-increment"
 import SweetAlert from "bootstrap-sweetalert";
 
 const buttonDownloadCSV = $(".marks-sheet-csv-link");
