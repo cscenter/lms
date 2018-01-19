@@ -6,6 +6,8 @@
 {% load core_tags %}
 {% load userpreview from custom_thumbnail %}
 
+{% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
+
 {% block content %}
 {% if students %}
     {% for chunk in students|chunks:"16" %}
@@ -25,8 +27,3 @@
     <div class="empty">пусто!</div>
 {% endif %}
 {% endblock content %}
-
-{# TODO: customize scripts if neccessary #}
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/alumni.js" %}"></script>
-{% endblock javascripts %}

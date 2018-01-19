@@ -12,10 +12,6 @@
 <link href="{% static "css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
 {% endblock hightlight_styles %}
 
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/projects_report.js" %}"></script>
-{% endblock javascripts %}
-
 {% block content %}{% localtime off %}
     {% with student=report.project_student.student project=report.project_student.project %}
 

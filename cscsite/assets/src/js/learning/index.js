@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import UberEditor from "../editor";
+import {createNotification} from "../utils";
 
 const sidebar = $("#o-sidebar");
 const footer = $(".footer");
@@ -35,10 +36,8 @@ const fn = {
                 modalFormWrapper.modal('toggle');
             }).fail(function (data) {
                 if (data.status === 403) {
-                    $.jGrowl(
-                        'Доступ запрещён. Вероятно, время редактирования комментария истекло.',
-                        { position: 'bottom-right', theme: 'error' }
-                    );
+                    const msg = 'Доступ запрещён. Вероятно, время редактирования комментария истекло.';
+                    createNotification(msg, 'error');
                     $this.remove();
                 }
             });
@@ -65,16 +64,13 @@ const fn = {
                 var textElement = $('.ubertext', target);
                 textElement.html(json.html);
                 UberEditor.render(textElement.get(0));
-                $.jGrowl('Комментарий успешно сохранён.',
-                    { position: 'bottom-right'});
+                createNotification('Комментарий успешно сохранён.');
             } else {
-                $.jGrowl('Комментарий не был сохранён.',
-                    { position: 'bottom-right', theme: 'error' });
+                createNotification('Комментарий не был сохранён.', 'error');
             }
         })
         .fail(function () {
-                $.jGrowl('Комментарий не был сохранён.',
-                    { position: 'bottom-right', theme: 'error' });
+            createNotification('Комментарий не был сохранён.', 'error');
         });
         return false;
     },

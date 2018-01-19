@@ -4,7 +4,7 @@ import $ from 'jquery';
 import "jgrowl/jquery.jgrowl.js";
 import "mathjax_config";
 import UberEditor from "./editor";
-import {csrfSafeMethod} from './utils';
+import {csrfSafeMethod, showComponentError} from './utils';
 import courseOfferingsList from './main/course_offerings';
 
 const CSC = window.CSC;
@@ -28,6 +28,17 @@ $(document).ready(function () {
     // Now it checks `id` attr existence in each peace of code ;<
     courseOfferingsList();
     fn.syllabusTabs();
+
+    // FIXME: init chunks (comma separated) instead of sections?
+    const section = $("body").data("init-section");
+    if (section === "lazy-img") {
+        import(/* webpackChunkName: "lazyload" */ 'components/lazyload')
+            .then(m => {
+                const component = m.default;
+                component.launch();
+            })
+            .catch(error => showComponentError(error));
+    }
 });
 
 const fn = {

@@ -4,6 +4,8 @@
 {% load static %}
 {% load thumbnail %}
 
+{% block body_attrs %} data-init-section="gallery"{% endblock body_attrs %}
+
 {% block gallery %}
     {% if teacher.images.all %}
         <h4>{% trans "Photos" %}</h4>
@@ -19,6 +21,3 @@
     {% endif %}
 {% endblock gallery %}
 
-{% block javascripts %}
-    <script type="text/javascript" src="{% static "js/club/gallery.js" %}"></script>
-{% endblock javascripts %}

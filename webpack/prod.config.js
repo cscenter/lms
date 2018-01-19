@@ -9,7 +9,7 @@ module.exports = {
     output: {
         filename: '[name]-[chunkhash].js',
         chunkFilename: '[name]-[chunkhash].js',
-        publicPath: '/static/js/dist/',
+        publicPath: '/static/dist/',
     },
 
     plugins: [

@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import Cropper from 'cropperjs';
 import $ from 'jquery';
-import {getTemplate} from './utils';
+import {createNotification, getTemplate} from './utils';
 
 // profileAppInit - global dependency :<
 const profileAppInit = window.profileAppInit;
@@ -82,18 +82,9 @@ let fn = {
                 }
             });
         }).fail(function() {
-            fn.showError(MESSAGE.preloadError);
+            createNotification(MESSAGE.preloadError, 'error');
         });
         deferred.resolve();
-    },
-
-    // TODO: move to util
-    showError: function(msg) {
-        $.jGrowl(msg, { theme: 'error', position: 'bottom-right' });
-    },
-
-    showMessage: function(msg) {
-        $.jGrowl(msg, { position: 'bottom-right' });
     },
 
     uploadInit: function () {
@@ -119,7 +110,7 @@ let fn = {
                 fn.uploadProgress(files[0]);
             } else {
                 // Let them read restrictions again.
-                fn.showError(MESSAGE.imgValidationError);
+                createNotification(MESSAGE.imgValidationError, 'error');
             }
         });
     },
@@ -168,7 +159,7 @@ let fn = {
             default:
                 code = xhr.response;
         }
-        fn.showError(MESSAGE.uploadError + code);
+        createNotification(MESSAGE.uploadError + code, 'error');
     },
 
     uploadSuccess: function (data, file) {
@@ -181,12 +172,12 @@ let fn = {
                     // Don't forget to update it
                     imageData = data;
                     fn.thumbInit(data);
-              } else {
-                  fn.showError(MESSAGE.imgDimensions);
-              }
+                } else {
+                    createNotification(MESSAGE.imgDimensions, 'error');
+                }
             });
         } else {
-            fn.showError(MESSAGE.unknownError);
+            createNotification(MESSAGE.unknownError, 'error');
         }
     },
 
@@ -263,11 +254,11 @@ let fn = {
             if (data.success == true) {
                 fn.thumbSuccess(cropper, data);
             } else {
-                fn.showError(data.reason);
+                createNotification(data.reason, 'error');
             }
         }).fail(function (xhr) {
             cropper.enable();
-            fn.showError(MESSAGE.thumbDoneFail + xhr.statusText);
+            createNotification(MESSAGE.thumbDoneFail + xhr.statusText, 'error');
         });
     },
 
@@ -288,7 +279,7 @@ let fn = {
     thumbSuccess: function(cropper, data) {
         cropper.enable();
         $('.thumbnail-img img').attr("src", data.thumbnail);
-        fn.showMessage(MESSAGE.thumbSuccess);
+        createNotification(MESSAGE.thumbSuccess);
         uploadContainer.modal("hide");
     }
 };

@@ -11,7 +11,7 @@
     <title>{% block title %}Computer Science Center{% endblock title %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static "img/center/favicon.png" %}" >
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    {% render_bundle 'center_styles' 'css' %}
+    {% render_bundle 'center' 'css' %}
     {% if request.user.is_curator %}
         <link href="{% static "css/center/staff.css" %}" rel="stylesheet">
     {% endif %}
@@ -81,7 +81,7 @@
 
     {% render_bundle 'manifest' 'js' %}
     {% render_bundle 'vendor' 'js' %}
-    {% if debug %}{% render_bundle 'center_styles' 'js' %}{% endif %}
+    {% render_bundle 'center' 'js' %}
     {% render_bundle 'main' 'js' %}
 
     {% if messages %}

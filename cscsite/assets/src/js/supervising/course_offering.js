@@ -1,5 +1,7 @@
 // TODO: dynamically load templates
 
+import {createNotification} from "../utils";
+
 const modalWrapper = $("#modal-container");
 
 export default function unreadNotifications() {
@@ -16,10 +18,7 @@ export default function unreadNotifications() {
             modalWrapper.modal('show');
         }).fail((data) => {
             if (data.status === 403) {
-                $.jGrowl(
-                    'Доступ запрещён.',
-                    { position: 'bottom-right', theme: 'error' }
-                );
+                createNotification('Доступ запрещён.', 'error');
                 $(this).remove();
             }
         });

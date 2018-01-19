@@ -6,7 +6,7 @@
 {% load static %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block body_attrs %} class="gray" data-init-section="submissions"{% endblock body_attrs %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
@@ -14,7 +14,7 @@
 
 {% block javascripts %}
     {% render_bundle 'forms' 'js' %}
-    <script type="text/javascript" src="{% static "js/assignment-submissions.js" %}"></script>
+    {% render_bundle 'teaching' 'js' %}
 {% endblock javascripts %}
 
 {% block content %}
