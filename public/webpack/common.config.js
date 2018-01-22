@@ -196,7 +196,7 @@ const common = {
 
     plugins: [
         new webpack.optimize.ModuleConcatenationPlugin(),
-        new BundleTracker({filename: '../webpack-stats.json'}),
+        new BundleTracker({filename: './webpack-stats.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
         new webpack.IgnorePlugin(/^\.\/locale$/),
