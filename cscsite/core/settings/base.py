@@ -288,7 +288,7 @@ REST_FRAMEWORK = {
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'dist/',  # relative to STATIC_URL
-        'STATS_FILE': str(ROOT_DIR / "webpack-stats.json"),
+        'STATS_FILE': str(ROOT_DIR / "public" / "webpack-stats.json"),
     }
 }
 
