@@ -17,11 +17,9 @@ const development = require('./dev.config');
 const production = require('./prod.config');
 const TARGET = process.env.npm_lifecycle_event;
 
-// require('babel-polyfill').default; FIXME: wtf?
-
 process.env.BABEL_ENV = TARGET;
 
-const __assetsdir = path.join(__dirname, '../assets');
+const __srcdir = path.join(__dirname, '../src');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
 let bundlesDirRelative = './dist/';
 // All dependencies will be copied to path, relative to bundles output
@@ -30,17 +28,17 @@ const STATIC_URL = path.join('/static/');
 
 // TODO: analyze bundles size and concat
 const PATHS = {
-    common: path.join(__assetsdir, '/src/js/main.js'),
-    profile: path.join(__assetsdir, '/src/js/profile.js'),
-    forms: path.join(__assetsdir, '/src/js/forms.js'),
-    admission: path.join(__assetsdir, '/src/js/center/admission.js'),
-    supervising: path.join(__assetsdir, '/src/js/supervising/index.js'),
-    learning: path.join(__assetsdir, '/src/js/learning/index.js'),
-    teaching: path.join(__assetsdir, '/src/js/teaching/index.js'),
-    dist: path.join(__assetsdir, bundlesDirRelative),
-    stats: path.join(__assetsdir, "/src/js/stats/main.js"),
-    center: path.join(__assetsdir, "/src/js/center/index.js"),
-    club: path.join(__assetsdir, "/src/js/club/index.js"),
+    common: path.join(__srcdir, '/js/main.js'),
+    profile: path.join(__srcdir, '/js/profile.js'),
+    forms: path.join(__srcdir, '/js/forms.js'),
+    admission: path.join(__srcdir, '/js/center/admission.js'),
+    supervising: path.join(__srcdir, '/js/supervising/index.js'),
+    learning: path.join(__srcdir, '/js/learning/index.js'),
+    teaching: path.join(__srcdir, '/js/teaching/index.js'),
+    dist: path.join(__srcdir, bundlesDirRelative),
+    stats: path.join(__srcdir, "/js/stats/main.js"),
+    center: path.join(__srcdir, "/js/center/index.js"),
+    club: path.join(__srcdir, "/js/club/index.js"),
 };
 
 
@@ -57,11 +55,11 @@ const VENDOR = [
     // 'react-router-redux',
     // 'jquery',
     // 'bootstrap-sass',
-    path.join(__assetsdir, '/src/js/editor.js'),
+    path.join(__srcdir, '/js/editor.js'),
 ];
 
 const common = {
-    context: __assetsdir,
+    context: __srcdir,
 
     entry: {
         main: PATHS.common,
@@ -92,9 +90,9 @@ const common = {
     resolve: {
         extensions: ['.jsx', '.js'],
         modules: [
-            path.join(__assetsdir, '/src/js'),
+            path.join(__srcdir, '/js'),
             __nodemodulesdir,
-            path.join(__assetsdir, '/src'),  // import scss with `sass` prefix for easy debug
+            __srcdir,  // import scss with `sass` prefix for easy debug
         ],
         symlinks: false
     },
@@ -111,10 +109,10 @@ const common = {
                         }
                     }
                 ],
-                include: path.resolve(__assetsdir, "src/js"),
+                include: path.resolve(__srcdir, "js"),
                 exclude: [
-                    path.resolve(__assetsdir, "src/sass/center/styles.scss"),
-                    path.resolve(__assetsdir, "src/sass/club/styles.scss"),
+                    path.resolve(__srcdir, "sass/center/styles.scss"),
+                    path.resolve(__srcdir, "sass/club/styles.scss"),
                 ]
             },
             {
