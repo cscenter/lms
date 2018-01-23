@@ -130,30 +130,14 @@ const common = {
                         {
                             loader: 'postcss-loader', // Run post css actions
                             options: {
-                                // ident: 'postcss',
+                                // See `postcss.config.js` for details
                                 sourceMap: DEBUG,
-                                // config: {
-                                //     path: path.join(__dirname, '../postcss.config.js')
-                                // },
-                                // plugins: () => { // post css plugins, can be exported to postcss.config.js
-                                //     return [
-                                //         require('autoprefixer')
-                                //     ];
-                                // }
-                            }
-                        },
-                        {
-                            // All urls must be relative to the entry-file, workaround for this
-                            // More about this problem: https://github.com/webpack-contrib/sass-loader#problems-with-url
-                            loader: 'resolve-url-loader',
-                            options: {
-                                sourceMap: DEBUG
                             }
                         },
                         {
                             loader: 'sass-loader', // compiles SASS to CSS
                             options: {
-                                sourceMap: true, // need this for `resolve-url-loader`
+                                sourceMap: DEBUG,
                                 outputStyle: 'expanded',
                                 includePaths: [__nodemodulesdir,]
                             }

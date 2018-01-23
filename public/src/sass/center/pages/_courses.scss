@@ -68,7 +68,7 @@
         top: 4px;
         width: 16px;
         height: 18px;
-        background: url("../../img/icons/club_apple.svg") left top no-repeat;
+        background: url("/static/img/icons/club_apple.svg") left top no-repeat;
         background-size: contain;
       }
     }
@@ -82,15 +82,15 @@
     }
 
     .__video {
-      background: url("../../img/icons/video.svg") center left no-repeat;
+      background: url("/static/img/icons/video.svg") center left no-repeat;
     }
 
     .__image {
-      background: url("../../img/icons/img.svg") center left no-repeat;
+      background: url("/static/img/icons/img.svg") center left no-repeat;
     }
 
     .__file {
-      background: url("../../img/icons/file.svg") center left no-repeat;
+      background: url("/static/img/icons/file.svg") center left no-repeat;
     }
   }
 }
