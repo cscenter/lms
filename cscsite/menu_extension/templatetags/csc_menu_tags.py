@@ -68,6 +68,7 @@ def csc_menu(context, menu_name, root_id=False):
     # For simplicity at the current time we have only one selected item.
     active_items = set()
     find_active_menu_items(menu_tree, context['request'], active_items)
+
     return {
         "tree": menu_tree,
         "active_items": active_items

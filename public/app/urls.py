@@ -14,12 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
+from django.contrib.auth import views as auth_views
 from django.views import generic
 
 
 class HtmlView(generic.TemplateView):
     def get_template_names(self):
-        path_to_template = self.kwargs.get('url', '')[:-1]
+        path_to_template = self.kwargs.get('path_to_template', '')[:-1]
         if not path_to_template:
             path_to_template = "pages/index"
         return [f"{path_to_template}.jinja2",
@@ -27,5 +28,7 @@ class HtmlView(generic.TemplateView):
 
 
 urlpatterns = [
-    url(r'^(?P<url>.*)$', HtmlView.as_view(), name='html_pages')
+    url(r'^$', HtmlView.as_view(), name='index'),
+    url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
+    url(r'^(?P<path_to_template>.*)$', HtmlView.as_view(), name='html_pages'),
 ]
