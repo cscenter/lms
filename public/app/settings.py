@@ -25,8 +25,6 @@ SECRET_KEY = '1zh$0zlqsd0a_o*4_e)m=%^23yzh#6w_6-6&_f@zd!2+jd&lyl'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-APPEND_SLASH = False
-
 ALLOWED_HOSTS = []
 
 
@@ -79,6 +77,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.StaticFilesExtension",
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
+                "app.jinja2_extensions.MenuExtension",
             ],
             "bytecode_cache": {
                 "name": "default",

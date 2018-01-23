@@ -15,7 +15,7 @@
             <ul{% if menu.tree|length > 8 %} class="__narrow"{% endif %}>
                 {% for menu_item in menu.tree %}
                     <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
-                        <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{% trans menu_item.caption context 'menu' %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+                        <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
                 {% endfor %}
             </ul>
@@ -24,9 +24,9 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% userpreview user "60x60" as im %}
+                    {% userpreview user "60x60" use_stab=0 as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% empty %}
+                    {% empty %}
                         <img src="{% if user.gender == "F" %}{% static "img/csc_girl_head.svg" %}{% else %}{% static "img/csc_boy_head.svg" %}{% endif %}" class="_empty">
                     {% enduserpreview %}
                     <span class="caret"></span>
@@ -57,7 +57,7 @@
                     {% elif second_level.extension.classes %}class="{{ second_level.extension.classes }}"
                     {% elif second_level.id in menu.active_items %}class="active"{% endif %}>
                         <a {% if second_level.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ second_level.url }}">
-                            {% trans second_level.caption context 'menu' %}
+                            {{ second_level.caption }}
 
                             {% if second_level.extension.budge and request.unread_notifications_cache|lookup:second_level.extension.budge %}
                             <span class="badge">

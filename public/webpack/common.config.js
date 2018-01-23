@@ -21,9 +21,9 @@ process.env.BABEL_ENV = TARGET;
 
 const __srcdir = path.join(__dirname, '../src');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let bundlesDirRelative = './dist/';
+let __bundlesdir = path.join(__dirname, '../assets/dist');
 // All dependencies will be copied to path, relative to bundles output
-const STATIC_PATH = path.join('/static/', bundlesDirRelative);
+const STATIC_PATH = path.join('/static/', __bundlesdir);
 const STATIC_URL = path.join('/static/');
 
 // TODO: analyze bundles size and concat
@@ -35,7 +35,6 @@ const PATHS = {
     supervising: path.join(__srcdir, '/js/supervising/index.js'),
     learning: path.join(__srcdir, '/js/learning/index.js'),
     teaching: path.join(__srcdir, '/js/teaching/index.js'),
-    dist: path.join(__srcdir, bundlesDirRelative),
     stats: path.join(__srcdir, "/js/stats/main.js"),
     center: path.join(__srcdir, "/js/center/index.js"),
     club: path.join(__srcdir, "/js/club/index.js"),
@@ -77,7 +76,7 @@ const common = {
 
     output: {
         filename: '[name]-[hash].js',
-        path: PATHS.dist,
+        path: __bundlesdir,
     },
 
     externals: {
@@ -213,7 +212,7 @@ const common = {
             name: "manifest",
             minChunks: Infinity
         }),
-        new CleanWebpackPlugin([PATHS.dist], {
+        new CleanWebpackPlugin([__bundlesdir], {
             verbose: true,
             root: process.cwd()
         }),

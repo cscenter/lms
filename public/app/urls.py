@@ -19,7 +19,11 @@ from django.views import generic
 
 class HtmlView(generic.TemplateView):
     def get_template_names(self):
-        return [self.kwargs.get('url')]
+        path_to_template = self.kwargs.get('url', '')[:-1]
+        if not path_to_template:
+            path_to_template = "pages/index"
+        return [f"{path_to_template}.jinja2",
+                f"{path_to_template}/index.jinja2"]
 
 
 urlpatterns = [

@@ -1,37 +1,12 @@
 from django import template
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.template import Library
 from django.template import TemplateSyntaxError
 from django.utils.encoding import smart_str
 from django.utils.six import text_type
-from sorl.thumbnail import get_thumbnail
-from sorl.thumbnail.images import DummyImageFile, BaseImageFile
-from sorl.thumbnail.templatetags.thumbnail import ThumbnailNode, kw_pat, \
-    ThumbnailNodeBase
+from sorl.thumbnail.images import DummyImageFile
+from sorl.thumbnail.templatetags.thumbnail import kw_pat, ThumbnailNodeBase
 
 register = Library()
-
-
-class StubImage(BaseImageFile):
-    url = staticfiles_storage.url("img/center/profile_no_photo.png")
-
-    def __init__(self, **kwargs):
-        geometry = kwargs.get("geometry", None)
-        if geometry:
-            self.size = geometry.split("x")
-        else:
-            self.size = 175, 238
-
-    def exists(self):
-        return True
-
-
-class BoyStubImage(StubImage):
-    url = staticfiles_storage.url("img/csc_boy.svg")
-
-
-class GirlStubImage(StubImage):
-    url = staticfiles_storage.url("img/csc_girl.svg")
 
 
 class UserThumbnailNode(ThumbnailNodeBase):
@@ -75,7 +50,6 @@ class UserThumbnailNode(ThumbnailNodeBase):
     def _render(self, context):
         """Replace DummyImage with csc girl/boy"""
         user = self.user.resolve(context)
-        file_ = getattr(user, "photo", None)
         geometry = self.geometry.resolve(context)
         options = {}
         for key, expr in self.options:
@@ -86,24 +60,10 @@ class UserThumbnailNode(ThumbnailNodeBase):
             else:
                 options[key] = value
 
-        # Default crop settings
-        if "crop" not in options:
-            options["crop"] = "center top"
-        if "cropbox" not in options:
-            options["cropbox"] = user.photo_thumbnail_cropbox()
+        use_stub = bool(options.pop("use_stab", True))
+        thumbnail = user.get_thumbnail(geometry, use_stub=use_stub, **options)
 
-        thumbnail = get_thumbnail(file_, geometry, **options)
-
-        render_empty = False
-        if not thumbnail or isinstance(thumbnail, DummyImageFile):
-            render_empty = True
-            cls = user.__class__
-            if not user.is_teacher and user.gender == cls.GENDER_MALE:
-                thumbnail = BoyStubImage(geometry=geometry)
-            elif not user.is_teacher and user.gender == cls.GENDER_FEMALE:
-                thumbnail = GirlStubImage(geometry=geometry)
-            else:
-                thumbnail = StubImage(geometry=geometry)
+        render_empty = not thumbnail or isinstance(thumbnail, DummyImageFile)
 
         if self.as_var:
             context.push()

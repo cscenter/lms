@@ -22,7 +22,8 @@ from jsonfield import JSONField
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
+from sorl.thumbnail import ImageField, get_thumbnail
+from sorl.thumbnail.images import DummyImageFile
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
@@ -31,6 +32,7 @@ from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import is_positive_grade
 from learning.permissions import LearningPermissionsMixin
+from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -469,6 +471,27 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         if self.cropbox_data:
             return photo_thumbnail_cropbox(self.cropbox_data)
         return ""
+
+    def get_thumbnail(self, geometry, use_stub=True, **options):
+        path_to_img = getattr(self, "photo", None)
+        # Default crop settings
+        if "crop" not in options:
+            options["crop"] = "center top"
+        if "cropbox" not in options:
+            options["cropbox"] = self.photo_thumbnail_cropbox()
+        thumbnail = get_thumbnail(path_to_img, geometry, **options)
+        if not thumbnail or isinstance(thumbnail, DummyImageFile):
+            if use_stub:
+                if not self.is_teacher and self.gender == CSCUser.GENDER_MALE:
+                    factory = BoyStubImage
+                elif not self.is_teacher and self.gender == CSCUser.GENDER_FEMALE:
+                    factory = GirlStubImage
+                else:
+                    factory = BaseStubImage
+                thumbnail = factory(geometry=geometry)
+            else:
+                thumbnail = None
+        return thumbnail
 
     # FIXME(Dmitry): this should use model_utils.fields#SplitField
     def get_short_note(self):
