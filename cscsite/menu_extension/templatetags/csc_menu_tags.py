@@ -4,6 +4,7 @@ import copy
 from django import template
 from django.conf import settings
 from django.urls import reverse, NoReverseMatch
+from django.utils.translation import pgettext_lazy
 
 from treemenus.models import Menu, MenuItem
 
@@ -26,6 +27,7 @@ def csc_menu(context, menu_name, root_id=False):
                              .order_by('level', 'rank')
                              .all())
             for item in flattened:
+                item.caption = pgettext_lazy('menu', item.caption)
                 # Groups list is empty if item available for all users.
                 item.groups_allowed = [g.id for g in item.extension.groups.all()]
                 # Override url from named_url if specified
