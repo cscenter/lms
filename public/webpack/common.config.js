@@ -198,6 +198,7 @@ const common = {
         }),
         new CleanWebpackPlugin([__bundlesdir], {
             verbose: true,
+            exclude: ['.gitattributes'],
             root: process.cwd()
         }),
         extractScss,
