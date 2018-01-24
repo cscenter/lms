@@ -4,7 +4,8 @@
   "description": "Webpack",
   "scripts": {
     "start": "webpack-dev-server --progress --config webpack/common.config.js",
-    "prod": "NODE_ENV=production webpack --config webpack/common.config.js --progress --display-error-details --display-modules --display-optimization-bailout"
+    "prod": "NODE_ENV=production webpack --config webpack/common.config.js --progress --display-error-details --display-modules --display-optimization-bailout",
+    "css-lint": "stylelint --syntax scss \"src/**/*.scss\""
   },
   "repository": {
     "type": "git",
@@ -78,6 +79,11 @@
     "redux-thunk": "^2.1.0",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.19.0",
+    "stylelint": "^8.4.0",
+    "stylelint-config-recommended-scss": "^3.0.0",
+    "stylelint-config-standard": "^18.0.0",
+    "stylelint-order": "^0.8.0",
+    "stylelint-scss": "^2.2.0",
     "uglifyjs-webpack-plugin": "^1.1.6",
     "webpack": "^3.10.0",
     "webpack-bundle-tracker": "^0.2.0",
