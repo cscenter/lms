@@ -26,13 +26,22 @@ git checkout -b split-frontend frontend-remote/master
 ```
 
 ## Update main repo from subtree
+
+```
 git fetch frontend-remote
-git merge -s subtree --squash frontend-remote/master    OR  git merge -X subtree=public/ --squash frontend-remote/master
-??? git commit -m "Updated the plugin"
+git merge -s subtree --squash frontend-remote/master
+# OR  git merge -X subtree=public/ --squash frontend-remote/master
+git commit -m "Updated public/ from remote repo"
+```
 
 OR 
 
 ```
+To make `subtree pull` work, you need to replace subdirectory with a subtree addition (merge your plugin history with main repo history)
+git rm -r public/
+git commit -m "Removing public/ for subtree replacement"
+git subtree add --prefix=public/ --squash frontend-remote master
+# Then
 git subtree pull --prefix=public/ --squash frontend-remote master
 ```
 
@@ -57,6 +66,7 @@ git push
 OR 
 
 ```
-# Backports all commits without exception that touched the subtree (can’t pick the relevant commits)
+# Backports all commits without exception that touched the subtree (can’t pick the relevant commits).
+# So, make sure to push changes in public/ to separated commits
 git subtree push --prefix=public/ frontend-remote master
 ```
