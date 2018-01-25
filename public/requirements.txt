@@ -1,6 +1,0 @@
-Django==1.11.9
-django-webpack-loader==0.5.0
-Jinja2==2.10
-django-jinja==2.4.1
-Pillow==4.1.1
-sorl-thumbnail==12.3

@@ -1,9 +1,0 @@
-# OS X specific files
-.DS_Store
-._*
-# SASS specific files
-**/.sass-cache/
-*.css.map
-
-package-lock.json
-node_modules/
