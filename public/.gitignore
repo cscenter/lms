@@ -1,0 +1,13 @@
+# OS X specific files
+.DS_Store
+._*
+# SASS specific files
+**/.sass-cache/
+*.css.map
+# Python
+*.pyc
+# Ignore IDEA files
+.idea/
+
+package-lock.json
+node_modules/

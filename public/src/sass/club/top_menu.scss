@@ -1,0 +1,264 @@
+$header-lvl1-bg:                 #7A9CC6;
+$header-lvl2-bg:                 #E6E6E6;
+
+
+.container {
+
+  &._top {
+    text-align: right;
+    font-size: 13px;
+    padding: 4px 15px 4px 0;
+
+    > ul {
+        list-style: none;
+        float: left;
+        margin: 0 0 0 20px;
+        padding: 0;
+
+        li {
+            list-style: none;
+            display: inline-block;
+            padding: 0 10px 0 0;
+
+            &._teacher {
+                a {
+                    color: green;
+                }
+            }
+
+            &._studying {
+                a {
+                    color: purple;
+                }
+            }
+
+            &._curator {
+                a {
+                    color: red;
+                }
+            }
+
+            &._admin {
+                a {
+                    color: #000;
+                }
+            }
+        }
+    }
+
+    .btn-group {
+        vertical-align: inherit;
+
+        > a {
+          text-decoration: none;
+          &:hover {
+              border-bottom: 1px dashed;
+          }
+        }
+
+
+      .dropdown-menu {
+        min-width: 100px;
+      }
+    }
+    .cities {
+        padding-right: 15px;
+
+        span {
+            font-weight: 500;
+        }
+    }
+
+    .languages {
+        span {
+            font-weight: 500;
+        }
+    }
+
+  }
+}
+
+
+
+.header {
+    &.lvl1 {
+        color: white;
+        margin-bottom: 30px;
+        background-color: $header-lvl1-bg;
+        min-width: $min-width;
+    }
+
+    &.lvl2 {
+        width: 100%;
+        /* width: 960px; */
+        color: white;
+        display: none;
+        z-index: -1;
+        margin: -30px 0 20px;
+        background-color: $header-lvl2-bg;
+        min-width: $min-width;
+
+        &.active {
+            display: block;
+            z-index: 100;  
+        }
+
+        li {
+
+            &.active, &:hover {
+                background-color: darken($header-lvl2-bg, 10%);
+            }
+        }
+
+        &.for-students {
+            background-color: #FBAA9F;
+
+            .row {
+                background-color: #FBAA9F;
+            }
+        }
+
+        &.for-teachers {
+            background-color: #A6A8CD;
+
+            .row {
+                background-color: #A6A8CD;
+            }
+        }
+
+        .logo-cell {
+            margin: 0;
+        }
+
+        a {
+            // color: darken($header-lvl2-bg, 80%);
+        }
+    }
+
+    ul {
+        padding-left: 0px;
+
+        li {
+            list-style: none;
+            float: left;
+            line-height: 50px;
+            padding: 0px 7px;
+            font-weight: bolder;
+            cursor: pointer;
+
+            &.active, &:hover {
+                background-color: darken($header-lvl1-bg, 10%);
+            }
+
+            a {
+                display: block;
+            }
+
+            i {
+                font-weight: normal;
+            }
+        }
+
+        &.dropdown-menu {
+            li {
+                float: none;
+                padding: 0;
+            }
+        }
+    }
+
+    a {
+       color: white;
+       font-weight: normal;
+
+       &:hover {
+            text-decoration: none;
+        }
+    }
+
+    .badge {
+        background-color: transparent;
+        border: 1px solid white;
+    }
+
+    .login {
+        line-height: 50px;
+        text-align: right;
+
+        .btn {
+            padding: 6px 8px;
+            background: none;
+        }
+
+        .logout-url {
+            font-weight: normal;
+        }
+
+        a.login-link, a.reg {
+            position: relative;
+            top: 1px;
+        }
+
+        a.reg {
+            border-left: 1px solid #fff;
+            margin-left: 10px;
+            padding-left: 10px;
+        }
+
+    }
+
+    .logo-cell {
+        position: relative;
+        margin-left: 0px;
+        margin-right: 10px;
+        width: 40px;
+        float: left;
+        margin: 5px 0;
+        height: 36px;
+    }
+
+    .logo-container {
+        position: absolute;
+        z-index: 1000;
+    }
+}
+
+
+li.for-students.active {
+  background-color: #A84234 !important;
+}
+.header.for-students li:hover {
+  background-color: #D37265;
+}
+.header.for-students li.active {
+  background-color: #A84234 !important;
+}
+
+
+
+li.for-teachers.active {
+  background-color: #515492 !important;
+}
+.header.for-teachers li:hover {
+  background-color: #787AAE;
+}
+.header.for-teachers li.active {
+  background-color: #515492 !important;
+}
+
+.header.lvl2.for-staff {
+  background-color: #E4C46C;
+}
+.header.lvl2.for-staff .row {
+  background-color: #E4C46C;
+}
+li.for-staff.active {
+  background-color: #D3B665 !important;
+}
+.header.for-staff li:hover {
+  background-color: #DBBD68;
+}
+.header.for-staff li.active {
+  background-color: #D3B665 !important;
+}
+

@@ -1,0 +1,64 @@
+.o-users-vlist-with-photo {
+  h4 {
+    margin-top: 0;
+  }
+
+  li {
+    padding-bottom: 10px;
+    @extend .clearfix;
+
+    img, .square-photo-stub {
+      float: left;
+      margin-right: 10px;
+    }
+  }
+}
+
+.list-group {
+  &.inverse {
+    .list-group-item {
+      color: $color-gray-20;
+      background: $background-grey;
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      padding: 8px 0;
+      border-bottom: 1px solid $color-gray-90;
+      border-color: $color-gray-90!important;
+      white-space: nowrap;
+      overflow:hidden;
+      -ms-text-overflow: ellipsis;
+      text-overflow: ellipsis;
+
+      &:first-child {
+        border-top-width: 0;
+      }
+      &:last-child {
+        border-bottom-width: 0;
+      }
+
+
+      &:hover, &:focus {
+        color: $color-blue;
+      }
+
+      &.active {
+        color: $color-blue!important;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+ul {
+  &.__files {
+
+    a {
+      text-decoration: none;
+
+      &:hover, &:focus {
+          color: $color-red;
+      }
+    }
+  }
+}

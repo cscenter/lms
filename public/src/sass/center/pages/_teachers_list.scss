@@ -1,0 +1,41 @@
+#teachers-detail {
+  h2 {
+    margin-bottom: 20px;
+  }
+}
+
+.teachers-list {
+  display: flex;
+  flex-flow: row wrap;
+  overflow: hidden;
+  margin: 0 -10px;
+
+  .teachers-list-item {
+    display: block;
+    flex: 0 0 25%;
+    float: left;
+    padding: 10px;
+    margin-bottom: 30px;
+    text-align: center;
+
+    img {
+      margin-bottom: 8px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    a {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .org {
+      color: $color-grey;
+    }
+  }
+
+  h1 {
+    margin-bottom: 40px;
+  }
+}

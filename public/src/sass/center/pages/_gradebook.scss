@@ -1,0 +1,302 @@
+@import "../variables";
+
+$even-color: #f5f5f5;
+$cell-height: 30px;
+$controls-height: 40px;
+$title-border-color: #e1e1e1;
+$students-column-width: 150px;
+$final-grade-column-width: 140px;
+$total-score-column-width: 66px;
+$assignment-column-width: 100px;
+$unsaved-state-color: #dcf0ff;
+
+.gradebook-wrapper {
+  position: relative;
+}
+
+#gradebook-container {
+  overflow: hidden;
+  overflow-x: auto;
+  min-width: $students-column-width + $final-grade-column-width + $total-score-column-width + 4 * $assignment-column-width;
+}
+
+.gradebook__controls {
+  position: relative;
+  height: $controls-height;
+  margin: 0;
+  visibility: hidden;
+
+  .scroll {
+    color: rgb(128, 128, 128);
+    font-size: 13px;
+    background: rgb(245, 245, 245);
+    padding: 0 14px;
+    line-height: 30px;
+    height: 30px;
+    border: 1px solid rgb(220, 220, 220);
+    position: absolute;
+    cursor: pointer;
+
+    &.left {
+      left: $students-column-width + $final-grade-column-width + $total-score-column-width;
+    }
+
+    &.right {
+      right: 0;
+    }
+  }
+}
+
+#gradebook {
+  margin: 0;
+  padding-left: $students-column-width + $final-grade-column-width + $total-score-column-width;
+
+  .headers {
+    overflow: hidden;
+    height: 90px;
+  }
+
+  .student {
+    overflow: hidden;
+    height: $cell-height;
+
+    &.even {
+      background: $even-color;
+    }
+  }
+
+  .meta {
+    overflow: hidden;
+  }
+
+  .title {
+    display: block;
+    float:left;
+    background: #f0f0f0;
+    border-bottom: 1px solid $title-border-color;
+    border-right: 1px solid #e6e6e6;
+    line-height: 120%;
+    color: #555;
+    height: 90px;
+    padding: 5px;
+
+    a {
+      display: inline-block;
+      height: 80px;
+      width: 90px;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    &.__student {
+
+      width: $students-column-width;
+      position: absolute;
+      left: 0;
+    }
+
+    &.__final_grade {
+      width: $final-grade-column-width;
+      position: absolute;
+      left: $students-column-width;
+    }
+
+    &.__total_score {
+      width: $total-score-column-width;
+      position: absolute;
+      left: $students-column-width + $final-grade-column-width;
+    }
+
+    &.__assignment {
+      width: $assignment-column-width;
+    }
+  }
+
+
+
+  .cell {
+    display: block;
+    float: left;
+    padding: 4px 6px;
+    height: $cell-height;
+    line-height: 20px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-right: 1px solid #e6e6e6;
+
+    &:focus {
+      background: #dcf0ff !important;
+    }
+
+    &.even {
+      background: $even-color;
+    }
+
+    &.__student {
+      width: $students-column-width;
+      position: absolute;
+      left: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
+    }
+
+    &.__final_grade {
+      width: $final-grade-column-width;
+      position: absolute;
+      left: $students-column-width;
+      background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
+
+      &.__unsaved {
+        background: $unsaved-state-color;
+        select {
+          background: $unsaved-state-color;
+        }
+      }
+
+      select {
+        display: block;
+        width: 100%;
+        color: #555;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 0;
+        //height: $cell-height;
+        padding: 0;
+      }
+    }
+
+    &.__total_score {
+      width: $total-score-column-width;
+      position: absolute;
+      left: $students-column-width + $final-grade-column-width;
+      text-align: right;
+      background: $color-white;
+
+      &.even {
+        background: $even-color;
+      }
+    }
+
+    &.__assignment {
+      overflow: hidden;
+      width: $assignment-column-width;
+
+      &.__score {
+        text-align: right;
+        input {
+          text-align: right;
+        }
+
+        input {
+          height: 20px;
+          border: 0;
+          width: 100%;
+          padding: 0;
+        }
+      }
+
+      &.__input {
+        cursor: pointer;
+        height: $cell-height;
+        text-align: right;
+        background: transparent;
+
+        &.even {
+          background: $even-color;
+        }
+
+        &.__unsaved {
+          background: $unsaved-state-color;
+        }
+
+        &:hover {
+          //background: $color-gray-90;
+          //border-color: $color-gray-90;
+        }
+      }
+
+      &.__expelled {
+        background: rgba($color-red, .3);
+      }
+
+      //a {
+      //  display: block;
+      //  width: 100px;
+      //  float: left;
+      //  background: #f0f0f0;
+      //  border-right: 1px solid $title-border-color;
+      //  border-bottom: 1px solid $title-border-color;
+      //  line-height: 124%;
+      //  height: 90px;
+      //  padding: 5px;
+      //  text-overflow: ellipsis;
+      //  overflow: hidden;
+      //}
+    }
+
+    &.__meta {
+      text-align: right;
+      color: #999;
+    }
+  }
+
+  .shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-shadow: rgba(0, 0, 0, 0.5) 5px 0px 8px -5px;
+    z-index: 1000;
+    width: 20px;
+    // 21px - shadow width + 1px to hide white border
+    left: $students-column-width + $final-grade-column-width + $total-score-column-width - 21px;
+
+  }
+}
+
+//FIXME: styles for sort button
+//.headers {
+//  > div:not(.no-sort) {
+//    cursor: pointer;
+//
+//    &:hover:after {
+//      visibility: visible;
+//      opacity: 1;
+//    }
+//
+//    &:after {
+//      content: '';
+//      float: right;
+//      margin-top: 7px;
+//      border-width: 0 4px 4px;
+//      border-style: solid;
+//      border-color: #404040 transparent;
+//      visibility: hidden;
+//      opacity: 0;
+//      -ms-user-select: none;
+//      -webkit-user-select: none;
+//      -moz-user-select: none;
+//      user-select: none;
+//    }
+//  }
+//
+//  > div[aria-sort=ascending]:not(.no-sort):after {
+//    border-bottom: none;
+//    border-width: 4px 4px 0;
+//  }
+//
+//  > div[aria-sort]:not(.no-sort):after {
+//    visibility: visible;
+//    opacity: 0.4;
+//  }
+//
+//}

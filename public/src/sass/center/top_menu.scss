@@ -1,0 +1,259 @@
+@import "variables";
+
+.header {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0 0 28px 0;
+
+    .logo-cell {
+        position: relative;
+        margin: 0 15px 0 0;
+        width: 80px;
+        float: left;
+        height: 50px;
+    }
+
+    .logo-container {
+        position: absolute;
+        z-index: 1000;
+    }
+
+    a {
+        display: block;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    .badge {
+        background-color: transparent;
+        border: 1px solid $color-gray-20;
+        color: $color-gray-20;
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+
+        li {
+            list-style: none;
+            float: left;
+            padding: 0 6px;
+            cursor: pointer;
+
+            i {
+                font-weight: normal;
+            }
+        }
+
+        &.__narrow li {
+            padding: 0 4px;
+        }
+    }
+
+    .menu.lvl1 {
+        height: 50px;
+        line-height: 50px;
+        color: white;
+        background-color: $header-lvl1-bg;
+        min-width: $min-width;
+
+        .container {
+            padding: 0;
+        }
+
+        a {
+            color: #fff;
+
+            .fa-angle-down {
+                min-width:11px;
+            }
+        }
+
+        li {
+            &:hover {
+                background-color: darken($header-lvl1-bg, 6%);
+            }
+
+            &.active {
+                background-color: darken($header-lvl1-bg, 14%) !important;
+            }
+        }
+    }
+
+    .menu.lvl2 {
+        width: 100%;
+        background-color: $background-grey;
+        min-width: $min-width;
+        border-bottom: 1px solid $color-gray-90;
+
+        ul {
+            margin-left: -10px;
+        }
+
+        li {
+            padding: 0 10px;
+            // rename with `active`
+            &.active {
+                a {
+                    border-bottom-color: $color-blue;
+                    color: #000;
+                }
+            }
+        }
+
+        a {
+            color: $color-gray-20;
+            line-height: 50px;
+            border-bottom: 4px solid transparent;
+
+            &:hover {
+                color: $color-blue;
+
+            }
+        }
+
+        &.for-students {
+            li {
+                &.active {
+                    //background-color: #F2A654!important;
+                    a {
+                        //color: #fff;
+                        border-color: #F6BE80;
+                    }
+                }
+
+            }
+        }
+
+        &.for-teachers {
+            li {
+                &.active {
+                    a {
+                        border-color: #515492;
+                    }
+                }
+
+            }
+        }
+
+        //&.for-teachers {
+        //    background-color: #A6A8CD;
+        //
+        //    .badge {
+        //        border: 1px solid #fff;
+        //        color: #fff;
+        //    }
+        //
+        //    ul {
+        //        margin-left: 0;
+        //    }
+        //
+        //    li {
+        //        &:hover {
+        //            background-color: #787AAE;
+        //        }
+        //
+        //        &.active {
+        //            background-color: #515492 !important;
+        //            a {
+        //                color: #fff;
+        //            }
+        //        }
+        //
+        //        a {
+        //            border-color: transparent!important;
+        //
+        //            &:hover {
+        //                color: #fff;
+        //            }
+        //        }
+        //    }
+        //}
+
+        &.for-staff {
+            li {
+                &.active {
+                    a {
+                        border-color: $color-green;
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+#login {
+    text-align: center;
+    padding-left: 0;
+
+    .logout-url {
+        font-weight: normal;
+    }
+    ul {
+        margin: 0;
+        padding: 6px 0;
+    }
+    li {
+        float: none;
+        padding: 0;
+
+        a {
+            padding: 5px 24px;
+            color: $color-gray-20;
+        }
+    }
+
+    .dropdown {
+        float: right;
+        padding: 0;
+
+        &.open, &:hover {
+            background-color: darken($header-lvl1-bg, 6%);
+        }
+    }
+
+    .divider {
+        margin: 6px 0;
+        &:hover {
+            background-color: $color-gray-90;
+        }
+    }
+
+    .dropdown-menu {
+        border-radius: 2px;
+    }
+
+
+    .dropdown-header {
+        padding: 6px 24px 4px;
+        cursor: inherit;
+
+        &:hover {
+            background: inherit;
+        }
+    }
+
+}
+#user-menu {
+    text-decoration: none!important;
+    display: inline-block;
+    height: 50px;
+    padding: 0 6px 0 6px;
+
+    .caret {
+        border-width: 5px;
+    }
+    img {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+
+        &._empty {
+            width: 36px;
+            height: 36px;
+        }
+    }
+}

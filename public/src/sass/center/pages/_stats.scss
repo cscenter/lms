@@ -1,0 +1,17 @@
+#stats-page {
+  h3 {
+    margin: 10px 0;
+  }
+}
+#plot-participants-by-group {
+  height: 340px;
+
+  .info {
+    padding-bottom: 15px;
+  }
+}
+#plot-participants-by-year {
+  height: 340px;
+  // quick fix, make buttons outside plot
+  margin-bottom: 60px;
+}

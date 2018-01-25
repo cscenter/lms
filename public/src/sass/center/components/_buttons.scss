@@ -1,0 +1,62 @@
+.btn-default, .btn-danger, .btn-success, .btn-primary, .btn-warning, .btn-info, .btn-link {
+  &.btn-block {
+    &.btn-wide {
+      padding: 10px 12px;
+    }
+    &.btn-announcement {
+      padding: 12px;
+      font-size: 16px;
+    }
+    &.btn-sm {
+      padding: 8px 10px;
+    }
+  }
+}
+
+
+// BTN OUTLINE
+.btn-outline.btn-default {
+  color: $color-grey;
+  background-color: transparent;
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.active,
+  .open > .dropdown-toggle.btn-outline.btn-default {
+    border-color: #e4eaec;
+    background-color: rgba(118, 131, 143, 0.1);
+    color: #76838f;
+  }
+  &:hover .badge,
+  &:focus .badge,
+  &:active .badge,
+  &.active .badge,
+  .open > .dropdown-toggle.btn-outline.btn-default .badge {
+    color: #76838f;
+    background-color: #76838f;
+  }
+
+}
+
+.btn-outline.btn-primary {
+  color: $color-blue;
+  background-color: transparent;
+  &:hover,
+  &:focus,
+  &:active,
+  &.active,
+  .open > .dropdown-toggle.btn-outline.btn-primary {
+    border-color: darken($color-blue, 7%);
+    background-color: darken($color-blue, 5%);
+    color: #ffffff;
+  }
+  &:hover .badge,
+  &:focus .badge,
+  &:active .badge,
+  &.active .badge,
+  .open > .dropdown-toggle.btn-outline.btn-primary .badge {
+    color: #57c7d4;
+    background-color: #ffffff;
+  }
+}
