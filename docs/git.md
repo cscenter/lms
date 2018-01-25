@@ -4,10 +4,10 @@ Useful Links:
 
 * https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
 
-## Add subtree if no local files in main repo
-git subtree add --prefix=public/ --squash frontend-remote master
+## Create subtree repo from subdirectory in main repo
 
-## How to create subtree from existing directory:
+Manually
+
 ```
 git checkout -b split-frontend
 git filter-branch --subdirectory-filter public/
@@ -17,31 +17,63 @@ git remote add frontend-remote git@github.com:cscenter/site-frontend.git
 git push -u frontend-remote split-frontend:master
 ```
 
-If no need pushing to split remote repo
+With git subtree
+
+```
+git remote add frontend-remote git@github.com:cscenter/site-frontend.git
+# Put public/ folder in a separate branch
+git subtree split -P public -b split-frontend
+git fetch frontend-remote
+git branch -u frontend-remote/master split-frontend
+```
+
+
+## Add subtree
+
+Manually (not tested with push/pull)
 
 ```
 git remote add frontend-remote git@github.com:cscenter/site-frontend.git
 git fetch frontend-remote
 git checkout -b split-frontend frontend-remote/master
+git read-tree --prefix=public/ -u split-frontend
 ```
 
-## Update main repo from subtree
+With git subtree
+
+```
+# Remove local files if neccessary
+git rm -r public/
+git add -u
+git commit -m "Removing public/ directory"
+git remote add frontend-remote git@github.com:cscenter/site-frontend.git
+git subtree add --prefix=public/ --squash frontend-remote master
+```
+
+## Update main repo from subtree repo
+
+```
+git checkout split-frontend
+git pull
+git checkout master
+```
+
 
 ```
 git fetch frontend-remote
-git merge -s subtree --squash frontend-remote/master
-# OR  git merge -X subtree=public/ --squash frontend-remote/master
+git checkout master
+git merge -Xsubtree=public/ --squash --no-commit frontend-remote/master
 git commit -m "Updated public/ from remote repo"
 ```
 
-OR 
+With git subtree
 
 ```
 To make `subtree pull` work, you need to replace subdirectory with a subtree addition (merge your plugin history with main repo history)
 git rm -r public/
 git commit -m "Removing public/ for subtree replacement"
 git subtree add --prefix=public/ --squash frontend-remote master
-# Then
+# Then git subtree pull --prefix=<subdirectory> <remote repo name> <branch name>
 git subtree pull --prefix=public/ --squash frontend-remote master
 ```
 
@@ -53,20 +85,22 @@ git pull -s subtree <remotename> <branchname>
 
 ## Backporting to the subtree’s remote
 
+Manually (not tested)
+
 ```
 # Add [To backport] in main repo for commits with files from subtree
 # Create new branch before backporting
 git checkout -b backport-plugin frontend-remote/master
 # Manually apply commits (No idea why should use cherry-pick twice)
-git cherry-pick -x master~3
-git cherry-pick -x --strategy=subtree master
+git cherry-pick -x --strategy=subtree master~3
 git push
 ```
 
-OR 
+With git subtree
 
 ```
 # Backports all commits without exception that touched the subtree (can’t pick the relevant commits).
 # So, make sure to push changes in public/ to separated commits
+# Format: git subtree push --prefix=public <remote repo name> <branch name>
 git subtree push --prefix=public/ frontend-remote master
 ```
