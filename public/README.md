@@ -36,7 +36,7 @@ $ brew install pyenv-virtualenv
 # Enable auto-activation of virtualenvs
 $ echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile
 # Create new virtualenv, where `csc-frontend` - this is a name of new virtualenv
-pyenv-virtualenv 3.6.4 csc-frontend
+pyenv virtualenv 3.6.4 csc-frontend
 # Activate it
 pyenv activate csc-frontend
 ```
