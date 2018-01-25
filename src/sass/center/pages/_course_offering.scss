@@ -1,0 +1,159 @@
+// Highlight targets. Used on course offering detail page right now.
+div[id^="news-"] {
+  &:target {
+    // color - like on .unread
+    background: $state-info-bg;
+    box-shadow: none;
+  }
+}
+.course-description {
+  h1, h2, h3, h4, h5 {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+// it's a quick fix, stupid classes, I know. Refactor if you see it
+.__pr5 {
+  padding-right: 5px;
+}
+
+.news-metainfo {
+  color: #AAA;
+  text-align: right;
+}
+
+.course-main-title {
+  margin: 0 0 30px 0;
+
+  small {
+    display: block;
+    font-size: 14px;
+    margin: 10px 0;
+
+    a {
+      color: $color-blue;
+    }
+  }
+}
+
+
+
+.o-users-vlist {
+  li {
+    padding-bottom: 10px;
+    @extend .clearfix;
+
+    a {
+      padding: 10px;
+      text-align: center;
+      font-size: 16px;
+      display: block;
+      line-height: 22px;
+
+      img {
+        margin: 0 0 8px;
+      }
+
+
+      &:hover {
+        //background: $background-grey;
+      }
+    }
+  }
+}
+
+.enroll-block {
+  margin-bottom: 5px;
+}
+
+.survey-btn {
+  margin-bottom: 5px;
+}
+
+.o-buttons-vertical {
+  margin: 10px 0 5px 0;
+
+  .btn {
+    padding: 12px 10px;
+  }
+
+  &.gray {
+    .btn {
+      color: $color-gray-20;
+      border-color: lighten($color-gray-60, 30%);
+    }
+  }
+}
+
+#course-news {
+  h4 {
+    margin-top: 0;
+
+    a {
+      opacity: 0;
+    }
+
+    &:hover {
+      a {
+        opacity: 1;
+      }
+    }
+  }
+
+  .panel-body {
+    padding: 25px;
+  }
+
+  .panel-footer {
+    padding: 0 25px 10px 25px;
+    margin-top: -10px;
+    overflow: hidden;
+  }
+
+  .date {
+    margin: 0 0 0 30px;
+    float: right;
+    font-size: 16px;
+    line-height: 1.2;
+    color: $color-gray-48;
+  }
+}
+
+#course-assignments {
+  .list-group-item {
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 16px;
+  }
+
+  .assignment-deadline {
+    display: inline-block;
+
+    span {
+      display: block;
+      text-align: center;
+    }
+
+  }
+}
+
+#course-contacts, #course-reviews {
+  h4:first-child {
+    margin-top: 0;
+  }
+}
+
+#course-classes, #course-assignments {
+  margin-top: -15px;
+
+  .table > thead > tr > th:first-child {
+    width: 114px;
+    white-space: nowrap;
+  }
+
+  .table > tbody > tr > td:first-child,
+  .table > thead > tr > th:first-child {
+    padding-left: 0;
+  }
+}

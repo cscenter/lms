@@ -1,0 +1,130 @@
+.nav-tabs-solid {
+  border-bottom-color: #f3f7f9;
+  > li {
+    > a:hover {
+      border-color: transparent;
+    }
+    &.active > a {
+      color: #76838f;
+      background-color: #f3f7f9;
+      border-color: transparent;
+      &:focus, &:hover {
+        color: #76838f;
+        background-color: #f3f7f9;
+        border-color: transparent;
+      }
+    }
+  }
+  ~ .tab-content {
+    padding: 20px;
+    background-color: #f3f7f9;
+  }
+  &.nav-justified > li {
+    > a {
+      border: none;
+    }
+    &.active > a {
+      border: none;
+      &:focus, &:hover {
+        border: none;
+      }
+    }
+  }
+  &.nav-tabs-bottom > li.active > a {
+    border: none;
+    &:focus, &:hover {
+      border: none;
+    }
+  }
+}
+
+.nav-tabs-inverse .nav-tabs-solid {
+  border-bottom-color: #ffffff;
+}
+.nav-tabs-inverse .nav-tabs-solid > li.active > a,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:hover,
+.nav-tabs-inverse .nav-tabs-solid > li.active > a:focus {
+  color: #76838f;
+  background-color: #ffffff;
+}
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid {
+  border-right-color: #ffffff;
+}
+.nav-tabs-inverse.nav-tabs-vertical .nav-tabs-solid.nav-tabs-reverse {
+  border-left-color: #ffffff;
+}
+.nav-tabs-inverse .tab-content {
+  background: #ffffff;
+}
+
+  // material design tabs
+.nav-tabs {
+  &.material {
+    border-bottom: 1px solid $color-gray-90;
+
+    li {
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
+    a {
+      padding: 10px 20px;
+    }
+
+    > li > a {
+      font-size: 16px;
+      font-weight: 400;
+      color: #76838f;
+      border-radius: 0!important;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      @include transition(.25s);
+
+      &:hover {
+        border-bottom-color: darken($color-gray-90, 10%);
+        background: transparent;
+      }
+    }
+
+    > li.active > a {
+      color: $color-blue;
+      border-bottom: 2px solid $color-blue;
+      background-color: #fff;
+
+      &:hover, &:active, &:focus {
+        border: 0;
+        border-bottom: 2px solid $color-blue;
+      }
+    }
+  }
+
+  // The name lost sense a little bit... :<
+  &.square {
+    margin: 15px 0;
+    border-bottom: 1px solid $color-gray-90;
+    padding-bottom: 1px;
+
+    a {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 0;
+      color: $color-blue;
+
+      &:hover {
+        background: $background-grey;
+      }
+    }
+
+    li.active {
+
+      a {
+        border: 0;
+        //background: $color-gray-90;
+        background: $background-grey;
+        color: $color-gray-48;
+      }
+    }
+  }
+}

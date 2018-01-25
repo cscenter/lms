@@ -1,0 +1,33 @@
+.assignment-comment {
+  &:hover {
+    .__edit {
+      opacity: 1;
+    }
+  }
+
+  h5.assignment {
+    margin-top: 0;
+  }
+
+  .metainfo {
+    color: #999;
+
+    &.first {
+      color: #888;
+      font-weight: bold;
+    }
+  }
+
+  .metainfo-holder {
+    min-height: 20px;
+  }
+
+  hr {
+    border-color: #CFCFCF;
+  }
+
+  .__edit {
+    color: $color-gray-20;
+    line-height: 1.1;
+  }
+}

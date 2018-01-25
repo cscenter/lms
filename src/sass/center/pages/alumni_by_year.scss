@@ -1,0 +1,89 @@
+#graduates-by-year {
+  @extend .container;
+  padding: 0 15px 0 15px;
+
+  h3 {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 24px;
+    background: #f9f9f9;
+    font-weight: normal;
+    border: 1px solid #f2f2f2;
+    margin: 0 20px 20px 0;
+    @include clearfix;
+  }
+
+  .dashed-link {
+    font-size: 24px;
+  }
+
+  .graduates-list {
+    margin: 0 0 80px 0;
+    overflow: hidden;
+
+    .empty {
+      padding: 20px 0;
+    }
+
+
+    .alumni {
+      width: 150px;
+      float: left;
+      overflow: hidden;
+      vertical-align: top;
+      margin: 0 5px 5px 0;
+
+      img {
+        max-width: 170px;
+      }
+
+      a {
+        font-weight: 300;
+        font-size: 16px;
+        display: inline-block;
+        line-height: 22px;
+        max-width: 170px;
+      }
+    }
+  }
+
+  .dashed-link {
+    margin-right: 30px;
+  }
+
+  .testimonials {
+    @extend .row;
+    padding: 0;
+  }
+
+
+  .c-student-faces {
+    padding: 0;
+    overflow: hidden;
+    
+    img {
+      background: none;
+    }
+  }
+}
+
+.stats {
+  margin-bottom: 65px;
+
+  .row {
+    margin-bottom: 15px;
+  }
+
+  .__hours, .__practices, .__courses {
+    .widget-content {
+      padding: 30px 15px;
+    }
+    .counter-label {
+      font-size: 26px;
+    }
+
+  }
+
+}
+
+

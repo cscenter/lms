@@ -1,0 +1,262 @@
+.projects-list-page {
+  @extend .container;
+
+  .table {
+    margin: 20px 0;
+  }
+
+  h3 {
+    text-transform: uppercase;
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+
+  th {
+    &.name {
+      width: 50%;
+    }
+
+    &.note {
+      width: 100px;
+    }
+  }
+
+  .projects-empty-list {
+    margin: 10px;
+  }
+
+  .pagination a {
+    background: inherit;
+  }
+
+  .deadlines {
+    margin: -10px 0 20px 0;
+    color: $color-gray-20;
+  }
+}
+
+// Detail page
+.pager {
+  &.__projects {
+    margin: 20px 0 0;
+
+    a {
+      background: none;
+      border: none;
+      font-size: 16px;
+      padding: 10px 0;
+
+      &:hover, &:focus {
+        color: $color-blue;
+        background: none;
+
+        span {
+          position: relative;
+          left: -5px;
+        }
+      }
+    }
+
+    li.next {
+      a {
+        &:hover, &:focus {
+          span {
+            position: relative;
+            left: 5px;
+          }
+        }
+      }
+    }
+  }
+}
+.project-type {
+  color: $color-grey;
+  margin: 20px 0 15px 0;
+}
+#project-detail-page {
+
+    padding: 10px 30px 30px;
+    background: #fff;
+
+  .col-xs-8 {
+    font-size: 14px;
+    .table {
+      font-size: 14px;
+    }
+
+  }
+
+  .card-header {
+    font-size: 16px;
+  }
+  .links {
+    margin: 20px 0 10px;
+    overflow: hidden;
+    .btn-block {
+      margin: 10px 0 20px;
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  h2 {
+    font-weight: 400;
+    margin: 30px 0;
+  }
+
+  h3 {
+    text-transform: uppercase;
+    font-size: 18px;
+    margin:30px 0 10px 0;
+  }
+
+  h4 {
+    margin:30px 0 10px 0;
+  }
+
+  .you-enrolled {
+    text-align: center;
+    color: $color-green;
+    margin: 10px 0 20px;
+    padding: 10px 12px;
+    border: 1px solid $color-green;
+  }
+
+  .report {
+    margin-bottom: 10px;
+  }
+  .report:last-child {
+    margin: 0;
+  }
+  .profile-link {
+    color: $color-gray-20;
+  }
+}
+
+.reviewers-list {
+  margin: -10px 0 20px 0;
+
+  h5 {
+    margin: 0 0 5px 0;
+  }
+}
+
+.o-send-report-timetable {
+  margin-top: 20px;
+  dl {
+    margin: 0;
+  }
+  dt {
+    width: 100px;
+  }
+  dd {
+    margin-left: 120px;
+  }
+}
+
+.comment-list li.reviewer {
+  margin-left: 40px;
+  margin-right: 0;
+}
+
+#id_report_status_change-status {
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+
+.presentation-link {
+  text-decoration: none!important;
+
+  i.fa {
+    margin-right: 5px;
+    color: $color-grey;
+  }
+  &:hover{
+    i.fa {
+    color: inherit;
+    }
+  }
+}
+
+
+#project-report-detail-page {
+  .__report-text {
+    &.ch-alt {
+      padding: 10px 26px;
+      font-size: 16px;
+    }
+  }
+
+  label[for=id_text] {
+    font-size: 18px;
+    margin: 10px 0;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-weight: 400;
+  }
+
+  .col-xs-3 {
+    h5:first-of-type {
+      margin-top: 0;
+    }
+  }
+
+  .media {
+    margin-bottom: 10px;
+  }
+
+  .review-scores {
+    padding: 13px;
+    border: 1px solid #f8f8f8;
+  }
+
+  .alert {
+    ul {
+      @extend .list-unstyled;
+    }
+  }
+
+  .panel {
+    border-radius: 0;
+    border-color: $color-gray-90;
+
+  }
+}
+
+
+.o-project-description {
+  border: 1px solid #f2f2f2;
+  background: #f8f8f8;
+  margin-bottom: 10px;
+
+  .panel-body {
+    padding: 10px 26px;
+  }
+  .panel-title {
+    text-decoration: none;
+    padding: 10px 26px;
+  }
+  .panel-title span {
+    font-size: 16px;
+  }
+}
+
+.-inline-submit {
+  margin-top: 24px;
+  padding: 6px 12px!important;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.-preliminary-scores {
+  padding: 15px!important;
+
+  .list-group-item {
+    border: 0;
+  }
+}

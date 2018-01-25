@@ -1,0 +1,63 @@
+.assignment-date {
+  &.tomorrow {
+    color: $color-red;
+  }
+
+  &.today {
+    color: $color-red;
+  }
+
+  &.day-after-tomorrow {
+    color: $color-orange;
+  }
+}
+
+
+// TEACHER assignment submissions page
+#assignments-select-button {
+  @extend .btn;
+  @extend .btn-primary;
+  padding: 6px 12px!important;
+}
+
+#assignments-page {
+  @extend .container;
+  position: relative;
+  min-height:500px;
+
+  h3 {
+    display: inline-block;
+    margin: 0;
+  }
+
+  .assignments-inner {
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    
+    tr > th:last-child, tr > td:last-child {
+      text-align: right;
+    }
+  }
+
+  .filters-wrapper {
+    height: 40px;
+    margin: 0 0 20px 0;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  .filters {
+    @extend .btn-group;
+    @extend .pull-right;
+    select {
+      width: 320px;
+    }
+
+    .bootstrap-select {
+      width: 320px;
+    }
+  }
+}

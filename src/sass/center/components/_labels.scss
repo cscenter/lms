@@ -1,0 +1,118 @@
+.label {
+  font-weight: normal;
+}
+
+.label-lg {
+  font-size: 16px
+}
+
+.label-sm {
+  padding: .2em .3em .2em;
+  font-size: 10px
+}
+
+.label {
+  &.csclub {
+    font-size: 12px;
+    border:1px solid $color-blue;
+    padding: 3px 6px;
+    border-radius: 0;
+    color: $color-blue;
+    vertical-align: baseline;
+    display: inline-block;
+  }
+}
+
+// LABEL OUTLINE
+.label.label-outline {
+  color: $color-grey;
+  background-color: transparent;
+  border-color: $color-grey;
+}
+.label-outline {
+  border: 1px solid transparent;
+  font-weight: normal;
+}
+
+.label-primary {
+  background-color: $color-blue;
+}
+.label-primary[href]:hover,
+.label-primary[href]:focus {
+  background-color: #77d6e1;
+}
+.label-primary.label-outline {
+  color: $color-blue;
+  background-color: transparent;
+  border-color: $color-blue;
+}
+
+.label-success {
+  background-color: $color-green;
+
+  &[href]:hover, &[href]:focus {
+    background-color: lighten($color-green, 5%);
+  }
+
+  &.label-outline {
+    color: $color-green;
+    background-color: transparent;
+    border-color: $color-green;
+  }
+}
+// TODO: calculate difference between .label-info[href]:hover and common bg color and refactor with darken/lighten
+.label-info {
+  background-color: #57c7d4;
+
+  &[href]:hover, &[href]:focus {
+    background-color: #77d6e1;
+  }
+
+  &.label-outline {
+    color: #57c7d4;
+    background-color: transparent;
+    border-color: #57c7d4;
+  }
+}
+
+.label-warning {
+  background-color: #f2a654;
+
+  &[href]:hover, &[href]:focus {
+    background-color: #f4b066;
+  }
+
+  &.label-outline {
+    color: #f2a654;
+    background-color: transparent;
+    border-color: #f2a654;
+  }
+}
+
+.label-danger {
+  background-color: #f96868;
+
+  &[href]:hover, &[href]:focus {
+    background-color: #fa7a7a;
+  }
+
+  &.label-outline {
+    color: #f96868;
+    background-color: transparent;
+    border-color: #f96868;
+  }
+}
+
+.label-dark {
+  background-color: #526069;
+
+  &[href]:hover, &[href]:focus {
+    background-color: #76838f;
+  }
+
+  &.label-outline {
+    color: #526069;
+    background-color: transparent;
+    border-color: #526069;
+  }
+}
