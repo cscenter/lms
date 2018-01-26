@@ -135,15 +135,21 @@ class Command(BaseCommand):
         for notification in notifications_assignments:
             base_url = get_base_url(notification)
             a_s = notification.student_assignment
+            tz_override = None
+            u = notification.user
+            # Override timezone to CS Center students for online course
+            if a_s.assignment.course_offering.is_correspondence and (
+                    u.is_student_center or u.is_volunteer):
+                tz_override = settings.TIME_ZONES[notification.user.city_id]
             context = {
                 'a_s_link_student': base_url + a_s.get_student_url(),
                 'a_s_link_teacher': base_url + a_s.get_teacher_url(),
-                'assignment_link': base_url + reverse('assignment_detail_teacher', args=[a_s.assignment.pk]),
-                'notification_created': notification.created_local(),
+                'assignment_link': base_url + a_s.assignment.get_teacher_url(),
+                'notification_created': notification.created_local(tz_override),
                 'assignment_name': smart_text(a_s.assignment),
                 'assignment_text': smart_text(a_s.assignment.text),
                 'student_name': smart_text(a_s.student),
-                'deadline_at': a_s.assignment.deadline_at_local(),
+                'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
                 'course_name': smart_text(a_s.assignment.course_offering.course)
             }
             if notification.is_about_creation:
