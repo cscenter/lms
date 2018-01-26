@@ -240,7 +240,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.STUDENT_CENTER],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
@@ -254,7 +254,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.STUDENT_CENTER],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
@@ -267,7 +267,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.STUDENT_CENTER],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             self.assertLoginRedirect(url)
             self.assertPOSTLoginRedirect(url, form)
             self.doLogout()
@@ -338,7 +338,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.STUDENT_CENTER],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
                 self.assertEquals(403, self.client.get(url).status_code)
             else:
@@ -382,7 +382,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
-            user = UserFactory.create(groups=groups)
+            user = UserFactory.create(groups=groups, city_id='spb')
             self.doLogin(user)
             if any(group in self.groups_allowed for group in groups):
                 co = CourseOfferingFactory.create(teachers=[user])
@@ -702,7 +702,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assignment = AssignmentFactory(deadline_at=dt,
                                    course_offering__city_id='spb',
                                    course_offering__semester_id=current_term.pk)
-    sa = StudentAssignmentFactory(assignment=assignment)
+    sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
     url = reverse('assignment_list_student')
     student = sa.student
     client.login(student)

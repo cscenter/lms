@@ -28,9 +28,8 @@ from learning.serializers import CourseOfferingNewsNotificationSerializer
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
     STUDENT_STATUS
 from learning.utils import get_term_index
-from learning.viewmixins import TeacherOnlyMixin, CuratorOnlyMixin
-from learning.views.utils import get_co_from_query_params, \
-    get_student_city_code, get_user_city_code
+from learning.viewmixins import TeacherOnlyMixin
+from learning.views.utils import get_co_from_query_params, get_user_city_code
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
            'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',
@@ -123,10 +122,15 @@ class CourseOfferingDetailView(generic.DetailView):
         # Aggregate teachers contacts
         contacts = [ct for g in teachers_by_role.values() for ct in g
                     if len(ct.teacher.private_contacts.strip()) > 0]
+        # Override timezone to CS Center students for online course
+        tz_override = None
+        if co.is_correspondence and (user.is_student_center or user.is_volunteer):
+            tz_override = settings.TIME_ZONES[user.city_id]
         # Course available for enrollment based on student city
         context = {
             'course_offering': co,
             'user_city': get_user_city_code(self.request),
+            'tz_override': tz_override,
             'co_failed_by_student': co_failed_by_student,
             'is_enrolled': is_enrolled,
             'is_actual_teacher': is_actual_teacher,

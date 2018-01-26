@@ -19,6 +19,7 @@ MIDDLEWARE = [
     'users.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'core.notifications.UnreadNotificationsCacheMiddleware',
+    'learning.middleware.StudentCityMiddleware',
     'core.middleware.RedirectMiddleware',
 ]
 INSTALLED_APPS += [

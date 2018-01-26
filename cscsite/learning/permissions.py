@@ -52,7 +52,10 @@ class LearningPermissionsMixin(object):
 
     @property
     def is_master_student(self):
-        """Studying for a masters degree"""
+        """
+        Studying for a masters degree. Student with this group should be
+        center student or volunteer.
+        """
         return self.group.MASTERS_DEGREE in self._cached_groups
 
     @property

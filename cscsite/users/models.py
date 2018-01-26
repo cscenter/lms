@@ -677,4 +677,3 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
 
     def enrollment_in_the_course(self, course_offering_id: int) -> Optional[Enrollment]:
         return None
-

@@ -1,15 +1,14 @@
-from __future__ import absolute_import, unicode_literals
-
 import datetime
+import logging
 
 import bleach
-import logging
 import hoep as h
 
 from django.conf import settings
 from django.urls import reverse
 from django.utils import formats
 from hashids import Hashids
+
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
 # Some details here https://github.com/Anomareh/Hoep

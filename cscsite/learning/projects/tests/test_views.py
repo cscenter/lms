@@ -229,7 +229,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = UserFactory(is_superuser=True, is_staff=True)
     today = now().date()
-    student = StudentCenterFactory()
+    student = StudentCenterFactory(city_id='spb')
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester.report_starts_at = today
@@ -252,7 +252,7 @@ def test_project_detail_reviewer(client, curator):
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
-    student = StudentCenterFactory()
+    student = StudentCenterFactory(city_id='spb')
     project = ProjectFactory(students=[student], semester=semester_prev)
     url = project.get_absolute_url()
     response = client.get(url)
@@ -361,7 +361,7 @@ def test_reportpage_notifications(client, curator):
     client.login(reviewer1)
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
-    student1, student2 = StudentCenterFactory.create_batch(2)
+    student1, student2 = StudentCenterFactory.create_batch(2, city_id='spb')
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,
                              reviewers=[reviewer1, reviewer2])

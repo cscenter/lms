@@ -1,7 +1,7 @@
 from vanilla import DetailView, ListView
 
 from learning.viewmixins import StudentOnlyMixin
-from learning.views.utils import get_student_city_code_or_redirect
+from learning.views.utils import get_student_city_code
 from .models import Stock, Borrow
 
 
@@ -17,7 +17,7 @@ class BookListView(StudentOnlyMixin, ListView):
               .prefetch_related("borrows", "borrows__student"))
         # For students show books from the city of learning
         if not self.request.user.is_curator:
-            city_code = get_student_city_code_or_redirect(self.request)
+            city_code = get_student_city_code(self.request)
             qs = qs.filter(city_id=city_code)
         return qs
 
@@ -40,6 +40,6 @@ class BookDetailView(StudentOnlyMixin, DetailView):
               .prefetch_related("borrows"))
         # For students show books from the city of learning
         if not self.request.user.is_curator:
-            city_code = get_student_city_code_or_redirect(self.request)
+            city_code = get_student_city_code(self.request)
             qs = qs.filter(city_id=city_code)
         return qs
