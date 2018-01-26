@@ -63,11 +63,13 @@ class CuratorFactory(UserFactory):
 class StudentFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.STUDENT_CENTER,
               PARTICIPANT_GROUPS.STUDENT_CLUB]
+    city_id = 'spb'
 
 
 class StudentCenterFactory(UserFactory):
     groups = [PARTICIPANT_GROUPS.STUDENT_CENTER]
     enrollment_year = 2015
+    city_id = 'spb'
 
 
 class StudentClubFactory(UserFactory):

@@ -4,7 +4,6 @@ from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, Count, query, Q
 
 from learning.models import CourseOfferingTeacher
-from learning.settings import GRADES
 
 
 class CSCUserQuerySet(query.QuerySet):

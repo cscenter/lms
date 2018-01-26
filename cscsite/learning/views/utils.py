@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Optional
 
 from django.contrib import messages
@@ -7,7 +6,6 @@ from django.contrib import messages
 from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning.models import CourseOffering
-from learning.settings import SEMESTER_TYPES
 from learning.utils import CityCode, semester_slug_re
 
 logger = logging.getLogger(__name__)
@@ -17,8 +15,8 @@ def get_user_city_code(request) -> Optional[CityCode]:
     """Returns city code for authenticated user"""
     if is_club_site():
         # On compsciclub.ru we have no concept of `user city`.
-        # For compatibility let student city will be equal to sub domain city.
-        # For kzn.compsciclub.ru it will be `kzn` and so on.
+        # For compatibility student city will be equal to sub domain city.
+        # For instance for kzn.compsciclub.ru it's' `kzn`.
         city_code = request.city_code
     else:
         city_code = getattr(request.user, "city_id", None)
@@ -38,18 +36,6 @@ def get_student_city_code(request) -> str:
         raise ValueError("Для вашего профиля не был указан "
                          "город. Обратитесь к куратору.")
     return city_code
-
-
-def get_student_city_code_or_redirect(request):
-    """
-    City code for CS Center student is mandatory. To avoid UB redirect
-    students with broken city setting to main page with alert message.
-    """
-    try:
-        return get_student_city_code(request)
-    except ValueError as e:
-        messages.error(request, e.args[0])
-        raise Redirect(to="/")
 
 
 def get_teacher_city_code(request) -> str:

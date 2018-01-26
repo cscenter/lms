@@ -14,7 +14,8 @@ from users.models import CSCUser
 class ICalTests(MyUtilitiesMixin, TestCase):
     def test_classes(self):
         user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
-                                   CSCUser.group.TEACHER_CENTER])
+                                   CSCUser.group.TEACHER_CENTER],
+                           city_id='spb')
         self.doLogin(user)
         fname = 'csc_classes.ics'
         # Empty calendar
@@ -41,7 +42,8 @@ class ICalTests(MyUtilitiesMixin, TestCase):
 
     def test_assignments(self):
         user = UserFactory(groups=[CSCUser.group.STUDENT_CENTER,
-                                   CSCUser.group.TEACHER_CENTER])
+                                   CSCUser.group.TEACHER_CENTER],
+                           city_id='spb')
         self.doLogin(user)
         fname = 'csc_assignments.ics'
         # Empty calendar

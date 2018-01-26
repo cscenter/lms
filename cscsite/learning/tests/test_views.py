@@ -170,7 +170,7 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             self.assertPOSTLoginRedirect(url, {})
             self.client.logout()
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
@@ -624,7 +624,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
             [PARTICIPANT_GROUPS.STUDENT_CENTER],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
             if not groups:
                 assert self.client.get(url).status_code == 302
             else:

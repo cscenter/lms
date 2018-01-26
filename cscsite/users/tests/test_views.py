@@ -199,6 +199,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         assert response.status_code == 200
         assertLoginRedirect(url)
         user.groups = [user.group.STUDENT_CENTER]
+        user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
@@ -358,9 +359,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
     def test_email_on_detail(self):
         """Email field should be displayed only to curators (superuser)"""
         student_mail = "student@student.mail"
-        student = UserFactory.create(
-            groups=['Student [CENTER]'],
-            email = student_mail)
+        student = StudentCenterFactory.create(email=student_mail)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         resp = self.client.get(url)
@@ -370,6 +369,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.doLogin(curator)
         resp = self.client.get(url)
         self.assertContains(resp, student_mail)
+
 
 @pytest.mark.django_db
 def test_club_students_profiles_on_cscenter_site(client):
@@ -566,7 +566,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = UserFactory.create(groups=[CSCUser.group.STUDENT_CENTER])
+        student = StudentCenterFactory()
         # add 2 enrollments from 1 course reading exactly
         course = CourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
