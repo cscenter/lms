@@ -124,8 +124,10 @@ class CourseOfferingDetailView(generic.DetailView):
                     if len(ct.teacher.private_contacts.strip()) > 0]
         # Override timezone to CS Center students for online course
         tz_override = None
-        if co.is_correspondence and (user.is_student_center or user.is_volunteer):
+        if not is_actual_teacher and co.is_correspondence and bool(
+                getattr(user, "city_id")):
             tz_override = settings.TIME_ZONES[user.city_id]
+        # TODO: set default value if `tz_override` is None
         # Course available for enrollment based on student city
         context = {
             'course_offering': co,
@@ -166,7 +168,7 @@ class CourseOfferingDetailView(generic.DetailView):
         unread_news_cnt = ((c.get("is_enrolled") or c.get('is_actual_teacher'))
                            and c.get("news") and get_news_cnt())
         can_view_assignments = (u.is_student or u.is_graduate or u.is_curator or
-                                c['is_actual_teacher'] or c['is_enrolled'])
+                                u.is_teacher or c['is_enrolled'])
         can_view_news = (not c['co_failed_by_student'] and
                          ((u.is_authenticated and
                            u.status != STUDENT_STATUS.expelled) or

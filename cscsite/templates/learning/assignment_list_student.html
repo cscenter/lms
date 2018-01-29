@@ -22,11 +22,12 @@
         {% for a_s in assignment_list_open %}
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
           <td>
-            <div class="assignment-date {{ a_s.assignment.deadline_at_local|date_soon_css }}">
+              {% call_method a_s.assignment "deadline_at_local" tz_override as assignment_deadline_at_local %}
+            <div class="assignment-date {{ assignment_deadline_at_local|date_soon_css }}">
               <span class="nowrap">
-                {{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }}
+                {{ assignment_deadline_at_local|naturalday:"d E Y" }}
               </span><br>
-              {{ a_s.assignment.deadline_at_local|time:"H:i" }}
+              {{ assignment_deadline_at_local|time:"H:i" }}
             </div>
           </td>
           <td>
@@ -54,6 +55,7 @@
     </div>
   </div>
   {% endif %}
+
   {% if assignment_list_archive %}
   <div class="row">
     <div class="col-xs-12">
@@ -70,8 +72,9 @@
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
           <td>
               <div class="assignment-date">
-                    <span class="nowrap">{{ a_s.assignment.deadline_at_local|naturalday:"d E Y" }}</span><br>
-                    {{ a_s.assignment.deadline_at_local|time:"H:i" }}
+                    {% call_method a_s.assignment "deadline_at_local" tz_override as assignment_deadline_at_local %}
+                    <span class="nowrap">{{ assignment_deadline_at_local|naturalday:"d E Y" }}</span><br>
+                    {{ assignment_deadline_at_local|time:"H:i" }}
               </div>
           </td>
           <td>
