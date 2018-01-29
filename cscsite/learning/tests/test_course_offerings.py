@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone, formats
 
 from learning.factories import CourseFactory, SemesterFactory, \
     CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
@@ -129,6 +130,28 @@ def test_course_offering_news(settings, admin_client):
     html = BeautifulSoup(response.content, "html.parser")
     assert any(date_str in s.string for s in
                html.find_all('div', {"class": "date"}))
+
+
+@pytest.mark.django_db
+def test_course_offering_assignment_deadline_l10n(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    teacher = TeacherCenterFactory()
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course_offering__city_id='spb',
+                                   course_offering__teachers=[teacher])
+    co = assignment.course_offering
+    client.login(teacher)
+    response = client.get(co.get_url_for_tab('assignments'))
+    html = BeautifulSoup(response.content, "html.parser")
+    deadline_date_str = formats.date_format(assignment.deadline_at_local(), 'd E')
+    assert deadline_date_str == "01 января"
+    assert any(deadline_date_str in s.text for s in
+               html.find_all('div', {"class": "assignment-deadline"}))
+    deadline_time_str = formats.date_format(assignment.deadline_at_local(), 'H:i')
+    assert deadline_time_str == "18:00"
+    assert any(deadline_time_str in s.string for s in
+               html.find_all('span', {"class": "text-muted"}))
 
 
 @pytest.mark.django_db

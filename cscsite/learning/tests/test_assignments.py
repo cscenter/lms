@@ -26,6 +26,11 @@ from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory
 
 
+
+# TODO: assignment submission page - comments localisation, assignment created localization
+# TODO: Преподавание -> Задания, добавить тест для deadline_local
+
+
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'
@@ -670,28 +675,6 @@ def test_assignment_deadline_display_for_teacher(settings, client):
 
 
 @pytest.mark.django_db
-def test_assignment_deadline_l10n_on_course_offering_detail(settings, client):
-    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
-    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    teacher = TeacherCenterFactory()
-    assignment = AssignmentFactory(deadline_at=dt,
-                                   course_offering__city_id='spb',
-                                   course_offering__teachers=[teacher])
-    co = assignment.course_offering
-    client.login(teacher)
-    response = client.get(co.get_url_for_tab('assignments'))
-    html = BeautifulSoup(response.content, "html.parser")
-    deadline_date_str = formats.date_format(assignment.deadline_at_local(), 'd E')
-    assert deadline_date_str == "01 января"
-    assert any(deadline_date_str in s.text for s in
-               html.find_all('div', {"class": "assignment-deadline"}))
-    deadline_time_str = formats.date_format(assignment.deadline_at_local(), 'H:i')
-    assert deadline_time_str == "18:00"
-    assert any(deadline_time_str in s.string for s in
-               html.find_all('span', {"class": "text-muted"}))
-
-
-@pytest.mark.django_db
 def test_deadline_l10n_on_student_assignments_page(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     format_date_part = 'd E Y'
@@ -732,9 +715,6 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
-
-# TODO: assignment submission page - comments localisation, assignment created localization
-# TODO: Преподавание -> Задания, добавить тест для deadline_local
 
 
 @pytest.mark.django_db
