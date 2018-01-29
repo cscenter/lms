@@ -1473,6 +1473,7 @@ class StudyProgramCourseGroup(models.Model):
         verbose_name_plural = _("Study Program Courses")
 
 
+# TODO: rename to MoocCourse
 @python_2_unicode_compatible
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)
