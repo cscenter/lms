@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
-from vanilla import CreateView
+from vanilla import CreateView, ListView
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
@@ -79,12 +79,11 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
         return self.student_assignment.get_student_url()
 
 
-class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
+class StudentAssignmentListView(StudentOnlyMixin, ListView):
     """ Show assignments from current semester only. """
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/assignment_list_student.html"
-    user_type = 'student'
 
     def get_queryset(self):
         current_semester = Semester.get_current()
@@ -95,7 +94,7 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
                 .order_by('assignment__deadline_at',
                           'assignment__course_offering__course__name',
                           'pk')
-                # FIXME: this prefetch doesn't seem to work
+                # FIXME: this prefetch doesn't seem to work properly
                 .prefetch_related('assignmentnotification_set')
                 .select_related('assignment',
                                 'assignment__course_offering',
@@ -103,20 +102,25 @@ class StudentAssignmentListView(StudentOnlyMixin, generic.ListView):
                                 'assignment__course_offering__semester',
                                 'student'))
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        # Get student enrollments from current term and then related co's
-        actual_co = (Enrollment.active
-                     .filter(course_offering__semester=self.current_semester,
-                             student=self.request.user)
-                     .values_list("course_offering", flat=True))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        enrolled_in = (Enrollment.active
+                       .filter(course_offering__semester=self.current_semester,
+                               student=self.request.user)
+                       .values_list("course_offering", flat=True))
         open_, archive = utils.split_on_condition(
             context['assignment_list'],
-            lambda a_s: a_s.assignment.is_open and a_s.assignment.course_offering.pk in actual_co)
+            lambda sa: sa.assignment.is_open and
+                       sa.assignment.course_offering_id in enrolled_in)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
-        context['user_type'] = self.user_type
+        user = self.request.user
+        # Since this view for students only, check only city settings
+        tz_override = None
+        if getattr(user, "city_id"):
+            tz_override = settings.TIME_ZONES[user.city_id]
+        context["tz_override"] = tz_override
         return context
 
 

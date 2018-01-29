@@ -137,7 +137,7 @@ class Command(BaseCommand):
             a_s = notification.student_assignment
             tz_override = None
             u = notification.user
-            # Override timezone to CS Center students for online course
+            # Override timezone to enrolled students if course is online
             if a_s.assignment.course_offering.is_correspondence and (
                     u.is_student_center or u.is_volunteer):
                 tz_override = settings.TIME_ZONES[notification.user.city_id]

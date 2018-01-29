@@ -908,15 +908,17 @@ class AssignmentProgressBaseView(AccessMixin):
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
         co = sa.assignment.course_offering
-        tz = co.get_city_timezone()
-        # Show datetime in student timezone for online courses
+        tz_override = co.get_city_timezone()
+        # For online courses format datetime in student timezone
+        # Note, that this view available for actual teachers, curators and
+        # enrolled students only
         if co.is_correspondence and (user.is_student_center or user.is_volunteer):
-            tz = settings.TIME_ZONES[user.city_id]
+            tz_override = settings.TIME_ZONES[user.city_id]
         context = {
             'user_type': self.user_type,
             'a_s': sa,
             'form': form,
-            'timezone': tz,
+            'timezone': tz_override,
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course_offering.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()
