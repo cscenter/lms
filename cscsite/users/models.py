@@ -164,7 +164,6 @@ class CSCUserStatusLog(models.Model):
 @python_2_unicode_compatible
 class CSCUser(LearningPermissionsMixin, AbstractUser):
 
-    # FIXME: replace `groups__name` with groups__pk in learning.signals
     group = PARTICIPANT_GROUPS
 
     STATUS = STUDENT_STATUS
@@ -324,7 +323,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     @property
     def city_code(self):
-        city_code = getattr(self, "city_id")
+        city_code = getattr(self, "city_id", None)
         return city_code if city_code else None
 
     @staticmethod
