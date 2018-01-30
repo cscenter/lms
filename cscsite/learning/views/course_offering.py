@@ -124,8 +124,7 @@ class CourseOfferingDetailView(generic.DetailView):
                     if len(ct.teacher.private_contacts.strip()) > 0]
         # Override timezone to CS Center students for online course
         tz_override = None
-        if not is_actual_teacher and co.is_correspondence and bool(
-                getattr(user, "city_id")):
+        if not is_actual_teacher and co.is_correspondence and user.city_code:
             tz_override = settings.TIME_ZONES[user.city_id]
         # TODO: set default value if `tz_override` is None
         # Course available for enrollment based on student city

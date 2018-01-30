@@ -179,6 +179,9 @@ def test_course_offering_is_correspondence(settings, client):
         assert response.context["tz_override"] is None
     co.is_correspondence = True
     co.save()
+    client.logout()
+    response = client.get(co.get_absolute_url())
+    assert response.status_code == 200
     # Any authenticated user (this teacher is not actual teacher of the course)
     client.login(teacher_nsk)
     response = client.get(url)
