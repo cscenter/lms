@@ -677,26 +677,32 @@ def test_assignment_deadline_display_for_teacher(settings, client):
 @pytest.mark.django_db
 def test_deadline_l10n_on_student_assignments_page(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
-    format_date_part = 'd E Y'
-    format_time_part = 'H:i'
-    # This day will be in archive block
+    FORMAT_DATE_PART = 'd E Y'
+    FORMAT_TIME_PART = 'H:i'
+    # This day will be in archive block (1 jan 2017 15:00)
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    # Assignment will be created with the past date, but we will see it on
+    # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
                                    course_offering__city_id='spb',
+                                   course_offering__is_correspondence=False,
                                    course_offering__semester_id=current_term.pk)
     sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
-    url = reverse('assignment_list_student')
     student = sa.student
     client.login(student)
-    response = client.get(url)
+    assert student.city_code == 'spb'
+    assert student.is_student_center
+    assert not student.is_student_club
+    url_learning_assignments = reverse('assignment_list_student')
+    response = client.get(url_learning_assignments)
     html = BeautifulSoup(response.content, "html.parser")
     # Note: On this page used `naturalday` filter, so use passed datetime
     year_part = formats.date_format(assignment.deadline_at_local(),
-                                    format_date_part)
+                                    FORMAT_DATE_PART)
     assert year_part == "01 января 2017"
     time_part = formats.date_format(assignment.deadline_at_local(),
-                                    format_time_part)
+                                    FORMAT_TIME_PART)
     assert time_part == "18:00"
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
@@ -706,14 +712,53 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assignment.deadline_at = dt
     assignment.save()
     year_part = formats.date_format(assignment.deadline_at_local(),
-                                    format_date_part)
+                                    FORMAT_DATE_PART)
     assert year_part == "01 февраля {}".format(now_year + 1)
     time_part = formats.date_format(assignment.deadline_at_local(),
-                                    format_time_part)
+                                    FORMAT_TIME_PART)
     assert time_part == "17:00"
-    response = client.get(url)
+    response = client.get(url_learning_assignments)
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Make course online, now deadlines depends on user timezone for
+    # center students
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    assignment_nsk = AssignmentFactory(deadline_at=dt,
+                                       course_offering__city_id='nsk',
+                                       course_offering__is_correspondence=True,
+                                       course_offering__semester=current_term)
+    StudentAssignmentFactory(assignment=assignment_nsk, student=student)
+    client.login(student)
+    response = client.get(url_learning_assignments)
+    assert len(response.context["assignment_list"]) == 2
+    assert response.context["tz_override"] == settings.TIME_ZONES['spb']
+    year_part = formats.date_format(assignment_nsk.deadline_at_local(),
+                                    FORMAT_DATE_PART)
+    assert year_part == "01 января 2017"
+    time_part = formats.date_format(
+        assignment_nsk.deadline_at_local(tz=settings.TIME_ZONES['spb']),
+        FORMAT_TIME_PART)
+    assert time_part == "18:00"
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Make student as a volunteer, should be the same
+    student.groups.remove(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    student.groups.add(PARTICIPANT_GROUPS.VOLUNTEER)
+    response = client.get(url_learning_assignments)
+    assert response.status_code == 200
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Make student as club participant only who hasn't city code in most cases
+    student.groups.remove(PARTICIPANT_GROUPS.VOLUNTEER)
+    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    response = client.get(url_learning_assignments)
+    assert response.context['tz_override'] is None
+    html = BeautifulSoup(response.content, "html.parser")
+    # Shows local time for nsk course
+    assert any(year_part in s.text and "22:00" in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
 
 

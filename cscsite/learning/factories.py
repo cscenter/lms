@@ -15,7 +15,7 @@ from learning.models import Course, Semester, CourseOffering, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, \
     AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
-from users.factories import UserFactory
+from users.factories import UserFactory, StudentCenterFactory
 from .utils import get_current_term_pair, get_term_by_index
 
 
@@ -207,7 +207,7 @@ class StudentAssignmentFactory(factory.DjangoModelFactory):
         model = StudentAssignment
 
     assignment = factory.SubFactory(AssignmentFactory)
-    student = factory.SubFactory(UserFactory, groups=['Student [CENTER]'])
+    student = factory.SubFactory(StudentCenterFactory)
 
 
 class AssignmentCommentFactory(factory.DjangoModelFactory):

@@ -29,6 +29,20 @@ class StudentAssignmentQuerySet(query.QuerySet):
         return self.filter(assignment__course_offering__semester_id=term.id)
 
 
+class _StudentAssignmentDefaultManager(models.Manager):
+    """On compsciclub.ru always restrict selection by open reading"""
+    def get_queryset(self):
+        if is_club_site():
+            return super().get_queryset().filter(
+                assignment__course_offering__is_open=True)
+        else:
+            return super().get_queryset()
+
+
+StudentAssignmentManager = _StudentAssignmentDefaultManager.from_queryset(
+    StudentAssignmentQuerySet)
+
+
 class StudyProgramQuerySet(query.QuerySet):
     def syllabus(self):
         from learning.models import StudyProgramCourseGroup
@@ -150,6 +164,7 @@ class _CourseOfferingDefaultManager(models.Manager):
             return super().get_queryset().filter(is_open=True)
         else:
             return super().get_queryset()
+
 
 CourseOfferingDefaultManager = _CourseOfferingDefaultManager.from_queryset(
     CourseOfferingQuerySet)

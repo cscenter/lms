@@ -118,7 +118,7 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         user = self.request.user
         # Since this view for students only, check only city settings
         tz_override = None
-        if user.city_code:
+        if user.city_code and (user.is_student_center or user.is_volunteer):
             tz_override = settings.TIME_ZONES[user.city_code]
         context["tz_override"] = tz_override
         return context
