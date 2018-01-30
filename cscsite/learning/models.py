@@ -28,9 +28,10 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
-from learning.managers import StudentAssignmentQuerySet, StudyProgramQuerySet, \
+from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
-    EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet
+    EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
+    StudentAssignmentManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -1015,7 +1016,7 @@ class StudentAssignment(TimeStampedModel):
     LAST_COMMENT_STUDENT = 1
     LAST_COMMENT_TEACHER = 2
 
-    objects = StudentAssignmentQuerySet.as_manager()
+    objects = StudentAssignmentManager()
 
     assignment = models.ForeignKey(
         Assignment,
