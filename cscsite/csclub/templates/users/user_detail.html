@@ -13,7 +13,7 @@
     <script type="text/javascript">
         window.profileAppInit = {{ initial|safe }};
         window.profileAppInit["preload"] = [
-            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}"
+            "{% static "v1/js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
     </script>
     {% render_bundle 'profile' 'js' %}
@@ -32,7 +32,7 @@
                          height="{{ im.height }}">
                 {% endthumbnail %}
             {% else %}
-                <img src="{% static 'img/center/profile_no_photo.png' %}">
+                <img src="{% static "v1/img/center/profile_no_photo.png" %}">
             {% endif %}
         </div>
 

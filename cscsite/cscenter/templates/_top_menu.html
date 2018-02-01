@@ -10,7 +10,7 @@
     <div class="container">
         <div class="col-xs-11">
             <div class="logo-cell">
-                <a class="logo-container" href="{% url 'index' %}"><img src="{% static "img/center/logo.svg" %}" alt="Computer Science Center"></a>
+                <a class="logo-container" href="{% url 'index' %}"><img src="{% static "v1/img/center/logo.svg" %}" alt="Computer Science Center"></a>
             </div>
             <ul{% if menu.tree|length > 8 %} class="__narrow"{% endif %}>
                 {% for menu_item in menu.tree %}
@@ -27,7 +27,7 @@
                     {% userpreview user "60x60" use_stab=0 as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% empty %}
-                        <img src="{% if user.gender == "F" %}{% static "img/csc_girl_head.svg" %}{% else %}{% static "img/csc_boy_head.svg" %}{% endif %}" class="_empty">
+                        <img src="{% if user.gender == "F" %}{% static "v1/img/csc_girl_head.svg" %}{% else %}{% static "v1/img/csc_boy_head.svg" %}{% endif %}" class="_empty">
                     {% enduserpreview %}
                     <span class="caret"></span>
                   </a>

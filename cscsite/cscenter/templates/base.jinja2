@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=960">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
     <title>{% block title %}Computer Science Center{% endblock title %}</title>
-    <link rel="shortcut icon" type="image/png" href="{{ static("img/center/favicon.png") }}">
+    <link rel="shortcut icon" type="image/png" href="{{ static("v1/img/center/favicon.png") }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{{ static("css/center/style.css") }}" rel="stylesheet">
+    <link href="{{ static("v1/css/center/style.css") }}" rel="stylesheet">
     {% if request.user.is_curator %}
-        <link href="{{ static("css/center/staff.css") }}" rel="stylesheet">
+        <link href="{{ static("v1/css/center/staff.css") }}" rel="stylesheet">
     {% endif %}
     {% block hightlight_styles %}
-    <link href="{{ static("css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
+    <link href="{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
     {% endblock hightlight_styles %}
     {% block stylesheets %} {% endblock stylesheets %}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -27,7 +27,7 @@
           config: {
               JS_SRC: {
                 MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
-                HIGHLIGHTJS: "{{ static("js/vendor/highlight.pack.js") }}",
+                HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}",
               },
               // Used to reflow editor on tab toggle event
               uberEditors: [],
@@ -70,8 +70,8 @@
     </div>
 
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("js/vendor/jquery-3.2.1.min.js") }}"><\/script>')</script>
-    <script type="text/javascript" src="{{ static("js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js") }}"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("v1/js/vendor/jquery-3.2.1.min.js") }}"><\/script>')</script>
+    <script type="text/javascript" src="{{ static("v1/js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js") }}"></script>
     <script type="text/javascript" src="//cdn.ravenjs.com/3.17.0/raven.min.js"></script>
     <script type="text/javascript" src="{{ static("js/raven_conf.js") }}"></script>
 

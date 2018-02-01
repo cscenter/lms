@@ -56,7 +56,7 @@
         {% userpreview teacher "170x238" as im %}
             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
         {% empty %}
-            <img src="{% static 'img/center/brain.jpg' %}">
+            <img src="{% static "v1/img/center/brain.jpg" %}">
         {% enduserpreview %}
     </div>
     {% if user.is_curator %}
