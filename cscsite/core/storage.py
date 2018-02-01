@@ -10,4 +10,4 @@ class StaticFilesConfig(_StaticFilesConfig):
 
 
 class PipelineCachedGZIPedStorage(GZIPMixin, CachedStaticFilesStorage):
-    gzip_patterns = ("css/*.css", "js/*.js")
+    gzip_patterns = ("*.css", "*.js")
