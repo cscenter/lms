@@ -1,16 +1,16 @@
 
 @import "variables";
-@import "../bootstrap.custom.scss";
-@import "../jgrowl.customize.scss";
-@import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
-@import "top_menu.scss";
+@import "../bootstrap.custom";
+@import "../jgrowl.customize";
+@import "../bootstrap.sweetalerts/sweet-alert-combine";
+@import "top_menu";
 
 @import "utilities/spacing";
 
 // Material design elements based on bootstrap
 @import "components/labels";
 //@import "components/page_aside";
-@import "_material_design.scss";
+@import "material_design";
 
 
 @import "components/inputs";
@@ -37,12 +37,12 @@
 @import "pages/courses";
 @import "pages/application";
 @import "pages/login";
-@import "pages/online_courses_page.scss";
+@import "pages/online_courses_page";
 @import "pages/orgs";
 @import "pages/index";
 @import "pages/testimonials";
 @import "pages/gradebook";
-@import "pages/courses_list_student.scss";
+@import "pages/courses_list_student";
 @import "pages/student_submission_comments";
 @import "pages/faq";
 @import "pages/alumni";

@@ -1,7 +1,7 @@
 import {showComponentError} from 'utils';
 import "magnific-popup";
 
-import styles from 'sass/club/style.scss';
+import styles from 'scss/club/style.scss';
 
 $(document).ready(function () {
     const section = $("body").data("init-section");

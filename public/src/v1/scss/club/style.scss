@@ -1,11 +1,11 @@
 // CLUB main styles
 @import "variables";
-@import "../bootstrap.custom.scss";
+@import "../bootstrap.custom";
 
 @import "../center/utilities/spacing";
 
-@import "../jgrowl.customize.scss";
-@import "../bootstrap.sweetalerts/sweet-alert-combine.scss";
+@import "../jgrowl.customize";
+@import "../bootstrap.sweetalerts/sweet-alert-combine";
 @import "profile_page";
 @import "../center/pages/login";
 @import "../center/pages/courses_list_student.scss";
@@ -26,7 +26,7 @@
 @import "../center/components/breadcrumbs";
 @import "../center/components/upload_photo";
 @import "../center/components/editor";
-@import "top_menu.scss";
+@import "top_menu";
 // Make sure to run `grunt build` from `csc` dir until we replace grunt with webpack.
 @import "magnific-popup/src/css/main.scss";
 

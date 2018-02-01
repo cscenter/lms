@@ -1,6 +1,6 @@
 import {reviewFormValidation} from './projects_report';
 
-import styles from 'sass/center/style.scss';
+import styles from 'scss/center/style.scss';
 
 // Let's leave it here for now
 $(function() {

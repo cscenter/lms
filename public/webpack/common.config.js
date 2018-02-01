@@ -110,8 +110,8 @@ const common = {
                 ],
                 include: path.resolve(__srcdir, "js"),
                 exclude: [
-                    path.resolve(__srcdir, "v1/sass/center/styles.scss"),
-                    path.resolve(__srcdir, "v1/sass/club/styles.scss"),
+                    path.resolve(__srcdir, "v1/scss/center/styles.scss"),
+                    path.resolve(__srcdir, "v1/scss/club/styles.scss"),
                 ]
             },
             {
