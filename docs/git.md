@@ -1,5 +1,12 @@
 # `public/` Folder Is Subtree
 
+TL;DR;
+
+```
+git subtree pull --prefix=public/ --squash frontend-remote master
+git subtree push --prefix=public/ frontend-remote master
+```
+
 Useful Links:
 
 * https://medium.com/@porteneuve/mastering-git-subtrees-943d29a798ec
