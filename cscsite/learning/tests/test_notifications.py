@@ -231,7 +231,7 @@ def test_new_assignment_timezone(settings):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
-    # Test with other timezone
+    # Test with another timezone
     sa.assignment.course_offering.city_id = 'nsk'
     sa.assignment.course_offering.save()
     AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
