@@ -1,6 +1,6 @@
 import errorHandler from "./utils/errorHandler";
 
-const staticVersion = process.env.STATIC_VERSION || "v2";
+const staticVersion = process.env.APP_VERSION || "v2";
 
 export const path = {
     build: {
@@ -17,7 +17,7 @@ export const path = {
         img: `src/${staticVersion}/img/**/*.*`,
         fonts: `src/${staticVersion}/fonts/**/*.*`
     },
-    clean: `./assets/${staticVersion}/dist`
+    clean: `./assets/${staticVersion}/dist/**/*.css`
 };
 
 export const sassConfig = {
@@ -40,8 +40,13 @@ export const plumberConfig = {
     errorHandler
 };
 
+let PROXY_PORT = 8001;
+if (process.env.APP_VERSION !== "v2") {
+    PROXY_PORT = 8000;
+}
+
 export const browserSyncConfig = {
-    proxy: "localhost:8001",
+    proxy: `localhost:${PROXY_PORT}`,
     notify: false,
     reloadOnRestart: true,
     snippetOptions: {

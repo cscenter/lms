@@ -12,7 +12,7 @@ import bs from "../utils/getBrowserSyncInstance";
 
 const css = () =>
     gulp
-        .src(["*.scss", "!_*.scss"], {cwd: path.src.scss})
+        .src(["**/*.scss", "**/!_*.scss"], {cwd: path.src.scss})
         .pipe(plumber(plumberConfig))
         //filter out unchanged scss files, only works when watching
         .pipe(gulpif(global.watch, cached('sass')))
@@ -22,7 +22,7 @@ const css = () =>
         .pipe(filter(function (file) {
           return !/\/_/.test(file.path) || !/^_/.test(file.relative);
         }))
-        .pipe(sass(sassConfig))
+        .pipe(sass(sassConfig).on('error', sass.logError))
         .pipe(autoprefixer({
             browsers: autoprefixerBrowserSupport
         }))

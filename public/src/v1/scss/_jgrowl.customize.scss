@@ -1,6 +1,6 @@
-@import "jgrowl/jgrowl.variables.scss";
+@import "jgrowl/jgrowl.variables";
 $jgrowl-backgroundColor: $color-green;
-@import "jgrowl/jgrowl.core.scss";
+@import "jgrowl/jgrowl.core";
 
 /* jGrowl overrides */
 .jGrowl {

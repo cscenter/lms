@@ -20,7 +20,7 @@ module.exports = {
     ],
 
     devServer: {
-        contentBase: path.resolve(__dirname, '../cscsite/assets/v1/dist'),
+        contentBase: path.resolve(__dirname, '../cscsite/assets/v1/dist/js'),
         port: 8081,
         hot: true,
         headers: { "Access-Control-Allow-Origin": "*" }

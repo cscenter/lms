@@ -21,7 +21,7 @@ process.env.BABEL_ENV = TARGET;
 
 const __srcdir = path.join(__dirname, '../src/v1');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, '../assets/v1/dist');
+let __bundlesdir = path.join(__dirname, '../assets/v1/dist/js');
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_PATH = path.join('/static/', __bundlesdir);
 const STATIC_URL = path.join('/static/');
