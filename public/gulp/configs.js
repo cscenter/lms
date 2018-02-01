@@ -1,21 +1,23 @@
 import errorHandler from "./utils/errorHandler";
 
+const staticVersion = process.env.STATIC_VERSION || "v2";
+
 export const path = {
     build: {
-        css: 'assets/v2/dist/css/',
-        img: 'assets/v2/dist/img/',
+        css: `assets/${staticVersion}/dist/css/`,
+        img: `assets/${staticVersion}/dist/img/`,
     },
     src: {
-        scss: 'src/v2/scss/',
-        img: 'src/v2/img/',
+        scss: `src/${staticVersion}/scss/`,
+        img: `src/${staticVersion}/img/`,
     },
     watch: {
-        jinja2: 'app/templates/v2/**/*.jinja2',
-        scss: 'src/v2/scss/**/*.scss',
-        img: 'src/v2/img/**/*.*',
-        fonts: 'src/v2/fonts/**/*.*'
+        jinja2: `app/templates/${staticVersion}/**/*.jinja2`,
+        scss: `src/${staticVersion}/scss/**/*.scss`,
+        img: `src/${staticVersion}/img/**/*.*`,
+        fonts: `src/${staticVersion}/fonts/**/*.*`
     },
-    clean: './assets/v2/dist'
+    clean: `./assets/${staticVersion}/dist`
 };
 
 export const sassConfig = {

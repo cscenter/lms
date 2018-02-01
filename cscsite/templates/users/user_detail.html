@@ -15,7 +15,7 @@
         {# TODO: How to preload this staff with webpack? #}
         window.profileAppInit = {{ initial|safe }};
         window.profileAppInit["preload"] = [
-            "{% static "js/vendor/FileAPI/FileAPI.min.js" %}"
+            "{% static "v1/js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
         {% if user.is_curator %}
             $('.loginas-user').click(function(e) {

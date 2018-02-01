@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=960">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
     <title>{% block title %}Computer Science Center{% endblock title %}</title>
-    <link rel="shortcut icon" type="image/png" href="{{ static("img/center/favicon.png") }}">
+    <link rel="shortcut icon" type="image/png" href="{{ static("v1/img/center/favicon.png") }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     {{ render_bundle('center', 'css') }}
     {% if request.user.is_curator %}
-        <link href="{{ static("css/center/staff.css") }}" rel="stylesheet">
+        <link href="{{ static("v1/css/center/staff.css") }}" rel="stylesheet">
     {% endif %}
     {% block hightlight_styles %}
-    <link href="{{ static("css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
+    <link href="{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
     {% endblock hightlight_styles %}
     {% block stylesheets %} {% endblock stylesheets %}
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->

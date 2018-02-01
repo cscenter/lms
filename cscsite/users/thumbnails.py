@@ -3,7 +3,7 @@ from sorl.thumbnail.images import BaseImageFile
 
 
 class BaseStubImage(BaseImageFile):
-    url = staticfiles_storage.url("img/center/profile_no_photo.png")
+    url = staticfiles_storage.url("v1/img/center/profile_no_photo.png")
 
     def __init__(self, **kwargs):
         geometry = kwargs.get("geometry", None)
@@ -17,8 +17,8 @@ class BaseStubImage(BaseImageFile):
 
 
 class GirlStubImage(BaseStubImage):
-    url = staticfiles_storage.url("img/csc_girl.svg")
+    url = staticfiles_storage.url("v1/img/csc_girl.svg")
 
 
 class BoyStubImage(BaseStubImage):
-    url = staticfiles_storage.url("img/csc_boy.svg")
+    url = staticfiles_storage.url("v1/img/csc_boy.svg")

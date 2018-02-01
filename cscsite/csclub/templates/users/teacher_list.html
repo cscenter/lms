@@ -21,12 +21,12 @@
                                         src="{{ im.url }}"
                                     {% else %}
                                         class="lazy"
-                                        src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}"
+                                        src="{% if user.gender == "M" %}{% static "v1/img/icons/man.png" %}{% else %}{% static "v1/img/icons/woman.png" %}{% endif %}"
                                         data-original="{{ im.url }}"
                                     {% endif %}>
                           {% endthumbnail %}
                     {% else %}
-                        <img src="{% if user.gender == "M" %}{% static "img/icons/man.png" %}{% else %}{% static "img/icons/woman.png" %}{% endif %}" width="220" height="308" alt="">
+                        <img src="{% if user.gender == "M" %}{% static "v1/img/icons/man.png" %}{% else %}{% static "v1/img/icons/woman.png" %}{% endif %}" width="220" height="308" alt="">
                     {% endif %}
                     {{ user.first_name }} {{ user.patronymic }}<br>
                     {{ user.last_name }}

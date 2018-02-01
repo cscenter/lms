@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Webpack",
   "scripts": {
-    "gulp": "./node_modules/gulp/bin/gulp.js",
-    "start": "BABEL_ENV=webpack webpack-dev-server --progress --config webpack/common.config.js",
-    "prod": "BABEL_ENV=webpack NODE_ENV=production webpack --config webpack/common.config.js --progress --display-error-details --display-modules --display-optimization-bailout",
+    "start": "webpack-dev-server --progress --config webpack/common.config.js",
+    "prod": "NODE_ENV=production webpack --config webpack/common.config.js --progress --display-error-details --display-modules --display-optimization-bailout",
     "css-lint": "stylelint --syntax scss \"src/**/*.scss\""
   },
   "repository": {
@@ -84,7 +83,7 @@
     "gulp-uglify": "^3.0.0",
     "list.js": "^1.5.0",
     "load-grunt-tasks": "^3.5.0",
-    "node-sass": "^4.6.1",
+    "node-sass": "^4.7.2",
     "postcss-loader": "^2.0.8",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
