@@ -140,7 +140,7 @@ class Command(BaseCommand):
             # Override timezone to enrolled students if course is online
             if a_s.assignment.course_offering.is_correspondence and (
                     u.is_student_center or u.is_volunteer):
-                tz_override = settings.TIME_ZONES[notification.user.city_id]
+                tz_override = settings.TIME_ZONES[notification.user.city_code]
             context = {
                 'a_s_link_student': base_url + a_s.get_student_url(),
                 'a_s_link_teacher': base_url + a_s.get_teacher_url(),
