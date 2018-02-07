@@ -19,9 +19,9 @@ const TARGET = process.env.npm_lifecycle_event;
 
 process.env.BABEL_ENV = TARGET;
 
-const __srcdir = path.join(__dirname, '../src');
+const __srcdir = path.join(__dirname, '../src/v1');
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, '../assets/dist');
+let __bundlesdir = path.join(__dirname, '../assets/v1/dist/js');
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_PATH = path.join('/static/', __bundlesdir);
 const STATIC_URL = path.join('/static/');
@@ -110,8 +110,8 @@ const common = {
                 ],
                 include: path.resolve(__srcdir, "js"),
                 exclude: [
-                    path.resolve(__srcdir, "sass/center/styles.scss"),
-                    path.resolve(__srcdir, "sass/club/styles.scss"),
+                    path.resolve(__srcdir, "v1/scss/center/styles.scss"),
+                    path.resolve(__srcdir, "v1/scss/club/styles.scss"),
                 ]
             },
             {

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
+    'django.contrib.sessions',
     'django_jinja',
     'treemenus'
 ]
@@ -47,12 +48,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(APP_DIR / "db.sqlite3"),
+    }
+}
 
 ROOT_URLCONF = 'app.urls'
 
