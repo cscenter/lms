@@ -24,12 +24,12 @@ git remote add frontend-remote git@github.com:cscenter/site-frontend.git
 git push -u frontend-remote split-frontend:master
 ```
 
-With git subtree
+With git subtree (it worked for the first time, but doesn't later :<)
 
 ```
 git remote add frontend-remote git@github.com:cscenter/site-frontend.git
 # Put public/ folder in a separate branch
-git subtree split -P public -b split-frontend
+git subtree split -P public/ -b split-frontend
 git fetch frontend-remote
 git branch -u frontend-remote/master split-frontend
 ```
@@ -92,15 +92,15 @@ git pull -s subtree <remotename> <branchname>
 
 ## Backporting to the subtree’s remote
 
-Manually (not tested)
+Manually
 
 ```
-# Add [To backport] in main repo for commits with files from subtree
-# Create new branch before backporting
-git checkout -b backport-plugin frontend-remote/master
-# Manually apply commits (No idea why should use cherry-pick twice)
-git cherry-pick -x --strategy=subtree master~3
-git push
+git fetch frontend-remote
+# Add [To backport] in main repo for commits with files from subtree for easier lookup
+# Create new branch `backport` before backporting
+git checkout -b backport frontend-remote/master
+git cherry-pick -x --strategy=subtree -Xsubtree=public master~3
+git push frontend-remote HEAD:master
 ```
 
 With git subtree
