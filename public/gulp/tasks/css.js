@@ -12,7 +12,7 @@ import bs from "../utils/getBrowserSyncInstance";
 
 const css = () =>
     gulp
-        .src(["**/*.scss", "**/!_*.scss"], {cwd: path.src.scss})
+        .src(["**/*.scss"], {cwd: path.src.scss})
         .pipe(plumber(plumberConfig))
         //filter out unchanged scss files, only works when watching
         .pipe(gulpif(global.watch, cached('sass')))
@@ -20,7 +20,7 @@ const css = () =>
         .pipe(sassInheritance({dir: path.src.scss}))
         //filter out internal imports (folders and files starting with "_" )
         .pipe(filter(function (file) {
-          return !/\/_/.test(file.path) || !/^_/.test(file.relative);
+          return !/\/_/.test(file.path) || !/^_/.test(file.basename);
         }))
         .pipe(sass(sassConfig).on('error', sass.logError))
         .pipe(autoprefixer({
