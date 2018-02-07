@@ -1,4 +1,5 @@
 import errorHandler from "./utils/errorHandler";
+import autoprefixer from "autoprefixer";
 
 const staticVersion = process.env.APP_VERSION || "v2";
 
@@ -25,15 +26,19 @@ export const sassConfig = {
     includePaths: ['./node_modules/']
 };
 
-export const autoprefixerBrowserSupport = [
-    'Chrome >= 45',
-    'Firefox ESR',
-    'Edge >= 12',
-    'Explorer >= 10',
-    'iOS >= 9',
-    'Safari >= 9',
-    'Android >= 4.4',
-    'Opera >= 30'
+export const postCssPlugins = [
+    autoprefixer({
+        browsers: [
+            'Chrome >= 45',
+            'Firefox ESR',
+            'Edge >= 12',
+            'Explorer >= 10',
+            'iOS >= 9',
+            'Safari >= 9',
+            'Android >= 4.4',
+            'Opera >= 30'
+        ]
+    })
 ];
 
 export const plumberConfig = {
@@ -41,10 +46,6 @@ export const plumberConfig = {
 };
 
 let PROXY_PORT = 8001;
-if (process.env.APP_VERSION !== "v2") {
-    PROXY_PORT = 8000;
-}
-
 export const browserSyncConfig = {
     proxy: `localhost:${PROXY_PORT}`,
     notify: false,

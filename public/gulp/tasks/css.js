@@ -3,11 +3,11 @@ import plumber from "gulp-plumber";
 import cached from "gulp-cached";
 import sass from "gulp-sass";
 import sassInheritance from "gulp-sass-inheritance";
-import autoprefixer from "gulp-autoprefixer";
+import postcss from "gulp-postcss";
 import gulpif from "gulp-if";
 import filter from "gulp-filter";
 
-import { autoprefixerBrowserSupport, sassConfig, plumberConfig, path } from "../configs";
+import { postCssPlugins, sassConfig, plumberConfig, path } from "../configs";
 import bs from "../utils/getBrowserSyncInstance";
 
 const css = () =>
@@ -23,9 +23,7 @@ const css = () =>
           return !/\/_/.test(file.path) || !/^_/.test(file.basename);
         }))
         .pipe(sass(sassConfig).on('error', sass.logError))
-        .pipe(autoprefixer({
-            browsers: autoprefixerBrowserSupport
-        }))
+        .pipe(postcss(postCssPlugins))
         .pipe(gulp.dest(path.build.css))
         .pipe(bs.reload({
             stream: true
