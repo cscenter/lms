@@ -104,7 +104,7 @@ git pull -s subtree <remotename> <branchname>
 
 ## Backporting to the subtree’s remote
 
-Manually
+Manually (получилось только так :<)
 
 ```
 git fetch frontend-remote
