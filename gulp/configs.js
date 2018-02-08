@@ -45,7 +45,7 @@ export const plumberConfig = {
     errorHandler
 };
 
-let PROXY_PORT = 8001;
+let PROXY_PORT = 8000;
 export const browserSyncConfig = {
     proxy: `localhost:${PROXY_PORT}`,
     notify: false,

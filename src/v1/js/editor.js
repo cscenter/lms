@@ -32,7 +32,7 @@ export default class UberEditor {
                 return "";
             },
             focusOnLoad: shouldFocus,
-            basePath: "/static/js/vendor/EpicEditor-v0.2.2",
+            basePath: "/static/v1/js/vendor/EpicEditor-v0.2.2",
             clientSideStorage: autoSaveEnabled,
             autogrow: {minHeight: 200},
             button: {bar: "show", fullscreen: buttonFullscreen},
