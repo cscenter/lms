@@ -80,33 +80,3 @@
 .table>thead>tr>th {
     border-bottom: 1px solid #e4eaec;
 }
-
-.panel-title {
-    display: block;
-
-}
-
-.panel-group {
-  .panel-title {
-    position: relative;
-
-    &:before {
-      content: "\f067";
-    }
-
-    &:after {
-      content: "\f068";
-    }
-
-    &:after, &:before {
-      position: absolute;
-      top: 6px;
-      right: 10px;
-      font: normal normal normal 14px/1 FontAwesome;
-    }
-  }
-
-  .panel-title[aria-expanded=true]:before {
-    opacity: 0;
-  }
-}

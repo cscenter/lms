@@ -1,0 +1,22 @@
+{% macro panel(id='', title='', body='', footer='', class='panel') -%}
+    <div class="{{ class }}"{% if id %} id="{{ id }}"{% endif %}>
+        {%- if title %}
+            <div class="panel-heading">{{ title|safe }}</div>
+        {%- endif %}
+            <div class="panel-body">
+                {{ body|safe }}
+            </div>
+        {% if footer -%}
+            <div class="panel-footer">{{ footer }}</div>
+        {%- endif -%}
+    </div>
+{%- endmacro %}
+
+{% macro panel_collapse(id, title='title', body='', class='panel') -%}
+    <div class="{{ class }}" id="{{ id }}">
+        <a class="panel-heading" aria-expanded="false" href="#{{ id }}__inner">{{ title|safe }}</a>
+        <div class="panel-collapse collapse" id="{{ id }}__inner" aria-expanded="false">
+            <div class="panel-body">{{ body|safe }}</div>
+        </div>
+    </div>
+{%- endmacro %}

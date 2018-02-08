@@ -6,15 +6,16 @@ $link-hover-color: darken($link-color, 5%);
 $pre-bg: #f8f8f8;
 
 $color-white: #fff;
-$color-blue: #4078c0;
-$color-grey: #9B9B9B;
+$color-blue: #2e6da4;
+//$color-blue: #4078c0;
+$color-grey: #9b9b9b;
 $color-orange: #f2a654;
 $color-green: #5cb85c;
 $color-red: #f96868;
 $color-yellow: #f9cd48;
 $color-purple: #6a679e;
-$color-gray-20: #333333;
-$color-gray-60: #666666;
+$color-gray-20: #333;
+$color-gray-60: #666;
 $color-gray-90: #e5e5e5;
 $color-gray-48: #7a7a7a;
 
@@ -40,13 +41,13 @@ $alert-info-text: $color-gray-20;
 $state-success-text: $color-green;
 $state-danger-text: $color-red;
 
-$alert-warning-border: rgba(255, 243, 230, 0.8);
-$alert-warning-bg: rgba(255, 243, 230, 0.8);
+$alert-warning-border: rgba(255, 243, 230, .8);
+$alert-warning-bg: rgba(255, 243, 230, .8);
 $alert-warning-text: $color-orange;
 
 $panel-default-heading-bg: $background-grey;
-
+$panel-bg: $color-white;
 $panel-footer-bg: inherit;
-$panel-inner-border: $color-gray-90;
+$panel-inner-border: transparent;
 
-$header-lvl1-bg:                 #4F86A0;
+$header-lvl1-bg: #4f86a0;

@@ -3,6 +3,7 @@ import plumber from "gulp-plumber";
 import cached from "gulp-cached";
 import sass from "gulp-sass";
 import sassInheritance from "gulp-sass-inheritance";
+import sourcemaps from "gulp-sourcemaps";
 import postcss from "gulp-postcss";
 import gulpif from "gulp-if";
 import filter from "gulp-filter";
@@ -22,8 +23,11 @@ const css = () =>
         .pipe(filter(function (file) {
           return !/\/_/.test(file.path) || !/^_/.test(file.basename);
         }))
+        // FIXME: doesn't work on first build :<
+        .pipe(gulpif(global.watch === true, sourcemaps.init()))
         .pipe(sass(sassConfig).on('error', sass.logError))
         .pipe(postcss(postCssPlugins))
+        .pipe(gulpif(global.watch === true, sourcemaps.write()))
         .pipe(gulp.dest(path.build.css))
         .pipe(bs.reload({
             stream: true

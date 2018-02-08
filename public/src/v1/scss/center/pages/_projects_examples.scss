@@ -1,0 +1,44 @@
+.practice-work {
+  background-color: $background-grey;
+  height: 220px;
+  text-align: center;
+  padding: 0 20px;
+
+  &::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 30px solid #fff;
+    border-top: 30px solid rgba(0, 0, 0, .15);
+    position: absolute;
+    bottom: 0px;
+    left: 15px;
+    z-index: 10;
+  }
+
+  &:hover {
+    background-image: url("/media/pages/document-hover.png");
+    color: #fff;
+  }
+}
+
+.student-practice-title,
+.practice-author,
+.practice-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.practice-author {
+  height: 25%;
+  margin: 0;
+}
+
+.student-practice-title {
+  height: 50%;
+}
+
+.students-practice a:hover {
+  text-decoration: none;
+}

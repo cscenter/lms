@@ -17,7 +17,7 @@ class MenuExtension(Extension):
 
 def csc_menu(request, menu_name, root_id=False):
     tree_menu = [
-        MenuItem(caption='Test', url='/pages/')
+        MenuItem(caption='Проекты', url='/v1/pages/projects/')
     ]
     for i in tree_menu:
         i.extension = MockExtension()
