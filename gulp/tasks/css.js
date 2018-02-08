@@ -3,6 +3,7 @@ import plumber from "gulp-plumber";
 import cached from "gulp-cached";
 import sass from "gulp-sass";
 import sassInheritance from "gulp-sass-inheritance";
+import sourcemaps from "gulp-sourcemaps";
 import postcss from "gulp-postcss";
 import gulpif from "gulp-if";
 import filter from "gulp-filter";
@@ -12,7 +13,7 @@ import bs from "../utils/getBrowserSyncInstance";
 
 const css = () =>
     gulp
-        .src(["**/*.scss", "**/!_*.scss"], {cwd: path.src.scss})
+        .src(["**/*.scss"], {cwd: path.src.scss})
         .pipe(plumber(plumberConfig))
         //filter out unchanged scss files, only works when watching
         .pipe(gulpif(global.watch, cached('sass')))
@@ -20,10 +21,13 @@ const css = () =>
         .pipe(sassInheritance({dir: path.src.scss}))
         //filter out internal imports (folders and files starting with "_" )
         .pipe(filter(function (file) {
-          return !/\/_/.test(file.path) || !/^_/.test(file.relative);
+          return !/\/_/.test(file.path) || !/^_/.test(file.basename);
         }))
+        // FIXME: doesn't work on first build :<
+        .pipe(gulpif(global.watch === true, sourcemaps.init()))
         .pipe(sass(sassConfig).on('error', sass.logError))
         .pipe(postcss(postCssPlugins))
+        .pipe(gulpif(global.watch === true, sourcemaps.write()))
         .pipe(gulp.dest(path.build.css))
         .pipe(bs.reload({
             stream: true

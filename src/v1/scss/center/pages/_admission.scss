@@ -83,7 +83,6 @@
 
 .admission-list-page, .interview-results-page  {
   @extend .container;
-  @extend .page-inverse;
 
   form {
     margin: 0 0 20px 0;

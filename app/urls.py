@@ -22,24 +22,13 @@ class HtmlView(generic.TemplateView):
     def get_template_names(self):
         path_to_template = self.kwargs.get('path_to_template', '')[:-1]
         if not path_to_template:
-            path_to_template = "pages/index"
+            path_to_template = "v1/pages/index"
         return [f"{path_to_template}.jinja2",
                 f"{path_to_template}/index.jinja2"]
-
-
-class V2HtmlView(generic.TemplateView):
-    def get_template_names(self):
-        path_to_template = self.kwargs.get('path_to_template', '')[:-1]
-        if not path_to_template:
-            path_to_template = "pages/index"
-        return [f"v2/{path_to_template}.jinja2",
-                f"v2/{path_to_template}/index.jinja2"]
 
 
 urlpatterns = [
     url(r'^$', HtmlView.as_view(), name='index'),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
-    url(r'^v2/(?P<path_to_template>.*)$', V2HtmlView.as_view(),
-        name='new_html_pages'),
     url(r'^(?P<path_to_template>.*)$', HtmlView.as_view(), name='html_pages'),
 ]

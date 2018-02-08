@@ -1,0 +1,72 @@
+{% extends "v1/layouts/base.jinja2" %}
+
+{% import "v1/components/_macros.jinja2" as components %}
+
+{% set table_example = '
+<br><br>
+<table class="table">
+    <tr>
+        <th>header 1</th>
+        <th>header 2</th>
+        <th>header 3</th>
+        <th>header 4</th>
+    </tr>
+    <tr>
+        <td>content 1</td>
+        <td>content 2</td>
+        <td>content 3</td>
+        <td>content 4</td>
+    </tr>
+</table>' %}
+
+
+
+{% block content %}
+    <div class="container py-50">
+        <h3>Panel</h3>
+        {{ components.panel(title='Panel heading', body='Panel content', class='panel panel-primary') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (.panel class only)</div>', body='Panel content', class='panel') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (+ .panel-default)</div>', body='Panel content', class='panel panel-default') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (+ .panel-warning)</div>', body='Panel content', class='panel panel-info') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (+ .panel-warning)</div>', body='Panel content', class='panel panel-warning') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (+ .panel-success)</div>', body='Panel content with table' + table_example, class='panel panel-success') }}
+        {{ components.panel(title='<div class="panel-title">Panel title (+ .panel-danger)</div>',  body='Panel content with table and footer' + table_example, class='panel panel-danger', footer='Footer content') }}
+    </div>
+
+    <div class="container py-50">
+        <h3>Panel Group</h3>
+        <div class="panel-group">
+            {{ components.panel_collapse('question-1',
+                     '<div class="panel-title">Где, по каким дням и во сколько проходят занятия в центре?</div>',
+                     'В Санкт-Петербурге курсы читаются преимущественно в БЦ «Таймс» и иногда в Физико-математическом лицее 239 и в ПОМИ РАН. В Новосибирске занятия проходят в учебных аудиториях нового корпуса Новосибирского государственного университета (НГУ).Так как система выбора курсов гибкая, студенты могут выбрать не только интересные, но и удобные в плане расписания предметы. Большинство занятий проходят по будням, с 18:30 до 20:00 — первая пара и с 20:00 до 21:30 — вторая.' + table_example
+            ) }}
+            {{ components.panel_collapse('question-2',
+                     'Можно ли посещать лекции без поступления? (в качестве вольного слушателя)',
+                     'Многие курсы CS центра закрытые, их могут посещать только студенты центра. При этом некоторые курсы в каждом семестре будут объявлены открытыми для всех желающих. Обычно это курсы, читаемые в рамках CS клуба. <a href="http://compsciclub.ru/schedule">Расписание занятий в CS клубе.</a>'
+            ) }}
+            {{ components.panel_collapse('question-3',
+                     'Как подготовиться к поступлению?',
+                     'Центр не организует подготовительных курсов для поступления. Программа для поступления и варианты экзаменов прошлых лет дают исчерпывающее представление о том, что нужно знать для успешного поступления.'
+            ) }}
+        </div>
+    </div>
+
+    <div class="bg-gray py-50">
+        <div class="container">
+            <div class="panel-group">
+                {{ components.panel_collapse('test-1',
+                         '<div class="panel-title">Где, по каким дням и во сколько проходят занятия в центре?</div>',
+                         'В Санкт-Петербурге курсы читаются преимущественно в БЦ «Таймс» и иногда в Физико-математическом лицее 239 и в ПОМИ РАН. В Новосибирске занятия проходят в учебных аудиториях нового корпуса Новосибирского государственного университета (НГУ).Так как система выбора курсов гибкая, студенты могут выбрать не только интересные, но и удобные в плане расписания предметы. Большинство занятий проходят по будням, с 18:30 до 20:00 — первая пара и с 20:00 до 21:30 — вторая.' + table_example
+                ) }}
+                {{ components.panel_collapse('test-2',
+                         'Можно ли посещать лекции без поступления? (в качестве вольного слушателя)',
+                         'Многие курсы CS центра закрытые, их могут посещать только студенты центра. При этом некоторые курсы в каждом семестре будут объявлены открытыми для всех желающих. Обычно это курсы, читаемые в рамках CS клуба. <a href="http://compsciclub.ru/schedule">Расписание занятий в CS клубе.</a>'
+                ) }}
+                {{ components.panel_collapse('test-3',
+                         'Как подготовиться к поступлению?',
+                         'Центр не организует подготовительных курсов для поступления. Программа для поступления и варианты экзаменов прошлых лет дают исчерпывающее представление о том, что нужно знать для успешного поступления.'
+                ) }}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
