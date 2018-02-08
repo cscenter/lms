@@ -4,14 +4,11 @@
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 {% block title %}Обучение в CS центре - полезное{% endblock title %}
 {% block content %}
-    <div id="questions-wrapper">
+    <div class="container">
         <div class="panel-group panel-group-continuous" id="questions">
             {% for qa in faq %}
                 <div class="panel">
-                    <div class="panel-heading" id="question-{{ qa.pk }}">
-                        <a class="panel-title" aria-expanded="false"
-                           href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
-                    </div>
+                    <div class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.question }}</div>
                     <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
                         <div class="panel-body">{{ qa.answer|safe }}</div>
                     </div>
