@@ -31,9 +31,9 @@ class Command(BaseCommand):
         current_term = Semester.get_current()
         today = now()
         notification_type_map = apps.get_app_config('notifications').type_map
-        remind_about_start_today = (
+        remind_about_start_today = (current_term.report_starts_at and
             today.date() == current_term.report_starts_at - timedelta(days=3))
-        remind_about_end_today = (
+        remind_about_end_today = (current_term.report_ends_at and
             today.date() == current_term.report_ends_at - timedelta(days=1))
         if remind_about_start_today:
             notification_code = types.PROJECT_REPORTING_STARTED.name
