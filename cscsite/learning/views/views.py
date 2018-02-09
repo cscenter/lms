@@ -41,7 +41,7 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool
+    OnlineCourse, InternationalSchool, CourseOfferingTeacher
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_current_term_pair, get_term_index, now_local, \
@@ -1175,14 +1175,34 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
 
         response = HttpResponse()
 
+        user = request.user
         if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
             qs = AssignmentAttachment.objects.filter(pk=pk)
             assignment_attachment = get_object_or_404(qs)
+            # To task attachments have access curators, course teachers and
+            # non-expelled students enrolled on the course.
+            if not user.is_curator:
+                is_current_student = None
+                is_current_teacher = None
+                assignment_id = assignment_attachment.assignment_id
+                if user.is_active_student:
+                    is_current_student = (StudentAssignment.objects
+                                          .filter(student_id=user.pk,
+                                                  assignment_id=assignment_id)
+                                          .exists())
+                if not is_current_student and user.is_teacher:
+                    qs = (CourseOfferingTeacher.objects
+                          .filter(teacher_id=user.pk,
+                                  course_offering__assignment_id=assignment_id))
+                    is_current_teacher = qs.exists()
+                if not is_current_student and not is_current_teacher:
+                    raise Http404
             file_field = assignment_attachment.attachment
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
-            if not request.user.is_teacher and not request.user.is_curator:
-                qs = qs.filter(student_assignment__student_id=request.user.pk)
+            if not user.is_teacher and not user.is_curator:
+                qs = qs.filter(student_assignment__student_id=user.pk)
+            # TODO: restrict access for teachers
             comment = get_object_or_404(qs)
             file_field = comment.attached_file
         else:
