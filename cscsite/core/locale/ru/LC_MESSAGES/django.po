@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-09 12:16+0000\n"
-"PO-Revision-Date: 2018-02-09 12:16+0000\n"
+"POT-Creation-Date: 2018-02-09 13:34+0000\n"
+"PO-Revision-Date: 2018-02-09 13:36+0000\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -184,11 +184,15 @@ msgstr ""
 "Размер файла %(size)s недопустим. Максимальный размер файла "
 "%(allowed_size)s."
 
-#: cscsite/learning/admin.py:132 cscsite/learning/admin.py:223
+#: cscsite/learning/admin.py:92
+msgid "You can create only open courses from CS club site"
+msgstr "Забыли сделать прочтение открытым?"
+
+#: cscsite/learning/admin.py:146 cscsite/learning/admin.py:237
 msgid "Created"
 msgstr "Дата создания"
 
-#: cscsite/learning/admin.py:166
+#: cscsite/learning/admin.py:180
 msgid ""
 "Assignment|Please, double check teachers list. Some of them not related to "
 "selected course offering"
@@ -196,19 +200,19 @@ msgstr ""
 "Перепроверьте список выбранных преподавателей. Кто-то из них не имеет "
 "отношения к выбранному прочтению курса."
 
-#: cscsite/learning/admin.py:228 cscsite/learning/models.py:850
+#: cscsite/learning/admin.py:242 cscsite/learning/models.py:850
 msgid "Assignment|deadline"
 msgstr "Срок сдачи"
 
-#: cscsite/learning/admin.py:250 cscsite/learning/models.py:847
+#: cscsite/learning/admin.py:264 cscsite/learning/models.py:847
 msgid "Assignment|assigned_to"
 msgstr "Задано"
 
-#: cscsite/learning/admin.py:255 cscsite/learning/models.py:854
+#: cscsite/learning/admin.py:269 cscsite/learning/models.py:854
 msgid "Asssignment|name"
 msgstr "Название"
 
-#: cscsite/learning/admin.py:282 cscsite/learning/models.py:1234
+#: cscsite/learning/admin.py:296 cscsite/learning/models.py:1234
 msgid "Enrollment|grade changed"
 msgstr "Оценка изменена"
 
@@ -2516,7 +2520,6 @@ msgstr ""
 "центра/Вольнослушателем"
 
 #: cscsite/users/admin.py:86
-#| msgid "Username must be unique"
 msgid "Email must be unique."
 msgstr "Email должен быть уникальным."
 
