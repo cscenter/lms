@@ -26,7 +26,7 @@ from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
-from core.utils import hashids, city_aware_reverse
+from core.utils import hashids, city_aware_reverse, is_club_site
 from learning import settings as learn_conf
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
