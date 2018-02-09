@@ -16,6 +16,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 from vanilla import DetailView
 
+from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from learning.models import StudentAssignment, \
     CourseOffering, Semester, Enrollment, StudyProgram
@@ -108,14 +109,17 @@ class TeacherDetailView(DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
+        filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
+        if is_club_site():
+            filters["city_code"] = self.request.city_code
         co_queryset = (CourseOffering.objects
-                       .in_city(self.request.city_code)
+                       .in_city(**filters)
                        .select_related('semester', 'course'))
-        return (auth.get_user_model()._default_manager
-            .prefetch_related(
-            Prefetch('teaching_set',
-                     queryset=co_queryset.all(),
-                     to_attr='course_offerings')))
+        return (CSCUser.objects
+                .prefetch_related(
+                    Prefetch('teaching_set',
+                             queryset=co_queryset.all(),
+                             to_attr='course_offerings')))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -145,8 +149,11 @@ class UserDetailView(generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course_offering__courseclass'))
+        filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
+        if is_club_site():
+            filters["city_code"] = self.request.city_code
         co_queryset = (CourseOffering.objects
-                       .in_city(self.request.city_code)
+                       .in_city(**filters)
                        .select_related('semester', 'course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),

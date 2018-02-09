@@ -3,11 +3,10 @@ from typing import List
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import query, Manager, Prefetch, Q
-from django.utils.timezone import now
+from django.db.models import query, Prefetch, Q
 
 from core.utils import is_club_site
-from learning.calendar import EventsCalendar, get_bounds_for_calendar_month
+from learning.calendar import get_bounds_for_calendar_month
 from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
 
@@ -125,8 +124,12 @@ class NonCourseEventQuerySet(query.QuerySet):
 
 class CourseOfferingQuerySet(models.QuerySet):
     def in_city(self, city_code):
-        return self.filter(Q(city_id=city_code, is_correspondence=False) |
-                           Q(is_correspondence=True))
+        _q = {"is_correspondence": False}
+        if isinstance(city_code, (list, tuple)):
+            _q["city_id__in"] = city_code
+        else:
+            _q["city_id__exact"] = city_code
+        return self.filter(Q(**_q) | Q(is_correspondence=True))
 
     def in_center_branches(self):
         return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)
