@@ -16,7 +16,7 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
 from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
-from core.utils import admin_datetime
+from core.utils import admin_datetime, is_club_site
 from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import CSCUser
@@ -81,6 +81,19 @@ class CourseOfferingTeacherInline(admin.TabularInline):
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
+class CourseOfferingAdminForm(forms.ModelForm):
+    class Meta:
+        model = CourseOffering
+        fields = '__all__'
+
+    def clean_is_open(self):
+        is_open = self.cleaned_data['is_open']
+        if is_club_site() and not is_open:
+            raise ValidationError(_("You can create only open courses "
+                                    "from CS club site"))
+        return is_open
+
+
 class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['city', 'semester']
     list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
@@ -88,6 +101,7 @@ class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+    form = CourseOfferingAdminForm
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
