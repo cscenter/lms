@@ -142,11 +142,6 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'django.template': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
         'django.db.backends': {
             'handlers': ['null'],
             'level': 'DEBUG',
@@ -155,6 +150,16 @@ LOGGING = {
         'django.db.backends.schema': {
             'handlers': ['console'],
             'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'notifications.handlers': {
