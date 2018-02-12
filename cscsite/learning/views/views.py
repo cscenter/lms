@@ -1193,10 +1193,10 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                 if not is_current_student and user.is_teacher:
                     qs = (CourseOfferingTeacher.objects
                           .filter(teacher_id=user.pk,
-                                  course_offering__assignment_id=assignment_id))
+                                  course_offering__assignment__id=assignment_id))
                     is_current_teacher = qs.exists()
                 if not is_current_student and not is_current_teacher:
-                    raise Http404
+                    return HttpResponseForbidden()
             file_field = assignment_attachment.attachment
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
