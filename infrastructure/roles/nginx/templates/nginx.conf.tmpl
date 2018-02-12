@@ -85,14 +85,18 @@ server {
     rewrite ^/lectures/$ http://open.compscicenter.ru/ permanent;
     {% endif %}
 
-    location /media  {
-        alias /shared/media;
+    location /media/  {
+        root /shared;
         access_log off;
         tcp_nodelay off;
         # gzip_static on;
         gzip on;
         expires 6h;
         add_header Cache-Control public,max-age=21600;
+
+        location ~ ^/media/assignment_([0-9]+) {
+            internal;
+        }
     }
 
     location /static {
