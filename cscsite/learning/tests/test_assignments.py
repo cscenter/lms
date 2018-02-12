@@ -16,15 +16,15 @@ from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory, CourseOfferingTeacherFactory
-from learning.models import StudentAssignment, Assignment, CourseOffering
-from learning.settings import GRADES, PARTICIPANT_GROUPS
+from learning.models import StudentAssignment, Assignment, CourseOffering, \
+    AssignmentAttachment
+from learning.settings import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
 from learning.utils import get_current_term_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
-    StudentCenterFactory
-
+    StudentCenterFactory, VolunteerFactory, ProjectReviewerFactory
 
 
 # TODO: assignment submission page - comments localisation, assignment created localization
@@ -808,3 +808,64 @@ def test_studentassignment_submission_grade(client):
     assert response.status_code == 200
     sa.refresh_from_db()
     assert sa.grade is None
+
+
+@pytest.mark.django_db
+def test_assignment_attachment_permissions(curator, client, tmpdir):
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    form = AssignmentFactory.attributes(create=True)
+    deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
+    deadline_time = form['deadline_at'].strftime("%H:%M")
+    tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
+    tmp_file.write("content")
+    form.update({'course_offering': co.pk,
+                 'attachments': tmp_file.open(),
+                 'deadline_at_0': deadline_date,
+                 'deadline_at_1': deadline_time})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    client.post(url, form)
+    assert Assignment.objects.count() == 1
+    assert AssignmentAttachment.objects.count() == 1
+    a_attachment = AssignmentAttachment.objects.first()
+    assert a_attachment.attachment.read() == b"content"
+    client.logout()
+    attachment_url = a_attachment.file_url()
+    response = client.get(attachment_url)
+    assert response.status_code == 302  # LoginRequiredMixin
+    student_spb = StudentCenterFactory(city_id='spb')
+    client.login(student_spb)
+    response = client.get(attachment_url)
+    assert response.status_code == 403  # not enrolled in
+    EnrollmentFactory(student=student_spb, course_offering=co)
+    response = client.get(attachment_url)
+    assert response.status_code == 200
+    student_spb.status = STUDENT_STATUS.expelled
+    student_spb.save()
+    response = client.get(attachment_url)
+    assert response.status_code == 403  # expelled
+    # Should be the same for volunteer
+    volunteer_spb = VolunteerFactory(city_id='spb')
+    response = client.get(attachment_url)
+    assert response.status_code == 403
+    client.login(volunteer_spb)
+    EnrollmentFactory(student=volunteer_spb, course_offering=co)
+    response = client.get(attachment_url)
+    assert response.status_code == 200
+    # Check not actual teacher access
+    other_teacher = TeacherCenterFactory()
+    client.login(other_teacher)
+    response = client.get(attachment_url)
+    assert response.status_code == 403  # not an actual teacher
+    client.login(teacher)
+    response = client.get(attachment_url)
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(attachment_url)
+    assert response.status_code == 200
+    project_reviewer = ProjectReviewerFactory()
+    # Reviewers and others have no access
+    client.login(project_reviewer)
+    response = client.get(attachment_url)
+    assert response.status_code == 403
