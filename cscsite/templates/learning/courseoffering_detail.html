@@ -157,7 +157,11 @@
                                 <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
-                                        <a href="{{ attachment.file_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
+                                        {% if user.is_curator or is_actual_teacher or is_enrolled %}
+                                            <a href="{{ attachment.file_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
+                                        {% else %}
+                                            {{ attachment.file_ext }}{% if not forloop.last %}, {% endif %}
+                                        {% endif %}
                                         {% empty %}
                                             Нет
                                     {% endfor %}
