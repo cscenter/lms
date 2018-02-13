@@ -2,7 +2,6 @@ import {showComponentError} from 'utils';
 
 $(document).ready(function () {
     let section = $("body").data("init-section");
-    console.log(section);
     if (section === "gradebook") {
         import(/* webpackChunkName: "gradebook" */ 'teaching/gradebook')
             .then(module => {
