@@ -21,7 +21,7 @@ const fn = {
         fn.finalGradeSelects();
         fn.submitForm();
         fn.downloadCSVButton();
-        // fn.assignmentGradeInputValidator();
+        fn.onChangeAssignmentGrade();
         fn.scrollButtons();
     },
 
@@ -74,20 +74,8 @@ const fn = {
         });
     },
 
-    assignmentGradeInputValidator: function() {
-        // FIXME: instead of implicitly fix user input - highlight this error
+    onChangeAssignmentGrade: function() {
         gradebook.on("change", "input.__assignment", function (e) {
-            const value = parseInt(this.value, 10);
-            if (!$.isNumeric(this.value) || !Number.isInteger(value)) {
-                this.value = '';
-            } else {
-                const maxGrade = parseInt($(this).attr("max"));
-                if (value < 0) {
-                    this.value = 0;
-                } else if (value > maxGrade) {
-                    this.value = maxGrade;
-                }
-            }
             fn.toggleState(e.target);
         });
     },

@@ -1,5 +1,6 @@
 import {showComponentError} from 'utils';
 
+// this line is a workaround for chunk hasher, remove it later
 $(document).ready(function () {
     let section = $("body").data("init-section");
     if (section === "gradebook") {
