@@ -5,6 +5,7 @@ import os
 import datetime
 
 import unittest
+from decimal import Decimal
 
 import pytest
 import pytz
@@ -482,3 +483,11 @@ def test_course_offering_enrollment_is_open(settings, mocker):
     assert co_spb.enrollment_is_open
 
 
+@pytest.mark.django_db
+def test_gradefield():
+    sa = StudentAssignmentFactory(assignment__grade_max=50)
+    sa.grade = 20
+    sa.save()
+    sa.refresh_from_db()
+    assert sa.grade == Decimal('20')
+    assert str(sa.grade) == '20'
