@@ -27,6 +27,14 @@ SUBMIT_BUTTON = Submit('save', _('Save'))
 CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
 
 
+class GradeField(forms.DecimalField):
+    def to_python(self, value):
+        """Allow using `1.23` and `1,23` string values"""
+        if value not in self.empty_values and hasattr(value, "replace"):
+            value = value.replace(",", ".")
+        return super().to_python(value)
+
+
 class CourseOfferingPKForm(forms.Form):
     course_offering_pk = forms.IntegerField(required=True)
 
@@ -299,11 +307,11 @@ class AssignmentModalCommentForm(forms.ModelForm):
 
 
 class AssignmentGradeForm(forms.Form):
-    grade = forms.IntegerField(
+    grade = GradeField(
         required=False,
         label="",
         min_value=0,
-        widget=forms.NumberInput(attrs={'min': 0, 'step': 1}))
+        widget=forms.NumberInput(attrs={'min': 0, 'step': 0.01}))
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -324,7 +332,7 @@ class AssignmentGradeForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(AssignmentGradeForm, self).clean()
-        if cleaned_data['grade'] and cleaned_data['grade'] > self.grade_max:
+        if cleaned_data.get('grade') and cleaned_data['grade'] > self.grade_max:
             raise forms.ValidationError(_("Grade can't be larger than "
                                           "maximum one ({0})")
                                         .format(self.grade_max))

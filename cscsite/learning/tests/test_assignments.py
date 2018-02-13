@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 import pytest
 import pytz
@@ -787,7 +788,10 @@ def test_first_comment_after_deadline(client):
 
 @pytest.mark.django_db
 def test_studentassignment_submission_grade(client):
-    """Make sure we can remove zeroed grade for student assignment"""
+    """
+    Make sure we can remove zeroed grade for student assignment and use
+    1.23 and 1,23 formats
+    """
     sa = StudentAssignmentFactory()
     teacher = TeacherCenterFactory.create()
     CourseOfferingTeacherFactory(course_offering=sa.assignment.course_offering,
@@ -808,6 +812,14 @@ def test_studentassignment_submission_grade(client):
     assert response.status_code == 200
     sa.refresh_from_db()
     assert sa.grade is None
+    form = {"grade": "1.22", "grading_form": True}
+    response = client.post(sa.get_teacher_url(), form, follow=True)
+    sa.refresh_from_db()
+    assert sa.grade == Decimal("1.22")
+    form = {"grade": "2,34", "grading_form": True}
+    response = client.post(sa.get_teacher_url(), form, follow=True)
+    sa.refresh_from_db()
+    assert sa.grade == Decimal("2.34")
 
 
 @pytest.mark.django_db

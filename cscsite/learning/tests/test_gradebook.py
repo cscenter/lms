@@ -502,6 +502,28 @@ def test_save_gradebook_form(client):
 
 
 @pytest.mark.django_db
+def test_save_gradebook_l10n(client):
+    """Input value for grade value can be int or decimal"""
+    teacher = TeacherCenterFactory()
+    client.login(teacher)
+    student = StudentCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    EnrollmentFactory.create(student=student, course_offering=co)
+    a = AssignmentFactory(course_offering=co, is_online=False,
+                          grade_min=10, grade_max=40)
+    sa = StudentAssignment.objects.get(student=student, assignment=a)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    data = gradebook_data(co)
+    form_cls = GradeBookFormFactory.build_form_class(data)
+    form = form_cls(data={field_name: 11})
+    assert form.is_valid()
+    form = form_cls(data={field_name: '11.1'})
+    assert form.is_valid()
+    form = form_cls(data={field_name: '11,3'})
+    assert form.is_valid()
+
+
+@pytest.mark.django_db
 def test_save_gradebook_less_than_passing_score(client):
     """
     Make sure form is valid when score is less than `grade_min` since
