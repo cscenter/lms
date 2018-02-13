@@ -491,3 +491,11 @@ def test_gradefield():
     sa.refresh_from_db()
     assert sa.grade == Decimal('20')
     assert str(sa.grade) == '20'
+    sa.grade = 10.00
+    sa.save()
+    sa.refresh_from_db()
+    assert str(sa.grade) == '10'
+    sa.grade = 20.50
+    sa.save()
+    sa.refresh_from_db()
+    assert str(sa.grade) == '20.5'
