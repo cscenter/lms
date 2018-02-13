@@ -14,6 +14,7 @@ from django.forms import BoundField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
+from learning.forms import GradeField
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     CourseOffering
 from learning.settings import GRADES
@@ -317,7 +318,7 @@ class CustomBoundField(BoundField):
                                         attrs=attrs))
 
 
-class AssignmentScore(forms.IntegerField):
+class AssignmentScore(GradeField):
     def __init__(self, assignment, submission):
         score = submission.score
         widget = forms.TextInput(attrs={

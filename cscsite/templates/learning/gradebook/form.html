@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load render_bundle from webpack_loader %}
 {% load lookup call_method from core_tags %}
+{% load l10n %}
 
 
 {% block body_attrs %} data-init-section="gradebook"{% endblock body_attrs %}
@@ -13,7 +14,7 @@
 {% endblock javascripts %}
 
 
-{% block content %}
+{% block content %}{% localize off %}
 <div class="container container-wide">
     <form method="post" name="gradebook">{% csrf_token %}
         <div class="row">
@@ -131,5 +132,6 @@
 {% include "learning/gradebook/_modal_stepic.html" %}
 {% include "learning/gradebook/_modal_yandex.html" %}
 
+{% endlocalize %}
 {% endblock content %}
 
