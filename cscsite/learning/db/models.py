@@ -8,4 +8,4 @@ class GradeField(DecimalField):
         decimal_as_int = value.to_integral_value()
         if value == decimal_as_int:
             return decimal_as_int
-        return value
+        return value.normalize()
