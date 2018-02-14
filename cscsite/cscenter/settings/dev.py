@@ -55,7 +55,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'logfile': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': str(ROOT_DIR / "app.log"),
             'maxBytes': 1024 * 1024 * 15,  # 15MB
