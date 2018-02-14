@@ -489,20 +489,15 @@ class AssignmentGradesImport:
 class AssignmentGradesImport:
     def __init__(self, assignment, csv_file, lookup_field, request=None):
         self.assignment = assignment
-        # TODO: remove self.request
-        self.request = request
         self.reader = unicodecsv.DictReader(iter(csv_file))
         self.lookup_field = lookup_field
-        self.total = 0
-        self.success = 0
 
     def validate_headers(self):
         headers = self.reader.fieldnames
         errors = []
         for header in [self.lookup_field, "total"]:
             if header not in headers:
-                errors.append(
-                    "ERROR: header `{}` not found".format(header))
+                errors.append(f"Header `{header}` not found")
         return errors
 
     def process(self):
@@ -522,24 +517,24 @@ class AssignmentGradesImport:
             lookup_field_value = getattr(s.student, self.lookup_field)
             active_students[str(lookup_field_value)] = s.student_id
 
+        total = 0
+        success = 0
         for row in self.reader:
-            self.total += 1
+            total += 1
             try:
                 lookup_field_value, score = self.clean(row)
                 student_id = active_students.get(lookup_field_value, None)
                 if student_id:
                     updated = self.update_score(student_id, score)
                     if not updated:
-                        logger.debug(f"Student with id {student_id} enrolled "
-                                     f"but doesn't have an assignment. "
-                                     f"lookup_field_value={lookup_field_value}")
-                    self.success += int(updated)
+                        msg = (f"Student with {self.lookup_field} = "
+                               f"{lookup_field_value} enrolled "
+                               f"but doesn't have an assignment.")
+                        logger.debug(msg)
+                    success += int(updated)
             except ValidationError as e:
                 logger.error(e.message)
-        return self.import_results()
-
-    def import_results(self):
-        return {'success': self.success, 'total': self.total}
+        return total, success
 
     def clean(self, row):
         lookup_field_value = row[self.lookup_field].strip()
