@@ -410,23 +410,3 @@ class AssignmentForm(CityAwareModelForm):
         fields = ['title', 'text', 'deadline_at', 'attachments', 'is_online',
                   'grade_min', 'grade_max']
 
-
-class GradebookImportCSVForm(forms.Form):
-    """Import grades for particular CourseOffering from *.csv"""
-
-    def __init__(self, *args, **kwargs):
-        course_id = kwargs.pop('course_id')
-        super().__init__(*args, **kwargs)
-        self.fields['assignment'].queryset = Assignment.objects.filter(
-            course_offering__course_id=course_id)
-
-    assignment = forms.ModelChoiceField(
-        queryset=Assignment.objects.all(),
-        empty_label=None)
-
-    csv_file = forms.FileField(
-        label=_('Select csv file'),
-        validators=[FileValidator(
-            allowed_mimetypes=('text/csv', 'application/vnd.ms-excel')),
-        ]
-    )

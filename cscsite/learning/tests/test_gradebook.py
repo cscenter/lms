@@ -1,17 +1,18 @@
 import datetime
+from io import StringIO, BytesIO
 import pytest
 import pytz
 import unicodecsv
 from bs4 import BeautifulSoup
+from django.contrib import messages
 from django.test import TestCase
 from django.urls import reverse
-from django.utils.encoding import smart_bytes
+from django.utils.encoding import smart_bytes, force_bytes
 
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory
-from learning.forms import GradebookImportCSVForm
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
-    GradeBookFormFactory
+    GradeBookFormFactory, AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
     STUDENT_STATUS
@@ -236,51 +237,6 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                       .get(student=student,
                                            course_offering=co)
                                       .grade))
-
-    def test_import_stepic(self):
-        teacher = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
-        student = StudentCenterFactory()
-        EnrollmentFactory.create(student=student, course_offering=co)
-        assignments = AssignmentFactory.create_batch(3, course_offering=co)
-        # for assignment in assignments:
-        #     a_s = StudentAssignment.objects.get(student=student,
-        #                                         assignment=assignment)
-        # Import grades allowed only for particular course offering
-        form_fields = {'assignment': assignments[0].pk}
-        form = GradebookImportCSVForm(form_fields,
-                                      course_id=co.course.pk)
-        self.assertFalse(form.is_valid())
-        self.assertListEqual(list(form.errors.keys()), ['csv_file'])
-        # Teachers can import grades only for own CO
-        teacher2 = TeacherCenterFactory()
-        self.doLogin(teacher2)
-        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
-        resp = self.client.post(url, {'assignment': assignments[0].pk})
-        self.assertEqual(resp.status_code, 404)
-        # Wrong assignment id
-        self.doLogin(teacher)
-        form = GradebookImportCSVForm(
-            {'assignment': max((a.pk for a in assignments)) + 1},
-            course_id=co.course.id)
-        self.assertFalse(form.is_valid())
-        self.assertIn('assignment', form.errors)
-        # Wrong course offering id
-        form = GradebookImportCSVForm(form_fields, course_id=-1)
-        self.assertFalse(form.is_valid())
-        self.assertIn('assignment', form.errors)
-        # CO not found
-        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk + 1])
-        resp = self.client.post(url, {'assignment': assignments[0].pk})
-        self.assertEqual(resp.status_code, 404)
-        # Check redirects
-        redirect_url = co.get_gradebook_url()
-        url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
-        resp = self.client.post(url, {'assignment': assignments[0].pk})
-        self.assertRedirects(resp, redirect_url)
-        self.assertIn('messages', resp.cookies)
-        # TODO: provide testing with request.FILES. Move it to test_utils...
-    # TODO: write test for user search by stepic id
 
 
 @pytest.mark.django_db
@@ -655,3 +611,120 @@ def test_gradebook_view_form_conflict(client):
     assert e.grade == GRADES.good
     sa.refresh_from_db()
     assert sa.grade == 4
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignments_from_csv_security(client):
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    student_spb = StudentCenterFactory(city_id='spb')
+    EnrollmentFactory.create(student=student_spb, course_offering=co)
+    assignments = AssignmentFactory.create_batch(3, course_offering=co,
+                                                 is_online=False)
+    teacher2 = TeacherCenterFactory()
+    client.login(teacher2)
+    url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    response = client.post(url, {'assignment': assignments[0].pk,
+                                 'csv_file': StringIO("stub\n")})
+    assert response.status_code == 403  # not actual teacher
+    # Wrong course offering id
+    url = reverse('markssheet_teacher_csv_import_stepic',
+                  args=[assignments[0].course_offering_id + 1])
+    response = client.post(url, {'assignment': assignments[0].pk,
+                                 'csv_file': StringIO("stub\n")})
+    assert response.status_code == 403
+    # csv_file not provided
+    redirect_url = co.get_gradebook_url()
+    url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    response = client.post(url, {'assignment': assignments[0].pk})
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignments_from_csv(client, tmpdir):
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    student1 = StudentCenterFactory(city_id='spb', yandex_id='yandex1',
+                                    stepic_id='1')
+    student2 = StudentCenterFactory(city_id='spb', yandex_id='yandex2',
+                                    stepic_id='2')
+    student3 = StudentCenterFactory(city_id='spb', yandex_id='custom_one',
+                                    stepic_id='3')
+    for s in [student1, student2, student3]:
+        EnrollmentFactory.create(student=s, course_offering=co)
+    assignment = AssignmentFactory.create(course_offering=co, is_online=False,
+                                          grade_max=50)
+    # Generate csv file with missing header `login`
+    tmp_file = tmpdir.mkdir("csv").join("grades_missing_header.csv")
+    tmp_file.write("""
+header1,header2,total
+1,2,10
+2,3,20
+    """.strip())
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': tmp_file.open()
+    }
+    url_import = reverse('markssheet_teacher_csv_import_yandex', args=[co.pk])
+    client.login(teacher)
+    response = client.post(url_import, form, follow=True)
+    assert response.status_code == 200
+    assert 'messages' in response.context
+    assert list(response.context['messages'])[0].level == messages.ERROR
+    #
+    tmp_file = tmpdir.join("csv").join("grades_yandex_logins.csv")
+    tmp_file.write("""
+yandex_id,header2,total
+yandex1,1,10
+yandex2,2,20
+yandex3,3,30
+    """.strip())
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': tmp_file.open()
+    }
+    response = client.post(url_import, form, follow=True)
+    assert response.status_code == 200
+    assert StudentAssignment.objects.get(student=student1).grade == 10
+    assert StudentAssignment.objects.get(student=student2).grade == 20
+    assert StudentAssignment.objects.get(student=student3).grade is None
+    # Try to override grades from csv with stepik ids
+    tmp_file = tmpdir.join("csv").join("grades_stepik_ids.csv")
+    tmp_file.write("""
+stepic_id,header2,total
+2,2,42
+3,3,1
+4,3,1
+5,3,100
+    """.strip())
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': tmp_file.open()
+    }
+    url_import = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    response = client.post(url_import, form, follow=True)
+    assert StudentAssignment.objects.get(student=student1).grade == 10
+    assert StudentAssignment.objects.get(student=student2).grade == 42
+    assert StudentAssignment.objects.get(student=student3).grade == 1
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
+    mocker.patch('django.contrib.messages.api.add_message')
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    student = StudentCenterFactory()
+    student.stepic_id = 20
+    student.save()
+    EnrollmentFactory.create(student=student, course_offering=co)
+    assignments = AssignmentFactory.create_batch(3, course_offering=co)
+    assignment = assignments[0]
+    expected_grade = 13
+    csv_input = force_bytes("stepic_id,total\n"
+                            "{},{}\n".format(student.stepic_id,
+                                             expected_grade))
+    csv_file = BytesIO(csv_input)
+    AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+    a_s = StudentAssignment.objects.get(student=student,
+                                        assignment=assignment)
+    assert a_s.grade == expected_grade

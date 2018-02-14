@@ -26,8 +26,8 @@ from .views import \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
 from learning.views.gradebook import GradeBookTeacherView, \
     GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
-    GradeBookTeacherImportCSVFromStepicView, \
-    GradeBookTeacherImportCSVFromYandexView
+    AssignmentGradesImportByStepikIDView, \
+    AssignmentGradesImportByYandexLoginView
 from learning.views.course_offering import CourseOfferingEditView, \
     CourseOfferingNewsCreateView, CourseOfferingNewsUpdateView, \
     CourseOfferingNewsDeleteView, CourseOfferingNewsUnreadNotificationsView
@@ -151,10 +151,10 @@ teaching_section_patterns = url(
                 GradeBookTeacherCSVView.as_view(),
                 name='markssheet_teacher_csv'),
             url(r'^(?P<course_offering_pk>\d+)/import/stepic$',
-                GradeBookTeacherImportCSVFromStepicView.as_view(),
+                AssignmentGradesImportByStepikIDView.as_view(),
                 name='markssheet_teacher_csv_import_stepic'),
             url(r'^(?P<course_offering_pk>\d+)/import/yandex$',
-                GradeBookTeacherImportCSVFromYandexView.as_view(),
+                AssignmentGradesImportByYandexLoginView.as_view(),
                 name='markssheet_teacher_csv_import_yandex'),
         ])),
     ]))

@@ -430,7 +430,7 @@ def _get_user_id(request, **filters):
         return ids[0]
 
 
-class ImportGrades(object):
+class AssignmentGradesImport:
     headers = None
 
     def __init__(self, request, assignment):
@@ -486,83 +486,73 @@ class ImportGrades(object):
             'subclasses of ImportGrade must provide update_score() method')
 
 
-class ImportGradesByStepicID(ImportGrades):
-    headers = ["user_id", "total"]
+class AssignmentGradesImport:
+    def __init__(self, assignment, csv_file, lookup_field, request=None):
+        self.assignment = assignment
+        # TODO: remove self.request
+        self.request = request
+        self.reader = unicodecsv.DictReader(iter(csv_file))
+        self.lookup_field = lookup_field
+        self.total = 0
+        self.success = 0
 
-    def clean_data(self, row):
-        stepic_id = row["user_id"].strip()
-        try:
-            stepic_id = int(stepic_id)
-        except ValueError:
-            msg = _("Can't convert user_id to int '{}'").format(stepic_id)
-            raise ValidationError(msg, code='invalid_user_id')
-        try:
-            score = int(ceil(float(row["total"])))
-        except ValueError:
-            msg = _("Can't convert points for user '{}'").format(stepic_id)
-            raise ValidationError(msg, code='invalid_score_value')
-        if score > self.assignment.grade_max:
-            msg = _("Score greater than max value for id '{}'").format(stepic_id)
-            raise ValidationError(msg, code='invalid_score_value')
-        return stepic_id, score
+    def validate_headers(self):
+        headers = self.reader.fieldnames
+        errors = []
+        for header in [self.lookup_field, "total"]:
+            if header not in headers:
+                errors.append(
+                    "ERROR: header `{}` not found".format(header))
+        return errors
 
-    def update_score(self, data):
-        stepic_id, score = data
-        assignment_id = self.assignment.pk
+    def process(self):
+        errors = self.validate_headers()
+        if errors:
+            raise ValidationError("<br>".join(errors))
+        msg = f"Start processing results for assignment_id={self.assignment.id}"
+        logger.debug(msg)
+        for row in self.reader:
+            self.total += 1
+            try:
+                lookup_field_value, score = self.clean(row)
+                res = self.update_score(lookup_field_value, score)
+                self.success += int(res)
+            except ValidationError as e:
+                logger.debug(e.message)
+        return self.import_results()
 
-        user_id = _get_user_id(self.request, stepic_id=stepic_id)
-        if not user_id:
-            return False
+    def import_results(self):
+        return {'success': self.success, 'total': self.total}
 
-        updated = (StudentAssignment.objects
-                   .filter(assignment__id=assignment_id,
-                           student_id=user_id)
-                   .update(grade=score))
-        if not updated:
-            msg = "User with id={} and stepic_id={} doesn't have " \
-                  "an assignment {}".format(user_id, stepic_id, assignment_id)
-            logger.debug(msg)
-            return False
-        logger.debug("Has written {} points for user_id={} on assignment_id={}"
-                     .format(score, user_id, assignment_id))
-        return True
-
-
-class ImportGradesByYandexLogin(ImportGrades):
-    headers = ["login", "total"]
-
-    def clean_data(self, row):
-        yandex_id = row['login'].strip()
+    def clean(self, row):
+        lookup_field_value = row[self.lookup_field].strip()
         try:
             score = int(ceil(float(row["total"])))
         except ValueError:
-            msg = _("Can't convert points for user '{}'").format(yandex_id)
+            msg = _("Can't convert points for user '{}'").format(
+                lookup_field_value)
             raise ValidationError(msg, code='invalid_score_value')
         if score > self.assignment.grade_max:
-            msg = _("Score greater then max grade for user '{}'").format(yandex_id)
+            msg = _("Score is greater than max grade for user '{}'").format(
+                lookup_field_value)
             raise ValidationError(msg, code='invalid_score_value')
-        return yandex_id, score
+        return lookup_field_value, score
 
-    def update_score(self, data):
-        yandex_id, score = data
+    def update_score(self, lookup_field_value, score):
         from learning.models import StudentAssignment
 
-        assignment_id = self.assignment.pk
-
-        user_id = _get_user_id(self.request, yandex_id__iexact=yandex_id)
+        kwargs = {self.lookup_field: lookup_field_value}
+        user_id = _get_user_id(self.request, **kwargs)
         if not user_id:
             return False
 
+        assignment_id = self.assignment.pk
         updated = (StudentAssignment.objects
                    .filter(assignment__id=assignment_id,
                            student_id=user_id)
                    .update(grade=score))
         if not updated:
-            msg = "User with id={} and yandex_id={} doesn't have " \
-                  "an assignment".format(user_id, yandex_id)
-            logger.debug(msg)
+            logger.debug(f"User with id={user_id} doesn't have an assignment")
             return False
-        logger.debug("Has written {} points for user_id={} on assignment_id={}"
-                     .format(score, user_id, assignment_id))
+        logger.debug(f"{score} points has written to user_id = {user_id}")
         return True
-
