@@ -64,7 +64,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'handlers': ['logfile'],
         },
         'django.db.backends': {
