@@ -510,10 +510,9 @@ class AssignmentGradesImport:
         qs = (Enrollment.active
               .filter(course_offering_id=self.assignment.course_offering_id)
               .only("student_id",
-                    f"student__{self.lookup_field}")
-              .iterator())
+                    f"student__{self.lookup_field}"))
         active_students = {}
-        for s in qs:
+        for s in qs.iterator():
             lookup_field_value = getattr(s.student, self.lookup_field)
             active_students[str(lookup_field_value)] = s.student_id
 
