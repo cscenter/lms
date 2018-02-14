@@ -260,7 +260,9 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
             assignment = (Assignment.objects
                           .select_related("course_offering")
                           .get(**filters))
-            self.import_grades_for_assignment(assignment)
+            total, success = self.import_grades_for_assignment(assignment)
+            messages.info(self.request,
+                          _("Successfully imported {} results").format(success))
         except ValidationError as e:
             messages.error(self.request, e.message)
         except Assignment.DoesNotExist:
@@ -275,10 +277,10 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
 class AssignmentGradesImportByStepikIDView(AssignmentGradesImportGenericView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
-        AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+        return AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
 
 
 class AssignmentGradesImportByYandexLoginView(AssignmentGradesImportGenericView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
-        AssignmentGradesImport(assignment, csv_file, "yandex_id").process()
+        return AssignmentGradesImport(assignment, csv_file, "yandex_id").process()
