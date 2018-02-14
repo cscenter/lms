@@ -260,7 +260,7 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
             assignment = (Assignment.objects
                           .select_related("course_offering")
                           .get(**filters))
-            self.import_grades(assignment)
+            self.import_grades_for_assignment(assignment)
         except ValidationError as e:
             messages.error(self.request, e.message)
         except Assignment.DoesNotExist:
@@ -268,17 +268,17 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
         url = assignment.course_offering.get_gradebook_url()
         return HttpResponseRedirect(url)
 
-    def import_grades(self, assignment):
+    def import_grades_for_assignment(self, assignment):
         raise NotImplementedError()
 
 
 class AssignmentGradesImportByStepikIDView(AssignmentGradesImportGenericView):
-    def import_grades(self, assignment):
+    def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
         AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
 
 
 class AssignmentGradesImportByYandexLoginView(AssignmentGradesImportGenericView):
-    def import_grades(self, assignment):
+    def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
         AssignmentGradesImport(assignment, csv_file, "yandex_id").process()

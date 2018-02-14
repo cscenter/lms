@@ -13,7 +13,6 @@ from core.admin import CityAwareSplitDateTimeField, CityAwareModelForm
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from core.validators import FileValidator
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
 
