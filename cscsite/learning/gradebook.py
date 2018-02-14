@@ -509,16 +509,33 @@ class AssignmentGradesImport:
         errors = self.validate_headers()
         if errors:
             raise ValidationError("<br>".join(errors))
-        msg = f"Start processing results for assignment_id={self.assignment.id}"
+        msg = f"Start processing results for assignment {self.assignment.id}"
         logger.debug(msg)
+
+        qs = (Enrollment.active
+              .filter(course_offering_id=self.assignment.course_offering_id)
+              .only("student_id",
+                    f"student__{self.lookup_field}")
+              .iterator())
+        active_students = {}
+        for s in qs:
+            lookup_field_value = getattr(s.student, self.lookup_field)
+            active_students[str(lookup_field_value)] = s.student_id
+
         for row in self.reader:
             self.total += 1
             try:
                 lookup_field_value, score = self.clean(row)
-                res = self.update_score(lookup_field_value, score)
-                self.success += int(res)
+                student_id = active_students.get(lookup_field_value, None)
+                if student_id:
+                    updated = self.update_score(student_id, score)
+                    if not updated:
+                        logger.debug(f"Student with id {student_id} enrolled "
+                                     f"but doesn't have an assignment. "
+                                     f"lookup_field_value={lookup_field_value}")
+                    self.success += int(updated)
             except ValidationError as e:
-                logger.debug(e.message)
+                logger.error(e.message)
         return self.import_results()
 
     def import_results(self):
@@ -539,21 +556,13 @@ class AssignmentGradesImport:
             raise ValidationError(msg, code='invalid_score_value')
         return lookup_field_value, score
 
-    def update_score(self, lookup_field_value, score):
-        from learning.models import StudentAssignment
-
-        kwargs = {self.lookup_field: lookup_field_value}
-        user_id = _get_user_id(self.request, **kwargs)
-        if not user_id:
-            return False
-
+    def update_score(self, student_id, score):
         assignment_id = self.assignment.pk
         updated = (StudentAssignment.objects
                    .filter(assignment__id=assignment_id,
-                           student_id=user_id)
+                           student_id=student_id)
                    .update(grade=score))
         if not updated:
-            logger.debug(f"User with id={user_id} doesn't have an assignment")
             return False
-        logger.debug(f"{score} points has written to user_id = {user_id}")
+        logger.debug(f"{score} points has written to student {student_id}")
         return True
