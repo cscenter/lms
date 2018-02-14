@@ -3,31 +3,30 @@ from typing import Optional
 
 import unicodecsv as csv
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Prefetch
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import redirect, get_object_or_404
+from django.http import HttpResponseRedirect, Http404, HttpResponse, \
+    HttpResponseForbidden, HttpResponseBadRequest
+from django.shortcuts import redirect
+from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
 from core.exceptions import Redirect
 from learning import utils
-from learning.forms import GradebookImportCSVForm
 from learning.gradebook import GradeBookFormFactory, gradebook_data, \
-    ImportGradesByStepicID, ImportGradesByYandexLogin
-from learning.models import Semester, CourseOffering, StudentAssignment, \
-    Enrollment
-from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET, \
-    GRADING_TYPES, GRADES
+    AssignmentGradesImport
+from learning.models import Semester, CourseOffering, Assignment
+from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
 from learning.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 
 __all__ = [
     "GradeBookCuratorDispatchView", "GradeBookTeacherDispatchView",
     "GradeBookTeacherView",
-    "GradeBookTeacherCSVView", "GradeBookTeacherImportCSVFromStepicView",
-    "GradeBookTeacherImportCSVFromYandexView"
+    "GradeBookTeacherCSVView", "AssignmentGradesImportByStepikIDView",
+    "AssignmentGradesImportByYandexLoginView"
 ]
 
 
@@ -243,41 +242,43 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
         return response
 
 
-class GradeBookTeacherImportCSVFromStepicView(TeacherOnlyMixin, generic.View):
-    """Import students grades from stepic platform"""
-
+class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
     def post(self, request, course_offering_pk, *args, **kwargs):
-        filters = {"pk": course_offering_pk}
+        try:
+            assignment_id = int(request.POST['assignment'])
+            csv_file = request.FILES['csv_file']
+        except (MultiValueDictKeyError, ValueError, TypeError):
+            return HttpResponseBadRequest()
+        filters = {
+            "pk": assignment_id,
+            "course_offering_id": course_offering_pk,
+            "is_online": False
+        }
         if not request.user.is_curator:
-            filters['teachers__in'] = [request.user.pk]
-        co = get_object_or_404(CourseOffering, **filters)
-        form = GradebookImportCSVForm(request.POST, request.FILES,
-                                      course_id=co.course_id)
-        if form.is_valid():
-            assignment = form.cleaned_data['assignment']
-            ImportGradesByStepicID(request, assignment).import_data()
-        else:
-            # TODO: provide better description
-            messages.info(request, _('Invalid form.'))
-        url = co.get_gradebook_url()
+            filters['course_offering__teachers__id'] = request.user.pk
+        try:
+            assignment = (Assignment.objects
+                          .select_related("course_offering")
+                          .get(**filters))
+            self.import_grades(assignment)
+        except ValidationError as e:
+            messages.error(self.request, e.message)
+        except Assignment.DoesNotExist:
+            return HttpResponseForbidden()
+        url = assignment.course_offering.get_gradebook_url()
         return HttpResponseRedirect(url)
 
+    def import_grades(self, assignment):
+        raise NotImplementedError()
 
-class GradeBookTeacherImportCSVFromYandexView(TeacherOnlyMixin, generic.View):
-    """Import students grades by yandex login"""
 
-    def post(self, request, course_offering_pk, *args, **kwargs):
-        filters = {"pk": course_offering_pk}
-        if not request.user.is_curator:
-            filters['teachers__in'] = [request.user.pk]
-        co = get_object_or_404(CourseOffering, **filters)
-        form = GradebookImportCSVForm(request.POST, request.FILES,
-                                      course_id=co.course_id)
-        if form.is_valid():
-            assignment = form.cleaned_data['assignment']
-            ImportGradesByYandexLogin(request, assignment).import_data()
-        else:
-            # TODO: provide better description
-            messages.info(request, _('Invalid form.'))
-        url = co.get_gradebook_url()
-        return HttpResponseRedirect(url)
+class AssignmentGradesImportByStepikIDView(AssignmentGradesImportGenericView):
+    def import_grades(self, assignment):
+        csv_file = self.request.FILES['csv_file']
+        AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+
+
+class AssignmentGradesImportByYandexLoginView(AssignmentGradesImportGenericView):
+    def import_grades(self, assignment):
+        csv_file = self.request.FILES['csv_file']
+        AssignmentGradesImport(assignment, csv_file, "yandex_id").process()

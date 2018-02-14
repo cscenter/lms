@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
-from io import BytesIO
-
 import pytest
 import pytz
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.encoding import force_bytes
 from mock import patch, MagicMock
 
-from learning.gradebook import ImportGradesByStepicID
 from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR)
 from learning.utils import split_on_condition, get_term_index, \
     get_term_index_academic_year_starts
-from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 
 
@@ -36,27 +29,6 @@ class UtilTests(TestCase):
                           split_on_condition(xs, lambda x: x % 2 != 0))
         self.assertEquals((xs, []), split_on_condition(xs, lambda x: True))
         self.assertEquals(([], xs), split_on_condition(xs, lambda x: False))
-
-    @patch('django.contrib.messages.api.add_message')
-    def test_import_stepic(self, mock_messages):
-        teacher = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
-        student = StudentCenterFactory()
-        student.stepic_id = 20
-        student.save()
-        EnrollmentFactory.create(student=student, course_offering=co)
-        assignments = AssignmentFactory.create_batch(3, course_offering=co)
-        assignment = assignments[0]
-        expected_grade = 13
-        csv_input = force_bytes("user_id,total\n"
-                                "{},{}\n".format(student.stepic_id,
-                                                 expected_grade))
-        request = MagicMock()
-        request.FILES = {'csv_file': BytesIO(csv_input)}
-        ImportGradesByStepicID(request, assignment).import_data()
-        a_s = StudentAssignment.objects.get(student=student,
-                                            assignment=assignment)
-        self.assertEquals(a_s.grade, expected_grade)
 
 
 def test_get_term_index():
