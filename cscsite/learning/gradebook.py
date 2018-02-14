@@ -14,7 +14,7 @@ from django.forms import BoundField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
-from learning.forms import GradeField
+from learning.forms import GradeField, AssignmentGradeForm
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     CourseOffering
 from learning.settings import GRADES
@@ -527,8 +527,9 @@ class AssignmentGradesImport:
     def clean(self, row):
         lookup_field_value = row[self.lookup_field].strip()
         try:
-            score = int(ceil(float(row["total"])))
-        except ValueError:
+            grade_field = AssignmentGradeForm.declared_fields['grade']
+            score = grade_field.to_python(row["total"])
+        except ValidationError:
             msg = _("Can't convert points for user '{}'").format(
                 lookup_field_value)
             raise ValidationError(msg, code='invalid_score_value')

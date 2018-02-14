@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 from io import StringIO, BytesIO
 import pytest
 import pytz
@@ -641,6 +642,31 @@ def test_gradebook_import_assignments_from_csv_security(client):
 
 
 @pytest.mark.django_db
+def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
+    mocker.patch('django.contrib.messages.api.add_message')
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(teachers=[teacher])
+    student = StudentCenterFactory()
+    student.stepic_id = 20
+    student.save()
+    EnrollmentFactory.create(student=student, course_offering=co)
+    assignments = AssignmentFactory.create_batch(3, course_offering=co)
+    assignment = assignments[0]
+    for expected_grade in [13, Decimal('13.42'), '12.34', '"34,56"']:
+        csv_input = force_bytes("stepic_id,total\n"
+                                "{},{}\n".format(student.stepic_id,
+                                                 expected_grade))
+        csv_file = BytesIO(csv_input)
+        AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+        a_s = StudentAssignment.objects.get(student=student,
+                                            assignment=assignment)
+        if hasattr(expected_grade, "replace"):
+            # remove quotes and replace comma
+            expected_grade = expected_grade.replace('"', '').replace(",", ".")
+        assert a_s.grade == Decimal(expected_grade)
+
+
+@pytest.mark.django_db
 def test_gradebook_import_assignments_from_csv(client, tmpdir):
     teacher = TeacherCenterFactory()
     co = CourseOfferingFactory.create(teachers=[teacher])
@@ -706,25 +732,3 @@ stepic_id,header2,total
     assert StudentAssignment.objects.get(student=student1).grade == 10
     assert StudentAssignment.objects.get(student=student2).grade == 42
     assert StudentAssignment.objects.get(student=student3).grade == 1
-
-
-@pytest.mark.django_db
-def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
-    mocker.patch('django.contrib.messages.api.add_message')
-    teacher = TeacherCenterFactory()
-    co = CourseOfferingFactory.create(teachers=[teacher])
-    student = StudentCenterFactory()
-    student.stepic_id = 20
-    student.save()
-    EnrollmentFactory.create(student=student, course_offering=co)
-    assignments = AssignmentFactory.create_batch(3, course_offering=co)
-    assignment = assignments[0]
-    expected_grade = 13
-    csv_input = force_bytes("stepic_id,total\n"
-                            "{},{}\n".format(student.stepic_id,
-                                             expected_grade))
-    csv_file = BytesIO(csv_input)
-    AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
-    a_s = StudentAssignment.objects.get(student=student,
-                                        assignment=assignment)
-    assert a_s.grade == expected_grade
