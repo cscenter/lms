@@ -122,6 +122,9 @@ urlpatterns = [
     url(r'^', include('learning.projects.urls')),
     url(r'^narnia/', include(admin.site.urls)),
     url(r'^narnia/', include(loginas_urls)),
+    # TODO: remove after testing
+    url(r'^', include('admission_test.urls')),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if 'rosetta' in settings.INSTALLED_APPS:

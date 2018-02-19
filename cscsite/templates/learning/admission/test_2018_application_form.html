@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block title %}Тренировка (набор 2018) - CSC{% endblock title %}
+
+{% block content %}
+    <div class="container" id="application-form">
+    <div class="card">
+        <div class="card-body card-padding">
+            {% crispy form %}
+        </div>
+    </div>
+        <a href="/admission-2018/testing/auth/">auth</a>
+    </div>
+{% endblock %}
