@@ -121,3 +121,5 @@ django-loginas==0.3.3
 git+https://github.com/pacahon/django-treemenus.git
 
 django-webpack-loader==0.5.0
+social-auth-core==1.6.0
+social-auth-app-django==2.1.0

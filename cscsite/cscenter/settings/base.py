@@ -26,6 +26,15 @@ INSTALLED_APPS += [
     'learning.admission.apps.AdmissionConfig',
     # 'django_ses'
     'post_office',
+    'admission_test',  # TODO: remove after testing
+]
+
+SOCIAL_AUTH_YANDEXRU_KEY = "4ac0b41c382a4dba9d8aeaa9a29d663b"
+SOCIAL_AUTH_YANDEXRU_SECRET = "8d708acac5d8422e8c4973d5bf2fa568"
+SOCIAL_AUTH_YANDEXRU_PIPELINE = [
+    'social_core.pipeline.social_auth.social_details',
+    # 'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
 ]
 
 # Add site specific templates
