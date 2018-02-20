@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+    function openPopup(url) {
+        var w = 700;
+        var h = 600;
+        var left = 100;
+        var top = 100;
+
+        url += "?next={% url 'admission_test:auth_complete' %}";
+        var name = "";
+        var settings = 'height=' + h + ',width=' + w + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes';
+        window.open(url, name, settings);
+    }
+
+    function yandexLoginSuccess(yandexLogin) {
+        $('.__auth-begin')
+            .html('<i class="fa fa-check text-success"></i> Доступ разрешен')
+            .attr("disabled", "disabled");
+        $.jGrowl('Доступ успешно предоставлен', {theme: "success", sticky: false, position: "bottom-right"});
+
+    }
+
+    function showError(msg) {
+        $.jGrowl(msg, {theme: "error", sticky: true, position: "bottom-right"});
+    }
+
+    $(function() {
+       $('div[data-toggle="popover"]').popover({html: true, trigger: "hover"});
+
+       $('.__auth-begin').click(function() {
+           if ($(this).attr("disabled")) {
+               return false;
+           }
+           var href = $(this).attr("href");
+           openPopup(href);
+          return false;
+       });
+    });
+    </script>
+{% endblock javascripts %}
+
+{% block content %}
+    <div class="container">
+        <p>Набор 2018 начнётся в марте, но прямо сейчас вы можете подписаться на новость о старте приёма заявок и попробовать свои силы в решении задач прошлых лет.
+            Часть этих задач мы собрали на платформе Яндекс.Контест, где мы несколько лет подряд проводим вступительные испытания.
+            Для доступа к пробному контесту заполните форму ниже. Вам на указанный email придёт письмо со ссылкой и инструкцией.</p>
+        <p class="mb-30"><b>Обратите внимание</b>, что эти <b>задачи ознакомительные</b>, их решение не даёт никаких преимуществ в наборе (кроме полученных знаний и опыта, конечно).</p>
+        <div class="row">
+            <div class="col-xs-8">
+                <div class="card">
+                    <div class="card-header ch-alt">Форма записи на пробный контест</div>
+                    <div class="card-body card-padding">
+                        {% crispy form %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

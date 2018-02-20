@@ -9,6 +9,11 @@ class YandexRuOAuth2(BaseOAuth2):
     ACCESS_TOKEN_METHOD = 'POST'
     REDIRECT_STATE = False
 
+    def auth_extra_arguments(self):
+        extra_arguments = super().auth_extra_arguments()
+        extra_arguments["force_confirm"] = "yes"
+        return extra_arguments
+
     @handle_http_errors
     def auth_complete(self, *args, **kwargs):
         """Completes login process, prevent user login"""

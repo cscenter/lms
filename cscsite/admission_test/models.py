@@ -33,10 +33,8 @@ class AdmissionTestApplicant(TimeStampedModel):
         help_text=_("Applicant|yandex_id"),
         null=True,
         blank=True)
-    yandex_id_normalize = models.CharField(
-        _("Yandex ID normalisation"),
-        max_length=80,
-        help_text=_("Applicant|yandex_id_normalization"),
+    participant_id = models.IntegerField(
+        "Participant ID in Yandex Contest",
         null=True,
         blank=True)
     github_id = models.CharField(
@@ -57,7 +55,3 @@ class AdmissionTestApplicant(TimeStampedModel):
     def get_full_name(self):
         parts = [self.surname, self.first_name, self.patronymic]
         return smart_text(" ".join(part for part in parts if part).strip())
-
-    def clean(self):
-        if self.yandex_id:
-            self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
