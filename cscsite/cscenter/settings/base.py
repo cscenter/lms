@@ -38,7 +38,10 @@ SOCIAL_AUTH_YANDEXRU_PIPELINE = [
 ]
 
 # Add site specific templates
-TEMPLATES[0]['DIRS'] = [str(BASE_DIR / "templates")] + TEMPLATES[0]['DIRS']
+TEMPLATES[0]['DIRS'] = [
+    str(BASE_DIR / "templates"),
+    str(PROJECT_DIR / "admission_test" / "templates"),
+] + TEMPLATES[0]['DIRS']
 
 LOCALE_PATHS += [
     str(BASE_DIR / "locale"),

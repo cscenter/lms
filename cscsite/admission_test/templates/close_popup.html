@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Пробный контест к Набору 2018</title>
+    <script type="text/javascript">
+
+        function closeAndUpdate() {
+            if (window.opener) {
+                window.opener.yandexLoginSuccess("{{ yandex_login }}");
+                window.close();
+            }
+        }
+
+        function closeAndShowError(error) {
+            if (window.opener) {
+                window.opener.showError("{{ error }}");
+                window.close();
+            }
+        }
+
+        {% if error %}
+            closeAndShowError("{{ error }}");
+        {% else %}
+            closeAndUpdate();
+        {% endif %}
+
+        // To handle errors, this template should be integrated into your authentication error message page
+        // Note that you can call any window.opener function like window.opener.func
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>
