@@ -42,30 +42,31 @@ def register_in_yandex_contest(applicant_id):
     if response.status_code not in [201, 409]:
         raise YandexAPIException()
 
-    # Send notification
+    # Generate notification
+    update_fields = {"status_code": response.status_code}
     if response.status_code == 201:
         participant_id = response.text
-        (AdmissionTestApplicant.objects
-         .filter(pk=instance.pk)
-         .update(participant_id=participant_id))
+        update_fields["participant_id"] = participant_id
         data = response.json()
         logger.debug("Meta data in JSON: {}".format(data))
-        mail.send(
-            [instance.email],
-            sender='info@compscicenter.ru',
-            # TODO: move template name to Campaign settings
-            template="admission-2018-subscribe",
-            context={
-                'CONTEST_ID': contest_id,
-                'YANDEX_LOGIN': instance.yandex_id,
-                'PARTICIPANT_ID': participant_id,
-            },
-            render_on_delivery=True,
-            backend='ses',
-        )
     else:  # 409 - already registered for this contest
-        # TODO: Send reminder?
         pass
+    # Saved response code from Yandex API means we processed the form
+    (AdmissionTestApplicant.objects
+     .filter(pk=instance.pk)
+     .update(**update_fields))
+    mail.send(
+        [instance.email],
+        sender='info@compscicenter.ru',
+        # TODO: move template name to Campaign settings
+        template="admission-2018-subscribe",
+        context={
+            'CONTEST_ID': contest_id,
+            'YANDEX_LOGIN': instance.yandex_id,
+        },
+        render_on_delivery=True,
+        backend='ses',
+    )
 
 
 
