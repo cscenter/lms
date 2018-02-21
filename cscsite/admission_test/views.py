@@ -58,7 +58,7 @@ class AdmissionTestApplicantCreateView(CreateView):
 
 
 def registration_complete(request):
-    request.session.pop(SESSION_LOGIN_KEY)
+    request.session.pop(SESSION_LOGIN_KEY, None)
     return render(request, 'registration_complete.html', context={
     })
 
