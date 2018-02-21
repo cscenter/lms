@@ -114,7 +114,6 @@ def auth_complete(request, *args, **kwargs):
     # the pipeline so that the pipeline can change the redirect if needed
     redirect_value = backend.strategy.session_get(redirect_name, '') or \
                      data.get(redirect_name, '')
-    # print(auth_data)
     return render(request, 'close_popup.html', context={
         "yandex_login": auth_data.get("login", "")
     })

@@ -37,6 +37,11 @@ class AdmissionTestApplicant(TimeStampedModel):
         "Participant ID in Yandex Contest",
         null=True,
         blank=True)
+    status_code = models.IntegerField(
+        "Yandex API Response",
+        editable=False,
+        null=True,
+        blank=True)
     github_id = models.CharField(
         _("Github ID"),
         max_length=255,
