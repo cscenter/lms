@@ -37,7 +37,7 @@ class AdmissionTestApplicationForm(forms.ModelForm):
         if yandex_passport:
             yandex_button = f'<a class="btn btn-default __auth-begin" href="{url}" disabled="disabled"><i class="fa fa-check text-success"></i> Доступ разрешен</a>'
         else:
-            yandex_button = f'<a class="btn btn-default __auth-begin" href="{url}">Разрешить доступ</a>'
+            yandex_button = f'<a class="btn btn-default __auth-begin" href="{url}">Разрешить доступ к данным на Яндексе</a>'
         self.helper.layout = Layout(
             Row(Div(Field('surname', placeholder=_("Surname")), css_class='col-xs-12')),
             Row(Div(Field('first_name', placeholder=_("First name")), css_class='col-xs-12')),
@@ -46,7 +46,6 @@ class AdmissionTestApplicationForm(forms.ModelForm):
             HTML(f"""
             <div class="row">
                 <div class="col-xs-12 form-group">
-                    <label for="id_yandex_id" class="control-label  requiredField">Доступ к данным на Яндексе<span class="asteriskField">*</span></label>
                     <div class="controls">
                         {yandex_button}
                         <div class="btn btn-sm" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
