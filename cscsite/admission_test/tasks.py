@@ -57,7 +57,7 @@ def register_in_yandex_contest(applicant_id):
      .update(**update_fields))
     mail.send(
         [instance.email],
-        sender='info@compscicenter.ru',
+        sender='CS центр <info@compscicenter.ru>',
         # TODO: move template name to Campaign settings
         template="admission-2018-subscribe",
         context={
