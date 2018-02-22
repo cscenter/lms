@@ -8,6 +8,8 @@
 {% load markdown from core_tags %}
 {% load render_bundle from webpack_loader %}
 
+{% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
+
 {% block javascripts %}
     {#    TODO: append instead of replace #}
     <script type="text/javascript">
