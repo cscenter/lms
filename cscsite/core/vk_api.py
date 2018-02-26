@@ -27,6 +27,7 @@ class VkOpenAPI:
     def get_wall(self, owner_id, **kwargs):
         """
         Returns a list of posts on a user wall or community wall.
+        https://vk.com/dev/wall.get
         """
         payload = {
             'v': 5.73,
