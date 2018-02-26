@@ -1,4 +1,6 @@
+import {showComponentError} from 'utils';
 import {reviewFormValidation} from './projects_report';
+import {initApplicationForm} from './application';
 
 // Let's leave it here for now
 $(function() {
@@ -14,5 +16,15 @@ $(function() {
 
     // Leave it here for now
     reviewFormValidation();
+
+    let section = $("body").data("init-section");
+    if (section === "application") {
+        import(/* webpackChunkName: "forms" */ 'forms')
+            .then(_ => {
+                $('select.select').selectpicker();
+                initApplicationForm();
+            })
+            .catch(error => showComponentError(error));
+    }
 });
 
