@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 from datetime import datetime
 
-from crispy_forms.bootstrap import FormActions, PrependedText, InlineRadios
+from crispy_forms.bootstrap import FormActions, InlineRadios
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field, Row, Fieldset, \
-    MultiField
+from crispy_forms.layout import Layout, Div, Submit, Field, Row
 from django import forms
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.forms.models import ModelForm
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from core.widgets import UbereditorWidget, DateInputAsTextInput
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
+from core.widgets import UbereditorWidget
 from learning.admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
@@ -82,24 +79,21 @@ class ApplicationFormStep1(forms.ModelForm):
         self.helper.layout = Layout(
             InlineRadios('city'),
             Row(
-                Div('surname', css_class='col-xs-4'),
-                Div('first_name', css_class='col-xs-4'),
-                Div('patronymic', css_class='col-xs-4'),
+                Div('surname', css_class='col-sm-4'),
+                Div('first_name', css_class='col-sm-4'),
+                Div('patronymic', css_class='col-sm-4'),
             ),
             Row(
-                Div(PrependedText('email', '@'), css_class='col-xs-8'),
-                Div('phone', css_class='col-xs-4')
+                Div('email', css_class='col-sm-8'),
+                Div('phone', css_class='col-sm-4')
             ),
             Row(
-                Div('yandex_id', css_class='col-xs-12'),
+                Div('yandex_id', css_class='col-sm-12'),
             ),
             Row(
-                Div('stepic_id', css_class='col-xs-6'),
-                Div('github_id', css_class='col-xs-6'),
+                Div('stepic_id', css_class='col-sm-6'),
+                Div('github_id', css_class='col-sm-6'),
             ),
-            Row(
-            ),
-
         )
         super().__init__(*args, **kwargs)
 
@@ -187,41 +181,41 @@ class ApplicationFormStep2(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
-                Div("university", css_class='col-xs-8'),
+                Div("university", css_class='col-sm-8'),
             ),
             Row(
-                Div('university_other', css_class='col-xs-8'),
+                Div('university_other', css_class='col-sm-8'),
                 css_class='margin-bottom-15',
                 css_id='university-other-row',
             ),
             Row(
-                Div('faculty', css_class='col-xs-8'),
+                Div('faculty', css_class='col-sm-8'),
             ),
             Row(
-                Div('course', css_class='col-xs-8'),
+                Div('course', css_class='col-sm-8'),
                 css_class='margin-bottom-15',
             ),
             Row(
-                Div('has_job', css_class='col-xs-4'),
-                Div('workplace', css_class='col-xs-4'),
-                Div('position', css_class='col-xs-4'),
+                Div('has_job', css_class='col-sm-4'),
+                Div('workplace', css_class='col-sm-4'),
+                Div('position', css_class='col-sm-4'),
                 css_class='margin-bottom-15',
             ),
             Row(
-                Div('experience', css_class='col-xs-12'),
+                Div('experience', css_class='col-sm-12'),
                 css_class='margin-bottom-15'
             ),
             Row(
-                Div('preferred_study_programs', css_class='col-xs-12'),
-                Div('preferred_study_programs_dm_note', css_class='col-xs-12'),
-                Div('preferred_study_programs_cs_note', css_class='col-xs-12'),
-                Div('preferred_study_programs_se_note', css_class='col-xs-12'),
+                Div('preferred_study_programs', css_class='col-sm-12'),
+                Div('preferred_study_programs_dm_note', css_class='col-sm-12'),
+                Div('preferred_study_programs_cs_note', css_class='col-sm-12'),
+                Div('preferred_study_programs_se_note', css_class='col-sm-12'),
                 css_class='margin-bottom-15',
                 css_id="study-programs-row"
             ),
             Row(
-                Div('where_did_you_learn', css_class='col-xs-12'),
-                Div('where_did_you_learn_other', css_class='col-xs-12'),
+                Div('where_did_you_learn', css_class='col-sm-12'),
+                Div('where_did_you_learn_other', css_class='col-sm-12'),
                 css_class='margin-bottom-15',
                 css_id="where-did-you-learn-row"
             ),

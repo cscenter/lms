@@ -8,6 +8,18 @@ from learning.admission.views import InterviewListView, InterviewDetailView, \
     InterviewCommentView, InterviewAppointmentView, InterviewSlots
 
 urlpatterns = [
+    url(r'^application/(?P<step>.+)/$',
+        ApplicantRequestWizardView.as_view(
+            url_name='admission_application_step'),
+        name='admission_application_step'),
+    url(r'^application/$',
+        ApplicantRequestWizardView.as_view(
+            url_name='admission_application_step'),
+        kwargs={"step": "welcome"},
+        name='admission_application'),
+    url(r'^application/complete/$',
+        ApplicationCompleteView.as_view(),
+        name='admission_application_complete'),
     url(r'^admission/', include([
         url(r'^applicants/$', ApplicantListView.as_view(), name='admission_applicants'),
         url(r'^applicants/(?P<pk>\d+)/$', ApplicantDetailView.as_view(), name='admission_applicant_detail'),
