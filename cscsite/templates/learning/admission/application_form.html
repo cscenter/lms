@@ -4,9 +4,9 @@
 {% load staticfiles %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block body_attrs %} class="gray" data-init-section="application"{% endblock body_attrs %}
 
-{% block title %}Анкета на поступление - CSC{% endblock title %}
+{% block title %}Анкета на поступление - Computer Science Center{% endblock title %}
 
 {% block head %}
 {{ wizard.form.media }}
@@ -16,32 +16,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
 {% endblock stylesheets %}
 
-{% block javascripts %}
-     {% render_bundle 'forms' 'js'  %}
-    <script type="text/javascript" >
-        $('select.select').selectpicker();
-    </script>
-{% endblock javascripts %}
-
 
 {% block content %}
     <div class="container" id="application-form">
     <div class="card">
-        {% if wizard.steps.current == 'spb' %}
-            <div class="card-header"><h2>Анкета для Санкт-Петербурга</h2></div>
-        {% elif wizard.steps.current == 'nsk' %}
-            <div class="card-header"><h2>Анкета для Новосибирска</h2></div>
-        {% endif %}
+        <div class="card-header ch-alt">
+            {% if wizard.steps.current == 'spb' %}
+                <h2>Анкета для Санкт-Петербурга</h2>
+            {% elif wizard.steps.current == 'nsk' %}
+                <h2>Анкета для Новосибирска</h2>
+            {% else %}
+                <h2>Анкета на поступление - Набор 2018</h2>
+            {% endif %}
+        </div>
         <div class="card-body card-padding">
-{#           <div class="progress">#}
-{#             <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5" style="width: 20%;">#}
-{#               Шаг {{ wizard.steps.step1 }} из {{ wizard.steps.count }}#}
-{#             </div>#}
-{#           </div>#}
-
-{#<div class="steps steps-sm row" data-plugin="matchHeight" data-by-row="true" role="tablist">#}
+{#            <div class="steps steps-sm row" data-plugin="matchHeight" data-by-row="true" role="tablist">#}
 {#                <div class="step col-md-4 {% if wizard.steps.step1 == 1 %}current{% else %}done{% endif %}" role="tab" aria-expanded="true">#}
-{#                <span class="step-number">1</span>#}
 {#                  <div class="step-desc">#}
 {#                    <span class="step-title">Город поступления</span>#}
 {#                    <p>Выберите город и укажите основную информацию о себе</p>#}
@@ -61,13 +51,9 @@
 {#                    <p>Перед отправкой проверьте, правильно ли введены данные</p>#}
 {#                  </div>#}
 {#                </div>#}
-{#              </div>#}
+{#            </div>#}
 
-
-            <div class="row">
-                {{ view.step1 }}
-                <div class="col-xs-12">
-                <form action="" method="post">{% csrf_token %}
+            <form action="" method="post">{% csrf_token %}
                 <table>
                 {{ wizard.management_form }}
                 {% if wizard.form.forms %}
@@ -85,7 +71,7 @@
                 {% endif %}
 
                 {% if wizard.steps.prev %}
-                <button name="wizard_goto_step" type="submit" class="btn btn-default" value="{{ wizard.steps.prev }}">Предыдущий шаг</button>
+                    <a href="{% url wizard.url_name wizard.steps.prev %}" class="btn btn-default __prev-step">Предыдущий шаг</a>
                 {% endif %}
 
                 {% if wizard.steps.current == 'spb' or wizard.steps.current == 'nsk' %}
@@ -93,9 +79,7 @@
                 {% else %}
                     <input type="submit" class="btn btn-default" value="Следующий шаг"/>
                 {% endif %}
-                </form>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 

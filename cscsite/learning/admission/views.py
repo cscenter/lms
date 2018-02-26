@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import json
 import re
@@ -11,19 +9,19 @@ from collections import Counter
 from django.apps import apps
 from django.contrib import messages
 from django.db import transaction, IntegrityError
-from django.http.response import HttpResponseForbidden, HttpResponseBadRequest
-from django.urls import reverse
-from django.db.models import Q, Avg, When, Value, Case, IntegerField, Prefetch, Count
+from django.db.models import Q, Avg, Value, Prefetch
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
+from django.http.response import HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
     RedirectView
-from django.views.generic.edit import BaseUpdateView, BaseCreateView, \
+from django.views.generic.edit import BaseCreateView, \
     ModelFormMixin
 from django_filters.views import BaseFilterView
 from extra_views import ModelFormSetView
@@ -33,7 +31,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.permissions import CuratorAccessPermission
-from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE, TIME_ZONES
+from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter, InterviewStatusFilter
@@ -43,17 +41,14 @@ from learning.admission.forms import InterviewCommentForm, \
     InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
     ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
-    Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewStream, \
-    InterviewInvitation
+    Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewInvitation
 from learning.admission.serializers import InterviewSlotSerializer
 from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
     calculate_time
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
-
 from users.models import CSCUser
 from .tasks import application_form_send_email
-
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
 
@@ -63,10 +58,7 @@ date_re = re.compile(
 )
 
 
-# Note: Not useful without Yandex.Contest REST API support :<
 # FIXME: Don't allow to save duplicates.
-# TODO: I'm now sure we need server side wizard.
-# TODO: The same we can achieve with Redux + some js.
 class ApplicantRequestWizardView(NamedUrlSessionWizardView):
     template_name = "learning/admission/application_form.html"
     form_list = [
@@ -122,7 +114,6 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
-        context['step1_data'] = self.storage.get_step_data('welcome')
         return context
 
 
