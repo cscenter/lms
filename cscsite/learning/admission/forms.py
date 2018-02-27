@@ -339,7 +339,7 @@ class InterviewForm(forms.ModelForm):
         super(InterviewForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper['assignments'].wrap(
-            Field, template='learning/admission/forms/assignments_field.html')
+            Field, template='admission/forms/assignments_field.html')
         self.helper.layout.append(
             FormActions(Submit('create', _('Create interview')),
                         css_class="pull-right"))
@@ -420,7 +420,7 @@ class InterviewAssignmentsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper['assignments'].wrap(
-            Field, template='learning/admission/forms/assignments_field.html')
+            Field, template='admission/forms/assignments_field.html')
         self.helper.layout.append(
             FormActions(Submit('update', _('Update assignments list'))))
         self.helper.form_class = self.prefix
