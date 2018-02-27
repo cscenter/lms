@@ -53,7 +53,7 @@ class AdmissionReport(ReportFileOutput):
                     value = applicant.get_course_display()
                 elif field.name == 'id':
                     value = "https://compscicenter.ru{}".format(
-                        reverse("admission_applicant_detail", args=[value])
+                        reverse("admission:applicant_detail", args=[value])
                     )
                 row.append(value)
             if hasattr(applicant, "online_test"):

@@ -16,7 +16,7 @@
         <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
             {% for campaign in active_campaigns %}
                 <li role="presentation" {% if selected_campaign.city.code == campaign.city.code %} class="active"{% endif %}>
-                    <a href="{% url "admission_interview_results_by_city" campaign.city.code %}">{{ campaign }}</a>
+                    <a href="{% url "admission:interview_results_by_city" campaign.city.code %}">{{ campaign }}</a>
                 </li>
             {% endfor %}
         </ul>
@@ -56,7 +56,7 @@
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td class="applicant">
-                                    <a href="{%  url "admission_applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
+                                    <a href="{%  url "admission:applicant_detail" applicant.pk %}">{{ applicant.get_full_name }}</a><br>
                                     {{ applicant.university }}
                                 </td>
                                 <td>{{ applicant.online_test.score|default:"-" }}/{{ selected_campaign.online_test_max_score }}</td>

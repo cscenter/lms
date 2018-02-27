@@ -222,7 +222,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 # any current campaign or show all if no active at all.
                 c = next((c.pk for c in current), "")
             url = "{}?campaign={}&status=".format(
-                reverse("admission_applicants"),
+                reverse("admission:applicants"),
                 c)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
@@ -260,7 +260,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         applicant_id = self.kwargs[self.pk_url_kwarg]
         try:
             interview = Interview.objects.get(applicant_id=applicant_id)
-            return HttpResponseRedirect(reverse("admission_interview_detail",
+            return HttpResponseRedirect(reverse("admission:interview_detail",
                                                 args=[interview.pk]))
         except Interview.DoesNotExist:
             return super().get(request, *args, **kwargs)
@@ -293,7 +293,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
     def get_success_url(self):
         messages.success(self.request, "Собеседование успешно добавлено",
                          extra_tags='timeout')
-        return reverse("admission_interview_detail", args=[self.object.pk])
+        return reverse("admission:interview_detail", args=[self.object.pk])
 
     def create_interview_from_slot(self, applicant, stream_form, slot):
         data = InterviewForm.build_data(applicant, slot)
@@ -347,7 +347,7 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
     def get_success_url(self):
         messages.success(self.request, "Статус успешно обновлён",
                          extra_tags='timeout')
-        return reverse("admission_applicant_detail", args=[self.object.pk])
+        return reverse("admission:applicant_detail", args=[self.object.pk])
 
 
 # FIXME: rewrite with rest framework
@@ -391,7 +391,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             status = InterviewStatusFilter.AGREED
             date = timezone.now().strftime("%d.%m.%Y")
             url = "{}?campaign={}&status={}&date={}".format(
-                reverse("admission_interviews"),
+                reverse("admission:interviews"),
                 c, status, date)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
@@ -530,7 +530,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
     def get_success_url(self):
         messages.success(self.request, "Комментарий успешно сохранён",
                          extra_tags='timeout')
-        return reverse("admission_interview_detail",
+        return reverse("admission:interview_detail",
                        args=[self.object.interview_id])
 
     @transaction.atomic
@@ -587,7 +587,7 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
             city_redirect_to = preferred_city
         else:
             city_redirect_to = next(cs.iterator(), DEFAULT_CITY_CODE)
-        return reverse("admission_interview_results_by_city", kwargs={
+        return reverse("admission:interview_results_by_city", kwargs={
             "city_slug": city_redirect_to
         })
 
@@ -662,7 +662,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
         except StopIteration:
             messages.error(self.request,
                            "Активная кампания по набору не найдена")
-            return HttpResponseRedirect(reverse("admission_applicants"))
+            return HttpResponseRedirect(reverse("admission:applicants"))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -673,13 +673,13 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
     def post(self, request, *args, **kwargs):
         # TODO: add tests
         applicant_pk = kwargs.get("pk")
-        back_url = reverse("admission_applicants")
+        back_url = reverse("admission:applicants")
         try:
             applicant = Applicant.objects.get(pk=applicant_pk)
         except Applicant.DoesNotExist:
             messages.error(self.request, "Анкета не найдена",
                            extra_tags='timeout')
-            return HttpResponseRedirect(reverse("admission_applicants"))
+            return HttpResponseRedirect(reverse("admission:applicants"))
         try:
             user = CSCUser.create_student_from_applicant(applicant)
         except CSCUser.MultipleObjectsReturned:

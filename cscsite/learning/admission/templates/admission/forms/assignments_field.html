@@ -17,7 +17,7 @@
         <label class="{% if inline_class %}checkbox-{{ inline_class }}{% endif %}">
             <input type="checkbox"{% if choice.id in field.value or choice.id|stringformat:"s" in field.value or choice.id|stringformat:"s" == field.value|stringformat:"s" %} checked="checked"{% endif %} name="{{ field.html_name }}" id="id_{{ field.html_name }}_{{ forloop.counter }}" value="{{ choice.id|unlocalize }}" {{ field.field.widget.attrs|flatatt }}>{{ choice.name|unlocalize }}
         </label>
-        <span data-text="{{ choice.campaign.display_short }}" class="pull-right text-muted" data-href="{% url "admission_interview_assignment_detail" choice.pk %}">{{ choice.campaign.display_short }}</span>
+        <span data-text="{{ choice.campaign.display_short }}" class="pull-right text-muted" data-href="{% url "admission:interview_assignment_detail" choice.pk %}">{{ choice.campaign.display_short }}</span>
       {% if not inline_class %}</div>{% endif %}
     {% endfor %}
 
