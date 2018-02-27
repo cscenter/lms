@@ -6,7 +6,7 @@
 
 {% block javascripts %}
     <script type="text/javascript">
-    function openPopup(url) {
+    function openSocialPopup(url) {
         var w = 700;
         var h = 600;
         var left = 100;
@@ -26,7 +26,7 @@
 
     }
 
-    function showError(msg) {
+    function showErrorYandexLogin(msg) {
         $.jGrowl(msg, {theme: "error", sticky: true, position: "bottom-right"});
     }
 
@@ -38,7 +38,7 @@
                return false;
            }
            var href = $(this).attr("href");
-           openPopup(href);
+           openSocialPopup(href);
           return false;
        });
     });

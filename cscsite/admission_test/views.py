@@ -1,23 +1,20 @@
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import Http404
-from django.shortcuts import redirect, render_to_response, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_auth
-from social_core.exceptions import MissingBackend, AuthCanceled, \
-    SocialAuthBaseException
+from social_core.exceptions import MissingBackend, SocialAuthBaseException
 from social_core.utils import get_strategy, user_is_authenticated, \
     partial_pipeline_data
 from vanilla import CreateView
 
-from admission_test.backends import YandexRuOAuth2
 from admission_test.forms import AdmissionTestApplicationForm
 from admission_test.models import AdmissionTestApplicant
+from core.api.yandex_oauth import YandexRuOAuth2Backend
 
-
-NAMESPACE = 'admission_test'
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation
 STORAGE = 'admission_test.models.DjangoStorageCustom'
@@ -59,8 +56,7 @@ class AdmissionTestApplicantCreateView(CreateView):
 
 def registration_complete(request):
     request.session.pop(SESSION_LOGIN_KEY, None)
-    return render(request, 'registration_complete.html', context={
-    })
+    return render(request, 'registration_complete.html', context={})
 
 
 @never_cache
@@ -70,7 +66,7 @@ def auth(request):
         request.strategy = request.social_strategy
     redirect_uri = reverse('admission_test:auth_complete')
     try:
-        request.backend = YandexRuOAuth2(request.social_strategy, redirect_uri)
+        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_uri)
     except MissingBackend:
         raise Http404('Backend not found')
     return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
@@ -85,7 +81,7 @@ def auth_complete(request, *args, **kwargs):
         request.strategy = request.social_strategy
     redirect_uri = reverse('admission_test:auth_complete')
     try:
-        request.backend = YandexRuOAuth2(request.social_strategy, redirect_uri)
+        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_uri)
     except MissingBackend:
         raise Http404('Backend not found')
 
@@ -108,12 +104,12 @@ def auth_complete(request, *args, **kwargs):
             key = f"{BACKEND_PREFIX}_{field_name}"
             backend.strategy.session_set(key, auth_data.get(field_name))
     except SocialAuthBaseException as e:
-        return render(request, 'close_popup.html', context={"error": str(e)})
+        return render(request, 'admission/social_close_popup.html', context={"error": str(e)})
 
     # pop redirect value before the session is trashed on login(), but after
     # the pipeline so that the pipeline can change the redirect if needed
     redirect_value = backend.strategy.session_get(redirect_name, '') or \
                      data.get(redirect_name, '')
-    return render(request, 'close_popup.html', context={
+    return render(request, 'admission/social_close_popup.html', context={
         "yandex_login": auth_data.get("login", "")
     })
