@@ -40,8 +40,7 @@ class ApplicationFormStep1(forms.ModelForm):
             ("nsk", _("Novosibirsk")),
         ),
         label='Выберите город, в котором вы живёте и куда хотите поступить',
-        help_text='С 2017 года CS центр есть не только в Санкт-Петербурге, '
-                  'но и в Новосибирске.'
+        help_text=''
     )
     yandex_id = forms.CharField(
         label='Укажите свой логин на Яндексе',
@@ -70,14 +69,13 @@ class ApplicationFormStep1(forms.ModelForm):
                      'тот email, по которому мы быстрее всего сможем с '
                      'вами связаться.',
             'phone': '',
-            'stepic_id': 'Если ссылка на ваш профиль на Stepik выглядит вот '
-                         'так: https://stepik.org/users/XXXX, то ID — это XXXX',
+            'stepic_id': 'https://stepik.org/users/XXXX, XXXX - это ваш ID',
         }
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        url = reverse("admission_test:auth_begin")
-        yandex_button = f'<a class="btn btn-default __auth-begin" href="{url}">Разрешить доступ к данным на Яндексе</a>'
+        url = reverse("admission:auth_begin")
+        yandex_button = f'<a class="btn btn-default __login-access-begin" href="{url}">Разрешить доступ к данным</a>'
         self.helper.layout = Layout(
             InlineRadios('city'),
             Row(
@@ -92,6 +90,7 @@ class ApplicationFormStep1(forms.ModelForm):
             HTML(f"""
                 <div class="row">
                     <div class="col-xs-12 form-group">
+                        <label for="id_welcome-yandex_id" class="control-label requiredField">Доступ к данным на Яндексе<span class="asteriskField">*</span></label>
                         <div class="controls">
                             {yandex_button}
                             <div class="btn btn-sm" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
@@ -102,9 +101,6 @@ class ApplicationFormStep1(forms.ModelForm):
                     </div>
                 </div>
                 """),
-            Row(
-                Div('yandex_id', css_class='col-sm-12'),
-            ),
             Row(
                 Div('stepic_id', css_class='col-sm-6'),
                 Div('github_id', css_class='col-sm-6'),

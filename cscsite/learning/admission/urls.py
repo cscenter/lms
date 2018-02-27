@@ -3,25 +3,28 @@ from django.conf.urls import include, url
 from learning.admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
     ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateUserView, \
-    InterviewResultsDispatchView, ApplicantRequestWizardView, \
+    InterviewResultsDispatchView, ApplicantFormWizardView, \
     ApplicationCompleteView, InterviewAssignmentDetailView, \
-    InterviewCommentView, InterviewAppointmentView, InterviewSlots
+    InterviewCommentView, InterviewAppointmentView, InterviewSlots, \
+    yandex_login_access, yandex_login_access_complete
 
 app_name = 'admission'
 
 urlpatterns = [
-    url(r'^application/(?P<step>.+)/$',
-        ApplicantRequestWizardView.as_view(
-            url_name='admission_application_step'),
-        name='admission_application_step'),
-    url(r'^application/$',
-        ApplicantRequestWizardView.as_view(
-            url_name='admission_application_step'),
-        kwargs={"step": "welcome"},
-        name='admission_application'),
-    url(r'^application/complete/$',
-        ApplicationCompleteView.as_view(),
-        name='admission_application_complete'),
+    url(r'^application/', include([
+        url(r'^$',
+            ApplicantFormWizardView.as_view(url_name='admission:application_step'),
+            kwargs={"step": "welcome"},
+            name='application'),
+        url(r'^yandex_access/$', yandex_login_access, name='auth_begin'),
+        url(r'^yandex_access/complete/$', yandex_login_access_complete,
+            name='auth_complete'),
+        url(r'^complete/$', ApplicationCompleteView.as_view(),
+            name='application_complete'),
+        url(r'^(?P<step>.+)/$',
+            ApplicantFormWizardView.as_view(url_name='admission:application_step'),
+            name='application_step'),
+    ])),
     url(r'^admission/', include([
         url(r'^applicants/$', ApplicantListView.as_view(), name='applicants'),
         url(r'^applicants/(?P<pk>\d+)/$', ApplicantDetailView.as_view(), name='applicant_detail'),

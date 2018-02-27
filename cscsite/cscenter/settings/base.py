@@ -29,6 +29,7 @@ INSTALLED_APPS += [
     'admission_test',  # TODO: remove after testing
 ]
 
+# Oauth application settings for getting access to login from Yandex.Passport
 SOCIAL_AUTH_YANDEXRU_KEY = "4ac0b41c382a4dba9d8aeaa9a29d663b"
 SOCIAL_AUTH_YANDEXRU_SECRET = "8d708acac5d8422e8c4973d5bf2fa568"
 SOCIAL_AUTH_YANDEXRU_PIPELINE = [
