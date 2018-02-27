@@ -2,7 +2,7 @@ from social_core.backends.oauth import BaseOAuth2
 from social_core.utils import handle_http_errors
 
 
-class YandexRuOAuth2(BaseOAuth2):
+class YandexRuOAuth2Backend(BaseOAuth2):
     name = 'yandexru'
     AUTHORIZATION_URL = 'https://oauth.yandex.ru/authorize'
     ACCESS_TOKEN_URL = 'https://oauth.yandex.ru/token'
@@ -16,7 +16,7 @@ class YandexRuOAuth2(BaseOAuth2):
 
     @handle_http_errors
     def auth_complete(self, *args, **kwargs):
-        """Completes login process, prevent user login"""
+        """Completes process, preventing user login"""
         self.process_error(self.data)
         state = self.validate_state()
         response = self.request_access_token(
