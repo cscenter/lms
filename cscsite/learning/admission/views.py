@@ -60,7 +60,7 @@ date_re = re.compile(
 
 # FIXME: Don't allow to save duplicates.
 class ApplicantRequestWizardView(NamedUrlSessionWizardView):
-    template_name = "learning/admission/application_form.html"
+    template_name = "admission/application_form.html"
     form_list = [
         ('welcome', ApplicationFormStep1),
         ('spb', ApplicationInSpbForm),
@@ -124,7 +124,7 @@ ApplicantRequestWizardView.condition_dict = {
 
 
 class ApplicationCompleteView(generic.TemplateView):
-    template_name = "learning/admission/application_done.html"
+    template_name = "admission/application_done.html"
 
 
 class ApplicantContextMixin(object):
@@ -190,7 +190,7 @@ class ApplicantContextMixin(object):
 class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'applicants'
     model = Applicant
-    template_name = "learning/admission/applicant_list.html"
+    template_name = "admission/applicant_list.html"
     filterset_class = ApplicantFilter
     paginate_by = 50
 
@@ -232,7 +232,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                           TemplateResponseMixin, BaseCreateView):
 
     form_class = InterviewForm
-    template_name = "learning/admission/applicant_detail.html"
+    template_name = "admission/applicant_detail.html"
 
     def get_queryset(self):
         applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
@@ -368,7 +368,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'interviews'
     model = Interview
     paginate_by = 50
-    template_name = "learning/admission/interviews.html"
+    template_name = "admission/interview_list.html"
 
     def get(self, request, *args, **kwargs):
         """
@@ -455,7 +455,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
 class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                           generic.TemplateView):
-    template_name = "learning/admission/interview.html"
+    template_name = "admission/interview_detail.html"
 
     def get_context_data(self, **kwargs):
         interview_id = self.kwargs['pk']
@@ -598,7 +598,7 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
     """
     # TODO: Think about pagination for model formsets in the future.
     context_object_name = 'interviews'
-    template_name = "learning/admission/interview_results.html"
+    template_name = "admission/interview_results.html"
     model = Applicant
     form_class = InterviewResultsModelForm
 
@@ -700,7 +700,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 
 
 class InterviewAppointmentView(generic.TemplateView):
-    template_name = "learning/admission/interview_appointment.html"
+    template_name = "admission/interview_appointment.html"
 
     def dispatch(self, request, *args, **kwargs):
         """Validate GET-parameters"""

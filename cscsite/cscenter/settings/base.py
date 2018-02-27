@@ -41,6 +41,7 @@ SOCIAL_AUTH_YANDEXRU_PIPELINE = [
 TEMPLATES[0]['DIRS'] = [
     str(BASE_DIR / "templates"),
     str(PROJECT_DIR / "admission_test" / "templates"),
+    str(PROJECT_DIR / "learning" / "admission" / "templates"),
 ] + TEMPLATES[0]['DIRS']
 
 LOCALE_PATHS += [

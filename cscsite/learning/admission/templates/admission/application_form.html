@@ -30,29 +30,6 @@
             {% endif %}
         </div>
         <div class="card-body card-padding">
-{#            <div class="steps steps-sm row" data-plugin="matchHeight" data-by-row="true" role="tablist">#}
-{#                <div class="step col-md-4 {% if wizard.steps.step1 == 1 %}current{% else %}done{% endif %}" role="tab" aria-expanded="true">#}
-{#                  <div class="step-desc">#}
-{#                    <span class="step-title">Город поступления</span>#}
-{#                    <p>Выберите город и укажите основную информацию о себе</p>#}
-{#                  </div>#}
-{#                </div>#}
-{##}
-{#                <div class="step col-md-4 {% if wizard.steps.step1 == 2 %}current{% elif wizard.steps.step1 == 3 %}done{% else %}{% endif %}" data-target="#exampleBilling" role="tab" aria-expanded="false">#}
-{#                  <div class="step-desc">#}
-{#                    <span class="step-title">Анкета</span>#}
-{#                    <p>Внимательно заполните поля для выбранного города</p>#}
-{#                  </div>#}
-{#                </div>#}
-{##}
-{#                <div class="step col-md-4 {% if wizard.steps.step1 == 3 %}done{% else %}{% endif %}" data-target="#exampleGetting" role="tab" aria-expanded="false">#}
-{#                  <div class="step-desc">#}
-{#                    <span class="step-title">Подтверждение</span>#}
-{#                    <p>Перед отправкой проверьте, правильно ли введены данные</p>#}
-{#                  </div>#}
-{#                </div>#}
-{#            </div>#}
-
             <form action="" method="post">{% csrf_token %}
                 <table>
                 {{ wizard.management_form }}
@@ -68,10 +45,6 @@
 
                 {% if wizard.steps.current == 'spb' or wizard.steps.current == 'nsk' %}
                     <p class="margin-top-10">Нажимая <b>«Подать заявку»</b>, вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приёмной кампании.</p>
-                {% endif %}
-
-                {% if wizard.steps.prev %}
-                    <a href="{% url wizard.url_name wizard.steps.prev %}" class="btn btn-default __prev-step">Предыдущий шаг</a>
                 {% endif %}
 
                 {% if wizard.steps.current == 'spb' or wizard.steps.current == 'nsk' %}

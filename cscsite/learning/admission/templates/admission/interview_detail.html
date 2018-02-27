@@ -57,7 +57,7 @@
                 <dt>Статус анкеты:</dt>
                 <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
                 {% endif %}
-            {% include "learning/admission/_applicant_form.html" with applicant_form=applicant_form %}
+            {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
@@ -163,5 +163,5 @@
     </div>
 </div>
 
-    {% include "learning/admission/_interview_assignment_modal.html" %}
+    {% include "admission/_interview_assignment_modal.html" %}
 {% endblock content %}
