@@ -302,7 +302,7 @@ class Applicant(TimeStampedModel):
         return ""
 
     def get_absolute_url(self):
-        return reverse('admission_applicant_detail', args=[self.pk])
+        return reverse('admission:applicant_detail', args=[self.pk])
 
     def __str__(self):
         if self.campaign_id:
@@ -524,7 +524,7 @@ class Interview(TimeStampedModel):
             raise ValidationError("You can't change status without date set up")
 
     def get_absolute_url(self):
-        return reverse('admission_interview_detail', args=[self.pk])
+        return reverse('admission:interview_detail', args=[self.pk])
 
     def in_transition_state(self):
         return self.status in self.TRANSITION_STATUSES
@@ -753,7 +753,7 @@ class InterviewInvitation(TimeStampedModel):
         return bool(self.interview_id)
 
     def get_absolute_url(self):
-        return reverse("admission_interview_appointment", kwargs={
+        return reverse("admission:interview_appointment", kwargs={
             "date": self.date.strftime('%d.%m.%Y'),
             "secret_code": str(self.secret_code).replace("-", "")
         })

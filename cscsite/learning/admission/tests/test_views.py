@@ -21,7 +21,7 @@ from users.factories import UserFactory
 
 @pytest.mark.django_db
 def test_simple_interviews_list(client, curator):
-    url = reverse('admission_interviews')
+    url = reverse('admission:interviews')
     client.login(curator)
     interviewer = InterviewerFactory()
     interview = InterviewFactory(
@@ -138,7 +138,7 @@ def test_interview_results_dispatch_view(curator, client):
     curator.save()
     user = UserFactory(is_staff=False, city=city1)
     client.login(user)
-    url = reverse('admission_interview_results_dispatch')
+    url = reverse('admission:interview_results_dispatch')
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[-1]
     assert status_code == 302
@@ -148,36 +148,36 @@ def test_interview_results_dispatch_view(curator, client):
     response = client.get(url, follow=True)
     # Redirect to default city
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission_interview_results_by_city",
+    assert redirect_url == reverse("admission:interview_results_by_city",
                                    kwargs={"city_slug": DEFAULT_CITY_CODE})
     # And then to applicants list page
     redirect_url, status_code = response.redirect_chain[1]
-    assert redirect_url == reverse("admission_applicants")
+    assert redirect_url == reverse("admission:applicants")
     # Create campaign, but not with curator default city value
     campaign1 = CampaignFactory.create(city=city2, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[1]
-    assert redirect_url == reverse("admission_applicants")
+    assert redirect_url == reverse("admission:applicants")
     # Make it active
     campaign1.current = True
     campaign1.save()
     # Now curator should see this active campaign tab
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission_interview_results_by_city",
+    assert redirect_url == reverse("admission:interview_results_by_city",
                                    kwargs={"city_slug": city2.pk})
     # Create campaign for curator default city, but not active
     campaign2 = CampaignFactory.create(city=city1, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission_interview_results_by_city",
+    assert redirect_url == reverse("admission:interview_results_by_city",
                                    kwargs={"city_slug": city2.pk})
     # Make it active
     campaign2.current = True
     campaign2.save()
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission_interview_results_by_city",
+    assert redirect_url == reverse("admission:interview_results_by_city",
                                    kwargs={"city_slug": city1.pk})
 
 

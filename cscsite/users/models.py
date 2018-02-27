@@ -418,7 +418,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     def get_applicant_form_url(self):
         try:
-            applicant_form_url = reverse("admission_applicant_detail",
+            applicant_form_url = reverse("admission:applicant_detail",
                                          args=[self.applicant.pk])
         except ObjectDoesNotExist:
             applicant_form_url = None

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from crispy_forms.bootstrap import FormActions, InlineRadios
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field, Row
+from crispy_forms.layout import Layout, Div, Submit, Field, Row, HTML
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.models import ModelForm
@@ -76,6 +76,8 @@ class ApplicationFormStep1(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
+        url = reverse("admission_test:auth_begin")
+        yandex_button = f'<a class="btn btn-default __auth-begin" href="{url}">Разрешить доступ к данным на Яндексе</a>'
         self.helper.layout = Layout(
             InlineRadios('city'),
             Row(
@@ -87,6 +89,19 @@ class ApplicationFormStep1(forms.ModelForm):
                 Div('email', css_class='col-sm-8'),
                 Div('phone', css_class='col-sm-4')
             ),
+            HTML(f"""
+                <div class="row">
+                    <div class="col-xs-12 form-group">
+                        <div class="controls">
+                            {yandex_button}
+                            <div class="btn btn-sm" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
+                                data-content="Пробный контест организован в системе Яндекс.Контест.<br>Чтобы выдать права участника, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети.<br>Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин, ФИО.">
+                                <i class="fa fa-2x fa-question-circle-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """),
             Row(
                 Div('yandex_id', css_class='col-sm-12'),
             ),
@@ -465,7 +480,7 @@ class InterviewCommentForm(forms.ModelForm):
         initial["interview"] = self.interview_id
         initial["interviewer"] = self.interviewer
         kwargs["initial"] = initial
-        self.helper.form_action = reverse("admission_interview_comment",
+        self.helper.form_action = reverse("admission:interview_comment",
                                           kwargs={"pk": self.interview_id})
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
@@ -518,7 +533,7 @@ class ApplicantStatusForm(forms.ModelForm):
         self.helper.layout.append(
             FormActions(Submit('update', _('Update')), css_class="pull-right"))
         self.helper.form_action = "{}{}".format(
-            reverse("admission_applicant_status_update", args=[self.instance.pk]),
+            reverse("admission:applicant_status_update", args=[self.instance.pk]),
             "#update-status-form")
 
 
