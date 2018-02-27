@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import Http404
@@ -59,17 +61,29 @@ def registration_complete(request):
     return render(request, 'registration_complete.html', context={})
 
 
+def redirect_to(redirect_url):
+    def _wrapper(f):
+        @wraps(f)
+        def _inner(*args, **kwargs):
+            return f(*args, redirect_url=redirect_url, **kwargs)
+        return _inner
+    return _wrapper
+
+
 @never_cache
-def auth(request):
+def yandex_login_access(request, *args, **kwargs):
     request.social_strategy = get_strategy(STRATEGY, STORAGE, request)
     if not hasattr(request, 'strategy'):
         request.strategy = request.social_strategy
-    redirect_uri = reverse('admission_test:auth_complete')
+    redirect_url = reverse(kwargs.pop("redirect_url"))
     try:
-        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_uri)
+        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_url)
     except MissingBackend:
         raise Http404('Backend not found')
     return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
+
+
+auth = redirect_to('admission_test:auth_complete')(yandex_login_access)
 
 
 @never_cache

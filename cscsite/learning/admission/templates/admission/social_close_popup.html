@@ -6,14 +6,14 @@
     <script type="text/javascript">
         function closeAndUpdate() {
             if (window.opener) {
-                window.opener.yandexLoginSuccess("{{ yandex_login }}");
+                window.opener.accessYandexLoginSuccess("{{ yandex_login }}");
                 window.close();
             }
         }
 
         function closeAndShowError(error) {
             if (window.opener) {
-                window.opener.showErrorYandexLogin(error);
+                window.opener.accessYandexLoginError(error);
                 window.close();
             }
         }
@@ -26,6 +26,6 @@
     </script>
 </head>
 <body>
-
+    Данное окно можно закрыть.
 </body>
 </html>

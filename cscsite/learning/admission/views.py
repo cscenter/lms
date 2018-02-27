@@ -5,20 +5,25 @@ import json
 import re
 import uuid
 from collections import Counter
+from functools import wraps
 
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
 from django.db.models import Q, Avg, Value, Prefetch
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
-from django.http.response import HttpResponseForbidden, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, \
+    Http404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
     RedirectView
 from django.views.generic.edit import BaseCreateView, \
@@ -29,15 +34,21 @@ from formtools.wizard.views import NamedUrlSessionWizardView
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from social_core.actions import do_auth
+from social_core.exceptions import MissingBackend, SocialAuthBaseException
+from social_core.storage import UserMixin
+from social_core.utils import user_is_authenticated, partial_pipeline_data
+from social_django.models import DjangoStorage
+from social_django.strategy import DjangoStrategy
 
 from api.permissions import CuratorAccessPermission
+from core.api.yandex_oauth import YandexRuOAuth2Backend
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter, InterviewStatusFilter
 from learning.admission.forms import InterviewCommentForm, \
-    ApplicantReadOnlyForm, \
-    InterviewForm, ApplicantStatusForm, \
+    ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
     InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
     ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
@@ -51,15 +62,95 @@ from users.models import CSCUser
 from .tasks import application_form_send_email
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
-
+STRATEGY = 'social_django.strategy.DjangoStrategy'
+# Override `user` attribute to prevent accidental user creation
+STORAGE = __name__ + '.DjangoStorageCustom'
+BACKEND_PREFIX = 'application_ya'
+SESSION_LOGIN_KEY = f"{BACKEND_PREFIX}_login"
 
 date_re = re.compile(
     r'(?P<day>\d{1,2})\.(?P<month>\d{1,2})\.(?P<year>\d{4})$'
 )
 
 
+class DjangoStorageCustom(DjangoStorage):
+    user = UserMixin
+
+
+def redirect_to(redirect_url):
+    """Used for yandex oauth view to pass redirect url pattern name"""
+    def _wrapper(f):
+        @wraps(f)
+        def _inner(*args, **kwargs):
+            return f(*args, redirect_url=redirect_url, **kwargs)
+        return _inner
+    return _wrapper
+
+
+@never_cache
+@redirect_to("admission:auth_complete")
+def yandex_login_access(request, *args, **kwargs):
+    redirect_url = reverse(kwargs.pop("redirect_url"))
+    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
+                                             *args, **kwargs)
+    if not hasattr(request, 'strategy'):
+        request.strategy = request.social_strategy
+    try:
+        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_url)
+    except MissingBackend:
+        raise Http404('Backend not found')
+    return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
+
+
+@never_cache
+@csrf_exempt
+@redirect_to("admission:auth_complete")
+def yandex_login_access_complete(request, *args, **kwargs):
+    """Authentication complete view"""
+    redirect_url = reverse(kwargs.pop("redirect_url"))
+    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
+                                             *args, **kwargs)
+    if not hasattr(request, 'strategy'):
+        request.strategy = request.social_strategy
+    try:
+        request.backend = YandexRuOAuth2Backend(request.social_strategy,
+                                                redirect_url)
+    except MissingBackend:
+        raise Http404('Backend not found')
+
+    user = request.user
+    backend = request.backend
+    redirect_name = REDIRECT_FIELD_NAME
+    data = backend.strategy.request_data()
+
+    is_authenticated = user_is_authenticated(user)
+    user = user if is_authenticated else None
+
+    try:
+        partial = partial_pipeline_data(backend, user, *args, **kwargs)
+        if partial:
+            # FIXME: UB
+            user = backend.continue_pipeline(partial)
+        else:
+            auth_data = backend.complete(user=user, *args, **kwargs)
+        for field_name in ["login", "sex"]:
+            key = f"{BACKEND_PREFIX}_{field_name}"
+            backend.strategy.session_set(key, auth_data.get(field_name))
+    except SocialAuthBaseException as e:
+        return render(request,
+                      'admission/social_close_popup.html',
+                      context={"error": str(e)})
+    # pop redirect value before the session is trashed on login(), but after
+    # the pipeline so that the pipeline can change the redirect if needed
+    redirect_value = backend.strategy.session_get(redirect_name, '') or \
+                     data.get(redirect_name, '')
+    return render(request,
+                  'admission/social_close_popup.html',
+                  context={"yandex_login": auth_data.get("login", "")})
+
+
 # FIXME: Don't allow to save duplicates.
-class ApplicantRequestWizardView(NamedUrlSessionWizardView):
+class ApplicantFormWizardView(NamedUrlSessionWizardView):
     template_name = "admission/application_form.html"
     form_list = [
         ('welcome', ApplicationFormStep1),
@@ -71,10 +162,7 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
         'nsk': {'has_job': 'Нет'},
     }
 
-    def done(self, form_list, **kwargs):
-        cleaned_data = {}
-        for form in form_list:
-            cleaned_data.update(form.cleaned_data)
+    def create_new_applicant(self, cleaned_data):
         cleaned_data['where_did_you_learn'] = ",".join(
             cleaned_data['where_did_you_learn'])
         cleaned_data['preferred_study_programs'] = ",".join(
@@ -100,7 +188,34 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
             application_form_send_email.delay(applicant.pk, LANGUAGE_CODE)
         else:
             print("SOMETHING WRONG?")
+
+    def done(self, form_list, **kwargs):
+        cleaned_data = {}
+        for form in form_list:
+            cleaned_data.update(form.cleaned_data)
+        self.create_new_applicant(cleaned_data)
         return HttpResponseRedirect(reverse("admission_application_complete"))
+
+    def get_form(self, step=None, data=None, files=None):
+        if step is None:
+            step = self.steps.current
+        if step == "welcome":
+            yandex_login = self.request.session.get(SESSION_LOGIN_KEY)
+            if yandex_login and data and "yandex_id" not in data:
+                data = data.copy()
+                form_prefix = self.get_form_prefix(step)
+                data[f"{form_prefix}-yandex_id"] = yandex_login
+        return super().get_form(step, data, files)
+
+    def render(self, form=None, **kwargs):
+        """
+        Returns a ``HttpResponse`` containing all needed context data.
+        """
+        if form:
+            print(form.errors)
+        form = form or self.get_form()
+        context = self.get_context_data(form=form, **kwargs)
+        return self.render_to_response(context)
 
     @staticmethod
     def show_spb_form(wizard):
@@ -117,14 +232,14 @@ class ApplicantRequestWizardView(NamedUrlSessionWizardView):
         return context
 
 
-ApplicantRequestWizardView.condition_dict = {
-    'spb': ApplicantRequestWizardView.show_spb_form,
-    'nsk': ApplicantRequestWizardView.show_nsk_form,
+ApplicantFormWizardView.condition_dict = {
+    'spb': ApplicantFormWizardView.show_spb_form,
+    'nsk': ApplicantFormWizardView.show_nsk_form,
 }
 
 
 class ApplicationCompleteView(generic.TemplateView):
-    template_name = "admission/application_done.html"
+    template_name = "admission/application_form_done.html"
 
 
 class ApplicantContextMixin(object):

@@ -18,7 +18,7 @@
         window.open(url, name, settings);
     }
 
-    function yandexLoginSuccess(yandexLogin) {
+    function accessYandexLoginSuccess(yandexLogin) {
         $('.__auth-begin')
             .html('<i class="fa fa-check text-success"></i> Доступ разрешен')
             .attr("disabled", "disabled");
@@ -26,7 +26,7 @@
 
     }
 
-    function showErrorYandexLogin(msg) {
+    function accessYandexLoginError(msg) {
         $.jGrowl(msg, {theme: "error", sticky: true, position: "bottom-right"});
     }
 
