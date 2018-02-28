@@ -316,7 +316,8 @@ class Applicant(TimeStampedModel):
         if not created:
             return False
         contests = list(Contest.objects
-                        .filter(pk=self.campaign_id)
+                        .filter(campaign_id=self.campaign_id,
+                                type=Contest.TYPE_TEST)
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
         if contests:
@@ -371,15 +372,23 @@ def contest_assignments_upload_to(instance, filename):
         filename=filename)
 
 
-@python_2_unicode_compatible
 class Contest(models.Model):
-    FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
 
+    FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
+    TYPE_TEST = 1
+    TYPE_EXAM = 2
+    TYPES = (
+        (TYPE_TEST, _("Testing")),
+        (TYPE_EXAM, _("Exam")),
+    )
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Contest|Campaign"),
         on_delete=models.PROTECT,
         related_name="contests")
+    type = models.IntegerField(
+        _("Type"),
+        choices=TYPES)
     contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
