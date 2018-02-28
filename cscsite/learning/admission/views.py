@@ -213,8 +213,6 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         """
         Returns a ``HttpResponse`` containing all needed context data.
         """
-        if form:
-            print(form.errors)
         form = form or self.get_form()
         context = self.get_context_data(form=form, **kwargs)
         return self.render_to_response(context)
