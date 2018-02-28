@@ -1,0 +1,65 @@
+{% load crispy_forms_field %}
+{% load crispy_forms_filters %}
+{% load l10n %}
+
+{% if field.is_hidden %}
+    {{ field }}
+{% else %}
+    {% if field|is_checkbox %}
+        <div class="form-group">
+        {% if label_class %}
+            <div class="controls {% for offset in bootstrap_checkbox_offsets %}{{ offset }} {% endfor %}{{ field_class }}">
+        {% endif %}
+    {% endif %}
+    <{% if tag %}{{ tag }}{% else %}div{% endif %} id="div_{{ field.auto_id }}" {% if not field|is_checkbox %}class="form-group{% else %}class="checkbox{% endif %}{% if wrapper_class %} {{ wrapper_class }}{% endif %}{% if form_show_errors%}{% if field.errors %} has-error{% endif %}{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
+        {% if field.label and not field|is_checkbox and form_show_labels %}
+            <label for="{{ field.id_for_label }}" class="control-label {{ label_class }}{% if field.field.required %} requiredField{% endif %}">
+                {{ field.label|safe }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+            </label>
+        {% endif %}
+
+        {% if field|is_checkboxselectmultiple %}
+            {# Inline {% include 'bootstrap3/layout/checkboxselectmultiple.html' %} #}
+            <div class="controls {{ field_class }}"{% if flat_attrs %} {{ flat_attrs|safe }}{% endif %}>
+                {% include 'bootstrap3/layout/help_text.html' %}
+                {% include 'bootstrap3/layout/field_errors_block.html' %}
+
+                {% for choice in field.field.choices %}
+
+                  {% if not inline_class %}<div class="checkbox">{% endif %}
+                    <label class="{% if inline_class %}checkbox-{{ inline_class }}{% endif %}">
+                        <input type="checkbox"{% if choice.0 in field.value or choice.0|stringformat:"s" in field.value or choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %} checked="checked"{% endif %} name="{{ field.html_name }}" id="id_{{ field.html_name }}_{{ forloop.counter }}" value="{{ choice.0|unlocalize }}" {{ field.field.widget.attrs|flatatt }}>{{ choice.1|unlocalize }}
+                    </label>
+                  {% if not inline_class %}</div>{% endif %}
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+        {% if field|is_radioselect %}
+            {% include 'bootstrap3/layout/radioselect.html' %}
+        {% endif %}
+
+        {% if not field|is_checkboxselectmultiple and not field|is_radioselect %}
+            {% if field|is_checkbox and form_show_labels %}
+                <label for="{{ field.id_for_label }}" class="{% if field.field.required %} requiredField{% endif %}">
+                    {% crispy_field field %}
+                    {{ field.label|safe }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+                </label>
+                {% include 'bootstrap3/layout/help_text_and_errors.html' %}
+            {% else %}
+                <div class="controls {{ field_class }}">
+                    {% crispy_field field %}
+                    {% include 'bootstrap3/layout/help_text_and_errors.html' %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </{% if tag %}{{ tag }}{% else %}div{% endif %}>
+    {% if field|is_checkbox %}
+        {% if label_class %}
+            </div>
+        {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

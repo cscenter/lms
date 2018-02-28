@@ -28,7 +28,7 @@ WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат/листовка в университете'),
     ('social_net', 'пост в соц. сетях'),
     ('friends', 'от друзей'),
-    ('other', 'другое (укажите, что именно, в следующем поле)')
+    ('other', 'другое')
 )
 
 
@@ -48,7 +48,7 @@ class ApplicationFormStep1(forms.ModelForm):
                    '"my.name@yandex.ru", тогда ваш логин — это '
                    '"my.name". Укажите в этом поле именно его.'))
     github_id = forms.CharField(
-        label='Укажите свой логин на GitHub, если есть',
+        label='Логин на GitHub',
         max_length=80,
         validators=[GITHUB_ID_VALIDATOR],
         required=False,
@@ -61,13 +61,10 @@ class ApplicationFormStep1(forms.ModelForm):
                   "phone", "yandex_id", "stepic_id", "github_id",)
         labels = {
             'email': 'Адрес электронной почты',
-            'stepic_id': 'Укажите свой ID на Stepik.org, если есть',
+            'stepic_id': 'ID на Stepik.org',
         }
         help_texts = {
-            'email': 'На всех этапах приёмной кампании основной способ '
-                     'связи с поступающими — электронная почта. Укажите '
-                     'тот email, по которому мы быстрее всего сможем с '
-                     'вами связаться.',
+            'email': '',
             'phone': '',
             'stepic_id': 'https://stepik.org/users/XXXX, XXXX - это ваш ID',
         }
@@ -94,7 +91,7 @@ class ApplicationFormStep1(forms.ModelForm):
                         <div class="controls">
                             {yandex_button}
                             <div class="btn btn-sm" tabindex="0" role="button" data-toggle="popover" data-trigger="focus"
-                                data-content="Пробный контест организован в системе Яндекс.Контест.<br>Чтобы выдать права участника, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети.<br>Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин, ФИО.">
+                                data-content="Вступительный тест организован в системе Яндекс.Контест. Чтобы выдать права участника и затем сопоставить результаты с анкетами, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети. Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин и ФИО.">
                                 <i class="fa fa-2x fa-question-circle-o"></i>
                             </div>
                         </div>
@@ -117,13 +114,12 @@ class ApplicationFormStep1(forms.ModelForm):
 class ApplicationFormStep2(forms.ModelForm):
     has_job = forms.ChoiceField(
         label='Вы сейчас работаете?',
-        choices=(("no", "Нет"), ("yes", "Да")))
+        choices=(("no", "Нет"), ("yes", "Да")),
+        widget=forms.RadioSelect(),)
     course = forms.ChoiceField(label='Курс, на котором вы учитесь',
                                choices=COURSES)
     where_did_you_learn = forms.MultipleChoiceField(
         label='Откуда вы узнали о CS центре?',
-        help_text='Вы можете выбрать несколько вариантов ответа, если '
-                  'источников больше одного',
         choices=WHERE_DID_YOU_LEARN,
         widget=forms.CheckboxSelectMultiple
     )
@@ -158,6 +154,7 @@ class ApplicationFormStep2(forms.ModelForm):
                                  'окончания обучения?',
             'additional_info': 'Напишите любую дополнительную информацию о '
                                'себе, которую хотите указать',
+            'where_did_you_learn_other': 'Откуда вы узнали о CS центре? (ваш вариант)'
 
 
         }
@@ -166,16 +163,10 @@ class ApplicationFormStep2(forms.ModelForm):
             'faculty': '',
             'workplace': '',
             'position': '',
-            'experience': 'Напишите здесь о том, что вы делаете на работе, '
-                          'и о своей нынешней дипломной или курсовой работе. '
-                          'Здесь стоит рассказать о студенческих проектах, '
-                          'в которых вы участвовали, или о небольших личных '
-                          'проектах, которые вы делаете дома, для своего '
-                          'удовольствия.',
+            'experience': '',
             'preferred_study_programs_dm_note': '',
             'preferred_study_programs_se_note': '',
-            'where_did_you_learn': 'Вы можете выбрать несколько вариантов '
-                                   'ответа, если источников больше одного.',
+            'where_did_you_learn': '',
             'motivation': '',
             'your_future_plans': '',
             'additional_info': ''
@@ -208,21 +199,31 @@ class ApplicationFormStep2(forms.ModelForm):
                 Div('faculty', css_class='col-sm-8'),
             ),
             Row(
-                Div('course', css_class='col-sm-8'),
+                Div('course', css_class='col-sm-4'),
                 css_class='margin-bottom-15',
             ),
             Row(
-                Div('has_job', css_class='col-sm-4'),
+                Div(InlineRadios('has_job'), css_class='col-sm-4'),
+            ),
+            Row(
                 Div('workplace', css_class='col-sm-4'),
                 Div('position', css_class='col-sm-4'),
                 css_class='margin-bottom-15',
+                css_id='job-details-row'
             ),
             Row(
-                Div('experience', css_class='col-sm-12'),
+                Div(Field('experience',
+                          placeholder='Напишите здесь о том, что вы делаете на работе, '
+                          'и о своей нынешней дипломной или курсовой работе. '
+                          'Здесь стоит рассказать о студенческих проектах, '
+                          'в которых вы участвовали, или о небольших личных '
+                          'проектах, которые вы делаете дома, для своего '
+                          'удовольствия.'), css_class='col-sm-12'),
                 css_class='margin-bottom-15'
             ),
             Row(
-                Div('preferred_study_programs', css_class='col-sm-12'),
+                Div(Field('preferred_study_programs',
+                          template="admission/forms/checkboxselectmultiple.html"), css_class='col-sm-12'),
                 Div('preferred_study_programs_dm_note', css_class='col-sm-12'),
                 Div('preferred_study_programs_cs_note', css_class='col-sm-12'),
                 Div('preferred_study_programs_se_note', css_class='col-sm-12'),
@@ -242,20 +243,22 @@ class ApplicationFormStep2(forms.ModelForm):
         areas_of_study_fieldset = next((f for f in self.helper.layout.fields
                                         if f.css_id == "study-programs-row"),
                                        None)
-        # Hide some fields if they are not necessary at the moment
+        # Hide fields if they are not necessary at the moment
         if not self.is_bound:
             for row in areas_of_study_fieldset:
-                if 'preferred_study_programs' not in row:
+                field_names = (fn for _, fn in row.get_field_names())
+                if 'preferred_study_programs' not in field_names:
                     row.css_class += ' hidden'
         else:
             target = self.CITY_CODE + "-preferred_study_programs"
             selected_areas = self.data.getlist(target)
             for row in areas_of_study_fieldset:
-                if 'preferred_study_programs' in row:
+                field_names = (fn for _, fn in row.get_field_names())
+                if 'preferred_study_programs' in field_names:
                     continue
                 selected = False
                 for area in selected_areas:
-                    input_name = "preferred_study_programs_{}_note".format(area)
+                    input_name = f"preferred_study_programs_{area}_note"
                     if input_name in row:
                         selected = True
                         break
@@ -273,8 +276,10 @@ class ApplicationFormStep2(forms.ModelForm):
         # Has job visibility
         target = self.CITY_CODE + "-has_job"
         if target not in self.data or self.data[target] == 'no':
-            self.fields['workplace'].disabled = True
-            self.fields['position'].disabled = True
+            fieldset = next((f for f in self.helper.layout.fields
+                             if f.css_id == "job-details-row"), None)
+            if fieldset:
+                fieldset.css_class += ' hidden'
         # Where did you learn
         target = self.CITY_CODE + "-where_did_you_learn"
         if target not in self.data or "other" not in self.data.getlist(target):
