@@ -29,9 +29,10 @@ INSTALLED_APPS += [
     'admission_test',  # TODO: remove after testing
 ]
 
-# Oauth application settings for getting access to login from Yandex.Passport
-SOCIAL_AUTH_YANDEXRU_KEY = "4ac0b41c382a4dba9d8aeaa9a29d663b"
-SOCIAL_AUTH_YANDEXRU_SECRET = "8d708acac5d8422e8c4973d5bf2fa568"
+# Oauth settings for getting access to login from Yandex.Passport
+# Note: application managed under `contest@compscicenter.ru` user
+SOCIAL_AUTH_YANDEXRU_KEY = "9990b75d62a541f88812b6ce8b39574f"
+SOCIAL_AUTH_YANDEXRU_SECRET = "7fd828cbb49d49d7a57b242828ea7115"
 SOCIAL_AUTH_YANDEXRU_PIPELINE = [
     'social_core.pipeline.social_auth.social_details',
     # 'social_core.pipeline.social_auth.social_uid',
