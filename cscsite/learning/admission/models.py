@@ -319,8 +319,6 @@ class Applicant(TimeStampedModel):
                         .filter(pk=self.campaign_id)
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
-        print(contests)
-        print("WTF")
         if contests:
             contest_index = self.pk % len(contests)
             self.contest_id = contests[contest_index]
