@@ -43,6 +43,7 @@ from social_django.strategy import DjangoStrategy
 
 from api.permissions import CuratorAccessPermission
 from core.api.yandex_oauth import YandexRuOAuth2Backend
+from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
@@ -59,7 +60,7 @@ from learning.admission.utils import generate_interview_reminder, \
     calculate_time
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import CSCUser
-from .tasks import application_form_send_email
+from .tasks import register_in_yandex_contest
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
 STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -175,17 +176,18 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         campaign = (Campaign.objects
                     .filter(year=today.year, city__code=city_code)
                     .first())
+        # TODO: Перенести проверку в начало .get/.post
         if not campaign:
             messages.error(self.request,
                            "Нет активной кампании для выбранного города!")
-            return HttpResponseRedirect(reverse("admission_application"))
+            raise Redirect(to=(reverse("admission:application")))
         cleaned_data['campaign'] = campaign
         del cleaned_data['city']
         applicant = Applicant(**cleaned_data)
-        applicant.clean()
+        applicant.clean()  # normalize yandex login
         applicant.save()
         if applicant.pk:
-            application_form_send_email.delay(applicant.pk, LANGUAGE_CODE)
+            register_in_yandex_contest.delay(applicant.pk, LANGUAGE_CODE)
         else:
             print("SOMETHING WRONG?")
 
@@ -194,7 +196,7 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         for form in form_list:
             cleaned_data.update(form.cleaned_data)
         self.create_new_applicant(cleaned_data)
-        return HttpResponseRedirect(reverse("admission_application_complete"))
+        return HttpResponseRedirect(reverse("admission:application_complete"))
 
     def get_form(self, step=None, data=None, files=None):
         if step is None:

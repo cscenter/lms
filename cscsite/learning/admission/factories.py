@@ -37,6 +37,7 @@ class CampaignFactory(factory.DjangoModelFactory):
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
     exam_passing_score = FuzzyInteger(20, 25)
+    application_ends_at = FuzzyDate(datetime.date(2018, 1, 1))
 
 
 class ApplicantFactory(factory.DjangoModelFactory):

@@ -7,90 +7,61 @@ from django_rq import job
 from post_office import mail
 
 from core.api.yandex_contest import CONTEST_PARTICIPANTS_URL, \
-    YandexContestAPIException
-from core.settings.base import CENTER_SITE_ID
+    YandexContestAPIException, YandexContestAPI
 
 logger = logging.getLogger(__name__)
 
 
 @job('high')
-def application_form_send_email(applicant_id, language_code):
-    """Send email with summary after application form processed"""
-    Site = apps.get_model('sites', 'Site')
-    site = Site.objects.get(pk=CENTER_SITE_ID)
+def register_in_yandex_contest(applicant_id, language_code):
+    """Register user in Yandex.Contest, then send email with summary"""
     translation.activate(language_code)
     Applicant = apps.get_model('admission', 'Applicant')
+    Contest = apps.get_model('admission', 'Contest')
     applicant = (Applicant.objects
                  .filter(pk=applicant_id)
                  .select_related("campaign", "campaign__city")
                  .first())
-    if applicant:
-        mail.send(
-            [applicant.email],
-            sender='info@compscicenter.ru',
-            template="admission-application-form-complete",
-            context={
-                'FIRST_NAME': applicant.first_name,
-                'SURNAME': applicant.surname,
-                'PATRONYMIC': applicant.patronymic,
-                'EMAIL': applicant.email,
-                'CITY': applicant.campaign.city.name,
-                'PHONE': applicant.phone,
-                'YANDEX_LOGIN': applicant.yandex_id,
-            },
-            backend='ses',
-        )
-    else:
-        logger.error("Applicant with id={} not found".format(applicant_id))
-
-
-@job('high')
-def register_in_yandex_contest(applicant_id):
-    """
-    https://api.contest.yandex.net/api/public/swagger-ui.html
-    """
-    AdmissionTestApplicant = apps.get_model('admission_test',
-                                            'AdmissionTestApplicant')
-    instance = AdmissionTestApplicant.objects.get(pk=applicant_id)
-
-    # TODO: send message to admin if token is wrong
-    # TODO: Store token in campaign settings?
-    AUTH_TOKEN = 'AQAAAAAAhPQ9AATQFodbry3QokzotMSy05M4Wec'
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"OAuth {AUTH_TOKEN}"
-    }
-    payload = {'login': instance.yandex_id}
-    contest_id = 7501
-    response = requests.post(CONTEST_PARTICIPANTS_URL.format(contest_id),
-                             headers=headers,
-                             params=payload,
-                             timeout=3)
-    if response.status_code not in [201, 409]:
-        raise YandexContestAPIException()
+    if not applicant.yandex_id:
+        logger.error(f"Empty yandex login for applicant id = {applicant_id}")
+    if not applicant.contest_id:
+        logger.error(f"Empty contest id for applicant id = {applicant_id}")
+        # FIXME: Get attempt to set contest id for user. If still fail - raise an Error
+    campaign = applicant.campaign
+    api = YandexContestAPI(access_token=campaign.access_token,
+                           refresh_token=campaign.refresh_token)
+    try:
+        status_code, data = api.register_in_contest(applicant.yandex_id,
+                                                    applicant.contest_id)
+    except YandexContestAPIException as e:
+        # TODO: send message to admin if token is wrong
+        logger.error("Yandex.Contest request error")
+        return
 
     # Generate notification
-    update_fields = {"status_code": response.status_code}
-    if response.status_code == 201:
-        participant_id = response.text
+    update_fields = {"status_code": status_code}
+    if status_code == 201:
+        participant_id = data
         update_fields["participant_id"] = participant_id
-        data = response.json()
-        logger.debug("Meta data in JSON: {}".format(data))
     else:  # 409 - already registered for this contest
         pass
-    # Saved response code from Yandex API means we processed the form
-    (AdmissionTestApplicant.objects
-     .filter(pk=instance.pk)
+    # Saved response code from Yandex API means we processed application form
+    (Applicant.objects
+     .filter(pk=applicant_id)
      .update(**update_fields))
     mail.send(
-        [instance.email],
+        [applicant.email],
         sender='CS центр <info@compscicenter.ru>',
-        # TODO: move template name to Campaign settings
-        template="admission-2018-subscribe",
+        template=campaign.template_name,
         context={
-            'CONTEST_ID': contest_id,
-            'YANDEX_LOGIN': instance.yandex_id,
+            'FIRST_NAME': applicant.first_name,
+            'SURNAME': applicant.surname,
+            'PATRONYMIC': applicant.patronymic,
+            'EMAIL': applicant.email,
+            'CITY': applicant.campaign.city.name,
+            'PHONE': applicant.phone,
+            'CONTEST_ID': applicant.contest_id,
+            'YANDEX_LOGIN': applicant.yandex_id,
         },
         render_on_delivery=True,
         backend='ses',
