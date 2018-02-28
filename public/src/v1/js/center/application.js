@@ -1,7 +1,7 @@
 function toggleUniversity() {
     $('select[name$="-university"]').change(function () {
         var universityID = parseInt(this.value);
-        // FIXME: What the magic constants?
+        // Hide additional field if selected `Other`
         var disabled = (universityID !== 10 && universityID !== 14);
         if (disabled) {
             $('#university-other-row').addClass('hidden');
@@ -14,11 +14,16 @@ function toggleUniversity() {
 }
 
 function toggleHasJob() {
-    $('select[name$="-has_job"]').change(function () {
+    $('input[name$="-has_job"]').change(function () {
         const disabled = this.value !== 'yes';
-        $('input[name$="-workplace"]').prop('disabled', disabled);
-        $('input[name$="position"]').prop('disabled', disabled);
-
+        console.log(disabled);
+        if (disabled) {
+            $('#job-details-row').addClass('hidden');
+        } else {
+            $('#job-details-row')
+                .removeClass('hidden')
+                .find('input[name$="-workplace"]').focus();
+        }
     });
 }
 
@@ -42,32 +47,11 @@ function toggleWhereDidYouLearn() {
         let $textarea = $('input[name$=-where_did_you_learn_other]');
         if ($(this).is(':checked')) {
             $textarea.closest('.col-sm-12').removeClass('hidden');
+            $textarea.focus();
         } else {
             $textarea.closest('.col-sm-12').addClass('hidden');
         }
     })
-}
-
-function showStepBackWarning() {
-    $('.__prev-step').click(function (e) {
-        // TODO: Check form was changed
-        e.preventDefault();
-        swal({
-            title: "",
-            text: "Данные текущего шага будут утеряны",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonClass: "btn-danger",
-            cancelButtonText: "Отмена!",
-            confirmButtonText: "Продолжить"
-        }, function (isConfirm) {
-            if (isConfirm) {
-                window.location.href = this.href;
-            } else {
-                return false;
-            }
-        });
-    });
 }
 
 export function initApplicationForm() {
@@ -75,5 +59,4 @@ export function initApplicationForm() {
     toggleHasJob();
     toggleStudyProjects();
     toggleWhereDidYouLearn();
-    showStepBackWarning();
 }
