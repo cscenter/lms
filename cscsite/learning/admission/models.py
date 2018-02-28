@@ -64,6 +64,24 @@ class Campaign(models.Model):
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"))
     current = models.BooleanField(_("Current campaign"), default=False)
+    application_ends_at = models.DateField(
+        _("Application Ends At"),
+        help_text=_("Last day for submitting application"))
+    access_token = models.CharField(
+        _("Access Token"),
+        help_text=_("Yandex.Contest Access Token"),
+        max_length=255,
+        blank=True)
+    refresh_token = models.CharField(
+        _("Refresh Token"),
+        help_text=_("Yandex.Contest Refresh Token"),
+        max_length=255,
+        blank=True)
+    template_name = models.CharField(
+        _("Template Name"),
+        help_text=_("Template name for invitation email message"),
+        max_length=255,
+        blank=True)
 
     class Meta:
         verbose_name = _("Campaign")
@@ -138,9 +156,6 @@ class Applicant(TimeStampedModel):
     yandex_id = models.CharField(
         _("Yandex ID"),
         max_length=80,
-        validators=[RegexValidator(regex="^[^@]*$",
-                                   message=_("Only the part before "
-                                             "\"@yandex.ru\" is expected"))],
         help_text=_("Applicant|yandex_id"),
         null=True,
         blank=True)
@@ -273,10 +288,45 @@ class Applicant(TimeStampedModel):
         blank=True,
     )
     uuid = models.UUIDField(editable=False, null=True, blank=True)
+    contest_id = models.IntegerField(
+        _("Yandex.Contest ID"),
+        null=True,
+        blank=True)
+    participant_id = models.IntegerField(
+        _("Participant ID"),
+        help_text=_("Participant ID if user registered in Yandex Contest"),
+        null=True,
+        blank=True)
+    status_code = models.IntegerField(
+        "Yandex API Response",
+        editable=False,
+        null=True,
+        blank=True)
 
     class Meta:
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        super().save(**kwargs)
+        self._set_contest_id(created)
+
+    def _set_contest_id(self, created):
+        if not created:
+            return False
+        contests = list(Contest.objects
+                        .filter(pk=self.campaign_id)
+                        .values_list("contest_id", flat=True)
+                        .order_by("contest_id"))
+        print(contests)
+        print("WTF")
+        if contests:
+            contest_index = self.pk % len(contests)
+            self.contest_id = contests[contest_index]
+            (Applicant.objects
+             .filter(pk=self.pk)
+             .update(contest_id=self.contest_id))
 
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

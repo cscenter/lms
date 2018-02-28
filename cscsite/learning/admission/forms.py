@@ -108,6 +108,11 @@ class ApplicationFormStep1(forms.ModelForm):
         )
         super().__init__(*args, **kwargs)
 
+    def clean(self):
+        yandex_login = self.cleaned_data.get("yandex_id", None)
+        if not yandex_login:
+            raise ValidationError("Не был получен доступ к данным на Яндексе.")
+
 
 class ApplicationFormStep2(forms.ModelForm):
     has_job = forms.ChoiceField(
