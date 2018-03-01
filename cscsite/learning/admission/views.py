@@ -160,18 +160,6 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         if cleaned_data['has_job'] == 'no':
             del cleaned_data['workplace']
             del cleaned_data['position']
-        city_code = cleaned_data['city']
-        today = timezone.now()
-        campaign = (Campaign.objects
-                    .filter(year=today.year, city_id=city_code)
-                    .first())
-        # TODO: Перенести проверку в начало .get/.post
-        if not campaign:
-            messages.error(self.request,
-                           "Нет активной кампании для выбранного города!")
-            raise Redirect(to=(reverse("admission:application")))
-        cleaned_data['campaign'] = campaign
-        del cleaned_data['city']
         applicant = Applicant(**cleaned_data)
         applicant.clean()  # normalize yandex login
         applicant.save()
@@ -191,6 +179,7 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
 
     def get_form_kwargs(self, step=None):
         kwargs = super().get_form_kwargs(step)
+        # Customize yandex login button widget based on stored value
         yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
         if yandex_login:
             kwargs["yandex_passport_access_allowed"] = True
@@ -199,6 +188,7 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
     def get_form(self, step=None, data=None, files=None):
         if step is None:
             step = self.steps.current
+        # Append yandex login to data if session value was found
         if step == "welcome":
             yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
             if yandex_login and data and "yandex_id" not in data:
@@ -207,27 +197,26 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
                 data[f"{form_prefix}-yandex_id"] = yandex_login
         return super().get_form(step, data, files)
 
-    def render(self, form=None, **kwargs):
-        """
-        Returns a ``HttpResponse`` containing all needed context data.
-        """
-        form = form or self.get_form()
-        context = self.get_context_data(form=form, **kwargs)
-        return self.render_to_response(context)
-
     @staticmethod
     def show_spb_form(wizard):
-        cleaned_data = wizard.get_cleaned_data_for_step('welcome')
-        return cleaned_data and cleaned_data['city'] == 'spb'
+        saved_data = wizard.storage.get_step_data('welcome')
+        return saved_data and saved_data.get("city") == "spb"
 
     @staticmethod
     def show_nsk_form(wizard):
-        cleaned_data = wizard.get_cleaned_data_for_step('welcome')
-        return cleaned_data and cleaned_data['city'] == 'nsk'
+        saved_data = wizard.storage.get_step_data('welcome')
+        return saved_data and saved_data.get("city") == "nsk"
 
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form, **kwargs)
-        return context
+    def process_step(self, form):
+        """
+        This method is used to postprocess the form data. By default, it
+        returns the raw `form.data` dictionary.
+        """
+        data = super().process_step(form)
+        if self.steps.current == "welcome":
+            # Additionally save city code for easier step recognition
+            data["city"] = form.cleaned_data['campaign'].city_id
+        return data
 
 
 ApplicantFormWizardView.condition_dict = {

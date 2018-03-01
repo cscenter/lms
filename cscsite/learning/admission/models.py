@@ -306,6 +306,7 @@ class Applicant(TimeStampedModel):
     class Meta:
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
+        unique_together = [('email', 'campaign')]
 
     def save(self, **kwargs):
         created = self.pk is None
