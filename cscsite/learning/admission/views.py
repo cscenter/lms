@@ -37,7 +37,7 @@ from rest_framework.views import APIView
 from social_core.actions import do_auth
 from social_core.exceptions import MissingBackend, SocialAuthBaseException
 from social_core.storage import UserMixin
-from social_core.utils import user_is_authenticated, partial_pipeline_data
+from social_core.utils import user_is_authenticated
 from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
 
@@ -163,7 +163,7 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         city_code = cleaned_data['city']
         today = timezone.now()
         campaign = (Campaign.objects
-                    .filter(year=today.year, city__code=city_code)
+                    .filter(year=today.year, city_id=city_code)
                     .first())
         # TODO: Перенести проверку в начало .get/.post
         if not campaign:
