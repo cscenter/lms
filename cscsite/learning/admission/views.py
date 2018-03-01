@@ -196,13 +196,22 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         for form in form_list:
             cleaned_data.update(form.cleaned_data)
         self.create_new_applicant(cleaned_data)
+        # Remove yandex login data from session
+        self.request.session.pop(SESSION_LOGIN_KEY, None)
         return HttpResponseRedirect(reverse("admission:application_complete"))
+
+    def get_form_kwargs(self, step=None):
+        kwargs = super().get_form_kwargs(step)
+        yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
+        if yandex_login:
+            kwargs["yandex_passport_access_allowed"] = True
+        return kwargs
 
     def get_form(self, step=None, data=None, files=None):
         if step is None:
             step = self.steps.current
         if step == "welcome":
-            yandex_login = self.request.session.get(SESSION_LOGIN_KEY)
+            yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
             if yandex_login and data and "yandex_id" not in data:
                 data = data.copy()
                 form_prefix = self.get_form_prefix(step)

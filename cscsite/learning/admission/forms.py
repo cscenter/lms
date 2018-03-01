@@ -71,8 +71,18 @@ class ApplicationFormStep1(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
+        yandex_passport = kwargs.pop("yandex_passport_access_allowed", None)
         url = reverse("admission:auth_begin")
-        yandex_button = f'<a class="btn btn-default __login-access-begin" href="{url}">Разрешить доступ к данным</a>'
+        if yandex_passport:
+            yandex_button = f'''
+<a class="btn btn-default __login-access-begin" href="{url}" disabled="disabled">
+    <i class="fa fa-check text-success"></i> Доступ разрешен
+</a>'''.strip()
+        else:
+            yandex_button = f'''
+<a class="btn btn-default __login-access-begin" href="{url}">
+    Разрешить доступ к данным
+</a>'''.strip()
         self.helper.layout = Layout(
             InlineRadios('city'),
             Row(
