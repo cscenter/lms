@@ -313,6 +313,9 @@ class Applicant(TimeStampedModel):
         super().save(**kwargs)
         self._set_contest_id(created)
 
+    def refresh_contest_id(self):
+        self._set_contest_id(created=True)
+
     def _set_contest_id(self, created):
         if not created:
             return False

@@ -1,4 +1,5 @@
 import logging
+from enum import IntEnum
 
 import requests
 
@@ -6,6 +7,14 @@ logger = logging.getLogger(__name__)
 
 API_URL = 'https://api.contest.yandex.net/api/public/v2'
 CONTEST_PARTICIPANTS_URL = API_URL + '/contests/{}/participants'
+
+
+class RegisterStatus(IntEnum):
+    CREATED = 201  # Successfully registered for contest
+    BAD_TOKEN = 401  # OAuth header is not declared or is wrong
+    NO_ACCESS = 403  # You have no access to this contest
+    NOT_FOUND = 404  # Contest not found
+    DUPLICATED = 409  # You have already registered for this contest
 
 
 class YandexContestAPIException(Exception):
@@ -34,7 +43,8 @@ class YandexContestAPI:
                                  headers=headers,
                                  params=payload,
                                  timeout=3)
-        if response.status_code not in [201, 409]:
+        if response.status_code not in [RegisterStatus.CREATED,
+                                        RegisterStatus.DUPLICATED]:
             raise YandexContestAPIException(response.status_code, response.text)
         data = response.json()
         logger.debug("Meta data in JSON: {}".format(data))
