@@ -15,6 +15,7 @@ from django.core.validators import RegexValidator, MinValueValidator, \
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
+from django.utils.safestring import mark_safe
 from django.utils.timezone import now, make_aware, localtime
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
@@ -45,7 +46,6 @@ def current_year():
     return now().year
 
 
-@python_2_unicode_compatible
 class Campaign(models.Model):
     year = models.PositiveSmallIntegerField(
         _("Campaign|Year"),
@@ -63,7 +63,10 @@ class Campaign(models.Model):
     exam_passing_score = models.SmallIntegerField(
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"))
-    current = models.BooleanField(_("Current campaign"), default=False)
+    current = models.BooleanField(
+        _("Current campaign"),
+        help_text=_("Show in application form list"),
+        default=False)
     application_ends_at = models.DateField(
         _("Application Ends At"),
         help_text=_("Last day for submitting application"))
@@ -100,8 +103,34 @@ class Campaign(models.Model):
     def display_short(self):
         return smart_text(_("{}, {}").format(self.city.abbr, self.year))
 
+    def clean(self):
+        if self.pk is None and self.current:
+            msg = _("You can't set `current` on campaign creation")
+            raise ValidationError(msg)
+        if self.current:
+            errors = []
+            contests = Contest.objects.filter(campaign_id=self.pk,
+                                              type=Contest.TYPE_TEST).count()
+            if not contests:
+                msg = _("Before mark campaign as `current` - add contests "
+                        "for testing")
+                errors.append(msg)
+            if not self.template_name:
+                errors.append(_("Empty template name"))
+            else:
+                from post_office.models import EmailTemplate
+                tn = self.template_name
+                if not EmailTemplate.objects.filter(name=tn).exists():
+                    msg = _("Email template {} doesn't exist")
+                    errors.append(msg.format(self.template_name))
+            if not self.access_token:
+                msg = _("Empty access token")
+                errors.append(msg)
+            if errors:
+                msg = mark_safe("<br>".join(str(e) for e in errors))
+                raise ValidationError(msg)
 
-@python_2_unicode_compatible
+
 class Applicant(TimeStampedModel):
     REJECTED_BY_TEST = 'rejected_test'
     PERMIT_TO_EXAM = 'permit_to_exam'
