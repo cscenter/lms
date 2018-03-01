@@ -16,7 +16,9 @@ class YandexRuOAuth2Backend(BaseOAuth2):
 
     @handle_http_errors
     def auth_complete(self, *args, **kwargs):
-        """Completes process, preventing user login"""
+        """
+        Completes process, preventing user authentication and pipeline running
+        """
         self.process_error(self.data)
         state = self.validate_state()
         response = self.request_access_token(
