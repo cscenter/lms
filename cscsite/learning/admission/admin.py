@@ -20,7 +20,7 @@ from learning.admission.models import Campaign, Interview, Applicant, Test, \
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ['year', 'city']
+    list_display = ['year', 'city', 'current']
     list_filter = ['city']
 
 

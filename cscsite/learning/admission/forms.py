@@ -6,7 +6,7 @@ from crispy_forms.bootstrap import FormActions, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Field, Row, HTML
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.forms.models import ModelForm
 from django.urls import reverse
 from django.utils import timezone
@@ -18,11 +18,9 @@ from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
 from learning.admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment, InterviewSlot, InterviewStream
+    InterviewAssignment, InterviewSlot, InterviewStream, Campaign
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
-ENVELOPE_ICON_HTML = '<i class="fa fa-envelope-o" aria-hidden="true"></i>'
-PHONE_ICON_HTML = '<i class="fa fa-mobile" aria-hidden="true"></i>'
 COURSES = Choices(('', '', '--------')) + CSCUser.COURSES
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат/листовка в университете'),
@@ -32,15 +30,16 @@ WHERE_DID_YOU_LEARN = (
 )
 
 
+class CampaignChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.city
+
+
 class ApplicationFormStep1(forms.ModelForm):
-    city = forms.ChoiceField(
-        widget=forms.RadioSelect(),
-        choices=(
-            ("spb", _("St Petersburg")),
-            ("nsk", _("Novosibirsk")),
-        ),
+    campaign = CampaignChoiceField(
         label='Выберите город, в котором вы живёте и куда хотите поступить',
-        help_text=''
+        queryset=None,
+        empty_label=None
     )
     yandex_id = forms.CharField(
         label='Укажите свой логин на Яндексе',
@@ -57,7 +56,7 @@ class ApplicationFormStep1(forms.ModelForm):
 
     class Meta:
         model = Applicant
-        fields = ("city", "surname", "first_name", "patronymic", "email",
+        fields = ("campaign", "surname", "first_name", "patronymic", "email",
                   "phone", "yandex_id", "stepic_id", "github_id",)
         labels = {
             'email': 'Адрес электронной почты',
@@ -68,9 +67,15 @@ class ApplicationFormStep1(forms.ModelForm):
             'phone': '',
             'stepic_id': 'https://stepik.org/users/XXXX, XXXX - это ваш ID',
         }
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': "Если вы уже зарегистрировали анкету на "
+                                   "указанный email и хотите внести изменения "
+                                   "- напишите на info@compscicenter.ru с этой почты.",
+            }
+        }
 
     def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
         yandex_passport = kwargs.pop("yandex_passport_access_allowed", None)
         url = reverse("admission:auth_begin")
         if yandex_passport:
@@ -83,8 +88,9 @@ class ApplicationFormStep1(forms.ModelForm):
 <a class="btn btn-default __login-access-begin" href="{url}">
     Разрешить доступ к данным
 </a>'''.strip()
+        self.helper = FormHelper()
         self.helper.layout = Layout(
-            InlineRadios('city'),
+            InlineRadios('campaign'),
             Row(
                 Div('surname', css_class='col-sm-4'),
                 Div('first_name', css_class='col-sm-4'),
@@ -114,11 +120,18 @@ class ApplicationFormStep1(forms.ModelForm):
             ),
         )
         super().__init__(*args, **kwargs)
+        # Restrict list of campaigns
+        year_now = timezone.now().year
+        self.fields['campaign'].queryset = (Campaign.objects
+                                            .filter(current=True, year=year_now)
+                                            .select_related('city'))
 
     def clean(self):
+        cleaned_data = super().clean()
         yandex_login = self.cleaned_data.get("yandex_id", None)
         if not yandex_login:
             raise ValidationError("Не был получен доступ к данным на Яндексе.")
+        return cleaned_data
 
 
 class ApplicationFormStep2(forms.ModelForm):
