@@ -107,7 +107,9 @@ def yandex_login_access(request, *args, **kwargs):
 @csrf_exempt
 @redirect_to("admission:auth_complete")
 def yandex_login_access_complete(request, *args, **kwargs):
-    """Authentication complete view"""
+    """
+    Authentication complete view. Our main goal - to retrieve user yandex login.
+    """
     redirect_url = reverse(kwargs.pop("redirect_url"))
     request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
                                              *args, **kwargs)
@@ -121,33 +123,20 @@ def yandex_login_access_complete(request, *args, **kwargs):
 
     user = request.user
     backend = request.backend
-    redirect_name = REDIRECT_FIELD_NAME
-    data = backend.strategy.request_data()
 
     is_authenticated = user_is_authenticated(user)
     user = user if is_authenticated else None
 
+    # Note: Pipeline is never called since we prevent user authentication
     try:
-        partial = partial_pipeline_data(backend, user, *args, **kwargs)
-        if partial:
-            # FIXME: UB
-            user = backend.continue_pipeline(partial)
-        else:
-            auth_data = backend.complete(user=user, *args, **kwargs)
+        auth_data = backend.complete(user=user, *args, **kwargs)
         for field_name in ["login", "sex"]:
             key = f"{BACKEND_PREFIX}_{field_name}"
             backend.strategy.session_set(key, auth_data.get(field_name))
+        context = {"yandex_login": auth_data.get("login", "")}
     except SocialAuthBaseException as e:
-        return render(request,
-                      'admission/social_close_popup.html',
-                      context={"error": str(e)})
-    # pop redirect value before the session is trashed on login(), but after
-    # the pipeline so that the pipeline can change the redirect if needed
-    redirect_value = backend.strategy.session_get(redirect_name, '') or \
-                     data.get(redirect_name, '')
-    return render(request,
-                  'admission/social_close_popup.html',
-                  context={"yandex_login": auth_data.get("login", "")})
+        context = {"error": str(e)}
+    return render(request, 'admission/social_close_popup.html', context=context)
 
 
 # FIXME: Don't allow to save duplicates.

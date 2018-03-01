@@ -33,11 +33,8 @@ INSTALLED_APPS += [
 # Note: application managed under `contest@compscicenter.ru` user
 SOCIAL_AUTH_YANDEXRU_KEY = "***REMOVED***"
 SOCIAL_AUTH_YANDEXRU_SECRET = "***REMOVED***"
-SOCIAL_AUTH_YANDEXRU_PIPELINE = [
-    'social_core.pipeline.social_auth.social_details',
-    # 'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-]
+# Note: we prevent calling pipeline for this backend
+SOCIAL_AUTH_YANDEXRU_PIPELINE = []
 
 # Add site specific templates
 TEMPLATES[0]['DIRS'] = [
