@@ -193,6 +193,7 @@ class ApplicationFormStep2(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        kwargs.pop("yandex_passport_access_allowed", None)
         if not self.CITY_CODE:
             raise ValueError("Provide city code prefix")
         self.helper = FormHelper()
