@@ -78,8 +78,8 @@ LOGGING = {
             'propagate': True,
         },
         "rq.worker": {
-            "level": "WARNING",
-            "handlers": ["console"],
+            "level": "DEBUG",
+            "handlers": ["logfile"],
             'propagate': False,
         },
         "post_office": {
