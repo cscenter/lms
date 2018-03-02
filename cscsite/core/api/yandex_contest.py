@@ -46,6 +46,8 @@ class YandexContestAPI:
         if response.status_code not in [RegisterStatus.CREATED,
                                         RegisterStatus.DUPLICATED]:
             raise YandexContestAPIException(response.status_code, response.text)
-        data = response.json()
-        logger.debug("Meta data in JSON: {}".format(data))
-        return response.status_code, data
+        participant_id = None
+        if response.status_code == RegisterStatus.CREATED:
+            participant_id = response.json()
+            logger.debug("Meta data: {}".format(participant_id))
+        return response.status_code, participant_id
