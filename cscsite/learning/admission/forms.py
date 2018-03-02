@@ -70,8 +70,8 @@ class ApplicationFormStep1(forms.ModelForm):
         error_messages = {
             NON_FIELD_ERRORS: {
                 'unique_together': "Если вы уже зарегистрировали анкету на "
-                                   "указанный email и хотите внести изменения "
-                                   "- напишите на info@compscicenter.ru с этой почты.",
+                                   "указанный email и хотите внести изменения, "
+                                   "напишите на info@compscicenter.ru с этой почты.",
             }
         }
 
