@@ -98,3 +98,4 @@ FILE_UPLOAD_HANDLERS = [
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
+REDIS_PASSWORD = None
