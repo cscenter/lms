@@ -1,0 +1,101 @@
+// Variables
+$card-spacer-y:                     .75rem !default;
+$card-spacer-x:                     1.25rem !default;
+$card-border-width:                 $border-width !default;
+$card-border-radius:                $border-radius !default;
+$card-border-color:                 rgba($black, .125) !default;
+$card-inner-border-radius:          calc(#{$card-border-radius} - #{$card-border-width}) !default;
+$card-cap-bg:                       rgba($black, .03) !default;
+$card-bg:                           $white !default;
+
+$card-img-overlay-padding:          1.25rem !default;
+
+$card-group-margin:                 ($grid-gutter-width / 2) !default;
+$card-deck-margin:                  $card-group-margin !default;
+
+$card-columns-count:                3 !default;
+$card-columns-gap:                  1.25rem !default;
+$card-columns-margin:               $card-spacer-y !default;
+
+// Imports
+@import "bootstrap/scss/card";
+
+
+.responsive-card-deck {
+  color: $gray-500;
+  @include make-col-ready();
+  @include make-col(12);
+
+  @include media-breakpoint-up(sm) {
+    @include make-col(6);
+  }
+
+  @include media-breakpoint-up(md) {
+    @include make-col(4);
+  }
+
+  @include media-breakpoint-up(lg) {
+    @include make-col(2);
+  }
+
+  .card-img-top {
+    border-radius: 0;
+    border: 1px solid $gray-300;
+  }
+}
+
+
+// Student reviews
+.testimonial {
+  padding: 1.7rem;
+  color: $gray-500;
+  //border: 1px solid #e9ecee;
+  flex-direction: row;
+  font-size: .9375rem;
+  @include font-smoothing();
+  justify-content: center;
+  text-align: center;
+
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    text-align: left;
+  }
+
+  img {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 4px #ddd;
+  }
+
+  span {
+    margin: .3rem 0;
+    display: block;
+    color: $gray-400;
+  }
+
+  &__details {
+    margin-left: 20px;
+    flex-basis: 0;
+    flex-grow: 1;
+
+    //@include media-breakpoint-up(md) {
+    //  @include make-col(12);
+    //  margin: 0;
+    //  text-align: center;
+    //}
+  }
+
+  &__name {
+    margin: 1rem 0 0 0;
+
+    @include media-breakpoint-up(lg) {
+      margin: 0;
+    }
+  }
+}
+
+.testimonial__text {
+  margin-bottom: 1rem;
+}

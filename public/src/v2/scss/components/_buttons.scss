@@ -1,0 +1,44 @@
+@import "bootstrap/scss/buttons";
+
+.btn--big {
+  @include button-size(20px, 25px, 18px, 20px, 4px);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.btn--small {
+  @include button-size(10px, 25px, 14px, 20px, 20px);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.btn--outline {
+  color: $light;
+  background-color: rgba(255, 255, 255, .1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, .2);
+  }
+}
+
+.btn--outline_gray {
+  color: $gray-400;
+  background-color: rgba(0, 0, 0, 0);
+  border: 1px solid $gray-400;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, .05);
+  }
+}
+
+.btn--green {
+  color: $white;
+  background-color: $teal;
+
+  &:hover {
+    background-color: lighten($teal, 5%);
+    color: $white;
+  }
+}
