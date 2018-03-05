@@ -29,16 +29,41 @@ INSTALLED_APPS += [
     'registration',
 ]
 
-
 LOCALE_PATHS = [
     str(BASE_DIR / "locale"),
 ] + LOCALE_PATHS
 
-# Template overrides
-TEMPLATES[0]['DIRS'] = [str(BASE_DIR / "templates")] + TEMPLATES[0]['DIRS']
-TEMPLATES[0]['OPTIONS']['context_processors'] += (
-    'core.context_processors.cities',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': False,
+        'DIRS': [
+            str(BASE_DIR / "templates"),
+            str(PROJECT_DIR / "templates"),
+            django.__path__[0] + '/forms/templates',
+        ],
+        'OPTIONS': {
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'learning.context_processors.redirect_bases',
+                'core.context_processors.cities',
+            ),
+            'debug': DEBUG
+        }
+    },
+]
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'

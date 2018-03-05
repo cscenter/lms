@@ -8,7 +8,7 @@ SITE_ID = 1
 ROOT_URLCONF = 'cscenter.urls'
 WSGI_APPLICATION = 'cscenter.wsgi.application'
 
-BASE_DIR = Path(__file__).parents[1]
+APP_DIR = Path(__file__).parents[1]
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -37,14 +37,42 @@ SOCIAL_AUTH_YANDEXRU_SECRET = "***REMOVED***"
 SOCIAL_AUTH_YANDEXRU_PIPELINE = []
 
 # Add site specific templates
-TEMPLATES[0]['DIRS'] = [
-    str(BASE_DIR / "templates"),
-    str(PROJECT_DIR / "admission_test" / "templates"),
-    str(PROJECT_DIR / "learning" / "admission" / "templates"),
-] + TEMPLATES[0]['DIRS']
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': False,
+        'DIRS': [
+            str(APP_DIR / "templates"),
+            str(PROJECT_DIR / "admission_test" / "templates"),
+            str(PROJECT_DIR / "learning" / "admission" / "templates"),
+            str(PROJECT_DIR / "templates"),
+            django.__path__[0] + '/forms/templates',
+        ],
+        'OPTIONS': {
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+
+                'learning.context_processors.redirect_bases'
+            ),
+            'debug': DEBUG
+        }
+    },
+]
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 LOCALE_PATHS += [
-    str(BASE_DIR / "locale"),
+    str(APP_DIR / "locale"),
     str(PROJECT_DIR / "learning" / "projects" / "locale"),
     str(PROJECT_DIR / "learning" / "admission" / "locale"),
 ]
@@ -57,7 +85,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = str(BASE_DIR / "newrelic.ini")
+NEWRELIC_CONF = str(APP_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 
@@ -72,4 +100,3 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
-
