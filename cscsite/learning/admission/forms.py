@@ -255,10 +255,19 @@ class ApplicationFormStep2(forms.ModelForm):
                 css_id="study-programs-row"
             ),
             Row(
+                Div('motivation', css_class='col-sm-12'),
+            ),
+            Row(
                 Div('where_did_you_learn', css_class='col-sm-12'),
                 Div('where_did_you_learn_other', css_class='col-sm-12'),
                 css_class='margin-bottom-15',
                 css_id="where-did-you-learn-row"
+            ),
+            Row(
+                Div('your_future_plans', css_class='col-sm-12'),
+            ),
+            Row(
+                Div('additional_info', css_class='col-sm-12'),
             ),
         )
         super().__init__(*args, **kwargs)
@@ -327,13 +336,13 @@ class ApplicationInSpbForm(ApplicationFormStep2):
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из трёх вам интересны в CS центре?',
         choices=(
-            ("dm", "Анализ Данных"),
+            ("dm", "Анализ данных"),
             ("cs", "Современная информатика"),
             ("se", "Разработка ПО")
         ),
-        help_text='Мы не просим поступающих определиться с направлением '
-                  'обучения, будучи студентом вам предстоит сделать этот выбор '
-                  'через год-полтора после поступления, а сейчас предлагаем '
+        help_text='Мы не просим поступающих сразу определиться с направлением '
+                  'обучения. Вам предстоит сделать этот выбор '
+                  'через год-полтора после поступления. Сейчас мы предлагаем '
                   'указать одно или несколько направлений, которые кажутся вам '
                   'интересными.',
         widget=forms.CheckboxSelectMultiple
@@ -351,12 +360,12 @@ class ApplicationInNskForm(ApplicationFormStep2):
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из двух вам интересны в CS центре?',
         choices=(
-            ("dm", "Анализ Данных"),
+            ("dm", "Анализ данных"),
             ("se", "Разработка ПО")
         ),
-        help_text='Мы не просим поступающих определиться с направлением '
-                  'обучения, будучи студентом вам предстоит сделать этот выбор '
-                  'через год-полтора после поступления, а сейчас предлагаем '
+        help_text='Мы не просим поступающих сразу определиться с направлением '
+                  'обучения. Вам предстоит сделать этот выбор '
+                  'через год-полтора после поступления. Сейчас мы предлагаем '
                   'указать одно или несколько направлений, которые кажутся вам '
                   'интересными.',
         widget=forms.CheckboxSelectMultiple
