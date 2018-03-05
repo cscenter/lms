@@ -1,8 +1,8 @@
 import {showComponentError} from 'utils';
 
+// this line is a workaround for chunk hasher, remove it later
 $(document).ready(function () {
     let section = $("body").data("init-section");
-    console.log(section);
     if (section === "gradebook") {
         import(/* webpackChunkName: "gradebook" */ 'teaching/gradebook')
             .then(module => {

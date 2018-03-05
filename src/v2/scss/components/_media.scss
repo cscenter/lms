@@ -1,0 +1,48 @@
+@media (max-width: 991px) {
+  html {
+    font-size: .9rem;
+
+    h1 {
+      font-size: 2.8rem;
+    }
+    h4 {
+      font-size: 1rem;
+    }
+  }
+
+  .navbar {
+    position: fixed !important;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+
+    background-color: $gray-500;
+    font-size: 18px;
+
+    .navbar-collapse {
+      height: 100vh;
+    }
+
+    .navbar-brand{
+      margin: 0;
+    }
+
+    .nav-item {
+      border-top: 1px solid $gray-600;
+      padding: 10px 0;
+
+      &:last-child {
+        border-bottom: 1px solid $gray-600;
+        margin-bottom: 20px;
+      }
+    }
+    ul {
+      margin-top: 20px;
+    }
+  }
+
+  .nav-link,
+  .btn--reg {
+    margin-left: 10px;
+  }
+}

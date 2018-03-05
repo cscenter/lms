@@ -1,0 +1,361 @@
+@mixin append-hr-to-container() {
+  .container::after {
+    content: "";
+    margin: #{2 * $hr-margin-y} 0;
+    border-top: $hr-border-width solid $hr-border-color;
+    display: block;
+  }
+}
+
+
+.__dark {
+  color: $gray-500;
+}
+
+
+// 1 - screen cover
+
+nav {
+  z-index: 5;
+}
+#navbarSupportedContent {
+  @include font-smoothing();
+}
+
+.cover {
+  @include font-smoothing();
+  position: relative;
+  top: -60px;
+  background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
+  background-size: cover;
+  color: $white;
+  padding: 80px 0 100px;
+
+  @include media-breakpoint-down(md) {
+    text-align: center;
+  }
+
+  &__title {
+    padding: 60px 0 20px;
+    max-width: 900px;
+  }
+
+  &__text {
+    margin-bottom: 40px;
+    max-width: 900px;
+  }
+
+}
+
+
+// 2 - screen offline-courses
+.csc-offline-courses {
+  @include append-hr-to-container;
+}
+
+.card-offline-course {
+  background-color: $gray-100;
+  text-align: center;
+  padding: 25px 10px 35px;
+
+  &:hover {
+    background-color: $teal;
+    transition: .2s;
+
+    .card-offline-course__icon--software-engineering {
+      background-image: url("/static/v2/img/pages/index/offline-courses/software-engineering-hover.svg");
+    }
+
+    .card-offline-course__icon--data-science {
+      background-image: url("/static/v2/img/pages/index/offline-courses/data-science-hover.svg");
+    }
+
+    .card-offline-course__icon--computer-science {
+      background-image: url("/static/v2/img/pages/index/offline-courses/computer-science-hover.svg");
+    }
+
+    .card-offline-course__card-title,
+    .card-offline-course__card-text {
+      color: $white;
+    }
+
+  }
+
+  &__text {
+    @include media-breakpoint-down(md) {
+      text-align: center;
+    }
+  }
+
+  &__card-title {
+    text-transform: uppercase;
+    color: $blue;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 0;
+
+    @include media-breakpoint-down(md) {
+      font-size: 18px;
+    }
+  }
+
+  &__icon {
+    margin-left: 15px;
+    display: flex;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    width: 100%;
+    height: 100px;
+
+    &--software-engineering {
+      background-image: url("/static/v2/img/pages/index/offline-courses/software-engineering.svg");
+    }
+
+    &--data-science {
+      background-image: url("/static/v2/img/pages/index/offline-courses/data-science.svg");
+    }
+
+    &--computer-science {
+      background-image: url("/static/v2/img/pages/index/offline-courses/computer-science.svg");
+    }
+
+  }
+
+  &__card-text {
+    font-size: $small-font-size;
+    color: $gray-400;
+
+    @include media-breakpoint-down(md) {
+      text-align: center;
+    }
+  }
+}
+
+//3-screen about-csc
+
+.about-csc {
+  @include append-hr-to-container;
+
+  @include media-breakpoint-down(md) {
+    text-align: center;
+    align-items: center;
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+  }
+
+  h4 {
+    text-transform: uppercase;
+  }
+
+  .btn {
+    margin-bottom: 2rem;
+  }
+
+  &__img {
+    height: 400px;
+    background-image: url("/static/v2/img/pages/index/cscenter_meetup.jpg");
+    @include make-col(12);
+    @include media-breakpoint-up(lg) {
+      @include make-col(8);
+    }
+    @include media-breakpoint-down(lg) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  &__description {
+    @include media-breakpoint-up(lg) {
+      @include make-col(4);
+      padding-left: 20px;
+    }
+
+  }
+
+  .supported-by {
+    a {
+      @include make-col(3);
+    }
+  }
+}
+
+// 4 - screen csc-online
+
+.csc-online-education {
+  @include media-breakpoint-down(md) {
+    text-align: center;
+  }
+
+  .card-img-top {
+    width: auto;
+    @include media-breakpoint-up(sm) {
+      width: 100%;
+    }
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  &__card-title {
+    padding-top: 10px;
+    margin-bottom: 0;
+    font-size: 16px;
+  }
+
+  .btn {
+    margin: .5rem 0 2rem;
+  }
+}
+
+//5-screen students-reviews
+
+.csc-student-reviews {
+  padding: 30px 0;
+  background-color: $light;
+
+  .card-columns {
+    column-count: 2;
+    @include media-breakpoint-down(md) {
+      column-count: 1;
+      text-align: center;
+    }
+  }
+
+}
+
+//6-screen social-media-posts
+
+.social-media-posts {
+  padding: 30px 0 0;
+  overflow: hidden;
+  font-size: .9375rem;
+
+  @include append-hr-to-container();
+}
+
+.social-media {
+  padding: 20px;
+  background-size: cover;
+  background-color: $gray-500;
+
+  @include media-breakpoint-down(md) {
+    text-align: center;
+  }
+
+  .card-columns {
+    column-count: 2;
+    @include media-breakpoint-down(md) {
+      column-count: 1;
+    }
+  }
+
+  &__text {
+    @include make-col(12);
+    color: $white;
+    margin-top: .625rem;
+
+    &--dark {
+      color: $gray-500;
+    }
+
+  }
+
+  &__date {
+    font-size: small;
+    &--light {
+      color: $gray-100;
+    }
+  }
+
+  &--instagram {
+    @include media-breakpoint-up(lg) {
+      @include make-col(6);
+    }
+    background-image: url('/media/pages/index/instagram-img.jpg');
+
+  }
+
+  &--full-size {
+    margin-bottom: .625rem;
+    @include media-breakpoint-up(lg) {
+      height: 500px;
+    }
+  }
+
+  &--vk {
+    background-color: $gray-300;
+  }
+
+  &--twitter {
+    background-color: $gray-300;
+  }
+
+  &--youtube {
+    background-image: url('/media/pages/index/youtube-img.jpg');
+  }
+
+  &--half-size {
+    @include media-breakpoint-up(lg) {
+      height: 245px;
+    }
+  }
+
+  &--small {
+    margin-top: .625rem;
+    @include make-col(12);
+
+    @include media-breakpoint-up(md) {
+      height: 245px;
+      @include make-col(6);
+    }
+  }
+}
+
+//footer
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  color: $gray-600;
+  font-size: .9375rem;
+  line-height: 1.5rem;
+  @include font-smoothing();
+
+  &__copyright {
+    @include make-col(6);
+    @include media-breakpoint-down(md) {
+      @include make-col(12);
+      text-align: center;
+    }
+  }
+
+  &__contacts {
+    display: flex;
+    justify-content: flex-end;
+    @include make-col(6);
+
+    @include media-breakpoint-down(md) {
+      @include make-col(12);
+      flex-direction: column;
+      text-align: center;
+    }
+
+  }
+  &__social-media-icons {
+
+    a {
+      margin: 0 .3rem;
+    }
+  }
+
+  &__email {
+    margin-right: 10px;
+    @include media-breakpoint-down(md) {
+      margin-bottom: 10px;
+    }
+  }
+}

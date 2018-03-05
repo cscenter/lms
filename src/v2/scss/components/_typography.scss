@@ -1,0 +1,24 @@
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/utilities/text";
+
+h1,
+h2,
+h3 {
+  font-weight: $font-weight-light;
+
+  @include media-breakpoint-down(md) {
+    text-align: center;
+  }
+}
+
+h1 {
+  @include font-smoothing();
+}
+
+h4 {
+  font-weight: $font-weight-normal;
+}
+
+.text-center {
+  text-align: center;
+}

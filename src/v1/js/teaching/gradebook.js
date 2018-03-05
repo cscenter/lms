@@ -1,5 +1,4 @@
 // TODO: remove arrow-increment
-import "components/jquery.arrow-increment"
 import SweetAlert from "bootstrap-sweetalert";
 
 const buttonDownloadCSV = $(".marks-sheet-csv-link");
@@ -12,11 +11,6 @@ let gradebook = $("#gradebook");
 
 let scrollButtonsWrapper = $(".gradebook__controls");
 
-function validateNumber(event) {
-    const key = window.event ? event.keyCode : event.which;
-    return !(key > 31 && (key < 48 || key > 57));
-}
-
 function isChanged(element) {
     return element.value !== element.getAttribute("initial");
 }
@@ -27,8 +21,7 @@ const fn = {
         fn.finalGradeSelects();
         fn.submitForm();
         fn.downloadCSVButton();
-        fn.assignmentGradeInputValidator();
-        fn.assignmentGradeInputIncrementByArrows();
+        fn.onChangeAssignmentGrade();
         fn.scrollButtons();
     },
 
@@ -81,21 +74,8 @@ const fn = {
         });
     },
 
-    assignmentGradeInputValidator: function() {
-        gradebook.on("keypress", "input.__assignment", validateNumber);
-        // FIXME: instead of implicitly fix user input - highlight this error
+    onChangeAssignmentGrade: function() {
         gradebook.on("change", "input.__assignment", function (e) {
-            const value = parseInt(this.value, 10);
-            if (!$.isNumeric(this.value) || !Number.isInteger(value)) {
-                this.value = '';
-            } else {
-                const maxGrade = parseInt($(this).attr("max"));
-                if (value < 0) {
-                    this.value = 0;
-                } else if (value > maxGrade) {
-                    this.value = maxGrade;
-                }
-            }
             fn.toggleState(e.target);
         });
     },
@@ -112,43 +92,6 @@ const fn = {
         } else {
             wrapper.classList.remove("__unsaved");
         }
-    },
-
-    assignmentGradeInputIncrementByArrows: function() {
-        gradebook.on("keydown", "input.__assignment", function(e) {
-            if (e.keyCode === 38 || e.keyCode === 40) {
-                let that = this; // input object
-                // Mb it's incredibly stupid practice, who cares?
-                if (that.increment === undefined || that.decrement === undefined) {
-                    that.increment = $.arrowIncrement.prototype.increment;
-                    that.decrement = $.arrowIncrement.prototype.decrement;
-                }
-                that.opts = {
-                    // Slightly modified version of original $.arrowIncrement method
-                    parseFn: function (value) {
-                        const parsed = value.match(/^(\D*?)(\d*(,\d{3})*(\.\d+)?)\D*$/);
-                        if (parsed && parsed[2]) {
-                            if (parsed[1] && parsed[1].indexOf('-') >= 0) {
-                                return -parsed[2].replace(',', '');
-                            } else {
-                                return +parsed[2].replace(',', '');
-                            }
-                        }
-                        // Empty string as 0
-                        if (value.length === 0) {
-                            return 0;
-                        }
-                        return NaN;
-                    }
-                };
-                that.$element = $(this);
-                if (e.keyCode === 38) { // up
-                    that.increment();
-                } else if (e.keyCode === 40) { // down
-                    that.decrement();
-                }
-            }
-        });
     },
 
     scrollButtons: function() {
