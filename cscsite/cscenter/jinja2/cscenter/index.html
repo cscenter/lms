@@ -16,40 +16,42 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/"><img src="{{ static('v2/img/logo-csc.svg') }}" alt="Computer Science Center"></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <div class="cover">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/"><img src="{{ static('v2/img/logo-csc.svg') }}" alt="Computer Science Center"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#top-menu" aria-controls="top-menu"
+                        aria-expanded="false" aria-label="Переключить">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">О центре</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Курсы</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Онлайн</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Лекторий</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Поступление</a>
-                    </li>
-                </ul>
+                <div class="collapse navbar-collapse" id="top-menu">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">О центре</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Курсы</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Онлайн</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Лекторий</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Поступление</a>
+                        </li>
+                    </ul>
 
-                <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
-                    <img src="{{ static('v2/img/icons/user-sign.svg') }}" alt="">Войти
-                </a>
+                    <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
+                        <img src="{{ static('v2/img/icons/user-sign.svg') }}" alt="">Войти
+                    </a>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
 
     <div class="cover">
