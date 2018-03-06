@@ -29,6 +29,12 @@ INSTALLED_APPS += [
     'django_jinja',
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+    }
+}
+
 # Oauth settings for getting access to login from Yandex.Passport
 # Note: application managed under `contest@compscicenter.ru` user
 SOCIAL_AUTH_YANDEXRU_KEY = "9990b75d62a541f88812b6ce8b39574f"
@@ -52,9 +58,9 @@ TEMPLATES = [
             "match_regex": r"^(?!narnia/).*",
             # Or put filters under templatetags and load with
             # django-jinja decorator
-            # "filters": {
-            #     # "thumbnail": "cscenter.settings.debug.thumbnail",
-            # },
+            "filters": {
+                "markdown": "core.jinja2_filters.markdown",
+            },
             "extensions": [
                 "jinja2.ext.do",
                 "jinja2.ext.loopcontrols",
@@ -76,7 +82,7 @@ TEMPLATES = [
                 "enabled": False,
             },
             "newstyle_gettext": True,
-            "autoescape": True,
+            "autoescape": False,
             "auto_reload": DEBUG,
             "translation_engine": "django.utils.translation",
         }

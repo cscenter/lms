@@ -24,12 +24,12 @@ class InstagramAPI:
             "Accept": "application/json",
         }
 
-    def get_recent_post(self, **kwargs):
+    def get_recent_posts(self, count=1, **kwargs):
         """
         Get the most recent media published by the owner of the access_token.
         """
         payload = {
-            'count': 1,
+            'count': count,
             'access_token': self.token
         }
         for k, v in kwargs.items():

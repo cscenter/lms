@@ -24,9 +24,10 @@ from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
 admin.autodiscover()
 
 urlpatterns = [
+    url(r'^$', cscenter_views.IndexView.as_view(), name='index'),
+    url(r'^v2/$', cscenter_views.NewIndexView.as_view(), name='v2_index'),
     url(r'^open-nsk/$', cscenter_views.OpenNskView.as_view(), name='open_nsk'),
     url(r'^api/', include('api.urls')),
-    url(r'^$', cscenter_views.IndexView.as_view(), name='index'),
     url(r'^robots\.txt$', robots, name='robotstxt'),
     # Redirect from old url `/pages/questions/` to more appropriate
     url(r'^pages/questions/$',

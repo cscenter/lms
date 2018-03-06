@@ -29,11 +29,12 @@ class VkOpenAPI:
         Returns a list of posts on a user wall or community wall.
         https://vk.com/dev/wall.get
         """
+        news_count = kwargs.pop("count", 1)
         payload = {
             'v': 5.73,
             'extended': 0,
             'filter': 'owner',
-            'count': 1,
+            'count': news_count,
             'owner_id': owner_id,
             'access_token': self.service_token
         }
