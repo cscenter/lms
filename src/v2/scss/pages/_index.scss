@@ -7,11 +7,9 @@
   }
 }
 
-
 .__dark {
   color: $gray-500;
 }
-
 
 // 1 - screen cover
 
@@ -22,17 +20,19 @@ nav {
   @include font-smoothing();
 }
 
+
 .cover {
   @include font-smoothing();
   position: relative;
-  top: -60px;
+  //top: -60px;
   background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
   background-size: cover;
   color: $white;
-  padding: 80px 0 100px;
+  padding: 0 0 100px;
 
   @include media-breakpoint-down(md) {
     text-align: center;
+    padding-top: 100px;
   }
 
   &__title {
@@ -44,12 +44,12 @@ nav {
     margin-bottom: 40px;
     max-width: 900px;
   }
-
 }
 
 
 // 2 - screen offline-courses
 .csc-offline-courses {
+  padding: 30px 0 0;
   @include append-hr-to-container;
 }
 
@@ -57,6 +57,7 @@ nav {
   background-color: $gray-100;
   text-align: center;
   padding: 25px 10px 35px;
+  border-radius: 0;
 
   &:hover {
     background-color: $teal;
@@ -141,6 +142,10 @@ nav {
     align-items: center;
   }
 
+  .row {
+    margin: 0;
+  }
+
   h2 {
     margin-bottom: 1rem;
   }
@@ -157,9 +162,11 @@ nav {
     height: 400px;
     background-image: url("/static/v2/img/pages/index/cscenter_meetup.jpg");
     @include make-col(12);
+
     @include media-breakpoint-up(lg) {
       @include make-col(8);
     }
+
     @include media-breakpoint-down(lg) {
       margin-bottom: 1rem;
     }
@@ -180,6 +187,7 @@ nav {
   }
 }
 
+
 // 4 - screen csc-online
 
 .csc-online-education {
@@ -187,10 +195,23 @@ nav {
     text-align: center;
   }
 
-  .card-img-top {
-    width: auto;
+  .card-img-wrapper {
+    max-height: 10rem;
+    overflow: hidden;
+
     @include media-breakpoint-up(sm) {
-      width: 100%;
+      max-height: none;
+    }
+
+    img {
+      border: 1px solid $gray-300;
+      width: auto;
+      max-width: 80%;
+
+      @include media-breakpoint-up(sm) {
+        width: 100%;
+        max-width: none;
+      }
     }
   }
 
@@ -215,6 +236,10 @@ nav {
 .csc-student-reviews {
   padding: 30px 0;
   background-color: $light;
+
+  .card {
+    border-radius: 0;
+  }
 
   .card-columns {
     column-count: 2;
@@ -255,7 +280,7 @@ nav {
   &__text {
     @include make-col(12);
     color: $white;
-    margin-top: .625rem;
+    margin: .625rem 0;
 
     &--dark {
       color: $gray-500;
