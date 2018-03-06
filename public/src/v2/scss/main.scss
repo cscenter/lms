@@ -6,6 +6,7 @@
 
 @import "utils/mixins";
 
+
 @import "components/typography";  // After: reboot
 @import "components/grid";
 @import "components/cards";
@@ -13,5 +14,7 @@
 @import "components/buttons";
 @import "components/nav";
 @import "components/navbar";
-
 @import "pages/index";
+
+@import "components/banners";
+

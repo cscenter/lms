@@ -7,11 +7,9 @@
   }
 }
 
-
 .__dark {
   color: $gray-500;
 }
-
 
 // 1 - screen cover
 
@@ -22,17 +20,19 @@ nav {
   @include font-smoothing();
 }
 
+
 .cover {
   @include font-smoothing();
   position: relative;
-  top: -60px;
+  //top: -60px;
   background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
   background-size: cover;
   color: $white;
-  padding: 80px 0 100px;
+  padding: 0 0 100px;
 
   @include media-breakpoint-down(md) {
     text-align: center;
+    padding-top: 100px;
   }
 
   &__title {
@@ -44,12 +44,12 @@ nav {
     margin-bottom: 40px;
     max-width: 900px;
   }
-
 }
 
 
 // 2 - screen offline-courses
 .csc-offline-courses {
+  padding: 30px 0 0;
   @include append-hr-to-container;
 }
 

@@ -69,7 +69,6 @@ $navbar-light-toggler-border-color: rgba($black, .1) !default;
 // Used for brand, project, or site names.
 
 .navbar-brand {
-  //width: 40px;
   display: inline-block;
   padding-top: $navbar-brand-padding-y;
   padding-bottom: $navbar-brand-padding-y;
@@ -93,6 +92,7 @@ $navbar-light-toggler-border-color: rgba($black, .1) !default;
   padding-left: 0;
   margin-bottom: 0;
   list-style: none;
+  width: 100%;
 
   &:hover {
     .nav-link {
@@ -116,6 +116,10 @@ $navbar-light-toggler-border-color: rgba($black, .1) !default;
     float: none;
   }
 
+}
+
+.navbar-reg-item{
+  margin-left: auto;
 }
 
 // Navbar text
