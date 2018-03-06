@@ -57,6 +57,7 @@ nav {
   background-color: $gray-100;
   text-align: center;
   padding: 25px 10px 35px;
+  border-radius: 0;
 
   &:hover {
     background-color: $teal;
@@ -141,6 +142,10 @@ nav {
     align-items: center;
   }
 
+  .row {
+    margin: 0;
+  }
+
   h2 {
     margin-bottom: 1rem;
   }
@@ -157,9 +162,11 @@ nav {
     height: 400px;
     background-image: url("/static/v2/img/pages/index/cscenter_meetup.jpg");
     @include make-col(12);
+
     @include media-breakpoint-up(lg) {
       @include make-col(8);
     }
+
     @include media-breakpoint-down(lg) {
       margin-bottom: 1rem;
     }
@@ -179,6 +186,7 @@ nav {
     }
   }
 }
+
 
 // 4 - screen csc-online
 
