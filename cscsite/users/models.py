@@ -314,6 +314,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
+    def clean(self):
+        self.csc_review = self.csc_review.strip()
+
     def save(self, **kwargs):
         if self.email and not self.yandex_id:
             username, domain = self.email.split("@", 1)

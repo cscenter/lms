@@ -29,6 +29,12 @@ INSTALLED_APPS += [
     'registration',
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+    }
+}
+
 LOCALE_PATHS = [
     str(BASE_DIR / "locale"),
 ] + LOCALE_PATHS

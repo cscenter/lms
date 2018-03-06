@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Computer Science Center{% endblock title %}</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
+    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
+
+    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
+    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+
+    {% block stylesheets %} {% endblock stylesheets %}
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><img src="{{ static('v2/img/logo-csc.svg') }}" alt="Computer Science Center"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">О центре</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Курсы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Онлайн</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Лекторий</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Поступление</a>
+                    </li>
+                </ul>
+
+                <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
+                    <img src="{{ static('v2/img/icons/user-sign.svg') }}" alt="">Войти
+                </a>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="cover">
+        <div class="container">
+            <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
+            <p class="cover__text">Двух- или трехгодичные очные вечерние курсы с возможностью
+                получения дипломов по трём направлениям: Computer Science, Data Science, Software Engineering</p>
+            <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
+            <a href="/about/" class="btn btn--big btn--outline">Узнать о центре</a>
+        </div>
+    </div>
+
+
+    <div class="csc-offline-courses" id="offline-courses">
+        <div class="container">
+            <h2>Очные курсы центра</h2>
+            <p class="card-offline-course__text">
+                Центр приглашает студентов средних и старших курсов технических вузов
+                пройти двух или трёхлетние курсы:
+            </p>
+
+            <div class="card-deck">
+                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+                    <div class="card-block">
+                        <div class="card-offline-course__icon card-offline-course__icon--software-engineering"></div>
+                        <h3 class="card-offline-course__card-title">Software Engineering</h3>
+                        <p class="card-offline-course__card-text">Разработка программного обеспечения</p>
+                    </div>
+                </a>
+
+                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+                    <div class="card-block">
+                        <div class="card-offline-course__icon card-offline-course__icon--data-science"></div>
+                        <h3 class="card-offline-course__card-title">Data Science</h3>
+                        <p class="card-offline-course__card-text">Анализ данных</p>
+                    </div>
+                </a>
+
+                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+                    <div class="card-block">
+                        <div class="card-offline-course__icon card-offline-course__icon--computer-science"></div>
+                        <h3 class="card-offline-course__card-title">Computer Science</h3>
+                        <p class="card-offline-course__card-text">Современная информатика</p>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="about-csc">
+        <div class="container">
+            <h2>О центре</h2>
+            <div class="row">
+                <div class="about-csc__img"></div>
+                <div class="about-csc__description">
+                    <p>
+                        Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и
+                        JetBrains. Мы существуем, чтобы дать возможность талантливым студентам и выпускникам развиваться
+                        в интересном им направлении.
+                    </p>
+                    <a class="btn btn--small btn--outline_gray" href="/about/">Подробнее</a>
+
+                    <h4>Организаторы</h4>
+                    <div class="supported-by">
+                        <a target="_blank" href="https://jetbrains.ru/students"><img src="{{ static('v2/img/logos/jetbrains.svg') }}" alt="JetBrains"></a>
+                        <a target="_blank" href="https://yandexdataschool.ru/"><img src="{{ static('v2/img/logos/shad.svg') }}" alt="Яндекс ШАД"></a>
+                        <a target="_blank" href="http://239.ru/"><img src="{{ static('v2/img/logos/fml239.svg') }}" alt="ФМЛ №239"></a>
+                        <a target="_blank" href="https://compsciclub.ru/"><img src="{{ static('v2/img/logos/csclub.svg') }}" alt="Computer Science Club"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{%- macro online_program_card(title, link, img_src, type, additional_classes='') %}
+    <a class="responsive-card{% if additional_classes %} {{ additional_classes }}{% endif %}" href="{{ link }}" target="_blank">
+        {% if img_src -%}
+            <div class="card-img-wrapper"><img src="{{ img_src }}" alt="{{ title }}"></div>
+        {%- endif %}
+        <div class="card-block">
+            <h4 class="csc-online-education__card-title">{{ title }}</h4>
+            <p class="csc-online-education__card-text">
+                <small class="text-muted">{{ type }}</small>
+            </p>
+        </div>
+    </a>
+{%- endmacro -%}
+
+    <div class="csc-online-education">
+        <div class="container">
+            <h2 class="text-center">Онлайн-образование</h2>
+
+            <div class="card-deck">
+                {# TODO: move online programs to get_context_data and remove macro, it's not generic enough #}
+                {{ online_program_card(title='Алгоритмы и эффективные вычисления', link='http://code.stepik.org/algo/', img_src=static('v2/img/pages/index/online_programs/algo.png'),
+                        type='Онлайн-программа',
+                        additional_classes='__online-program') }}
+                {{ online_program_card(title='Математика для разработчика', link='http://code.stepik.org/math/', img_src=static('v2/img/pages/index/online_programs/math.png'), type='Онлайн-программа') }}
+                {{ online_program_card(title='Разработка на C++, Java и Haskell', link='http://code.stepik.org/dev/', img_src=static('v2/img/pages/index/online_programs/dev.png'), type='Онлайн-программа') }}
+                {%- for online_course in online_courses -%}
+                    {{ online_program_card(online_course.name, online_course.link, online_course.avatar_url, 'Онлайн-курс') }}
+                {%- endfor %}
+            </div>
+            <div class="text-center">
+                <a href="{{ url('onlinecourses_list') }}" class="btn btn--outline_gray btn--small">Все материалы</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="csc-student-reviews __dark">
+        <div class="container">
+            <h2>Отзывы студентов</h2>
+            <div class="card-columns">
+                {% for student in testimonials %}
+                    <div class="card">
+                        <div class="testimonial">
+                            {% with im = student.get_thumbnail("150x150", use_stub=False) %}
+                                {% if im %}
+                                    <img alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                {% endif %}
+                            {% endwith %}
+                            <div class="testimonial__details">
+                                <h4 class="testimonial__name">{{ student.get_full_name() }}</h4>
+                                <span>Выпуск {{ student.graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
+                                <div class="testimonial__text">
+                                    {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <a href="{{ url('testimonials') }}" class="btn btn--small btn--outline_gray mt-3">Все отзывы</a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="social-media-posts">
+        <div class="container">
+            <h2>#compscicenter</h2>
+
+            <div class="card-group">
+                {% if instagram_posts %}
+                    {% for post in instagram_posts %}
+                        <div class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
+                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="40" alt="">
+                            <div class="social-media__text">{{ post.text }}</div>
+                            <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
+                        </div>
+                    {% endfor %}
+
+
+                {% endif %}
+
+
+                <div class="col-lg-6">
+                    <div class="row">
+                        {% if vk_news %}
+                            {% for post in vk_news %}
+                                <div class="social-media social-media--vk social-media--half-size">
+                                    <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}"
+                                         width="40px" alt="">
+                                    <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
+                                    <p class="social-media__date">{{ post.date|date("j b") }}</p>
+                                </div>
+                            {% endfor %}
+
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="social-media social-media--twitter social-media--small">
+                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/twitter.svg') }}"
+                                 width="40px" alt="">
+                            <p class="social-media__text social-media__text--dark">CS центр теперь и в Новосибирске:
+                                compscicenter.ru/open-nsk/ </p>
+                            <p class="social-media__date">26 дек</p>
+                        </div>
+                        <div class="social-media social-media--youtube social-media--small">
+                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/youtube.svg') }}"
+                                 width="40px" alt="">
+                            <p class="social-media__text">CS центр теперь и в Новосибирске:
+                                compscicenter.ru/open-nsk/ </p>
+                            <p class="social-media__date social-media__date--light">26 дек</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer container">
+            <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
+            <div class="footer__contacts">
+                <a href="mailto:info@compscicenter.ru" class="footer__email">info@compscicenter.ru</a>
+                <div class="footer__social-media-icons">
+                    <a target="_blank" href="https://vk.com/compscicenter"><img src="{{ static('v2/img/icons/footer/vk.svg') }}" alt=""></a>
+                    <a target="_blank" href="https://instagram.com/compscicenter"><img src="{{ static('v2/img/icons/footer/instagram.svg') }}" alt=""></a>
+                    <a target="_blank" href="https://twitter.com/compscicenter"><img src="{{ static('v2/img/icons/footer/twitter.svg') }}" alt=""></a>
+                    <a target="_blank" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}"><img src="{{ static('v2/img/icons/footer/facebook.svg') }}"></a>
+                    <a target="_blank" href="https://www.youtube.com/c/compscicenterru"><img src="{{ static('v2/img/icons/footer/youtube.svg') }}" alt=""></a>
+                </div>
+            </div>
+    </footer>
+
+
+    <script type="text/javascript" src="{{ static('v2/js/vendor/jquery-3.2.1.slim.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

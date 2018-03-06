@@ -1513,6 +1513,12 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
     def is_ongoing(self):
         return self.start and self.start <= timezone.now()
 
+    @property
+    def avatar_url(self):
+        if self.photo:
+            return self.photo.url
+        return None
+
 
 @python_2_unicode_compatible
 class InternationalSchool(TimeStampedModel):
