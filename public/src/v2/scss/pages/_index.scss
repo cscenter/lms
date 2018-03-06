@@ -195,10 +195,23 @@ nav {
     text-align: center;
   }
 
-  .card-img-top {
-    width: auto;
+  .card-img-wrapper {
+    max-height: 10rem;
+    overflow: hidden;
+
     @include media-breakpoint-up(sm) {
-      width: 100%;
+      max-height: none;
+    }
+
+    img {
+      border: 1px solid $gray-300;
+      width: auto;
+      max-width: 80%;
+
+      @include media-breakpoint-up(sm) {
+        width: 100%;
+        max-width: none;
+      }
     }
   }
 
@@ -223,6 +236,10 @@ nav {
 .csc-student-reviews {
   padding: 30px 0;
   background-color: $light;
+
+  .card {
+    border-radius: 0;
+  }
 
   .card-columns {
     column-count: 2;
@@ -263,7 +280,7 @@ nav {
   &__text {
     @include make-col(12);
     color: $white;
-    margin-top: .625rem;
+    margin: .625rem 0;
 
     &--dark {
       color: $gray-500;
