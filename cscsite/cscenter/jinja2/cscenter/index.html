@@ -65,6 +65,13 @@
                                 </button>
                                 <div class="dropdown">
                                     <div class="dropdown-menu" aria-labelledby="userMenuButton">
+                                        <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
+                                        {% if request.user.is_project_reviewer or request.user.is_curator_of_projects %}
+                                            <a class="dropdown-item" href="{{ url('projects:report_list_reviewers') }}">Проекты</a>
+                                        {% endif %}
+                                        {% if request.user.is_interviewer %}
+                                            <a class="dropdown-item" href="{{ url('admission:interviews') }}">Набор</a>
+                                        {% endif %}
                                         {% if request.user.is_student %}
                                             <a class="dropdown-item" href="{{ url('assignment_list_student') }}">Обучение</a>
                                         {% endif %}
