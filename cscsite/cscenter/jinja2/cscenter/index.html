@@ -16,9 +16,18 @@
 </head>
 
 <body>
-
     <div class="cover">
         <div class="navbar-container">
+            {% if is_admission_active %}
+                <div class="top-banner">
+                    <div class="container">
+                        <p class="top-banner__text">
+                            <img class="top-banner__img" src="{{ static('v2/img/banners/top-banner-kids.svg') }}"  width="70" alt="Набор в Computer Science Center" />
+                            30 марта начинается <a class="top-banner__link" href="{{ url('admission:application') }}">весенний набор</a> на курсы центра!
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
             <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="container">
                     <a class="navbar-brand" href="/"><img src="{{ static('v2/img/logo-csc.svg') }}" alt="Computer Science Center"></a>

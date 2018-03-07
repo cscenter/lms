@@ -132,7 +132,7 @@ class NewIndexView(TemplateView):
             'online_courses': pool[:3],
             'vk_news': vk_news_rendered,
             'instagram_posts': instagram_posts_rendered,
-            'is_admission_active': False
+            'is_admission_active': True
         }
         return context
 
