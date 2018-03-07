@@ -14,7 +14,7 @@ from cscenter.views import NewIndexView
 logger = logging.getLogger(__name__)
 
 
-CACHE_EXPIRES_IN = 3600
+CACHE_EXPIRES_IN = 3600 * 6
 
 
 class Command(BaseCommand):
