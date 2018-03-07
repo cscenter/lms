@@ -60,9 +60,25 @@
                         </li>
 
                         <li class="nav-item navbar-reg-item">
-                            <a class="btn btn--outline btn--reg" href="#">
-                                <img src="/static/v2/img/icons/user-sign.svg" alt="">Войти
-                            </a>
+                            {#                            <a class="btn btn--outline btn--reg" href="#">#}
+                            {#                                <img src="/static/v2/img/icons/user-sign.svg" alt="">Войти#}
+                            {#                            </a>#}
+                            <div class="dropdown">
+                                <button class="btn btn--disable dropdown-toggle" type="button" id="dropdownMenuButton"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Святослав
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#">Обучение</a>
+                                    <a class="dropdown-item" href="#">Проекты</a>
+                                    <a class="dropdown-item" href="#">Курирование</a>
+                                    <a class="dropdown-item" href="#">Админ-панель</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Выйти</a>
+                                </div>
+                            </div>
+
+
                         </li>
                     </ul>
 
