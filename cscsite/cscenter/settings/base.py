@@ -32,6 +32,10 @@ INSTALLED_APPS += [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+    },
+    'social_networks': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': str(ROOT_DIR / ".cache")
     }
 }
 

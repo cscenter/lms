@@ -165,17 +165,7 @@
     </div>
 
 {%- macro online_program_card(title, link, img_src, type, additional_classes='') %}
-    <a class="responsive-card{% if additional_classes %} {{ additional_classes }}{% endif %}" href="{{ link }}" target="_blank">
-        {% if img_src -%}
-            <div class="card-img-wrapper"><img src="{{ img_src }}" alt="{{ title }}"></div>
-        {%- endif %}
-        <div class="card-block">
-            <h4 class="csc-online-education__card-title">{{ title }}</h4>
-            <p class="csc-online-education__card-text">
-                <small class="text-muted">{{ type }}</small>
-            </p>
-        </div>
-    </a>
+
 {%- endmacro -%}
 
     <div class="csc-online-education">
@@ -183,15 +173,19 @@
             <h2 class="text-center">Онлайн-обучение</h2>
 
             <div class="card-deck">
-                {# TODO: move online programs to get_context_data and remove macro, it's not generic enough #}
-                {{ online_program_card(title='Алгоритмы и эффективные вычисления', link='http://code.stepik.org/algo/', img_src=static('v2/img/pages/index/online_programs/algo.png'),
-                        type='Онлайн-программа',
-                        additional_classes='__online-program') }}
-                {{ online_program_card(title='Математика для разработчика', link='http://code.stepik.org/math/', img_src=static('v2/img/pages/index/online_programs/math.png'), type='Онлайн-программа') }}
-                {{ online_program_card(title='Разработка на C++, Java и Haskell', link='http://code.stepik.org/dev/', img_src=static('v2/img/pages/index/online_programs/dev.png'), type='Онлайн-программа') }}
-                {%- for online_course in online_courses -%}
-                    {{ online_program_card(online_course.name, online_course.link, online_course.avatar_url, 'Онлайн-курс') }}
-                {%- endfor %}
+                {% for course in courses %}
+                    <a class="responsive-card" href="{{ course.link }}" target="_blank">
+                        {% if course.avatar_url -%}
+                            <div class="card-img-wrapper"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
+                        {%- endif %}
+                        <div class="card-block">
+                            <h4 class="csc-online-education__card-title">{{ course.name }}</h4>
+                            <p class="csc-online-education__card-text">
+                                <small class="text-muted">{{ course.tag }}</small>
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
             </div>
             <div class="text-center">
                 <a href="{{ url('onlinecourses_list') }}" class="btn btn--outline_gray btn--small">Все материалы</a>
@@ -241,18 +235,14 @@
                             <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
                         </div>
                     {% endfor %}
-
-
                 {% endif %}
-
 
                 <div class="col-lg-6">
                     <div class="row">
                         {% if vk_news %}
                             {% for post in vk_news %}
                                 <div class="social-media social-media--vk social-media--half-size">
-                                    <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}"
-                                         width="40px" alt="">
+                                    <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
                                     <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
                                     <p class="social-media__date">{{ post.date|date("j b") }}</p>
                                 </div>
@@ -262,15 +252,13 @@
                     </div>
                     <div class="row">
                         <div class="social-media social-media--twitter social-media--small">
-                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/twitter.svg') }}"
-                                 width="40px" alt="">
+                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/twitter.svg') }}" width="40" alt="">
                             <p class="social-media__text social-media__text--dark">CS центр теперь и в Новосибирске:
                                 compscicenter.ru/open-nsk/ </p>
                             <p class="social-media__date">26 дек</p>
                         </div>
                         <div class="social-media social-media--youtube social-media--small">
-                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/youtube.svg') }}"
-                                 width="40px" alt="">
+                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/youtube.svg') }}" width="40" alt="">
                             <p class="social-media__text">CS центр теперь и в Новосибирске:
                                 compscicenter.ru/open-nsk/ </p>
                             <p class="social-media__date social-media__date--light">26 дек</p>

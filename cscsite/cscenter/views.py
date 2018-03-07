@@ -6,6 +6,8 @@ import random
 
 from collections import Counter, OrderedDict
 from datetime import datetime
+from django.contrib.staticfiles.storage import staticfiles_storage
+from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -86,6 +88,13 @@ class IndexView(generic.TemplateView):
         return context
 
 
+class OnlineCourseTuple(NamedTuple):
+    name: str
+    link: str
+    avatar_url: str
+    tag: str
+
+
 class NewIndexView(TemplateView):
     template_name = "cscenter/index.html"
     TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -93,13 +102,34 @@ class NewIndexView(TemplateView):
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
 
     def get_context_data(self, **kwargs):
-        # Don't care about performance for online courses now
+        # Online programs + online courses
+        courses = [
+            OnlineCourseTuple('Алгоритмы и эффективные вычисления',
+                              'https://code.stepik.org/algo/',
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/algo.png'),
+                              'Онлайн-программа'),
+            OnlineCourseTuple('Математика для разработчика',
+                              'https://code.stepik.org/math/',
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/math.png'),
+                              'Онлайн-программа'),
+            OnlineCourseTuple('Разработка на C++, Java и Haskell',
+                              'https://code.stepik.org/dev/',
+                              staticfiles_storage.url(
+                                  'v2/img/pages/index/online_programs/dev.png'),
+                              'Онлайн-программа')
+        ]
         today = now().date()
-        pool = list(OnlineCourse
-                    .objects
+        pool = list(OnlineCourse.objects
                     .filter(Q(end__date__gt=today) | Q(is_self_paced=True))
+                    .only('name', 'link', 'photo')
                     .order_by("start", "name"))
         random.shuffle(pool)
+        for course in pool[:3]:
+            courses.append(OnlineCourseTuple(name=course.name,
+                                             link=course.link,
+                                             avatar_url=course.avatar_url,
+                                             tag='Онлайн-курс'))
+        # Testimonials
         testimonials = cache.get(self.TESTIMONIALS_CACHE_KEY)
         if testimonials is None:
             # TODO: Вызывать strip перед сохранением csc_review, пройтись по имеющимся записям.
@@ -111,27 +141,12 @@ class NewIndexView(TemplateView):
                  .order_by('?'))[:4]
             testimonials = s
             cache.set(self.TESTIMONIALS_CACHE_KEY, testimonials, 3600)
-        # Get recent vk posts from cache if exists
-        vk_news = cache.get(self.VK_CACHE_KEY)
-        vk_news_rendered = []
-        if vk_news:
-            for post in vk_news:
-                dt = datetime.fromtimestamp(post.date)
-                rendered = SocialPost(post.text, dt)
-                vk_news_rendered.append(rendered)
-        # Get recent instagram post from cache if exists
-        instagram_posts = cache.get(self.INSTAGRAM_CACHE_KEY)
-        instagram_posts_rendered = []
-        if instagram_posts:
-            for post in instagram_posts:
-                dt = datetime.fromtimestamp(post.date)
-                rendered = SocialPost(post.text, dt, post.thumbnail)
-                instagram_posts_rendered.append(rendered)
+        cache = caches['social_networks']
         context = {
             'testimonials': testimonials,
-            'online_courses': pool[:3],
-            'vk_news': vk_news_rendered,
-            'instagram_posts': instagram_posts_rendered,
+            'courses': courses,
+            'vk_news': cache.get(self.VK_CACHE_KEY),
+            'instagram_posts': cache.get(self.INSTAGRAM_CACHE_KEY),
             'is_admission_active': True
         }
         return context
