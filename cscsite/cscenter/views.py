@@ -141,12 +141,12 @@ class NewIndexView(TemplateView):
                  .order_by('?'))[:4]
             testimonials = s
             cache.set(self.TESTIMONIALS_CACHE_KEY, testimonials, 3600)
-        cache = caches['social_networks']
+        _cache = caches['social_networks']
         context = {
             'testimonials': testimonials,
             'courses': courses,
-            'vk_news': cache.get(self.VK_CACHE_KEY),
-            'instagram_posts': cache.get(self.INSTAGRAM_CACHE_KEY),
+            'vk_news': _cache.get(self.VK_CACHE_KEY),
+            'instagram_posts': _cache.get(self.INSTAGRAM_CACHE_KEY),
             'is_admission_active': True
         }
         return context
