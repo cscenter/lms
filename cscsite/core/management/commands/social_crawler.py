@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-from typing import NamedTuple
-from django.core.cache import cache
+from datetime import datetime
 
+from django.core.cache import caches
 from django.core.management.base import BaseCommand
 from requests import RequestException
 
@@ -21,6 +21,8 @@ class Command(BaseCommand):
     help = 'Grab last N posts from social networks: [vk.com, instagram.com]'
 
     def handle(self, *args, **options):
+        cache = caches['social_networks']
+        cache.clear()
         # Note: better to store data in file-based cache
         vk_news = cache.get(NewIndexView.VK_CACHE_KEY)
         if vk_news is None:
@@ -29,7 +31,10 @@ class Command(BaseCommand):
                 json_data = vk_api.get_wall(owner_id=CSCENTER_GROUP_ID)
                 data_to_cache = []
                 for news in json_data["response"]["items"]:
-                    post = SocialPost(text=news['text'], date=news['date'])
+                    url = f"https://vk.com/compscicenter?w=wall{news['owner_id']}_{news['id']}"
+                    post = SocialPost(text=news['text'],
+                                      date=datetime.fromtimestamp(news['date']),
+                                      post_url=url)
                     data_to_cache.append(post)
                 cache.set(NewIndexView.VK_CACHE_KEY,
                           data_to_cache, CACHE_EXPIRES_IN)
@@ -50,7 +55,8 @@ class Command(BaseCommand):
                     else:
                         caption = ''
                     to_cache = SocialPost(text=caption,
-                                          date=int(post['created_time']),
+                                          date=datetime.fromtimestamp(int(post['created_time'])),
+                                          post_url=post['link'],
                                           thumbnail=thumbnail)
                     data_to_cache.append(to_cache)
                 cache.set(NewIndexView.INSTAGRAM_CACHE_KEY, data_to_cache,

@@ -20,11 +20,9 @@ RAVEN_CONFIG = {
     'release': raven.fetch_git_sha(str(ROOT_DIR)),
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache'
-    }
+CACHES['default'] = {
+    'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    'LOCATION': '/tmp/django_cache'
 }
 
 INSTALLED_APPS += ['raven.contrib.django.raven_compat',]
