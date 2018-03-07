@@ -49,7 +49,7 @@
                                 <a class="nav-link" href="/online/">Онлайн</a>
                             </li>
                             <li class="nav-item">
-                                <a target="_blank" class="nav-link" href="https://open.compscicenter.ru/">Лекторий</a>
+                                <a target="_blank" rel="noopener" class="nav-link" href="https://open.compscicenter.ru/">Лекторий</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/enrollment/">Поступление</a>
@@ -154,10 +154,10 @@
 
                     <h4>Организаторы</h4>
                     <div class="supported-by">
-                        <a target="_blank" href="https://jetbrains.ru/students"><img src="{{ static('v2/img/logos/jetbrains.svg') }}" alt="JetBrains"></a>
-                        <a target="_blank" href="https://yandexdataschool.ru/"><img src="{{ static('v2/img/logos/shad.svg') }}" alt="Яндекс ШАД"></a>
-                        <a target="_blank" href="http://239.ru/"><img src="{{ static('v2/img/logos/fml239.svg') }}" alt="ФМЛ №239"></a>
-                        <a target="_blank" href="https://compsciclub.ru/"><img src="{{ static('v2/img/logos/csclub.svg') }}" alt="Computer Science Club"></a>
+                        <a target="_blank" rel="noopener" href="https://jetbrains.ru/students"><img src="{{ static('v2/img/logos/jetbrains.svg') }}" alt="JetBrains"></a>
+                        <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/"><img src="{{ static('v2/img/logos/shad.svg') }}" alt="Яндекс ШАД"></a>
+                        <a target="_blank" rel="noopener" href="http://239.ru/"><img src="{{ static('v2/img/logos/fml239.svg') }}" alt="ФМЛ №239"></a>
+                        <a target="_blank" rel="noopener" href="https://compsciclub.ru/"><img src="{{ static('v2/img/logos/csclub.svg') }}" alt="Computer Science Club"></a>
                     </div>
                 </div>
             </div>
@@ -171,10 +171,9 @@
     <div class="csc-online-education">
         <div class="container">
             <h2 class="text-center">Онлайн-обучение</h2>
-
             <div class="card-deck">
                 {% for course in courses %}
-                    <a class="responsive-card" href="{{ course.link }}" target="_blank">
+                    <a class="responsive-card" href="{{ course.link }}" target="_blank" rel="noopener">
                         {% if course.avatar_url -%}
                             <div class="card-img-wrapper"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
                         {%- endif %}
@@ -274,11 +273,11 @@
             <div class="footer__contacts">
                 <a href="mailto:info@compscicenter.ru" class="footer__email">info@compscicenter.ru</a>
                 <div class="footer__social-media-icons">
-                    <a target="_blank" href="https://vk.com/compscicenter"><img src="{{ static('v2/img/icons/footer/vk.svg') }}" alt=""></a>
-                    <a target="_blank" href="https://instagram.com/compscicenter"><img src="{{ static('v2/img/icons/footer/instagram.svg') }}" alt=""></a>
-                    <a target="_blank" href="https://twitter.com/compscicenter"><img src="{{ static('v2/img/icons/footer/twitter.svg') }}" alt=""></a>
-                    <a target="_blank" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}"><img src="{{ static('v2/img/icons/footer/facebook.svg') }}"></a>
-                    <a target="_blank" href="https://www.youtube.com/c/compscicenterru"><img src="{{ static('v2/img/icons/footer/youtube.svg') }}" alt=""></a>
+                    <a target="_blank" rel="noopener" href="https://vk.com/compscicenter"><img src="{{ static('v2/img/icons/footer/vk.svg') }}" alt=""></a>
+                    <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter"><img src="{{ static('v2/img/icons/footer/instagram.svg') }}" alt=""></a>
+                    <a target="_blank" rel="noopener" href="https://twitter.com/compscicenter"><img src="{{ static('v2/img/icons/footer/twitter.svg') }}" alt=""></a>
+                    <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}"><img src="{{ static('v2/img/icons/footer/facebook.svg') }}"></a>
+                    <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru"><img src="{{ static('v2/img/icons/footer/youtube.svg') }}" alt=""></a>
                 </div>
             </div>
     </footer>
