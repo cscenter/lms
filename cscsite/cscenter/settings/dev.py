@@ -5,6 +5,8 @@ for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 ALLOWED_HOSTS = ["dev.compscicenter.ru"]
 
+MEDIA_ROOT = str(Path('/shared', 'media'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
