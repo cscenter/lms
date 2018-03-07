@@ -122,7 +122,7 @@ class NewIndexView(TemplateView):
         # Get recent instagram post from cache if exists
         instagram_posts = cache.get(self.INSTAGRAM_CACHE_KEY)
         instagram_posts_rendered = []
-        if vk_news:
+        if instagram_posts:
             for post in instagram_posts:
                 dt = datetime.fromtimestamp(post.date)
                 rendered = SocialPost(post.text, dt, post.thumbnail)
