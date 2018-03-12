@@ -38,56 +38,6 @@ from users.models import CSCUser
 from .filters import CoursesFilter
 
 
-class IndexView(generic.TemplateView):
-    template_name = "index.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data(**kwargs)
-        pool = cache.get('index_page_spb_courses_with_video')
-        if pool is None:
-            # Note: Show courses based on SPB timezone
-            year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
-            current_term_index = get_term_index(year, term_type)
-            term_index = get_term_index_academic_year_starts(year, term_type)
-            # Subtract 1 academic year
-            term_index -= TERMS_IN_ACADEMIC_YEAR
-            pool = list(CourseOffering.objects
-                        .in_city(self.request.city_code)
-                        .filter(is_published_in_video=True,
-                                is_open=False,
-                                semester__index__gte=term_index,
-                                semester__index__lte=current_term_index)
-                        .defer('description')
-                        .select_related('course')
-                        .prefetch_related('teachers', 'semester')
-                        .annotate(Count('courseclass')))
-            cache.set('index_page_spb_courses_with_video', pool, 3600)
-        random.shuffle(pool)
-        context['courses'] = pool[:3]
-        testimonials = cache.get('index_page_testimonials')
-        if testimonials is None:
-            s = (CSCUser.objects
-                 .filter(groups=CSCUser.group.GRADUATE_CENTER)
-                 .exclude(csc_review='').exclude(photo='')
-                 .order_by('?')
-                 .first())
-            if s and s.csc_review.strip():
-                testimonials = [s]
-            cache.set('index_page_testimonials', testimonials, 3600)
-        context['testimonials'] = testimonials
-        # Don't care about performance for online courses
-        today = now().date()
-        pool = list(OnlineCourse
-                    .objects
-                    .filter(Q(end__date__gt=today) |
-                            Q(is_self_paced=True))
-                    .order_by("start", "name"))
-        random.shuffle(pool)
-        context['online_courses'] = pool[:1]
-        context['is_admission_active'] = False
-        return context
-
-
 class OnlineCourseTuple(NamedTuple):
     name: str
     link: str
@@ -95,7 +45,7 @@ class OnlineCourseTuple(NamedTuple):
     tag: str
 
 
-class NewIndexView(TemplateView):
+class IndexView(TemplateView):
     template_name = "cscenter/index.html"
     TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
     VK_CACHE_KEY = 'v2_index_vk_social_news'
@@ -132,7 +82,6 @@ class NewIndexView(TemplateView):
         # Testimonials
         testimonials = cache.get(self.TESTIMONIALS_CACHE_KEY)
         if testimonials is None:
-            # TODO: Вызывать strip перед сохранением csc_review, пройтись по имеющимся записям.
             # TODO: Выбрать только нужные поля
             s = (CSCUser.objects
                  .filter(groups=CSCUser.group.GRADUATE_CENTER)
@@ -143,6 +92,7 @@ class NewIndexView(TemplateView):
             cache.set(self.TESTIMONIALS_CACHE_KEY, testimonials, 3600)
         _cache = caches['social_networks']
         context = {
+            # 'request': self.request,
             'testimonials': testimonials,
             'courses': courses,
             'vk_news': _cache.get(self.VK_CACHE_KEY),

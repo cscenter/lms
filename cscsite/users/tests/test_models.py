@@ -27,11 +27,10 @@ def test_enrolled_on_the_course():
 def test_user_city_code(client, settings):
     student = StudentFactory.create(city_id='kzn')
     response = client.get('/')
-    request = response.context['request']
-    assert request.user.city_code is None
+    assert response.wsgi_request.user.city_code is None
     client.login(student)
     response = client.get('/')
-    assert response.context['request'].user.city_code == 'kzn'
+    assert response.wsgi_request.user.city_code == 'kzn'
 
 
 @pytest.mark.django_db
@@ -64,7 +63,7 @@ def test_cached_groups(settings):
 def test_permissions(client):
     # Unauthenticated user
     response = client.get("/")
-    request_user = response.context['request'].user
+    request_user = response.wsgi_request.user
     assert not request_user.is_authenticated
     assert not request_user.is_student_center
     assert not request_user.is_student_club
@@ -84,7 +83,7 @@ def test_permissions(client):
     student = StudentCenterFactory(status='')
     client.login(student)
     response = client.get("/")
-    request_user = response.context['request'].user
+    request_user = response.wsgi_request.user
     assert request_user.is_authenticated
     assert request_user.is_student_center
     assert not request_user.is_student_club
@@ -104,7 +103,7 @@ def test_permissions(client):
     student.status = STUDENT_STATUS.expelled
     student.save()
     response = client.get("/")
-    request_user = response.context['request'].user
+    request_user = response.wsgi_request.user
     assert request_user.is_authenticated
     assert request_user.is_student_center
     assert not request_user.is_student_club
