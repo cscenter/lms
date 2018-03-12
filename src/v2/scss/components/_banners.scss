@@ -24,7 +24,7 @@
     font-weight: normal;
 
     &:hover{
-      color:  lighten($teal,20%);
+      color: lighten($teal, 20%);
     }
   }
 
@@ -32,7 +32,9 @@
     position: relative;
     top: 4px;
     width: 70px;
+    height: 52px;
     margin-right: 5px;
+
     @include media-breakpoint-down(md){
       display: none;
     }
