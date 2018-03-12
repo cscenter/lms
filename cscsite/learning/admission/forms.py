@@ -146,6 +146,10 @@ class ApplicationFormStep2(forms.ModelForm):
         choices=WHERE_DID_YOU_LEARN,
         widget=forms.CheckboxSelectMultiple
     )
+    motivation = forms.CharField(
+        label='Почему вы хотите учиться в CS центре?',
+        required=True,
+        widget=forms.Textarea(attrs={"rows": 6}))
 
     class Meta:
         model = Applicant
@@ -172,7 +176,6 @@ class ApplicationFormStep2(forms.ModelForm):
                                                 'день, вы хотели бы принять '
                                                 'участие? Почему? Каких знаний '
                                                 'вам для этого не хватает?',
-            'motivation': 'Почему вы хотите учиться в CS центре?',
             'your_future_plans': 'Чем вы планируете заниматься после '
                                  'окончания обучения?',
             'additional_info': 'Напишите любую дополнительную информацию о '
@@ -190,7 +193,6 @@ class ApplicationFormStep2(forms.ModelForm):
             'preferred_study_programs_dm_note': '',
             'preferred_study_programs_se_note': '',
             'where_did_you_learn': '',
-            'motivation': '',
             'your_future_plans': '',
             'additional_info': ''
         }
@@ -200,7 +202,6 @@ class ApplicationFormStep2(forms.ModelForm):
             'preferred_study_programs_dm_note': forms.Textarea(attrs={"rows": 6}),
             'preferred_study_programs_cs_note': forms.Textarea(attrs={"rows": 6}),
             'preferred_study_programs_se_note': forms.Textarea(attrs={"rows": 6}),
-            'motivation': forms.Textarea(attrs={"rows": 6}),
             'your_future_plans': forms.Textarea(attrs={"rows": 6}),
             'additional_info': forms.Textarea(attrs={"rows": 6}),
         }
@@ -258,16 +259,16 @@ class ApplicationFormStep2(forms.ModelForm):
                 Div('motivation', css_class='col-sm-12'),
             ),
             Row(
-                Div('where_did_you_learn', css_class='col-sm-12'),
-                Div('where_did_you_learn_other', css_class='col-sm-12'),
-                css_class='margin-bottom-15',
-                css_id="where-did-you-learn-row"
-            ),
-            Row(
                 Div('your_future_plans', css_class='col-sm-12'),
             ),
             Row(
                 Div('additional_info', css_class='col-sm-12'),
+            ),
+            Row(
+                Div('where_did_you_learn', css_class='col-sm-12'),
+                Div('where_did_you_learn_other', css_class='col-sm-12'),
+                css_class='margin-bottom-15',
+                css_id="where-did-you-learn-row"
             ),
         )
         super().__init__(*args, **kwargs)
