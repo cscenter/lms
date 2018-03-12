@@ -98,7 +98,7 @@
             <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
             <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
             <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
-            <a href="/about/" class="btn btn--big btn--outline">Узнать о центре</a>
+            <a href="/about/" class="btn btn--big btn--white">Узнать о центре</a>
         </div>
     </div>
 
@@ -227,24 +227,28 @@
 
             <div class="card-group">
                 {% if instagram_posts %}
-                    {% for post in instagram_posts %}
-                        <div class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
-                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="40" alt="">
-                            <div class="social-media__text">{{ post.text }}</div>
-                            <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
+                    <div class="col-lg-6">
+                        <div class="row">
+                        {% for post in instagram_posts %}
+                            <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
+                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="40" alt="">
+                                <div class="social-media__text">{{ post.text }}</div>
+                                <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
+                            </a>
+                        {% endfor %}
                         </div>
-                    {% endfor %}
+                    </div>
                 {% endif %}
 
                 <div class="col-lg-6">
                     {% if vk_news %}
                         {% for post in vk_news %}
                             <div class="row">
-                                <div class="social-media social-media--vk social-media--half-size">
+                                <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
                                     <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
                                     <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
                                     <p class="social-media__date">{{ post.date|date("j b") }}</p>
-                                </div>
+                                </a>
                             </div>
                         {% endfor %}
                     {% endif %}
