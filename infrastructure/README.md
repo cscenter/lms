@@ -1,6 +1,5 @@
 
 # TODO (critical):
-* separated playbook for cronjobs
 * Fix db and media backup cronjob task
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.

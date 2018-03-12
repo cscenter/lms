@@ -1,9 +1,8 @@
 ---
-# TODO: add `send_queued_email (every minute)`
-- name: daily late-night backup goes in cron
+- name: Daily late-night DB backup goes in cron
   become_user: "{{ item }}"
   cron:
-    name: backup CSC website to S3
+    name: backup CSC website DB to S3
     user: "{{ item }}"
     hour: "4"
     minute: "0"
@@ -17,7 +16,25 @@
   with_items:
     - "{{ cscenter_user }}"
 
-- name: notify people every 5 minutes (cronjob)
+- name: Daily late-night media backup goes in cron
+  become_user: "{{ item }}"
+  cron:
+    name: backup CSC website media/ dir to S3
+    user: "{{ item }}"
+    hour: "4"
+    minute: "5"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/manage.py mediabackup
+      --settings={{item}}.settings.{{ app_environment }}
+      --compress
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
+      >> /home/{{ item }}/site/logs/cscbackup.log
+      2>&1
+  with_items:
+    - "{{ cscenter_user }}"
+
+- name: Notify people every 5 minutes (cronjob)
   become_user: "{{ item }}"
   cron:
     name: CSC mail notifier
@@ -75,6 +92,37 @@
       /home/{{ item }}/site/repo/manage.py clearsessions
       --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscnotifier.log
+      >> /home/{{ item }}/site/logs/cronjobs.log
+  with_items:
+    - "{{ cscenter_user }}"
+
+- name: Send queued emails with amazon SES each minute
+  become_user: "{{ item }}"
+  cron:
+    name: Send queued emails with amazon SES
+    user: "{{ item }}"
+    minute: "*"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/manage.py send_queued_mail
+      --settings={{ item }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
+      >> /home/{{ item }}/site/logs/cronjobs.log
+  with_items:
+    - "{{ cscenter_user }}"
+
+- name: Get latest news from social networks for cscenter index page
+  become_user: "{{ item }}"
+  cron:
+    name: Get latest news from social networks for cscenter index page
+    user: "{{ item }}"
+    minute: "0"
+    hour: "*/6"
+    job: >
+      . /home/{{ item }}/site/env/bin/activate &&
+      /home/{{ item }}/site/repo/manage.py social_crawler
+      --settings={{ item }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{item}}/site/repo/cscsite'
+      >> /home/{{ item }}/site/logs/cronjobs.log
   with_items:
     - "{{ cscenter_user }}"
