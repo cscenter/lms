@@ -38,7 +38,7 @@
     set_fact:
       requirements_concated_md5: "{{ requirements_stat.results | map(attribute='stat.md5') | join('') }}"
 
-  - name: Try to fetch file with md5 hash value from previous deploy
+  - name: Try to fetch file with md5 hash value from the previous deploy
     fetch:
       src: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
       dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
@@ -50,12 +50,12 @@
     local_action: stat path="tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
     register: local_md5_file
 
-  - name: Try to read requirements md5 value from previous deploy
+  - name: Try to read requirements md5 value from the previous deploy
     set_fact:
       requirements_md5: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}') }}"
     when: local_md5_file.stat.exists == True
 
-  - name: Install requirements if they were changed from previous deploy
+  - name: Install requirements if they were changed from the previous deploy
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
     become_user: "{{ app_user }}"
