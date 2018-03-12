@@ -16,10 +16,10 @@
 nav {
   z-index: 5;
 }
+
 #navbarSupportedContent {
   @include font-smoothing();
 }
-
 
 .cover {
   @include font-smoothing();
@@ -45,7 +45,6 @@ nav {
     max-width: 900px;
   }
 }
-
 
 // 2 - screen offline-courses
 .csc-offline-courses {
@@ -135,6 +134,7 @@ nav {
 //3-screen about-csc
 
 .about-csc {
+
   @include append-hr-to-container;
 
   @include media-breakpoint-down(md) {
@@ -187,7 +187,6 @@ nav {
   }
 }
 
-
 // 4 - screen csc-online
 
 .csc-online-education {
@@ -198,19 +197,40 @@ nav {
   .card-img-wrapper {
     max-height: 10rem;
     overflow: hidden;
+    position: relative;
 
     @include media-breakpoint-up(sm) {
       max-height: none;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba($gray-500, .3);
+        transition: .3s;
+      }
     }
 
     img {
-      border: 1px solid $gray-300;
       width: auto;
       max-width: 80%;
 
       @include media-breakpoint-up(sm) {
         width: 100%;
         max-width: none;
+      }
+    }
+  }
+
+  .responsive-card {
+    &:hover {
+      .card-img-wrapper {
+        &::before {
+          background-color: rgba($gray-500, .1);
+        }
       }
     }
   }
@@ -234,7 +254,7 @@ nav {
 //5-screen students-reviews
 
 .csc-student-reviews {
-  padding: 30px 0;
+  padding: 30px 0 40px;
   background-color: $light;
 
   .card {
@@ -242,13 +262,13 @@ nav {
   }
 
   .card-columns {
+    margin: 30px 0;
     column-count: 2;
     @include media-breakpoint-down(md) {
       column-count: 1;
       text-align: center;
     }
   }
-
 }
 
 //6-screen social-media-posts
@@ -257,14 +277,13 @@ nav {
   padding: 30px 0 0;
   overflow: hidden;
   font-size: .9375rem;
-
   @include append-hr-to-container();
 }
 
 .social-media {
   padding: 20px;
+  margin: 5px;
   background-size: cover;
-  background-color: $gray-500;
 
   @include media-breakpoint-down(md) {
     text-align: center;
@@ -281,6 +300,8 @@ nav {
     @include make-col(12);
     color: $white;
     margin: .625rem 0;
+    max-height: 150px;
+    overflow: hidden;
 
     &--dark {
       color: $gray-500;
@@ -290,21 +311,40 @@ nav {
 
   &__date {
     font-size: small;
+    color: $gray-500;
     &--light {
       color: $gray-100;
     }
   }
 
   &--instagram {
-    @include media-breakpoint-up(lg) {
-      @include make-col(6);
+    position: relative;
+    //@include media-breakpoint-up(lg) {
+    //  @include make-col(6);
+    //}
+    &::before {
+      content: "";
+      background-image: url('/media/pages/index/instagram-img.jpg');
+      //opacity: .4;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      position: absolute;
+      z-index: -1;
     }
-    background-image: url('/media/pages/index/instagram-img.jpg');
+
+    background-color: rgba($gray-500, .65);
+    transition: .3s;
+
+    &:hover {
+      background-color: rgba($gray-500, .8);
+    }
 
   }
 
   &--full-size {
-    margin-bottom: .625rem;
+    //margin-bottom: 5px;
     @include media-breakpoint-up(lg) {
       height: 500px;
     }
@@ -312,6 +352,11 @@ nav {
 
   &--vk {
     background-color: $gray-300;
+    transition: .3s;
+    &:hover {
+      background-color: rgba($gray-300, .6);
+    }
+
   }
 
   &--twitter {
@@ -323,18 +368,21 @@ nav {
   }
 
   &--half-size {
+    //margin-bottom: .625rem;
     @include media-breakpoint-up(lg) {
       height: 245px;
     }
   }
 
   &--small {
-    margin-top: .625rem;
+    //margin-top: .625rem;
     @include make-col(12);
 
     @include media-breakpoint-up(md) {
       height: 245px;
       @include make-col(6);
+      flex-grow: 1;
+      max-width: 100%;
     }
   }
 }

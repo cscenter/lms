@@ -14,7 +14,7 @@
   letter-spacing: 3px;
 }
 
-.btn--outline {
+.btn--white{
   color: $light;
   background-color: rgba(255, 255, 255, .1);
 
@@ -24,13 +24,27 @@
   }
 }
 
+.btn--outline{
+  color: $light;
+  //background-color: rgba(255, 255, 255, 0);
+  border: 1px solid transparentize($white,.8);
+
+  &:hover {
+    color: $light;
+    //background-color: rgba(255, 255, 255, .2);
+    border: 1px solid transparentize($white,.6);
+  }
+}
+
+
 .btn--outline_gray {
   color: $gray-400;
   background-color: rgba(0, 0, 0, 0);
   border: 1px solid $gray-400;
 
   &:hover {
-    background-color: rgba(0, 0, 0, .05);
+    color: $gray-400;
+    background-color: rgba($gray-400, .1);
   }
 }
 
@@ -48,4 +62,10 @@
   border: none;
   background-color: rgba(0,0,0,0);
   color: $white;
+}
+
+
+.btn_img{
+  margin-right: 5px;
+  margin-bottom: 3px;
 }
