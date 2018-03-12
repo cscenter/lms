@@ -319,32 +319,32 @@ nav {
 
   &--instagram {
     position: relative;
-    //@include media-breakpoint-up(lg) {
-    //  @include make-col(6);
-    //}
+    background-image: url('/media/pages/index/instagram-img.jpg');
+
     &::before {
       content: "";
-      background-image: url('/media/pages/index/instagram-img.jpg');
-      //opacity: .4;
       top: 0;
       left: 0;
       bottom: 0;
       right: 0;
       position: absolute;
-      z-index: -1;
+      z-index: 0;
+      background-color: rgba($gray-500, .65);
+      transition: .3s;
     }
-
-    background-color: rgba($gray-500, .65);
-    transition: .3s;
 
     &:hover {
-      background-color: rgba($gray-500, .8);
+      &::before {
+        background-color: rgba($gray-500, .8);
+      }
     }
 
+    > * {
+      position: relative;
+    }
   }
 
   &--full-size {
-    //margin-bottom: 5px;
     @include media-breakpoint-up(lg) {
       height: 500px;
     }
@@ -368,14 +368,12 @@ nav {
   }
 
   &--half-size {
-    //margin-bottom: .625rem;
     @include media-breakpoint-up(lg) {
       height: 245px;
     }
   }
 
   &--small {
-    //margin-top: .625rem;
     @include make-col(12);
 
     @include media-breakpoint-up(md) {
