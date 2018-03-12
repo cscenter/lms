@@ -237,32 +237,17 @@
                 {% endif %}
 
                 <div class="col-lg-6">
-                    <div class="row">
-                        {% if vk_news %}
-                            {% for post in vk_news %}
+                    {% if vk_news %}
+                        {% for post in vk_news %}
+                            <div class="row">
                                 <div class="social-media social-media--vk social-media--half-size">
                                     <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
                                     <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
                                     <p class="social-media__date">{{ post.date|date("j b") }}</p>
                                 </div>
-                            {% endfor %}
-
-                        {% endif %}
-                    </div>
-                    <div class="row">
-                        <div class="social-media social-media--twitter social-media--small">
-                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/twitter.svg') }}" width="40" alt="">
-                            <p class="social-media__text social-media__text--dark">CS центр теперь и в Новосибирске:
-                                compscicenter.ru/open-nsk/ </p>
-                            <p class="social-media__date">26 дек</p>
-                        </div>
-                        <div class="social-media social-media--youtube social-media--small">
-                            <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/youtube.svg') }}" width="40" alt="">
-                            <p class="social-media__text">CS центр теперь и в Новосибирске:
-                                compscicenter.ru/open-nsk/ </p>
-                            <p class="social-media__date social-media__date--light">26 дек</p>
-                        </div>
-                    </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
