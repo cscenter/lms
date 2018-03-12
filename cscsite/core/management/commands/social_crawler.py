@@ -28,7 +28,7 @@ class Command(BaseCommand):
         if vk_news is None:
             vk_api = VkOpenAPI()
             try:
-                json_data = vk_api.get_wall(owner_id=CSCENTER_GROUP_ID)
+                json_data = vk_api.get_wall(owner_id=CSCENTER_GROUP_ID, count=2)
                 data_to_cache = []
                 for news in json_data["response"]["items"]:
                     url = f"https://vk.com/compscicenter?w=wall{news['owner_id']}_{news['id']}"
