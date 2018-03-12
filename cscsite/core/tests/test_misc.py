@@ -131,8 +131,8 @@ def test_middleware_center_site(client, settings):
     assert settings.SITE_ID == settings.CENTER_SITE_ID
     url = reverse('index')
     response = client.get(url)
-    assert hasattr(response.context['request'], 'city_code')
-    assert response.context['request'].city_code == settings.DEFAULT_CITY_CODE
+    assert hasattr(response.wsgi_request, 'city_code')
+    assert response.wsgi_request.city_code == settings.DEFAULT_CITY_CODE
 
 
 @pytest.mark.django_db

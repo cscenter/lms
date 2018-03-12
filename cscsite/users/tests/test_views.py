@@ -455,50 +455,50 @@ def test_login_restrictions(client, settings):
     # Login as center student
     student.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as center and club student simultaneously
     student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer
     student.groups = [PARTICIPANT_GROUPS.VOLUNTEER]
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer and club students simultaneously
     student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as graduate only
     student.groups = [PARTICIPANT_GROUPS.GRADUATE_CENTER]
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # graduate and club
     student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Only club gtfo
     student.groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
-    assert not response.context["request"].user.is_authenticated
+    assert not response.wsgi_request.user.is_authenticated
     # Club teacher
     student.groups.add(PARTICIPANT_GROUPS.TEACHER_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert not response.context["request"].user.is_authenticated
+    assert not response.wsgi_request.user.is_authenticated
     # Center teacher
     student.groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
     response = client.post(reverse('login'), user_data, follow=True)
-    assert response.context["request"].user.is_authenticated
+    assert response.wsgi_request.user.is_authenticated
     # Just to make sure we have no super user permissions
-    assert not response.context["request"].user.is_curator
+    assert not response.wsgi_request.user.is_curator
 
 
 class UserReferenceTests(MyUtilitiesMixin, TestCase):
