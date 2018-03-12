@@ -14,7 +14,7 @@ from cscenter.views import NewIndexView
 logger = logging.getLogger(__name__)
 
 
-CACHE_EXPIRES_IN = 3600 * 6
+CACHE_EXPIRES_IN = None  # Manually clean cache on each command run
 
 
 class Command(BaseCommand):
