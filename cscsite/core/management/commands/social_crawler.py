@@ -9,7 +9,7 @@ from requests import RequestException
 from core.api.instagram import InstagramAPI
 from core.api.utils import SocialPost
 from core.api.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
-from cscenter.views import NewIndexView
+from cscenter.views import IndexView
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Command(BaseCommand):
         cache = caches['social_networks']
         cache.clear()
         # Note: better to store data in file-based cache
-        vk_news = cache.get(NewIndexView.VK_CACHE_KEY)
+        vk_news = cache.get(IndexView.VK_CACHE_KEY)
         if vk_news is None:
             vk_api = VkOpenAPI()
             try:
@@ -36,13 +36,13 @@ class Command(BaseCommand):
                                       date=datetime.fromtimestamp(news['date']),
                                       post_url=url)
                     data_to_cache.append(post)
-                cache.set(NewIndexView.VK_CACHE_KEY,
+                cache.set(IndexView.VK_CACHE_KEY,
                           data_to_cache, CACHE_EXPIRES_IN)
             except RequestException:
                 logger.error("vk.com: Network connection problem")
             except VkAPIException:
                 pass
-        instagram_posts = cache.get(NewIndexView.INSTAGRAM_CACHE_KEY)
+        instagram_posts = cache.get(IndexView.INSTAGRAM_CACHE_KEY)
         if instagram_posts is None:
             instagram_api = InstagramAPI()
             try:
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                                           post_url=post['link'],
                                           thumbnail=thumbnail)
                     data_to_cache.append(to_cache)
-                cache.set(NewIndexView.INSTAGRAM_CACHE_KEY, data_to_cache,
+                cache.set(IndexView.INSTAGRAM_CACHE_KEY, data_to_cache,
                           CACHE_EXPIRES_IN)
             except RequestException:
                 logger.error("instagram.com: Network connection problem")
