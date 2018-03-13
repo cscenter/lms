@@ -195,32 +195,33 @@ nav {
   }
 
   .card-img-wrapper {
-    max-height: 10rem;
+    // max-width: 200px;
+    // max-height: 200px;
+    text-align: center;
     overflow: hidden;
     position: relative;
 
-    @include media-breakpoint-up(sm) {
-      max-height: none;
-
-      &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: rgba($gray-500, .3);
-        transition: .3s;
-      }
+    @include media-breakpoint-down(sm) {
+      max-width: 200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba($gray-500, .3);
+      transition: .3s;
     }
 
     img {
-      width: auto;
-      max-width: 80%;
+      width: 100%;
 
       @include media-breakpoint-up(sm) {
         width: 100%;
-        max-width: none;
       }
     }
   }
