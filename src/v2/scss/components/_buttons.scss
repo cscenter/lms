@@ -4,8 +4,11 @@
   @include button-size(20px, 25px, 18px, 20px, 4px);
   text-transform: uppercase;
   letter-spacing: 3px;
-  margin-right: 20px;
-  margin-bottom: 20px;
+  margin: 0 auto 1rem;
+
+  @include media-breakpoint-up(md) {
+    margin: 0 1rem 1rem 0;
+  }
 }
 
 .btn--small {
