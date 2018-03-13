@@ -23,6 +23,12 @@ postgres=# CREATE USER csc WITH password 'FooBar';
 CREATE ROLE
 postgres=# GRANT ALL privileges ON DATABASE cscdb TO csc;
 GRANT
+postgres=# CREATE DATABASE test_cscdb;
+CREATE DATABASE
+postgres=# ALTER DATABASE test_cscdb OWNER TO csc;
+ALTER DATABASE
+postgres=# ALTER USER csc with CREATEDB;
+ALTER ROLE
 ^D
 ```
 * Load data to database from dump
