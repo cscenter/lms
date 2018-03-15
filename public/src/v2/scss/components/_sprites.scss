@@ -6,9 +6,7 @@
 
 .svg-inline {
   position: absolute;
-  z-index: -1;
-  width: 1px;
-  height: 1px;
-  left: -1px;
-  top: -1px;
+  z-index: -999;
+  left: -10000px;
+  top: -10000px;
 }
