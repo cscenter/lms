@@ -27,7 +27,8 @@ from core.api.utils import SocialPost
 from core.exceptions import Redirect
 from core.models import Faq
 from cscenter.serializers import CourseOfferingSerializer
-from cscenter.utils import group_terms_by_academic_year
+from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
+    PublicRouteException
 from learning.models import CourseOffering, CourseOfferingTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
@@ -46,10 +47,21 @@ class OnlineCourseTuple(NamedTuple):
 
 
 class IndexView(TemplateView):
-    template_name = "cscenter/index.html"
+    template_name = 'cscenter/index.html'
     TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
     VK_CACHE_KEY = 'v2_index_vk_social_news'
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
+
+    def get(self, request, *args, **kwargs):
+        if request.user.index_redirect:
+            try:
+                section_code = request.user.index_redirect
+                url = PublicRoute.url_by_code(section_code)
+                return HttpResponseRedirect(redirect_to=url)
+            except PublicRouteException:
+                pass
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         # Online programs + online courses
@@ -64,8 +76,7 @@ class IndexView(TemplateView):
                               'Онлайн-программа'),
             OnlineCourseTuple('Разработка на C++, Java и Haskell',
                               'https://code.stepik.org/dev/',
-                              staticfiles_storage.url(
-                                  'v2/img/pages/index/online_programs/dev.png'),
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/dev.png'),
                               'Онлайн-программа')
         ]
         today = now().date()
@@ -92,7 +103,6 @@ class IndexView(TemplateView):
             cache.set(self.TESTIMONIALS_CACHE_KEY, testimonials, 3600)
         _cache = caches['social_networks']
         context = {
-            # 'request': self.request,
             'testimonials': testimonials,
             'courses': courses,
             'vk_news': _cache.get(self.VK_CACHE_KEY),

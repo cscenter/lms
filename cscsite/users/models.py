@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, absolute_import
-
 import logging
 from random import choice
 from string import ascii_lowercase, digits
@@ -28,6 +26,7 @@ from sorl.thumbnail.images import DummyImageFile
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site
+from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import is_positive_grade
@@ -161,7 +160,6 @@ class CSCUserStatusLog(models.Model):
             "{} [{}]".format(self.student.get_full_name(True), self.semester))
 
 
-@python_2_unicode_compatible
 class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     group = PARTICIPANT_GROUPS
@@ -305,6 +303,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     workplace = models.CharField(
         _("Workplace"),
         max_length=200,
+        blank=True)
+    index_redirect = models.CharField(
+        _("Index Redirect Option"),
+        max_length=200,
+        choices=PublicRoute.choices(),
         blank=True)
 
     objects = CustomUserManager()
@@ -534,6 +537,24 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 .select_related('project', 'project__semester')
                 .order_by('project__semester__index'))
 
+    def get_redirect_options(self):
+        """
+        Returns list of website sections available for redirect to current
+        authenticated user
+        """
+        sections = []
+        if self.is_project_reviewer or self.is_curator_of_projects:
+            sections.append(PublicRoute.PROJECTS.choice)
+        if self.is_interviewer:
+            sections.append(PublicRoute.ADMISSION.choice)
+        if self.is_student:
+            sections.append(PublicRoute.LEARNING.choice)
+        if self.is_teacher:
+            sections.append(PublicRoute.TEACHING.choice)
+        if self.is_curator:
+            sections.append(PublicRoute.STAFF.choice)
+        return sections
+
     def stats(self, term):
         """
         Stats for SUCCESSFULLY completed courses and enrollments in 
@@ -673,6 +694,7 @@ class CSCUserReference(TimeStampedModel):
 class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     group = PARTICIPANT_GROUPS
     city_code = None
+    index_redirect = None
 
     def __str__(self):
         return 'NotAuthenticatedUser'

@@ -10,6 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
 from crispy_forms.bootstrap import FormActions
 
+from core.utils import is_club_site
 from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
@@ -62,8 +63,18 @@ class LoginForm(AuthenticationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    index_redirect = forms.ChoiceField(
+        label='Редирект с главной страницы',
+        help_text="Выберите раздел, в который вы будете попадать при переходе "
+                  "на главную страницу.",
+        required=False,
+        widget=forms.Select(),)
+
     def __init__(self, *args, **kwargs):
-        super(UserProfileForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        option_empty = ('', 'Отключен')
+        user_options = self.instance.get_redirect_options()
+        self.fields['index_redirect'].choices = [option_empty] + user_options
 
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
@@ -76,16 +87,15 @@ class UserProfileForm(forms.ModelForm):
                            'private_contacts']
 
         club_fields = ['first_name', 'last_name', 'patronymic']
-        if kwargs['instance'].is_student_club and \
-           not kwargs['instance'].is_student_center:
+        if is_club_site():
             show_fields = club_fields + show_fields
+            del self.fields["index_redirect"]
         else:
+            show_fields.append('index_redirect')
             for field in club_fields:
                 del self.fields[field]
 
-        self.helper.layout = Layout(
-            Div(*show_fields),
-            CANCEL_SAVE_PAIR)
+        self.helper.layout = Layout(Div(*show_fields), CANCEL_SAVE_PAIR)
 
         if 'csc_review' not in show_fields:
             del self.fields['csc_review']
@@ -94,7 +104,8 @@ class UserProfileForm(forms.ModelForm):
         model = CSCUser
         fields = ['phone', 'workplace', 'note', 'yandex_id', 'github_id',
                   'stepic_id', 'csc_review', 'private_contacts',
-                  'first_name', 'last_name', 'patronymic']
+                  'first_name', 'last_name', 'patronymic',
+                  'index_redirect']
         widgets = {
             'note': UbereditorWidget,
             'csc_review': UbereditorWidget,
