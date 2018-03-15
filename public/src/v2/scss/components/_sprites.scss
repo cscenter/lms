@@ -1,0 +1,17 @@
+// svg sprite dimensions base cls
+.sprite-img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.svg-inline {
+  position: absolute;
+  z-index: -1;
+
+  > svg {
+    width: 0;
+    height: 0;
+    position: absolute;
+    z-index: -1;
+  }
+}

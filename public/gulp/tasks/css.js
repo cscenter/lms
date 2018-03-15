@@ -8,17 +8,17 @@ import postcss from "gulp-postcss";
 import gulpif from "gulp-if";
 import filter from "gulp-filter";
 
-import { postCssPlugins, sassConfig, plumberConfig, path } from "../configs";
+import { postCssPlugins, sassConfig, plumberConfig, paths } from "../configs";
 import bs from "../utils/getBrowserSyncInstance";
 
 const css = () =>
     gulp
-        .src(["**/*.scss"], {cwd: path.src.scss})
+        .src(["**/*.scss"], {cwd: paths.src.scss})
         .pipe(plumber(plumberConfig))
         //filter out unchanged scss files, only works when watching
-        .pipe(gulpif(global.watch, cached('sass')))
+        .pipe(gulpif(global.watch === true, cached('sass')))
         //find files that depend on the files that have changed
-        .pipe(sassInheritance({dir: path.src.scss}))
+        .pipe(sassInheritance({dir: paths.src.scss}))
         //filter out internal imports (folders and files starting with "_" )
         .pipe(filter(function (file) {
           return !/\/_/.test(file.path) || !/^_/.test(file.basename);
@@ -28,7 +28,7 @@ const css = () =>
         .pipe(sass(sassConfig).on('error', sass.logError))
         .pipe(postcss(postCssPlugins))
         .pipe(gulpif(global.watch === true, sourcemaps.write()))
-        .pipe(gulp.dest(path.build.css))
+        .pipe(gulp.dest(paths.build.css))
         .pipe(bs.reload({
             stream: true
         }));
