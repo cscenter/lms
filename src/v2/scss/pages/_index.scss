@@ -1,3 +1,5 @@
+@import "../sprites/index";
+
 @mixin append-hr-to-container() {
   .container::after {
     content: "";
@@ -430,4 +432,33 @@ nav {
       margin-bottom: 10px;
     }
   }
+}
+
+
+// svg sprite dimensions
+.sprite-img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+// FIXME: autogenerate classes?
+._top-banner-kids {
+  margin-right: 5px;
+  position: relative;
+  bottom: -4px;
+}
+
+._csc {
+  width: 74px;
+  height: 26px;
+}
+
+._icon-social {
+  width: 21px;
+  height: 21px;
+}
+
+._jetbrains {
+  width: 66px;
+  height: 70px;
 }

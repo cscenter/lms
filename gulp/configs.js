@@ -1,16 +1,23 @@
 import errorHandler from "./utils/errorHandler";
 import autoprefixer from "autoprefixer";
+import path from "path";
 
 const staticVersion = process.env.APP_VERSION || "v2";
 
-export const path = {
+export const rootDir = path.dirname(__dirname);
+
+export const paths = {
     build: {
         css: `assets/${staticVersion}/dist/css/`,
         img: `assets/${staticVersion}/dist/img/`,
+        svgSprites: `assets/${staticVersion}/dist/img/sprites/`,
+        svgSpritesSCSS: `src/${staticVersion}/scss/sprites/`,
     },
     src: {
         scss: `src/${staticVersion}/scss/`,
         img: `src/${staticVersion}/img/`,
+        svgSprites: `src/${staticVersion}/img/sprites/svg/`,
+        // js managed by webpack, ok
     },
     watch: {
         jinja2: `templates/${staticVersion}/**/*.jinja2`,
@@ -18,13 +25,16 @@ export const path = {
         img: `src/${staticVersion}/img/**/*.*`,
         fonts: `src/${staticVersion}/fonts/**/*.*`
     },
-    clean: `./assets/${staticVersion}/dist/**/*.css`
+    clean: {
+        css: `./assets/${staticVersion}/dist/**/*.css`
+    }
 };
 
 export const sassConfig = {
     outputStyle: 'compressed',
     includePaths: ['./node_modules/']
 };
+
 
 export let postCssPlugins;
 if (staticVersion === "v2") {
@@ -78,4 +88,4 @@ export const browserSyncConfig = {
 };
 
 // Cleanup configuration
-export const delConfig = [path.clean];
+export const delConfig = [paths.clean.css, paths.build.svgSprites];

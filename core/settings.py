@@ -66,6 +66,7 @@ TEMPLATES = [
         "APP_DIRS": False,
         'DIRS': [
             str(ROOT_DIR / "templates"),
+            str(ROOT_DIR / "assets" / "v2" / "dist" / "img"),  # svg inline support
         ],
         "NAME": "jinja2",
         "OPTIONS": {

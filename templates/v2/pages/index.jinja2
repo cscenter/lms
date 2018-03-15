@@ -10,14 +10,16 @@
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk"/>
 
     <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
-    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
     <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
 
     {% block stylesheets %} {% endblock stylesheets %}
 </head>
 
-<body>
+{% import "v2/_macros.jinja2" as macros %}
 
+<body>
+    <div class="svg-inline">{% include "sprites/index.svg" %}</div>
 
 <div class="cover">
 
@@ -25,8 +27,8 @@
 
         <div class="top-banner">
             <div class="container">
-                <div class="top-banner__text"><img class="top-banner__img"  src="/static/v2/img/banners/top-banner-kids.svg" width="70" alt="">
-                    До 14 апреля открыт <a class="top-banner__link" href="/application/">приём заявок</a> на очное обучение в центре
+                <div class="top-banner__text">
+                    {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="/application/">приём заявок</a> на очное обучение в центре
                 </div>
             </div>
         </div>
@@ -34,7 +36,7 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
-                <a class="navbar-brand" href="#"><img src="/static/v2/img/logo-csc.svg" alt=""></a>
+                <a class="navbar-brand" href="#">{{ macros.svg_inline('logo-csc') }}</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -92,8 +94,7 @@
 
     <div class="container">
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
-        <p class="cover__text">Двух- или трехгодичные очные вечерние курсы с возможностью
-            получения дипломов по трём направлениям: Computer Science, Data Science, Software Engineering</p>
+        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
         <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
         <a class="btn btn--big btn--white">Узнать о центре</a>
     </div>
@@ -104,8 +105,7 @@
     <div class="container">
         <h2>Очные курсы центра</h2>
         <p class="card-offline-course__text">
-            Центр приглашает студентов средних и старших курсов технических вузов
-            пройти двух или трёхлетние курсы:
+            Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических специальностей пройти двух- или трёхлетние курсы по направлениям:
         </p>
 
         <div class="card-deck">
@@ -152,10 +152,10 @@
 
                 <h4>Организаторы</h4>
                 <div class="supported-by">
-                    <a href="#"><img src="/static/v2/img/logos/jetbrains.svg" alt="JetBrains"></a>
-                    <a href="#"><img src="/static/v2/img/logos/shad.svg" alt="Яндекс ШАД"></a>
-                    <a href="#"><img src="/static/v2/img/logos/fml239.svg" alt="ФМЛ №239"></a>
-                    <a href="#"><img src="/static/v2/img/logos/csclub.svg" alt="Computer Science Club"></a>
+                    <a href="#" title="JetBrains">{{ macros.svg_inline('logo-jetbrains') }}</a>
+                    <a href="#" title="Яндекс ШАД">{{ macros.svg_inline('logo-shad') }}</a>
+                    <a href="#" title="ФМЛ №239">{{ macros.svg_inline('logo-fml239') }}</a>
+                    <a href="#" title="Computer Science Club">{{ macros.svg_inline('logo-csclub') }}</a>
                 </div>
             </div>
         </div>
@@ -170,10 +170,10 @@
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
-                    <img src="/media/pages/index/program-online.png" alt="Card image cap">
+                    <img src="/static/v2/img/pages/index/online_programs/algo.png" alt="Card image cap">
                 </div>
                 <div class="card-block">
-                    <h4 class="csc-online-education__card-title">Основы программирования</h4>
+                    <h4 class="csc-online-education__card-title">Алгоритмы и эффективные вычисления</h4>
                     <p class="csc-online-education__card-text">
                         <small class="text-muted">Онлайн-программа</small>
                     </p>
@@ -182,25 +182,24 @@
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
-                    <img src="/media/pages/index/course-diskret.png" alt="Card image cap">
+                    <img src="/static/v2/img/pages/index/online_programs/math.png" alt="Card image cap">
                 </div>
                 <div class="card-block">
-                    <h4 class="csc-online-education__card-title">Ликбез по дискретной
-                        математике</h4>
+                    <h4 class="csc-online-education__card-title">Математика для разработчика</h4>
                     <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-курс</small>
+                        <small class="text-muted">Онлайн-программа</small>
                     </p>
                 </div>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
-                    <img src="/media/pages/index/instagram-img.jpg" alt="Card image cap">
+                    <img src="/static/v2/img/pages/index/online_programs/dev.png" alt="Card image cap">
                 </div>
                 <div class="card-block">
-                    <h4 class="csc-online-education__card-title">Программирование на языке C++</h4>
+                    <h4 class="csc-online-education__card-title">Разработка на C++, Java и Haskell</h4>
                     <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-курс</small>
+                        <small class="text-muted">Онлайн-программа</small>
                     </p>
                 </div>
             </a>
@@ -441,11 +440,11 @@
             info@compscicenter.ru
         </a>
         <div class="footer__social-media-icons">
-            <a href=""><img src="/static/v2/img/icons/footer/vk.svg" alt=""></a>
-            <a href=""><img src="/static/v2/img/icons/footer/instagram.svg" alt=""></a>
-            <a href=""><img src="/static/v2/img/icons/footer/twitter.svg" alt=""></a>
-            <a href=""><img src="/static/v2/img/icons/footer/facebook.svg" alt=""></a>
-            <a href=""><img src="/static/v2/img/icons/footer/youtube.svg" alt=""></a>
+            <a href="">{{ macros.svg_inline('vk') }}</a>
+            <a href="">{{ macros.svg_inline('instagram') }}</a>
+            <a href="">{{ macros.svg_inline('twitter') }}</a>
+            <a href="">{{ macros.svg_inline('facebook') }}</a>
+            <a href="">{{ macros.svg_inline('youtube') }}</a>
         </div>
     </div>
 </footer>

@@ -28,13 +28,7 @@
     }
   }
 
-  &__img {
-    position: relative;
-    top: 4px;
-    width: 70px;
-    height: 52px;
-    margin-right: 5px;
-
+  svg {
     @include media-breakpoint-down(md){
       display: none;
     }
