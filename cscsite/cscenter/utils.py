@@ -1,4 +1,7 @@
 from collections import OrderedDict
+from enum import Enum
+
+from django.urls import reverse
 
 from learning.utils import get_term_index_academic_year_starts, \
     get_term_by_index
@@ -27,3 +30,45 @@ def group_terms_by_academic_year(courses):
             terms.setdefault(academic_year, []).append(term.type)
             prev_visited = term
     return terms
+
+
+class PublicRouteException(Exception):
+    pass
+
+
+class PublicRoute(Enum):
+    """
+    Mapping for some public url codes to internal route names.
+    """
+    PROJECTS = ('projects', 'Проекты', 'projects:report_list_reviewers')
+    ADMISSION = ('admission', 'Набор', 'admission:interviews')
+    LEARNING = ('learning', 'Обучение', 'assignment_list_student')
+    TEACHING = ('teaching', 'Преподавание', 'assignment_list_teacher')
+    STAFF = ('staff', 'Курирование', 'staff:student_search')
+
+    def __init__(self, code, section_name, url_name):
+        self.code = code
+        self.section_name = section_name
+        self.url_name = url_name
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def url(self):
+        return reverse(self.url_name)
+
+    @property
+    def choice(self):
+        return self.code, self.section_name
+
+    @classmethod
+    def url_by_code(cls, code):
+        try:
+            return getattr(cls, code.upper()).url
+        except AttributeError:
+            raise PublicRouteException(f"Code {code} doesn't supported")
+
+    @classmethod
+    def choices(cls):
+        return [(o.code, o.section_name) for o in cls.__members__.values()]
