@@ -55,6 +55,8 @@ TEMPLATES = [
             django.__path__[0] + '/forms/jinja2',
             str(APP_DIR / "jinja2"),
             str(PROJECT_DIR / "core" / "jinja2"),
+            # svg inline support
+            str(PROJECT_DIR / "assets" / "v2" / "dist" / "img"),
         ],
         "NAME": "jinja2",
         "OPTIONS": {
