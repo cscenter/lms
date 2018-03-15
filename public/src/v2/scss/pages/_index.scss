@@ -60,12 +60,22 @@ nav {
   padding: 25px 10px 35px;
   border-radius: 0;
 
+  .card-offline-course__icon {
+    height: 100px;
+  }
+
+  svg {
+    margin-left: 30px;
+    fill: #1d1d1d;
+    height: 100px;
+  }
+
   &:hover {
     background-color: $teal;
     transition: .2s;
 
-    .card-offline-course__icon--software-engineering {
-      background-image: url("/static/v2/img/pages/index/offline-courses/software-engineering-hover.svg");
+    svg {
+      fill: $white;
     }
 
     .card-offline-course__icon--data-science {
@@ -99,28 +109,6 @@ nav {
     @include media-breakpoint-down(md) {
       font-size: 18px;
     }
-  }
-
-  &__icon {
-    margin-left: 15px;
-    display: flex;
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    width: 100%;
-    height: 100px;
-
-    &--software-engineering {
-      background-image: url("/static/v2/img/pages/index/offline-courses/software-engineering.svg");
-    }
-
-    &--data-science {
-      background-image: url("/static/v2/img/pages/index/offline-courses/data-science.svg");
-    }
-
-    &--computer-science {
-      background-image: url("/static/v2/img/pages/index/offline-courses/computer-science.svg");
-    }
-
   }
 
   &__card-text {
@@ -435,30 +423,8 @@ nav {
 }
 
 
-// svg sprite dimensions
-.sprite-img {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-// FIXME: autogenerate classes?
 ._top-banner-kids {
   margin-right: 5px;
   position: relative;
   bottom: -4px;
-}
-
-._csc {
-  width: 74px;
-  height: 26px;
-}
-
-._icon-social {
-  width: 21px;
-  height: 21px;
-}
-
-._jetbrains {
-  width: 66px;
-  height: 70px;
 }

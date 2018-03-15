@@ -35,6 +35,7 @@ const svgSprites = () => {
             // }))
             // build svg sprite
             .pipe(svgSprite({
+                // svg: {namespaceClassnames: false},
                 mode: {
                     defs: {
                         dest: '.',
