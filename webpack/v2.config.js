@@ -33,6 +33,7 @@ const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
 };
 
+// Let's include necessary parts instead of the whole polyfill bundle
 const VENDOR = [
     'babel-polyfill',
 ];
@@ -42,7 +43,7 @@ const common = {
 
     entry: {
         main: PATHS.common,
-        vendor: VENDOR,
+        // vendor: VENDOR,
     },
 
     output: {
