@@ -448,7 +448,9 @@
         </div>
     </div>
 </footer>
-
+    {{ render_bundle('manifest', config='V2') }}
+    {{ render_bundle('vendor', config='V2') }}
+    {{ render_bundle('main', config='V2') }}
 
 <script type="text/javascript" src="{{ static('v2/js/vendor/jquery-3.2.1.slim.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"

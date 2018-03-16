@@ -4,12 +4,14 @@ const webpack = require('webpack');
 const WebpackChunkHash = require('webpack-chunk-hash');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
+const APP_VERSION = process.env.APP_VERSION || "v1";
+
 
 module.exports = {
     output: {
         filename: '[name]-[chunkhash].js',
         chunkFilename: '[name]-[chunkhash].js',
-        publicPath: '/static/v1/dist/js/',
+        publicPath: `/static/${APP_VERSION}/dist/js/`,
     },
 
     plugins: [

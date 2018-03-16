@@ -19,42 +19,22 @@ const TARGET = process.env.npm_lifecycle_event;
 
 process.env.BABEL_ENV = TARGET;
 
-const __srcdir = path.join(__dirname, '../src/v1');
+const APP_VERSION = "v2";
+
+const __srcdir = path.join(__dirname, `../src/${APP_VERSION}`);
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, '../assets/v1/dist/js');
+let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_PATH = path.join('/static/', __bundlesdir);
 const STATIC_URL = path.join('/static/');
 
-// TODO: analyze bundles size and concat
 const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
-    profile: path.join(__srcdir, '/js/profile.js'),
-    forms: path.join(__srcdir, '/js/forms.js'),
-    admission: path.join(__srcdir, '/js/center/admission.js'),
-    supervising: path.join(__srcdir, '/js/supervising/index.js'),
-    learning: path.join(__srcdir, '/js/learning/index.js'),
-    teaching: path.join(__srcdir, '/js/teaching/index.js'),
-    stats: path.join(__srcdir, "/js/stats/main.js"),
-    center: path.join(__srcdir, "/js/center/index.js"),
-    club: path.join(__srcdir, "/js/club/index.js"),
 };
-
 
 const VENDOR = [
     'babel-polyfill',
-    // 'history',
-    // 'react',
-    // 'react-dom',
-    // 'react-redux',
-    // 'react-router',
-    // 'react-mixin',
-    // 'classnames',
-    // 'redux',
-    // 'react-router-redux',
-    // 'jquery',
-    // 'bootstrap-sass',
-    path.join(__srcdir, '/js/editor.js'),
 ];
 
 const common = {
@@ -62,15 +42,6 @@ const common = {
 
     entry: {
         main: PATHS.common,
-        center: PATHS.center,
-        club: PATHS.club,
-        profile: PATHS.profile,
-        forms: PATHS.forms, // TODO: Should it be DLL instead?
-        admission: PATHS.admission,
-        learning: PATHS.learning,
-        teaching: PATHS.teaching,
-        stats: PATHS.stats,
-        supervising: PATHS.supervising,
         vendor: VENDOR,
     },
 
@@ -79,19 +50,13 @@ const common = {
         path: __bundlesdir,
     },
 
-    externals: {
-        jquery: 'jQuery',
-        // Note: EpicEditor is an old dead shit without correct support.
-        EpicEditor: 'EpicEditor',
-        "d3": "d3"
-    },
+    externals: {},
 
     resolve: {
         extensions: ['.jsx', '.js'],
         modules: [
             path.join(__srcdir, '/js'),
-            __nodemodulesdir,
-            __srcdir,  // import scss with `sass` prefix for easy debug
+            __nodemodulesdir
         ],
         symlinks: false
     },
@@ -108,10 +73,9 @@ const common = {
                         }
                     }
                 ],
-                include: path.resolve(__srcdir, "js"),
-                exclude: [
-                    path.resolve(__srcdir, "v1/scss/center/styles.scss"),
-                    path.resolve(__srcdir, "v1/scss/club/styles.scss"),
+                include: [
+                    path.resolve(__srcdir, "js"),
+                    path.resolve(__nodemodulesdir, "bootstrap"),  // used object spread syntax
                 ]
             },
             {
@@ -177,7 +141,7 @@ const common = {
 
     plugins: [
         new webpack.optimize.ModuleConcatenationPlugin(),
-        new BundleTracker({filename: './webpack-stats.json'}),
+        new BundleTracker({filename: './webpack-stats-v2.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
         new webpack.IgnorePlugin(/^\.\/locale$/),
@@ -205,10 +169,10 @@ const common = {
     ],
 };
 
-if (['dev', 'start'].includes(TARGET) || !TARGET) {
+if (['dev2', 'start'].includes(TARGET) || !TARGET) {
     module.exports = merge(common, development);
 }
 
-if (TARGET === 'prod' || !TARGET) {
+if (TARGET === 'prod2' || !TARGET) {
     module.exports = merge(common, production);
 }

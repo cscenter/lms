@@ -8,8 +8,11 @@ import path from "path";
  */
 
 export default function getDirs(parentDir) {
-    return fs.readdirSync(parentDir)
-      .filter(function(file) {
-        return fs.statSync(path.join(parentDir, file)).isDirectory();
-      });
+    if (fs.existsSync(parentDir)) {
+        return fs.readdirSync(parentDir)
+          .filter(function(file) {
+            return fs.statSync(path.join(parentDir, file)).isDirectory();
+          });
+    }
+    return [];
 }
