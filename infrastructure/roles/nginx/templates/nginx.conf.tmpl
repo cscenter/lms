@@ -120,6 +120,7 @@ server {
         }
         add_header X-Frame-Options $frame_options;
         {% endif %}
+        add_header Cache-Control no-cache,no-store,must-revalidate;
 
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
 
