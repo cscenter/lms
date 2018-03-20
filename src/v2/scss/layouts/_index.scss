@@ -1,0 +1,98 @@
+@import "index_menu";
+@import "../sprites/index";
+
+@mixin append-hr-to-container() {
+  .container::after {
+    content: "";
+    margin: #{2 * $hr-margin-y} 0;
+    border-top: $hr-border-width solid $hr-border-color;
+    display: block;
+  }
+}
+
+// TODO: rename to `inversed`?
+.__dark {
+  color: $gray-500;
+}
+
+// Note: Let's store styles for jumbotron and menu in one place (here)
+// 1 - screen cover
+
+._top-banner-kids {
+  margin-right: 5px;
+  position: relative;
+  bottom: -4px;
+}
+
+.cover {
+  @include font-smoothing();
+  position: relative;
+  background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
+  background-size: cover;
+  color: $white;
+  padding: 0 0 100px;
+
+  @include media-breakpoint-down(md) {
+    text-align: center;
+    padding-top: 100px;
+  }
+
+  nav {
+    z-index: 5;
+  }
+}
+
+.cover__title {
+  padding: 60px 0 20px;
+  max-width: 900px;
+}
+
+.cover__text {
+  margin-bottom: 40px;
+  max-width: 900px;
+}
+
+// Footer styles
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  color: $gray-600;
+  font-size: .9375rem;
+  line-height: 1.5rem;
+  @include font-smoothing();
+
+  &__copyright {
+    @include make-col(6);
+    @include media-breakpoint-down(md) {
+      @include make-col(12);
+      text-align: center;
+    }
+  }
+
+  &__contacts {
+    display: flex;
+    justify-content: flex-end;
+    @include make-col(6);
+
+    @include media-breakpoint-down(md) {
+      @include make-col(12);
+      flex-direction: column;
+      text-align: center;
+    }
+
+  }
+  &__social-media-icons {
+
+    a {
+      margin: 0 .3rem;
+    }
+  }
+
+  &__email {
+    margin-right: 10px;
+    @include media-breakpoint-down(md) {
+      margin-bottom: 10px;
+    }
+  }
+}
