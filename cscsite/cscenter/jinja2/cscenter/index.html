@@ -59,7 +59,7 @@
 
                     {% if not request.user.is_authenticated %}
                         <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
-                            <img src="{{ static('v2/img/icons/user-sign.svg') }}" alt="">Войти
+                            Войти <div class="btn-reg--icon"></div>
                         </a>
                     {% else %}
                         <div class="dropdown">
