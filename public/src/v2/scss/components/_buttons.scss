@@ -17,7 +17,7 @@
   letter-spacing: 3px;
 }
 
-.btn--white{
+.btn--white {
   color: $light;
   background-color: rgba(255, 255, 255, .1);
 
@@ -27,18 +27,17 @@
   }
 }
 
-.btn--outline{
+.btn--outline {
   color: $light;
   //background-color: rgba(255, 255, 255, 0);
-  border: 1px solid transparentize($white,.8);
+  border: 1px solid transparentize($white, .8);
 
   &:hover {
     color: $light;
     //background-color: rgba(255, 255, 255, .2);
-    border: 1px solid transparentize($white,.6);
+    border: 1px solid transparentize($white, .6);
   }
 }
-
 
 .btn--outline_gray {
   color: $gray-400;
@@ -61,14 +60,34 @@
   }
 }
 
-.btn--disable{
-  border: none;
-  background-color: rgba(0,0,0,0);
-  color: $white;
+.btn-reg--icon {
+  margin-right: 5px;
+  margin-top: 2px;
+  height: 24px;
+  width: 24px;
+  background-image: url("/static/v2/img/icons/user-sign.svg");
+  background-size: cover;
+  order: -1;
+
+    @include media-breakpoint-down(md) {
+      margin-right: 0px;
+      //padding: 0;
+  }
+
+
 }
 
+.btn--reg {
+  display: flex;
 
-.btn_img{
-  margin-right: 5px;
-  margin-bottom: 3px;
+  @include media-breakpoint-down(md) {
+    text-indent: -9999px;
+    border: none;
+    //padding: 0;
+
+    &:hover {
+      border: none;
+    }
+  }
+
 }
