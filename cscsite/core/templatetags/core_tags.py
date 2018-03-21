@@ -10,6 +10,7 @@ from django.template.base import TextNode
 from django.utils.numberformat import format
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
+from multiselectfield.db.fields import MSFList
 
 from ..admin import get_admin_url
 from ..utils import render_markdown
@@ -195,6 +196,8 @@ def chunks(value, chunk_length):
 def replace(value, args):
     """Args must be separated by space"""
     old, new = args.split(" ")
+    if isinstance(value, MSFList):
+        value = str(value)
     return value.replace(old, new)
 # replace.is_safe = True
 
