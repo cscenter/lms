@@ -7,30 +7,32 @@
   margin-bottom: 20px;
   padding: 0;
 
-  &__text {
-    color: $white;
-    text-align: center;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 300;
-    align-items: center;
-    margin: 0;
-  }
-
-  &__link {
-    padding-bottom: 1px;
-    border-bottom: 1px solid transparentize($teal, .5);
-    font-weight: normal;
-
-    &:hover {
-      color: lighten($teal, 20%);
-    }
-  }
-
   svg {
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       display: none;
     }
+  }
+}
+
+.top-banner__text {
+  color: $white;
+  text-align: center;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 300;
+  align-items: center;
+  margin: 0;
+}
+
+.top-banner__link {
+  color: $white;
+  padding-bottom: 1px;
+  border-bottom: 1px solid transparentize($white, .5);
+  font-weight: 400;
+
+  &:hover {
+    border-bottom: 1px solid transparentize($teal, .5);
+    color: lighten($teal, 20%);
   }
 }
