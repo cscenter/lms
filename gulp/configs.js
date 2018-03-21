@@ -80,6 +80,7 @@ export const browserSyncConfig = {
     proxy: `localhost:${PROXY_PORT}`,
     notify: false,
     reloadOnRestart: true,
+    startPath: `/${staticVersion}/pages/`,
     snippetOptions: {
         rule: {
             match: /<\/body>/i
