@@ -2,13 +2,15 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
-from post_office.models import Email, EmailTemplate
+from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
 from admission_test.models import AdmissionTestApplicant
 from learning.admission.management.commands._utils import CurrentCampaignsMixin
-from learning.admission.models import Applicant, Exam
+from learning.admission.models import Applicant
 
+
+# TODO: remove duplicates
 
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = """Admission campaign start notification"""
