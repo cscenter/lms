@@ -36,7 +36,7 @@ django-rosetta==0.7.13
 django-modeltranslation==0.12.1
 
 # Mailing support
-django-post_office==2.0.8
+django-post_office==3.0.4
 django-ses==0.8.2
 
 # Amazon services
