@@ -336,11 +336,7 @@ class ApplicationInSpbForm(ApplicationFormStep2):
     )
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из трёх вам интересны в CS центре?',
-        choices=(
-            ("dm", "Анализ данных"),
-            ("cs", "Современная информатика"),
-            ("se", "Разработка ПО")
-        ),
+        choices=Applicant.STUDY_PROGRAMS,
         help_text='Мы не просим поступающих сразу определиться с направлением '
                   'обучения. Вам предстоит сделать этот выбор '
                   'через год-полтора после поступления. Сейчас мы предлагаем '
@@ -361,8 +357,8 @@ class ApplicationInNskForm(ApplicationFormStep2):
     preferred_study_programs = forms.MultipleChoiceField(
         label='Какие направления обучения из двух вам интересны в CS центре?',
         choices=(
-            ("dm", "Анализ данных"),
-            ("se", "Разработка ПО")
+            (Applicant.STUDY_PROGRAM_DS, "Анализ данных"),
+            (Applicant.STUDY_PROGRAM_SE, "Разработка ПО")
         ),
         help_text='Мы не просим поступающих сразу определиться с направлением '
                   'обучения. Вам предстоит сделать этот выбор '
@@ -549,7 +545,7 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
         model = Applicant
         exclude = ("campaign", "first_name", "patronymic", "surname",
                    "status", "admin_note", "yandex_id_normalize", "user",
-                   "university_other")
+                   "university_other", "contest_id", "participant_id")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

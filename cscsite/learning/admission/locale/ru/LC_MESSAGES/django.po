@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-01 16:01+0000\n"
-"PO-Revision-Date: 2018-03-01 16:11+0000\n"
-"Last-Translator: b'  <>'\n"
+"PO-Revision-Date: 2018-03-21 13:53+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -523,10 +523,9 @@ msgid "Applicant|Status"
 msgstr "Статус"
 
 #: cscsite/learning/admission/models.py:319
-#, fuzzy
 #| msgid "Contest #ID"
 msgid "Yandex.Contest ID"
-msgstr "#ID Контеста"
+msgstr "Яндекс.Контест (тестирование)"
 
 #: cscsite/learning/admission/models.py:323
 msgid "Participant ID"

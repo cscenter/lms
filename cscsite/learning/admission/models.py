@@ -161,6 +161,14 @@ class Applicant(TimeStampedModel):
         (VOLUNTEER, _("Applicant|Volunteer")),
         (THEY_REFUSED, _("He or she refused")),
     )
+    STUDY_PROGRAM_DS = "ds"
+    STUDY_PROGRAM_CS = "cs"
+    STUDY_PROGRAM_SE = "se"
+    STUDY_PROGRAMS = (
+        (STUDY_PROGRAM_DS, "Анализ данных"),
+        (STUDY_PROGRAM_CS, "Современная информатика"),
+        (STUDY_PROGRAM_SE, "Разработка ПО")
+    )
 
     campaign = models.ForeignKey(
         Campaign,
@@ -265,9 +273,11 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|additional_info"),
         blank=True,
         null=True)
-    preferred_study_programs = models.CharField(
+    from multiselectfield import MultiSelectField
+    preferred_study_programs = MultiSelectField(
         _("Study program"),
         help_text=_("Applicant|study_program"),
+        choices=STUDY_PROGRAMS,
         max_length=255)
     preferred_study_programs_dm_note = models.TextField(
         _("Study program (DM note)"),
