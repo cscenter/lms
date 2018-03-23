@@ -32,7 +32,13 @@ class Command(BaseCommand):
                 data_to_cache = []
                 for news in json_data["response"]["items"]:
                     url = f"https://vk.com/compscicenter?w=wall{news['owner_id']}_{news['id']}"
-                    post = SocialPost(text=news['text'],
+                    # Process repost
+                    if not news["text"] and "copy_history" in news:
+                        # 0 index stores the post from which we made a repost
+                        post_text = news["copy_history"][0]["text"]
+                    else:
+                        post_text = news["text"]
+                    post = SocialPost(text=post_text,
                                       date=datetime.fromtimestamp(news['date']),
                                       post_url=url)
                     data_to_cache.append(post)
