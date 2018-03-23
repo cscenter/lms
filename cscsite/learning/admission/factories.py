@@ -50,7 +50,6 @@ class ApplicantFactory(factory.DjangoModelFactory):
     surname = factory.Sequence(lambda n: "Surname %03d" % n)
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
-    uuid = factory.LazyFunction(uuid.uuid4)
     university = factory.SubFactory(UniversityFactory)
 
 

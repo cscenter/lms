@@ -326,21 +326,6 @@ class Applicant(TimeStampedModel):
         null=True,
         blank=True,
     )
-    uuid = models.UUIDField(editable=False, null=True, blank=True)
-    contest_id = models.IntegerField(
-        _("Yandex.Contest ID"),
-        null=True,
-        blank=True)
-    participant_id = models.IntegerField(
-        _("Participant ID"),
-        help_text=_("Participant ID if user registered in Yandex Contest"),
-        null=True,
-        blank=True)
-    status_code = models.IntegerField(
-        "Yandex API Response",
-        editable=False,
-        null=True,
-        blank=True)
 
     class Meta:
         verbose_name = _("Applicant")
