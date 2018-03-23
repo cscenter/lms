@@ -20,6 +20,7 @@ from django.utils.timezone import now, make_aware, localtime
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+from multiselectfield import MultiSelectField
 from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
@@ -273,7 +274,6 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|additional_info"),
         blank=True,
         null=True)
-    from multiselectfield import MultiSelectField
     preferred_study_programs = MultiSelectField(
         _("Study program"),
         help_text=_("Applicant|study_program"),
@@ -350,25 +350,12 @@ class Applicant(TimeStampedModel):
     def save(self, **kwargs):
         created = self.pk is None
         super().save(**kwargs)
-        self._set_contest_id(created)
+        if created:
+            self._assign_testing()
 
-    def refresh_contest_id(self):
-        self._set_contest_id(created=True)
-
-    def _set_contest_id(self, created):
-        if not created:
-            return False
-        contests = list(Contest.objects
-                        .filter(campaign_id=self.campaign_id,
-                                type=Contest.TYPE_TEST)
-                        .values_list("contest_id", flat=True)
-                        .order_by("contest_id"))
-        if contests:
-            contest_index = self.pk % len(contests)
-            self.contest_id = contests[contest_index]
-            (Applicant.objects
-             .filter(pk=self.pk)
-             .update(contest_id=self.contest_id))
+    def _assign_testing(self):
+        testing = Test(applicant=self, status=Test.NEW)
+        testing.save()
 
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
@@ -416,7 +403,6 @@ def contest_assignments_upload_to(instance, filename):
 
 
 class Contest(models.Model):
-
     FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
     TYPE_TEST = 1
     TYPE_EXAM = 2
@@ -457,28 +443,50 @@ class Contest(models.Model):
         return self.contest_id
 
 
-@python_2_unicode_compatible
 class Test(TimeStampedModel):
+    NEW = 'new'
+    REGISTERED = 'registered'
+    IN_PROGRESS = 'in_progress'
+    FINISHED = 'completed'
+    STATUSES = (
+        (NEW, _("New")),
+        (REGISTERED, _("Registered")),
+        (IN_PROGRESS, _("In progress")),
+        (FINISHED, _("Finished")),
+    )
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="online_test")
+    status = models.CharField(
+        choices=STATUSES,
+        default=NEW,
+        verbose_name=_("Status"),
+        max_length=15)
     details = JSONField(
         verbose_name=_("Details"),
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
-        null=True,
     )
-    # TODO: replace with FK to Contest model?
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
         max_length=42,
         blank=True,
         null=True)
+    contest_participant_id = models.IntegerField(
+        help_text="Participant ID if user registered in Yandex Contest",
+        editable=False,
+        null=True,
+        blank=True)
+    contest_status_code = models.IntegerField(
+        "Yandex API Response",
+        editable=False,
+        null=True,
+        blank=True)
     score = models.PositiveSmallIntegerField(
-        verbose_name=_("Score"))
+        verbose_name=_("Score"), null=True, blank=True)
 
     class Meta:
         verbose_name = _("Testing")
@@ -491,8 +499,28 @@ class Test(TimeStampedModel):
         else:
             return smart_text(self.score)
 
+    def compute_contest_id(self):
+        """
+        Returns contest id based on applicant id and existing contest records.
+        """
+        contests = list(Contest.objects
+                        .filter(campaign_id=self.applicant.campaign_id,
+                                type=Contest.TYPE_TEST)
+                        .values_list("contest_id", flat=True)
+                        .order_by("contest_id"))
+        if contests:
+            contest_index = self.applicant.id % len(contests)
+            return contests[contest_index]
 
-@python_2_unicode_compatible
+    def save(self, **kwargs):
+        created = self.pk is None
+        if created and not self.yandex_contest_id:
+            contest_id = self.compute_contest_id()
+            if contest_id:
+                self.yandex_contest_id = contest_id
+        super().save(**kwargs)
+
+
 class Exam(TimeStampedModel):
     applicant = models.OneToOneField(
         Applicant,
