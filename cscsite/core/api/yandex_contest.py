@@ -6,7 +6,9 @@ import requests
 logger = logging.getLogger(__name__)
 
 API_URL = 'https://api.contest.yandex.net/api/public/v2'
-CONTEST_PARTICIPANTS_URL = API_URL + '/contests/{}/participants'
+PARTICIPANTS_URL = API_URL + '/contests/{}/participants'
+PARTICIPANT_URL = API_URL + '/contests/{contest_id}/participants/{participant_id}'
+STANDINGS_URL = API_URL + '/contests/{contest_id}/standings'
 
 
 class RegisterStatus(IntEnum):
@@ -15,6 +17,27 @@ class RegisterStatus(IntEnum):
     NO_ACCESS = 403  # You have no access to this contest
     NOT_FOUND = 404  # Contest not found
     DUPLICATED = 409  # You have already registered for this contest
+
+
+class ResponseStatus(IntEnum):
+    SUCCESS = 200
+    BAD_REQUEST = 400  # Bad Request
+    BAD_TOKEN = 401  # OAuth header is not declared or is wrong
+    NO_ACCESS = 403  # You don't have enough permissions
+    NOT_FOUND = 404  # User or contest not found
+    NOT_ALLOWED = 405  # Method Not Allowed
+
+
+STANDINGS_PARAMS = {
+    'page': 'page',
+    'page_size': 'pageSize',
+    'for_judde': 'forJudge',
+    'show_virtual': 'showVirtual',
+    'show_external': 'showExternal',
+    'locale': 'locale',
+    'participant': 'participantSearch',
+    'participant_group_id': 'userGroupId'
+}
 
 
 class YandexContestAPIException(Exception):
@@ -37,8 +60,7 @@ class YandexContestAPI:
     def register_in_contest(self, yandex_login, contest_id):
         headers = self.base_headers
         payload = {'login': yandex_login}
-
-        api_contest_url = CONTEST_PARTICIPANTS_URL.format(contest_id)
+        api_contest_url = PARTICIPANTS_URL.format(contest_id)
         response = requests.post(api_contest_url,
                                  headers=headers,
                                  params=payload,
@@ -51,3 +73,33 @@ class YandexContestAPI:
             participant_id = response.json()
             logger.debug("Meta data: {}".format(participant_id))
         return response.status_code, participant_id
+
+    def participant_info(self, contest_id, participant_id):
+        headers = self.base_headers
+        url = PARTICIPANT_URL.format(contest_id=contest_id,
+                                     participant_id=participant_id)
+        response = requests.get(url, headers=headers, timeout=1)
+        if response.status_code != ResponseStatus.SUCCESS:
+            raise YandexContestAPIException(response.status_code, response.text)
+        info = response.json()
+        logger.debug("Meta data: {}".format(info))
+        return response.status_code, info
+
+    def standings(self, contest_id, **params):
+        headers = self.base_headers
+        url = STANDINGS_URL.format(contest_id=contest_id)
+        if "page_size" not in params:
+            params["page_size"] = 100
+        if "locale" not in params:
+            params["locale"] = "ru"
+        payload = {}
+        for param_key, param_value in params.items():
+            key = STANDINGS_PARAMS.get(param_key, param_key)
+            payload[key] = param_value
+        logger.debug(f"Payload: {payload}")
+        response = requests.get(url, headers=headers, params=payload, timeout=3)
+        if response.status_code != ResponseStatus.SUCCESS:
+            raise YandexContestAPIException(response.status_code, response.text)
+        json_data = response.json()
+        logger.debug(f"Meta data: {json_data}")
+        return response.status_code, json_data
