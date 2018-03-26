@@ -31,8 +31,11 @@ class ResponseStatus(IntEnum):
 STANDINGS_PARAMS = {
     'page': 'page',
     'page_size': 'pageSize',
-    'for_judde': 'forJudge',
+    'for_judge': 'forJudge',  # something about freezing submissions
+    # Participants can start contest after ending if allowed in settings
     'show_virtual': 'showVirtual',
+    # Admins can attach results from external log without having
+    # participants submissions.
     'show_external': 'showExternal',
     'locale': 'locale',
     'participant': 'participantSearch',
@@ -86,12 +89,19 @@ class YandexContestAPI:
         return response.status_code, info
 
     def standings(self, contest_id, **params):
+        """Scoreboard for those who started contest and sent anything"""
         headers = self.base_headers
         url = STANDINGS_URL.format(contest_id=contest_id)
         if "page_size" not in params:
             params["page_size"] = 100
         if "locale" not in params:
             params["locale"] = "ru"
+        if "for_judge" not in params:
+            params["for_judge"] = False
+        if "show_external" not in params:
+            params["show_external"] = False
+        if "show_virtual" not in params:
+            params["show_virtual"] = False
         payload = {}
         for param_key, param_value in params.items():
             key = STANDINGS_PARAMS.get(param_key, param_key)
