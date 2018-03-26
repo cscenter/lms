@@ -168,8 +168,11 @@ class UserDetailView(generic.DetailView):
                               'onlinecourserecord_set',
                               'areas_of_study',
                               'cscuserreference_set']
+        filters = {}
+        if not self.request.user.is_curator:
+            filters["is_active"] = True
         return (auth.get_user_model()._default_manager
-                .all()
+                .filter(**filters)
                 .select_related(*select_list)
                 .prefetch_related(*prefetch_list))
 
