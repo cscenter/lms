@@ -15,7 +15,7 @@
     <title>{% block title %}Computer Science Club{% endblock title %}</title>
     <link rel="shortcut icon" href="{% static "v1/img/club/favicon.ico" %}" >
     <link href="{% static "v1/dist/css/club/style.css" %}" rel="stylesheet">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     {% block hightlight_styles %}
     <link href="{% static "v1/css/vendor/highlight-styles/tomorrow.css" %}" rel="stylesheet">
     {% endblock hightlight_styles %}
@@ -86,6 +86,7 @@
           <div class="col-xs-9">{% trans "Computer Science Club, 2007–18 гг."%}</div>
           <div class="col-xs-3 social">
             {% if request.city_code == 'spb' %}
+            <a href="https://t.me/compsciclub" target="_blank"><i class="fa fa-telegram fa-2x"></i></a>
             <a href="mailto:spbinfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
             <a href="https://vk.com/spbcsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
             <a href="http://groups.google.com/group/pdmicsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
