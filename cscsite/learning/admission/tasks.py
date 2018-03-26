@@ -2,13 +2,20 @@ import logging
 
 from django.apps import apps
 from django.utils import translation
+from django.utils.timezone import now
 from django_rq import job
 from post_office import mail
 
 from core.api.yandex_contest import YandexContestAPIException, YandexContestAPI, \
     RegisterStatus
+from learning.admission.models import Test, Contest
 
 logger = logging.getLogger(__name__)
+
+
+def notify_admin_bad_token(campaign_id):
+    """Send message about bad auth token for Yandex.Contest API"""
+    pass
 
 
 @job('high')
@@ -37,8 +44,7 @@ def register_in_yandex_contest(applicant_id, language_code):
     except YandexContestAPIException as e:
         error_status_code, text = e.args
         if error_status_code == RegisterStatus.BAD_TOKEN:
-            # TODO: send message to admin if token is wrong
-            pass
+            notify_admin_bad_token(campaign.pk)
         logger.error(f"Yandex.Contest api request error [id = {applicant_id}]")
         raise
 
@@ -92,14 +98,63 @@ def register_in_yandex_contest(applicant_id, language_code):
 def import_testing_results(task_id):
     Applicant = apps.get_model('admission', 'Applicant')
     Campaign = apps.get_model('admission', 'Campaign')
-    current_campaigns = list(Campaign.objects
-                             .filter(current=True)
-                             .values_list("pk", flat=True))
-
-    applicants = (Applicant.objects
-                  .filter(status__isnull=True,
-                          campagin_id__in=current_campaigns)
-                  .exclude(contest_id__isnull=True))
-    for applicant in applicants:
-        pass
-        # TODO: Если статус - duplicated, то нужно искать сначала participant_id, т.к. без него ничего не сделать.
+    current_campaigns = Campaign.objects.filter(current=True)
+    if not current_campaigns:
+        # TODO: Before add task - check current campaigns are exist
+        return
+    # Campaigns are the same now, but handle them separately,
+    # since this behavior can be changed in the future.
+    for campaign in current_campaigns:
+        if now().date() <= campaign.application_ends_at:
+            update_status = Test.IN_PROGRESS
+        else:
+            update_status = Test.FINISHED
+        api = YandexContestAPI(access_token=campaign.access_token)
+        for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
+            contest_id = contest.contest_id
+            paging = {
+                "page_size": 50,
+                "page": 1
+            }
+            logger.debug(f"Starting processing contest {contest_id}")
+            # Note, that scoreboard can be modified at any moment.
+            # It means we can miss some results during the parsing
+            # if someone has improved his position and moved to scoreboard
+            # `page` which we are already processed.
+            participants_total = 0
+            updated_total = 0
+            while True:
+                try:
+                    status, json_data = api.standings(contest_id, **paging)
+                    total = 0
+                    for row in json_data['rows']:
+                        participants_total += 1
+                        total += 1
+                        participant_id = row['participantInfo']['id']
+                        score_str: str = row['score']
+                        score_str = score_str.replace(',', '.')
+                        score = int(round(float(score_str)))
+                        # TODO: Обновлять статус? Но это +1 запрос на каждый результат, если делать это точно
+                        updated = (Test.objects
+                                   .filter(applicant__campaign_id=campaign.pk,
+                                           contest_participant_id=participant_id,
+                                           status__in=[Test.REGISTERED,
+                                                       Test.IN_PROGRESS])
+                                   .update(score=score, status=update_status))
+                        if updated:
+                            updated_total += 1
+                    if total < paging["page_size"]:
+                        break
+                    paging["page"] += 1
+                    # TODO: timeout?
+                except YandexContestAPIException as e:
+                    error_status_code, text = e.args
+                    if error_status_code == RegisterStatus.BAD_TOKEN:
+                        notify_admin_bad_token(campaign.pk)
+                    logger.exception(f"Yandex.Contest API error. "
+                                     f"Method: `standings` "
+                                     f"Contest: {contest_id}")
+                    break
+            logger.debug(f"Total participants {participants_total}")
+            logger.debug(f"Updated {updated_total}")
+        # FIXME: если контест закончился - для всех, кого нет в scoreboard надо проставить соответствующий статус анкете и тесту.
