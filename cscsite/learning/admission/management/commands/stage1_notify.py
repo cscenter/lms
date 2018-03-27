@@ -72,7 +72,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         EXCLUDE_STATUSES = [Applicant.ACCEPT,
                             Applicant.ACCEPT_IF,
                             Applicant.VOLUNTEER]
-        failed_in_prev_campaign = (Applicant.objects
+        failed_in_prev_campaign = (Applicant.subscribed
                                    .filter(campaign_id=prev_campaign.pk)
                                    .exclude(status__in=EXCLUDE_STATUSES,
                                             user__isnull=False)
@@ -107,7 +107,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         type_ = NotificationType.OPEN_DAY_CURRENT_YEAR
         template_name = self.get_template_name(campaign, type_)
         template = get_email_template(template_name)
-        applicants = Applicant.objects.filter(campaign_id=campaign.pk)
+        applicants = Applicant.subscribed.filter(campaign_id=campaign.pk)
         sent = 0
         for applicant in applicants:
             recipients = [applicant.email]
