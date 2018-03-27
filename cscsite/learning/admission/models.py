@@ -12,7 +12,7 @@ from django.templatetags.tz import datetimeobject
 from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
@@ -130,6 +130,19 @@ class Campaign(models.Model):
             if errors:
                 msg = mark_safe("<br>".join(str(e) for e in errors))
                 raise ValidationError(msg)
+
+
+class ApplicantQuerySet(models.QuerySet):
+    pass
+
+
+class _ApplicantSubscribedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_unsubscribed=False)
+
+
+ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
+    ApplicantQuerySet)
 
 
 class Applicant(TimeStampedModel):
@@ -320,6 +333,11 @@ class Applicant(TimeStampedModel):
         blank=True,
         null=True,
         max_length=20)
+    is_unsubscribed = models.BooleanField(
+        _("Unsubscribed"),
+        default=False,
+        db_index=True,
+        help_text=_("Unsubscribe from future notifications"))
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET(models.SET_NULL),
@@ -332,11 +350,22 @@ class Applicant(TimeStampedModel):
         verbose_name_plural = _("Applicants")
         unique_together = [('email', 'campaign')]
 
+    objects = models.Manager()
+    subscribed = ApplicantSubscribedManager()
+
+    @transaction.atomic
     def save(self, **kwargs):
         created = self.pk is None
         super().save(**kwargs)
         if created:
             self._assign_testing()
+        if self.is_unsubscribed:
+            # Looking for other applicants with the same email and
+            # unsubscribe them too.
+            (Applicant.objects
+             .filter(email=self.email)
+             .exclude(pk=self.pk)
+             .update(is_unsubscribed=True))
 
     def _assign_testing(self):
         testing = Test(applicant=self, status=Test.NEW)
