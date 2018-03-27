@@ -84,8 +84,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['id', 'yandex_id', 'surname', 'first_name', 'patronymic',
-                    'campaign']
+    list_display = ['id', 'yandex_id', 'surname', 'first_name', 'campaign', 'created']
     list_filter = ['campaign', 'status']
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id',
                      'first_name', 'surname', 'email']
