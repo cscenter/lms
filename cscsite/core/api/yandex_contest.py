@@ -96,12 +96,15 @@ class YandexContestAPI:
             params["page_size"] = 100
         if "locale" not in params:
             params["locale"] = "ru"
+        # Due to the features of the `shad` monitor, set for_judge to True
         if "for_judge" not in params:
-            params["for_judge"] = False
+            params["for_judge"] = True
         if "show_external" not in params:
             params["show_external"] = False
         if "show_virtual" not in params:
             params["show_virtual"] = False
+        for bool_attr in ["for_judge", "show_external", "show_virtual"]:
+            params[bool_attr] = str(params[bool_attr]).lower()
         payload = {}
         for param_key, param_value in params.items():
             key = STANDINGS_PARAMS.get(param_key, param_key)
