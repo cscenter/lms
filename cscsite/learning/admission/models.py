@@ -183,6 +183,16 @@ class Applicant(TimeStampedModel):
         (STUDY_PROGRAM_CS, "Современная информатика"),
         (STUDY_PROGRAM_SE, "Разработка ПО")
     )
+    INFO_SOURCES = (
+        ('uni', 'плакат/листовка в университете'),
+        ('social_net', 'пост в соц. сетях'),
+        ('friends', 'от друзей'),
+        ('other', 'другое'),
+        # Legacy options
+        ('habr', 'Прочитал в статье на habr.ru'),
+        ('club', 'Из CS клуба'),
+        ('tandp', 'Теории и практики')
+    )
 
     campaign = models.ForeignKey(
         Campaign,
