@@ -317,11 +317,12 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|study_program_cs"),
         null=True,
         blank=True)
-    where_did_you_learn = models.TextField(
+    # Note: replace with m2m relation first if you need some statistics
+    # based on field below
+    where_did_you_learn = MultiSelectField(
         _("Where did you learn?"),
-        help_text=_("Applicant|where_did_you_learn_about_cs_center"))
-    # Note: If in next year where_did_you_learn will stay TextField, remove
-    # field below (merge there values on form level)
+        help_text=_("Applicant|where_did_you_learn_about_cs_center"),
+        choices=INFO_SOURCES)
     where_did_you_learn_other = models.CharField(
         _("Where did you learn? (other)"),
         max_length=255,
