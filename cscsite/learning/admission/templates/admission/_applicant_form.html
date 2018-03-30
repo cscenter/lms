@@ -1,4 +1,5 @@
-{% for field in applicant_form %}
+{% for field in applicant_form %}{% spaceless %}
+    {% if field.name == 'where_did_you_learn_other' %}{% else %}
     <dt>{{ field.label_tag }}</dt>
     {% if field.name == 'github_id' %}
         <dd>{% if field.value %}{{ field.value }} <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}"><i class="fa fa-github-alt" aria-hidden="true"></i></a>{% else %}<не указано>{% endif %}</dd>
@@ -6,7 +7,10 @@
         <dd>{{ applicant_form.instance.get_course_display }}</dd>
     {% elif field.name == 'university' %}
         <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}{{ applicant_form.instance.university.name }}{% endif %}</dd>
+    {% elif field.name == 'where_did_you_learn' %}
+        <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}. {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>
     {% else %}
         <dd>{% if field.value %}{{ field.value|linebreaks }}{% else %}<не указано>{% endif %}</dd>
     {% endif %}
-{% endfor %}
+    {% endif %}
+{% endspaceless %}{% endfor %}
