@@ -503,12 +503,9 @@ class InterviewCommentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            Div('score'),
             Div('text'),
-            Div(
-                Div('score', css_class='col-xs-6'),
-                Div(Submit('save', _('Save'), css_class='pull-right'),
-                    css_class='col-xs-6'),
-                css_class="row")
+            FormActions(Submit('save', _('Save'))),
         )
         self.interviewer = kwargs.pop("interviewer", None)
         self.interview_id = kwargs.pop("interview_id", None)
@@ -520,6 +517,7 @@ class InterviewCommentForm(forms.ModelForm):
                                           kwargs={"pk": self.interview_id})
         super(InterviewCommentForm, self).__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
+        self.fields['text'].label = "Комментарий"
 
     def clean_interviewer(self):
         interviewer = self.cleaned_data['interviewer']
@@ -545,7 +543,8 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
         model = Applicant
         exclude = ("campaign", "first_name", "patronymic", "surname",
                    "status", "admin_note", "yandex_id_normalize", "user",
-                   "university_other", "contest_id", "participant_id")
+                   "university_other", "contest_id", "participant_id",
+                   "is_unsubscribed")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
