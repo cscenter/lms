@@ -9,14 +9,14 @@
 
 {% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
-{% block body_attrs %} class="gray" data-init-sections="interview"{% endblock body_attrs %}
+{% block body_attrs %} class="gray admission-interview-page" data-init-sections="interview"{% endblock body_attrs %}
 
 {% block javascripts %}
     {% render_bundle "admission" "js" %}
 {% endblock javascripts %}
 
 {% block content %}
-<div class="admission-interview-page">
+<div class="container">
     <div class="page-header">
         <h2 class="page-title">{{ applicant.get_full_name }}{% if request.user.is_curator %}
             <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
@@ -91,20 +91,25 @@
             {% endif %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            <div class="interview-info">{{ applicant.get_full_name }}<br>{{ interview.date }}</div>
-                {% for assignment in interview.assignments.all %}
-                    <h3>{{ assignment.name }}</h3>
-                    <h3 class="print-version">Задание {{ forloop.counter }}</h3>
-                    <div class="ubertext">
-                        {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
+            <div class="interview-info visible-print-block">{{ applicant.get_full_name }}<br>{{ interview.date }}</div>
+                {% if interview.assignments.all %}
+                    <div class="clear hidden-print">
+                        <button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>
                     </div>
-                    {% if assignment.solution %}
-                        <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}{{ assignment.solution|safe }}{% endmarkdown %}</div>
-                    {% endif %}
-                    <hr>
-                {% empty %}
-                    <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
-                {% endfor %}
+                    {% for assignment in interview.assignments.all %}
+                        <h3 class="hidden-print">{{ assignment.name }}</h3>
+                        <h3 class="visible-print-block">Задание {{ forloop.counter }}</h3>
+                        <div class="ubertext">
+                            {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
+                        </div>
+                        {% if assignment.solution %}
+                            <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}{{ assignment.solution|safe }}{% endmarkdown %}</div>
+                        {% endif %}
+                        <hr>
+                    {% endfor %}
+                {% else %}
+                        <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
+                {% endif %}
                 {% if request.user.is_curator %}
                     <a href="#assignments-edit-block" data-toggle="collapse" aria-expanded="false" class="collapse-link">Редактировать список</a>
                     <div class="panel-collapse">
@@ -117,7 +122,7 @@
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
             {% if show_all_comments and interview.comments.all %}
-                <ul class="panel-info">
+                <ul class="score-info">
                     <li>
                       <div class="num text-info">{{ interview.average_score|floatdot:2 }}</div>
                       <p>Средний балл</p>
