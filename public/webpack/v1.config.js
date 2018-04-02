@@ -34,7 +34,7 @@ const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
     profile: path.join(__srcdir, '/js/profile.js'),
     forms: path.join(__srcdir, '/js/forms.js'),
-    admission: path.join(__srcdir, '/js/center/admission.js'),
+    admission: path.join(__srcdir, '/js/center/admission/index.js'),
     supervising: path.join(__srcdir, '/js/supervising/index.js'),
     learning: path.join(__srcdir, '/js/learning/index.js'),
     teaching: path.join(__srcdir, '/js/teaching/index.js'),
