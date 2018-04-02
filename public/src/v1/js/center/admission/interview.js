@@ -92,9 +92,21 @@ function initAssignmentsCheckboxes() {
     });
 }
 
+function printButtons() {
+    $('._print-without-solution').click(function() {
+        $('body').removeClass('_with-printable-solutions');
+        window.print();
+    });
+    $('._print-with-solution').click(function() {
+        $('body').addClass('_with-printable-solutions');
+        window.print();
+    });
+}
+
 export default function initInterviewSection() {
     restoreTabFromHash();
     initInterviewCommentForm();
     initRatingBar();
     initAssignmentsCheckboxes();
+    printButtons();
 }

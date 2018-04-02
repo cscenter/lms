@@ -35,13 +35,13 @@
     .br-widget {
       a {
         border: 1px solid lighten(black, 70%);
-        background: white;
+        background: $color-white;
         box-sizing: border-box;
 
         &.br-active,
         &.br-selected {
           border: 1px solid black;
-          background: white;
+          background: $color-white;
         }
       }
 
@@ -53,39 +53,46 @@
   }
 }
 
-
-.admission-list-page, .admission-interview-page {
+.admission-list-page {
   .panel-title {
     padding: 10px 10px 0 10px;
   }
+
   .panel-body {
     td:last-child {
       font-size: 16px;
     }
   }
-  .panel-info {
-    float: right;
-    margin: 0 10px 0 0;
-    li {
-      list-style: none;
-      display: inline-block;
-      margin-right: 30px;
-      text-align: center;
-      &:last-child {
-        margin: 0;
-      }
-      .num {
-        font-size: 24px;
-        line-height: 1.2em;
-      }
-      p {
-        margin: 0;
-      }
+
+}
+
+// TODO: move to components?
+.score-info {
+  float: right;
+  margin: 0 10px 0 0;
+
+  li {
+    list-style: none;
+    display: inline-block;
+    margin-right: 30px;
+    text-align: center;
+    &:last-child {
+      margin: 0;
+    }
+
+    .num {
+      font-size: 24px;
+      line-height: 1.2em;
+    }
+
+    p {
+      margin: 0;
     }
   }
 }
 
-.admission-list-page, .interview-results-page  {
+.admission-list-page,
+.interview-results-page {
   @extend .container;
 
   form {
@@ -107,6 +114,7 @@
       font-size: 24px;
     }
   }
+
   .applicant {
     a {
       font-size: 16px;
@@ -141,7 +149,7 @@
           border-radius: 50%;
           line-height: 40px;
           text-align: center;
-          @extend .bg-info;
+          background-color: $state-info-bg;
           color: #333;
         }
       }
@@ -168,8 +176,6 @@
     i {
       font-size: 16px;
       color: #666;
-      -webkit-transition: all .3s;
-      -o-transition: all .3s;
       transition: all .3s;
       &:hover {
         opacity: .8;
@@ -185,11 +191,13 @@
       margin-left: 10px;
     }
   }
+
   .slidePanel-actions {
     position: absolute;
     top: 30px;
     right: 20px;
   }
+
   .slidePanel-inner {
     padding: 0 15px;
   }
@@ -201,24 +209,8 @@
   }
 }
 
-
-
-// nav tabs
-// TODO: Move to _material_designs? or components
-
-
-.nav-tabs-reverse > li {
-  float: right;
-  > a {
-    margin-right: 0;
-    margin-left: 2px;
-  }
-}
-
-
-
-.admission-interview-page, .admission-applicant-page {
-  @extend .container;
+.admission-interview-page,
+.admission-applicant-page {
 
   h4 {
     margin-bottom: 10px;
@@ -227,6 +219,7 @@
       color: $color-grey;
     }
   }
+
   .form-group {
     .controls {
       margin-right: 0;
@@ -241,21 +234,21 @@
   }
 
   .page-header {
-      margin-top: 0;
-      margin-bottom: 0;
-      background: 0 0;
-      position: relative;
-      border-bottom: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    background: 0 0;
+    position: relative;
+    border-bottom: none;
 
     h3 {
       margin: 0;
     }
 
     .page-header-actions {
-        position: absolute;
-        right: 0px;
-        top: 0;
-        margin: auto;
+      position: absolute;
+      right: 0;
+      top: 0;
+      margin: auto;
 
       .edit-interview-btn {
         color: #666;
@@ -267,7 +260,8 @@
     }
   }
 
-  .date, .additional-info {
+  .date,
+  .additional-info {
     font-size: 18px;
     color: $color-grey;
   }
@@ -306,42 +300,33 @@
       }
       .comment-body {
         .fio {
-          font-weight: bold;
+          font-weight: 600;
         }
       }
     }
 
-    #assignments {
-      .interview-info {
-        margin-bottom: 30px;
-        text-align: right;
-        display: none;
-      }
-
-      h3.print-version {
-        display: none;
-      }
-
-      .collapse-link {
-        font-size: 24px;
-        margin: 0;
-      }
-
-      .panel-collapse {
-        margin-top: 10px;
-      }
-
-      .solution {
-        background: $background-grey;
-        padding: 10px;
-      }
+    .interview-info {
+      margin-bottom: 30px;
+      text-align: right;
     }
 
+    .collapse-link {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .panel-collapse {
+      margin-top: 10px;
+    }
+
+    .solution {
+      background: $background-grey;
+      padding: 10px;
+    }
   }
 }
 
-
-
+// TODO: move to components
 .assignments-multicheckbox {
   .checkbox {
     padding: 5px !important;
@@ -357,17 +342,13 @@
   }
 }
 
-
-
-
-
 .admission-applicant-page {
 
-  select[name=interviewers] {
+  select[name="interviewers"] {
     min-height: 200px;
   }
 
-  select[name=assignments] {
+  select[name="assignments"] {
     min-height: 300px;
   }
 }
@@ -394,46 +375,24 @@
 }
 
 
-
-
-// print mode for interview detail page
 @media print {
-  .collapse-link {
-    display: none;
-  }
-
-  form.interview_assignments_form {
-    display: none;
-  }
-
-  div.header, div.footer {
-    display: none!important;
-  }
   .admission-interview-page {
-    .page-header, .additional-info {
-      display: none;
-    }
-    .date {
-      display: none;
-    }
-    .nav {
+    .collapse-link,
+    .interview_assignments_form,
+    .header,
+    .footer,
+    .page-header,
+    .additional-info,
+    .date,
+    .nav,
+    .solution {
       display: none;
     }
 
-    #assignments {
-      .interview-info {
-        display: block!important;
-      }
-
-      h3 {
-        display: none;
-        &.print-version {
-          display: block!important;
-        }
-      }
-
+    &._with-printable-solutions {
       .solution {
-        display: none;
+        display: block;
+        padding: 0;
       }
     }
   }
