@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from learning.factories import CourseClassFactory, NonCourseEventFactory, \
-    CourseOfferingFactory, EnrollmentFactory
+    CourseOfferingFactory, EnrollmentFactory, VenueFactory
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
@@ -33,15 +33,14 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
     groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
 
     def test_teacher_calendar(self):
-        teacher = TeacherCenterFactory()
+        teacher = TeacherCenterFactory(city_id='spb')
         other_teacher = TeacherCenterFactory()
         self.doLogin(teacher)
         classes = flatten_calendar_month_events(
             self.client.get(reverse(self.url_name)).context['events'])
         assert len(classes) == 0
         this_month_date = (datetime.datetime.now()
-                           .replace(day=15,
-                                    tzinfo=timezone.utc))
+                           .replace(day=15, tzinfo=timezone.utc))
         own_classes = (
             CourseClassFactory
             .create_batch(3, course_offering__teachers=[teacher],
@@ -50,9 +49,10 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
             CourseClassFactory
             .create_batch(5, course_offering__teachers=[other_teacher],
                           date=this_month_date))
+        venue = VenueFactory(city_id=teacher.city_id)
         events = (
             NonCourseEventFactory
-            .create_batch(2, date=this_month_date))
+            .create_batch(2, date=this_month_date, venue=venue))
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(resp.context['events'])

@@ -767,6 +767,12 @@ class InterviewStream(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Campaign"),
+        on_delete=models.CASCADE,
+        blank=True,
+        related_name="interview_streams")
 
     class Meta:
         verbose_name = _("Interview stream")
@@ -799,6 +805,13 @@ class InterviewStream(TimeStampedModel):
             if diff < self.duration:
                 raise ValidationError(
                     _("Stream duration can't be less than slot duration"))
+        if self.venue and not self.campaign_id:
+            try:
+                self.campaign = Campaign.objects.get(current=True,
+                                                     city_id=self.venue.city_id)
+            except Campaign.DoesNotExist:
+                msg = f"No current campaign provided for venue {self.venue}"
+                raise ValidationError(msg)
         # TODO: Divisible or not?
 
 
