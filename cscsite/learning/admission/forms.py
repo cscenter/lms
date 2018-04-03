@@ -135,10 +135,12 @@ class ApplicationFormStep1(forms.ModelForm):
 
 
 class ApplicationFormStep2(forms.ModelForm):
-    has_job = forms.ChoiceField(
+    has_job = forms.TypedChoiceField(
         label='Вы сейчас работаете?',
-        choices=(("no", "Нет"), ("yes", "Да")),
-        widget=forms.RadioSelect(),)
+        coerce=lambda x: x == 'yes',
+        choices=[('no', 'Нет'), ('yes', 'Да')],
+        widget=forms.RadioSelect
+    )
     course = forms.ChoiceField(label='Курс, на котором вы учитесь',
                                choices=COURSES)
     where_did_you_learn = forms.MultipleChoiceField(
