@@ -119,8 +119,8 @@ class VenueFactory(factory.DjangoModelFactory):
         model = Venue
 
     city = factory.Iterator(City.objects.all())
-    name = "Test venue"
-    description = "This is a special venue for tests"
+    name = factory.Sequence(lambda n: "Test venue %03d" % n)
+    description = factory.Sequence(lambda n: "special venue for tests %03d" % n)
 
 
 class AreaOfStudyFactory(factory.DjangoModelFactory):

@@ -1028,17 +1028,21 @@ def test_student_courses_list_csclub(client, settings, mocker):
     current_term = SemesterFactory.create_current(
         city_code=settings.DEFAULT_CITY_CODE)
     assert current_term.type == "spring"
+    settings.SITE_ID = settings.CENTER_SITE_ID
     co = CourseOfferingFactory.create(semester__type=now_season,
                                       semester__year=now_year, city_id='nsk',
                                       is_open=False)
+    settings.SITE_ID = settings.CLUB_SITE_ID
     # compsciclub.ru can't see center courses with default manager
     assert CourseOffering.objects.count() == 0
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['archive_enrolled']) == 0
+    settings.SITE_ID = settings.CENTER_SITE_ID
     co.is_open = True
     co.save()
+    settings.SITE_ID = settings.CLUB_SITE_ID
     assert CourseOffering.objects.count() == 1
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
@@ -1055,10 +1059,12 @@ def test_student_courses_list_csclub(client, settings, mocker):
     summer_semester = SemesterFactory.create(year=now_year - 1, type='summer')
     co.semester = summer_semester
     co.save()
+    settings.SITE_ID = settings.CENTER_SITE_ID
     co_active = CourseOfferingFactory.create(semester__type=now_season,
                                              semester__year=now_year,
                                              city_id='spb',
                                              is_open=True)
+    settings.SITE_ID = settings.CLUB_SITE_ID
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 1
