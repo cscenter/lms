@@ -1,13 +1,11 @@
 from django.db import models
-from django.db.models import TextField, TimeField
-from django import forms
-from django.utils import timezone, formats
+from django.db.models import TextField
+from django.utils import timezone
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
-from django.core import validators
 from django.utils.translation import ugettext_lazy as _
-from import_export.admin import ExportActionModelAdmin, ExportMixin
+from import_export.admin import ExportMixin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, meta
@@ -19,6 +17,23 @@ from learning.admission.import_export import OnlineTestRecordResource, \
 from learning.admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
     InterviewInvitation
+
+
+class CampaignListFilter(admin.SimpleListFilter):
+    title = _('Campaign')
+    parameter_name = 'campaign_id__exact'
+
+    def lookups(self, request, model_admin):
+        campaigns = (Campaign.objects
+                     .select_related("city")
+                     .order_by("-city_id", "-year"))
+        return [(c.pk, str(c)) for c in campaigns]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(**{self.parameter_name: self.value()})
+        else:
+            return queryset
 
 
 class CampaignAdmin(admin.ModelAdmin):
@@ -85,7 +100,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
 
 class ApplicantAdmin(admin.ModelAdmin):
     list_display = ['id', 'yandex_id', 'surname', 'first_name', 'campaign', 'created']
-    list_filter = ['campaign', 'status']
+    list_filter = [CampaignListFilter, 'status']
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id',
                      'first_name', 'surname', 'email']
     readonly_fields = ['yandex_id_normalize']
@@ -110,7 +125,7 @@ class InterviewAssignmentAdmin(admin.ModelAdmin):
 
 class ContestAdmin(admin.ModelAdmin):
     list_display = ['contest_id', 'campaign']
-    list_filter = ['campaign']
+    list_filter = [CampaignListFilter]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
@@ -190,7 +205,9 @@ class InterviewSlotsInline(admin.TabularInline):
 # TODO: Как проверять, что потоки не пересекаются? Если совпадает место?
 class InterviewStreamAdmin(admin.ModelAdmin):
     form = InterviewStreamChangeForm
-    readonly_fields = ("interviewers",)
+    list_select_related = ['campaign', 'campaign__city']
+    list_display = ["date", "campaign"]
+    list_filter = [CampaignListFilter]
     inlines = [InterviewSlotsInline]
     # TODO: how to customize time widget format to H:M?
 

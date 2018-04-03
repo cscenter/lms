@@ -118,7 +118,7 @@ class VenueFactory(factory.DjangoModelFactory):
     class Meta:
         model = Venue
 
-    # TODO: make sure city_id is one from `settings.TIME_ZONES`
+    city = factory.Iterator(City.objects.all())
     name = "Test venue"
     description = "This is a special venue for tests"
 
@@ -136,7 +136,9 @@ class CourseClassFactory(factory.DjangoModelFactory):
         model = CourseClass
 
     course_offering = factory.SubFactory(CourseOfferingFactory)
-    venue = factory.SubFactory(VenueFactory)
+    venue = factory.SubFactory(
+        VenueFactory,
+        city=factory.SelfAttribute('..course_offering.city'))
     type = 'lecture'
     name = factory.Sequence(lambda n: "Test class %03d" % n)
     description = factory.Sequence(

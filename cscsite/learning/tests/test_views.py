@@ -408,7 +408,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
                                                 semester=s)
         form = CourseClassFactory.attributes(create=True)
-        form.update({'venue': VenueFactory.create().pk})
+        venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
+        form.update({'venue': venue.pk})
         del form['slides']
         url = co.get_create_class_url()
         self.doLogin(teacher)
@@ -433,7 +434,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
                                                 semester=s)
         form = CourseClassFactory.attributes(create=True)
-        form.update({'venue': VenueFactory.create().pk, '_addanother': True})
+        venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
+        form.update({'venue': venue.pk, '_addanother': True})
         del form['slides']
         self.doLogin(teacher)
         url = co.get_create_class_url()
@@ -926,7 +928,7 @@ def test_course_class_form(client, curator, settings):
     co.completed_at = now().date() + datetime.timedelta(days=1)
     co.save()
     next_day = now() + datetime.timedelta(days=1)
-    venue = VenueFactory()
+    venue = VenueFactory(city=co.city)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
         "type": "lecture",

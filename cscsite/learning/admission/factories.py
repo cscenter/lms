@@ -1,17 +1,15 @@
+import datetime
 import random
-import uuid
 from itertools import count
 
-import datetime
 import factory
 import pytz
 from django.db.models.signals import post_save
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate, \
     FuzzyDateTime
 
-from django.utils import timezone
-
-from core.factories import UniversityFactory, CityFactory
+from core.factories import UniversityFactory
+from core.models import City
 from learning.admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
     InterviewSlot, InterviewStream, InterviewInvitation
@@ -32,7 +30,7 @@ class CampaignFactory(factory.DjangoModelFactory):
         model = Campaign
 
     year = factory.Iterator(count(start=2015))
-    city = factory.SubFactory(CityFactory)
+    city = factory.Iterator(City.objects.all())
     online_test_max_score = FuzzyInteger(30, 40)
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
@@ -133,7 +131,10 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
     class Meta:
         model = InterviewStream
 
-    venue = factory.SubFactory(VenueFactory)
+    #
+    venue = factory.SubFactory(VenueFactory,
+                               city=factory.SelfAttribute('..campaign.city'))
+    campaign = factory.SubFactory(CampaignFactory)
     date = FuzzyDate(datetime.date(2011, 1, 1))
     # 13:00 - 15:00
     start_at = FuzzyTime(datetime.datetime(2011, 1, 1, 13, 0, 0),
