@@ -268,12 +268,9 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|work_or_study_experience"),
         null=True,
         blank=True)
-    has_job = models.CharField(
+    has_job = models.NullBooleanField(
         _("Do you work?"),
-        help_text=_("Applicant|has_job"),
-        max_length=10,
-        null=True,
-        blank=True)
+        help_text=_("Applicant|has_job"))
     workplace = models.CharField(
         _("Workplace"),
         help_text=_("Applicant|workplace"),
