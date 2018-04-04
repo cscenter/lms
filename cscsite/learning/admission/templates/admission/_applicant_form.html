@@ -1,5 +1,8 @@
 {% for field in applicant_form %}{% spaceless %}
-    {% if field.name == 'where_did_you_learn_other' %}{% else %}
+    {% if field.name == 'where_did_you_learn_other' %}
+    {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
+    {% elif field.name == 'position' and not applicant_form.has_job.value %}
+    {% else %}
     <dt>{{ field.label_tag }}</dt>
     {% if field.name == 'github_id' %}
         <dd>{% if field.value %}{{ field.value }} <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}"><i class="fa fa-github-alt" aria-hidden="true"></i></a>{% else %}<не указано>{% endif %}</dd>
@@ -9,6 +12,14 @@
         <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}{{ applicant_form.instance.university.name }}{% endif %}</dd>
     {% elif field.name == 'where_did_you_learn' %}
         <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}. {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>
+    {% elif field.name == 'has_job' %}<dd>
+        {% if field.value %}
+            Да
+        {% elif field.value == None %}
+            <не указано>
+        {% else %}
+            Нет
+        {% endif %}</dd>
     {% else %}
         <dd>{% if field.value %}{{ field.value|linebreaks }}{% else %}<не указано>{% endif %}</dd>
     {% endif %}

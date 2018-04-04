@@ -546,7 +546,7 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
         exclude = ("campaign", "first_name", "patronymic", "surname",
                    "status", "admin_note", "yandex_id_normalize", "user",
                    "university_other", "contest_id", "participant_id",
-                   "is_unsubscribed")
+                   "is_unsubscribed", "university2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
