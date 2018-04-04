@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
 
 import factory
-from django.conf import settings
 
 from django.contrib.auth.models import Group
-from django.core.exceptions import ImproperlyConfigured
-
-from core.factories import CityFactory
-from core.models import City
 from learning.settings import PARTICIPANT_GROUPS, GRADES
 from users.models import CSCUser, SHADCourseRecord, CSCUserReference, \
     OnlineCourseRecord
