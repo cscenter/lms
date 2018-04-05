@@ -167,5 +167,5 @@ pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql
 
 
 
-
-
+# Setup cronjobs
+ansible-playbook -i inventory/ec2.py setup.yml --tags="cronjobs"

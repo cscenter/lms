@@ -5,7 +5,7 @@
     name: backup CSC website DB to S3
     user: "{{ item }}"
     hour: "4"
-    minute: "0"
+    minute: "7"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py dbbackup
@@ -22,7 +22,7 @@
     name: backup CSC website media/ dir to S3
     user: "{{ item }}"
     hour: "4"
-    minute: "5"
+    minute: "12"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py mediabackup
@@ -50,12 +50,14 @@
   with_items:
     - "{{ cscenter_user }}"
 
-- name: remove useless notifications each week (cronjob)
+- name: remove useless notifications each Wednesday (cronjob)
   become_user: "{{ item }}"
   cron:
     name: CSC notification cleanup
     user: "{{ item }}"
-    special_time: weekly
+    weekday: 3
+    hour: "2"
+    minute: "3"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py notification_cleanup
@@ -72,7 +74,7 @@
     name: Send project notification about deadline if neccessary
     user: "{{ item }}"
     hour: "1,13"
-    minute: "0"
+    minute: "7"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py projects_notifications
@@ -88,7 +90,8 @@
   cron:
     name: Remove expired CSC sessions
     user: "{{ item }}"
-    special_time: daily
+    hour: 0
+    minute: 7
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py clearsessions
@@ -110,7 +113,7 @@
       /home/{{ item }}/site/repo/manage.py send_queued_mail
       --settings={{ item }}.settings.{{ app_environment }}
       --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cronjobs.log
+      >> /home/{{ item }}/site/logs/send_queued_mail.log
       2>&1
   with_items:
     - "{{ cscenter_user }}"
@@ -120,8 +123,8 @@
   cron:
     name: Get latest news from social networks for cscenter index page
     user: "{{ item }}"
-    minute: "0"
-    hour: "*/6"
+    minute: "7"
+    hour: "12,18,23"
     job: >
       . /home/{{ item }}/site/env/bin/activate &&
       /home/{{ item }}/site/repo/manage.py social_crawler

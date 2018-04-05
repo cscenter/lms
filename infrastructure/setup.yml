@@ -66,11 +66,10 @@
       supervisor_superlance: true
       supervisor_events_email_to: "webmaster@compscicenter.ru"
       supervisor_events:
-        # Restart process if it's allocate more then 100MB
+        # Restart process if it's allocate more than 100MB
         - name: memmon
-          command: memmon -g rqworkers=100MB -m {{ supervisor_events_email_to }}
+          command: memmon -g rqworkers=300MB -m {{ supervisor_events_email_to }}
           events: TICK_60
-          process_name: memmon
         # Send email if all attempts to restart process are failed
         # FIXME: disable, should test first
 #        - name: fatalmailbatch
