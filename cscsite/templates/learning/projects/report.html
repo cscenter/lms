@@ -27,10 +27,8 @@
     <div class="col-xs-9">
 
     <div class="panel-group">
-        <div class="o-project-description panel">
-            <div class="panel-heading">
-                <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-description"><span>Цели и задачи проекта</span></a>
-            </div>
+        <div class="c-project-description panel">
+            <div class="panel-heading">Цели и задачи проекта</div>
             <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
                 <div class="panel-body">
                     {% markdown 3600 "project_detail_description" project.pk project.modified %}
@@ -110,11 +108,9 @@
             <div class="panel-group">
             {% for review in reviews %}
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <a class="panel-title" aria-expanded="false" data-toggle="collapse" href="#project-review-{{ review.pk }}">
-                            {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
-                        </a>
-                    </div>
+                    <a class="panel-heading" href="#project-review-{{ review.pk }}">
+                        {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
+                    </a>
                     <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
                         <div class="panel-body -preliminary-scores">
                             {% include "learning/projects/_report_preliminary_assessment.html" %}
