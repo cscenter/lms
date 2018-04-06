@@ -13,6 +13,7 @@ csc3/
 cscsite/static/
 local/
 .cache/
+.pytest_cache/
 .coverage
 # TODO: replace public/ with submodule, add to ignore here
 *-debug.log
