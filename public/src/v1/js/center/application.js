@@ -16,7 +16,6 @@ function toggleUniversity() {
 function toggleHasJob() {
     $('input[name$="-has_job"]').change(function () {
         const disabled = this.value !== 'yes';
-        console.log(disabled);
         if (disabled) {
             $('#job-details-row').addClass('hidden');
         } else {
