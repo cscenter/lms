@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Row, Field
-from django.utils.timezone import now
+from crispy_forms.layout import Layout, Div, Submit, Row, Field, HTML
+from django.conf import settings
+from django.urls import reverse
+from django.utils import formats, timezone
 from django.utils.translation import ugettext_lazy as _
 
 from core.filters import FilterEmptyChoiceMixin
 from learning.admission.models import Applicant, Interview, Campaign
+from learning.views import get_user_city_code
+from tasks.models import Task
 
 
 class ApplicantStatusFilter(django_filters.ChoiceFilter):
@@ -42,20 +44,17 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
     def form(self):
         if not hasattr(self, '_form'):
             self._form = super(ApplicantFilter, self).form
-            self._form.fields["campaign"].help_text = ""
-            self._form.fields["status"].help_text = ""
-            self._form.fields["surname"].help_text = ""
             self._form.helper = FormHelper()
-            # Looks like I disable it due to GET method
-            self._form.helper.disable_csrf = True
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
                 Row(
-                    Div("campaign", css_class="col-xs-4"),
-                    Div("status", css_class="col-xs-4"),
-                    Div("surname", css_class="col-xs-4"),
-                ),
-                FormActions(Submit('', _('Filter'))))
+                    Div("campaign", css_class="col-xs-3"),
+                    Div("status", css_class="col-xs-3"),
+                    Div("surname", css_class="col-xs-3"),
+                    Div(Submit('', _('Filter'),
+                               css_class="btn-block -inline-submit"),
+                        css_class="col-xs-3"),
+                ))
         return self._form
 
 

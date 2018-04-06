@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'bootstrap_pagination',
     'prettyjson',
     'mptt',
+    'tasks',
     'learning.gallery.apps.GalleryConfig',
     'learning.projects.apps.ProjectsConfig',
     'notifications.apps.NotificationsConfig',
