@@ -3,14 +3,27 @@
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
 {% load replace from core_tags %}
+{% load render_bundle from webpack_loader %}
 
 {% block title %}Анкеты - CSC{% endblock title %}
 
-{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block body_attrs %} class="gray" data-init-sections="applicant_list"{% endblock body_attrs %}
+
+{% block javascripts %}
+    {% render_bundle 'admission' 'js' %}
+{% endblock javascripts %}
 
 {% block content %}
 <div class="admission-list-page">
     {% crispy filter.form %}
+
+{% if import_testing_results %}
+    <div class="pb-10">
+        <a href="{% url 'admission:import_testing_results' %}" class="btn btn-default _btn-import-testings-results mr-10">
+            <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
+        </a> Последний запуск {{ import_testing_results.date }} Статус: {{ import_testing_results.status }}
+    </div>
+{% endif %}
 
     <div class="page-content">
       <div class="panel">

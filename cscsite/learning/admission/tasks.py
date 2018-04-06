@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import apps
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.timezone import now
 from django_rq import job
 from post_office import mail
@@ -95,12 +95,20 @@ def register_in_yandex_contest(applicant_id, language_code):
 
 
 @job('default')
-def import_testing_results(task_id):
+def import_testing_results(task_id=None):
     Applicant = apps.get_model('admission', 'Applicant')
     Campaign = apps.get_model('admission', 'Campaign')
+    Task = apps.get_model('tasks', 'Task')
+    if task_id:
+        try:
+            task = Task.objects.unlocked(timezone.now()).get(pk=task_id)
+        except Task.DoesNotExist:
+            logger.error(f"Task with id = {task_id} doesn't exist.")
+            return
+    task.lock(locked_by="rqworker")
     current_campaigns = Campaign.objects.filter(current=True)
     if not current_campaigns:
-        # TODO: Before add task - check current campaigns are exist
+        # TODO: mark task as failed
         return
     # Campaigns are the same now, but handle them separately,
     # since this behavior can be changed in the future.
@@ -158,3 +166,5 @@ def import_testing_results(task_id):
             logger.debug(f"Total participants {participants_total}")
             logger.debug(f"Updated {updated_total}")
         # FIXME: если контест закончился - для всех, кого нет в scoreboard надо проставить соответствующий статус анкете и тесту.
+    task.processed_at = timezone.now()
+    task.save()

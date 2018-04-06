@@ -6,7 +6,8 @@ from learning.admission.views import InterviewListView, InterviewDetailView, \
     InterviewResultsDispatchView, ApplicantFormWizardView, \
     ApplicationCompleteView, InterviewAssignmentDetailView, \
     InterviewCommentView, InterviewAppointmentView, InterviewSlots, \
-    yandex_login_access, yandex_login_access_complete
+    yandex_login_access, yandex_login_access_complete, \
+    applicant_testing_new_task
 
 app_name = 'admission'
 
@@ -27,6 +28,7 @@ urlpatterns = [
     ])),
     url(r'^admission/', include([
         url(r'^applicants/$', ApplicantListView.as_view(), name='applicants'),
+        url(r'^applicants/import/testing/$', applicant_testing_new_task, name='import_testing_results'),
         url(r'^applicants/(?P<pk>\d+)/$', ApplicantDetailView.as_view(), name='applicant_detail'),
         url(r'^applicants/(?P<pk>\d+)/create_user$', ApplicantCreateUserView.as_view(), name='applicant_create_user'),
         url(r'^applicants/status/(?P<pk>\d+)/$', ApplicantStatusUpdateView.as_view(), name='applicant_status_update'),

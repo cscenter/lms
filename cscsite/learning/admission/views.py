@@ -8,6 +8,7 @@ from collections import Counter
 from functools import wraps
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
@@ -16,10 +17,10 @@ from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
 from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, \
-    Http404
+    Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, formats
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
@@ -59,8 +60,10 @@ from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
     calculate_time
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
+from learning.views import get_user_city_code
+from tasks.models import Task
 from users.models import CSCUser
-from .tasks import register_in_yandex_contest
+from .tasks import register_in_yandex_contest, import_testing_results
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
 STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -289,6 +292,49 @@ class ApplicantContextMixin(object):
         return context
 
 
+def applicant_testing_new_task(request):
+    """
+    Creates new task for importing testing results from yandex contests.
+    Make sure `current` campaigns are already exists in DB before add new task.
+    """
+    if request.method == "POST" and request.user.is_curator:
+        task = Task.build(
+            task_name="learning.admission.tasks.import_testing_results",
+            creator=request.user)
+        # Not really atomic, just trying to avoid useless rows in DB
+        try:
+            Task.objects.unlocked(timezone.now()).get(processed_at__isnull=True,
+                                                      task_name=task.task_name,
+                                                      task_hash=task.task_hash)
+        except Task.MultipleObjectsReturned:
+            # Even more than 1 job in Task.MAX_RUN_TIME seconds
+            pass
+        except Task.DoesNotExist:
+            task.save()
+            import_testing_results.delay(task_id=task.pk)
+        return HttpResponse(status=201)
+    return HttpResponseForbidden()
+
+
+class ApplicantTestingResultsTask(APIView):
+    """
+    Returns interview slots for requested venue and date.
+    """
+    http_method_names = ['post']
+    permission_classes = [CuratorAccessPermission]
+
+    def post(self, request, format=None):
+        slots = []
+        if "stream" in request.GET:
+            try:
+                stream = int(self.request.GET["stream"])
+            except ValueError:
+                raise ParseError()
+            slots = InterviewSlot.objects.filter(stream_id=stream)
+        serializer = InterviewSlotSerializer(slots, many=True)
+        return Response(serializer.data)
+
+
 class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'applicants'
     model = Applicant
@@ -296,26 +342,22 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     filterset_class = ApplicantFilter
     paginate_by = 50
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["filter"] = self.filterset
-        return context
-
     def get_queryset(self):
-        return (Applicant.objects
-                .select_related("exam", "online_test", "campaign", "university",
-                                "campaign__city")
-                .prefetch_related("interview")
-                .annotate(exam__score_coalesce=Coalesce('exam__score',
-                                                        Value(-1)))
-                .order_by("-exam__score_coalesce", "-online_test__score", "pk"))
+        return (
+            Applicant.objects
+            .select_related("exam", "online_test", "campaign", "university",
+                            "campaign__city")
+            .prefetch_related("interview")
+            .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)))
+            .order_by("-exam__score_coalesce", "-online_test__score", "pk"))
 
     def get(self, request, *args, **kwargs):
-        """Set filter defaults and redirect"""
+        """Sets filter defaults and redirects"""
         user = self.request.user
         if user.is_curator and "campaign" not in self.request.GET:
             # Try to find user preferred current campaign id
-            current = list(Campaign.objects.filter(current=True)
+            current = list(Campaign.objects
+                           .filter(current=True)
                            .only("pk", "city_id"))
             try:
                 c = next(c.pk for c in current if c.city_id == user.city_id)
@@ -323,11 +365,34 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 # We didn't find active campaign for user city. Try to get
                 # any current campaign or show all if no active at all.
                 c = next((c.pk for c in current), "")
-            url = "{}?campaign={}&status=".format(
-                reverse("admission:applicants"),
-                c)
+            url = reverse("admission:applicants")
+            url = f"{url}?campaign={c}&status="
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaign = context['filter'].form.cleaned_data.get('campaign')
+        import_testing_results_btn_state = None
+        if campaign and campaign.current and self.request.user.is_curator:
+            task_name = "learning.admission.tasks.import_testing_results"
+            task = (Task.objects
+                    .get_task(task_name)
+                    .filter(processed_at__isnull=False)
+                    .order_by("-id")
+                    .first())
+            if task:
+                dt = task.processed_at
+                city_code = get_user_city_code(self.request)
+                if city_code:
+                    tz = settings.TIME_ZONES[city_code]
+                    dt = timezone.localtime(dt, timezone=tz)
+                import_testing_results_btn_state = {
+                    "date": formats.date_format(dt, "d.m.Y H:i"),
+                    "status": "Успешно" if not task.is_failed() else "Ошибка"
+                }
+        context["import_testing_results"] = import_testing_results_btn_state
+        return context
 
 
 class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
