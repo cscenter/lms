@@ -391,6 +391,8 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                     "date": formats.date_format(dt, "d.m.Y H:i"),
                     "status": "Успешно" if not task.is_failed() else "Ошибка"
                 }
+            else:
+                import_testing_results_btn_state = {}
         context["import_testing_results"] = import_testing_results_btn_state
         return context
 
