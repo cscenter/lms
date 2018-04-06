@@ -147,7 +147,8 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                         css_class="col-xs-4"),
                 ),
                 Row(
-                    FormActions(Div(Submit('', _('Filter')),
+                    FormActions(Div(Submit('', _('Filter'),
+                                           css_class="btn btn-primary mb-15"),
                                     css_class="col-xs-4"))
                 )
             )
