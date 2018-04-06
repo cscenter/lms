@@ -1,6 +1,6 @@
 import {restoreTabFromHash} from './utils';
 
-export function interviewFromStreamForm() {
+function interviewFromStreamForm() {
     const wrapper = $(".admission-applicant-page #create");
     wrapper.find("select[name=interview_from_stream-stream]")
         .change({wrapper: wrapper}, _interviewSlotsHandler);
@@ -44,7 +44,7 @@ function _interviewSlotsHandler(event) {
 }
 
 
-export default function initApplicantSection() {
+export default function initApplicantDetailSection() {
     restoreTabFromHash();
     interviewFromStreamForm();
 }

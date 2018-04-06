@@ -96,8 +96,6 @@
   @extend .container;
 
   form {
-    margin: 0 0 20px 0;
-
     select {
       -webkit-transition: none!important;
     }
@@ -206,6 +204,12 @@
     display: block;
     width: 120px;
     color: $color-grey;
+  }
+}
+
+.interview-results-page {
+  form {
+    margin: 0 0 20px 0;
   }
 }
 
