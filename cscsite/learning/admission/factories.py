@@ -5,6 +5,7 @@ from itertools import count
 import factory
 import pytz
 from django.db.models.signals import post_save
+from django.utils import timezone
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate, \
     FuzzyDateTime
 
@@ -35,7 +36,9 @@ class CampaignFactory(factory.DjangoModelFactory):
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
     exam_passing_score = FuzzyInteger(20, 25)
-    application_ends_at = FuzzyDate(datetime.date(2018, 1, 1))
+    application_ends_at = factory.Faker('date_time_between',
+                                        start_date="now", end_date="+30d",
+                                        tzinfo=timezone.utc)
 
 
 class ApplicantFactory(factory.DjangoModelFactory):

@@ -13,10 +13,29 @@ from core.settings.base import DEFAULT_CITY_CODE
 from learning.admission.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
-from learning.admission.filters import InterviewsCuratorFilter
 from learning.admission.forms import InterviewFromStreamForm
 from learning.admission.models import Applicant, Interview, InterviewInvitation
 from users.factories import UserFactory
+
+
+@pytest.mark.django_db
+def test_autoclose_application_form(client):
+    today = timezone.now()
+    campaign = CampaignFactory(year=today.year, current=True)
+    url = reverse("admission:application_step", kwargs={"step": "welcome"})
+    response = client.get(url)
+    assert response.status_code == 200
+    campaign.current = False
+    campaign.save()
+    response = client.get(url)
+    assert response.status_code == 302
+    assert "closed" in response.url
+    campaign.current = True
+    campaign.application_ends_at = today - datetime.timedelta(days=1)
+    campaign.save()
+    response = client.get(url)
+    assert response.status_code == 302
+    assert "closed" in response.url
 
 
 @pytest.mark.django_db

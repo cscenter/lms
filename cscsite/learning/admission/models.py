@@ -8,15 +8,14 @@ from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import query, Q
-from django.templatetags.tz import datetimeobject
 from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
-from django.utils.timezone import now, make_aware, localtime
 from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -44,7 +43,7 @@ WITH_ASSIGNMENTS_TEXT = """
 
 def current_year():
     # Don't care about inaccuracy and use UTC timezone here
-    return now().year
+    return timezone.now().year
 
 
 class Campaign(models.Model):
@@ -68,7 +67,7 @@ class Campaign(models.Model):
         _("Current campaign"),
         help_text=_("Show in application form list"),
         default=False)
-    application_ends_at = models.DateField(
+    application_ends_at = models.DateTimeField(
         _("Application Ends At"),
         help_text=_("Last day for submitting application"))
     access_token = models.CharField(
@@ -97,6 +96,11 @@ class Campaign(models.Model):
     @property
     def city_aware_field_name(self):
         return self.__class__.city.field.name
+
+    def application_ends_at_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.application_ends_at, timezone=tz)
 
     def __str__(self):
         return smart_text(_("{}, {}").format(self.city.name, self.year))
@@ -659,7 +663,7 @@ class Interview(TimeStampedModel):
     def date_local(self, tz=None):
         if not tz:
             tz = self.get_city_timezone()
-        return localtime(self.date, timezone=tz)
+        return timezone.localtime(self.date, timezone=tz)
 
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
@@ -850,7 +854,7 @@ class InterviewSlot(TimeStampedModel):
 class InterviewInvitationQuerySet(query.QuerySet):
     def for_applicant(self, applicant):
         """Returns last active invitation for requested user"""
-        today = now()
+        today = timezone.now()
         return (self.filter(Q(expired_at__gt=today) | Q(expired_at__isnull=True,
                                                         date__gte=today.date()))
                     .filter(applicant=applicant)
@@ -909,7 +913,7 @@ class InterviewInvitation(TimeStampedModel):
 
     @property
     def is_expired(self):
-        return now() >= self.expired_at
+        return timezone.now() >= self.expired_at
 
     @property
     def is_accepted(self):

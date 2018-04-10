@@ -119,12 +119,9 @@ class ApplicationFormStep1(forms.ModelForm):
                 Div('github_id', css_class='col-sm-6'),
             ),
         )
+        campaigns_qs = kwargs.pop("campaigns_qs", None)
         super().__init__(*args, **kwargs)
-        # Restrict list of campaigns
-        year_now = timezone.now().year
-        self.fields['campaign'].queryset = (Campaign.objects
-                                            .filter(current=True, year=year_now)
-                                            .select_related('city'))
+        self.fields['campaign'].queryset = campaigns_qs
 
     def clean(self):
         cleaned_data = super().clean()
