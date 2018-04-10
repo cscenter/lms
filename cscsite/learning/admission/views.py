@@ -186,6 +186,17 @@ class ApplicantFormWizardView(NamedUrlSessionWizardView):
         yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
         if yandex_login:
             kwargs["yandex_passport_access_allowed"] = True
+        if step == "welcome":
+            # Validate we have any active campaign with ongoing application
+            # period
+            today = timezone.now()
+            campaigns_qs = (Campaign.objects
+                            .filter(current=True, year=today.year,
+                                    application_ends_at__gt=today)
+                            .select_related('city'))
+            if not len(campaigns_qs):
+                raise Redirect(to=reverse("admission:application_closed"))
+            kwargs["campaigns_qs"] = campaigns_qs
         return kwargs
 
     def get_form(self, step=None, data=None, files=None):

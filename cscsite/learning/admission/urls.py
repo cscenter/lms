@@ -9,6 +9,8 @@ from learning.admission.views import InterviewListView, InterviewDetailView, \
     yandex_login_access, yandex_login_access_complete, \
     applicant_testing_new_task
 
+from htmlpages.views import flatpage
+
 app_name = 'admission'
 
 urlpatterns = [
@@ -22,6 +24,9 @@ urlpatterns = [
             name='auth_complete'),
         url(r'^complete/$', ApplicationCompleteView.as_view(),
             name='application_complete'),
+        url(r'^closed/$', flatpage,
+            kwargs={"url": "/application/closed/"},
+            name='application_closed'),
         url(r'^(?P<step>.+)/$',
             ApplicantFormWizardView.as_view(url_name='admission:application_step'),
             name='application_step'),

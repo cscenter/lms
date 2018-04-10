@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-27 14:06+0000\n"
-"PO-Revision-Date: 2018-03-27 14:08+0000\n"
+"PO-Revision-Date: 2018-04-10 13:15+0000\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -174,7 +174,7 @@ msgstr "Окончание приема заявок"
 
 #: cscsite/learning/admission/models.py:73
 msgid "Last day for submitting application"
-msgstr "Последний день, когда можно отправить заявку"
+msgstr "Дедлайн отправки анкеты"
 
 #: cscsite/learning/admission/models.py:75
 msgid "Access Token"
@@ -221,7 +221,7 @@ msgstr ""
 
 #: cscsite/learning/admission/models.py:116
 msgid "Before mark campaign as `current` - add contests for testing"
-msgstr "Не найдены контесты для тестирования."
+msgstr "Не найдены контесты для этапа тестирования."
 
 #: cscsite/learning/admission/models.py:120
 msgid "Empty template name"

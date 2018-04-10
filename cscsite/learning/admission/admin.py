@@ -37,8 +37,15 @@ class CampaignListFilter(admin.SimpleListFilter):
 
 
 class CampaignAdmin(admin.ModelAdmin):
+    form = CityAwareModelForm
     list_display = ['year', 'city', 'current']
     list_filter = ['city']
+    formfield_overrides = {
+        models.DateTimeField: {
+            'widget': CityAwareAdminSplitDateTimeWidget,
+            'form_class': CityAwareSplitDateTimeField
+        },
+    }
 
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
