@@ -113,7 +113,7 @@ def import_testing_results(task_id=None):
     # Campaigns are the same now, but handle them separately,
     # since this behavior can be changed in the future.
     for campaign in current_campaigns:
-        if now().date() <= campaign.application_ends_at:
+        if now() <= campaign.application_ends_at:
             update_status = Test.IN_PROGRESS
         else:
             update_status = Test.FINISHED
