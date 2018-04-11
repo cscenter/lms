@@ -25,12 +25,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.base import TemplateResponseMixin, ContextMixin, \
-    RedirectView
+from django.views.generic.base import TemplateResponseMixin, RedirectView
 from django.views.generic.edit import BaseCreateView, \
     ModelFormMixin
-from django_filters.views import BaseFilterView
-from extra_views import ModelFormSetView
+from django_filters.views import BaseFilterView, FilterMixin
+from extra_views.formsets import BaseModelFormSetView
 from formtools.wizard.views import NamedUrlSessionWizardView
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
@@ -48,10 +47,10 @@ from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown
 from learning.admission.filters import ApplicantFilter, InterviewsFilter, \
-    InterviewsCuratorFilter, InterviewStatusFilter
+    InterviewsCuratorFilter, InterviewStatusFilter, ResultsFilter
 from learning.admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
-    InterviewResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
+    ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
     ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewInvitation
@@ -768,75 +767,28 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
         else:
             city_redirect_to = next(cs.iterator(), DEFAULT_CITY_CODE)
         return reverse("admission:interview_results_by_city", kwargs={
-            "city_slug": city_redirect_to
+            "city_code": city_redirect_to
         })
 
 
-class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
+class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
+                           BaseModelFormSetView):
     """
     We can have multiple interviews for applicant
     """
-    # TODO: Think about pagination for model formsets in the future.
     context_object_name = 'interviews'
     template_name = "admission/interview_results.html"
     model = Applicant
-    form_class = InterviewResultsModelForm
-
-    def get_context_data(self, **kwargs):
-        # XXX: To avoid double query to DB, skip ModelFormSetView action
-        context = ContextMixin.get_context_data(self, **kwargs)
-        stats = Counter()
-        for form in context["formset"].forms:
-            # Select the highest interview score to sort by
-            applicant = form.instance
-            interview = applicant.interview
-            stats.update((applicant.status,))
-
-        def cpm_interview_best_score(form):
-            # XXX: `average` score calculated with queryset
-            if form.instance.interview.average is None:
-                return Comment.UNREACHABLE_COMMENT_SCORE
-            else:
-                return form.instance.interview.average
-
-        context["formset"].forms.sort(key=cpm_interview_best_score,
-                                      reverse=True)
-        context["stats"] = [(Applicant.get_name_by_status_code(s), cnt) for
-                            s, cnt in stats.items()]
-        context["active_campaigns"] = self.active_campaigns
-        context["selected_campaign"] = self.selected_campaign
-        return context
-
-    def get_factory_kwargs(self):
-        kwargs = super(InterviewResultsView, self).get_factory_kwargs()
-        kwargs["extra"] = 0
-        kwargs["can_order"] = False
-        kwargs["can_delete"] = False
-        return kwargs
-
-    def get_queryset(self):
-        """Sort data by average interview score"""
-        return (Applicant.objects
-            # TODO: Carefully restrict by status to optimize query
-            .filter(campaign=self.selected_campaign)
-            .select_related("exam", "online_test", "university")
-            .exclude(interview__isnull=True)
-            .prefetch_related(
-                Prefetch(
-                    'interview',
-                    queryset=(Interview.objects
-                              .annotate(average=Avg('comments__score'))),
-                ),
-            )
-        )
+    form_class = ResultsModelForm
+    filterset_class = ResultsFilter
+    extra = 0
 
     def dispatch(self, request, *args, **kwargs):
-        # It's (mb?) irrelevant to POST action, but not a big deal
         self.active_campaigns = (Campaign.objects
                                  .filter(current=True)
                                  .select_related("city"))
         try:
-            city_code = self.kwargs["city_slug"]
+            city_code = self.kwargs["city_code"]
             self.selected_campaign = next(c for c in self.active_campaigns
                                           if c.city.code == city_code)
         except StopIteration:
@@ -844,6 +796,71 @@ class InterviewResultsView(CuratorOnlyMixin, ModelFormSetView):
                            "Активная кампания по набору не найдена")
             return HttpResponseRedirect(reverse("admission:applicants"))
         return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+        formset = self.construct_formset()
+        context = self.get_context_data(filter=self.filterset,
+                                        formset=formset)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+        formset = self.construct_formset()
+        if formset.is_valid():
+            return self.formset_valid(formset)
+        else:
+            return self.formset_invalid(formset)
+
+    def get_formset_kwargs(self):
+        """Overrides queryset for instantiating the formset."""
+        kwargs = super().get_formset_kwargs()
+        kwargs['queryset'] = self.filterset.qs
+        return kwargs
+
+    def get_queryset(self):
+        """Sort data by average interview score"""
+        return (
+            Applicant.objects
+            # TODO: Carefully restrict by status to optimize query
+            .filter(campaign=self.selected_campaign)
+            .exclude(interview__isnull=True)
+            .select_related("exam", "online_test", "university")
+            .prefetch_related(
+                Prefetch(
+                    'interview',
+                    queryset=(Interview.objects
+                              .annotate(average_score=Avg('comments__score'))),
+                ),
+            ))
+
+    def get_context_data(self, filter, formset, **kwargs):
+
+        def cpm_interview_best_score(form):
+            # XXX: `average_score` calculated by queryset
+            if form.instance.interview.average_score is None:
+                return Comment.UNREACHABLE_COMMENT_SCORE
+            else:
+                return form.instance.interview.average_score
+
+        formset.forms.sort(key=cpm_interview_best_score, reverse=True)
+        stats = Counter()
+        for form in formset.forms:
+            # Select the highest interview score to sort by
+            applicant = form.instance
+            stats.update((applicant.status,))
+        stats = [(Applicant.get_name_by_status_code(s), cnt) for
+                 s, cnt in stats.items()]
+        context = {
+            "filter": filter,
+            "formset": formset,
+            "stats": stats,
+            "active_campaigns": self.active_campaigns,
+            "selected_campaign": self.selected_campaign
+        }
+        return context
 
 
 class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):

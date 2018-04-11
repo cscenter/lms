@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+
 import django_filters
 from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field, HTML
-from django.conf import settings
-from django.urls import reverse
-from django.utils import formats, timezone
 from django.utils.translation import ugettext_lazy as _
 
-from core.filters import FilterEmptyChoiceMixin
+from core.filters import FilterEmptyChoiceMixin, EMPTY_CHOICE
+from core.models import University
+from learning.admission.forms import ResultsModelForm
 from learning.admission.models import Applicant, Interview, Campaign
-from learning.views import get_user_city_code
-from tasks.models import Task
 
 
 class ApplicantStatusFilter(django_filters.ChoiceFilter):
@@ -152,4 +150,42 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                                     css_class="col-xs-4"))
                 )
             )
+        return self._form
+
+
+class ResultsFilter(django_filters.FilterSet):
+    status = ApplicantStatusFilter(empty_label=None,
+                                   choices=ResultsModelForm.RESULTS_CHOICES,
+                                   label=_("Status"))
+    university = django_filters.ChoiceFilter(label=_("University"))
+
+    class Meta:
+        model = Applicant
+        fields = ['status', 'university', 'course']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get universities based on requested city
+        qs = (University.objects
+              .filter(city_id=self.request.city_code)
+              .select_related("city")
+              .order_by("-city", "sort"))
+        university_choices = [EMPTY_CHOICE] + [(u.id, u.name) for u in qs.all()]
+        self.filters['university'].extra["choices"] = university_choices
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super().form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("status", css_class="col-xs-3"),
+                    Div("university", css_class="col-xs-3"),
+                    Div("course", css_class="col-xs-3"),
+                    Div(Submit('', _('Filter'),
+                               css_class="btn-block -inline-submit"),
+                        css_class="col-xs-3"),
+                ))
         return self._form
