@@ -26,18 +26,22 @@ class CurrentCityMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         url_aware_of_the_city = bool(view_kwargs.get("city_aware", False))
         if url_aware_of_the_city and not is_club_site():
-            delimiter = view_kwargs["city_delimiter"]
+            # No need in delimiter if we always explicitly set city code
+            use_delimiter = view_kwargs.get("use_delimiter", True)
+            delimiter = view_kwargs.get("city_delimiter", None)
             city_code = view_kwargs["city_code"]
             if not city_code:
-                if delimiter:
+                if use_delimiter and delimiter:
                     # For default city delimiter must be empty
                     raise Http404
                 city_code = settings.DEFAULT_CITY_CODE
-            elif city_code not in settings.TIME_ZONES or not delimiter:
+            elif city_code not in settings.TIME_ZONES or (use_delimiter and
+                                                          not delimiter):
                 # None-empty delimiter if valid city code provided
                 raise Http404
         else:
             if url_aware_of_the_city:
+                # FIXME: Подразумевается, что никогда не используем в url?
                 if view_kwargs["city_code"] or view_kwargs["city_delimiter"]:
                     raise Http404
             # Assume we have only 1 lvl sub domains

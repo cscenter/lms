@@ -9,9 +9,7 @@
 
 {% block content %}
 <div class="interview-results-page">
-    <ol class="breadcrumb projects">
-      <li class="active">Текущие наборы</li>
-    </ol>
+    {% crispy filter.form %}
     <div class="nav-tabs-horizontal nav-tabs-inverse">
         <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
             {% for campaign in active_campaigns %}
@@ -22,13 +20,14 @@
         </ul>
         <div class="tab-content">
             {% if formset|length > 0 %}
-                <b>Статистика</b>
-                <ul class="list-unstyled">
-                    <li>Всего: {{ formset.total_form_count }}</li>
-                {% for status, cnt in stats %}
-                    <li>{{ status }}: {{ cnt }}</li>
-                {% endfor %}
-                </ul>
+                {% if not filter.data.status %}
+                    <ul class="list-unstyled">
+                        <li>Всего: {{ formset.total_form_count }}</li>
+                    {% for status, cnt in stats %}
+                        <li>{{ status }}: {{ cnt }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
 
                 <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
                 {{ formset.management_form }}
@@ -61,7 +60,7 @@
                                 </td>
                                 <td>{{ applicant.online_test.score|default:"-" }}/{{ selected_campaign.online_test_max_score }}</td>
                                 <td>{{ applicant.exam.score|default:"-" }}/{{ selected_campaign.exam_max_score }}</td>
-                                <td>{% if interview.status == 'completed' %}{{ interview.average|floatdot:2 }}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
+                                <td>{% if interview.status == 'completed' %}{% if interview.average_score != None %}{{ interview.average_score|floatdot:2 }}{% else %}<не найдено>{% endif %}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
                                 <td>
                                     {{ form.status }}
                                     {{ form.status.errors }}
@@ -77,7 +76,7 @@
                     <button type="submit" class="btn btn-primary btn-outline">Сохранить</button>
                 </form>
             {% else %}
-                Для выбранного набора ещё нет прошедших собеседование.
+                Измените параметры поиска, либо для выбранного набора ещё нет прошедших собеседование.
             {% endif %}
         </div>
     </div>

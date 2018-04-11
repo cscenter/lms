@@ -14,6 +14,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
+from core.filters import EMPTY_CHOICE
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
@@ -514,7 +515,7 @@ class InterviewCommentForm(forms.ModelForm):
         kwargs["initial"] = initial
         self.helper.form_action = reverse("admission:interview_comment",
                                           kwargs={"pk": self.interview_id})
-        super(InterviewCommentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
         self.fields['text'].label = "Комментарий"
 
@@ -571,37 +572,30 @@ class ApplicantStatusForm(forms.ModelForm):
             "#update-status-form")
 
 
-INTERVIEW_RESULTS_CHOICES = (
-    ("", "------"),
-    (Applicant.ACCEPT, "Берём"),
-    (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
-    (Applicant.ACCEPT_IF, "Берём с условием"),
-    (Applicant.REJECTED_BY_INTERVIEW, "Не берём"),
-    (Applicant.THEY_REFUSED, "Отказался"),
-)
+class ResultsModelForm(ModelForm):
+    RESULTS_CHOICES = (
+        EMPTY_CHOICE,
+        (Applicant.ACCEPT, "Берём"),
+        (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
+        (Applicant.ACCEPT_IF, "Берём с условием"),
+        (Applicant.REJECTED_BY_INTERVIEW, "Не берём"),
+        (Applicant.THEY_REFUSED, "Отказался"),
+    )
 
-
-class InterviewResultsModelForm(ModelForm):
-    """
-    In `InterviewResultsView` we use Interview manager
-    to retrieve data, because one applicant can have many interviews,
-    but in fact we want to update applicant model.
-    """
     class Meta:
         model = Applicant
         fields = ("status",)
-        # FIXME: don't know why widget override doesn't work here
 
-    status = forms.ChoiceField(choices=INTERVIEW_RESULTS_CHOICES,
+    status = forms.ChoiceField(choices=RESULTS_CHOICES,
                                required=False,
                                initial="")
 
     def clean_status(self):
-        """Save old status if none provided"""
-        data = self.cleaned_data["status"]
-        if not data:
+        """Remains old status if none was provided"""
+        new_status = self.cleaned_data["status"]
+        if not new_status:
             return self.instance.status
-        return data
+        return new_status
 
 
 class InterviewStreamChangeForm(ModelForm):

@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from post_office.models import Email
 
 from core.factories import CityFactory
+from core.models import City
 from core.settings.base import DEFAULT_CITY_CODE
 from learning.admission.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
@@ -152,7 +153,7 @@ def test_autoupdate_applicant_status_from_final():
 @pytest.mark.django_db
 def test_interview_results_dispatch_view(curator, client):
     # Not enough permissions if you are not a curator
-    city1, city2 = CityFactory.create_batch(2)
+    city1, city2 = City.objects.all()[:2]
     curator.city = city1
     curator.save()
     user = UserFactory(is_staff=False, city=city1)
@@ -168,7 +169,7 @@ def test_interview_results_dispatch_view(curator, client):
     # Redirect to default city
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_slug": DEFAULT_CITY_CODE})
+                                   kwargs={"city_code": DEFAULT_CITY_CODE})
     # And then to applicants list page
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
@@ -184,20 +185,20 @@ def test_interview_results_dispatch_view(curator, client):
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_slug": city2.pk})
+                                   kwargs={"city_code": city2.pk})
     # Create campaign for curator default city, but not active
     campaign2 = CampaignFactory.create(city=city1, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_slug": city2.pk})
+                                   kwargs={"city_code": city2.pk})
     # Make it active
     campaign2.current = True
     campaign2.save()
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_slug": city1.pk})
+                                   kwargs={"city_code": city1.pk})
 
 
 @pytest.mark.django_db
