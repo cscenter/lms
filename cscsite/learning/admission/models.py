@@ -712,7 +712,6 @@ class Interview(TimeStampedModel):
             pass
 
 
-@python_2_unicode_compatible
 class Comment(TimeStampedModel):
     MIN_SCORE = -2
     MAX_SCORE = 2

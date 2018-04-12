@@ -505,6 +505,7 @@ class InterviewCommentForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div('score'),
             Div('text'),
+            'interview', 'interviewer',
             FormActions(Submit('save', _('Save'))),
         )
         self.interviewer = kwargs.pop("interviewer", None)

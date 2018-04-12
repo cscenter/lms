@@ -686,12 +686,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
     """Update/Insert view for interview comment"""
     form_class = InterviewCommentForm
-
-    def get(self, request, *args, **kwargs):
-        # Quick fix, return empty json on GET
-        if not self.request.is_ajax():
-            return JsonResponse({})
-        return super(InterviewCommentView, self).get(request, *args, **kwargs)
+    http_method_names = ['post', 'put']
 
     def get_object(self, queryset=None):
         if queryset is None:
@@ -706,12 +701,6 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
         return Comment.objects.filter(interview=self.kwargs["pk"],
                                       interviewer=self.request.user)
 
-    def get_success_url(self):
-        messages.success(self.request, "Комментарий успешно сохранён",
-                         extra_tags='timeout')
-        return reverse("admission:interview_detail",
-                       args=[self.object.interview_id])
-
     @transaction.atomic
     def form_valid(self, form):
         if self.request.is_ajax():
@@ -719,23 +708,17 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
             return JsonResponse({"success": "true"})
         return super().form_valid(form)
 
+    def get_success_url(self):
+        messages.success(self.request, "Комментарий успешно сохранён",
+                         extra_tags='timeout')
+        return reverse("admission:interview_detail",
+                       args=[self.object.interview_id])
+
     def form_invalid(self, form):
         if self.request.is_ajax():
             return JsonResponse({"success": "false",
                                  "errors": form.errors.as_json()})
         return super().form_invalid(form)
-
-    def _get_interviewer(self):
-        interview_id = self.kwargs["pk"]
-        interview = get_object_or_404(Interview.objects
-                                      .filter(pk=interview_id)
-                                      .prefetch_related("interviewers"))
-        if self.request.user.is_curator:
-            return self.request.user
-        for i in interview.interviewers.all():
-            if i.pk == self.request.user.pk:
-                return i
-        return None
 
     def get_form_kwargs(self):
         interview_id = self.kwargs["pk"]
@@ -753,6 +736,18 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
             except ValueError:
                 pass
         return kwargs
+
+    def _get_interviewer(self):
+        interview_id = self.kwargs["pk"]
+        interview = get_object_or_404(Interview.objects
+                                      .filter(pk=interview_id)
+                                      .prefetch_related("interviewers"))
+        if self.request.user.is_curator:
+            return self.request.user
+        for i in interview.interviewers.all():
+            if i.pk == self.request.user.pk:
+                return i
+        return None
 
 
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
