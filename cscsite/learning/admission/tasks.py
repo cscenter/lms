@@ -65,9 +65,13 @@ def register_in_yandex_contest(applicant_id, language_code):
                         applicant__yandex_id=applicant.yandex_id)
                       .only("contest_participant_id")
                       .first())
-        # Admins/judges could be registered directly through contest admin, so
-        # we haven't info about there participant id and can't easily get there
-        # results later, but still allow them testing application form
+        # 1. Admins/judges could be registered directly through contest admin,
+        # so we haven't info about there participant id and can't easily get
+        # there results later, but still allow them testing application form
+        # 2. When registering user in contest on `read timeout` response
+        # we lost information about there participant id without any ability to
+        # restore it through API (until the participant appears in
+        # results table)
         if registered:
             participant_id = registered.contest_participant_id
             update_fields["contest_participant_id"] = participant_id
@@ -94,6 +98,7 @@ def register_in_yandex_contest(applicant_id, language_code):
     )
 
 
+# FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение
 @job('default')
 def import_testing_results(task_id=None):
     Applicant = apps.get_model('admission', 'Applicant')
@@ -138,19 +143,19 @@ def import_testing_results(task_id=None):
                     for row in json_data['rows']:
                         participants_total += 1
                         total += 1
-                        participant_id = row['participantInfo']['id']
+                        yandex_login = row['participantInfo']['login']
                         score_str: str = row['score']
                         score_str = score_str.replace(',', '.')
                         score = int(round(float(score_str)))
                         # TODO: Обновлять статус? Но это +1 запрос на каждый результат, если делать это точно
                         updated = (Test.objects
                                    .filter(applicant__campaign_id=campaign.pk,
-                                           contest_participant_id=participant_id,
+                                           applicant__yandex_id=yandex_login,
+                                           yandex_contest_id=contest_id,
                                            status__in=[Test.REGISTERED,
                                                        Test.IN_PROGRESS])
                                    .update(score=score, status=update_status))
-                        if updated:
-                            updated_total += 1
+                        updated_total += updated
                     if total < paging["page_size"]:
                         break
                     paging["page"] += 1
