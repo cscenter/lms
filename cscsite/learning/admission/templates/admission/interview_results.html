@@ -2,7 +2,6 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
-{% load floatdot from core_tags %}
 
 {% block title %}Результаты набора {{ selected_campaign.city.code }} - CSC{% endblock title %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
@@ -60,7 +59,7 @@
                                 </td>
                                 <td>{{ applicant.online_test.score|default:"-" }}/{{ selected_campaign.online_test_max_score }}</td>
                                 <td>{{ applicant.exam.score|default:"-" }}/{{ selected_campaign.exam_max_score }}</td>
-                                <td>{% if interview.status == 'completed' %}{% if interview.average_score != None %}{{ interview.average_score|floatdot:2 }}{% else %}<не найдено>{% endif %}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
+                                <td>{% if interview.status == 'completed' %}{% if interview.average_score != None %}{{ interview.get_average_score_display }}{% else %}<не найдено>{% endif %}{% else %}<span class="grey">{{ applicant.get_status_display }}</span>{% endif %}</td>
                                 <td>
                                     {{ form.status }}
                                     {{ form.status.errors }}
