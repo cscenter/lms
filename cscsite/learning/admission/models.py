@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator, MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
-from django.utils import timezone
+from django.utils import timezone, numberformat
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
@@ -683,10 +683,19 @@ class Interview(TimeStampedModel):
     def in_transition_state(self):
         return self.status in self.TRANSITION_STATUSES
 
+    @property
     def average_score(self):
+        # `_average_score` can be calculated with query annotation to improve
+        # performance
+        if hasattr(self, "_average_score"):
+            return self._average_score
         scores = [comment.score for comment in self.comments.all()]
         if scores:
-            return float(sum(scores)) / len(scores)
+            self._average_score = float(sum(scores)) / len(scores)
+            return self._average_score
+
+    def get_average_score_display(self, decimal_pos=2):
+        return numberformat.format(self.average_score, ".", decimal_pos)
 
     def __str__(self):
         return smart_text(self.applicant)

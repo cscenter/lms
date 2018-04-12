@@ -827,14 +827,13 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
                 Prefetch(
                     'interview',
                     queryset=(Interview.objects
-                              .annotate(average_score=Avg('comments__score'))),
+                              .annotate(_average_score=Avg('comments__score'))),
                 ),
             ))
 
     def get_context_data(self, filter, formset, **kwargs):
 
         def cpm_interview_best_score(form):
-            # XXX: `average_score` calculated by queryset
             if form.instance.interview.average_score is None:
                 return Comment.UNREACHABLE_COMMENT_SCORE
             else:

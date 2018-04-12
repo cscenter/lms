@@ -67,6 +67,9 @@ TEMPLATES = [
             "filters": {
                 "markdown": "core.jinja2_filters.markdown",
             },
+            "globals": {
+                "crispy": "core.jinja2_filters.crispy",
+            },
             "extensions": [
                 "jinja2.ext.do",
                 "jinja2.ext.loopcontrols",
