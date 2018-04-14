@@ -107,7 +107,7 @@ class IndexView(TemplateView):
             'courses': courses,
             'vk_news': _cache.get(self.VK_CACHE_KEY),
             'instagram_posts': _cache.get(self.INSTAGRAM_CACHE_KEY),
-            'is_admission_active': True
+            'is_admission_active': False
         }
         return context
 
