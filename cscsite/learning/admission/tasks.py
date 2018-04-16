@@ -1,6 +1,7 @@
 import logging
 
 from django.apps import apps
+from django.db.models import Q
 from django.utils import translation, timezone
 from django.utils.timezone import now
 from django_rq import job
@@ -57,6 +58,7 @@ def register_in_yandex_contest(applicant_id, language_code):
         participant_id = data
         update_fields["contest_participant_id"] = participant_id
     else:  # 409 - already registered for this contest
+        # TODO: по идее можно и удалить этот код, т.к. на participant id нельзя полагаться.
         registered = (Test.objects
                       .filter(
                         yandex_contest_id=contest_id,
@@ -118,10 +120,8 @@ def import_testing_results(task_id=None):
     # Campaigns are the same now, but handle them separately,
     # since this behavior can be changed in the future.
     for campaign in current_campaigns:
-        if now() <= campaign.application_ends_at:
-            update_status = Test.IN_PROGRESS
-        else:
-            update_status = Test.FINISHED
+        # TODO: add contest deadline and check that contest has ended
+        update_status = Test.IN_PROGRESS
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
             contest_id = contest.contest_id
@@ -144,22 +144,25 @@ def import_testing_results(task_id=None):
                         participants_total += 1
                         total += 1
                         yandex_login = row['participantInfo']['login']
+                        participant_id = row['participantInfo']['id']
                         score_str: str = row['score']
                         score_str = score_str.replace(',', '.')
                         score = int(round(float(score_str)))
                         # TODO: Обновлять статус? Но это +1 запрос на каждый результат, если делать это точно
+                        participant = (Q(applicant__yandex_id=yandex_login) |
+                                       Q(contest_participant_id=participant_id))
                         updated = (Test.objects
                                    .filter(applicant__campaign_id=campaign.pk,
-                                           applicant__yandex_id=yandex_login,
                                            yandex_contest_id=contest_id,
                                            status__in=[Test.REGISTERED,
                                                        Test.IN_PROGRESS])
+                                   .filter(participant)
                                    .update(score=score, status=update_status))
                         updated_total += updated
                     if total < paging["page_size"]:
                         break
                     paging["page"] += 1
-                    # TODO: timeout?
+                    # TODO: handle read timeout?
                 except YandexContestAPIException as e:
                     error_status_code, text = e.args
                     if error_status_code == RegisterStatus.BAD_TOKEN:
