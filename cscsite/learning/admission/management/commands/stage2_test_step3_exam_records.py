@@ -11,8 +11,9 @@ from learning.admission.models import Applicant, Test, Exam, Contest
 
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = """
-        Create empty exam results record (if not exists) for each applicant 
-        who successfully passed test (score >= test passing score). 
+        Deprecated. Creates empty exam results record (if not exists) for 
+        each applicant who successfully passed test (score >= test passing 
+        score). 
         Randomly set contest id.
         """
 
