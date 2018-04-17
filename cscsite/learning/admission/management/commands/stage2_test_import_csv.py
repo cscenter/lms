@@ -10,10 +10,10 @@ from learning.admission.import_export import OnlineTestRecordResource
 from ._utils import CurrentCampaignsMixin, HandleErrorsMixin
 
 
-# TODO: Make `city` attr required
 class Command(CurrentCampaignsMixin, HandleErrorsMixin, BaseCommand):
     help = (
-        """Import results for online test. Run in dry mode by default.
+        """
+        Deprecated. Import results for online test. Run in dry mode by default.
 
         Try to find already existed online test results first by `lookup` field 
         (should be unique within current campaigns)

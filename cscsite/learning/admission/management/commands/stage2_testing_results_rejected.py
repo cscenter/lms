@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db.models import Q
 from post_office import mail
-from post_office.models import EmailTemplate, Email
+from post_office.models import Email
 from post_office.utils import get_email_template
 
 from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
@@ -14,7 +12,7 @@ from learning.admission.models import Test, Applicant
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     help = """
-    Set status REJECTED_BY_TEST for those who fail testing, also 
+    Updates status to REJECTED_BY_TEST for those who failed testing, then 
     send notification to them.
     """
 
@@ -22,6 +20,10 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')
+        parser.add_argument(
+            '--skip-context', action='store_true',
+            dest='skip_context',
+            help='Skip email context')
 
     def handle(self, *args, **options):
         city_code = options["city"] if options["city"] else None
@@ -32,15 +34,21 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         self.validate_templates(campaigns, types=["testing-fail"])
 
-        total = 0
-        generated = 0
         for campaign in campaigns:
-            # Get applicants where score is empty or < passing score
+            self.stdout.write(str(campaign))
+            total = 0
+            generated = 0
             testing_passing_score = campaign.online_test_passing_score
             if not testing_passing_score:
                 self.stdout.write("Zero testing passing score "
                                   "for {}. Skip".format(campaign))
                 continue
+
+            template_type = "testing-fail"
+            template_name = self.get_template_name(campaign, template_type)
+            template = get_email_template(template_name)
+
+            # applicants who's score is empty or < passing score
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk)
                           .filter(Q(online_test__score__lt=testing_passing_score) |
@@ -49,38 +57,31 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                   "online_test__score",
                                   "exam__yandex_contest_id",
                                   "yandex_id",
-                                  "email")
-                          # Weak attempt to process the latest application if
-                          # user (with unique email) send more then one.
-                          .order_by("-pk"))
-
-            template_type = "testing-fail"
-            template_name = self.get_template_name(campaign, template_type)
-            template = get_email_template(template_name)
-
+                                  "email"))
             for a in applicants:
                 total += 1
-                if a["online_test__score"] is None:
-                    score = 0
-                else:
-                    score = int(a["online_test__score"])
-                assert score < testing_passing_score
-                # Set status
                 (Applicant.objects
                  .filter(pk=a["pk"])
                  .update(status=Applicant.REJECTED_BY_TEST))
                 # Add notification to queue
-                score_str = str(score) + " балл" + self.pluralize(score)
-                context = {
-                    'SCORE': score_str,
-                    'LOGIN': a["yandex_id"],
-                }
+                if options['skip_context']:
+                    context = {}
+                else:
+                    if a["online_test__score"] is None:
+                        score = 0
+                    else:
+                        score = int(a["online_test__score"])
+                    assert score < testing_passing_score
+                    context = {
+                        'SCORE': score,
+                        'LOGIN': a["yandex_id"],
+                    }
                 recipients = [a["email"]]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     mail.send(
                         recipients,
-                        sender='info@compscicenter.ru',
+                        sender='CS центр <info@compscicenter.ru>',
                         template=template,
                         context=context,
                         # Render on delivery, we have no really big amount of
@@ -89,23 +90,6 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                         backend='ses',
                     )
                     generated += 1
-                else:
-                    self.stdout.write(a["email"])
-        self.stdout.write("Processed applicants: {}".format(total))
-        self.stdout.write("Generated emails: {}".format(generated))
+            self.stdout.write(f"    Processed applicants: {total}")
+            self.stdout.write(f"    Generated emails: {generated}")
         self.stdout.write("Done")
-
-    # shitty code
-    @staticmethod
-    def pluralize(value):
-        endings = ["", "a", "ов"]
-        if value % 100 in (11, 12, 13, 14):
-            return endings[2]
-        if value % 10 == 1:
-            return endings[0]
-        if value % 10 in (2, 3, 4):
-            return endings[1]
-        else:
-            return endings[2]
-
-

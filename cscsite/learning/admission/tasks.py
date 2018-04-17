@@ -58,7 +58,6 @@ def register_in_yandex_contest(applicant_id, language_code):
         participant_id = data
         update_fields["contest_participant_id"] = participant_id
     else:  # 409 - already registered for this contest
-        # TODO: по идее можно и удалить этот код, т.к. на participant id нельзя полагаться.
         registered = (Test.objects
                       .filter(
                         yandex_contest_id=contest_id,
