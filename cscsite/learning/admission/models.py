@@ -470,15 +470,15 @@ class Contest(models.Model):
 
 
 class Test(TimeStampedModel):
-    NEW = 'new'
-    REGISTERED = 'registered'
-    IN_PROGRESS = 'in_progress'
-    FINISHED = 'completed'
+    NEW = 'new'  # created
+    REGISTERED = 'registered'  # registered in contest
+    AUTO_UPDATE = 'auto'  # auto updating score through contest api
+    MANUAL = 'manual'  # manual score input
     STATUSES = (
         (NEW, _("New")),
         (REGISTERED, _("Registered")),
-        (IN_PROGRESS, _("In progress")),
-        (FINISHED, _("Finished")),
+        (AUTO_UPDATE, _("Auto updating score")),
+        (MANUAL, _("Manual score input")),
     )
     applicant = models.OneToOneField(
         Applicant,
