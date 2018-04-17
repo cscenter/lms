@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 API_URL = 'https://api.contest.yandex.net/api/public/v2'
 PARTICIPANTS_URL = API_URL + '/contests/{}/participants'
 PARTICIPANT_URL = API_URL + '/contests/{contest_id}/participants/{participant_id}'
+CONTEST_URL = API_URL + '/contests/{contest_id}'
 STANDINGS_URL = API_URL + '/contests/{contest_id}/standings'
 
 
@@ -47,6 +48,7 @@ class YandexContestAPIException(Exception):
     pass
 
 
+# TODO: catch read timeout exceptions in api?
 class YandexContestAPI:
     BASE_URL = "https://api.vk.com/method/"
 
@@ -76,6 +78,16 @@ class YandexContestAPI:
             participant_id = response.json()
             logger.debug("Meta data: {}".format(participant_id))
         return response.status_code, participant_id
+
+    def contest_info(self, contest_id):
+        headers = self.base_headers
+        url = CONTEST_URL.format(contest_id=contest_id)
+        response = requests.get(url, headers=headers, timeout=1)
+        if response.status_code != ResponseStatus.SUCCESS:
+            raise YandexContestAPIException(response.status_code, response.text)
+        info = response.json()
+        logger.debug("Meta data: {}".format(info))
+        return response.status_code, info
 
     def participant_info(self, contest_id, participant_id):
         headers = self.base_headers
