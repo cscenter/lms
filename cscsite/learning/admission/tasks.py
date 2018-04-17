@@ -120,7 +120,7 @@ def import_testing_results(task_id=None):
     # since this behavior can be changed in the future.
     for campaign in current_campaigns:
         # TODO: add contest deadline and check that contest has ended
-        update_status = Test.IN_PROGRESS
+        update_status = Test.AUTO_UPDATE
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
             contest_id = contest.contest_id
@@ -154,7 +154,7 @@ def import_testing_results(task_id=None):
                                    .filter(applicant__campaign_id=campaign.pk,
                                            yandex_contest_id=contest_id,
                                            status__in=[Test.REGISTERED,
-                                                       Test.IN_PROGRESS])
+                                                       Test.AUTO_UPDATE])
                                    .filter(participant)
                                    .update(score=score, status=update_status))
                         updated_total += updated
