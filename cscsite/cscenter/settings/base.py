@@ -25,6 +25,7 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'learning.admission.apps.AdmissionConfig',
     'post_office',
+    'staff',
     'admission_test',  # TODO: remove after testing
     'django_jinja',
 ]
@@ -103,6 +104,7 @@ TEMPLATES = [
             str(APP_DIR / "templates"),
             str(PROJECT_DIR / "admission_test" / "templates"),
             str(PROJECT_DIR / "learning" / "admission" / "templates"),
+            str(PROJECT_DIR / "staff" / "templates"),
             str(PROJECT_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
         ],

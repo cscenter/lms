@@ -29,6 +29,7 @@ THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
 CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
+# Rename if use on club site
 CITIES = {
     "spb": _("Saint Petersburg"),
     "nsk": _("Novosibirsk")
@@ -66,7 +67,6 @@ INSTALLED_APPS = [
     'core',
     'htmlpages',
     'learning',
-    'staff',
     'library.apps.LibraryConfig',
     'loginas',
     'import_export',

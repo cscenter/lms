@@ -12,8 +12,9 @@
             <div class="list-group">
                 <div  class="list-group-item">
                     <h4 class="list-group-item-heading">Будут выпускаться</h4>
-                    Скачать список в формате <a href="{% url 'staff:exports_students_diplomas' %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' %}">CSV</a>.<br>
-                    Немного <a href="{% url 'staff:exports_students_diplomas_stats' %}">статистики</a> для будущего выпуска.
+                    {% for code, name in center_branches.items %}
+                        <b>{{ name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' code %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' code %}">CSV</a><br><a href="{% url 'staff:exports_alumni_stats' code %}">Статистика</a><br>
+                    {% endfor %}
                 </div>
                 <div class="list-group-item">
                     <h4 class="list-group-item-heading">Ведомость успеваемости. Полная</h4>
