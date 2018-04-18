@@ -53,7 +53,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ['__str__', 'score', 'get_campaign', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
     search_fields = ['applicant__yandex_id', 'applicant__surname',
-                     'applicant__first_name']
+                     'applicant__first_name', 'applicant__email']
     raw_id_fields = ['applicant']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
