@@ -29,7 +29,7 @@ def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
     return timezone.localtime(timezone.now(), timezone=tz_aware)
 
 
-def get_current_term_pair(tz_aware: Union[Timezone, CityCode]):
+def get_current_term_pair(tz_aware: Union[Timezone, CityCode]) -> TermTuple:
     dt_local = now_local(tz_aware)
     return date_to_term_pair(dt_local)
 

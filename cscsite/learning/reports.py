@@ -105,15 +105,14 @@ class ProgressReport(ReportFileOutput):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, honest_grade_system=False, target_semester=None,
-                 request=None):
+    def __init__(self, honest_grade_system=False, request=None, qs_filters=None):
         # Max count values among all students
         self.shads_max = 0
         self.online_courses_max = 0
         self.projects_max = 0
-        self.target_semester = target_semester
         self.request = request
-        students_data = self.get_queryset(term=self.target_semester)
+        qs_filters = qs_filters or {}
+        students_data = self.get_queryset(**qs_filters)
         # Collect course headers and prepare enrollments info
         courses_headers = OrderedDict()
         for s in students_data:
@@ -289,9 +288,11 @@ class ProgressReportForDiplomas(ProgressReport):
         """
         Explicitly exclude rows with bad grades (or without) on query level.
         """
+        filters = kwargs.pop("filters", {})
         return CSCUser.objects.students_info(
             filters={
-                "status": CSCUser.STATUS.will_graduate
+                "status": CSCUser.STATUS.will_graduate,
+                **filters
             },
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
         )
@@ -302,6 +303,7 @@ class ProgressReportForDiplomas(ProgressReport):
             'Фамилия',
             'Имя',
             'Отчество',
+            'Почта',
             'Университет',
             'Направления',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
@@ -320,6 +322,7 @@ class ProgressReportForDiplomas(ProgressReport):
             student.last_name,
             student.first_name,
             student.patronymic,
+            student.email,
             student.university,
             " и ".join(s.name for s in student.areas_of_study.all()),
             self.passed_courses_total(student),
@@ -447,20 +450,29 @@ class ProgressReportForSemester(ProgressReport):
 
     UNSUCCESSFUL_GRADES = [GRADES.not_graded, GRADES.unsatisfactory]
 
+    def __init__(self, term, honest_grade_system=False, request=None,
+                 qs_filters=None):
+        self.target_semester = term
+        qs_filters = qs_filters or {}
+        qs_filters["semester"] = self.target_semester
+        super().__init__(honest_grade_system, request, qs_filters)
+
     @staticmethod
     def get_queryset(**kwargs):
-        assert "term" in kwargs
+        semester = kwargs.pop("semester")
+        filters = kwargs.pop("filters", {})
         return CSCUser.objects.students_info(
             filters={
                 "groups__in": [
                     CSCUser.group.STUDENT_CENTER,
                     CSCUser.group.VOLUNTEER
                 ],
+                **filters
             },
             exclude={
                 "status": STUDENT_STATUS.expelled
             },
-            semester=kwargs["term"],
+            semester=semester,
         )
 
     def before_process_row(self, student):

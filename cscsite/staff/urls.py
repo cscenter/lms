@@ -5,7 +5,7 @@ app_name = 'staff'
 from learning.views.gradebook import GradeBookCuratorDispatchView, \
     GradeBookTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
-    ExportsView, StudentsDiplomasStatsView, StudentsDiplomasView, \
+    ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
@@ -43,15 +43,17 @@ urlpatterns = [
         url(r'^$',
             ExportsView.as_view(),
             name='exports'),
-        url(r'^diplomas_stats/$',
-            StudentsDiplomasStatsView.as_view(),
-            name='exports_students_diplomas_stats'),
-        url(r'^diplomas/$',
-            StudentsDiplomasView.as_view(),
-            name='exports_students_diplomas'),
-        url(r'^diplomas/csv/$',
-            StudentsDiplomasCSVView.as_view(),
-            name='exports_students_diplomas_csv'),
+        url(r'^alumni/', include([
+            url(r'^(?P<city_code>nsk|kzn|spb|)/stats/$',
+                StudentsDiplomasStatsView.as_view(),
+                name='exports_alumni_stats'),
+            url(r'^(?P<city_code>nsk|kzn|spb|)/tex/$',
+                StudentsDiplomasTexView.as_view(),
+                name='exports_students_diplomas_tex'),
+            url(r'^(?P<city_code>nsk|kzn|spb|)/csv/$',
+                StudentsDiplomasCSVView.as_view(),
+                name='exports_students_diplomas_csv'),
+        ]), kwargs={"city_aware": True, "use_delimiter": False}),
         url(r'^sheet/csv/$',
             ProgressReportFullView.as_view(output_format="csv"),
             name='exports_sheet_all_students_csv'),

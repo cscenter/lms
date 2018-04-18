@@ -83,27 +83,31 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
 
 
 class ExportsView(CuratorOnlyMixin, generic.TemplateView):
-    def get_context_data(self, **kwargs):
-        context = super(ExportsView, self).get_context_data(**kwargs)
-        year, term = get_current_term_pair(settings.DEFAULT_CITY_CODE)
-        current_term_index = get_term_index(year, term)
-        context["current_term"] = {"year": year, "type": term}
-        prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
-        context["prev_term"] = {"year": prev_term_year, "type": prev_term}
-        context["campaigns"] = Campaign.objects.order_by("-city__name", "-year")
-        return context
     template_name = "staff/exports.html"
+
+    def get_context_data(self, **kwargs):
+        current_term = get_current_term_pair(settings.DEFAULT_CITY_CODE)
+        current_term_index = get_term_index(current_term.year, current_term.type)
+        prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
+        context = {
+            "current_term": current_term,
+            "prev_term": {"year": prev_term_year, "type": prev_term},
+            "campaigns": Campaign.objects.order_by("-city__name", "-year"),
+            "center_branches": settings.CITIES
+        }
+        return context
 
 
 class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
     BAD_GRADES = [GRADES.unsatisfactory, GRADES.not_graded]
 
-    def get_context_data(self, **kwargs):
-        context = super(StudentsDiplomasStatsView, self).get_context_data(
-            **kwargs)
-        students = CSCUser.objects.students_info(
-            filters={"status": CSCUser.STATUS.will_graduate})
+    def get_context_data(self, city_code, **kwargs):
+        filters = {
+            "city_id": city_code,
+            "status": CSCUser.STATUS.will_graduate
+        }
+        students = CSCUser.objects.students_info(filters=filters)
 
         unique_teachers = set()
         total_hours = 0
@@ -230,36 +234,37 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     most_courses_in_term_students.add(s)
                 elif s.max_courses_in_term > most_courses_in_term_student.max_courses_in_term:
                     most_courses_in_term_students = {s}
-        context['less_failed_courses'] = less_failed_courses
-        context['most_failed_courses'] = most_failed_courses
-        context['all_three_practicies_are_internal'] = all_three_practicies_are_internal
-        context['passed_practicies_in_first_two_years'] = passed_practicies_in_first_two_years
-        context['passed_internal_practicies_in_first_two_years'] = passed_internal_practicies_in_first_two_years
-        context['finished_two_or_more_programs'] = finished_two_or_more_programs
-        context['by_enrollment_year'] = dict(by_enrollment_year)
-        context['enrolled_on_first_course'] = enrolled_on_first_course
-        context['most_courses_students'] = most_courses_students
-        context['most_courses_in_term_students'] = most_courses_in_term_students
-        context['most_open_courses_students'] = most_open_courses_students
-        context['students'] = students
-        context["unique_teachers_count"] = len(unique_teachers)
-        context["total_hours"] = int(total_hours)
-        context["unique_courses"] = unique_courses
-        context["good_total"] = good_total
-        context["excellent_total"] = excellent_total
-        context["total_passed_courses"] = total_passed_courses
-        context["unique_projects"] = unique_projects
+        context = {
+            'city': settings.CITIES[city_code],
+            'less_failed_courses': less_failed_courses,
+            'most_failed_courses': most_failed_courses,
+            'all_three_practicies_are_internal': all_three_practicies_are_internal,
+            'passed_practicies_in_first_two_years': passed_practicies_in_first_two_years,
+            'passed_internal_practicies_in_first_two_years': passed_internal_practicies_in_first_two_years,
+            'finished_two_or_more_programs': finished_two_or_more_programs,
+            'by_enrollment_year': dict(by_enrollment_year),
+            'enrolled_on_first_course': enrolled_on_first_course,
+            'most_courses_students': most_courses_students,
+            'most_courses_in_term_students': most_courses_in_term_students,
+            'most_open_courses_students': most_open_courses_students,
+            'students': students,
+            "unique_teachers_count": len(unique_teachers),
+            "total_hours": int(total_hours),
+            "unique_courses": unique_courses, "good_total": good_total,
+            "excellent_total": excellent_total,
+            "total_passed_courses": total_passed_courses,
+            "unique_projects": unique_projects
+        }
         return context
 
 
-class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
+class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
-    def get_context_data(self, **kwargs):
-        context = super(StudentsDiplomasView, self).get_context_data(**kwargs)
-        students = ProgressReportForDiplomas.get_queryset()
+    def get_context_data(self, city_code, **kwargs):
+        filters = {"city_id": city_code}
+        students = ProgressReportForDiplomas.get_queryset(filters=filters)
 
-        # FIXME: Investigate can I update queryset instead?
         def is_project_active(ps):
             return (not ps.project.is_external and
                     not ps.project.canceled and
@@ -269,15 +274,22 @@ class StudentsDiplomasView(CuratorOnlyMixin, generic.TemplateView):
         for student in students:
             student.projects_through = list(filter(is_project_active,
                                                    student.projects_through))
-        context['students'] = students
+        context = {
+            "city": settings.CITIES[city_code],
+            "students": students
+        }
         return context
 
 
 class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
-    def get(self, request, *args, **kwargs):
-        progress_report = ProgressReportForDiplomas(request=request)
+    def get(self, request, city_code, *args, **kwargs):
+        qs_filters = {
+            "filters": {"city_id": city_code}
+        }
+        progress_report = ProgressReportForDiplomas(request=request,
+                                                    qs_filters=qs_filters)
         return progress_report.output_csv()
 
 
@@ -313,8 +325,8 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
             semester = get_object_or_404(Semester, **filters)
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
-        progress_report = ProgressReportForSemester(honest_grade_system=True,
-                                                    target_semester=semester,
+        progress_report = ProgressReportForSemester(semester,
+                                                    honest_grade_system=True,
                                                     request=request)
         if self.output_format == "csv":
             return progress_report.output_csv()

@@ -14,7 +14,7 @@ class CSCUserQuerySet(query.QuerySet):
                       filters=None,
                       exclude=None,
                       exclude_grades=None,
-                      semester=False):
+                      semester=None):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 

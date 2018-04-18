@@ -184,8 +184,8 @@ def test_report_full(rf):
 @pytest.mark.django_db
 def test_report_for_target_term(rf):
     def get_progress_report(term):
-        return ProgressReportForSemester(honest_grade_system=True,
-                                         target_semester=term,
+        return ProgressReportForSemester(term,
+                                         honest_grade_system=True,
                                          request=rf.request())
     teacher = TeacherCenterFactory.create()
     s = SemesterFactory.create_current()
@@ -292,10 +292,12 @@ def test_report_for_target_term(rf):
 
 
 @pytest.mark.django_db
-def test_report_diplomas(rf):
-    request = rf.get(reverse('staff:exports_students_diplomas_csv'))
+def test_report_diplomas_csv(rf):
+    request = rf.get(reverse('staff:exports_students_diplomas_csv',
+                             kwargs={"city_code": "spb"}))
     teacher = TeacherCenterFactory.create()
-    student1, student2, student3 = StudentCenterFactory.create_batch(3)
+    student1, student2, student3 = StudentCenterFactory.create_batch(
+        3, city_id="spb")
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
@@ -364,3 +366,38 @@ def test_report_diplomas(rf):
     progress_report = ProgressReportForDiplomas(request=request)
     # +4 headers for project
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 13
+
+    student1.city_id = "nsk"
+    student1.save()
+    progress_report = ProgressReportForDiplomas(request=request)
+    assert len(progress_report.data) == 2
+
+
+@pytest.mark.django_db
+def test_report_diplomas_by_city(rf):
+    stub_request = rf.get("/")
+    s1, s2, s3 = StudentCenterFactory.create_batch(3, city_id="spb")
+    s1.status = STUDENT_STATUS.will_graduate
+    s1.save()
+    s2.status = STUDENT_STATUS.will_graduate
+    s2.save()
+    progress_report = ProgressReportForDiplomas(request=stub_request)
+    assert len(progress_report.data) == 2
+    progress_report = ProgressReportForDiplomas(
+        request=stub_request,
+        qs_filters={"filters": {"city_id": "spb"}})
+    assert len(progress_report.data) == 2
+    progress_report = ProgressReportForDiplomas(
+        request=stub_request,
+        qs_filters={"filters": {"city_id": "nsk"}})
+    assert len(progress_report.data) == 0
+    s3.status = STUDENT_STATUS.will_graduate
+    s3.city_id = "nsk"
+    s3.save()
+    progress_report = ProgressReportForDiplomas(
+        request=stub_request, qs_filters={"filters": {"city_id": "spb"}})
+    assert len(progress_report.data) == 2
+    progress_report = ProgressReportForDiplomas(
+        request=stub_request, qs_filters={"filters": {"city_id": "nsk"}})
+    assert len(progress_report.data) == 1
+    assert progress_report.data[0].pk == s3.pk

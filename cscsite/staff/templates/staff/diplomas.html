@@ -9,9 +9,16 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/github.min.css">
 {% endblock stylesheets %}
 
+{% block javascripts %}
+    <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/highlight.min.js"></script>
+    <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/languages/tex.min.js"></script>
+    {% render_bundle 'supervising' 'js' %}
+{% endblock javascripts %}
+
 {# Note: Feel the fear below. #}
 {% block content %}
     <div class="container">
+    <h3>{{ city }}</h3>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
 {{ '{' }}направлени{{ s.areas_of_study.all|pluralize:"ю,ям" }} {% for program in s.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %}\\и {% endif %}{% endfor %}{{ '}' }}
@@ -35,9 +42,3 @@
 </code></pre>
     </div>
 {% endblock content %}
-
-{% block javascripts %}
-    <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/highlight.min.js"></script>
-    <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/languages/tex.min.js"></script>
-    {% render_bundle 'supervising' 'js' %}
-{% endblock javascripts %}
