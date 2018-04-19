@@ -237,7 +237,7 @@
                         <div class="row">
                         {% for post in instagram_posts %}
                             <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
-                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="40" alt="">
+                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34" alt="">
                                 <div class="social-media__text">{{ post.text }}</div>
                                 <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
                             </a>
