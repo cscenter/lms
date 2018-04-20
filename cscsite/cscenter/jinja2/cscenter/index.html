@@ -63,7 +63,7 @@
                         </a>
                     {% else %}
                         <div class="dropdown">
-                            <button class="btn _user-menu-btn" type="button" id="userMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button class="btn _user-menu-btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span>{{ request.user.get_short_name() }}</span>
                                 {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                                     {%- if im -%}
