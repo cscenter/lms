@@ -1,6 +1,21 @@
+import Raven from 'raven-js';
 import $ from 'jquery';
 import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
+
+import ravenOptions from './raven_conf';
+
+// Configure `raven-js`
+Raven
+    .config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763',
+            ravenOptions)
+    .install();
+let authenticatedUser = $("#userMenuButton").data('id');
+if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
+    Raven.setUserContext({
+        id: authenticatedUser
+    });
+}
 
 $(function () {
     // Click on `Show programs'
