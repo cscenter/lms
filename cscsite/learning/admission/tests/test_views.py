@@ -1,3 +1,5 @@
+import urllib
+
 import pytest
 import datetime
 
@@ -17,6 +19,9 @@ from learning.admission.factories import ApplicantFactory, InterviewFactory, \
 from learning.admission.forms import InterviewFromStreamForm
 from learning.admission.models import Applicant, Interview, InterviewInvitation
 from users.factories import UserFactory
+
+# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
+# TODO: Проверить время отправки напоминания, время/дату собеседования
 
 
 @pytest.mark.django_db
@@ -202,6 +207,25 @@ def test_interview_results_dispatch_view(curator, client):
 
 
 @pytest.mark.django_db
+def test_interview_comment_create(curator, client, settings):
+    interview = InterviewFactory.create()
+    client.login(curator)
+    form = {
+        "text": "Comment message",
+        "interview": interview.pk,
+        "interviewer": curator.pk
+    }
+    url = reverse("admission:interview_comment", args=[interview.pk])
+    response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    assert response.status_code == 200
+    assert response.json()['success'] == 'false'
+    form['score'] = 2
+    response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    assert response.status_code == 200
+    assert response.json()['success'] == 'true'
+
+
+@pytest.mark.django_db
 def test_invitation_slots(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
     admission_settings = apps.get_app_config("admission")
@@ -301,9 +325,3 @@ def test_interview_from_slot(curator, client, settings):
     assert interview.date.hour == 5  # UTC +7 for nsk
     assert interview.date_local().hour == slot.start_at.hour
     assert interview.date_local().minute == slot.start_at.minute
-
-
-
-
-# TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
-# TODO: Проверить время отправки напоминания, время/дату собеседования
