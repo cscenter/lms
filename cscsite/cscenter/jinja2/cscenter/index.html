@@ -89,6 +89,7 @@
                                 {% endif %}
                                 {% if request.user.is_staff %}
                                     <a class="dropdown-item" href="{{ url('staff:student_search') }}">Курирование</a>
+                                    <a class="dropdown-item" href="{{ url('stats:index') }}">Статистика</a>
                                     <a class="dropdown-item" href="{{ url('admin:index') }}">Админ-панель</a>
                                 {% endif %}
                                 <div class="dropdown-divider"></div>
