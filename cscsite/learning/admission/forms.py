@@ -499,6 +499,11 @@ class InterviewCommentForm(forms.ModelForm):
                 'data-local-persist': 'true',
             })
         }
+        error_messages = {
+            'score': {
+                'required': _("Укажите оценку перед сохранением."),
+            },
+        }
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

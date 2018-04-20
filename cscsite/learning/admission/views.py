@@ -716,25 +716,19 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 
     def form_invalid(self, form):
         if self.request.is_ajax():
-            return JsonResponse({"success": "false",
-                                 "errors": form.errors.as_json()})
+            # TODO: return 400 status code?
+            msg = "<br>".join(m for ms in form.errors.values() for m in ms)
+            r = JsonResponse({"errors": msg})
+            r.status_code = 400
+            return r
         return super().form_invalid(form)
 
     def get_form_kwargs(self):
-        interview_id = self.kwargs["pk"]
         kwargs = super().get_form_kwargs()
         kwargs.update({
             "interviewer": self._get_interviewer(),
-            "interview_id": interview_id
+            "interview_id": self.kwargs["pk"]
         })
-        if self.request.is_ajax():
-            try:
-                json_data = json.loads(self.request.body.decode("utf-8"))
-                kwargs.update({
-                    'data': json_data,
-                })
-            except ValueError:
-                pass
         return kwargs
 
     def _get_interviewer(self):
