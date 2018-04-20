@@ -217,12 +217,10 @@ def test_interview_comment_create(curator, client, settings):
     }
     url = reverse("admission:interview_comment", args=[interview.pk])
     response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-    assert response.status_code == 200
-    assert response.json()['success'] == 'false'
+    assert response.status_code == 400  # invalid form: empty score
     form['score'] = 2
     response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
     assert response.status_code == 200
-    assert response.json()['success'] == 'true'
 
 
 @pytest.mark.django_db
