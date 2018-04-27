@@ -50,7 +50,8 @@ class Command(BaseCommand):
 
             generated = 0
             for row in reader:
-                row = {k: row[k].strip() for k in row}
+                row = {k: (v.strip() if v is not None else "")
+                       for k, v in row.items()}
                 if "template_name" in row:
                     template_name = row["template_name"]
                     try:
