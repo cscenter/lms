@@ -244,7 +244,8 @@ def test_course_offering_assignment_timezone(settings, client):
 
 
 @pytest.mark.django_db
-def test_update_composite_fields(curator, client):
+def test_update_composite_fields(curator, client, mocker):
+    mocker.patch("learning.tasks.maybe_upload_slides_yandex.delay")
     teacher = TeacherCenterFactory()
     co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
                                       teachers=[teacher])
