@@ -5,13 +5,15 @@ from typing import Optional
 
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone, formats
 
 from learning.factories import CourseFactory, SemesterFactory, \
     CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
-    CourseOfferingTeacherFactory
+    CourseOfferingTeacherFactory, CourseClassFactory
 from learning.models import Semester
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
@@ -239,3 +241,30 @@ def test_course_offering_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
+
+
+@pytest.mark.django_db
+def test_update_composite_fields(curator, client):
+    teacher = TeacherCenterFactory()
+    co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                      teachers=[teacher])
+    cc1 = CourseClassFactory.create(course_offering=co, video_url="")
+    co.refresh_from_db()
+    assert not co.materials_video
+    assert not co.materials_slides
+    assert not co.materials_files
+    slides_file = SimpleUploadedFile("slides.pdf", b"slides_content")
+    client.login(curator)
+    form = model_to_dict(cc1)
+    form['slides'] = slides_file
+    client.post(cc1.get_update_url(), form)
+    co.refresh_from_db()
+    assert not co.materials_video
+    assert co.materials_slides
+    assert not co.materials_files
+    cc2 = CourseClassFactory.create(course_offering=co, video_url="youtuuube")
+    co.refresh_from_db()
+    assert co.materials_video
+    # Slides were uploaded on first class
+    assert co.materials_slides
+    assert not co.materials_files

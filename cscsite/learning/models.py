@@ -748,17 +748,22 @@ class CourseClass(TimeStampedModel):
     def _get_track_field(self, field):
         return getattr(self, '_original_{}'.format(field))
 
-    def refresh_composite_fields(self):
-        """Composite fields used on courses list page"""
-        has_class_slides = bool(self.slides)
-        has_class_video = self.video_url.strip() != ""
-        has_class_materials_files = self.courseclassattachment_set.exists()
-        if any([has_class_slides, has_class_video, has_class_materials_files]):
-            CourseOffering.objects.filter(pk=self.course_offering_id).update(
-                materials_slides=has_class_slides,
-                materials_video=has_class_video,
-                materials_files=has_class_materials_files
-            )
+    def update_composite_fields(self):
+        """
+        Updates composite fields used on courses list page under the assumption
+        that teacher/curator never deletes materials, only adds.
+        """
+        update_fields = {}
+        if bool(self.slides):
+            update_fields["materials_slides"] = True
+        if self.video_url.strip() != "":
+            update_fields["materials_video"] = True
+        if self.courseclassattachment_set.exists():
+            update_fields["materials_files"] = True
+        if update_fields:
+            (CourseOffering.objects
+             .filter(pk=self.course_offering_id)
+             .update(**update_fields))
 
     def clean(self):
         super(CourseClass, self).clean()
@@ -774,7 +779,7 @@ class CourseClass(TimeStampedModel):
         if self.slides and not self.slides_url:
             maybe_upload_slides_yandex.delay(self.pk)
         self._update_track_fields()
-        self.refresh_composite_fields()
+        self.update_composite_fields()
 
     def video_iframe(self):
         return get_oembed_html(self.video_url, 'video_oembed',
@@ -809,7 +814,7 @@ class CourseClassAttachment(TimeStampedModel, object):
         created = self.pk is None
         super().save(*args, **kwargs)
         if created:
-            CourseClass.refresh_composite_fields(self.course_class)
+            CourseClass.update_composite_fields(self.course_class)
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
