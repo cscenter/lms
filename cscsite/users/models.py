@@ -555,7 +555,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             sections.append(PublicRoute.STAFF.choice)
         return sections
 
-    def stats(self, term):
+    def stats(self, current_term):
         """
         Stats for SUCCESSFULLY completed courses and enrollments in 
         requested term.
@@ -569,15 +569,15 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         center_courses = set()
         club_courses = set()
         club_adjusted = 0
-        in_term_total = 0  # center, club and shad courses
-        in_term_courses = set()  # center and club courses
-        in_term_passed = 0  # # Center and club courses. Included in passed.
-        in_term_may_contribute = 0  # Center and club courses.
+        in_current_term_total = 0  # center, club and shad courses
+        in_current_term_courses = set()  # center and club courses
+        in_current_term_passed = 0  # Center and club courses
+        in_current_term_in_progress = 0  # Center and club courses
         for e in self.enrollment_set.all():
-            in_term = e.course_offering.semester_id == term.pk
-            if in_term:
-                in_term_total += 1
-                in_term_courses.add(e.course_offering.course_id)
+            in_current_term = e.course_offering.semester_id == current_term.pk
+            if in_current_term:
+                in_current_term_total += 1
+                in_current_term_courses.add(e.course_offering.course_id)
             if e.course_offering.is_open:
                 # See queryset in `cast_students_to_will_graduate`
                 if hasattr(e, "classes_total"):
@@ -588,20 +588,20 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 if is_positive_grade(e.grade):
                     club_courses.add(e.course_offering.course_id)
                     club_adjusted += contribution
-                    in_term_passed += int(in_term)
-                elif in_term:
-                    in_term_may_contribute += contribution
+                    in_current_term_passed += int(in_current_term)
+                elif in_current_term:
+                    in_current_term_in_progress += contribution
             else:
                 if is_positive_grade(e.grade):
                     center_courses.add(e.course_offering.course_id)
-                    in_term_passed += int(in_term)
-                elif in_term:
-                    in_term_may_contribute += 1
+                    in_current_term_passed += int(in_current_term)
+                elif in_current_term:
+                    in_current_term_in_progress += 1
         online_total = len(self.onlinecourserecord_set.all())
         shad_total = 0
         for c in self.shadcourserecord_set.all():
             shad_total += int(is_positive_grade(c.grade))
-            in_term_total += int(c.semester_id == term.pk)
+            in_current_term_total += int(c.semester_id == current_term.pk)
 
         return {
             "passed": {
@@ -615,10 +615,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 "shad_total": shad_total
             },
             "in_term": {
-                "total": in_term_total,
-                "courses": in_term_courses,  # center and club courses
-                "passed": in_term_passed,
-                "may_contribute": in_term_may_contribute,
+                "total": in_current_term_total,
+                "courses": in_current_term_courses,  # center and club courses
+                "passed": in_current_term_passed,
+                "in_progress": in_current_term_in_progress,
             }
         }
 
