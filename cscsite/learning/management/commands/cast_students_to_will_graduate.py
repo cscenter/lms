@@ -13,7 +13,7 @@ from users.models import CSCUser, SHADCourseRecord, OnlineCourseRecord
 
 class Command(BaseCommand):
     help = """
-Try to set `will_gratuate` status and appropriate study programs for 
+Try to set `will_graduate` status and appropriate study programs for 
 students who satisfy the requirements.
 
 Requirements:
@@ -66,9 +66,8 @@ Requirements:
                     .order_by())
 
         for student in students.all():
-            # print(student.pk, student.stats(term=current_term))
-            stats = student.stats(term=current_term)
-            total_adjusted = (stats["in_term"]["may_contribute"] +
+            stats = student.stats(current_term=current_term)
+            total_adjusted = (stats["in_term"]["in_progress"] +
                               stats["passed"]["adjusted"])
             if total_adjusted >= 12:
                 areas = []
@@ -76,16 +75,16 @@ Requirements:
                     if (program.year != student.curriculum_year or
                             program.city_id != student.city_id):
                         continue
-                    groupes_total = len(program.course_groups.all())
                     # Student should have at least 1 passed course in each group
-                    groupes_satisfied = 0
+                    groups_total = len(program.course_groups.all())
+                    groups_satisfied = 0
                     for course_groups in program.course_groups.all():
                         center_courses = stats["passed"]["center_courses"]
                         courses = center_courses.union(
                             stats["in_term"]["courses"])
-                        groupes_satisfied += any(c.id in courses for c in
+                        groups_satisfied += any(c.id in courses for c in
                                                  course_groups.courses.all())
-                    if groupes_total and groupes_satisfied == groupes_total:
+                    if groups_total and groups_satisfied == groups_total:
                         areas.append(program.area.code)
                 if areas:
                     CSCUser.objects.filter(pk=student.pk).update(
