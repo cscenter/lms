@@ -1,4 +1,4 @@
-from django.db.models import Count, When, IntegerField, Case
+from django.db.models import Count, When, IntegerField, Case, Q
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
@@ -14,8 +14,9 @@ from stats.admission.pandas_serializers import \
 from stats.admission.serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
 
-TestingCountAnnotation = Count(Case(When(online_test__isnull=False, then=1),
-                                    output_field=IntegerField()))
+TestingCountAnnotation = Count(
+    Case(When(Q(online_test__isnull=False, online_test__score__isnull=False), then=1),
+         output_field=IntegerField()))
 ExaminationCountAnnotation = Count(Case(When(exam__isnull=False, then=1),
                                         output_field=IntegerField()))
 InterviewingCountAnnotation = Count(Case(When(interview__isnull=False, then=1),
