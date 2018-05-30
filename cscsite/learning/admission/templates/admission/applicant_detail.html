@@ -72,7 +72,7 @@
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
             {% if online_test %}
-                <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test and contests.test.file %}Контест <a
+                <h4>Тест: {{ online_test.score_display }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test and contests.test.file %}Контест <a
                         href="{{ contests.test.file_url }}" target="_blank">{% if online_test.yandex_contest_id %}#{{ online_test.yandex_contest_id }}{% endif %}</a>
                 {% elif online_test.yandex_contest_id  %}Контест #{{ online_test.yandex_contest_id }}{% endif %}</h4>
                 <ul class="list-unstyled">
@@ -86,12 +86,19 @@
                 <hr>
             {% endif %}
             {% if exam %}
-                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam and contests.exam.file %}Контест <a
+                <h4>Экзамен: {{ exam.score_display }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam and contests.exam.file %}Контест <a
                         href="{{ contests.exam.file_url }}" target="_blank">{% if exam.yandex_contest_id %}#{{ exam.yandex_contest_id }}{% endif %}</a>{% elif exam.yandex_contest_id  %}
                     Контест #{{ exam.yandex_contest_id }}{% endif %}</h4>
                 <ul class="list-unstyled">
                 {% for k,v in exam.details.items %}
-                    <li>{{ k }}: {{ v }}</li>
+                    <li>
+                        {% if k == "scores" %}
+                            <b>Результаты</b>:<br>{% for k, v in v.items %}{{ k }}: {{ v }}<br>{% endfor %}
+                        {% else %}
+                            <b>{{ k }}</b>: {{ v }}
+                        {% endif %}
+                    </li>
+
                 {% endfor %}
                 </ul>
             {% else %}
