@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import django.core.validators
 from django.db import migrations
-import learning.db.models
+import core.db.models
 
 
 class Migration(migrations.Migration):
@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentassignment',
             name='grade',
-            field=learning.db.models.GradeField(blank=True, decimal_places=2, max_digits=6, null=True, validators=[django.core.validators.MinValueValidator(0)], verbose_name='Grade'),
+            field=core.db.models.GradeField(blank=True, null=True, verbose_name='Grade'),
         ),
     ]

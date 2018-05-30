@@ -28,7 +28,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, city_aware_reverse, is_club_site
 from learning import settings as learn_conf
-from learning.db.models import GradeField
+from core.db.models import GradeField
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
@@ -1036,10 +1036,7 @@ class StudentAssignment(TimeStampedModel):
     grade = GradeField(
         verbose_name=_("Grade"),
         null=True,
-        blank=True,
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(0)])
+        blank=True)
     grade_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='grade')
