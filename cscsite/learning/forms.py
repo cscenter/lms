@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import CityAwareSplitDateTimeField, CityAwareModelForm
+from core.forms import GradeField
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
@@ -24,14 +25,6 @@ CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        css_class="btn btn-default")
 SUBMIT_BUTTON = Submit('save', _('Save'))
 CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
-
-
-class GradeField(forms.DecimalField):
-    def to_python(self, value):
-        """Allow using `1.23` and `1,23` string values"""
-        if value not in self.empty_values and hasattr(value, "replace"):
-            value = value.replace(",", ".")
-        return super().to_python(value)
 
 
 class CourseOfferingPKForm(forms.Form):
@@ -306,11 +299,7 @@ class AssignmentModalCommentForm(forms.ModelForm):
 
 
 class AssignmentGradeForm(forms.Form):
-    grade = GradeField(
-        required=False,
-        label="",
-        min_value=0,
-        widget=forms.NumberInput(attrs={'min': 0, 'step': 0.01}))
+    grade = GradeField(required=False, label="")
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

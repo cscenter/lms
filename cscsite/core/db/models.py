@@ -1,7 +1,10 @@
 from django.core.validators import MinValueValidator
 from django.db.models import DecimalField
 
+from core import forms
 
+
+# TODO: rename?
 class GradeField(DecimalField):
     """Stores positive value with 2 decimal places"""
     def __init__(self, *args, **kwargs):
@@ -19,3 +22,7 @@ class GradeField(DecimalField):
         if value == decimal_as_int:
             return decimal_as_int
         return value.normalize()
+
+    def formfield(self, **kwargs):
+        kwargs.setdefault("form_class", forms.GradeField)
+        return super(GradeField, self).formfield(**kwargs)

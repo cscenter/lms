@@ -14,7 +14,8 @@ from django.forms import BoundField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
-from learning.forms import GradeField, AssignmentGradeForm
+from learning.forms import AssignmentGradeForm
+from core.forms import GradeField
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     CourseOffering
 from learning.settings import GRADES
