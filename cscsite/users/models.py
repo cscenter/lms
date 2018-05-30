@@ -29,7 +29,7 @@ from core.utils import is_club_site
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
-from learning.utils import is_positive_grade
+from learning.utils import is_positive_grade, is_negative_grade
 from learning.permissions import LearningPermissionsMixin
 from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage
 from .managers import CustomUserManager
@@ -572,6 +572,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         in_current_term_total = 0  # center, club and shad courses
         in_current_term_courses = set()  # center and club courses
         in_current_term_passed = 0  # Center and club courses
+        in_current_term_failed = 0  # Center and club courses
         in_current_term_in_progress = 0  # Center and club courses
         # FIXME: add test for `is_deleted=False`. Check all incomings for `enrollment_set`
         for e in self.enrollment_set.filter(is_deleted=False).all():
@@ -591,13 +592,19 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                     club_adjusted += contribution
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
-                    in_current_term_in_progress += contribution
+                    if is_negative_grade(e.grade):
+                        in_current_term_failed += 1
+                    else:
+                        in_current_term_in_progress += contribution
             else:
                 if is_positive_grade(e.grade):
                     center_courses.add(e.course_offering.course_id)
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
-                    in_current_term_in_progress += 1
+                    if is_negative_grade(e.grade):
+                        in_current_term_failed += 1
+                    else:
+                        in_current_term_in_progress += 1
         online_total = len(self.onlinecourserecord_set.all())
         shad_total = 0
         for c in self.shadcourserecord_set.all():
@@ -619,7 +626,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             "in_term": {
                 "total": in_current_term_total,
                 "courses": in_current_term_courses,  # center and club courses
-                "passed": in_current_term_passed,
+                "passed": in_current_term_passed,  # center and club
+                "failed": in_current_term_failed,  # center and club
+                # FIXME: adusted value, not int
                 "in_progress": in_current_term_in_progress,
             }
         }

@@ -163,6 +163,10 @@ def is_positive_grade(grade):
     return grade in POSITIVE_GRADES
 
 
+def is_negative_grade(grade):
+    return grade == GRADES.unsatisfactory
+
+
 def split_on_condition(iterable, predicate):
     true_lst, false_lst = [], []
     for x in iterable:
