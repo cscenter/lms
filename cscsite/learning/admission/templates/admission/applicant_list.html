@@ -64,8 +64,8 @@
                         </td>
                         <td>{{ applicant.campaign.city.abbr }},&nbsp;{{ applicant.campaign.year }}</td>
                         <td>{{ applicant.preferred_study_programs|replace:", <br>"|safe|default:"-" }}</td>
-                        <td>{{ applicant.online_test.score|default:"-" }}</td>
-                        <td>{{ applicant.exam.score|default:"-" }}</td>
+                        <td>{% if applicant.online_test %}{{ applicant.online_test.score_display }}{% else %}-{% endif %}</td>
+                        <td>{% if applicant.exam %}{{ applicant.exam.score_display }}{% else %}-{% endif %}</td>
                     </tr>
                 {% empty %}
                     <tr>
