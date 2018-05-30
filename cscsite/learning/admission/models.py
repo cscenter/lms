@@ -526,6 +526,9 @@ class Test(TimeStampedModel):
         else:
             return smart_text(self.score)
 
+    def score_display(self):
+        return self.score if self.score is not None else "-"
+
     def compute_contest_id(self):
         """
         Returns contest id based on applicant id and existing contest records.
@@ -587,6 +590,9 @@ class Exam(TimeStampedModel):
             return self.applicant.get_full_name()
         else:
             return smart_text(self.score)
+
+    def score_display(self):
+        return self.score if self.score is not None else "-"
 
 
 @python_2_unicode_compatible
