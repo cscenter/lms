@@ -24,6 +24,7 @@ from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
+from core.db.models import GradeField
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Venue
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
@@ -566,8 +567,9 @@ class Exam(TimeStampedModel):
         max_length=42,
         blank=True,
         null=True)
-    score = models.PositiveSmallIntegerField(
+    score = GradeField(
         verbose_name=_("Score"),
+        # Avoid loading empty values with admin interface
         null=True)
 
     class Meta:
