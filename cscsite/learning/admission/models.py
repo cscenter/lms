@@ -822,7 +822,7 @@ class InterviewStream(TimeStampedModel):
             if diff < self.duration:
                 raise ValidationError(
                     _("Stream duration can't be less than slot duration"))
-        if self.venue and not self.campaign_id:
+        if self.venue_id and not self.campaign_id:
             try:
                 self.campaign = Campaign.objects.get(current=True,
                                                      city_id=self.venue.city_id)
