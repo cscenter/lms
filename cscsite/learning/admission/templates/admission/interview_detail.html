@@ -61,34 +61,7 @@
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
-            {% if online_test %}
-                <h4>Тест: {{ online_test.score|floatformat }} / <span>{{ campaign.online_test_max_score }}</span> {% if contests.test and contests.test.file %}Контест <a
-                        href="{{ contests.test.file_url }}" target="_blank">{% if online_test.yandex_contest_id %}
-                    #{{ online_test.yandex_contest_id }}{% endif %}</a>
-                {% elif online_test.yandex_contest_id  %}Контест #{{ online_test.yandex_contest_id }}{% endif %}</h4>
-                <ul class="list-unstyled">
-                {% for k,v in online_test.details.items %}
-                    <li>{{ k }}: {{ v }}</li>
-                {% endfor %}
-                </ul>
-                <hr>
-            {% else %}
-                Результаты теста не найдены.
-                <hr>
-            {% endif %}
-            {% if exam %}
-                <h4>Экзамен: {{ exam.score|floatformat }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam and contests.exam.file %}Контест <a
-                        href="{{ contests.exam.file_url }}" target="_blank">{% if exam.yandex_contest_id %}
-                    #{{ exam.yandex_contest_id }}{% endif %}</a>{% elif exam.yandex_contest_id  %}
-                    Контест #{{ exam.yandex_contest_id }}{% endif %}</h4>
-                <ul class="list-unstyled">
-                {% for k,v in exam.details.items %}
-                    <li>{{ k }}: {{ v }}</li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                Результаты экзамена не найдены.
-            {% endif %}
+            {% include "admission/_results_tab.html" %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
             <div class="interview-info visible-print-block">{{ applicant.get_full_name }}<br>{{ interview.date }}</div>

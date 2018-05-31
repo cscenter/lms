@@ -442,6 +442,7 @@ class InterviewFromStreamForm(forms.Form):
                                             .select_related("stream")
                                             .filter(stream_id=stream_id))
         # TODO: respect timezone
+        # TODO: include current day, but restrict available slots?
         self.fields['stream'].queryset = InterviewStream.objects.filter(
             venue__city_id=city_code,
             date__gt=now().date()).select_related("venue")
