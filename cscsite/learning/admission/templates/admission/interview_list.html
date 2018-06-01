@@ -10,90 +10,16 @@
 
 {% block title %}Собеседования - CSC{% endblock title %}
 
-{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block body_attrs %} class="gray" data-init-sections="datetimepicker"{% endblock body_attrs %}
 
 {% block stylesheets %}
+    {# TODO: move to webpack #}
     <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
 {% endblock stylesheets %}
 
 {% block javascripts %}
-    {% render_bundle 'forms' 'js' %}
-
-    <script type="text/javascript" defer>
-        {# FIXME: copied from course_class.html #}
-        var TIMEPICKER_ICONS = {
-            time: 'fa fa-clock-o',
-            date: 'fa fa-calendar',
-            up: 'fa fa-chevron-up',
-            down: 'fa fa-chevron-down',
-            previous: 'fa fa-chevron-left',
-            next: 'fa fa-chevron-right',
-            today: 'fa fa-screenshot',
-            clear: 'fa fa-trash',
-            close: 'fa fa-check',
-        };
-        var TIMEPICKER_TOOLTIPS = {
-            today: 'Go to today',
-            clear: 'Clear selection',
-            close: 'Закрыть',
-            selectMonth: 'Выбрать месяц',
-            prevMonth: 'Предыдущий месяц',
-            nextMonth: 'Следующий месяц',
-            selectYear: 'Выбрать год',
-            prevYear: 'Предыдущий год',
-            nextYear: 'Следующий год',
-            selectDecade: 'Выбрать декаду',
-            prevDecade: 'Предыдущая декада',
-            nextDecade: 'Следующая декада',
-            prevCentury: 'Предыдущий век',
-            nextCentury: 'Следующий век'
-        };
-
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-
-            $('.input-daterange .input-group, #id_date').datetimepicker({
-                allowInputToggle: true,
-                useCurrent: false,
-                locale: 'ru',
-                format: 'DD.MM.YYYY',
-                stepping: 5,
-                toolbarPlacement: "bottom",
-                keyBinds: {
-                    left: false,
-                    right: false,
-                    escape: function () {
-                        this.hide();
-                    },
-                },
-                icons: TIMEPICKER_ICONS,
-                tooltips: TIMEPICKER_TOOLTIPS,
-
-            });
-            var dateFromPicker = $('#id_date_0').closest('.input-group');
-            var dateToPicker = $('#id_date_1').closest('.input-group');
-            dateToPicker.data("DateTimePicker").useCurrent(false);
-            dateFromPicker.on("dp.change", function (e) {
-                dateToPicker.data("DateTimePicker").minDate(e.date);
-                if (e.date) {
-                    if (dateToPicker.data("DateTimePicker").date() === null) {
-                        dateToPicker.data("DateTimePicker").defaultDate(e.date);
-                    } else if (dateToPicker.data("DateTimePicker").date() < e.date) {
-                        dateToPicker.data("DateTimePicker").date(e.date);
-                    }
-                }
-            });
-            dateToPicker.on("dp.change", function (e) {
-                dateFromPicker.data("DateTimePicker").maxDate(e.date);
-                if (dateFromPicker.data("DateTimePicker").date() === null) {
-                    dateFromPicker.data("DateTimePicker").defaultDate(e.date);
-                }
-            });
-
-
-        });
-    </script>
+    {% render_bundle 'admission' %}
 {% endblock javascripts %}
 
 {% block content %}

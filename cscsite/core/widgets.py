@@ -4,7 +4,7 @@ from collections import OrderedDict, namedtuple
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django_filters.widgets import RangeWidget
+from django_filters.widgets import RangeWidget, SuffixedMultiWidget
 
 from core.admin import city_aware_to_naive
 from learning.settings import DATE_FORMAT_RU
@@ -21,13 +21,16 @@ class AdminRichTextAreaWidget(UbereditorWidget):
     template_name = 'widgets/ubertextarea.html'
 
 
-class DateTimeRangeWidget(RangeWidget):
+class DateTimeRangeWidget(SuffixedMultiWidget, RangeWidget):
     template_name = 'widgets/datetime_range.html'
+    suffixes = ['from', 'to']
 
     def __init__(self, attrs=None):
         widgets = (forms.DateInput(attrs={"class": "form-control",
+                                          "autocomplete": "off",
                                           "placeholder": "C"}),
                    forms.DateInput(attrs={"class": "form-control",
+                                          "autocomplete": "off",
                                           "placeholder": "По"}))
         super(RangeWidget, self).__init__(widgets, attrs)
 

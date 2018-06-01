@@ -65,14 +65,16 @@ def test_simple_interviews_list(client, curator, settings):
     # For curator set default filters and redirect
     assert response.status_code == 302
     assert f"campaign={campaign.pk}" in response.url
-    assert "status=agreed" in response.url
+    assert f"status={Interview.COMPLETED}" in response.url
+    assert f"status={Interview.APPROVED}" in response.url
     today_date = formats.date_format(today, "SHORT_DATE_FORMAT")
-    assert f"date_0={today_date}&date_1={today_date}" in response.url
+    assert f"date_from={today_date}&date_to={today_date}" in response.url
 
     def format_url(campaign_id, date_from: str, date_to: str):
-        return "{}?campaign={}&status=agreed&date_0={}&date_1={}".format(
-            reverse('admission:interviews'),
-            campaign_id, date_from, date_to)
+        return (reverse('admission:interviews') +
+                f"?campaign={campaign_id}&status={Interview.COMPLETED}&"
+                f"status={Interview.APPROVED}&"
+                f"date_from={date_from}&date_to={date_to}")
     url = format_url(campaign.pk, today_date, today_date)
     response = client.get(url)
     assert response.status_code == 200
