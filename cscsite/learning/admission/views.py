@@ -575,11 +575,12 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             if not c:
                 messages.error(self.request, "Нет активных кампаний по набору.")
             # Duplicate initial values from filterset
-            status = InterviewStatusFilter.AGREED
+            statuses = "&".join(f"status={s}" for s in
+                                [Interview.COMPLETED, Interview.APPROVED])
             date = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
-            url = "{}?campaign={}&status={}&date_0={}&date_1={}".format(
+            url = "{}?campaign={}&{statuses}&date_from={date_from}&date_to={date_to}".format(
                 reverse("admission:interviews"),
-                c, status, date, date)
+                c, statuses=statuses, date_from=date, date_to=date)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -595,9 +596,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         if not kwargs["data"]:
             today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
             kwargs["data"] = {
-                "status": InterviewStatusFilter.AGREED,
-                "date_0": today,
-                "date_1": today
+                "status": [Interview.COMPLETED, Interview.APPROVED],
+                "date_from": today,
+                "date_to": today
             }
         return kwargs
 

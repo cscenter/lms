@@ -7,8 +7,10 @@ from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django import forms
+from django.forms import SelectMultiple
 from django.utils.translation import ugettext_lazy as _
 from django_filters.conf import settings as filters_settings
+
 
 from core.models import University
 from core.widgets import DateTimeRangeWidget
@@ -43,20 +45,19 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
         return super().filter(qs, value)
 
 
-# Filter Forms
+# Forms
 class InterviewsFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = "get"
         self.helper.layout = Layout(
             Row(
-                Div('status', css_class="col-xs-6"),
-                Div('date', css_class="col-xs-6"),
+                Div('status', css_class="col-xs-4"),
+                Div('date', css_class="col-xs-5"),
+                Div(Submit('', _('Filter'),
+                           css_class="btn-block -inline-submit"),
+                    css_class="col-xs-3"),
             ),
-            Row(
-                FormActions(Div(Submit('', _('Filter'), css_class="mb-15"),
-                                css_class="col-xs-4"))
-            )
         )
         super().__init__(*args, **kwargs)
 
@@ -69,12 +70,11 @@ class InterviewsCuratorFilterForm(forms.Form):
             Row(
                 Div(Field('campaign'), css_class="col-xs-3"),
                 Div('status', css_class="col-xs-3"),
-                Div('date', css_class="col-xs-6")
+                Div('date', css_class="col-xs-4"),
+                Div(Submit('', _('Filter'),
+                           css_class="btn-block -inline-submit"),
+                    css_class="col-xs-2"),
             ),
-            Row(
-                FormActions(Div(Submit('', _('Filter'), css_class="mb-15"),
-                                css_class="col-xs-4"))
-            )
         )
         super().__init__(*args, **kwargs)
 
@@ -114,13 +114,16 @@ class ApplicantFilter(django_filters.FilterSet):
 
 
 class InterviewsBaseFilter(django_filters.FilterSet):
-    status = InterviewStatusFilter(choices=Interview.STATUSES,
-                                   label=_("Status"),
-                                   help_text="")
-    date = django_filters.DateFromToRangeFilter(name="date",
-                                                label="Период собеседований",
-                                                help_text="",
-                                                widget=DateTimeRangeWidget)
+    date = django_filters.DateFromToRangeFilter(
+        name="date",
+        label="Период собеседований",
+        help_text="",
+        widget=DateTimeRangeWidget)
+    status = django_filters.MultipleChoiceFilter(
+        choices=Interview.STATUSES,
+        label=_("Status"),
+        help_text="",
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}))
 
     class Meta:
         model = Interview
