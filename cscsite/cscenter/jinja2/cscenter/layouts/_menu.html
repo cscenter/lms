@@ -12,9 +12,12 @@
         <div class="menu-desktop-wrapper">
             <ul class="navbar-nav">
                 {% for menu_item in menu["tree"] %}
+                    {# Hack to hide `curators` from top menu #}
+                    {% if menu_item.id != 15 %}
                     <li class="nav-item">
                         <a class="nav-link {% if menu_item.id in menu["active_items"] %}_active{% endif %}" {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
                     </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -31,24 +34,18 @@
                         {%- if im -%}
                             <img class="user-menu-img" src="{{ im.url }}" width="30" height="30" alt="{{ request.user.get_full_name() }}">
                         {%- else -%}
-                            <img src="{{ static('v2/img/icons/user-sign.svg') }}" width="30" height="30" alt="">
+                            {{ macros.svg_inline('user-sign') }}
                         {%- endif -%}
                     {%- endwith %}
                 </button>
                 <div class="dropdown-menu _arrow-right" aria-labelledby="userMenuButton">
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
-                    {% if request.user.is_project_reviewer or request.user.is_curator_of_projects %}
-                        <a class="dropdown-item" href="{{ url('projects:report_list_reviewers') }}">Проекты</a>
-                    {% endif %}
-                    {% if request.user.is_interviewer %}
-                        <a class="dropdown-item" href="{{ url('admission:interviews') }}">Набор</a>
-                    {% endif %}
-                    {% if request.user.is_student %}
-                        <a class="dropdown-item" href="{{ url('assignment_list_student') }}">Обучение</a>
-                    {% endif %}
-                    {% if request.user.is_teacher %}
-                        <a class="dropdown-item" href="{{ url('assignment_list_teacher') }}">Преподавание</a>
-                    {% endif %}
+{#                    {% if request.user.is_interviewer %}#}
+{#                        <a class="dropdown-item" href="{{ url('admission:interviews') }}">Набор</a>#}
+{#                    {% endif %}#}
+{#                    {% if request.user.is_project_reviewer or request.user.is_curator_of_projects %}#}
+{#                        <a class="dropdown-item" href="{{ url('projects:report_list_reviewers') }}">Проекты</a>#}
+{#                    {% endif %}#}
                     {% if request.user.is_staff %}
                         <a class="dropdown-item" href="{{ url('staff:student_search') }}">Курирование</a>
                         <a class="dropdown-item" href="{{ url('stats:index') }}">Статистика</a>
