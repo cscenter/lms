@@ -19,33 +19,9 @@
             </ul>
         </div>
 
-        <div class="menu-mobile-wrapper collapse" id="top-menu-mobile">
-            <ul>
-                {% for menu_item in menu["tree"] -%}
-                    <li>
-                        {% if menu_item.children -%}
-                            <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}"
-                               href="{{ menu_item.url }}"
-                               data-toggle="collapse" aria-expanded="{% if menu_item.id in menu["active_items"] %}true{% else %}false{% endif %}"
-                               data-target="#top-menu-item-{{ loop.index }}"
-                               aria-controls="top-menu-item-{{ loop.index }}"
-                            >{{ menu_item.caption }} {{ macros.svg_inline('arrow-bottom') }}</a>
-                            <div class="mobile-submenu collapse {% if menu_item.id in menu["active_items"] %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
-                                {% for item in menu_item.children -%}
-                                <a class="mobile-submenu-item{% if item.id in menu["active_items"] %} _active{% endif %}" href="{{ item.url }}">{{ item.caption }}</a>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}" href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
-                        {% endif -%}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-
         {% if not request.user.is_authenticated %}
-            <a class="btn btn--outline btn-reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
-                Войти <div class="btn-reg--icon"></div>
+            <a class="btn btn--outline menu-btn-reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
+                {{ macros.svg_inline('user-sign') }} Войти
             </a>
         {% else %}
             <div class="dropdown dropdown-user-menu">
@@ -53,7 +29,7 @@
                     <span>{{ request.user.first_name or request.user.username }}</span>
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                         {%- if im -%}
-                            <img class="user-menu-img" src="{{ im.url }}" alt="{{ request.user.get_full_name() }}">
+                            <img class="user-menu-img" src="{{ im.url }}" width="30" height="30" alt="{{ request.user.get_full_name() }}">
                         {%- else -%}
                             <img src="{{ static('v2/img/icons/user-sign.svg') }}" width="30" height="30" alt="">
                         {%- endif -%}
@@ -83,6 +59,29 @@
                 </div>
             </div>
         {% endif %}
+    </div>
+    <div class="menu-mobile-wrapper collapse" id="top-menu-mobile">
+        <ul class="container">
+            {% for menu_item in menu["tree"] -%}
+                <li>
+                    {% if menu_item.children -%}
+                        <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}"
+                           href="{{ menu_item.url }}"
+                           data-toggle="collapse" aria-expanded="{% if menu_item.id in menu["active_items"] %}true{% else %}false{% endif %}"
+                           data-target="#top-menu-item-{{ loop.index }}"
+                           aria-controls="top-menu-item-{{ loop.index }}"
+                        >{{ menu_item.caption }} {{ macros.svg_inline('arrow-bottom') }}</a>
+                        <div class="mobile-submenu collapse {% if menu_item.id in menu["active_items"] %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
+                            {% for item in menu_item.children -%}
+                            <a class="mobile-submenu-item{% if item.id in menu["active_items"] %} _active{% endif %}" href="{{ item.url }}">{{ item.caption }}</a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}" href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
+                    {% endif -%}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </nav>
 
