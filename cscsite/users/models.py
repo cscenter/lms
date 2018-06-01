@@ -573,7 +573,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         in_current_term_courses = set()  # center and club courses
         in_current_term_passed = 0  # Center and club courses
         in_current_term_in_progress = 0  # Center and club courses
-        for e in self.enrollment_set.all():
+        # FIXME: add test for `is_deleted=False`. Check all incomings for `enrollment_set`
+        for e in self.enrollment_set.filter(is_deleted=False).all():
             in_current_term = e.course_offering.semester_id == current_term.pk
             if in_current_term:
                 in_current_term_total += 1
@@ -604,6 +605,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             in_current_term_total += int(c.semester_id == current_term.pk)
 
         return {
+            # All the time
             "passed": {
                 "total": len(center_courses) + online_total + shad_total +
                          len(club_courses),

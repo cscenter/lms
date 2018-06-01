@@ -430,6 +430,16 @@ def contest_assignments_upload_to(instance, filename):
         filename=filename)
 
 
+def validate_json_container(value):
+    """
+    Doesn't call if value is empty. This behavior checked in model clean method
+    """
+    if not isinstance(value, dict):
+        raise ValidationError(
+            "Serialized JSON should have dict as a container."
+        )
+
+
 class Contest(models.Model):
     FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
     TYPE_TEST = 1
@@ -452,7 +462,12 @@ class Contest(models.Model):
         max_length=42,
         blank=True,
         null=True)
-
+    details = JSONField(
+        verbose_name=_("Details"),
+        load_kwargs={'object_pairs_hook': OrderedDict},
+        blank=True,
+        validators=[validate_json_container]
+    )
     file = models.FileField(
         _("Assignments in pdf format"),
         blank=True,
@@ -464,6 +479,10 @@ class Contest(models.Model):
         verbose_name = _("Contest")
         verbose_name_plural = _("Contests")
 
+    def clean(self):
+        if not self.details:
+            self.details = {}
+
     def file_url(self):
         return self.file.url
 
@@ -474,12 +493,10 @@ class Contest(models.Model):
 class Test(TimeStampedModel):
     NEW = 'new'  # created
     REGISTERED = 'registered'  # registered in contest
-    AUTO_UPDATE = 'auto'  # auto updating score through contest api
     MANUAL = 'manual'  # manual score input
     STATUSES = (
         (NEW, _("New")),
-        (REGISTERED, _("Registered")),
-        (AUTO_UPDATE, _("Auto updating score")),
+        (REGISTERED, _("Registered in contest")),
         (MANUAL, _("Manual score input")),
     )
     applicant = models.OneToOneField(
