@@ -18,7 +18,7 @@
     "@babel/polyfill": "^7.0.0-beta.49",
     "@babel/runtime": "^7.0.0-beta.49",
     "blueimp-md5": "^2.6.0",
-    "bootstrap": "^4.0.0",
+    "bootstrap": "^4.1.1",
     "bootstrap-fileinput": "^4.4.6",
     "bootstrap-sass": "^3.3.7",
     "bootstrap-select": "^1.13.1",
