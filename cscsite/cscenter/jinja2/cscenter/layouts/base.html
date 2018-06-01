@@ -23,10 +23,21 @@
 
     {% block before_navbar_container %}{% endblock before_navbar_container %}
     <div class="navbar-container">
-        {% block top_banner %}{% endblock top_banner %}
+        {% block top_banner %}
+            {%- if is_admission_active -%}
+                <div class="top-banner">
+                    <div class="container">
+                        <div class="top-banner__text">
+                            {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="{{ url('admission:application') }}">приём заявок</a> на очное обучение в центре
+                        </div>
+                    </div>
+                </div>
+            {%- endif -%}
+        {% endblock top_banner %}
         {% include "cscenter/layouts/_menu.html" %}
     </div>
-    {% block after_navbar_container %}{% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}{% endblock after_navbar_container %}
+    {% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
+    {% block after_navbar_container %}{% endblock after_navbar_container %}
 
     {% block content %}{% endblock content %}
 
