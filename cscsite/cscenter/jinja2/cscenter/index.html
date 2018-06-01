@@ -1,20 +1,8 @@
-{#{% import "_macros.jinja2" as macros -%}#}
 {% extends "cscenter/layouts/base.html" %}
 
 {% set menu_theme="__transparent-theme" %}
 
 {% block sprites %}{% include "sprites/index.svg" without context %}{% endblock sprites %}
-
-
-{% block top_banner %}{% if is_admission_active -%}
-    <div class="top-banner">
-        <div class="container">
-            <div class="top-banner__text">
-                {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="{{ url('admission:application') }}">приём заявок</a> на очное обучение в центре
-            </div>
-        </div>
-    </div>
-{%- endif %}{% endblock top_banner %}
 
 
 {% block before_navbar_container %}<div class="cover">{% endblock before_navbar_container %}

@@ -2,18 +2,18 @@
 {% set user = request.user %}
 <nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">
-        <button class="navbar-toggler" type="button" data-toggle="collapse"
-                data-target="#top-menu-mobile" aria-controls="top-menu-mobile"
+        <button class="navbar-toggler hamburger hamburger--vortex" type="button"
+                data-toggle="collapse" data-target="#top-menu-mobile" aria-controls="top-menu-mobile"
                 aria-expanded="false" aria-label="Toggle navigation">
-            {{ macros.svg_inline('burger-menu') }}
+            <span class="hamburger-box"><span class="hamburger-inner"></span></span>
         </button>
         <a class="navbar-logo" href="/">{{ macros.svg_inline('logo-csc') }}</a>
 
         <div class="menu-desktop-wrapper">
             <ul class="navbar-nav">
                 {% for menu_item in menu["tree"] %}
-                    <li class="nav-item {% if menu_item.id in menu["active_items"] %}_active{% endif %}">
-                        <a class="nav-link" {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if menu_item.id in menu["active_items"] %}_active{% endif %}" {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
                     </li>
                 {% endfor %}
             </ul>
@@ -50,7 +50,7 @@
         {% else %}
             <div class="dropdown dropdown-user-menu">
                 <button class="btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span>{{ request.user.get_short_name() }}</span>
+                    <span>{{ request.user.first_name or request.user.username }}</span>
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                         {%- if im -%}
                             <img class="user-menu-img" src="{{ im.url }}" alt="{{ request.user.get_full_name() }}">
@@ -86,27 +86,19 @@
     </div>
 </nav>
 
-{% if show_submenu %}
-    <nav class="navbar navbar-submenu">
-        <div class="container">
-            <ul class="navbar-nav">
-                <li class="nav-item _active">
-                    <a class="nav-link" href="#">Цели и история</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Команда</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Преподаватели</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Выпускники</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Отзывы</a>
-                </li>
-            </ul>
 
-        </div>
-    </nav>
-{% endif %}
+{% for menu_item in menu["tree"] %}
+    {% if menu_item.id in menu["active_items"] and menu_item.children %}
+        <nav class="navbar navbar-submenu">
+            <div class="container">
+                <ul class="navbar-nav">
+                    {% for second_level in menu_item.children %}
+                        <li class="nav-item{% if second_level.id in menu["active_items"] %} _active{% endif %}">
+                            <a class="nav-link" {% if second_level.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ second_level.url }}">{{ second_level.caption }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </nav>
+    {% endif %}
+{% endfor %}
