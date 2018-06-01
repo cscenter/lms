@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-
 import django_filters
-from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django import forms
 from django.forms import SelectMultiple
 from django.utils.translation import ugettext_lazy as _
-from django_filters.conf import settings as filters_settings
 
 
 from core.models import University
@@ -167,8 +163,7 @@ class ResultsFilter(django_filters.FilterSet):
               .filter(city_id=self.request.city_code)
               .select_related("city")
               .order_by("-city", "sort"))
-        university_choices = [('', filters_settings.EMPTY_CHOICE_LABEL)] + \
-                             [(u.id, u.name) for u in qs.all()]
+        university_choices = [(u.id, u.name) for u in qs.all()]
         self.filters['university'].extra["choices"] = university_choices
 
     @property
