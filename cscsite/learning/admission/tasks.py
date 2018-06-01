@@ -100,6 +100,7 @@ def register_in_yandex_contest(applicant_id, language_code):
 
 
 # FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение
+# TODO: What if rq.timeouts.JobTimeoutException?
 @job('default')
 def import_testing_results(task_id=None):
     Applicant = apps.get_model('admission', 'Applicant')
@@ -116,11 +117,11 @@ def import_testing_results(task_id=None):
     if not current_campaigns:
         # TODO: mark task as failed
         return
+    now = timezone.now()
     # Campaigns are the same now, but handle them separately,
     # since this behavior can be changed in the future.
     for campaign in current_campaigns:
         # TODO: add contest deadline and check that contest has ended
-        update_status = Test.AUTO_UPDATE
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
             contest_id = contest.contest_id
@@ -138,6 +139,13 @@ def import_testing_results(task_id=None):
             while True:
                 try:
                     status, json_data = api.standings(contest_id, **paging)
+                    # Assignment titles
+                    if "titles" not in contest.details:
+                        if not contest.details:
+                            contest.details = {}
+                        titles = [t["name"] for t in json_data["titles"]]
+                        contest.details["titles"] = titles
+                        contest.save()
                     total = 0
                     for row in json_data['rows']:
                         participants_total += 1
@@ -150,13 +158,18 @@ def import_testing_results(task_id=None):
                         # TODO: Обновлять статус? Но это +1 запрос на каждый результат, если делать это точно
                         participant = (Q(applicant__yandex_id=yandex_login) |
                                        Q(contest_participant_id=participant_id))
+                        # Participant progress
+                        scores = [a["score"] for a in row["problemResults"]]
+                        update_fields = {
+                            "score": score,
+                            "details": {"scores": scores}
+                        }
                         updated = (Test.objects
                                    .filter(applicant__campaign_id=campaign.pk,
                                            yandex_contest_id=contest_id,
-                                           status__in=[Test.REGISTERED,
-                                                       Test.AUTO_UPDATE])
+                                           status=Test.REGISTERED)
                                    .filter(participant)
-                                   .update(score=score, status=update_status))
+                                   .update(**update_fields))
                         updated_total += updated
                     if total < paging["page_size"]:
                         break

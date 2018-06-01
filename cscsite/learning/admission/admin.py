@@ -81,6 +81,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
 
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
+    raw_id_fields = ("applicant",)
     list_display = ['__str__', 'score', 'yandex_contest_id']
     search_fields = ['applicant__yandex_id', 'applicant__surname',
                      'applicant__first_name', 'yandex_contest_id']
@@ -133,6 +134,9 @@ class InterviewAssignmentAdmin(admin.ModelAdmin):
 class ContestAdmin(admin.ModelAdmin):
     list_display = ['contest_id', 'campaign']
     list_filter = [CampaignListFilter]
+    formfield_overrides = {
+        JSONField: {'widget': PrettyJSONWidget}
+    }
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':

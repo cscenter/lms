@@ -315,9 +315,13 @@ def applicant_testing_new_task(request):
             creator=request.user)
         # Not really atomic, just trying to avoid useless rows in DB
         try:
-            Task.objects.unlocked(timezone.now()).get(processed_at__isnull=True,
-                                                      task_name=task.task_name,
-                                                      task_hash=task.task_hash)
+            # FIXME: Deal with deadlocks (locked tasks which were started
+            # processing by rqworker but did fail during the processing)
+            # Without it this try-block looks useless
+            Task.objects.get(locked_by__isnull=True,
+                             processed_at__isnull=True,
+                             task_name=task.task_name,
+                             task_hash=task.task_hash)
         except Task.MultipleObjectsReturned:
             # Even more than 1 job in Task.MAX_RUN_TIME seconds
             pass
@@ -360,8 +364,10 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             .select_related("exam", "online_test", "campaign", "university",
                             "campaign__city")
             .prefetch_related("interview")
-            .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)))
-            .order_by("-exam__score_coalesce", "-online_test__score", "pk"))
+            .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
+                      test__score_coalesce=Coalesce('online_test__score',
+                                                    Value(-1)))
+            .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
     def get(self, request, *args, **kwargs):
         """Sets filter defaults and redirects"""
