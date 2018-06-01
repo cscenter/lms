@@ -1,118 +1,37 @@
-{% import "_macros.jinja2" as macros -%}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title>{% block title %}Computer Science Center{% endblock title %}</title>
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
-    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
+{#{% import "_macros.jinja2" as macros -%}#}
+{% extends "cscenter/layouts/base.html" %}
 
-    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
-    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
-    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+{% set menu_theme="__transparent-theme" %}
 
-    {% block stylesheets %} {% endblock stylesheets %}
-</head>
-<body>
-    <div class="svg-inline">{% include "sprites/index.svg" without context %}</div>
-    <div class="cover">
-        <div class="navbar-container">
-            {% if is_admission_active %}
-                <div class="top-banner">
-                    <div class="container">
-                        <div class="top-banner__text">
-                            {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="{{ url('admission:application') }}">приём заявок</a> на очное обучение в центре
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-            <nav class="navbar navbar-expand-lg navbar-dark">
-                <div class="container">
-                    <a class="navbar-brand" href="/" title="Computer Science Center">{{ macros.svg_inline('logo-csc') }}</a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse"
-                            data-target="#top-menu" aria-controls="top-menu"
-                            aria-expanded="false" aria-label="Переключить">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+{% block sprites %}{% include "sprites/index.svg" without context %}{% endblock sprites %}
 
-                    <div class="collapse navbar-collapse" id="top-menu">
-                        <ul class="navbar-nav mr-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="/about/">О центре</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/courses/">Курсы</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/online/">Онлайн</a>
-                            </li>
-                            <li class="nav-item">
-                                <a target="_blank" rel="noopener" class="nav-link" href="https://open.compscicenter.ru/">Лекторий</a>
-                            </li>
-                            <li class="nav-item navbar-last-item">
-                                <a class="nav-link" href="/enrollment/">Поступление</a>
-                            </li>
-                        </ul>
-                    </div>
 
-                    {% if not request.user.is_authenticated %}
-                        <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
-                            Войти <div class="btn-reg--icon"></div>
-                        </a>
-                    {% else %}
-                        <div class="dropdown">
-                            <button class="btn _user-menu-btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span>{{ request.user.get_short_name() }}</span>
-                                {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
-                                    {%- if im -%}
-                                        <img class="user-menu-img" src="{{ im.url }}" alt="{{ request.user.get_full_name() }}">
-                                    {%- else -%}
-                                        <img src="{{ static('v2/img/icons/user-sign.svg') }}" width="30" height="30" alt="">
-                                    {%- endif -%}
-                                {%- endwith %}
-                            </button>
-                            <div class="dropdown-menu _user-menu" aria-labelledby="userMenuButton">
-                                <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
-                                {% if request.user.is_project_reviewer or request.user.is_curator_of_projects %}
-                                    <a class="dropdown-item" href="{{ url('projects:report_list_reviewers') }}">Проекты</a>
-                                {% endif %}
-                                {% if request.user.is_interviewer %}
-                                    <a class="dropdown-item" href="{{ url('admission:interviews') }}">Набор</a>
-                                {% endif %}
-                                {% if request.user.is_student %}
-                                    <a class="dropdown-item" href="{{ url('assignment_list_student') }}">Обучение</a>
-                                {% endif %}
-                                {% if request.user.is_teacher %}
-                                    <a class="dropdown-item" href="{{ url('assignment_list_teacher') }}">Преподавание</a>
-                                {% endif %}
-                                {% if request.user.is_staff %}
-                                    <a class="dropdown-item" href="{{ url('staff:student_search') }}">Курирование</a>
-                                    <a class="dropdown-item" href="{{ url('stats:index') }}">Статистика</a>
-                                    <a class="dropdown-item" href="{{ url('admin:index') }}">Админ-панель</a>
-                                {% endif %}
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ url('logout') }}">Выйти</a>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </nav>
-        </div>
-
+{% block top_banner %}{% if is_admission_active -%}
+    <div class="top-banner">
         <div class="container">
-            <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
-            <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
-            <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
-            <a href="/about/" class="btn btn--big btn--white">Узнать о центре</a>
+            <div class="top-banner__text">
+                {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="{{ url('admission:application') }}">приём заявок</a> на очное обучение в центре
+            </div>
         </div>
     </div>
+{%- endif %}{% endblock top_banner %}
 
 
+{% block before_navbar_container %}<div class="cover">{% endblock before_navbar_container %}
+{% block after_navbar_container %}
+    <div class="container">
+        <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
+        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
+        <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
+        <a href="/about/" class="btn btn--big btn--white">Узнать о центре</a>
+    </div>
+</div> {# -- div.cover #}
+{% endblock after_navbar_container %}
+
+{% block content %}
     <div class="csc-offline-courses" id="offline-courses">
         <div class="container">
-            <h2>Очные курсы центра</h2>
+            <h2 class="m-center">Очные курсы центра</h2>
             <p class="card-offline-course__text">
                 Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических специальностей пройти двух- или трёхлетние курсы по направлениям:
             </p>
@@ -171,10 +90,6 @@
         </div>
     </div>
 
-{%- macro online_program_card(title, link, img_src, type, additional_classes='') %}
-
-{%- endmacro -%}
-
     <div class="csc-online-education">
         <div class="container">
             <h2 class="text-center">Онлайн-обучение</h2>
@@ -201,19 +116,21 @@
 
     <div class="csc-student-reviews __dark">
         <div class="container">
-            <h2>Отзывы студентов</h2>
+            <h2 class="m-center">Отзывы студентов</h2>
             <div class="card-columns">
                 {% for student in testimonials %}
                     <div class="card">
                         <div class="testimonial">
                             {% with im = student.get_thumbnail("150x150", use_stub=False) %}
                                 {% if im %}
-                                    <img alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                    <img class="img-rounded" alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="74" height="74">
                                 {% endif %}
                             {% endwith %}
                             <div class="testimonial__details">
-                                <h4 class="testimonial__name">{{ student.get_full_name() }}</h4>
-                                <span>Выпуск {{ student.graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
+                                <div class="testimonial__author">
+                                    <h4>{{ student.get_full_name() }}</h4>
+                                    <span>Выпуск {{ student.graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
+                                </div>
                                 <div class="testimonial__text">
                                     {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
                                 </div>
@@ -230,7 +147,7 @@
 
     <div class="social-media-posts">
         <div class="container">
-            <h2>#compscicenter</h2>
+            <h2 class="m-center">#compscicenter</h2>
 
             <div class="row">
                 {% if instagram_posts %}
@@ -263,52 +180,4 @@
             </div>
         </div>
     </div>
-
-    <footer class="footer container">
-            <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
-            <div class="footer__contacts">
-                <a href="mailto:info@compscicenter.ru" class="footer__email">info@compscicenter.ru</a>
-                <div class="footer__social-media-icons">
-                    <a target="_blank" rel="noopener" href="https://vk.com/compscicenter">{{ macros.svg_inline('vk') }}</a>
-                    <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter">{{ macros.svg_inline('instagram') }}</a>
-                    <a target="_blank" rel="noopener" href="https://twitter.com/compscicenter">{{ macros.svg_inline('twitter') }}</a>
-                    <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_inline('facebook') }}</a>
-                    <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru">{{ macros.svg_inline('youtube') }}</a>
-                </div>
-            </div>
-    </footer>
-
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript" >
-        (function (d, w, c) {
-            (w[c] = w[c] || []).push(function() {
-                try {
-                    w.yaCounter25844420 = new Ya.Metrika({
-                        id:25844420,
-                        clickmap:true,
-                        trackLinks:true,
-                        accurateTrackBounce:true,
-                        webvisor:true
-                    });
-                } catch(e) { }
-            });
-
-            var n = d.getElementsByTagName("script")[0],
-                s = d.createElement("script"),
-                f = function () { n.parentNode.insertBefore(s, n); };
-            s.type = "text/javascript";
-            s.async = true;
-            s.src = "https://mc.yandex.ru/metrika/watch.js";
-
-            if (w.opera == "[object Opera]") {
-                d.addEventListener("DOMContentLoaded", f, false);
-            } else { f(); }
-        })(document, window, "yandex_metrika_callbacks");
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/25844420" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
-
-    {{ render_bundle('manifest', config='V2') }}
-    {{ render_bundle('main', config='V2') }}
-</body>
-</html>
+{% endblock content %}
