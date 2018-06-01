@@ -73,7 +73,7 @@
                         >{{ menu_item.caption }} {{ macros.svg_inline('arrow-bottom') }}</a>
                         <div class="mobile-submenu collapse {% if menu_item.id in menu["active_items"] %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
                             {% for item in menu_item.children -%}
-                            <a class="mobile-submenu-item{% if item.id in menu["active_items"] %} _active{% endif %}" href="{{ item.url }}">{{ item.caption }}</a>
+                            <a class="mobile-submenu__item{% if item.id in menu["active_items"] %} _active{% endif %}" href="{{ item.url }}">{{ item.caption }}</a>
                             {% endfor %}
                         </div>
                     {% else %}
