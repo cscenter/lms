@@ -21,21 +21,15 @@ class AdminRichTextAreaWidget(UbereditorWidget):
 
 
 class DateTimeRangeWidget(RangeWidget):
-    def format_output(self, rendered_widgets):
-        return """
-        <div class="input-daterange">
-            <div class="input-group">
-                <span class="input-group-addon">
-                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                </span>
-                {}
-            </div>
-            <div class="input-group">
-                <span class="input-group-addon">-</span>
-                {}
-            </div>
-        </div>
-        """.format(rendered_widgets[0], rendered_widgets[1])
+    template_name = 'widgets/datetime_range.html'
+
+    def __init__(self, attrs=None):
+        widgets = (forms.DateInput(attrs={"class": "form-control",
+                                          "placeholder": "C"}),
+                   forms.DateInput(attrs={"class": "form-control",
+                                          "placeholder": "По"}))
+        super(RangeWidget, self).__init__(widgets, attrs)
+
 
 _fields = ['target', 'name', 'exist', 'visible', 'unread_cnt']
 Tab = namedtuple('Tab', _fields)
