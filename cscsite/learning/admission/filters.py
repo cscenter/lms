@@ -8,7 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field, HTML
 from django.utils.translation import ugettext_lazy as _
 
-from core.filters import FilterEmptyChoiceMixin, EMPTY_CHOICE
+from core.filters import EMPTY_CHOICE
 from core.models import University
 from learning.admission.forms import ResultsModelForm
 from learning.admission.models import Applicant, Interview, Campaign
@@ -18,18 +18,35 @@ class ApplicantStatusFilter(django_filters.ChoiceFilter):
     def filter(self, qs, value):
         if value == Applicant.PERMIT_TO_EXAM:
             return qs.exclude(**{
-                '%s__%s' % (self.name, "exact"): Applicant.REJECTED_BY_TEST
+                f"{self.field_name}__exact": Applicant.REJECTED_BY_TEST
             })
         return super().filter(qs, value)
 
 
-class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+class InterviewStatusFilter(django_filters.ChoiceFilter):
+    AGREED = "agreed"
+    AGREED_CHOICE = (AGREED, _('Approved and completed'))
+    AGREED_STATUSES = [Interview.COMPLETED, Interview.APPROVED]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.extra['choices'] = (self.AGREED_CHOICE,) + self.extra['choices']
+
+    def filter(self, qs, value):
+        if value == self.AGREED:
+            return self.get_method(qs)(**{
+                f"{self.field_name}__in": self.AGREED_STATUSES
+            })
+        return super().filter(qs, value)
+
+
+class ApplicantFilter(django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
         queryset=(Campaign.objects
                   .select_related("city")
                   .order_by("-city__name", "-year").all()))
-    status = ApplicantStatusFilter(empty_label=None, choices=Applicant.STATUS,
+    status = ApplicantStatusFilter(choices=Applicant.STATUS,
                                    label=_("Status"))
     surname = django_filters.CharFilter(lookup_expr='icontains',
                                         label=_("Surname"))
@@ -56,25 +73,8 @@ class ApplicantFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
         return self._form
 
 
-class InterviewStatusFilter(django_filters.ChoiceFilter):
-    AGREED = "agreed"
-    AGREED_CHOICE = (AGREED, _('Approved and completed'))
-
-    def __init__(self, *args, **kwargs):
-        super(InterviewStatusFilter, self).__init__(*args, **kwargs)
-        self.extra['choices'] = [self.AGREED_CHOICE] + self.extra['choices']
-
-    def filter(self, qs, value):
-        if value == self.AGREED:
-            qs = self.get_method(qs)(**{
-                '%s__%s' % (self.name, "in"): [Interview.COMPLETED, Interview.APPROVED]})
-            return qs
-        return super(InterviewStatusFilter, self).filter(qs, value)
-
-
-class InterviewsBaseFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
-    status = InterviewStatusFilter(empty_label=None,
-                                   choices=Interview.STATUSES,
+class InterviewsBaseFilter(django_filters.FilterSet):
+    status = InterviewStatusFilter(choices=Interview.STATUSES,
                                    label=_("Status"),
                                    help_text="")
     date = django_filters.DateFilter(method='filter_by_date',

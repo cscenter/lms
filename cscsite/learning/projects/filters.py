@@ -15,7 +15,6 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from core.filters import FilterEmptyChoiceMixin
 from learning.projects.models import Project, ProjectStudent
 from learning.settings import PARTICIPANT_GROUPS, GRADES
 from users.models import CSCUser
@@ -28,7 +27,7 @@ BOOLEAN_CHOICES = (
 )
 
 
-class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
+class ProjectsFilter(django_filters.FilterSet):
     is_external = django_filters.TypedChoiceFilter(
         label=_("External project"),
         choices=BOOLEAN_CHOICES,
@@ -49,7 +48,6 @@ class ProjectsFilter(FilterEmptyChoiceMixin, django_filters.FilterSet):
                                            label=_("Supervisor"))
 
     projectstudent__final_grade = django_filters.ChoiceFilter(
-        empty_label=None,
         choices=Project.GRADES,
         lookup_expr='exact',
         label=_("Final grade"))
