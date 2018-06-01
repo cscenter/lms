@@ -1,91 +1,55 @@
-<nav class="navbar{% if menu_theme %} {{ menu_theme }}{% endif %}">
+{% set menu = csc_menu(request, "compscicenter") %}
+{% set user = request.user %}
+<nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">
         <button class="navbar-toggler" type="button" data-toggle="collapse"
                 data-target="#top-menu-mobile" aria-controls="top-menu-mobile"
                 aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon">{{ macros.svg_inline('burger-menu') }}</span>
+            {{ macros.svg_inline('burger-menu') }}
         </button>
         <a class="navbar-logo" href="/">{{ macros.svg_inline('logo-csc') }}</a>
 
         <div class="menu-desktop-wrapper">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/about/">О центре</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/courses/">Курсы</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/online/">Онлайн</a>
-                </li>
-                <li class="nav-item">
-                    <a target="_blank" rel="noopener" class="nav-link" href="https://open.compscicenter.ru/">Лекторий</a>
-                </li>
-                <li class="nav-item navbar-last-item">
-                    <a class="nav-link" href="/enrollment/">Поступление</a>
-                </li>
+                {% for menu_item in menu["tree"] %}
+                    <li class="nav-item {% if menu_item.id in menu["active_items"] %}_active{% endif %}">
+                        <a class="nav-link" {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
+                    </li>
+                {% endfor %}
             </ul>
         </div>
 
         <div class="menu-mobile-wrapper collapse" id="top-menu-mobile">
             <ul>
-                <li>
-                    <a class="nav-link _active" data-toggle="collapse" aria-expanded="true"
-                    data-target="#top-menu-item-1"
-                    aria-controls="top-menu-item-1">
-                    <span>О центре</span> {{ macros.svg_inline('arrow-bottom') }}
-                    </a>
-                    <div class="mobile-submenu collapse show" id="top-menu-item-1">
-                        <a class="mobile-submenu-item _active" href="#">Цели и история</a>
-                        <a class="mobile-submenu-item" href="#">Программа</a>
-                        <a class="mobile-submenu-item" href="#">Команда</a>
-                        <a class="mobile-submenu-item" href="#">Преподаватели</a>
-                        <a class="mobile-submenu-item" href="#">Выпускники</a>
-                    </div>
-                </li>
-                <li>
-                    <a class="nav-link" data-toggle="collapse" aria-expanded="false"
-                       data-target="#top-menu-item-2"
-                       aria-controls="top-menu-item-2">
-                        <span>Программы</span> {{ macros.svg_inline('arrow-bottom') }}
-                    </a>
-                    <div class="mobile-submenu collapse" id="top-menu-item-2">
-                        <a class="mobile-submenu-item" href="#">Software engineering</a>
-                        <a class="mobile-submenu-item" href="#">Data science</a>
-                        <a class="mobile-submenu-item" href="#">Computer science</a>
-                    </div>
-                </li>
-                <li>
-                    <a class="nav-link" href="#">Курсы</a>
-                </li>
-                <li>
-                    <a class="nav-link" data-toggle="collapse" aria-expanded="false"
-                       data-target="#top-menu-item-3"
-                       aria-controls="top-menu-item-3">
-                        <span>Онлайн</span> {{ macros.svg_inline('arrow-bottom') }}
-                    </a>
-                    <div class="mobile-submenu collapse" id="top-menu-item-3">
-                        <a class="mobile-submenu-item" href="#">Онлайн-курсы</a>
-                        <a class="mobile-submenu-item" href="#">Видеозаписи лекций</a>
-                        <a class="mobile-submenu-item" href="#">Онлайн-программа</a>
-                    </div>
-                </li>
-                <li>
-                    <a class="nav-link" href="#">Лекторий</a>
-                </li>
-                <li class="navbar-last-item">
-                    <a class="nav-link" href="#">Поступление</a>
-                </li>
+                {% for menu_item in menu["tree"] -%}
+                    <li>
+                        {% if menu_item.children -%}
+                            <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}"
+                               href="{{ menu_item.url }}"
+                               data-toggle="collapse" aria-expanded="{% if menu_item.id in menu["active_items"] %}true{% else %}false{% endif %}"
+                               data-target="#top-menu-item-{{ loop.index }}"
+                               aria-controls="top-menu-item-{{ loop.index }}"
+                            >{{ menu_item.caption }} {{ macros.svg_inline('arrow-bottom') }}</a>
+                            <div class="mobile-submenu collapse {% if menu_item.id in menu["active_items"] %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
+                                {% for item in menu_item.children -%}
+                                <a class="mobile-submenu-item{% if item.id in menu["active_items"] %} _active{% endif %}" href="{{ item.url }}">{{ item.caption }}</a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <a class="nav-link{% if menu_item.id in menu["active_items"] %} _active{% endif %}" href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
+                        {% endif -%}
+                    </li>
+                {% endfor %}
             </ul>
         </div>
 
         {% if not request.user.is_authenticated %}
-            <a class="btn btn--outline btn--reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
+            <a class="btn btn--outline btn-reg" href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
                 Войти <div class="btn-reg--icon"></div>
             </a>
         {% else %}
-            <div class="dropdown">
-                <button class="btn _user-menu-btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="dropdown dropdown-user-menu">
+                <button class="btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span>{{ request.user.get_short_name() }}</span>
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                         {%- if im -%}
@@ -95,7 +59,7 @@
                         {%- endif -%}
                     {%- endwith %}
                 </button>
-                <div class="dropdown-menu _user-menu" aria-labelledby="userMenuButton">
+                <div class="dropdown-menu _arrow-right" aria-labelledby="userMenuButton">
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
                     {% if request.user.is_project_reviewer or request.user.is_curator_of_projects %}
                         <a class="dropdown-item" href="{{ url('projects:report_list_reviewers') }}">Проекты</a>

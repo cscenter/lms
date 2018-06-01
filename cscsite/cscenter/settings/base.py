@@ -85,6 +85,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.StaticFilesExtension",
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
+                "core.jinja2_extensions.MenuExtension"
             ],
             "bytecode_cache": {
                 "name": "default",
