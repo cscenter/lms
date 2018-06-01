@@ -31,9 +31,9 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
     AGREED_CHOICE = (AGREED, _('Approved and completed'))
     AGREED_STATUSES = [Interview.COMPLETED, Interview.APPROVED]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.extra['choices'] = (self.AGREED_CHOICE,) + self.extra['choices']
+    def __init__(self, *args, choices, **kwargs):
+        choices = (self.AGREED_CHOICE,) + choices
+        super().__init__(*args, choices=choices, **kwargs)
 
     def filter(self, qs, value):
         if value == self.AGREED:
