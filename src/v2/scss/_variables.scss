@@ -261,6 +261,8 @@ $hr-margin-y:                 $spacer !default;
 
 $table-cell-padding:          .75rem !default;
 $table-cell-padding-sm:       .3rem !default;
+$table-striped-order:         odd !default;
+$table-caption-color:         $text-muted !default;
 
 // Buttons + Forms
 //
@@ -288,3 +290,10 @@ $input-btn-border-width:      $border-width !default;
 $btn-border-radius: $border-radius;
 $btn-border-radius-lg: $border-radius-lg;
 $btn-border-radius-sm: $border-radius-sm;
+
+// Forms
+$label-margin-bottom:                   .5rem !default;
+
+// Nav
+$nav-divider-color:                 $gray-200 !default;
+$nav-divider-margin-y:              ($spacer / 2) !default;
