@@ -66,6 +66,7 @@ urlpatterns = [
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
     # Alumni
+    url(r'^alumni2/$', cscenter_views.AlumniV2View.as_view(), name='alumni_v2'),
     url(r'^alumni/$', cscenter_views.AlumniView.as_view(), name='alumni'),
     url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(),
         name='alumni_by_area_of_study'),

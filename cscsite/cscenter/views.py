@@ -306,6 +306,16 @@ class AlumniByYearView(generic.ListView):
         return [testimonials[index] for index in indexes]
 
 
+class AlumniV2View(generic.TemplateView):
+    template_name = "cscenter/alumni.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        code = self.kwargs.get("area_of_study_code", False)
+        context["selected_area_of_study"] = code
+        return context
+
+
 class SyllabusView(generic.TemplateView):
     template_name = "syllabus.html"
 
