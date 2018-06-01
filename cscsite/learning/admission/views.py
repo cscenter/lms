@@ -59,6 +59,7 @@ from learning.admission.serializers import InterviewSlotSerializer
 from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
     calculate_time
+from learning.settings import DATE_FORMAT_RU
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from learning.views import get_user_city_code
 from tasks.models import Task
@@ -399,7 +400,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                     tz = settings.TIME_ZONES[city_code]
                     dt = timezone.localtime(dt, timezone=tz)
                 import_testing_results_btn_state = {
-                    "date": formats.date_format(dt, "d.m.Y H:i"),
+                    "date": formats.date_format(dt, "SHORT_DATETIME_FORMAT"),
                     "status": "Успешно" if not task.is_failed() else "Ошибка"
                 }
             else:
@@ -569,7 +570,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 messages.error(self.request, "Нет активных кампаний по набору.")
             # Duplicate initial values from filterset
             status = InterviewStatusFilter.AGREED
-            date = timezone.now().strftime("%d.%m.%Y")
+            date = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
             url = "{}?campaign={}&status={}&date_0={}&date_1={}".format(
                 reverse("admission:interviews"),
                 c, status, date, date)
@@ -586,7 +587,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         # for form without magic is to put it in the view.
         kwargs = super().get_filterset_kwargs(filterset_class)
         if not kwargs["data"]:
-            today = timezone.now().date()
+            today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
             kwargs["data"] = {
                 "status": InterviewStatusFilter.AGREED,
                 "date_0": today,
@@ -893,7 +894,8 @@ class InterviewAppointmentView(generic.TemplateView):
     def dispatch(self, request, *args, **kwargs):
         """Validate GET-parameters"""
         try:
-            date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
+            date = datetime.datetime.strptime(self.kwargs['date'],
+                                              DATE_FORMAT_RU)
             secret = uuid.UUID(self.kwargs['secret_code'], version=4)
         except ValueError:
             return HttpResponseBadRequest()
@@ -922,7 +924,8 @@ class InterviewAppointmentView(generic.TemplateView):
         return context
 
     def get_invitation(self):
-        date = datetime.datetime.strptime(self.kwargs['date'], '%d.%m.%Y')
+        date = datetime.datetime.strptime(self.kwargs['date'],
+                                          DATE_FORMAT_RU)
         return get_object_or_404(
             InterviewInvitation.objects
                 .select_related("stream", "stream__venue", "applicant")

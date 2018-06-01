@@ -10,7 +10,7 @@ from django.core import mail, management
 from django.test import TestCase
 
 from learning.admin import AssignmentAdmin
-from learning.settings import GRADES, STUDENT_STATUS
+from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 from ..factories import *
 from .mixins import *
@@ -37,7 +37,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                 'text': a.text,
                 'grade_min': 0,
                 'grade_max': 5,
-                'deadline_at_0': a.deadline_at.strftime('%d.%m.%Y'),
+                'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
                 'deadline_at_1': '00:00'
         }
         url = co.get_create_assignment_url()
@@ -122,7 +122,7 @@ def test_notification_teachers_list_for_assignment(client):
         'text': a.text,
         'grade_min': 0,
         'grade_max': 5,
-        'deadline_at_0': a.deadline_at.strftime('%d.%m.%Y'),
+        'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
     url = co.get_create_assignment_url()

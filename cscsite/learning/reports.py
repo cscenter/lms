@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import datetime
 import io
+from abc import ABCMeta, abstractmethod
+from collections import OrderedDict, defaultdict
+from datetime import datetime
 
 import six
-
-from abc import ABCMeta, abstractmethod, abstractproperty
-from collections import OrderedDict, defaultdict
-
 import unicodecsv
 from django.http import HttpResponse
+from django.utils import formats
 from django.utils.encoding import force_text
 from xlsxwriter import Workbook
 
-from learning.settings import GRADES, STUDENT_STATUS
+from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU, \
+    TIME_FORMAT_RU
 from learning.utils import get_grade_index, is_positive_grade
 from users.models import CSCUser
 
@@ -82,8 +82,8 @@ class ReportFileOutput(object):
         return response
 
     def get_filename(self):
-        today = datetime.datetime.now()
-        return "report_{}".format(today.strftime("%d.%m.%Y"))
+        today = formats.date_format(datetime.now(), "SHORT_DATE_FORMAT")
+        return f"report_{today}"
 
     def debug_response(self):
         # TODO: replace with table view
@@ -334,7 +334,7 @@ class ProgressReportForDiplomas(ProgressReport):
         return row
 
     def get_filename(self):
-        today = datetime.datetime.now()
+        today = datetime.now()
         return "diplomas_{}".format(today.year)
 
     def passed_courses_total(self, student):
@@ -404,6 +404,7 @@ class ProgressReportFull(ProgressReport):
             sum(1 for c in student.shads if self.is_positive_grade(c)) +
             sum(1 for _ in student.online_courses)
         )
+        dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         row = [
             student.last_name,
             student.first_name,
@@ -423,7 +424,7 @@ class ProgressReportFull(ProgressReport):
             student.get_status_display(),
             '',  # FIXME: error in student.status_changed_at field
             student.comment,
-            student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
+            student.comment_changed_at.strftime(dt_format),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
             self.get_applicant_form_absolute_url(student),
@@ -436,8 +437,8 @@ class ProgressReportFull(ProgressReport):
         return row
 
     def get_filename(self):
-        today = datetime.datetime.now()
-        return "sheet_{}".format(today.strftime("%d.%m.%Y"))
+        today = formats.date_format(datetime.now(), "SHORT_DATE_FORMAT")
+        return f"sheet_{today}"
 
 
 class ProgressReportForSemester(ProgressReport):
@@ -587,6 +588,7 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollments_eq_target_semester +
             student.shad_eq_target_semester
         )
+        dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         row = [
             student.last_name,
             student.first_name,
@@ -606,7 +608,7 @@ class ProgressReportForSemester(ProgressReport):
             student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at
             student.comment,
-            student.comment_changed_at.strftime("%H:%M %d.%m.%Y"),
+            student.comment_changed_at.strftime(dt_format),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
             success_total_lt_target_semester,

@@ -11,6 +11,10 @@ from model_utils import Choices
 LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
 TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 
+# TODO: try to replace with builtin `formats.date_format`
+DATE_FORMAT_RU = "%d.%m.%Y"
+TIME_FORMAT_RU = "%H:%M"
+
 # Assignment types constances
 # TODO: Mb should move to core settings for hashids?
 ASSIGNMENT_TASK_ATTACHMENT = 0

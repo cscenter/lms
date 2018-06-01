@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters.widgets import RangeWidget
 
 from core.admin import city_aware_to_naive
+from learning.settings import DATE_FORMAT_RU
 
 
 class UbereditorWidget(forms.Textarea):
@@ -52,7 +53,7 @@ class DateInputAsTextInput(forms.DateInput):
 
     def __init__(self, attrs=None, format=None):
         super(DateInputAsTextInput, self).__init__(attrs, format)
-        self.format = '%d.%m.%Y'
+        self.format = DATE_FORMAT_RU
 
 
 class TimeInputAsTextInput(forms.TimeInput):
