@@ -1,15 +1,17 @@
+$top-banner-height: 60px;
+
 .top-banner {
   background-color: darken($gray-500, 10%);
   display: flex;
   align-items: center;
   width: 100%;
   height: 60px;
-  margin-bottom: 20px;
   padding: 0;
 
   svg {
-    @include media-breakpoint-down(md) {
-      display: none;
+    display: none;
+    @include media-breakpoint-up(lg) {
+      display: inline-block;
     }
   }
 }
@@ -20,19 +22,31 @@
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  font-weight: 300;
-  align-items: center;
-  margin: 0;
+  font-weight: $font-weight-light;
 }
 
 .top-banner__link {
   color: $white;
   padding-bottom: 1px;
   border-bottom: 1px solid transparentize($white, .5);
-  font-weight: 400;
+  font-weight: $font-weight-normal;
 
   &:hover {
     border-bottom: 1px solid transparentize($teal, .5);
     color: lighten($teal, 20%);
   }
+}
+
+.top-banner-spacer {
+  height: $top-banner-height;
+  @include media-breakpoint-up(lg) {
+    height: 0;
+  }
+}
+
+// hack
+._top-banner-kids {
+  margin-right: 5px;
+  position: relative;
+  bottom: -4px;
 }

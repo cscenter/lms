@@ -1,0 +1,163 @@
+// Variables
+$card-spacer-y: .75rem !default;
+$card-spacer-x: 1rem !default;
+$card-border-width: 1px;
+$card-border-radius: $border-radius !default;
+$card-border-color: $gray-300;
+$card-inner-border-radius: $card-border-radius;
+$card-cap-bg: rgba($black, .03) !default;
+$card-bg: $white !default;
+
+$card-img-overlay-padding: 1.25rem !default;
+
+//
+// Base styles
+//
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: $card-bg;
+  background-clip: border-box;
+  font-size: 1rem;
+  border: $card-border-width solid $card-border-color;
+  @include border-radius($card-border-radius);
+
+  &._inversed {
+    background-color: $gray-300;
+    padding: 1rem;
+
+    .card-img {
+      margin-bottom: 1rem;
+    }
+
+    .card-body {
+      padding: 0;
+    }
+  }
+
+  > hr {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  > .list-group:first-child {
+    .list-group-item:first-child {
+      @include border-top-radius($card-border-radius);
+    }
+  }
+
+  > .list-group:last-child {
+    .list-group-item:last-child {
+      @include border-bottom-radius($card-border-radius);
+    }
+  }
+}
+
+.card-body {
+  // Enable `flex-grow: 1` for decks and groups so that card blocks take up
+  // as much space as possible, ensuring footers are aligned to the bottom.
+  flex: 1 1 auto;
+  padding: $card-spacer-x;
+
+  // FIXME: rename to `small-text`
+  &._small {
+    font-size: $small-font-size;
+  }
+}
+
+.card-title {
+  margin-bottom: $card-spacer-y;
+}
+
+
+.card-text:last-child {
+  margin-bottom: 0;
+}
+
+.card-link {
+  @include hover {
+    text-decoration: none;
+  }
+
+  + .card-link {
+    margin-left: $card-spacer-x;
+  }
+}
+
+//
+// Optional textual caps
+//
+// FIXME: Let's comment it, mb it will be useful really soon
+//.card-header {
+//  padding: $card-spacer-y $card-spacer-x;
+//  margin-bottom: 0; // Removes the default margin-bottom of <hN>
+//  background-color: $card-cap-bg;
+//  border-bottom: $card-border-width solid $card-border-color;
+//
+//  &:first-child {
+//    @include border-radius($card-inner-border-radius $card-inner-border-radius 0 0);
+//  }
+//
+//  + .list-group {
+//    .list-group-item:first-child {
+//      border-top: 0;
+//    }
+//  }
+//}
+//
+//.card-footer {
+//  padding: $card-spacer-y $card-spacer-x;
+//  background-color: $card-cap-bg;
+//  border-top: $card-border-width solid $card-border-color;
+//
+//  &:last-child {
+//    @include border-radius(0 0 $card-inner-border-radius $card-inner-border-radius);
+//  }
+//}
+
+
+//
+// Header navs
+//
+
+//.card-header-tabs {
+//  margin-right: -($card-spacer-x / 2);
+//  margin-bottom: -$card-spacer-y;
+//  margin-left: -($card-spacer-x / 2);
+//  border-bottom: 0;
+//}
+//
+//.card-header-pills {
+//  margin-right: -($card-spacer-x / 2);
+//  margin-left: -($card-spacer-x / 2);
+//}
+
+// Card image
+.card-img-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: $card-img-overlay-padding;
+}
+
+.card-img {
+  width: 100%; // Required because we use flexbox and this inherently applies align-self: stretch
+}
+
+// Card image caps
+.card-img-top {
+  width: 100%; // Required because we use flexbox and this inherently applies align-self: stretch
+  @include border-top-radius($card-inner-border-radius);
+}
+
+.card-img-bottom {
+  width: 100%; // Required because we use flexbox and this inherently applies align-self: stretch
+  @include border-bottom-radius($card-inner-border-radius);
+}
+

@@ -1,9 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
-// const APP_VERSION = process.env.APP_VERSION || "v1";
-
 module.exports = {
+    mode: "development",
     devtool: "cheap-eval-source-map",
 
     output: {
@@ -17,13 +16,16 @@ module.exports = {
             },
             '__DEVELOPMENT__': true
         }),
-        new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin()
     ],
 
+    // This is default settings for development mode, but lets set it explicitly
+    optimization: {
+        namedModules: true,
+        concatenateModules: false
+    },
+
     devServer: {
-        // FIXME: похоже, можно удалить, т.к. не используется (убедиться в этом)
-        // contentBase: path.resolve(__dirname, `../cscsite/assets/${APP_VERSION}/dist/js`),
         port: 8081,
         hot: true,
         headers: { "Access-Control-Allow-Origin": "*" }

@@ -1,0 +1,35 @@
+{
+  "total": 5,
+  "items": [
+    {
+      "id": 1,
+      "full_name": "Иван Иванов",
+      "profile_url": "/users/1/",
+      "photo": "path/to/file"
+    },
+    {
+      "id": 2,
+      "full_name": "Алексей Алексеев",
+      "profile_url": "/users/2/",
+      "photo": "path/to/file2"
+    },
+    {
+      "id": 3,
+      "full_name": "Иван Иванов2",
+      "profile_url": "/users/1/",
+      "photo": "path/to/file"
+    },
+    {
+      "id": 4,
+      "full_name": "Алексей Алексеев",
+      "profile_url": "/users/2/",
+      "photo": "path/to/file2"
+    },
+    {
+      "id": 5,
+      "full_name": "test user2",
+      "profile_url": "/users/2/",
+      "photo": "path/to/file2"
+    }
+  ]
+}

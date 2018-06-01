@@ -3,15 +3,9 @@ const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const DEBUG = (process.env.NODE_ENV !== "production");
-
-const extractScss = new ExtractTextPlugin({
-    filename: "[name].[contenthash].css",
-    allChunks: true,
-    disable: DEBUG
-});
 
 const development = require('./dev.config');
 const production = require('./prod.config');
@@ -35,7 +29,9 @@ const PATHS = {
 
 // Let's include necessary parts instead of the whole polyfill bundle
 const VENDOR = [
-    'babel-polyfill',
+    '@babel/polyfill',  // TODO: optimize?
+    'react',
+    'react-dom',
 ];
 
 const common = {
@@ -43,7 +39,7 @@ const common = {
 
     entry: {
         main: PATHS.common,
-        // vendor: VENDOR,
+        vendor: VENDOR,
     },
 
     output: {
@@ -70,45 +66,72 @@ const common = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            cacheDirectory: true  // Improve performance
+                            // `.babelrc.js` doesn't work for 7.0.0.-beta.46
+                            babelrc: false,
+                            presets: [
+                                [
+                                    "@babel/preset-stage-2",
+                                    {
+                                        "decoratorsLegacy": true
+                                    }
+                                ],
+                                [
+                                    "@babel/preset-env",
+                                    {
+                                        "modules": false,
+                                        "loose": true
+                                    }
+                                ],
+                                "@babel/preset-react"
+                            ],
+                            cacheDirectory: true,  // Improve performance
+                            "env": {
+                                "production": {
+                                    "plugins": [
+                                        ["transform-react-remove-prop-types", {
+                                            // TODO: eslint-plugin-react has a rule forbid-foreign-prop-types to make this plugin safer
+                                            "mode": "remove",
+                                            "ignoreFilenames": ["node_modules"]
+                                        }]
+                                    ]
+                                }
+                            }
                         }
                     }
                 ],
                 include: [
                     path.resolve(__srcdir, "js"),
-                    path.resolve(__nodemodulesdir, "bootstrap"),  // used object spread syntax
+                    path.resolve(__nodemodulesdir, "bootstrap"),  // needs babel, used object spread syntax
                 ]
             },
             {
-                test: /\.scss$/,
+                test: /\.s?[ac]ss$/,
                 exclude: __nodemodulesdir,
-                use: extractScss.extract({
-                    fallback: 'style-loader', // inject CSS to page
-                    use: [
-                        {
-                            loader: 'css-loader', // translates CSS into CommonJS modules
-                            options: {
-                                minimize: !DEBUG,
-                                sourceMap: DEBUG,
-                            }
-                        },
-                        {
-                            loader: 'postcss-loader', // Run post css actions
-                            options: {
-                                // See `postcss.config.js` for details
-                                sourceMap: DEBUG,
-                            }
-                        },
-                        {
-                            loader: 'sass-loader', // compiles SASS to CSS
-                            options: {
-                                sourceMap: DEBUG,
-                                outputStyle: 'expanded',
-                                includePaths: [__nodemodulesdir,]
-                            }
-                        },
-                    ]
-                }),
+                use: [
+                    DEBUG ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader', // translates CSS into CommonJS modules
+                        options: {
+                            minimize: !DEBUG,
+                            sourceMap: DEBUG,
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader', // Run post css actions
+                        options: {
+                            // See `postcss.config.js` for details
+                            sourceMap: DEBUG,
+                        }
+                    },
+                    {
+                        loader: 'sass-loader', // compiles SASS to CSS
+                        options: {
+                            sourceMap: DEBUG,
+                            outputStyle: 'expanded',
+                            includePaths: [__nodemodulesdir,]
+                        }
+                    },
+                ],
             },
             {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
@@ -141,7 +164,6 @@ const common = {
     },
 
     plugins: [
-        new webpack.optimize.ModuleConcatenationPlugin(),
         new BundleTracker({filename: './webpack-stats-v2.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
@@ -152,22 +174,31 @@ const common = {
         //     'jQuery': 'jquery',
         //     'window.jQuery': 'jquery'
         // }),
-        // extract all common modules to vendor so we can load multiple apps in one page
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor",
-            // TODO: explicitely remove styles chunks here?
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "manifest",
-            minChunks: Infinity
-        }),
         new CleanWebpackPlugin([__bundlesdir], {
             verbose: true,
             exclude: ['.gitattributes'],
             root: process.cwd()
         }),
-        extractScss,
+        new MiniCssExtractPlugin({
+          // Options similar to the same options in webpackOptions.output
+          // both options are optional
+          filename: DEBUG ? '[name].css' : '[name].[hash].css',
+          chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
+        })
     ],
+
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				vendor: {
+					name: "vendor",
+					test: "vendor",
+					enforce: true
+				},
+			}
+		}
+	}
+
 };
 
 if (['dev2', 'start'].includes(TARGET) || !TARGET) {

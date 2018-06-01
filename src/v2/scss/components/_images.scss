@@ -1,0 +1,32 @@
+$figure-caption-font-size:          $font-size-sm;
+$figure-caption-color:              $gray-400;
+
+
+.img-rounded {
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 4px #ddd;
+}
+
+.img-fluid {
+  @include img-fluid;
+}
+
+//
+// Figures
+//
+
+.figure {
+  // Ensures the caption's text aligns with the image.
+  display: inline-block;
+}
+
+.figure-img {
+  margin-bottom: ($spacer / 2);
+  line-height: 1;
+}
+
+.figure-caption {
+  font-size: $figure-caption-font-size;
+  color: $figure-caption-color;
+}

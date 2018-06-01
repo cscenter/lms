@@ -1,0 +1,67 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+<div class="container page-content">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="_title">Цели и история CS центра</h1>
+            <p class="_text">Computer Science Center — это совместная инициатива Computer Science клуба при ПОМИ РАН,
+                компании JetBrains и
+                Школы анализа данных Яндекса. Центр предлагает двух- или трёхлетние вечерние очные курсы студентам из
+                Санкт-Петербурга и Новосибирска по одному из трёх направлений: анализ данных, разработка ПО или современная
+                информатика. Для тех, кто не может учиться очно, Центр готовит онлайн-курсы по математике и
+                программированию.
+            </p>
+            <figure class="figure">
+              <img src="/media/pages/text-page/cs-lecture.png" class="figure-img img-fluid" alt="">
+              <figcaption class="figure-caption">Лекция в Computer Science Center</figcaption>
+            </figure>
+
+            <p class="_text">Computer Science Center — это совместная инициатива Computer Science клуба при ПОМИ РАН,
+                компании JetBrains и
+                Школы анализа данных Яндекса. Центр предлагает двух- или трёхлетние вечерние очные курсы студентам из
+                Санкт-Петербурга и Новосибирска по одному из трёх направлений: анализ данных, разработка ПО или современная
+                информатика. Для тех, кто не может учиться очно, Центр готовит онлайн-курсы по математике и
+                программированию.
+            </p>
+            <h3>Центр был создан при активном участии учредителей</h3>
+            <ul>
+                <li><a href="">Андрей Иванов</a></li>
+                <li><a href="">Елена Бунина</a></li>
+                <li><a href="">Александр Куликов</a></li>
+                <li><a href="">Александр Смаль</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-3 offset-lg-1">
+{#            <h3 class="_title">Полезные материалы</h3>#}
+            <div class="text-note">
+                <a href="#">Поступление</a>
+                <p class="_text">Обучение в центре бесплатное. Набор учащихся проходит по конкурсу один раз в
+                    год.</p>
+            </div>
+
+            <div class="card _inversed mb-3">
+                <img class="card-img d-none d-lg-block" src="/media/pages/text-page/info-card-image.jpg" alt="">
+                <div class="card-body _small">
+                    Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                    живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по будним вечерам и
+                    выходным.
+                </div>
+            </div>
+
+            <div class="testimonial _bubble">
+                <div class="testimonial__quote">
+                    <div class="testimonial__text">
+                        CSCenter — явление, которое наполняет чувством искренней гордости за свою страну. В его основе заложены справедливость, свободный дух
+                    </div>
+                </div>
+                <img class="img-rounded" src="/media/pages/index/student.png" width="50" height="50">
+                <div class="testimonial__author">
+                    <a href="#">Евгений Игоревич Викулов</a>
+                    <span>Выпуск 2017, Разработка ПО, Современная информатика</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

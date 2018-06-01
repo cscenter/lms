@@ -1,15 +1,30 @@
 {
   "presets": [
-    ["es2015", { "loose": true, "modules": false }],
-    ["env", {"modules": false}],
-    "stage-0",
-    "react"
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "loose": true
+      }
+    ],
+    [
+      "@babel/preset-stage-2",
+      {
+        "decoratorsLegacy": true
+      }
+    ],
+    "@babel/preset-react"
   ],
   "plugins": [
-    "transform-object-rest-spread",
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/syntax-object-rest-spread",
     "transform-es2015-spread",
-      // Allow class constants
-    ["transform-class-properties", { "spec": true }]
-    //    ["transform-es2015-spread", {"loose": true}]
+    // Allow class constants
+    [
+      "transform-class-properties",
+      {
+        "spec": true
+      }
+    ]
   ]
 }

@@ -17,90 +17,34 @@
 </head>
 
 {% import "v2/_macros.jinja2" as macros %}
+{% import "v2/components/menu/_macros.jinja2" as top_menu %}
 
 <body>
-    <div class="svg-inline">{% include "sprites/index.svg" %}</div>
+
+<div class="svg-inline">
+    {% include "sprites/common.svg" %}
+    {% include "sprites/index.svg" %}
+</div>
 
 <div class="cover">
-
-    <div class="navbar-container">
-
-        <div class="top-banner">
-            <div class="container">
-                <div class="top-banner__text">
-                    {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="/application/">приём заявок</a> на очное обучение в центре
-                </div>
-            </div>
-        </div>
-
-
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">{{ macros.svg_inline('logo-csc') }}</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse"
-                        data-target="#topMainMenu" aria-controls="topMainMenu"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="topMainMenu">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">О центре</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Курсы</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Онлайн</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Лекторий</a>
-                        </li>
-                        <li class="nav-item navbar-last-item">
-                            <a class="nav-link" href="#">Поступление</a>
-                        </li>
-                    </ul>
-                </div>
-
-{#                <a class="btn btn--outline btn--reg" href="#">#}
-{#                    Войти <div class="btn-reg--icon"></div>#}
-{#                </a>#}
-
-                <div class="dropdown">
-                    <button class="btn _user-menu-btn" type="button" id="userMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span>Святослав</span><img class="user-menu-img" src="/media/pages/index/student.png" alt="">
-                    </button>
-                    <div class="dropdown-menu _user-menu" aria-labelledby="userMenuButton">
-                        <a class="dropdown-item" href="#">Обучение</a>
-                        <a class="dropdown-item" href="#">Проекты</a>
-                        <a class="dropdown-item" href="#">Курирование</a>
-                        <a class="dropdown-item" href="#">Админ-панель</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Выйти</a>
-                    </div>
-                </div>
-
-            </div>
-        </nav>
-
-    </div>
-
+    {{ top_menu.render(show_submenu=False, theme_class="__transparent-theme") }}
 
     <div class="container">
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
-        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
-        <a href="#offline-courses" class="btn btn--big btn--green">Смотреть программы</a>
-        <a class="btn btn--big btn--white">Узнать о центре</a>
+        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём
+            направлениям: Computer Science, Data Science, Software Engineering.</p>
+        <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
+        <a class="btn btn--big btn--white _m-wide" href="#">Узнать о центре</a>
     </div>
 </div>
 
 
 <div class="csc-offline-courses" id="offline-courses">
     <div class="container">
-        <h2>Очные курсы центра</h2>
+        <h2 class="m-center">Очные курсы центра</h2>
         <p class="card-offline-course__text">
-            Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических специальностей пройти двух- или трёхлетние курсы по направлениям:
+            Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических
+            специальностей пройти двух- или трёхлетние курсы по направлениям:
         </p>
 
         <div class="card-deck">
@@ -248,11 +192,13 @@
         <div class="card-columns">
             <div class="card">
                 <div class="testimonial">
-                    <img src="/media/pages/index/student.png" alt="">
+                    <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
                     <div class="testimonial__details">
-                        <h4 class="testimonial__name">Евгений Игоревич Викулов</h4>
-                        <span>Выпуск 2017, Разработка ПО</span>
-                        <p class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
+                        <div class="testimonial__author">
+                            <h4>Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
                             знаний, где каждому
                             открыт
                             путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
@@ -263,23 +209,23 @@
                             невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
                             Здесь
                             очень круто и увлекательно!
-                        <ul>
-                            <li>огромный выбор направлений, в которых интересно развиваться,</li>
-                            <li>преподаватели, на пары к которым действительно хочется ходить,</li>
-                            <li>интересные темы практик (последняя переросла в мой диплом),</li>
-                            <li>умнейшие люди, общаясь с которыми, хочется идти и развиваться дальше.</li>
+                            <ul>
+                                <li>огромный выбор направлений, в которых интересно развиваться,</li>
+                                <li>преподаватели, на пары к которым действительно хочется ходить,</li>
+                                <li>интересные темы практик (последняя переросла в мой диплом),</li>
+                                <li>умнейшие люди, общаясь с которыми, хочется идти и развиваться дальше.</li>
 
-                        </ul>
-                        </p>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="testimonial">
-                    <img src="/media/pages/index/student.png" alt="">
+                    <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
                     <div class="testimonial__details">
-                        <h4 class="testimonial__name">Евгений Игоревич Викулов</h4>
+                        <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
                         <span>Выпуск 2017, Разработка ПО</span>
                         <p class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
                             знаний, где каждому
@@ -298,9 +244,9 @@
 
             <div class="card">
                 <div class="testimonial">
-                    <img src="/media/pages/index/student.png" alt="">
+                    <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
                     <div class="testimonial__details">
-                        <h4 class="testimonial__name">Евгений Игоревич Викулов</h4>
+                        <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
                         <span>Выпуск 2017, Разработка ПО</span>
                         <div class="testimonial__text">
                             И даже в трудный час, когда уж неизбежен крах,
@@ -314,9 +260,9 @@
 
             <div class="card">
                 <div class="testimonial">
-                    <img src="/media/pages/index/student.png" alt="">
+                    <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
                     <div class="testimonial__details">
-                        <h4 class="testimonial__name">Евгений Игоревич Викулов</h4>
+                        <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
                         <span>Выпуск 2017, Разработка ПО</span>
                         <p class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
                             знаний, где каждому открыт
@@ -342,89 +288,101 @@
 
 <div class="social-media-posts">
     <div class="container">
-        <h2>#compscicenter</h2>
+        <h2 class="m-center">#compscicenter</h2>
 
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="row">
-                        <a href="#" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size">
-                            <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/instagram.svg" width="34" alt="">
-                            <p class="social-media__text">На Новый год студенты Центра обмениваются подарками в рамках
-                                «Тайного Санты» — игры,
-                                когда каждый дарит кому-то подарок, но получатель подарка не знает, кто же его Санта. У
-                                нас всегда есть специальная ёлочка, обрастающая подарками. Посмотрите, как она
-                                наполнилась в Новосибирске. И там обмен уже произошёл :)</p>
-                            <p class="social-media__date social-media__date--light">26 дек</p>
-                        </a>
-                    </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <a href="#" target="_blank" rel="noopener"
+                       class="social-media social-media--instagram social-media--full-size">
+                        <img class="social-media__icon"
+                             src="/static/v2/img/pages/index/social-media-posts/instagram.svg" width="34" alt="">
+                        <p class="social-media__text">На Новый год студенты Центра обмениваются подарками в рамках
+                            «Тайного Санты» — игры,
+                            когда каждый дарит кому-то подарок, но получатель подарка не знает, кто же его Санта. У
+                            нас всегда есть специальная ёлочка, обрастающая подарками. Посмотрите, как она
+                            наполнилась в Новосибирске. И там обмен уже произошёл :)</p>
+                        <p class="social-media__date social-media__date--light">26 дек</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="row">
+                    <a href="#" target="_blank" rel="noopener"
+                       class="social-media social-media--vk social-media--half-size">
+                        <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg"
+                             width="40" alt="">
+                        <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
+                            обмениваются
+                            подарками в
+                            рамках
+                            «Тайного Санты» — игры,
+                            когда каждый дарит</p>
+                        <p class="social-media__date">26 дек</p>
+                    </a>
                 </div>
 
-                <div class="col-lg-6">
-                    <div class="row">
-                        <a href="#" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
-                            <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg" width="40" alt="">
-                            <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
-                                обмениваются
-                                подарками в
-                                рамках
-                                «Тайного Санты» — игры,
-                                когда каждый дарит</p>
-                            <p class="social-media__date">26 дек</p>
-                        </a>
-                    </div>
-
-                    <div class="row">
-                        <a href="" target="_blank" rel="noopener"
-                           class="social-media social-media--vk social-media--half-size">
-                            <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg" width="40" alt="">
-                            <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
-                                обмениваются
-                                подарками в рамках «Тайного Санты» — игры, да каждый дарит</p>
-                            <p class="social-media__date">26 дек</p>
-                        </a>
-                    </div>
-{#                    <div class="row">#}
-{#                        <div class="social-media social-media--twitter social-media--small">#}
-{#                            <img class="social-media__icon"#}
-{#                                 src="/static/v2/img/pages/index/social-media-posts/twitter.svg"#}
-{#                                 width="40px" alt="">#}
-{#                            <p class="social-media__text social-media__text--dark">CS центр теперь и в Новосибирске:#}
-{#                                compscicenter.ru/open-nsk/ </p>#}
-{#                            <p class="social-media__date">26 дек</p>#}
-{##}
-{#                        </div>#}
-{##}
-{##}
-{#                        <div class="social-media social-media--youtube social-media--small">#}
-{#                            <img class="social-media__icon"#}
-{#                                 src="/static/v2/img/pages/index/social-media-posts/youtube.svg"#}
-{#                                 width="40px" alt="">#}
-{#                            <p class="social-media__text">CS центр теперь и в Новосибирске:#}
-{#                                compscicenter.ru/open-nsk/ </p>#}
-{#                            <p class="social-media__date social-media__date--light">26 дек</p>#}
-{##}
-{#                        </div>#}
-{##}
-{##}
-{#                    </div>#}
-
+                <div class="row">
+                    <a href="" target="_blank" rel="noopener"
+                       class="social-media social-media--vk social-media--half-size">
+                        <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg"
+                             width="40" alt="">
+                        <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                            обмениваются
+                            подарками в рамках «Тайного Санты» — игры, да каждый дарит</p>
+                        <p class="social-media__date">26 дек</p>
+                    </a>
                 </div>
+                {#                    <div class="row">#}
+                {#                        <div class="social-media social-media--twitter social-media--small">#}
+                {#                            <img class="social-media__icon"#}
+                {#                                 src="/static/v2/img/pages/index/social-media-posts/twitter.svg"#}
+                {#                                 width="40px" alt="">#}
+                {# <p class="social-media__text social-media__text--dark">CS центр теперь и в Новосибирске:#}
+                {# compscicenter.ru/open-nsk/ </p>#}
+                {# <p class="social-media__date">26 дек</p>#}
+                {##}
+                {#
+            </div>
+            #}
+            {##}
+            {##}
+            {#
+            <div class="social-media social-media--youtube social-media--small">#}
+                {# <img class="social-media__icon" #}
+                        {# src="/static/v2/img/pages/index/social-media-posts/youtube.svg" #}
+                        {# width="40px" alt="">#}
+                {# <p class="social-media__text">CS центр теперь и в Новосибирске:#}
+                    {# compscicenter.ru/open-nsk/ </p>#}
+                {# <p class="social-media__date social-media__date--light">26 дек</p>#}
+                {##}
+                {#
+            </div>
+            #}
+            {##}
+            {##}
+            {#
         </div>
+        #}
+
     </div>
+</div>
+</div>
 </div>
 
 <footer class="footer container">
@@ -442,8 +400,8 @@
         </div>
     </div>
 </footer>
-    {{ render_bundle('manifest', config='V2') }}
-    {{ render_bundle('main', config='V2') }}
+{{ render_bundle('vendor', config='V2') }}
+{{ render_bundle('main', config='V2') }}
 
 </body>
 </html>

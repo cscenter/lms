@@ -19,7 +19,7 @@ $(function() {
 
     let section = $("body").data("init-section");
     if (section === "application") {
-        import(/* webpackChunkName: "forms" */ 'forms')
+        import('forms')
             .then(_ => {
                 $('select.select').selectpicker();
                 initApplicationForm();

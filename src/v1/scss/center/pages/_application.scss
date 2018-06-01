@@ -2,4 +2,8 @@
   .card {
     @extend .z-depth-1;
   }
+
+  textarea {
+    resize: vertical;
+  }
 }

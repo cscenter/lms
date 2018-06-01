@@ -1,4 +1,4 @@
-@import "index_menu";
+@import "../sprites/common";
 @import "../sprites/index";
 
 @mixin append-hr-to-container() {
@@ -10,18 +10,10 @@
   }
 }
 
+
 // TODO: rename to `inversed`?
 .__dark {
   color: $gray-500;
-}
-
-// Note: Let's store styles for jumbotron and menu in one place (here)
-// 1 - screen cover
-
-._top-banner-kids {
-  margin-right: 5px;
-  position: relative;
-  bottom: -4px;
 }
 
 .cover {
@@ -30,11 +22,11 @@
   background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
   background-size: cover;
   color: $white;
-  padding: 0 0 100px;
-
-  @include media-breakpoint-down(md) {
-    text-align: center;
-    padding-top: 100px;
+  padding: 60px 0 100px;
+  text-align: center;
+  @include media-breakpoint-up(lg) {
+    text-align: left;
+    padding-top: 0;
   }
 
   nav {
@@ -56,6 +48,9 @@
 .footer {
   display: flex;
   flex-wrap: wrap;
+  padding-top: 2rem;
+  border-top: $hr-border-width solid $hr-border-color;
+  margin-top: 2rem;
   margin-bottom: 2rem;
   color: $gray-600;
   font-size: .9375rem;

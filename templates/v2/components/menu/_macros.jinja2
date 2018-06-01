@@ -1,0 +1,167 @@
+{% import "v2/_macros.jinja2" as macros %}
+
+{% macro render(show_submenu=True, show_notification=True, show_login_button=False, theme_class='') -%}
+
+    <div class="navbar-container">
+        {% if show_notification %}
+        <div class="top-banner">
+            <div class="container">
+                <div class="top-banner__text">
+                    {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="/application/">приём заявок</a> на очное обучение в центре
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+            <div class="container">
+                <button class="navbar-toggler hamburger hamburger--vortex" type="button"
+                        data-toggle="collapse" data-target="#top-menu-mobile" aria-controls="top-menu-mobile"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+                </button>
+
+                <a class="navbar-logo" href="/v2/pages/">{{ macros.svg_inline('logo-csc') }}</a>
+
+                <div class="menu-desktop-wrapper">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link _active" href="/v2/pages/about/">О центре</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Программы</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Курсы</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Онлайн</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Лекторий</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Поступление</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Обучение</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Преподавание</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Набор</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Проекты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/v2/components/">Компоненты</a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% if show_login_button %}
+                    <a class="btn btn--outline menu-btn-reg" href="#">
+                        {{ macros.svg_inline('user-sign') }} Войти
+                    </a>
+                {% else %}
+                    <div class="dropdown dropdown-user-menu">
+                        <button class="btn" type="button" id="userMenuButton" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span>Святослав Михайлов</span><img class="user-menu-img" src="/media/pages/index/student.png" width="30" height="30" alt="">
+                        </button>
+                        <div class="dropdown-menu _arrow-right _user-menu" aria-labelledby="userMenuButton">
+                            <a class="dropdown-item" href="#">Обучение</a>
+                            <a class="dropdown-item" href="#">Проекты</a>
+                            <a class="dropdown-item" href="#">Курирование</a>
+                            <a class="dropdown-item" href="#">Админ-панель</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Выйти</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="menu-mobile-wrapper collapse" id="top-menu-mobile">
+                <ul class="container">
+                    <li>
+                        <a class="nav-link _active" data-toggle="collapse" aria-expanded="true"
+                           data-target="#top-menu-item-1"
+                           aria-controls="top-menu-item-1">
+                            <span>О центре</span> {{ macros.svg_inline('arrow-bottom') }}
+                        </a>
+                        <div class="mobile-submenu collapse show" id="top-menu-item-1">
+                            <a class="mobile-submenu__item _active" href="/v2/pages/about/">Цели и история</a>
+                            <a class="mobile-submenu__item" href="#">Программа</a>
+                            <a class="mobile-submenu__item" href="#">Команда</a>
+                            <a class="mobile-submenu__item" href="#">Преподаватели</a>
+                            <a class="mobile-submenu__item" href="#">Выпускники</a>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="nav-link" data-toggle="collapse" aria-expanded="false"
+                           data-target="#top-menu-item-2"
+                           aria-controls="top-menu-item-2">
+                            <span>Программы</span> {{ macros.svg_inline('arrow-bottom') }}
+                        </a>
+                        <div class="mobile-submenu collapse" id="top-menu-item-2">
+                            <a class="mobile-submenu__item" href="#">Software engineering</a>
+                            <a class="mobile-submenu__item" href="#">Data science</a>
+                            <a class="mobile-submenu__item" href="#">Computer science</a>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#">Курсы</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" data-toggle="collapse" aria-expanded="false"
+                           data-target="#top-menu-item-3"
+                           aria-controls="top-menu-item-3">
+                            <span>Онлайн</span> {{ macros.svg_inline('arrow-bottom') }}
+                        </a>
+                        <div class="mobile-submenu collapse" id="top-menu-item-3">
+                            <a class="mobile-submenu__item" href="#">Онлайн-курсы</a>
+                            <a class="mobile-submenu__item" href="#">Видеозаписи лекций</a>
+                            <a class="mobile-submenu__item" href="#">Онлайн-программа</a>
+                        </div>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="#">Лекторий</a>
+                    </li>
+                    <li class="navbar-last-item">
+                        <a class="nav-link" href="#">Поступление</a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+
+        {% if show_submenu %}
+            <nav class="navbar navbar-submenu">
+                <div class="container">
+                    <ul class="navbar-nav">
+                        <li class="nav-item _active">
+                            <a class="nav-link" href="#">Цели и история</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Команда</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Преподаватели</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Выпускники</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Отзывы</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+    {% endif %}
+    </div>
+    {% if show_notification %}<div class="top-banner-spacer"></div>{% endif %}
+{%- endmacro %}

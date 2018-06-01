@@ -1,3 +1,34 @@
+// For each of Bootstrap's buttons, define text, background, and border color.
+
+$btn-padding-y: $input-btn-padding-y;
+$btn-padding-x: $input-btn-padding-x;
+$btn-line-height: $input-btn-line-height;
+
+$btn-padding-y-sm: $input-btn-padding-y-sm;
+$btn-padding-x-sm: $input-btn-padding-x-sm;
+$btn-line-height-sm: $input-btn-line-height-sm;
+
+$btn-padding-y-lg: $input-btn-padding-y-lg;
+$btn-padding-x-lg: $input-btn-padding-x-lg;
+$btn-line-height-lg: $input-btn-line-height-lg;
+
+$btn-border-width: $input-btn-border-width;
+
+$btn-font-weight: $font-weight-normal;
+$btn-box-shadow: inset 0 1px 0 rgba($white, .15), 0 1px 1px rgba($black, .075);
+$btn-focus-width: $input-btn-focus-width;
+$btn-focus-box-shadow: $input-btn-focus-box-shadow;
+$btn-disabled-opacity: .65;
+$btn-active-box-shadow: inset 0 3px 5px rgba($black, .125);
+
+$btn-link-disabled-color: $gray-600;
+
+$btn-block-spacing-y: .5rem;
+
+
+
+$btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+
 @import "bootstrap/scss/buttons";
 
 .btn--big {
@@ -19,22 +50,25 @@
 
 .btn--white {
   color: $light;
-  background-color: rgba(255, 255, 255, .1);
+  background-color: transparentize($white, .9);
 
   &:hover {
     color: $light;
-    background-color: rgba(255, 255, 255, .2);
+    background-color: transparentize($white, .8);
+  }
+
+  &:focus {
+    color: $light;
+    background-color: transparentize($white, .85);
   }
 }
 
 .btn--outline {
   color: $light;
-  //background-color: rgba(255, 255, 255, 0);
   border: 1px solid transparentize($white, .8);
 
   &:hover {
     color: $light;
-    //background-color: rgba(255, 255, 255, .2);
     border: 1px solid transparentize($white, .6);
   }
 }
@@ -48,6 +82,11 @@
     color: $gray-400;
     background-color: rgba($gray-400, .1);
   }
+
+  &:focus {
+    color: $gray-400;
+    background-color: rgba($gray-400, .05);
+  }
 }
 
 .btn--green {
@@ -55,39 +94,18 @@
   background-color: $teal;
 
   &:hover {
-    background-color: lighten($teal, 5%);
     color: $white;
+    background-color: lighten($teal, 5%);
+  }
+
+  &:focus {
+    background-color: lighten($teal, 3%);
   }
 }
 
-.btn-reg--icon {
-  margin-right: 5px;
-  margin-top: 2px;
-  height: 24px;
-  width: 24px;
-  background-image: url("/static/v2/img/icons/user-sign.svg");
-  background-size: cover;
-  order: -1;
-
-    @include media-breakpoint-down(md) {
-      margin-right: 0px;
-      //padding: 0;
+._m-wide {
+  width: 100%;
+  @include media-breakpoint-up(lg) {
+    width: auto;
   }
-
-
-}
-
-.btn--reg {
-  display: flex;
-
-  @include media-breakpoint-down(md) {
-    text-indent: -9999px;
-    border: none;
-    //padding: 0;
-
-    &:hover {
-      border: none;
-    }
-  }
-
 }

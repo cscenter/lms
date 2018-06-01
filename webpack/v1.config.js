@@ -3,15 +3,10 @@ const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const DEBUG = (process.env.NODE_ENV !== "production");
 
-const extractScss = new ExtractTextPlugin({
-    filename: "[name].[contenthash].css",
-    allChunks: true,
-    disable: DEBUG
-});
 
 const development = require('./dev.config');
 const production = require('./prod.config');
@@ -34,7 +29,7 @@ const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
     profile: path.join(__srcdir, '/js/profile.js'),
     forms: path.join(__srcdir, '/js/forms.js'),
-    admission: path.join(__srcdir, '/js/center/admission.js'),
+    admission: path.join(__srcdir, '/js/center/admission/index.js'),
     supervising: path.join(__srcdir, '/js/supervising/index.js'),
     learning: path.join(__srcdir, '/js/learning/index.js'),
     teaching: path.join(__srcdir, '/js/teaching/index.js'),
@@ -45,7 +40,7 @@ const PATHS = {
 
 
 const VENDOR = [
-    'babel-polyfill',
+    '@babel/polyfill',
     // 'history',
     // 'react',
     // 'react-dom',
@@ -101,7 +96,7 @@ const common = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|jsx)$/,
                 use: [
                     {
                         loader: 'babel-loader',
@@ -113,35 +108,33 @@ const common = {
                 include: path.resolve(__srcdir, "js")
             },
             {
-                test: /\.scss$/,
+                test: /\.s?[ac]ss$/,
                 exclude: __nodemodulesdir,
-                use: extractScss.extract({
-                    fallback: 'style-loader', // inject CSS to page
-                    use: [
-                        {
-                            loader: 'css-loader', // translates CSS into CommonJS modules
-                            options: {
-                                minimize: !DEBUG,
-                                sourceMap: DEBUG,
-                            }
-                        },
-                        {
-                            loader: 'postcss-loader', // Run post css actions
-                            options: {
-                                // See `postcss.config.js` for details
-                                sourceMap: DEBUG,
-                            }
-                        },
-                        {
-                            loader: 'sass-loader', // compiles SASS to CSS
-                            options: {
-                                sourceMap: DEBUG,
-                                outputStyle: 'expanded',
-                                includePaths: [__nodemodulesdir,]
-                            }
-                        },
-                    ]
-                }),
+                use: [
+                    DEBUG ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader', // translates CSS into CommonJS modules
+                        options: {
+                            minimize: !DEBUG,
+                            sourceMap: DEBUG,
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader', // Run post css actions
+                        options: {
+                            // See `postcss.config.js` for details
+                            sourceMap: DEBUG,
+                        }
+                    },
+                    {
+                        loader: 'sass-loader', // compiles SASS to CSS
+                        options: {
+                            sourceMap: DEBUG,
+                            outputStyle: 'expanded',
+                            includePaths: [__nodemodulesdir,]
+                        }
+                    },
+                ],
             },
             {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
@@ -174,7 +167,6 @@ const common = {
     },
 
     plugins: [
-        new webpack.optimize.ModuleConcatenationPlugin(),
         new BundleTracker({filename: './webpack-stats.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
@@ -185,22 +177,35 @@ const common = {
         //     'jQuery': 'jquery',
         //     'window.jQuery': 'jquery'
         // }),
-        // extract all common modules to vendor so we can load multiple apps in one page
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor",
-            // TODO: explicitely remove styles chunks here?
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "manifest",
-            minChunks: Infinity
-        }),
         new CleanWebpackPlugin([__bundlesdir], {
             verbose: true,
             exclude: ['.gitattributes'],
             root: process.cwd()
         }),
-        extractScss,
+        new MiniCssExtractPlugin({
+          // Options similar to the same options in webpackOptions.output
+          // both options are optional
+          filename: DEBUG ? '[name].css' : '[name].[hash].css',
+          chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
+        })
     ],
+
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				vendor: {
+					name: "vendor",
+					test: "vendor",
+					enforce: true
+				},
+				forms: {
+					name: "forms",
+					test: "forms",
+					enforce: true
+				},
+			}
+		}
+	}
 };
 
 if (['dev', 'start'].includes(TARGET) || !TARGET) {

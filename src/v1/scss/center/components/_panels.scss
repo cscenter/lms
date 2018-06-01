@@ -59,7 +59,7 @@
       width: 30px;
       height: 30px;
       background-image: url("/static/v1/img/icons/panel-arrow.svg");
-      transition: all 150ms linear;
+      transition: transform 150ms linear;
     }
 
     &[aria-expanded="true"] {

@@ -29,3 +29,17 @@ $caret-width: 0;
 
 // Imports
 @import "bootstrap/scss/dropdown";
+
+._arrow-right {
+  &::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    right: 8px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid $white;
+  }
+}
