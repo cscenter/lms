@@ -8,13 +8,13 @@ from crispy_forms.layout import Layout, Div, Submit, Field, Row, HTML
 from django import forms
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.forms.models import ModelForm
+from django_filters.conf import settings as filters_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from core.filters import EMPTY_CHOICE
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
@@ -581,7 +581,7 @@ class ApplicantStatusForm(forms.ModelForm):
 
 class ResultsModelForm(ModelForm):
     RESULTS_CHOICES = (
-        EMPTY_CHOICE,
+        ('', filters_settings.EMPTY_CHOICE_LABEL),
         (Applicant.ACCEPT, "Берём"),
         (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
         (Applicant.ACCEPT_IF, "Берём с условием"),
