@@ -21,11 +21,41 @@
     {% render_bundle 'forms' 'js' %}
 
     <script type="text/javascript" defer>
+        {# FIXME: copied from course_class.html #}
+        var TIMEPICKER_ICONS = {
+            time: 'fa fa-clock-o',
+            date: 'fa fa-calendar',
+            up: 'fa fa-chevron-up',
+            down: 'fa fa-chevron-down',
+            previous: 'fa fa-chevron-left',
+            next: 'fa fa-chevron-right',
+            today: 'fa fa-screenshot',
+            clear: 'fa fa-trash',
+            close: 'fa fa-check',
+        };
+        var TIMEPICKER_TOOLTIPS = {
+            today: 'Go to today',
+            clear: 'Clear selection',
+            close: 'Закрыть',
+            selectMonth: 'Выбрать месяц',
+            prevMonth: 'Предыдущий месяц',
+            nextMonth: 'Следующий месяц',
+            selectYear: 'Выбрать год',
+            prevYear: 'Предыдущий год',
+            nextYear: 'Следующий год',
+            selectDecade: 'Выбрать декаду',
+            prevDecade: 'Предыдущая декада',
+            nextDecade: 'Следующая декада',
+            prevCentury: 'Предыдущий век',
+            nextCentury: 'Следующий век'
+        };
+
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
-        });
-        $(function () {
-            $('#id_date').datetimepicker({
+
+            $('.input-daterange .input-group, #id_date').datetimepicker({
+                allowInputToggle: true,
+                useCurrent: false,
                 locale: 'ru',
                 format: 'DD.MM.YYYY',
                 stepping: 5,
@@ -37,18 +67,31 @@
                         this.hide();
                     },
                 },
-                icons: {
-                    time: 'fa fa-clock-o',
-                    date: 'fa fa-calendar',
-                    up: 'fa fa-chevron-up',
-                    down: 'fa fa-chevron-down',
-                    previous: 'fa fa-chevron-left',
-                    next: 'fa fa-chevron-right',
-                    today: 'fa fa-screenshot',
-                    clear: 'fa fa-trash',
-                    close: 'fa fa-remove'
+                icons: TIMEPICKER_ICONS,
+                tooltips: TIMEPICKER_TOOLTIPS,
+
+            });
+            var dateFromPicker = $('#id_date_0').closest('.input-group');
+            var dateToPicker = $('#id_date_1').closest('.input-group');
+            dateToPicker.data("DateTimePicker").useCurrent(false);
+            dateFromPicker.on("dp.change", function (e) {
+                dateToPicker.data("DateTimePicker").minDate(e.date);
+                if (e.date) {
+                    if (dateToPicker.data("DateTimePicker").date() === null) {
+                        dateToPicker.data("DateTimePicker").defaultDate(e.date);
+                    } else if (dateToPicker.data("DateTimePicker").date() < e.date) {
+                        dateToPicker.data("DateTimePicker").date(e.date);
+                    }
                 }
             });
+            dateToPicker.on("dp.change", function (e) {
+                dateFromPicker.data("DateTimePicker").maxDate(e.date);
+                if (dateFromPicker.data("DateTimePicker").date() === null) {
+                    dateFromPicker.data("DateTimePicker").defaultDate(e.date);
+                }
+            });
+
+
         });
     </script>
 {% endblock javascripts %}

@@ -21,6 +21,7 @@ from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, 
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone, formats
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
@@ -569,9 +570,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             # Duplicate initial values from filterset
             status = InterviewStatusFilter.AGREED
             date = timezone.now().strftime("%d.%m.%Y")
-            url = "{}?campaign={}&status={}&date={}".format(
+            url = "{}?campaign={}&status={}&date_0={}&date_1={}".format(
                 reverse("admission:interviews"),
-                c, status, date)
+                c, status, date, date)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -585,9 +586,11 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         # for form without magic is to put it in the view.
         kwargs = super().get_filterset_kwargs(filterset_class)
         if not kwargs["data"]:
+            today = timezone.now().date()
             kwargs["data"] = {
                 "status": InterviewStatusFilter.AGREED,
-                "date": timezone.now().date()
+                "date_0": today,
+                "date_1": today
             }
         return kwargs
 
