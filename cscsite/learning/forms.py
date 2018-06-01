@@ -14,6 +14,7 @@ from core.forms import GradeField
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
+from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
 from .models import Course, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment
 
@@ -337,10 +338,10 @@ class AssignmentForm(CityAwareModelForm):
         widget=UbereditorWidget(attrs={'autofocus': 'autofocus'}))
     deadline_at = CityAwareSplitDateTimeField(
         label=_("Deadline"),
-        input_date_formats=["%d.%m.%Y"],
-        input_time_formats=["%H:%M"],
-        widget=CityAwareSplitDateTimeWidget(date_format="%d.%m.%Y",
-                                            time_format="%H:%M")
+        input_date_formats=[DATE_FORMAT_RU],
+        input_time_formats=[TIME_FORMAT_RU],
+        widget=CityAwareSplitDateTimeWidget(date_format=DATE_FORMAT_RU,
+                                            time_format=TIME_FORMAT_RU)
     )
     attachments = forms.FileField(
         label=_("Attached file"),

@@ -19,7 +19,8 @@ from learning.factories import SemesterFactory, CourseOfferingFactory, \
     StudentAssignmentFactory, CourseOfferingTeacherFactory
 from learning.models import StudentAssignment, Assignment, CourseOffering, \
     AssignmentAttachment
-from learning.settings import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS
+from learning.settings import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS, \
+    DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
@@ -283,8 +284,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         CourseOfferingFactory.create_batch(3, teachers=[teacher])
         co = CourseOfferingFactory.create(teachers=[teacher])
         form = AssignmentFactory.attributes(create=True)
-        deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
-        deadline_time = form['deadline_at'].strftime("%H:%M")
+        deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
+        deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
         form.update({'course_offering': co.pk,
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
@@ -303,8 +304,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
                                      course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         form = model_to_dict(a)
-        deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
-        deadline_time = form['deadline_at'].strftime("%H:%M")
+        deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
+        deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
         form.update({'title': a.title + " foo42bar",
                      'course_offering': co.pk,
                      'attached_file': None,
@@ -827,8 +828,8 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     teacher = TeacherCenterFactory()
     co = CourseOfferingFactory.create(teachers=[teacher])
     form = AssignmentFactory.attributes(create=True)
-    deadline_date = form['deadline_at'].strftime("%d.%m.%Y")
-    deadline_time = form['deadline_at'].strftime("%H:%M")
+    deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
+    deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
     tmp_file.write("content")
     form.update({'course_offering': co.pk,

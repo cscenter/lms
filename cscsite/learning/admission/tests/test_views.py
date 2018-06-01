@@ -6,7 +6,7 @@ import datetime
 from bs4 import BeautifulSoup
 from django.apps import apps
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
@@ -45,23 +45,50 @@ def test_autoclose_application_form(client):
 
 
 @pytest.mark.django_db
-def test_simple_interviews_list(client, curator):
-    url = reverse('admission:interviews')
+def test_simple_interviews_list(client, curator, settings):
+    settings.LANGUAGE_CODE = 'ru'
     client.login(curator)
     interviewer = InterviewerFactory()
-    interview = InterviewFactory(
+    campaign = CampaignFactory(current=True)
+    today = timezone.now()
+    interview1, interview2, interview3 = InterviewFactory.create_batch(3,
         interviewers=[interviewer],
-        applicant__status=Applicant.INTERVIEW_SCHEDULED,
-        applicant__campaign__current=True)
-    response = client.get(url)
+        date=today,
+        status=Interview.COMPLETED,
+        applicant__status=Applicant.INTERVIEW_COMPLETED,
+        applicant__campaign=campaign)
+    interview2.date = today + datetime.timedelta(days=1)
+    interview2.save()
+    interview3.date = today + datetime.timedelta(days=2)
+    interview3.save()
+    response = client.get(reverse('admission:interviews'))
     # For curator set default filters and redirect
     assert response.status_code == 302
-    assert "campaign={}".format(interview.applicant.campaign_id) in response.url
+    assert f"campaign={campaign.pk}" in response.url
     assert "status=agreed" in response.url
-    response = client.get(response.url)
+    today_date = formats.date_format(today, "SHORT_DATE_FORMAT")
+    assert f"date_0={today_date}&date_1={today_date}" in response.url
+
+    def format_url(campaign_id, date_from: str, date_to: str):
+        return "{}?campaign={}&status=agreed&date_0={}&date_1={}".format(
+            reverse('admission:interviews'),
+            campaign_id, date_from, date_to)
+    url = format_url(campaign.pk, today_date, today_date)
+    response = client.get(url)
     assert response.status_code == 200
     assert "InterviewsCuratorFilter" in str(response.context['form'].__class__)
-    client.login(interviewer)
+    assert len(response.context["interviews"]) == 1
+    url = format_url(campaign.pk, today_date, "")
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context["interviews"]) == 3
+    url = format_url(campaign.pk,
+                     today_date,
+                     formats.date_format(interview2.date, "SHORT_DATE_FORMAT"))
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context["interviews"]) == 2
+    assert interview3 not in response.context["interviews"]
 
 
 @pytest.mark.django_db

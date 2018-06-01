@@ -27,7 +27,8 @@ from post_office.utils import get_email_template
 from core.db.models import GradeField
 from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
 from learning.models import Venue
-from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR
+from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR, \
+    DATE_FORMAT_RU
 from learning.utils import get_current_term_pair
 from users.models import CSCUser
 
@@ -937,7 +938,7 @@ class InterviewInvitation(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("admission:interview_appointment", kwargs={
-            "date": self.date.strftime('%d.%m.%Y'),
+            "date": self.date.strftime(DATE_FORMAT_RU),
             "secret_code": str(self.secret_code).replace("-", "")
         })
 

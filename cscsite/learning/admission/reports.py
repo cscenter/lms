@@ -7,6 +7,7 @@ import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.db.models import Prefetch
+from django.utils import formats
 from django.utils.numberformat import format
 from django.utils.encoding import force_text
 from collections import OrderedDict
@@ -128,4 +129,5 @@ class AdmissionReport(ReportFileOutput):
         return "admission_{}_{}_report_{}".format(
             self.campaign.city_id,
             self.campaign.year,
-            today.strftime("%d.%m.%Y"))
+            formats.date_format(today, "SHORT_DATE_FORMAT")
+        )

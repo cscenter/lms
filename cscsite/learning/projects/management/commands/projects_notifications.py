@@ -11,7 +11,7 @@ from django.utils.timezone import now
 
 from learning.models import Semester
 from learning.projects.models import ProjectStudent
-from learning.settings import GRADES
+from learning.settings import GRADES, DATE_FORMAT_RU
 from notifications import types
 from notifications.models import Notification
 from notifications.signals import notify
@@ -75,8 +75,8 @@ class Command(BaseCommand):
                             .distinct()
                             .all())
         context = {
-            "period_start": term.report_starts_at.strftime('%d.%m.%Y'),
-            "deadline": term.report_ends_at.strftime('%d.%m.%Y'),
+            "period_start": term.report_starts_at.strftime(DATE_FORMAT_RU),
+            "deadline": term.report_ends_at.strftime(DATE_FORMAT_RU),
         }
         for ps in project_students:
             context.update({

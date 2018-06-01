@@ -5,6 +5,8 @@ from itertools import groupby
 from django.utils import timezone
 from post_office import mail
 
+from learning.settings import DATE_FORMAT_RU
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +44,7 @@ def generate_interview_reminder(interview, slot) -> None:
             template=interview.REMINDER_TEMPLATE,
             context={
                 "SUBJECT_CITY": interview.applicant.campaign.city.name,
-                "DATE": meeting_at.strftime("%d.%m.%Y"),
+                "DATE": meeting_at.strftime(DATE_FORMAT_RU),
                 "TIME": meeting_at.strftime("%H:%M"),
                 "DIRECTIONS": slot.stream.venue.directions
             },
