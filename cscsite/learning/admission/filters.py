@@ -105,10 +105,10 @@ class ApplicantFilter(django_filters.FilterSet):
                 Row(
                     Div("campaign", css_class="col-xs-3"),
                     Div("status", css_class="col-xs-3"),
-                    Div("surname", css_class="col-xs-3"),
+                    Div("surname", css_class="col-xs-4"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
-                        css_class="col-xs-3"),
+                        css_class="col-xs-2"),
                 ))
         return self._form
 

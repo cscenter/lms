@@ -14,9 +14,12 @@
             </div>
             <ul{% if menu.tree|length > 8 %} class="__narrow"{% endif %}>
                 {% for menu_item in menu.tree %}
+                    {# XXX: Hack to hide `curators` menu item #}
+                    {% if menu_item.id != 15 %}
                     <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
                         <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -33,10 +36,12 @@
                   </a>
                   <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
                       <li class="dropdown-header">{{ user.get_short_name }}</li>
+                      <li><a href="{{ user.get_absolute_url }}">{% trans "Profile" %}</a></li>
                       {% if user.is_staff %}
+                          <li><a href="{% url 'staff:student_search' %}">Курирование</a></li>
+                          <li><a href="{% url 'stats:index' %}">Статистика</a></li>
                           <li><a href="{% url 'admin:index' %}" target="_blank">Админ-панель</a></li>
                       {% endif %}
-                      <li><a href="{{ user.get_absolute_url }}">{% trans "Profile" %}</a></li>
                       <li><a href="{% url 'logout' %}">{% trans "Logout" %}</a></li>
                   </ul>
                 </div>
