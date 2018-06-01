@@ -17,6 +17,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
 
@@ -29,8 +30,33 @@ class HtmlView(generic.TemplateView):
                 f"{path_to_template}/index.jinja2"]
 
 
+class JSONView(generic.View):
+
+    def get(self, request, path_to_json, *args, **kwargs):
+        file_path = str(settings.ROOT_DIR / "templates" / "ajax" / path_to_json)
+        with open(file_path) as f:
+            kwargs = {}
+            kwargs.setdefault('content_type', 'application/json')
+            return HttpResponse(content=f.readlines(), **kwargs)
+
+    def post(self, request, path_to_json, *args, **kwargs):
+        file_path = str(settings.ROOT_DIR / "templates" / "ajax" / path_to_json)
+        with open(file_path) as f:
+            kwargs = {}
+            kwargs.setdefault('content_type', 'application/json')
+            return HttpResponse(content=f.readlines(), **kwargs)
+
+    def get_template_names(self):
+        path_to_template = self.kwargs.get('path_to_template', '')[:-1]
+        if not path_to_template:
+            path_to_template = "v1/pages/index"
+        return [f"{path_to_template}.jinja2",
+                f"{path_to_template}/index.jinja2"]
+
+
 urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     url(r'^$', HtmlView.as_view(), name='index'),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
+    url(r'^ajax/(?P<path_to_json>.*)$', JSONView.as_view(), name='json_data'),
     url(r'^(?P<path_to_template>.*)$', HtmlView.as_view(), name='html_pages'),
 ]

@@ -1,3 +1,10 @@
+.m-center {
+  text-align: center;
+  @include media-breakpoint-up(lg) {
+    text-align: inherit;
+  }
+}
+
 // 2 - screen offline-courses
 .csc-offline-courses {
   padding: 30px 0 0;
@@ -218,7 +225,6 @@
   padding: 30px 0 0;
   overflow: hidden;
   font-size: .9375rem;
-  @include append-hr-to-container();
 }
 
 .social-media {

@@ -22,3 +22,12 @@ export function showComponentError(error, msg='An error occurred while loading t
     console.error(error);
     createNotification(msg, 'error');
 }
+
+export function getSections() {
+    let sections = $("body").data("init-sections");
+    if (sections === undefined) {
+        return [];
+    } else {
+        return sections.split(",");
+    }
+}

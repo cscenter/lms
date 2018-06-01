@@ -1,0 +1,271 @@
+$navbar-padding-y: $spacer;
+$navbar-padding-x: $spacer;
+$navbar-nav-link-padding-x: 0;
+$nav-link-padding-x: .5rem;
+$nav-link-padding-y: .3rem;
+$nav-link-mobile-padding-x: 20px;
+$navbar-brand-font-size: $font-size-lg;
+// Compute the navbar-brand padding-y so the navbar-brand will have the same height as navbar-text and nav-link
+$nav-link-height: ($font-size-base * $line-height-base + $nav-link-padding-y * 2);
+$navbar-brand-height: $navbar-brand-font-size * $line-height-base;
+$navbar-brand-padding-y: ($nav-link-height - $navbar-brand-height) / 2;
+
+$navbar-toggler-padding-y: .25rem;
+$navbar-toggler-padding-x: .25rem;
+$navbar-toggler-padding-x: 10px;
+$navbar-toggler-margin-x: $nav-link-padding-x - $input-btn-padding-x;
+$navbar-toggler-font-size: $font-size-lg;
+$navbar-toggler-border-radius: $btn-border-radius;
+
+@import "hamburger";
+
+.navbar-container {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 10;
+  @include font-smoothing();
+  @include media-breakpoint-up(lg) {
+    position: relative;
+  }
+}
+
+.navbar {
+  background-color: $gray-500;
+
+  > .container {
+    display: flex;
+    align-items: start;
+    flex-wrap: wrap;
+    @include media-breakpoint-up(lg) {
+      flex-wrap: nowrap;
+    }
+  }
+}
+
+.navbar-logo {
+  display: flex; // ie 10 fix
+  padding: $nav-link-padding-y 0;
+  margin: ($navbar-padding-y - $nav-link-padding-y) $navbar-padding-x ($navbar-padding-y - $nav-link-padding-y) 0;
+}
+
+.navbar-toggler {
+  display: flex;
+  align-self: center;
+
+  padding: $navbar-padding-y $navbar-toggler-padding-x;
+  margin-left: -$navbar-toggler-padding-x;
+  background-color: transparent; // remove default button style
+  border: none; // remove default button style
+
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  color: $white;
+  opacity: .5;
+  white-space: nowrap;
+  &:hover {
+    color: $white;
+    opacity: 1;
+  }
+  &._active {
+    opacity: 1;
+  }
+
+  svg {
+    margin-left: auto;
+  }
+}
+
+.menu-desktop-wrapper {
+  padding: ($navbar-padding-y - $nav-link-padding-y) 0;
+  display: none;
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    flex-basis: 0; // ie 10 fix
+    flex-grow: 1; // ie 10 fix
+  }
+}
+
+.navbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+  width: 100%; // ie 10 fix
+
+
+  .nav-link {
+    padding: $nav-link-padding-y $nav-link-padding-x;
+  }
+}
+
+.navbar-main {
+  .nav-item {
+    margin-bottom: 1px; // hack to avoid blinking on hovering two vertically adjacent links
+  }
+}
+
+.menu-mobile-wrapper {
+  // TODO: Rewrite js part, only then remove transition
+  //@include transition(all 0ms);
+  width: 100%;
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+
+  ul {
+    border-top: 1px solid $gray-600;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    min-height: 100vh;
+
+    background-color: $gray-500;
+
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
+
+    li {
+      border-bottom: 1px solid $gray-600;
+      font-size: $font-size-lg;
+      &:last-child {
+        border-bottom: 0;
+      }
+
+
+    }
+    .nav-link {
+      color: $white;
+      opacity: .5;
+      padding: $nav-link-mobile-padding-x;
+      &:hover {
+        opacity: 1;
+        color: $white;
+      }
+
+      &[aria-expanded="true"] {
+        ._arrow-bottom {
+          transform: rotate(180deg);
+        }
+      }
+
+      &._active {
+        color: $white;
+        opacity: 1;
+      }
+
+      ._arrow-bottom {
+        transition: all .25s;
+      }
+    }
+  }
+
+  .mobile-submenu {
+    &.collapsing {
+      transition-duration: .25s;
+    }
+  }
+
+  .mobile-submenu__item {
+    text-align: left;
+    display: block;
+    color: $gray-400;
+    font-size: $font-size-base;
+    padding: 10px 20px;
+    &:hover {
+      color: $white;
+    }
+    &:last-child {
+      padding: 10px 20px 30px 20px;
+    }
+    &._active {
+      color: $white;
+      background-color: transparentize($black, .6);
+    }
+  }
+}
+
+.__transparent-theme {
+  background-color: $gray-500;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+  }
+}
+
+.navbar-submenu {
+  height: 40px;
+  align-items: center;
+  font-size: $font-size-sm;
+  display: none;
+  background-color: $gray-200;
+  @include media-breakpoint-up(lg) {
+    display: flex;
+  }
+
+  .navbar-nav {
+    margin-left: -$nav-link-padding-x;
+  }
+
+  .nav-item {
+    &._active {
+      .nav-link {
+        opacity: 1;
+      }
+    }
+  }
+
+  .nav-link {
+    color: $gray-500;
+    opacity: .5;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.menu-btn-reg {
+  //display: flex;
+  margin: ($navbar-padding-y - $input-btn-padding-y) 0 0 auto;
+}
+
+
+.dropdown-user-menu {
+  padding: ($navbar-padding-y - $input-btn-padding-y) 0 0; // skip bottom padding since user img height > logo height
+  margin-top: -1px;
+  margin-left: auto;
+  margin-right: -$navbar-toggler-padding-x;
+
+  .dropdown-menu {
+    right: $navbar-toggler-padding-x;
+    left: auto;
+  }
+
+  .btn {
+    color: $white;
+    border-color: transparent;
+    background-color: rgba(0, 0, 0, 0);
+    padding-left: $navbar-toggler-padding-x;
+    padding-right: $navbar-toggler-padding-x;
+
+    span {
+      margin-right: 10px;
+      display: none;
+      @include media-breakpoint-up(lg) {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+.user-menu-img {
+  border-radius: 50%;
+}

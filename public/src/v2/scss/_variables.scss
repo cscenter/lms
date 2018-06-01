@@ -18,7 +18,7 @@ $gray-100: #f3f6f7;
 $gray-200: #e9e9e9;
 $gray-300: #ecf0f2;
 $gray-400: #8b9ca7;
-$gray-500: #314451;
+$gray-500: #374148;
 $gray-600: #6c757d;
 
 $colors: (
@@ -39,7 +39,7 @@ $grays: (
 
 // Themes
 
-$primary:       $teal;
+$primary:       $blue;
 $secondary:     $gray-600;
 $light:         $gray-100;
 $dark:          $gray-500;
@@ -145,7 +145,7 @@ $container-max-widths: (
   sm: 540px,
   md: 720px,
   lg: 960px,
-  xl: 1200px
+  xl: 1140px
 );
 
 @include _assert-ascending($container-max-widths, "$container-max-widths");
@@ -155,8 +155,9 @@ $container-max-widths: (
 //
 // Set the number of columns and specify the width of the gutters.
 
-$grid-columns:                12 !default;
-$grid-gutter-width:           10px !default;
+$grid-columns:                12;
+$grid-gutter-width:           10px;
+$mobile-padding-x: 20px;
 
 // Components
 //
@@ -203,17 +204,17 @@ $font-weight-bold:            600 !default;
 $font-weight-base:            $font-weight-normal !default;
 $line-height-base:            1.45 !default;
 
-$h1-font-size:                $font-size-base * 3.1 !default;
+$h1-font-size:                $font-size-base * 3 !default;
 $h2-font-size:                $font-size-base * 2 !default;
-$h3-font-size:                $font-size-base * 1.3 !default;
+$h3-font-size:                $font-size-base * 1.4 !default;
 $h4-font-size:                $font-size-base * 1 !default;
 $h5-font-size:                $font-size-base !default;
 $h6-font-size:                $font-size-base !default;
 
-$headings-margin-bottom:      ($spacer / 2) !default;
+$headings-margin-bottom:      $spacer;
 $headings-font-family:        inherit !default;
-$headings-font-weight:        500 !default;
-$headings-line-height:        1.2 !default;
+$headings-font-weight:        $font-weight-light;
+$headings-line-height:        1.1 !default;
 $headings-color:              inherit !default;
 
 $display1-size:               6rem !default;
@@ -230,7 +231,7 @@ $display-line-height:         $headings-line-height !default;
 $lead-font-size:              ($font-size-base * 1.25) !default;
 $lead-font-weight:            300 !default;
 
-$small-font-size:             80% !default;
+$small-font-size:             .875rem !default;
 
 $text-muted:                  $gray-600 !default;
 

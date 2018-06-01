@@ -1,0 +1,69 @@
+$hamburger-types: (
+  vortex,
+  vortex-r
+);
+$hamburger-padding-x: 10px;
+$hamburger-padding-y: 16px;
+$hamburger-layer-width: 22px;
+$hamburger-layer-height: 2px;
+$hamburger-layer-spacing: 6px;
+$hamburger-layer-color: $white;
+$hamburger-hover-opacity: 1;
+$hamburger-layer-border-radius             : 4px !default;
+$hamburger-hover-transition-duration       : .15s !default;
+$hamburger-hover-transition-timing-function: linear !default;
+
+// To use CSS filters as the hover effect instead of opacity,
+// set $hamburger-hover-use-filter as true and
+// change the value of $hamburger-hover-filter accordingly.
+$hamburger-hover-use-filter: false !default;
+$hamburger-hover-filter    : opacity(50%) !default;
+
+@import "hamburgers/_sass/hamburgers/base";
+
+/*
+ * Vortex
+ */
+.hamburger--vortex {
+  .hamburger-inner {
+    transition-duration: .2s;
+    transition-timing-function: cubic-bezier(.19, 1, .22, 1);
+
+    &::before,
+    &::after {
+      transition-duration: 0s;
+      transition-delay: .1s;
+      transition-timing-function: linear;
+    }
+
+    &::before {
+      transition-property: top, opacity;
+    }
+
+    &::after {
+      transition-property: bottom, transform;
+    }
+  }
+
+  &.is-active {
+    .hamburger-inner {
+      transform: rotate(765deg);
+      transition-timing-function: cubic-bezier(.19, 1, .22, 1);
+
+      &::before,
+      &::after {
+        transition-delay: 0s;
+      }
+
+      &::before {
+        top: 0;
+        opacity: 0;
+      }
+
+      &::after {
+        bottom: 0;
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

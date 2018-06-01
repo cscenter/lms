@@ -1,24 +1,7 @@
-// Variables
-$card-spacer-y: .75rem !default;
-$card-spacer-x: 1.25rem !default;
-$card-border-width: 0;
-$card-border-radius: $border-radius !default;
-$card-border-color: rgba($black, .125) !default;
-$card-inner-border-radius: calc(#{$card-border-radius} - #{$card-border-width}) !default;
-$card-cap-bg: rgba($black, .03) !default;
-$card-bg: $white !default;
+@import "_cards/base";
+@import "_cards/card_group";
+@import "_cards/testimonials";
 
-$card-img-overlay-padding: 1.25rem !default;
-
-$card-group-margin: ($grid-gutter-width / 2) !default;
-$card-deck-margin: $card-group-margin !default;
-
-$card-columns-count: 3 !default;
-$card-columns-gap: 1.25rem !default;
-$card-columns-margin: $card-spacer-y !default;
-
-// Imports
-@import "bootstrap/scss/card";
 
 // FIXME: class name is too generic, since css below hardcoded for 6 columns on desktop, rename it to more appropriate name
 .responsive-card {
@@ -39,66 +22,26 @@ $card-columns-margin: $card-spacer-y !default;
   }
 }
 
-// Student reviews
-.testimonial {
-  padding: 1.7rem;
-  color: $gray-500;
-  flex-direction: row;
-  font-size: .9375rem;
-  @include font-smoothing();
-  justify-content: center;
-  text-align: center;
-
-  @include media-breakpoint-up(lg) {
-    display: flex;
-    text-align: left;
-  }
-
-  img {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 0 4px #ddd;
-  }
-
-  span {
-    margin: .3rem 0;
-    display: block;
-    color: $gray-400;
-  }
-}
-
-.testimonial__details {
-  margin-left: 20px;
-  flex-basis: 0;
-  flex-grow: 1;
-
-  @include media-breakpoint-down(md) {
-    margin-left: 0;
-  }
-
-  ul {
-    @include media-breakpoint-down(md) {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      padding-bottom: 5px;
-    }
-
-  }
-}
-
-.testimonial__name {
-  margin: 1rem 0 0 0;
-
-  @include media-breakpoint-up(lg) {
-    margin: 0;
-  }
-}
-
-.testimonial__text {
+// Note: Can be easily replaced with `div.card>div.card-body._small>a.h4+p`. Let's leave this one for now.
+.text-note {
+  position: relative;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-sm;
+  padding: 15px 15px 10px 15px;
   margin-bottom: 1rem;
 
+  &::after {
+    content: " ";
+    width: 14px;
+    height: 14px;
+    background-image: url("/static/v2/img/icons/more-info-block_corner.svg");
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+  }
+
+  ._text {
+    margin-top: 5px;
+    font-size: $small-font-size;
+  }
 }

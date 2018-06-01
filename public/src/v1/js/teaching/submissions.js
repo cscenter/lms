@@ -1,3 +1,5 @@
+import {showComponentError} from 'utils';
+
 let filterAssignmentForm = $(".filters form");
 
 let assignmentSelect = $("#assignments-select");
@@ -7,15 +9,19 @@ const fn = {
         fn.initFiltersForm();
     },
 
-    initFiltersForm: function() {
-        assignmentSelect.selectpicker({
-            maxOptions: 2,
-            iconBase: 'fa',
-            tickIcon: 'fa-check'
-        });
-        assignmentSelect.on('loaded.bs.select', function (e) {
-          $(this).closest('.filters').find('.loading').remove();
-        });
+    initFiltersForm: function () {
+        import('forms')
+            .then(_ => {
+                assignmentSelect.selectpicker({
+                    iconBase: 'fa',
+                    tickIcon: 'fa-check'
+                });
+                assignmentSelect.on('loaded.bs.select', function (e) {
+                    $(this).closest('.filters').find('.loading').remove();
+                });
+            })
+            .catch(error => showComponentError(error));
+
 
         // TODO: simplify
         filterAssignmentForm.on('submit', function () {

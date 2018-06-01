@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Цели и история центра{% endblock title %}</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
+    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk"/>
+
+    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
+    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
+
+    {% block stylesheets %} {% endblock stylesheets %}
+</head>
+
+{% import "v2/_macros.jinja2" as macros %}
+{% import "v2/components/menu/_macros.jinja2" as top_menu %}
+
+<body>
+<div class="svg-inline">
+    {% include "sprites/common.svg" %}
+    {% block sprites %}{% endblock sprites %}
+</div>
+
+{% block menu %}{{ top_menu.render(theme_class="__inner-theme") }}{% endblock menu %}
+
+{% block content %}place page content here{% endblock content %}
+
+<footer class="footer container">
+    <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
+    <div class="footer__contacts">
+        <a href="" class="footer__email">
+            info@compscicenter.ru
+        </a>
+        <div class="footer__social-media-icons">
+            <a href="">{{ macros.svg_inline('vk') }}</a>
+            <a href="">{{ macros.svg_inline('instagram') }}</a>
+            <a href="">{{ macros.svg_inline('twitter') }}</a>
+            <a href="">{{ macros.svg_inline('facebook') }}</a>
+            <a href="">{{ macros.svg_inline('youtube') }}</a>
+        </div>
+    </div>
+</footer>
+
+{{ render_bundle('vendor', config='V2') }}
+{{ render_bundle('main', config='V2') }}
+</body>
+</html>

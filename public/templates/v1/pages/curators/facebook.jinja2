@@ -1,0 +1,33 @@
+{% extends "v1/layouts/base.jinja2" %}
+
+{% block javascripts %}
+    {{ render_bundle('supervising', 'js') }}
+{% endblock javascripts %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div id="graduates">
+        <div id="Facebook" data-init='{
+            "entry_url": "/ajax/students.json",
+            "state":{
+                "city":"spb",
+                "query":"",
+                "enrollment_year":"2016"
+            },
+            "options":{
+                "optionsEnrollmentYear":[
+                    {"value":"2016", "label":"2016"},
+                    {"value":"2017", "label":"2017"},
+                    {"value":"2018", "label":"2018"}
+                ],
+                "optionsCity":[
+                    {"value":"spb", "label": "Санкт-Петербург"},
+                    {"value":"nsk", "label": "Новосибирск"}
+                ]
+            }
+        }' class="__react-root"></div>
+    </div>
+{% endblock content %}

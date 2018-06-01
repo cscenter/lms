@@ -15,7 +15,7 @@ import merge from "merge-stream";  // combines the streams and ends only when al
 // https://github.com/gulpjs/gulp/blob/4.0/docs/recipes/running-task-steps-per-folder.md
 const svgSprites = () => {
     let sprites = getDirs(paths.src.svgSprites);
-    if (sprites.length == 0) {
+    if (sprites.length === 0) {
         return createEmptyStream();
     }
 
@@ -23,7 +23,7 @@ const svgSprites = () => {
     let tasks = sprites.map(function (dir) {
         return gulp.src(["*.svg"], {cwd: paths.src.svgSprites + dir})
             .pipe(plumber(plumberConfig))
-            // TODO: What if gulp-svg-spirets optimize svg?
+            // TODO: What if gulp-svg-sprites optimize svg?
             // .pipe(gulpif(global.watch !== true, svgmin({
             // 	js2svg: {
             // 		pretty: true

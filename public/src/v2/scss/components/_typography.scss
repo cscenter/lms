@@ -1,13 +1,11 @@
 @import "bootstrap/scss/type";
-@import "bootstrap/scss/utilities/text";
+@import "bootstrap/scss/utilities/text"; // TODO: what exactly we use from here right now?
 
-h1,
-h2,
-h3 {
-  font-weight: $font-weight-light;
-
-  @include media-breakpoint-down(md) {
-    text-align: center;
+a {
+  &.h4 {
+    display: inline-block;
+    margin-bottom: 4px;
+    color: $link-color;
   }
 }
 
@@ -19,16 +17,15 @@ h4 {
   font-weight: $font-weight-normal;
 }
 
-.text-center {
-  text-align: center;
-}
-
-@media (max-width: 991px) {
+@include media-breakpoint-down(md) {
   html {
     font-size: .9rem;
 
     h1 {
-      font-size: 2.8rem;
+      font-size: 2.4rem;
+    }
+    h2 {
+      font-size: 2rem;
     }
 
     h4 {

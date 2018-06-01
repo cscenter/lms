@@ -65,12 +65,10 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
 
 .btn--outline {
   color: $light;
-  //background-color: rgba(255, 255, 255, 0);
   border: 1px solid transparentize($white, .8);
 
   &:hover {
     color: $light;
-    //background-color: rgba(255, 255, 255, .2);
     border: 1px solid transparentize($white, .6);
   }
 }
@@ -105,31 +103,9 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
   }
 }
 
-.btn-reg--icon {
-  margin-right: 5px;
-  margin-top: 2px;
-  height: 24px;
-  width: 24px;
-  background-image: url("/static/v2/img/icons/user-sign.svg");
-  background-size: cover;
-  order: -1;
-
-  @include media-breakpoint-down(md) {
-    margin-right: 0;
+._m-wide {
+  width: 100%;
+  @include media-breakpoint-up(lg) {
+    width: auto;
   }
-
-}
-
-.btn--reg {
-  display: flex;
-
-  @include media-breakpoint-down(md) {
-    text-indent: -9999px;
-    border: none;
-
-    &:hover {
-      border: none;
-    }
-  }
-
 }
