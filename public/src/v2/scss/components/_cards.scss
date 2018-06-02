@@ -34,7 +34,8 @@
     content: " ";
     width: 14px;
     height: 14px;
-    background-image: url("/static/v2/img/icons/more-info-block_corner.svg");
+    // FIXME: add svg file, then uncomment
+    //background-image: url("/static/v2/img/icons/more-info-block_corner.svg");
     position: absolute;
     right: -1px;
     bottom: -1px;
