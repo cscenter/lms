@@ -8,73 +8,10 @@
     <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
 {% endblock stylesheets %}
 
-{% block javascripts %}
-{# FIXME: Repeated in interviews.html. Do something with that #}
-    {% render_bundle 'forms' 'js' %}
-    <script type="text/javascript">
-        $(function () {
-            var TIMEPICKER_ICONS = {
-                time: 'fa fa-clock-o',
-                date: 'fa fa-calendar',
-                up: 'fa fa-chevron-up',
-                down: 'fa fa-chevron-down',
-                previous: 'fa fa-chevron-left',
-                next: 'fa fa-chevron-right',
-                today: 'fa fa-screenshot',
-                clear: 'fa fa-trash',
-                close: 'fa fa-check',
-            };
-            var TIMEPICKER_TOOLTIPS = {
-                today: 'Go to today',
-                clear: 'Clear selection',
-                close: 'Закрыть',
-                selectMonth: 'Выбрать месяц',
-                prevMonth: 'Предыдущий месяц',
-                nextMonth: 'Следующий месяц',
-                selectYear: 'Выбрать год',
-                prevYear: 'Предыдущий год',
-                nextYear: 'Следующий год',
-                selectDecade: 'Выбрать декаду',
-                prevDecade: 'Предыдущая декада',
-                nextDecade: 'Следующая декада',
-                prevCentury: 'Предыдущий век',
-                nextCentury: 'Следующий век'
-            };
-            $('.datepicker').datetimepicker({
-                locale: 'ru',
-                format: 'DD.MM.YYYY',
-                stepping: 5,
-                allowInputToggle: true,
-                toolbarPlacement: "bottom",
-                keyBinds: {
-                    left: false,
-                    right: false,
-                    escape: function () {
-                        this.hide();
-                    },
-                },
-                icons: TIMEPICKER_ICONS,
-                tooltips: TIMEPICKER_TOOLTIPS
-            });
+{% block body_attrs %} data-init-sections="assignmentForm"{% endblock body_attrs %}
 
-            $('#timepicker').datetimepicker({
-                locale: 'ru',
-                format: 'HH:mm',
-                stepping: 1,
-                useCurrent: false,
-                allowInputToggle: true,
-                icons: TIMEPICKER_ICONS,
-                tooltips: TIMEPICKER_TOOLTIPS,
-                defaultDate: new Date("01/01/1980 23:59"),
-                keyBinds: {
-                    left: false,
-                    right: false,
-                    up: false,
-                    down: false
-                }
-            });
-        });
-    </script>
+{% block javascripts %}
+    {% render_bundle 'teaching' 'js' %}
 {% endblock javascripts %}
 
 {% block content %}
