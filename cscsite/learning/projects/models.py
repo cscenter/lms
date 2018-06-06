@@ -115,21 +115,23 @@ class ProjectStudent(models.Model):
 
     def final_grade_display(self):
         """
-        For internal projects show 'Satisfactory' instead of 'Pass'.
+        For internal projects show 'Satisfactory' instead of 'Pass',
+        except summer projects.
         For projects earlier spring 2016 (exclusively) -
         dont' override grade status name.
-        May require additional query to db to get project instance
+
+        May hit db to get project and semester instances
         """
         final_grade = GRADES[self.final_grade]
         # For research work grade type is binary at most
         if self.project.project_type == Project.PROJECT_TYPES.research:
             return final_grade
-        # XXX: Assume projects with id greater than magic number -
-        # from terms >= spring 2016
-        MAGIC_PROJECT_ID = 357
+        # XXX: Assume all projects >= spring 2016 have id > magic number
+        MAGIC_ID = 357
         if (self.final_grade == getattr(GRADES, "pass") and
-                self.project_id > MAGIC_PROJECT_ID and
-                not self.project.is_external):
+                self.project_id > MAGIC_ID and
+                not self.project.is_external and
+                self.project.semester.type != Semester.TYPES.summer):
             final_grade = _("Assignment|pass")
         return final_grade
 
@@ -259,6 +261,8 @@ class Project(TimeStampedModel):
 
     def report_period_ended(self):
         today = now_local(self.city_id).date()
+        if not self.semester.report_ends_at:
+            return None
         return self.semester.report_ends_at > today
 
     def report_period_active(self):
