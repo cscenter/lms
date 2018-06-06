@@ -5,6 +5,8 @@ from __future__ import absolute_import, unicode_literals
 from collections import OrderedDict, defaultdict
 
 import itertools
+from typing import NamedTuple
+
 from braces.views import JSONResponseMixin
 from django.conf import settings
 from django.contrib import messages
@@ -25,6 +27,7 @@ from vanilla import TemplateView, ListView
 
 from api.permissions import CuratorAccessPermission
 from core.models import City
+from core.templatetags.core_tags import tex
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
 from learning.models import Semester, CourseOffering, StudyProgram, \
@@ -265,6 +268,13 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         filters = {"city_id": city_code}
         students = ProgressReportForDiplomas.get_queryset(filters=filters)
 
+        class DiplomaCourse(NamedTuple):
+            type: str
+            name: str
+            teachers: str
+            final_grade: str
+            class_count: int = 0
+
         def is_project_active(ps):
             return (not ps.project.is_external and
                     not ps.project.canceled and
@@ -274,6 +284,30 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         for student in students:
             student.projects_through = list(filter(is_project_active,
                                                    student.projects_through))
+            courses = []
+            for e in student.enrollments:
+                course = DiplomaCourse(
+                    type="course",
+                    name=tex(e.course_offering.course.name),
+                    teachers=", ".join(t.get_abbreviated_name() for t in
+                                       e.course_offering.teachers.all()),
+                    final_grade=str(e.grade_honest).lower(),
+                    class_count=e.course_offering.courseclass_set.count() * 2
+                )
+                courses.append(course)
+            for c in student.shads:
+                course = DiplomaCourse(
+                    type="shad",
+                    name=tex(c.name),
+                    teachers=c.teachers,
+                    final_grade=str(c.grade_display).lower(),
+                )
+                courses.append(course)
+            courses.sort(key=lambda c: c.name)
+            student.courses = courses
+            delattr(student, "enrollments")
+            delattr(student, "shads")
+
         context = {
             "city": settings.CITIES[city_code],
             "students": students

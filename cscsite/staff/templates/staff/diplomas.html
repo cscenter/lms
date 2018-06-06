@@ -21,15 +21,13 @@
     <h3>{{ city }}</h3>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}направлени{{ s.areas_of_study.all|pluralize:"ю,ям" }} {% for program in s.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %}\\и {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}сентября {{s.enrollment_year}} года{{ '}' }}
-{{ '{' }}{% for enrollment in s.enrollments %}
-{% spaceless %}\course{{ '{' }}{{enrollment.course_offering.course.name|tex}}{{ '}' }}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if enrollment.course_offering.courseclass_set.count > 0 %}{% widthratio enrollment.course_offering.courseclass_set.count 1 2 %}{% endif %}{{ '}' }}{{ '{' }}{{enrollment.grade_honest|lower}}{{ '}' }}
-       {{ '{' }}{% for teacher in enrollment.course_offering.teachers.all %}{{teacher.first_name|first}}. {% if teacher.patronymic %}{{teacher.patronymic|first}}. {% endif %}{{teacher.last_name}}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}направлени{{ s.areas_of_study.all|pluralize:"ю,ям" }} {% for program in s.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{{s.enrollment_year}} года{{ '}' }}
+{{ '{' }}{% for course in s.courses %}
+{% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}
+       {{ '{' }}{{ course.teachers }}{{ '}' }}
 {% endspaceless %}{% if forloop.last %}
-{% endif %}{% endfor %}{% if s.shads|length > 0 %}{% for project in s.shads %}{% spaceless %}
-\shad{{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.teachers}}{{ '}' }}{{ '{' }}{{project.grade_display|lower}}{{ '}' }}{% endspaceless %}
-{% endfor %}{% endif %}{{ '}' }}
+{% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{% if s.projects_through|length > 0 %}
 {% for ps in s.projects_through %}{% with project=ps.project %}{% spaceless %}
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
