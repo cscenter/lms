@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from decimal import Decimal
 
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
@@ -24,7 +25,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             '--city', type=str,
             help='Current campaign city code')
         parser.add_argument(
-            '--reject_value', type=int,
+            '--reject_value', type=Decimal,
             help='Set `rejected by exam` to applicants with exam score equal or'
                  ' below this value')
 
@@ -40,7 +41,10 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         campaign = campaigns.first()
         reject_value = options["reject_value"]
         if not reject_value:
-            raise CommandError("Score value for rejection is not specified")
+            raise CommandError(
+                "Score value for rejection is not specified. If you haven't "
+                "any application form in pending status, set "
+                "`reject_value` = `passing_score` - 0.01")
         exam_score_pass = campaign.exam_passing_score
         if not exam_score_pass:
             self.stdout.write("Zero exam passing score "
