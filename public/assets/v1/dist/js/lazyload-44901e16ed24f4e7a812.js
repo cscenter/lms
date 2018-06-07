@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[2],{NXli:function(n,a,i){"use strict";i.r(a);i("hmhZ"),i("Z8x7");var o={launch:function(){$("img.lazy").lazyload({})}};a.default=o}}]);
