@@ -1,0 +1,42 @@
+{% extends "cscenter/layouts/base.html" %}
+
+{% block title %}Отзывы выпускников - {{ super() }}{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="testimonials"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="container page-content">
+        <h1>Выпускники о CS центре</h1>
+
+        <div class="row" id="masonry-grid">
+            {% for student in testimonials %}
+                <div class="grid-item">
+                    {{ macros.testimonial_card(student) }}
+                </div>
+            {% endfor %}
+            <div class="grid-sizer"></div>
+        </div>
+        {% if is_paginated %}TODO: Pagination
+            {{ page_obj }}
+            {#                    {% bootstrap_paginate page_obj range=10 size="large" show_prev_next="true" show_first_last="false" previous_label="<i class='fa fa-chevron-left'></i>" next_label="<i class='fa fa-chevron-right'></i>" %}#}
+        {% endif %}
+    </div>
+
+    <style>
+        .grid-sizer,
+        .grid-item {
+            width: 50%;
+        }
+        .grid-item {
+            padding-left: .5rem;
+            padding-right: .5rem;
+        }
+        @media (max-width: 992px) {
+            .grid-item {
+                width: 100%;
+                padding-left: .5rem;
+                padding-right: .5rem;
+            }
+        }
+    </style>
+{% endblock content %}

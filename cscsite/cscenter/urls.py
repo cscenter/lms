@@ -82,7 +82,9 @@ urlpatterns = [
     url(r'^faq/$', cscenter_views.QAListView.as_view(), name='faq'),
     url(r'^testimonials/$', cscenter_views.TestimonialsListView.as_view(),
         name='testimonials'),
-
+    url(r'^testimonials2/$',
+        cscenter_views.TestimonialsListV2View.as_view(),
+        name='testimonials_v2'),
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
 
