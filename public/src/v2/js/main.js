@@ -4,6 +4,7 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
+import {showComponentError, getSections} from 'utils';
 
 // Configure `raven-js`
 Raven
@@ -11,6 +12,12 @@ Raven
             ravenOptions)
     .install();
 let authenticatedUser = $("#userMenuButton").data('id');
+if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
+    Raven.setUserContext({
+        id: authenticatedUser
+    });
+}
+
 $(function () {
     let navbarContainer = document.getElementsByClassName("navbar-container")[0];
     let navbarToggler = $(".navbar-toggler");
@@ -62,10 +69,23 @@ $(function () {
             scrollTop: $(scrollTo).offset().top - offset
         }, 700);
     });
-});
-if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
-    Raven.setUserContext({
-        id: authenticatedUser
-    });
 
-}
+    // TODO: section or component-based approach. What to choose?
+    let sections = getSections();
+    if (sections.includes("testimonials")) {
+        import(/* webpackChunkName: "testimonials" */ 'sections/testimonials')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
+    } else {
+
+    }
+    let reactApps = document.querySelectorAll('.__react-root');
+    if (reactApps.length > 0) {
+        import(/* webpackChunkName: "react" */ 'react_app')
+            .then(m => { reactApps.forEach(m.renderComponentInElement); })
+            .catch(error => showComponentError(error));
+    }
+});
+
+
+

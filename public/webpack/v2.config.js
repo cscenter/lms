@@ -11,7 +11,7 @@ const development = require('./dev.config');
 const production = require('./prod.config');
 const TARGET = process.env.npm_lifecycle_event;
 
-process.env.BABEL_ENV = TARGET;
+process.env.BABEL_ENV = process.env.NODE_ENV;
 
 const APP_VERSION = "v2";
 
@@ -27,19 +27,17 @@ const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
 };
 
-// Let's include necessary parts instead of the whole polyfill bundle
-const VENDOR = [
-    '@babel/polyfill',  // TODO: optimize?
-    'react',
-    'react-dom',
-];
-
 const common = {
     context: __srcdir,
 
     entry: {
+        common: [
+            '@babel/polyfill',
+            'jquery',
+            'popper.js',
+            'fontfaceobserver',
+        ],
         main: PATHS.common,
-        vendor: VENDOR,
     },
 
     output: {
@@ -61,48 +59,27 @@ const common = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|jsx)$/,
+                include: path.resolve(__srcdir, "js"),
                 use: [
                     {
                         loader: 'babel-loader',
-                        options: {
-                            // `.babelrc.js` doesn't work for 7.0.0.-beta.46
-                            babelrc: false,
-                            presets: [
-                                [
-                                    "@babel/preset-stage-2",
-                                    {
-                                        "decoratorsLegacy": true
-                                    }
-                                ],
-                                [
-                                    "@babel/preset-env",
-                                    {
-                                        "modules": false,
-                                        "loose": true
-                                    }
-                                ],
-                                "@babel/preset-react"
-                            ],
-                            cacheDirectory: true,  // Improve performance
-                            "env": {
-                                "production": {
-                                    "plugins": [
-                                        ["transform-react-remove-prop-types", {
-                                            // TODO: eslint-plugin-react has a rule forbid-foreign-prop-types to make this plugin safer
-                                            "mode": "remove",
-                                            "ignoreFilenames": ["node_modules"]
-                                        }]
-                                    ]
-                                }
-                            }
-                        }
                     }
-                ],
-                include: [
-                    path.resolve(__srcdir, "js"),
-                    path.resolve(__nodemodulesdir, "bootstrap"),  // needs babel, used object spread syntax
                 ]
+            },
+            {
+                test: /\.js$/,
+                include: path.resolve(__nodemodulesdir, "bootstrap"),
+                use: [{
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: false,
+                        cacheDirectory: true,
+                        plugins: [
+                            "@babel/plugin-proposal-object-rest-spread"
+                        ]
+                    }
+                }]
             },
             {
                 test: /\.s?[ac]ss$/,
@@ -180,31 +157,59 @@ const common = {
             root: process.cwd()
         }),
         new MiniCssExtractPlugin({
-          // Options similar to the same options in webpackOptions.output
-          // both options are optional
-          filename: DEBUG ? '[name].css' : '[name].[hash].css',
-          chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: DEBUG ? '[name].css' : '[name].[hash].css',
+            chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
         })
     ],
 
-	optimization: {
-		splitChunks: {
-			cacheGroups: {
-				vendor: {
-					name: "vendor",
-					test: "vendor",
-					enforce: true
-				},
-			}
-		}
-	}
+    optimization: {
+        splitChunks: {
+            chunks: "async",
+            minSize: 30000,
+            minChunks: 1,
+            maxAsyncRequests: 5,
+            maxInitialRequests: 3,
+            automaticNameDelimiter: '~',
+            name: true,
+            cacheGroups: {
+                common: {
+                    chunks: "all",
+                    test: "common",
+                    name: "common",
+                    enforce: true
+                },
+                // react: {
+                //     chunks: "all",
+                //     test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+                //     name: "react",
+                //     enforce: true,
+                // },
+                vendors: {
+                    // chunks: "all",
+                    minChunks: 2,
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: -10,
+                    // reuseExistingChunk: true
+                },
+                // default: {
+                //     minChunks: 2,
+                //     priority: -20,
+                //     reuseExistingChunk: true
+                // }
+            }
+        }
+    }
 
 };
 
+let appConfig;
 if (['dev2', 'start'].includes(TARGET) || !TARGET) {
-    module.exports = merge(common, development);
+    appConfig = merge(common, development);
+}
+if (TARGET === 'prod2' || !TARGET) {
+    appConfig = merge(common, production);
 }
 
-if (TARGET === 'prod2' || !TARGET) {
-    module.exports = merge(common, production);
-}
+module.exports = appConfig;

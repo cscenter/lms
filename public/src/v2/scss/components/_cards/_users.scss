@@ -1,0 +1,31 @@
+.graduates-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  .fix-grid {
+    width: 170px;
+    height: 0;
+    margin: 0;
+  }
+}
+.user-card {
+  width: 170px;
+  float: left; // for older browsers
+  overflow: hidden;
+  vertical-align: top;
+  margin: 0 0 32px 0;
+
+  img {
+    max-width: 170px;
+  }
+
+  a {
+    font-weight: 300;
+    margin-top: 8px;
+    font-size: 16px;
+    display: inline-block;
+    line-height: 22px;
+    max-width: 170px;
+  }
+}

@@ -1,6 +1,8 @@
 @import "../sprites/common";
 @import "../sprites/index";
 
+$footer-height: 90px;
+
 @mixin append-hr-to-container() {
   .container::after {
     content: "";
@@ -11,9 +13,15 @@
 }
 
 
-// TODO: rename to `inversed`?
-.__dark {
-  color: $gray-500;
+html {
+  min-height: 100%;
+  position: relative;
+}
+
+body {
+  @include media-breakpoint-up(lg) {
+    margin-bottom: $footer-height;
+  }
 }
 
 .cover {
@@ -46,16 +54,26 @@
 
 // Footer styles
 .footer {
-  display: flex;
-  flex-wrap: wrap;
-  padding-top: 2rem;
-  border-top: $hr-border-width solid $hr-border-color;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  color: $gray-600;
-  font-size: .9375rem;
-  line-height: 1.5rem;
-  @include font-smoothing();
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  @include media-breakpoint-up(lg) {
+    position: absolute;
+    bottom: 0;
+    height: $footer-height;
+  }
+
+  > .container {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 2rem;
+    border-top: $hr-border-width solid $hr-border-color;
+    margin-bottom: 2rem;
+    color: $gray-600;
+    font-size: .9375rem;
+    line-height: 1.5rem;
+    @include font-smoothing();
+  }
 
   &__copyright {
     @include make-col(6);
