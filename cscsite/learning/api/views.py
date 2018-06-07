@@ -17,7 +17,7 @@ class AlumniList(ListAPIView):
                 .filter(groups__pk=CSCUser.group.GRADUATE_CENTER)
                 .prefetch_related("areas_of_study")
                 .only("pk", "first_name", "last_name", "graduation_year",
-                      "city_id")
+                      "cropbox_data", "city_id")
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def list(self, request, *args, **kwargs):

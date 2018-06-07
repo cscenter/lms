@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 from django_filters.views import FilterView, FilterMixin
 from rest_framework.renderers import JSONRenderer
-from vanilla import TemplateView
+from vanilla import TemplateView, ListView
 
 from core.api.utils import SocialPost
 from core.exceptions import Redirect
@@ -171,6 +171,19 @@ class TestimonialsListView(generic.ListView):
                 .order_by("-graduation_year", "last_name"))
 
 
+class TestimonialsListV2View(ListView):
+    context_object_name = "testimonials"
+    template_name = "cscenter/testimonials.html"
+    paginate_by = 10
+
+    def get_queryset(self):
+        return (CSCUser.objects
+                .filter(groups=CSCUser.group.GRADUATE_CENTER)
+                .exclude(csc_review='').exclude(photo='')
+                .prefetch_related("areas_of_study")
+                .order_by("-graduation_year", "last_name"))
+
+
 class TeachersView(generic.ListView):
     template_name = "center_teacher_list.html"
     context_object_name = "teachers"
@@ -310,10 +323,27 @@ class AlumniV2View(generic.TemplateView):
     template_name = "cscenter/alumni.html"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        code = self.kwargs.get("area_of_study_code", False)
-        context["selected_area_of_study"] = code
-        return context
+        app_data = {
+            "entry_url": reverse("api:alumni"),
+            "state": {
+                # FIXME: default values?
+                "area": self.kwargs.get("area", None),
+                "city": self.kwargs.get("city", None),
+                "query": self.kwargs.get("query", ""),
+                "year": self.kwargs.get("year", None)
+            },
+            "options": {
+                "cities": [{"label": str(v), "value": k} for k, v
+                           in settings.CITIES.items()],
+                "areas": [{"label": a.name, "value": a.code} for a
+                          in AreaOfStudy.objects.all()],
+                # TODO: retrieve last year?
+                "years": [{"label": y, "value": y} for y in range(2013, now().year)]
+            }
+        }
+        return {
+            "app_data": app_data
+        }
 
 
 class SyllabusView(generic.TemplateView):
