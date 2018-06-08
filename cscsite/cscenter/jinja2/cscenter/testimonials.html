@@ -16,9 +16,19 @@
             {% endfor %}
             <div class="grid-sizer"></div>
         </div>
-        {% if is_paginated %}TODO: Pagination
-            {{ page_obj }}
-            {#                    {% bootstrap_paginate page_obj range=10 size="large" show_prev_next="true" show_first_last="false" previous_label="<i class='fa fa-chevron-left'></i>" next_label="<i class='fa fa-chevron-right'></i>" %}#}
+        {% if is_paginated %}
+            {% set p = pagination(page_obj, request) %}
+            {% if p.page_urls %}
+                <nav aria-label="Page Navigation">
+                  <ul class="pagination">
+                    {% if p.first_page_url %}<li class="page-item"><a class="page-link" href="{{ p.first_page_url }}" tabindex="-1"><<</a></li>{% endif %}
+                    {% for page_num, url in p.page_urls %}
+                        <li class="page-item{% if page_obj.number == page_num %} active{% endif %}"><a class="page-link" href="{{ url }}">{{ page_num }}</a></li>
+                    {% endfor %}
+                    {% if p.last_page_url %}<li class="page-item"><a class="page-link" href="{{ p.last_page_url }}" tabindex="-1">>></a></li>{% endif %}
+                  </ul>
+                </nav>
+            {% endif %}
         {% endif %}
     </div>
 
