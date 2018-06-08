@@ -30,7 +30,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("{}:".format(campaign))
             statuses = [
                 Applicant.INTERVIEW_TOBE_SCHEDULED,
-                Applicant.REJECTED_BY_EXAM
+                Applicant.REJECTED_BY_EXAM,
+                Applicant.THEY_REFUSED
             ]
             applicants = (Applicant.objects
                           .filter(campaign=campaign.pk,
