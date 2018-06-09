@@ -1,5 +1,4 @@
-@import "../sprites/common";
-@import "../sprites/index";
+$footer-height: 90px;
 
 $footer-height: 90px;
 
@@ -21,6 +20,10 @@ html {
 body {
   @include media-breakpoint-up(lg) {
     margin-bottom: $footer-height;
+  }
+  // TODO: mb-0 ?
+  &._nofooter {
+    margin-bottom: 0;
   }
 }
 

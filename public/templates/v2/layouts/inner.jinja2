@@ -19,7 +19,7 @@
 {% import "v2/_macros.jinja2" as macros %}
 {% import "v2/components/menu/_macros.jinja2" as top_menu %}
 
-<body>
+<body {% block body_attrs %}{% endblock body_attrs %}>
 <div class="svg-inline">
     {% include "sprites/common.svg" %}
     {% block sprites %}{% endblock sprites %}
@@ -29,23 +29,26 @@
 
 {% block content %}place page content here{% endblock content %}
 
-<footer class="footer container">
-    <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
-    <div class="footer__contacts">
-        <a href="" class="footer__email">
-            info@compscicenter.ru
-        </a>
-        <div class="footer__social-media-icons">
-            <a href="">{{ macros.svg_inline('vk') }}</a>
-            <a href="">{{ macros.svg_inline('instagram') }}</a>
-            <a href="">{{ macros.svg_inline('twitter') }}</a>
-            <a href="">{{ macros.svg_inline('facebook') }}</a>
-            <a href="">{{ macros.svg_inline('youtube') }}</a>
+{% block footer -%}
+<footer class="footer">
+    <div class="container">
+        <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
+        <div class="footer__contacts">
+            <a href="" class="footer__email">
+                info@compscicenter.ru
+            </a>
+            <div class="footer__social-media-icons">
+                <a href="">{{ macros.svg_inline('vk') }}</a>
+                <a href="">{{ macros.svg_inline('instagram') }}</a>
+                <a href="">{{ macros.svg_inline('twitter') }}</a>
+                <a href="">{{ macros.svg_inline('facebook') }}</a>
+                <a href="">{{ macros.svg_inline('youtube') }}</a>
+            </div>
         </div>
     </div>
 </footer>
-
-{{ render_bundle('vendor', config='V2') }}
+{%- endblock footer %}
+{{ render_bundle('common', config='V2') }}
 {{ render_bundle('main', config='V2') }}
 </body>
 </html>

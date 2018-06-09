@@ -1,31 +1,63 @@
-.graduates-list {
+.user-cards {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-
-  .fix-grid {
-    width: 170px;
-    height: 0;
-    margin: 0;
+  justify-content: left;
+  margin: 0 -10px 0 -10px;
+  @include media-breakpoint-up(sm) {
+    justify-content: space-between;
+  }
+  &:after {
+    content: "";
+    flex: auto;
   }
 }
+
 .user-card {
   width: 170px;
   float: left; // for older browsers
-  overflow: hidden;
   vertical-align: top;
-  margin: 0 0 32px 0;
+  margin-bottom: 32px;
+  margin-left: $grid-gutter-width / 2;
+  margin-right: $grid-gutter-width / 2;
+
+  @include media-breakpoint-up(sm) {
+    width: 150px;
+  }
+  @include media-breakpoint-up(lg) {
+    width: 170px;
+  }
 
   img {
-    max-width: 170px;
+    max-width: 100%;
+    height: auto;
   }
 
   a {
-    font-weight: 300;
     margin-top: 8px;
     font-size: 16px;
-    display: inline-block;
-    line-height: 22px;
-    max-width: 170px;
+    line-height: 18px;
   }
 }
+
+.user-card__photo {
+  position: relative;
+  margin: auto;
+}
+
+.achievements {
+  width: 50px;
+  position: absolute;
+  top: 2px;
+  right: -2px;
+}
+
+.achievements__item {
+  margin-bottom: 5px;
+  transition: all 200ms;
+  &:hover {
+    transform: scale(1.3);
+    transition: all 200ms ease;
+    padding-bottom: 4px;
+  }
+}
+
