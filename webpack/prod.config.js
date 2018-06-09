@@ -11,6 +11,17 @@ module.exports = {
         publicPath: `/static/${APP_VERSION}/dist/js/`,
     },
 
+    stats: {
+        colors: false,
+        hash: true,
+        timings: true,
+        assets: true,
+        chunks: true,
+        chunkModules: true,
+        modules: true,
+        children: true,
+    },
+
     optimization: {
         namedModules: false,
         concatenateModules: true
@@ -18,9 +29,7 @@ module.exports = {
 
     plugins: [
         new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: '"production"'
-            },
+            'process.env.NODE_ENV': '"production"',
             '__DEVELOPMENT__': false
         }),
         // Need this plugin for deterministic hashing

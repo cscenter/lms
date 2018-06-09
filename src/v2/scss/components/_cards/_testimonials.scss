@@ -1,3 +1,16 @@
+._testimonials {
+  &.card-columns {
+    @include media-breakpoint-down(sm) {
+      column-count: 1;
+    }
+  }
+
+  .card {
+    border-radius: 0;
+  }
+}
+
+
 .testimonial {
   @include font-smoothing();
   padding: 1.7rem;

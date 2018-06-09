@@ -16,9 +16,11 @@
 @import "components/cards";
 @import "components/dropdown";
 @import "components/grid";
+@import "components/tooltips";
 @import "components/sprites";
 @import "components/menu";  // After: buttons
 @import "components/typography";  // After: reboot
+@import "components/misc";
 
 @import "pages/index";
 

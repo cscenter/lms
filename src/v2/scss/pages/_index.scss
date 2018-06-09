@@ -205,24 +205,15 @@
   padding: 30px 0 40px;
   background-color: $light;
 
-  .card {
-    border-radius: 0;
-  }
-
   .card-columns {
     margin: 30px 0;
-    column-count: 2;
-    @include media-breakpoint-down(md) {
-      column-count: 1;
-      text-align: center;
-    }
   }
 }
 
 //6-screen social-media-posts
 
 .social-media-posts {
-  padding: 30px 0 0;
+  padding: 30px 0;
   overflow: hidden;
   font-size: .9375rem;
 }

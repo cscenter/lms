@@ -1,5 +1,9 @@
 @import "bootstrap/scss/grid";
 
+._dark {
+  background: $gray-100;
+}
+
 .container {
   @include media-breakpoint-down(md) {
     padding-left: $mobile-padding-x;
@@ -9,6 +13,7 @@
 
 .page-content {
   margin-top: 70px;
+  padding-bottom: 2rem;
   @include media-breakpoint-up(lg) {
     margin-top: 40px;
   }
