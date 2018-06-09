@@ -23,7 +23,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
   position: fixed;
   width: 100%;
   top: 0;
-  z-index: 10;
+  z-index: $zindex-menu;
   @include font-smoothing();
   @include media-breakpoint-up(lg) {
     position: relative;
