@@ -1,0 +1,237 @@
+{% extends "cscenter/layouts/base.html" %}
+
+{% block body_attrs %}class="mb-0" data-init-sections="honorBoard"{% endblock body_attrs %}
+
+{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+
+{% block menu %}
+<div class="navbar-container">
+    <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+        <div class="container">
+            <a class="navbar-logo" href="/">{{ macros.svg_inline('logo-csc') }}</a>
+            <div class="menu-desktop-wrapper">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link _active" href="/{{graduation_year}}/">Выпускники 2018</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="#stats">Статистика</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#photos">Фотографии</a></li>
+                    {% if testimonials -%}
+                        <li class="nav-item"><a class="nav-link" href="#testimonials">Отзывы</a></li>
+                    {%- endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+{% endblock menu %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>Выпуск {{ graduation_year }} в лицах</h1>
+                <div class="user-cards">
+                    {% for user in graduates %}
+                        <a class="user-card" href="{{ user.get_absolute_url() }}" id="user-card-{{ user.pk }}">
+                            <div class="user-card__photo">
+                                {% with im = user.get_thumbnail("170x238", use_stub=False) -%}
+                                    {% if im -%}
+                                        <img alt="{{ user.get_full_name() }}" src="{{ im.url }}">
+                                    {% else %}
+                                        {% if user.gender == user.__class__.GENDER_FEMALE %}
+                                            <img src="{{ static("v2/img/placeholder/woman.png") }}" alt="{{ user.get_full_name() }}">
+                                        {% else %}
+                                            <img src="{{ static("v2/img/placeholder/man.png") }}" alt="{{ user.get_full_name() }}">
+                                        {% endif %}
+                                    {%- endif %}
+                                {%- endwith %}
+                            </div>
+                            <div class="user-card__details">{{ user.get_short_name() }}</div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="_dark"><a name="stats"></a>
+        <div class="container py-4">
+            <h1 class="text-center">Статистика</h1>
+            <div class="row">
+                <div class="col-lg-6 mt-5 mb-sm-5 text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">72</p>
+                            <p>Преподавателя</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">46</p>
+                            <p>Курсов</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">9 709</p>
+                            <p>Часов в аудиториях</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">81</p>
+                            <p>Уникальный проект</p>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mb-sm-5 text-center">
+                    <svg viewBox="0 0 562 442" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                         xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>Статистика выпускников 2018</title>
+                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <g transform="translate(-10.000000, -11.000000)">
+                                <text font-size="14" font-weight="normal" fill="#1D1D1D">
+                                    <tspan x="230.672" y="276.543945">оценок по курсам</tspan>
+                                </text>
+                                <text font-size="14" font-weight="normal" fill="#1D1D1D">
+                                    <tspan x="9.58" y="411">оценок отлично</tspan>
+                                </text>
+                                <text font-size="14" font-weight="normal" fill="#1D1D1D">
+                                    <tspan x="442" y="436">оценок</tspan>
+                                    <tspan x="442" y="451">удовлетворительно</tspan>
+                                </text>
+                                <text font-size="14" font-weight="normal" fill="#1D1D1D">
+                                    <tspan x="464.519" y="65">оценок хорошо</tspan>
+                                </text>
+                                <text font-size="97" font-weight="bold" fill="#304452">
+                                    <tspan x="226" y="254">381</tspan>
+                                </text>
+                                <text font-size="42" font-weight="bold" fill="#00C49F">
+                                    <tspan x="48.934" y="395">169</tspan>
+                                </text>
+                                <text font-size="42" font-weight="bold" fill="#C7D3DA">
+                                    <tspan x="442" y="415">101</tspan>
+                                </text>
+                                <text font-size="42" font-weight="bold" fill="#4D86A1">
+                                    <tspan x="458.024" y="49">111</tspan>
+                                </text>
+                                <g transform="translate(68.000000, 11.000000)">
+                                    <path d="M58.1632,117.0637 C113.5302,21.1657 236.1542,-11.6913 332.0512,43.6757 C427.9492,99.0427 460.8062,221.6667 405.4392,317.5637 C350.0732,413.4607 227.4492,446.3187 131.5512,390.9517 C35.6542,335.5847 2.7972,212.9607 58.1632,117.0637 M115.3282,150.0677 C78.1892,214.3937 100.2292,296.6477 164.5562,333.7867 C228.8822,370.9257 311.1362,348.8857 348.2752,284.5597 C385.4132,220.2327 363.3732,137.9787 299.0472,100.8397 C234.7212,63.7017 152.4672,85.7407 115.3282,150.0677"
+                                          fill="#DEE4E8"></path>
+                                    <path d="M58.1632,117.0637 C113.5302,21.1657 236.1542,-11.6913 332.0512,43.6757 C427.9492,99.0427 460.8062,221.6667 405.4392,317.5637 C350.0732,413.4607 227.4492,446.3187 131.5512,390.9517 C35.6542,335.5847 2.7972,212.9607 58.1632,117.0637 Z M115.3282,150.0677 C78.1892,214.3937 100.2292,296.6477 164.5562,333.7867 C228.8822,370.9257 311.1362,348.8857 348.2752,284.5597 C385.4132,220.2327 363.3732,137.9787 299.0472,100.8397 C234.7212,63.7017 152.4672,85.7407 115.3282,150.0677 Z"
+                                          stroke="#282727"></path>
+                                    <path d="M321.8922,120.9075 L321.8832,120.8985 C302.6632,102.9755 278.9852,91.5085 253.5872,87.3995 L259.4412,53.1315 L262.7412,16.5375 L264.0172,15.2045 L265.8382,15.5045 C304.0542,21.8035 339.7482,38.8105 369.0552,65.2405 L369.0752,65.2185 L371.6202,67.5925 L374.1642,69.9655 L374.1442,69.9875 C434.4782,128.1995 452.9962,217.3265 421.0402,294.5915 L419.7032,297.8265 L352.3022,269.9085 L353.6392,266.6765 C374.4362,216.3875 361.9272,158.2555 321.9022,120.9165 L321.8922,120.9075 Z"
+                                          fill="#4C85A2"></path>
+                                    <path d="M321.8922,120.9075 L321.8832,120.8985 C302.6632,102.9755 278.9852,91.5085 253.5872,87.3995 L259.4412,53.1315 L262.7412,16.5375 L264.0172,15.2045 L265.8382,15.5045 C304.0542,21.8035 339.7482,38.8105 369.0552,65.2405 L369.0752,65.2185 L371.6202,67.5925 L374.1642,69.9655 L374.1442,69.9875 C434.4782,128.1995 452.9962,217.3265 421.0402,294.5915 L419.7032,297.8265 L352.3022,269.9085 L353.6392,266.6765 C374.4362,216.3875 361.9272,158.2555 321.9022,120.9165 L321.8922,120.9075 Z"
+                                          stroke="#282727"></path>
+                                    <path d="M38.3912,95.0085 C86.6872,26.1385 169.5502,-10.5025 253.0712,3.4275 L269.3552,6.1435 L253.0232,103.7405 L236.7572,101.0275 C188.4152,92.9655 139.9302,115.7225 115.2682,158.4195 L115.2622,158.4285 L115.2562,158.4395 C83.2382,213.8965 101.3212,284.7765 155.8982,317.9995 L169.9922,326.5785 L118.5382,411.1105 L104.4432,402.5315 C8.6932,344.2445 -26.0228,223.1025 21.9052,123.5475 C21.9052,123.5475 31.2682,104.0775 38.3912,95.0085"
+                                          fill="#2AB899"></path>
+                                    <path d="M38.3912,95.0085 C86.6872,26.1385 169.5502,-10.5025 253.0712,3.4275 L269.3552,6.1435 L253.0232,103.7405 L236.7572,101.0275 C188.4152,92.9655 139.9302,115.7225 115.2682,158.4195 L115.2622,158.4285 L115.2562,158.4395 C83.2382,213.8965 101.3212,284.7765 155.8982,317.9995 L169.9922,326.5785 L118.5382,411.1105 L104.4432,402.5315 C8.6932,344.2445 -26.0228,223.1025 21.9052,123.5475 C21.9052,123.5475 31.2682,104.0775 38.3912,95.0085 Z"
+                                          stroke="#282727"></path>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4"><a name="photos"></a>
+        <h1 class="text-center">Фотографии</h1>
+        <div class="row">
+            <div class="col-md-6 mt-3"><img class="img-fluid" src="/media/alumni/2018/graduates-1.jpg" alt=""></div>
+            <div class="col-md-6 mt-3"><img class="img-fluid" src="/media/alumni/2018/graduates-2.jpg" alt=""></div>
+            <div class="col mt-3">
+                <img class="img-fluid" src="/media/alumni/2018/graduates-3.jpg" alt="">
+            </div>
+        </div>
+    </div>
+
+    {% if testimonials %}
+    <div class="csc-student-reviews"><a name="testimonials"></a>
+        <div class="container">
+            <h1 class="text-center">Отзывы студентов</h1>
+            <div class="card-columns _testimonials">
+                {% for student in testimonials %}
+                    <div class="card">
+                        <div class="testimonial">
+                            {% with im = student.get_thumbnail("150x150", use_stub=False) %}
+                                {% if im %}
+                                    <img class="img-rounded" alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="74" height="74">
+                                {% endif %}
+                            {% endwith %}
+                            <div class="testimonial__details">
+                                <div class="testimonial__author">
+                                    <h4>{{ student.get_full_name() }}</h4>
+                                    <span>Выпуск {{ graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
+                                </div>
+                                <div class="testimonial__text">
+                                    {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <a href="{{ url('testimonials') }}" class="btn btn--small btn--outline_gray mt-3">Все отзывы</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script type="text/javascript">
+        var ACHIEVEMENTS = {
+            "envelope_zero": "Меньше всего писем на curators@",
+            "envelope_inf": "Больше всего писем на curators@",
+            "most_courses": "Больше всего курсов",
+            "grampycat": "Ни разу не записывался на праздник до этого и не участвовал в НГ викторине",
+            "night": "Больше всего ночных комментариев на сайте",
+            "check": "Сдали всё, что взяли",
+            "spring": "Все практики только весной",
+            "first_term": "Поступили на первом курсе университета",
+            "partymaker": "Пришел на все праздники",
+            "half-night": "Больше половины ночных комментариев",
+            "cs_club": "Больше всего курсов клуба",
+            "two_diploms": "Закончили по двум направлениям или более",
+        };
+        var achievementGrid = {
+            "envelope_zero": [
+                1642,  // bzikadze
+            ],
+            "envelope_inf": [
+                830, // starikova
+            ],
+            "most_courses": [
+                891, // lavrenko
+            ],
+            "cs_club": [
+                732, // ryazanov
+            ],
+            "grampycat": [
+              912, // golovanov
+            ],
+            "night": [
+                919, // kurbonzoda
+                895, // ushanov
+                893, // gulyaev
+            ],
+            "check": [
+                1645, // kormihov
+            ],
+            "spring": [
+                741, // suhochev
+            ],
+            "two_diploms": [
+                891, // lavrenko
+                902, // kukushkin
+                1287, // hvorov
+                1645, // kormishov
+                1660, // shulman
+                894, // bordinuk
+            ]
+
+        };
+    </script>
+
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}

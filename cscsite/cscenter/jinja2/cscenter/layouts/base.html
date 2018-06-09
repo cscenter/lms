@@ -22,6 +22,7 @@
     </div>
 
     {% block before_navbar_container %}{% endblock before_navbar_container %}
+    {% block menu %}
     <div class="navbar-container">
         {% block top_banner %}
             {%- if is_admission_active -%}
@@ -37,10 +38,12 @@
         {% include "cscenter/layouts/_menu.html" %}
     </div>
     {% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
+    {% endblock menu %}
     {% block after_navbar_container %}{% endblock after_navbar_container %}
 
     {% block content %}{% endblock content %}
 
+    {% block footer %}
     <footer class="footer">
         <div class="container">
             <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
@@ -56,6 +59,7 @@
             </div>
         </div>
     </footer>
+    {% endblock footer %}
 
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript" >
