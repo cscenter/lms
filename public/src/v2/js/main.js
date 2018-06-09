@@ -76,6 +76,10 @@ $(function () {
         import(/* webpackChunkName: "testimonials" */ 'sections/testimonials')
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
+    } else if (sections.includes("honorBoard")) {
+        import(/* webpackChunkName: "honorBoard" */ 'sections/honorBoard')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
     } else {
 
     }
