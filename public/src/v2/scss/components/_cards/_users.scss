@@ -13,16 +13,12 @@
 }
 
 .user-card {
-  width: 170px;
+  width: 150px;
   float: left; // for older browsers
   vertical-align: top;
   margin-bottom: 32px;
   margin-left: $grid-gutter-width / 2;
   margin-right: $grid-gutter-width / 2;
-
-  @include media-breakpoint-up(sm) {
-    width: 150px;
-  }
   @include media-breakpoint-up(lg) {
     width: 170px;
   }
