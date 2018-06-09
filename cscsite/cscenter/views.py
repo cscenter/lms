@@ -319,6 +319,56 @@ class AlumniByYearView(generic.ListView):
         return [testimonials[index] for index in indexes]
 
 
+class AlumniHonorBoardView(TemplateView):
+    def get_template_names(self):
+        graduation_year = int(self.kwargs['year'])
+        return [
+            f"cscenter/alumni/{graduation_year}.html",
+            "cscenter/alumni/fallback_year.html"
+        ]
+
+    def get_graduates(self, filters):
+        return (CSCUser.objects
+                .filter(**filters)
+                .distinct()
+                .only("pk", "first_name", "last_name", "patronymic", "gender",
+                      "cropbox_data")
+                .order_by("last_name", "first_name"))
+
+    def get_context_data(self, **kwargs):
+        graduation_year = int(self.kwargs['year'])
+        preview = self.request.GET.get('preview', False)
+        filters = {
+            "groups__pk": CSCUser.group.GRADUATE_CENTER,
+            "graduation_year": graduation_year
+        }
+        if preview and self.request.user.is_curator:
+            filters = {"status": CSCUser.STATUS.will_graduate}
+        graduates = self.get_graduates(filters)
+        if not graduates.exists():
+            raise Http404
+        cache_key = f'alumni_{graduation_year}_testimonials'
+        testimonials = cache.get(cache_key)
+        if testimonials is None:
+            s = (CSCUser.objects
+                 .filter(**filters)
+                 .exclude(csc_review='')
+                 .prefetch_related("areas_of_study"))
+            testimonials = s[:]
+            cache.set(cache_key, testimonials, 3600)
+        # Get random testimonials
+        testimonials_count = len(testimonials) if testimonials else 0
+        indexes = random.sample(range(testimonials_count),
+                                min(testimonials_count, 5))
+        random_testimonials = [testimonials[index] for index in indexes]
+        context = {
+            "graduation_year": graduation_year,
+            "graduates": graduates,
+            "testimonials": random_testimonials
+        }
+        return context
+
+
 class AlumniV2View(generic.TemplateView):
     template_name = "cscenter/alumni.html"
 

@@ -70,8 +70,10 @@ urlpatterns = [
     url(r'^alumni/$', cscenter_views.AlumniView.as_view(), name='alumni'),
     url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(),
         name='alumni_by_area_of_study'),
-    url(r'^(?P<year>[0-9]{4})/$', cscenter_views.AlumniByYearView.as_view(),
+    url(r'^(?P<year>201[3-7])/$', cscenter_views.AlumniByYearView.as_view(),
         name='alumni_memory'),
+    url(r'^(?P<year>20[0-9]{2})/$', cscenter_views.AlumniHonorBoardView.as_view(),
+        name='alumni_honor'),
 
     url(r'^notifications/', include("notifications.urls")),
     url(r'^staff/', include("staff.urls")),
