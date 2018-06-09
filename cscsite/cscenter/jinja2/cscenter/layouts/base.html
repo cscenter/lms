@@ -12,8 +12,7 @@
     <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
     <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
-
-    {% block stylesheets %} {% endblock stylesheets %}
+    {%- block stylesheets %} {% endblock stylesheets %}
 </head>
 <body {% block body_attrs %}{% endblock body_attrs %}>
     <div class="svg-inline">

@@ -28,30 +28,26 @@
 
 {% block content %}
     <div class="container page-content">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1>Выпуск {{ graduation_year }} в лицах</h1>
-                <div class="user-cards">
-                    {% for user in graduates %}
-                        <a class="user-card" href="{{ user.get_absolute_url() }}" id="user-card-{{ user.pk }}">
-                            <div class="user-card__photo">
-                                {% with im = user.get_thumbnail("170x238", use_stub=False) -%}
-                                    {% if im -%}
-                                        <img alt="{{ user.get_full_name() }}" src="{{ im.url }}">
-                                    {% else %}
-                                        {% if user.gender == user.__class__.GENDER_FEMALE %}
-                                            <img src="{{ static("v2/img/placeholder/woman.png") }}" alt="{{ user.get_full_name() }}">
-                                        {% else %}
-                                            <img src="{{ static("v2/img/placeholder/man.png") }}" alt="{{ user.get_full_name() }}">
-                                        {% endif %}
-                                    {%- endif %}
-                                {%- endwith %}
-                            </div>
-                            <div class="user-card__details">{{ user.get_short_name() }}</div>
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
+        <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
+        <div class="user-cards">
+            {% for user in graduates -%}
+                <a class="user-card" href="{{ user.get_absolute_url() }}" id="user-card-{{ user.pk }}">
+                    <div class="user-card__photo">
+                        {% with im = user.get_thumbnail("170x238", use_stub=False) -%}
+                            {% if im -%}
+                                <img alt="{{ user.get_full_name() }}" src="{{ im.url }}">
+                            {%- else -%}
+                                {% if user.gender == user.__class__.GENDER_FEMALE -%}
+                                    <img src="{{ static("v2/img/placeholder/woman.png") }}" alt="{{ user.get_full_name() }}">
+                                {%- else -%}
+                                    <img src="{{ static("v2/img/placeholder/man.png") }}" alt="{{ user.get_full_name() }}">
+                                {%- endif %}
+                            {%- endif %}
+                        {%- endwith %}
+                    </div>
+                    <div class="user-card__details">{{ user.get_short_name() }}</div>
+                </a>
+            {% endfor -%}
         </div>
     </div>
 
@@ -72,7 +68,7 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <p class="infographic-count">9 709</p>
+                            <p class="infographic-count">9&nbsp;709</p>
                             <p>Часов в аудиториях</p>
                         </div>
                         <div class="col-6">
