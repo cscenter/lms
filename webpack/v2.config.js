@@ -73,11 +73,7 @@ const common = {
                 use: [{
                     loader: 'babel-loader',
                     options: {
-                        babelrc: false,
-                        cacheDirectory: true,
-                        plugins: [
-                            "@babel/plugin-proposal-object-rest-spread"
-                        ]
+                        extends: path.resolve(__srcdir, "js", ".babelrc.js")
                     }
                 }]
             },

@@ -16,6 +16,7 @@
   width: 150px;
   float: left; // for older browsers
   vertical-align: top;
+  line-height: 20px;
   margin-bottom: 32px;
   margin-left: $grid-gutter-width / 2;
   margin-right: $grid-gutter-width / 2;
@@ -27,17 +28,11 @@
     max-width: 100%;
     height: auto;
   }
-
-  a {
-    margin-top: 8px;
-    font-size: 16px;
-    line-height: 18px;
-  }
 }
 
 .user-card__photo {
   position: relative;
-  margin: auto;
+  margin: 0 auto 5px;
 }
 
 .achievements {
