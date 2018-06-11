@@ -129,9 +129,20 @@ $grid-breakpoints: (
   xs: 0,
   sm: 576px,
   md: 768px,
-  lg: 992px,
+  lg: 992px, // XXX: Keep in sync with values from `v2/js/utils.js`
   xl: 1260px
 );
+
+// Custom breakpoints for more control, used on user cards page
+$iphone-5-width: 320px;
+$iphone-6-width: 375px;
+$iphone-6-plus-width: 414px;
+$mobile-breakpoints: (
+  iphone5: $iphone-5-width,
+  iphone6: $iphone-6-width,
+  iphone6plus: $iphone-6-plus-width
+);
+
 
 @include _assert-ascending($grid-breakpoints, "$grid-breakpoints");
 @include _assert-starts-at-zero($grid-breakpoints);

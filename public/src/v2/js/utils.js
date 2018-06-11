@@ -1,3 +1,4 @@
+export const MOBILE_VIEWPORT_MAX = 992;
 
 export function getSections() {
     if (document.body.hasAttribute("data-init-sections")) {

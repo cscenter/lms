@@ -1,3 +1,5 @@
+
+
 .user-cards {
   display: flex;
   flex-wrap: wrap;
@@ -13,15 +15,23 @@
 }
 
 .user-card {
-  width: 150px;
+  width: 170px;
   float: left; // for older browsers
   vertical-align: top;
-  line-height: 20px;
+  line-height: 1.25;
   margin-bottom: 32px;
-  margin-left: $grid-gutter-width / 2;
-  margin-right: $grid-gutter-width / 2;
-  @include media-breakpoint-up(lg) {
+  padding-left: $grid-gutter-width / 2;
+  padding-right: $grid-gutter-width / 2;
+
+  @include media-breakpoint-up(iphone5, $mobile-breakpoints) {
+      width: 50%;
+  }
+
+  @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
     width: 170px;
+  }
+  @include media-breakpoint-up(lg) {
+    width: 190px;
   }
 
   img {
@@ -36,7 +46,6 @@
 }
 
 .achievements {
-  width: 50px;
   position: absolute;
   top: 2px;
   right: -2px;
