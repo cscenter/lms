@@ -1,5 +1,6 @@
 import Raven from 'raven-js';
 import $ from 'jquery';
+import '@babel/polyfill';
 import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 

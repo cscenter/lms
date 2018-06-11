@@ -1,0 +1,21 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1>Navigation</h1>
+                <ul>
+                    <li><a href="/v2/components/cards/">Cards</a></li>
+                    <li><a href="/v2/components/user_cards/">User Cards</a></li>
+                    <li><a href="/v2/components/menu/">Top Menu for authenticated user</a></li>
+                    <li><a href="/v2/components/menu/unauth/">Top Menu for unauthenticated user</a></li>
+                    <li><a href="/v2/components/menu/without_banner/">Top Menu without banner</a></li>
+                    <li><a href="/v2/components/preloader/">Preloader</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
