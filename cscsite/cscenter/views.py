@@ -332,7 +332,7 @@ class AlumniHonorBoardView(TemplateView):
                 .filter(**filters)
                 .distinct()
                 .only("pk", "first_name", "last_name", "patronymic", "gender",
-                      "cropbox_data")
+                      "cropbox_data", "photo")
                 .order_by("last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
@@ -345,7 +345,7 @@ class AlumniHonorBoardView(TemplateView):
         if preview and self.request.user.is_curator:
             filters = {"status": CSCUser.STATUS.will_graduate}
         graduates = self.get_graduates(filters)
-        if not graduates.exists():
+        if not len(graduates):
             raise Http404
         cache_key = f'alumni_{graduation_year}_testimonials'
         testimonials = cache.get(cache_key)
@@ -359,7 +359,7 @@ class AlumniHonorBoardView(TemplateView):
         # Get random testimonials
         testimonials_count = len(testimonials) if testimonials else 0
         indexes = random.sample(range(testimonials_count),
-                                min(testimonials_count, 5))
+                                min(testimonials_count, 4))
         random_testimonials = [testimonials[index] for index in indexes]
         context = {
             "graduation_year": graduation_year,
