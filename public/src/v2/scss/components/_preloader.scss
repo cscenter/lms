@@ -28,7 +28,7 @@
     display: block;
     position: absolute;
     content: "";
-    z-index: 9999;
+    z-index: $zindex-preloader;
     top: 0;
     bottom: 0;
     left: 0;
@@ -43,13 +43,16 @@
   }
 
   &._fullscreen {
-    z-index: 9999;
     position: fixed;
-    top: -50px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     height: 100vh;
     min-width: 100%;
+
+    &::before {
+
+    }
   }
 }
