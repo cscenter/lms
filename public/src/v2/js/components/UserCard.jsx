@@ -5,19 +5,26 @@ import LazyLoad from 'react-lazyload';
 
 class UserCard extends React.Component {
     static defaultProps = {
-        imgHeight: 238,
-        imgWidth: 170,
+        imgInitialWidth: 170,
+        imgInitialHeight: 238,
         className: 'user-card'
     };
 
     render() {
         return (
-            <div className={this.props.className}>
-                <LazyLoad height={this.props.imgHeight} once offset={100}>
-                    <img src={this.props.photo} width={this.props.imgWidth} height={this.props.imgHeight} />
-                </LazyLoad>
-                <a href={`/users/${this.props.id}/`}>{this.props.name}</a>
-            </div>
+            <a className={this.props.className}
+               href={`/users/${this.props.id}/`}
+               id={`user-card-${this.props.id}`}>
+                <div className="user-card__photo">
+                    <LazyLoad height={this.props.imgInitialHeight}
+                              throttle={200}
+                          once
+                          offset={200}>
+                        <img src={this.props.photo} alt={this.props.name} />
+                    </LazyLoad>
+                </div>
+                <div className="user-card__details">{this.props.name}</div>
+            </a>
         );
     }
 }
