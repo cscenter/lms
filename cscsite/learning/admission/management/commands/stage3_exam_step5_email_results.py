@@ -16,6 +16,10 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')
+        parser.add_argument(
+            '--fail-only', action='store_true',
+            dest="fail_only",
+            help="Send emails only to those who didn't pass to the next stage")
 
     def handle(self, *args, **options):
         city_code = options["city"] if options["city"] else None
@@ -24,15 +28,19 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=["exam-fail", "exam-success"])
+        email_types = ["exam-fail"]
+        if not options["fail_only"]:
+            email_types.append("exam-success")
+        self.validate_templates(campaigns, types=email_types)
 
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))
             statuses = [
-                Applicant.INTERVIEW_TOBE_SCHEDULED,
                 Applicant.REJECTED_BY_EXAM,
                 Applicant.THEY_REFUSED
             ]
+            if not options["fail_only"]:
+                statuses.append(Applicant.INTERVIEW_TOBE_SCHEDULED)
             applicants = (Applicant.objects
                           .filter(campaign=campaign.pk,
                                   status__in=statuses)
@@ -52,7 +60,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     }
                     mail.send(
                         recipients,
-                        sender='info@compscicenter.ru',
+                        sender='CS центр <info@compscicenter.ru>',
                         template=template,
                         # Render on delivery, we have no really big amount of
                         # emails to think about saving CPU time
