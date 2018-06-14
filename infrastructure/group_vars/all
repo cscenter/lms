@@ -11,7 +11,9 @@ available_sites:
     site_user_group: "shared"
     site_root: "/home/cscenter/site/repo"
     media_root: "/shared/media"
+    static_root: "/home/cscenter/site/repo/cscsite/static"
     backup_root: "/shared/backup_tmp"
+    apps_dir_name: cscsite
     app_settings: "cscenter"
     app_environment: production
     repo_url: git@github.com:cscenter/site.git
@@ -19,6 +21,7 @@ available_sites:
     db_user: csc
     db_user_password: FooBar
     main_domain: "compscicenter.ru"
+    default_server: yes
     enable_https: yes
     setup_cronjobs: yes
     certbot_domains:
@@ -29,7 +32,9 @@ available_sites:
     site_user_group: "shared"
     site_root: "/home/csclub/site/repo"
     media_root: "/shared/media"
+    static_root: "/home/cscenter/site/repo/cscsite/static"
     backup_root: "/shared/backup_tmp"
+    apps_dir_name: cscsite
     app_settings: "csclub"
     app_environment: production
     repo_url: git@github.com:cscenter/site.git
@@ -37,6 +42,7 @@ available_sites:
     db_user: csc
     db_user_password: FooBar
     main_domain: "compsciclub.ru"
+    default_server: no
     enable_https: yes
     setup_cronjobs: no
     certbot_domains:

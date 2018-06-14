@@ -43,8 +43,8 @@ server {
     # ssl config by Mozilla https://wiki.mozilla.org/Security/Server_Side_TLS
 
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
-    ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
-    ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
+    # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
+    # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
     ssl_session_timeout 10m;
     ssl_session_cache shared:SSL:10m;
 
@@ -77,7 +77,7 @@ server {
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root /home/{{ site_user }}/site/repo/cscsite/templates/;
+        root /home/{{ site_user }}/site/repo/{{ apps_dir_name }}/templates/;
         try_files /errors/404.html =404;
     }
 
@@ -100,7 +100,7 @@ server {
     }
 
     location /static {
-        alias /home/{{ site_user }}/site/repo/cscsite/static;
+        alias {{ static_root }};
         access_log off;
         tcp_nodelay off;
         gzip_static on;

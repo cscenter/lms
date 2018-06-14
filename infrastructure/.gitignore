@@ -1,3 +1,19 @@
-files/backup_user_access_keys.txt
+# Mac specific files
+.DS_Store
+._*
+
+*.sublime-project
+*.pyc
+*.sqlite3
+.idea/
+local/
+.cache/
+.pytest_cache/
+.coverage
+*-debug.log
+coverage/
+
+deploy_ssh_key
+deploy_ssh_key.pub
 *.retry
 .vagrant/

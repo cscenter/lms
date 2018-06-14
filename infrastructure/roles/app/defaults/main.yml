@@ -1,5 +1,5 @@
 ---
-app_environment: production
+certbot_auto_renew: yes
 certbot_cert_filename: fullchain.pem
 certbot_privkey_filename: privkey.pem
 certbot_trusted_chain_filename: chain.pem

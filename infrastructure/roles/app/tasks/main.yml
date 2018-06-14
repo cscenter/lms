@@ -51,9 +51,14 @@
     src: "/etc/nginx/sites-available/{{ site_user }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ site_user }}.conf"
     state: link
-  notify: restart nginx
   tags:
     - nginx
+  when: nginx_status.stat.exists
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
   when: nginx_status.stat.exists
 
 - name: Configure certbot to auto-renew tls certificates

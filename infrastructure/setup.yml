@@ -1,5 +1,5 @@
 - name: Setup EC2 instance
-  hosts: "{{ aws_ec2_host }}"
+  hosts: "{{ hosts_override | default(aws_ec2_host) }}"
   user: "{{ aws_ec2_user }}"
   become: yes
   become_user: "{{ aws_ec2_root_user }}"

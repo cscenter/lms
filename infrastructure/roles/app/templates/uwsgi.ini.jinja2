@@ -1,9 +1,9 @@
 [uwsgi]
 # Django-related settings
-chdir           = /home/{{ site_user }}/site/repo/cscsite
+chdir           = /home/{{ site_user }}/site/repo/{{ apps_dir_name }}
 module          = {{ app_settings }}.wsgi:application
 virtualenv      = /home/{{ site_user }}/site/env
-pythonpath      = /home/{{ site_user }}/site/repo/cscsite
+pythonpath      = /home/{{ site_user }}/site/repo/{{ apps_dir_name }}
 env             = DJANGO_SETTINGS_MODULE={{ app_settings }}.settings.{{ app_environment }}
 env             = PYTHONIOENCODING=UTF-8
 env             = LC_ALL=en_US.UTF-8

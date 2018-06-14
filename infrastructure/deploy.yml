@@ -5,6 +5,7 @@
   vars:
     app_environment: production
     site_user: cscenter
+    app_settings: site_user
 
   tasks:
   - name: Check site_user value
@@ -28,6 +29,8 @@
   - name: Get file stats for production requirements.txt
     stat:
       path: "{{ site_src }}/requirements/{{ item }}.txt"
+      get_checksum: true
+      checksum_algorithm: md5
     register: requirements_stat
     with_items:
       - "base"
@@ -35,7 +38,7 @@
 
   - name: Concat md5 from previous step
     set_fact:
-      requirements_concated_md5: "{{ requirements_stat.results | map(attribute='stat.md5') | join('') }}"
+      requirements_concatenated_md5: "{{ requirements_stat.results | map(attribute='stat.checksum') | join('') }}"
 
   - name: Try to fetch file with md5 hash value from the previous deploy
     fetch:
@@ -58,15 +61,15 @@
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
     become_user: "{{ site_user }}"
-    when: requirements_concated_md5 != requirements_md5
+    when: requirements_concatenated_md5 != requirements_md5
 
   - name: Update requirements.txt files summary md5 value
     copy:
-      content: "{{ requirements_concated_md5 }}"
+      content: "{{ requirements_concatenated_md5 }}"
       dest: "/home/{{ site_user }}/site/{{ requirements_prev_md5_file }}"
     become: yes
     become_user: "{{ site_user }}"
-    when: requirements_concated_md5 != requirements_md5
+    when: requirements_concatenated_md5 != requirements_md5
 
   - name: Collectstatic
     become: yes

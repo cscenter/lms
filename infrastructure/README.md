@@ -1,3 +1,9 @@
+EC2 provision based on dynamic inventory - [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+
+FIXME:
+
+backup_root?
+media_root?
 
 # TODO (critical):
 * restore db and media/ with playbook
@@ -10,39 +16,33 @@
 * Think how to update python version without breaking site for updating period (now it does by removing current venv. No idea how to properly rename venv :<)
 
 TODO (important):
-* Now `venv` named like `env_35x`. Need to rename them to `venv` back or update playbooks to handle this new name. 
-Now only `deploy.yml` edited as a workaround for new naming conv.
 * add `registration` app to cscenter, then remove club worker?
 * restore db from s3
-* add tags. Then use it. E.g. `ansible-playbook -i inventory/ec2.py  provision.yml -v -t lvm` setup lvm only
 * Add check for ansible version
 * `# Redirect from `www.` to domain without `www` <--- check first that main site domain is two level
 
 Requirements
 ------------
   
-* python3
 * Ansible (>=2.5.x) `pip install ansible`
-* boto3 library `pip install boto3` (may not work from virtualenv)
+* boto3 `pip install boto3` (may not work from virtualenv)
 * aws cli (optional) `pip install awscli`
-* For Dynamic inventory in Ansible used [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
 
 ## Prerequisites
 
 Default VPC, subnets and other network settings except security groups
 Manually created:
 * Administrator User (with Access Key)
-* EC2 KeyPair (don't forget to save in ~/.ssh/)
-* Elastic IP (check var in vars/aws.yml)
+* EC2 KeyPair (don't forget to save it in ~/.ssh/)
+* Elastic IP
 * S3 buckets. Look for inspiration in `s3` ansible role
 
 Before start
 ------------
 
 * Install all requirements
-* Add Administrator User security credentials (Access Key) to environment, boto or awscli settings
-  Ansible uses the boto configuration file (typically ~/.boto) if no credentials are provided
-  Also awscli `~/.aws/credentials` works for me:
+* Add admin credentials to environment, boto or awscli settings
+  E.g. `~/.aws/credentials`:
   ```
   [Credentials]
   aws_access_key_id = <your_access_key_here>
@@ -57,12 +57,10 @@ Playbooks
 
 File | Action
 ---- | ------
-backup_setup.yml | Create users for buckets with appropriate policy configuration. *Works only with Ansible >= 2.0.0*
-backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` (cscenter or csclub) and host explicitly (see cmd example below)
-backup_restore.yml | Should restore db and media/ folder. But it doesn't work now.
 provision.yml | Create security groups. Launch instance. Create additional Volume, attach to new instance. Setup LVM on additional Volume
 setup.yml | Part of provision (but can be used independently). Create app on new instance.
-deploy.yml | Deploy one of the sites (cscenter or csclub)
+deploy.yml | Deploy routine
+backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` (cscenter or csclub) and host explicitly (see cmd example below)
 
 
 ## Deploy
@@ -75,11 +73,8 @@ deploy.yml | Deploy one of the sites (cscenter or csclub)
 
 Command to run:
 
-    ansible-playbook -i inventory/ec2.py provision.yml-v
-    ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=csclub" -v
-
-
-Variable `app_user` should be one of [cscenter, csclub]
+    ansible-playbook -i inventory/ec2.py provision.yml -v
+    ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "site_user=csclub" -v
 
 
 ## Create s3 buckets

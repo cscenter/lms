@@ -106,7 +106,7 @@
 
     - name: add launched instances to host group
       local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
-      with_items: ec2.tagged_instances
+      loop: "{{ ec2.tagged_instances }}"
 
     - name: Create new volume and attach it to EC2 instance
       ec2_vol:
@@ -118,13 +118,16 @@
       register: ec2_vol
       when: attach_second_volume
 
-    - name: Configure new volume
-      hosts: "{{ aws_ec2_host }}"
-      user: "{{ aws_ec2_user }}"
-      become: yes
-      become_user: "{{ aws_ec2_root_user }}"
-      include_role:
-        name: lvm
-      tags:
-        - lvm
-      when: attach_second_volume
+# FIXME: Так не сработает. И нужно выносить настройки provision (localhost?) в отдельный файл
+#- name: Configure new volume
+#  hosts: "{{ aws_ec2_host }}"
+#  user: "{{ aws_ec2_user }}"
+#  become: yes
+#  become_user: "{{ aws_ec2_root_user }}"
+#  include_role:
+#    name: lvm
+#  vars:
+#    attach_second_volume: no
+#  tags:
+#    - lvm
+#  when: attach_second_volume

@@ -7,7 +7,7 @@
     home: "/home/{{ site_user }}"
     name: "{{ site_user }}"
     state: present
-    groups: shared
+    groups: "{{ site_user_group }}"
     append: yes
 
 - name: Create .ssh directory
