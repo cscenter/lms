@@ -1,0 +1,26 @@
+[uwsgi]
+# Django-related settings
+chdir           = /home/{{ site_user }}/site/repo/cscsite
+module          = {{ app_settings }}.wsgi:application
+virtualenv      = /home/{{ site_user }}/site/env
+pythonpath      = /home/{{ site_user }}/site/repo/cscsite
+env             = DJANGO_SETTINGS_MODULE={{ app_settings }}.settings.{{ app_environment }}
+env             = PYTHONIOENCODING=UTF-8
+env             = LC_ALL=en_US.UTF-8
+env             = LANG=en_US.UTF-8
+
+# process-related settings
+master          = true
+enable-threads  = true
+processes       = 5
+socket          = /tmp/uwsgi_{{ site_user }}.socket
+die-on-term     = true
+chmod-socket    = 666
+vacuum          = true
+stats           = /tmp/uwsgi_{{ site_user }}_stats.socket
+uid             = {{ site_user }}
+gid             = {{ site_user_group }}
+logto           = /home/{{ site_user }}/site/logs/uwsgi.log
+log-maxsize     = 5242880
+wait-for-socket-timeout = 600
+unprivileged-binary-patch-arg = %(virtualenv)/bin/uwsgi --ini {{ site_user }}.ini

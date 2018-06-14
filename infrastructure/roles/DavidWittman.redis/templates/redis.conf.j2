@@ -24,10 +24,10 @@ databases {{ redis_databases }}
 {% for save in redis_save -%}
 save {{ save }}
 {% endfor -%}
-stop-writes-on-bgsave-error yes
-rdbcompression yes
-rdbchecksum yes
-dbfilename dump.rdb
+stop-writes-on-bgsave-error {{ redis_stop_writes_on_bgsave_error|string }}
+rdbcompression {{ redis_rdbcompression|string }}
+rdbchecksum {{ redis_rdbchecksum|string }}
+dbfilename {{ redis_db_filename|string }}
 
 # Replication
 {% if redis_slaveof -%}
@@ -68,7 +68,7 @@ maxmemory-policy {{ redis_maxmemory_policy }}
 # Append Only Mode
 appendonly {{ redis_appendonly }}
 appendfilename "{{ redis_appendfilename }}"
-appendfsync {{ redis_appendfsync }}
+appendfsync {{ redis_appendfsync|string }}
 no-appendfsync-on-rewrite {{ redis_no_appendfsync_on_rewrite }}
 auto-aof-rewrite-percentage {{ redis_auto_aof_rewrite_percentage }}
 auto-aof-rewrite-min-size {{ redis_auto_aof_rewrite_min_size }}
@@ -81,7 +81,7 @@ slowlog-log-slower-than {{ redis_slowlog_log_slower_than }}
 slowlog-max-len {{ redis_slowlog_max_len }}
 
 # Event Notification
-notify-keyspace-events ""
+notify-keyspace-events {{ redis_notify_keyspace_events }}
 
 # Advanced
 hash-max-ziplist-entries 512

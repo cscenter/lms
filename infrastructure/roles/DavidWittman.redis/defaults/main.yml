@@ -1,13 +1,19 @@
 ---
 ## Installation options
-redis_version: 2.8.9
+redis_version: 2.8.24
 redis_install_dir: /opt/redis
-redis_user: redis
-redis_group: "{{ redis_user }}"
 redis_dir: /var/lib/redis/{{ redis_port }}
 redis_download_url: "http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+# Set this to true to validate redis tarball checksum against vars/main.yml
 redis_verify_checksum: false
+# Set this value to a local path of a tarball to use for installation instead of downloading
 redis_tarball: false
+# Set this to true to build 32-bit binaries of Redis
+redis_make_32bit: false
+
+redis_user: redis
+redis_group: "{{ redis_user }}"
+
 # The open file limit for Redis/Sentinel
 redis_nofile_limit: 16384
 
@@ -18,6 +24,8 @@ redis_nofile_limit: 16384
 redis_as_service: true
 # Add local facts to /etc/ansible/facts.d for Redis
 redis_local_facts: true
+# Service name
+redis_service_name: "redis_{{ redis_port }}"
 
 ## Networking/connection options
 redis_bind: 0.0.0.0
@@ -45,15 +53,15 @@ redis_slave_priority: 100
 redis_repl_backlog_size: false
 
 ## Logging
-redis_logfile: '""'                                                             
-# Enable syslog. "yes" or "no"                                                  
-redis_syslog_enabled: "yes"                                                     
-redis_syslog_ident: redis_{{ redis_port }}                                      
-# Syslog facility. Must be USER or LOCAL0-LOCAL7                                
-redis_syslog_facility: USER   
+redis_logfile: '""'
+# Enable syslog. "yes" or "no"
+redis_syslog_enabled: "yes"
+redis_syslog_ident: "{{ redis_service_name }}"
+# Syslog facility. Must be USER or LOCAL0-LOCAL7
+redis_syslog_facility: USER
 
 ## General configuration
-redis_daemonize: "yes"                                                          
+redis_daemonize: "yes"
 redis_pidfile: /var/run/redis/{{ redis_port }}.pid
 # Number of databases to allow
 redis_databases: 16
@@ -66,18 +74,26 @@ redis_slowlog_max_len: 128
 redis_maxmemory: false
 redis_maxmemory_policy: noeviction
 redis_rename_commands: []
+
+# the file name for the RDB Backup
+redis_db_filename: "dump.rdb"
+
 # How frequently to snapshot the database to disk
 # e.g. "900 1" => 900 seconds if at least 1 key changed
 redis_save:
   - 900 1
   - 300 10
   - 60 10000
+redis_stop_writes_on_bgsave_error: "yes"
+redis_rdbcompression: "yes"
+redis_rdbchecksum: "yes"
 redis_appendonly: "no"
 redis_appendfilename: "appendonly.aof"
 redis_appendfsync: "everysec"
 redis_no_appendfsync_on_rewrite: "no"
 redis_auto_aof_rewrite_percentage: "100"
 redis_auto_aof_rewrite_min_size: "64mb"
+redis_notify_keyspace_events: '""'
 
 ## Redis sentinel configs
 # Set this to true on a host to configure it as a Sentinel

@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: clean coverage test pip static freeze msg msgcompile migrate run run_flame dumpdata loaddata test_travis clean cmd check_defined sass sass_club webpack run_club
+.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata coverage test_travis test clean cmd refresh deploy deploy_remote check_defined
 
 run:
 	python manage.py runserver --settings=$(PROJECT).settings.local $(PORT)

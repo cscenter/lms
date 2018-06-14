@@ -8,16 +8,53 @@
   hosts: localhost
   connection: local
   gather_facts: False
-  vars_files:
-    - vars/aws.yml
   vars:
     aws_ec2_region: eu-central-1
     aws_ec2_instance_type: t2.small
+    aws_ec2_instance_volume_size: 20
     aws_ec2_keypair: csc-main
     # Ubuntu 14.04 hvm ssd
     aws_ec2_image: ami-accff2b1
+    attach_second_volume: True
+    second_volume_size: 30
+    security_groups:
+      - name: ssh
+        desc: the security group for ssh-available server
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      - name: web
+        desc: the security group for the web server
+        rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
 
   tasks:
+    - name: Gather facts about any instance with provided tag
+      ec2_instance_facts:
+        filters:
+          "tag:Name": "{{ aws_ec2_instance_tag }}"
+      register: ec2_instances_lookup
+
+    - name: Check ec2 instance already exists
+      fail:
+        msg: "EC2 instance with tag.Name '{{ aws_ec2_instance_tag }}' already exists"
+      when: ec2_instances_lookup["instances"]|length > 0
+
     - name: Create required network security groups
       ec2_group:
         name: "{{ item.name }}"
@@ -25,7 +62,7 @@
         rules: "{{ item.rules }}"
         rules_egress: "{{ item.rules_egress }}"
         region: "{{ aws_ec2_region }}"
-      with_items: security_groups
+      with_items: "{{ security_groups }}"
 
     - name: Launch instance
       ec2:
@@ -37,13 +74,13 @@
           - web
           - ssh
         instance_tags:
-          Name: "{{ aws_ec2_new_instance_tag }}"
+          Name: "{{ aws_ec2_instance_tag }}"
         exact_count: 1
         count_tag:
-          Name: "{{ aws_ec2_new_instance_tag }}"
+          Name: "{{ aws_ec2_instance_tag }}"
         volumes:
           - device_name: /dev/sda1
-            volume_size: 20
+            volume_size: "{{ aws_ec2_instance_volume_size }}"
             volume_type: gp2
         wait: true
       register: ec2
@@ -68,31 +105,26 @@
       when: ec2.instances|length > 0
 
     - name: add launched instances to host group
-      local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host_new }}
+      local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
       with_items: ec2.tagged_instances
 
-    - name: Create new volume and attach it to new EC2 instance
+    - name: Create new volume and attach it to EC2 instance
       ec2_vol:
         region: "{{ aws_ec2_region }}"
         instance: "{{ ec2.tagged_instances[0].id }}"
-        volume_size: 30
+        volume_size: "{{ second_volume_size }}"
         volume_type: gp2
         device_name: /dev/xvdf
       register: ec2_vol
+      when: attach_second_volume
 
-- name: Setup shared/ Volume
-  hosts: "{{ aws_ec2_host_new }}"
-  become: yes
-  become_user: ubuntu
-  vars_files:
-    - vars/aws.yml
-  roles:
-    - lvm
-  tags:
-    - lvm
-
-  # - name: setup provisioned servers
-  #   include: setup.yml
-
-# - name: restore production backup
-#   include: restore_backup.yml
+    - name: Configure new volume
+      hosts: "{{ aws_ec2_host }}"
+      user: "{{ aws_ec2_user }}"
+      become: yes
+      become_user: "{{ aws_ec2_root_user }}"
+      include_role:
+        name: lvm
+      tags:
+        - lvm
+      when: attach_second_volume

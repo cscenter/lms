@@ -1,127 +1,121 @@
 ---
-- name: Upgrade system dependencies and install core stuff
-  import_tasks: apt.yml
+- name: Set vars
+  set_fact: "{{ item.key }}={{ item.value }}"
+  with_dict: "{{ app_config }}"
 
-- import_tasks: pip.yml
+- name: Start processing user = {{ site_user }}
+  debug:
+    msg: "{{ app_config }}"
 
 - name: Create users and groups
-  import_tasks: users.yml
+  include_tasks: users.yml
   tags:
     - users
 
-- import_tasks: stuff.yml
-
-- name: create application directory structure for cscenter site
+- name: Create application directory structure
   file:
-    path: "/home/{{ cscenter_user }}/site/{{ item }}"
+    path: "/home/{{ site_user }}/site/{{ item }}"
     state: directory
-    owner: "{{ cscenter_user }}"
+    owner: "{{ site_user }}"
   with_items:
     - logs
 
-- name: create application directory structure for csclub site
+- name: clone website repo
+  become: yes
+  become_user: "{{ site_user }}"
+  git:
+    accept_hostkey: yes
+    repo: "{{ repo_url }}"
+    dest: "/home/{{ site_user }}/site/repo"
+    key_file: "/home/{{ site_user }}/.ssh/id_rsa"
+
+- name: Ensure folder for file-based cache exists
+  file: path=/tmp/django_cache mode=777 state=directory
+
+- name: Nginx status
+  stat: path=/etc/init.d/nginx
+  register: nginx_status
+  tags:
+    - nginx
+
+- name: Copy nginx config
+  template:
+    src: nginx.conf.jinja2
+    dest: "/etc/nginx/sites-available/{{ site_user }}.conf"
+  tags:
+    - nginx
+  when: nginx_status.stat.exists
+
+- name: Symlink nginx config
   file:
-    path: "/home/{{ csclub_user }}/site/{{ item }}"
-    state: directory
-    owner: "{{ csclub_user }}"
-  with_items:
-    - logs
+    src: "/etc/nginx/sites-available/{{ site_user }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ site_user }}.conf"
+    state: link
+  notify: restart nginx
   tags:
-    - csclub
+    - nginx
+  when: nginx_status.stat.exists
 
-- name: clone website repo
-  become: yes
-  become_user: "{{ cscenter_user }}"
-  git:
-    accept_hostkey: yes
-    repo: git@github.com:cscenter/site.git
-    dest: "/home/{{ cscenter_user }}/site/repo"
-    key_file: "/home/{{ cscenter_user }}/.ssh/id_rsa"
-
-- name: clone website repo
-  become: yes
-  become_user: "{{ csclub_user }}"
-  git:
-    accept_hostkey: yes
-    repo: git@github.com:cscenter/site.git
-    dest: "/home/{{ csclub_user }}/site/repo"
-    key_file: "/home/{{ csclub_user }}/.ssh/id_rsa"
+- name: Configure certbot to auto-renew tls certificates
+  include_tasks: certbot.yml
   tags:
-    - csclub
+    - certbot
+    - tls
+  when: nginx_status.stat.exists and enable_https
+
+- name: Ensure Nginx is started
+  service: name=nginx state=started
+  when: nginx_status.stat.exists
 
 # FIXME: restart doesn't work right now. Touch config or figure out what's wrong
-- name: Install dependencies
-  import_tasks: venv.yml
+- name: Install app dependencies
+  include_tasks: venv.yml
   notify: restart uwsgi
   tags:
     - venv
 
-- name: Copy upstart uwsgi config
+- name: Copy uwsgi config
   template:
-    src: uwsgi-upstart.tmpl
-    dest: /etc/init/uwsgi.conf
-  tags:
-    - uwsgi
-
-- name: create uwsgi config dir
-  file: path=/etc/uwsgi/vassals state=directory
-
-- name: copy uwsgi configs
-  template:
-    src: uwsgi.ini.tmpl
-    dest: "/etc/uwsgi/vassals/{{ item }}.ini"
-    owner: "{{ item }}"
+    src: uwsgi.ini.jinja2
+    dest: "/etc/uwsgi/vassals/{{ site_user }}.ini"
+    owner: "{{ site_user }}"
   notify: restart uwsgi
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
   tags:
     - uwsgi
 
-- name: Run collectstatic for cscenter
-  become_user: "{{ cscenter_user }}"
-  django_manage:
-    command: "collectstatic"
-    app_path: "/home/{{ cscenter_user }}/site/repo"
-    settings: "{{ cscenter_user }}.settings.{{ app_environment }}"
-    virtualenv: "/home/{{ cscenter_user }}/site/env/"
-  tags:
-    - collectstatic
-
-- name: Run collectstatic for csclub
-  become_user: "{{ csclub_user }}"
-  django_manage:
-    command: "collectstatic"
-    app_path: "/home/{{ csclub_user }}/site/repo"
-    settings: "{{ csclub_user }}.settings.{{ app_environment }}"
-    virtualenv: "/home/{{ csclub_user }}/site/env/"
-  tags:
-    - collectstatic
-    - csclub
-
-- name: Create shared media/ folder
+- name: Create media/ folder
   file:
-    path: "/shared/media"
+    path: "{{ media_root }}"
     state: directory
     owner: "ubuntu"
-    group: "{{ group_shared }}"
+    group: "{{ site_user_group }}"
     mode: 0775
 
 - name: Create tmp folder for django-dbbackup
   file:
-    path: "/shared/backup_tmp"
+    path: "{{ backup_root }}"
     state: directory
     owner: "ubuntu"
-    group: "{{ group_shared }}"
+    group: "{{ site_user_group }}"
     mode: 0775
 
-- name: Process db
-  import_tasks: db.yml
+- name: Configure db
+  include_tasks: db.yml
   tags:
     - db
 
+- name: Run collectstatic
+  become_user: "{{ site_user }}"
+  django_manage:
+    command: "collectstatic"
+    app_path: "/home/{{ site_user }}/site/repo"
+    settings: "{{ app_settings }}.settings.{{ app_environment }}"
+    virtualenv: "/home/{{ site_user }}/site/env/"
+  tags:
+    - collectstatic
+
 - name: Set up cron jobs
-  import_tasks: cronjobs.yml
+  include_tasks: cronjobs.yml
+  when: setup_cronjobs
   tags:
     - cronjobs
-

@@ -1,24 +1,8 @@
 ---
-- name: ensure the PostgreSQL service is running
-  service: name=postgresql state=started enabled=yes
-
-- name: Change postgres data storage | Drop cluster if exist
-  become: yes
-  become_method: sudo
-  ignore_errors: yes
-  shell: "pg_dropcluster --stop {{ pg_version }} main"
-
-- name: Change postgres data storage | Create cluster
-  become: yes
-  become_method: sudo
-  ignore_errors: yes
-  shell: "pg_createcluster -d /shared/db/data/ --start -e UTF-8 {{ pg_version }} main"
-  notify: restart postgres
-
-- name: ensure user exists
+- name: Ensure user exists
   become: yes
   become_user: postgres
-  postgresql_user: state=present name=csc password=FooBar
+  postgresql_user: state=present name="{{ db_user }}" password="{{ db_user_password }}"
 
 - name: Create database
   become: yes
@@ -26,35 +10,32 @@
   postgresql_db:
     name: "{{ db_name }}"
     encoding: "UTF-8"
-    owner: csc
+    owner: "{{ db_user }}"
     state: present
-  register: cscdb
+  register: db
 
-- name: ensure user has access to the database
+- name: Ensure user has access to the database
   become: yes
   become_user: postgres
   postgresql_user:
     db: "{{ db_name }}"
-    name: csc
+    name: "{{ db_user }}"
     priv: ALL
     state: present
 
-- name: ensure user does not have unnecessary privileges
+- name: Ensure user does not have unnecessary privileges
   become: yes
   become_user: postgres
   postgresql_user:
-    name: csc
+    name: "{{ db_user }}"
     role_attr_flags: NOSUPERUSER,CREATEDB
     state: present
 
-- name: init Django db. *No matter club or center user here*
+- name: Run migrations
   become: yes
-  become_user: "{{ cscenter_user }}"
+  become_user: "{{ site_user }}"
   django_manage:
     command: "migrate"
-    app_path: "/home/{{ cscenter_user }}/site/repo"
-    settings: "{{ cscenter_user }}.settings.{{ app_environment }}"
-    virtualenv: "/home/{{ cscenter_user }}/site/env/"
-
-- name: ensure folder for file-based cache exists
-  file: path=/tmp/django_cache mode=777 state=directory
+    app_path: "/home/{{ site_user }}/site/repo"
+    settings: "{{ app_settings }}.settings.{{ app_environment }}"
+    virtualenv: "/home/{{ site_user }}/site/env/"

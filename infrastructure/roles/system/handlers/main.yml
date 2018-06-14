@@ -9,7 +9,7 @@
   become: yes
   become_method: sudo
 
-- name: restart postgres
-  service: name=postgresql state=restarted
-  become: yes
-  become_method: sudo
+- name: restart ntp
+  service:
+    name: "{{ ntp_daemon }}"
+    state: restarted

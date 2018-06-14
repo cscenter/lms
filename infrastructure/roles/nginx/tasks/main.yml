@@ -1,4 +1,14 @@
 ---
+- name: Add nginx PPA
+  apt_repository:
+    repo: "ppa:nginx/stable"
+    update_cache: yes
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
 - name: Create dir for nginx crypto stuff
   file:
     path: "{{ nginx_tls_path }}"
@@ -14,20 +24,12 @@
     dest: "{{ nginx_tls_path }}/{{ item.to }}"
     mode: 0400
   with_items:
-    - from: cscweb_tls_dhparam.pem
+    - from: tls_dhparams.pem
       to: dhparam.pem
   tags:
     - nginx
     - tls
   when: enable_https
-
-- name: Copy nginx config
-  template:
-    src: nginx.conf.tmpl
-    dest: "/etc/nginx/sites-available/{{ item.site_user }}.conf"
-  with_items: "{{ available_sites }}"
-  tags:
-    - nginx
 
 - name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
@@ -35,25 +37,6 @@
   tags:
     - nginx
 
-- name: Symlink nginx config
-  file:
-    src: "/etc/nginx/sites-available/{{ item.site_user }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ item.site_user }}.conf"
-    state: link
-  notify: restart nginx
-  with_items: "{{ available_sites }}"
-  tags:
-    - nginx
-
-- name: Nginx status
-  stat: path=/etc/init.d/nginx
-  register: nginx_status
-  tags:
-    - nginx
-
-- name: Configure certbot and nginx to auto-renew tls certificates
-  include: certbot.yml
-  tags:
-    - nginx
-    - tls
-  when: nginx_status.stat.exists and enable_https
+- name: Download and install certbot
+  get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
+  when: enable_https

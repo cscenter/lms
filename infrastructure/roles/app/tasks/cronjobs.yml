@@ -1,136 +1,120 @@
 ---
 - name: Daily late-night DB backup goes in cron
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
-    name: backup CSC website DB to S3
-    user: "{{ item }}"
+    name: backup DB to S3
+    user: "{{ site_user }}"
     hour: "4"
     minute: "7"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py dbbackup
-      --settings={{item}}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscbackup.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py dbbackup
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cscbackup.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: Daily late-night media backup goes in cron
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
-    name: backup CSC website media/ dir to S3
-    user: "{{ item }}"
+    name: backup media/ dir to S3
+    user: "{{ site_user }}"
     hour: "4"
     minute: "12"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py mediabackup
-      --settings={{item}}.settings.{{ app_environment }}
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py mediabackup
+      --settings={{ app_settings }}.settings.{{ app_environment }}
       --compress
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscbackup.log
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cscbackup.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: Notify people every 5 minutes (cronjob)
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
-    name: CSC mail notifier
-    user: "{{ item }}"
+    name: mail notifier
+    user: "{{ site_user }}"
     minute: "*/5"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py notify
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscnotifier.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py notify
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: remove useless notifications each Wednesday (cronjob)
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
-    name: CSC notification cleanup
-    user: "{{ item }}"
+    name: notification cleanup
+    user: "{{ site_user }}"
     weekday: 3
     hour: "2"
     minute: "3"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py notification_cleanup
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscnotifier.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py notification_cleanup
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: Project deadlines notification
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
     name: Send project notification about deadline if neccessary
-    user: "{{ item }}"
+    user: "{{ site_user }}"
     hour: "1,13"
     minute: "7"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py projects_notifications
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cscnotifier.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py projects_notifications
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: Once a day remove expired sessions
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
-    name: Remove expired CSC sessions
-    user: "{{ item }}"
+    name: Remove expired sessions
+    user: "{{ site_user }}"
     hour: 0
     minute: 7
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py clearsessions
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cronjobs.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py clearsessions
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cronjobs.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
 - name: Send queued emails with amazon SES each minute
-  become_user: "{{ item }}"
+  become_user: "{{ site_user }}"
   cron:
     name: Send queued emails with amazon SES
-    user: "{{ item }}"
+    user: "{{ site_user }}"
     minute: "*"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py send_queued_mail
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/send_queued_mail.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py send_queued_mail
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/send_queued_mail.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"
 
-- name: Get latest news from social networks for cscenter index page
-  become_user: "{{ item }}"
+- name: Get latest news from social networks for index page
+  become_user: "{{ site_user }}"
   cron:
-    name: Get latest news from social networks for cscenter index page
-    user: "{{ item }}"
+    name: Get latest news from social networks for index page
+    user: "{{ site_user }}"
     minute: "7"
     hour: "12,18,23"
     job: >
-      . /home/{{ item }}/site/env/bin/activate &&
-      /home/{{ item }}/site/repo/manage.py social_crawler
-      --settings={{ item }}.settings.{{ app_environment }}
-      --pythonpath='/home/{{item}}/site/repo/cscsite'
-      >> /home/{{ item }}/site/logs/cronjobs.log
+      . /home/{{ site_user }}/site/env/bin/activate &&
+      /home/{{ site_user }}/site/repo/manage.py social_crawler
+      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --pythonpath='/home/{{ site_user }}/site/repo/cscsite'
+      >> /home/{{ site_user }}/site/logs/cronjobs.log
       2>&1
-  with_items:
-    - "{{ cscenter_user }}"

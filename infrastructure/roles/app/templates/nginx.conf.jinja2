@@ -1,13 +1,13 @@
-upstream django_{{ item.site_user }} {
-    server unix:///tmp/uwsgi_{{ item.site_user }}.socket;
+upstream django_{{ site_user }} {
+    server unix:///tmp/uwsgi_{{ site_user }}.socket;
 }
 {% if enable_https %}
 server {
     listen 80;
-    server_name {{ item.certbot_domains|join(' ') }};
+    server_name {{ certbot_domains|join(' ') }};
 
     location /.well-known/acme-challenge/ {
-        alias /home/{{ item.site_user }}/site/repo/.well-known/acme-challenge/;
+        alias /home/{{ site_user }}/site/repo/.well-known/acme-challenge/;
     }
 
     location / {
@@ -18,22 +18,22 @@ server {
 # Redirect from `www.` to domain without `www`
 server {
     listen 443 ssl;
-    server_name www.{{ item.site_domain }};
+    server_name www.{{ main_domain }};
 
     # Make sure to update ansible regexp for uncommenting ssl certificates paths if https enabled.
-    # ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
-    # ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
+    # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
+    # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
     # Fetch OCSP records from URL in ssl_certificate and cache them
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    return 301 https://{{ item.site_domain }}$request_uri;
+    return 301 https://{{ main_domain }}$request_uri;
 }
 {% endif %}
 
 server {
-    listen {% if enable_https %}443 ssl{% else %}80{% endif %}{% if item.site_domain == "compscicenter.ru" %} default_server{% endif %};
-    server_name{% for domain in item.certbot_domains -%}
+    listen {% if enable_https %}443 ssl{% else %}80{% endif %}{% if main_domain == "compscicenter.ru" %} default_server{% endif %};
+    server_name{% for domain in certbot_domains -%}
         {% if not domain.startswith("www") %} {{ domain }}{% endif %}
     {%- endfor %};
 
@@ -43,8 +43,8 @@ server {
     # ssl config by Mozilla https://wiki.mozilla.org/Security/Server_Side_TLS
 
     # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
-    ssl_certificate {{ item.certbot_config_dir }}/{{ certbot_cert_filename }};
-    ssl_certificate_key {{ item.certbot_config_dir }}/{{ certbot_privkey_filename }};
+    ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
+    ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
     ssl_session_timeout 10m;
     ssl_session_cache shared:SSL:10m;
 
@@ -57,7 +57,7 @@ server {
     ssl_prefer_server_ciphers on;
 
     # FIXME: Enable hsts for compsciclub.ru after manual testing https!
-    {% if item.site_domain == "compscicenter.ru" -%}
+    {% if main_domain == "compscicenter.ru" -%}
     # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
     add_header Strict-Transport-Security max-age=15768000;
     {% endif %}
@@ -70,18 +70,18 @@ server {
     # We don't need to specify ssl_trusted_certificate, because Let's Encrypt
     # creates fullchain.pem containing all certificates and we use that
     # for ssl_certificate already.
-    # ssl_trusted_certificate {{ item.certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
+    # ssl_trusted_certificate {{ certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
     {% endif %}
     resolver 8.8.8.8;
 
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root /home/{{ item.site_user }}/site/repo/cscsite/templates/;
+        root /home/{{ site_user }}/site/repo/cscsite/templates/;
         try_files /errors/404.html =404;
     }
 
-    {% if item.site_domain == "compscicenter.ru" -%}
+    {% if main_domain == "compscicenter.ru" -%}
     rewrite ^/lectures/$ http://open.compscicenter.ru/ permanent;
     {% endif %}
 
@@ -100,7 +100,7 @@ server {
     }
 
     location /static {
-        alias /home/{{ item.site_user }}/site/repo/cscsite/static;
+        alias /home/{{ site_user }}/site/repo/cscsite/static;
         access_log off;
         tcp_nodelay off;
         gzip_static on;
@@ -113,7 +113,7 @@ server {
 
     # Django
     location / {
-        {% if item.site_domain == "compscicenter.ru" -%}
+        {% if main_domain == "compscicenter.ru" -%}
         set $frame_options '';
         if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
             set $frame_options 'SAMEORIGIN';
@@ -127,7 +127,7 @@ server {
         gzip on;
         # Serve 30x statuses with nginx
         uwsgi_intercept_errors on;
-        uwsgi_pass django_{{ item.site_user }};
+        uwsgi_pass django_{{ site_user }};
         include uwsgi_params;
     }
 }

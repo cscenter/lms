@@ -1,22 +1,21 @@
 ---
 - name: Start deployment
-  hosts: "{{ aws_ec2_host_new }}"
-  user: ubuntu
-  vars_files:
-    - vars/aws.yml
+  hosts: "{{ aws_ec2_host }}"
+  user: "{{ aws_ec2_user }}"
   vars:
     app_environment: production
+    site_user: cscenter
 
   tasks:
-  - name: Check app_user value
+  - name: Check site_user value
     fail:
-      msg: "`app_user` var should be one of [cscenter, csclub]"
-    when: app_user != "cscenter" and app_user != "csclub"
+      msg: "`site_user` var should be one of [cscenter, csclub]"
+    when: site_user != "cscenter" and site_user != "csclub"
 
   - name: Set variables for better readability
     set_fact:
-      site_src: "/home/{{ app_user }}/site/repo"
-      venv_dir: "/home/{{ app_user }}/site/env"
+      site_src: "/home/{{ site_user }}/site/repo"
+      venv_dir: "/home/{{ site_user }}/site/env"
       requirements_prev_md5_file: ".requirements_prev_deploy_md5"
       # Default value if file didn't fetched from remote server
       requirements_md5: ""
@@ -24,7 +23,7 @@
   - name: Get stuff from git
     git: repo=git@github.com:cscenter/site.git dest={{ site_src }}
     become: yes
-    become_user: "{{ app_user }}"
+    become_user: "{{ site_user }}"
 
   - name: Get file stats for production requirements.txt
     stat:
@@ -40,7 +39,7 @@
 
   - name: Try to fetch file with md5 hash value from the previous deploy
     fetch:
-      src: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
+      src: "/home/{{ site_user }}/site/{{ requirements_prev_md5_file }}"
       dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
       flat: yes
       fail_on_missing: no
@@ -58,37 +57,37 @@
   - name: Install requirements if they were changed from the previous deploy
     pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
     become: yes
-    become_user: "{{ app_user }}"
+    become_user: "{{ site_user }}"
     when: requirements_concated_md5 != requirements_md5
 
   - name: Update requirements.txt files summary md5 value
     copy:
       content: "{{ requirements_concated_md5 }}"
-      dest: "/home/{{ app_user }}/site/{{ requirements_prev_md5_file }}"
+      dest: "/home/{{ site_user }}/site/{{ requirements_prev_md5_file }}"
     become: yes
-    become_user: "{{ app_user }}"
+    become_user: "{{ site_user }}"
     when: requirements_concated_md5 != requirements_md5
 
   - name: Collectstatic
     become: yes
-    become_user: "{{ app_user }}"
+    become_user: "{{ site_user }}"
     django_manage:
       command: "collectstatic --noinput"
       app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.{{ app_environment }}"
+      settings: "{{ app_settings }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 
   - name: Migrate DB
     become: yes
-    become_user: "{{ app_user }}"
+    become_user: "{{ site_user }}"
     django_manage:
       command: "migrate"
       app_path: "{{ site_src }}"
-      settings: "{{ app_user }}.settings.{{ app_environment }}"
+      settings: "{{ app_settings }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 
   - name: Touch config file to reload uwsgi
-    file: path=/etc/uwsgi/vassals/{{ app_user }}.ini state=touch
+    file: path=/etc/uwsgi/vassals/{{ site_user }}.ini state=touch
     become: yes
     become_method: sudo
 

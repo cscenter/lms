@@ -19,7 +19,38 @@
       - default/redis_sentinel.init.j2
       paths:
         - ../templates
-  when: redis_as_service
+  when: redis_as_service and ansible_service_mgr|default() != "systemd"
+
+- name: create sentinel systemd service
+  template:
+    src: "{{ item }}"
+    dest: /etc/systemd/system/sentinel_{{ redis_sentinel_port }}.service
+    mode: 0644
+  with_first_found:
+    - files:
+      - "{{ ansible_os_family }}/redis_sentinel.service.j2"
+      - default/redis_sentinel.service.j2
+      paths:
+        - ../templates
+  register: sentinel_unit_file
+  when: redis_as_service and ansible_service_mgr|default() == "systemd"
+
+- name: create systemd tmpfiles configuration
+  template:
+    src: etc/tmpfiles.d/redis.conf.j2
+    dest: /etc/tmpfiles.d/redis.conf
+    mode: 0644
+  when:
+    - redis_as_service
+    - ansible_service_mgr|default() == "systemd"
+    - (redis_sentinel_pidfile|dirname).startswith("/var/run") or (redis_sentinel_pidfile|dirname).startswith("/run")
+
+- name: reload systemd daemon
+  command: systemctl daemon-reload
+  when:
+    - redis_as_service
+    - ansible_service_mgr|default() == "systemd"
+    - sentinel_unit_file|changed
 
 - name: set sentinel to start at boot
   service:
@@ -75,21 +106,22 @@
     src: redis_sentinel.conf.j2
     dest: /etc/redis/sentinel_{{ redis_sentinel_port }}.conf
     owner: "{{ redis_user }}"
-  notify: restart sentinel
+    mode: 0640
+  notify: "restart sentinel {{ redis_sentinel_port }}"
 
 - name: add sentinel init config file
   template:
     dest: /etc/sysconfig/sentinel_{{ redis_sentinel_port }}
     src: redis.init.conf.j2
   when: ansible_os_family == "RedHat"
-  notify: restart sentinel
+  notify: "restart sentinel {{ redis_sentinel_port }}"
 
 - name: add sentinel init config file
   template:
     dest: /etc/default/sentinel_{{ redis_sentinel_port }}
     src: redis.init.conf.j2
   when: ansible_os_family == "Debian"
-  notify: restart sentinel
+  notify: "restart sentinel {{ redis_sentinel_port }}"
 
 # Flush handlers before ensuring the service is started to prevent
 # a start and then restart

@@ -1,6 +1,0 @@
-- name: BACKUPS SETUP
-  hosts: 127.0.0.1
-  connection: local
-  gather_facts: False
-  roles:
-    - s3

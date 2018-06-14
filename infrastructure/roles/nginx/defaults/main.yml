@@ -1,28 +1,5 @@
 ---
 
-enable_https: yes
+enable_https: no
 nginx_tls_path: /etc/nginx/crypto
-certbot_script: /opt/certbot-auto
 certbot_auto_renew: yes
-available_sites:
-  - admin_email: webmaster@compscicenter.ru
-    site_user: "{{ cscenter_user }}"
-    site_root: /home/{{ cscenter_user }}/site/repo
-    site_domain: "compscicenter.ru"
-    certbot_domains:
-      - "compscicenter.ru"
-      - "www.compscicenter.ru"
-    # The 'certbot' will automatically generate files for us.
-    certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
-  - admin_email: webmaster@compscicenter.ru
-    site_user: "{{ csclub_user }}"
-    site_root: /home/{{ csclub_user }}/site/repo
-    site_domain: "compsciclub.ru"
-    certbot_domains:
-      - "compsciclub.ru"
-      - "www.compsciclub.ru"
-      - "kzn.compsciclub.ru"
-    certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
-certbot_cert_filename: fullchain.pem
-certbot_privkey_filename: privkey.pem
-certbot_trusted_chain_filename: chain.pem

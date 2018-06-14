@@ -1,0 +1,43 @@
+---
+- name: LetsEncrypt Certbot directory exists
+  file:
+    path: "{{ site_root }}/.well-known/acme-challenge"
+    state: directory
+    recurse: yes
+    owner: "{{ site_user }}"
+    group: "{{ site_user }}"
+
+- name: Generate certificates
+  command: >
+    {{ certbot_script }} certonly --webroot
+    --noninteractive --agree-tos
+    --email {{ admin_email }}
+    -w {{ site_root }}
+    -d {{ certbot_domains|join(' -d ') }}
+  args:
+    creates: "{{ certbot_config_dir }}"
+
+# Note: the `.` special character matches any character except newlines.
+# Note: Make sure nginx configs were copied to `dest` (see `nginx.yml`)
+- name: Uncomment `ssl_certificate` and `ssl_certificate_key`
+  replace:
+    dest: "/etc/nginx/sites-available/{{ site_user }}.conf"
+    regexp: '^(\s*)# ssl_certificate(.*);$'
+    replace: '\1ssl_certificate\2;'
+    backup: no
+  notify: reload nginx
+
+- name: Ensure a cron job to auto-renew the cert exists
+  cron:
+    name: "daily auto renew cert for {{ main_domain }}"
+    special_time: daily
+    job: >
+      {{ certbot_script }} certonly --webroot
+      --noninteractive --agree-tos --quiet
+      --email {{ admin_email }}
+      -w {{ site_root }}
+      -d {{ certbot_domains|join(' -d ') }}
+      --deploy-hook 'service nginx reload'
+      --no-self-upgrade
+    state: present
+  when: certbot_auto_renew

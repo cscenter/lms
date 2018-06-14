@@ -2,13 +2,7 @@
 # TODO (critical):
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
-* `apt-get install ntpd` with servers in /etc/ntp.conf
-    server ru.pool.ntp.org
-    server pool.ntp.org
-    server time.nist.gov
-    server ntp.psn.ru
-    server ntp1.imvp.ru
-* Problems with restarting supervisor. All programs can be in RUNNING state, but ansible task failed. (??? is it fixed?)
+* Check that `ntpd` works as expected!
 * fix certbot default email/domain values! They should be real...
 * Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 used as system 
 `python3` (now py3.6 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
@@ -28,8 +22,8 @@ Requirements
 ------------
   
 * python3
-* Ansible (>=2.4.x) `pip install ansible`
-* boto library `pip install boto` (may not work from virtualenv)
+* Ansible (>=2.5.x) `pip install ansible`
+* boto3 library `pip install boto3` (may not work from virtualenv)
 * aws cli (optional) `pip install awscli`
 * For Dynamic inventory in Ansible used [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
 
@@ -81,6 +75,7 @@ deploy.yml | Deploy one of the sites (cscenter or csclub)
 
 Command to run:
 
+    ansible-playbook -i inventory/ec2.py provision.yml-v
     ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=csclub" -v
 
 
@@ -111,24 +106,20 @@ Don't forget to add ssh-key to ssh agent
 
 `ansible-playbook -i hosts provision.yml`
 
-Creates new instance with {{ aws_ec2_host_new }} name tag.
+Creates new instance with {{ aws_ec2_host }} name tag.
 
 TODO:
-* Add fail if instance already exists (max 1 intance with {{ aws_ec2_host_new}} name tag)
 * Add new instance to known_hosts (on local machine)
 * mv Elastic IP from old instance to new
 * tmux create session https://gist.github.com/henrik/1967800 and save them
-* symlinks for uwsgi configs to /etc/uwsgi/vassals? 
 
 
 ## Host setup
+```
+# In theory it's idempotent, so you can modify `setup.yml` and rerun playbook as you wish
+ansible-playbook -i inventory/ec2.py setup.yml
+```
 
-TODO:
-* change zsh settings for csclub (template)
-* add tags to additional Volume with `ec2_tag`
-
-* run `ansible-playbook -i inventory/ec2.py setup.yml`. In theory it's idempotent, so you
-can modify `setup.yml` and rerun playbook as you wish
 
 
 ## BACKUP restore
@@ -145,15 +136,12 @@ Note: Бэкап делается bd и media. У сайта клуба и це�
 TODO:
 * Test app write in log
 * Restore dbbackup
-* Make certbot optional? And add to csclub site too.
 
 ## How to replace instance
 1. `ansible-playbook -i hosts provision.yml`
 2. Manually restore db and media/ for cscenter
 3. Change elastic IP
 4. Manually stop old instance
-5. Replace tag cscweb_new to `cscweb`
-NAILED IT!
 
 
 TIPS:
@@ -167,5 +155,5 @@ pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql
 
 
 
-# Setup cronjobs
+# Update cronjobs
 ansible-playbook -i inventory/ec2.py setup.yml --tags="cronjobs"

@@ -1,0 +1,110 @@
+---
+- name: Upgrade all packages to the latest version
+  apt: upgrade=dist
+
+- name: set default locale LANG to UTF-8
+  lineinfile: dest=/etc/default/locale line='LANG="en_US.utf8"' regexp='^LANG=' state=present insertafter=BOF
+
+- name: set default locale LC_ALL to UTF-8
+  lineinfile: dest=/etc/environment line='LC_ALL="en_US.utf8"' regexp='^LC_ALL=' state=present insertafter=BOF
+
+- name: check if a reboot is required
+  stat: path=/var/run/reboot-required get_md5=no
+  register: reboot_file
+
+# Reboot issue: https://github.com/ansible/ansible/issues/14413
+- name: reboot the server
+  command: /sbin/reboot removes=/var/run/reboot-required
+  when: reboot_file.stat.exists == true
+
+- name: Wait for server to go offline (because of reboot)
+  local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
+  become: false
+  when: reboot_file.stat.exists == true
+
+- name: Add python PPAs
+  apt_repository:
+    repo: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - 'ppa:deadsnakes/ppa'
+
+- name: Apt dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-setuptools
+    - python-dev
+    - git
+    - ntp
+    - zsh
+    - tmux
+    - htop
+    - build-essential
+    # app dependencies
+    - gettext
+    # regular expressions support
+    - libpcre3
+    - libpcre3-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libmagic-dev
+    - libcurl4-gnutls-dev
+    - "{{ python_pkg }}"
+    - "{{ python_pkg }}-dev"
+    - python3-pip
+    - python-pycurl
+
+- name: install pip
+  easy_install: name=pip
+
+- name: install system python (2.x) dependencies
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+  with_items:
+    - name: ipython
+      version: "5.5.0"
+    - name: virtualenv
+      version: "15.1.0"
+    - name: psycopg2 # (used to make sure db user exists)
+      version: "2.7.4"
+
+- name: Install uwsgi (for python 3.x)
+  pip:
+    executable: "pip3"
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+  with_items:
+    - name: uwsgi
+      version: "2.0.17"
+    - name: uwsgitop
+      version: "0.10"
+  tags:
+    - uwsgi
+
+- name: Copy upstart uwsgi config
+  template:
+    src: uwsgi-upstart.jinja2
+    dest: /etc/init/uwsgi.conf
+  tags:
+    - uwsgi
+
+- name: Create uwsgi config dir
+  file: path=/etc/uwsgi/vassals state=directory
+  tags:
+    - uwsgi
+
+- name: Setup zsh for ec2 user
+  include_tasks: zsh.yml
+  with_items:
+    - "{{ aws_ec2_user }}"
+
+- name: Setup ntpd
+  import_tasks: ntp.yml
+  tags:
+    - ntpd
+    - ntp

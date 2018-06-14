@@ -1,47 +1,43 @@
 ---
 - name: Create group for /media folder
-  group: name={{ group_shared }} state=present
+  group: name={{ site_user_group }} state=present
 
-- name: create users for websites
+- name: Create website user
   user:
-    home: "/home/{{ item }}"
-    name: "{{ item }}"
+    home: "/home/{{ site_user }}"
+    name: "{{ site_user }}"
     state: present
     groups: shared
     append: yes
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
 
-# Preparing deployment
-- name: create .ssh directory for both website users
+- name: Create .ssh directory
   file:
-    path: "/home/{{ item }}/.ssh"
+    path: "/home/{{ site_user }}/.ssh"
     state: directory
-    owner: "{{ item }}"
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
+    owner: "{{ site_user }}"
 
-- name: ensure github.com is a known host
+- name: Ensure github.com is a known host
   lineinfile:
-    dest: /{{ item }}/.ssh/known_hosts
+    dest: /{{ site_user }}/.ssh/known_hosts
     create: yes
     state: present
     line: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
     regexp: "^github\\.com"
-  with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
 
-- name: ensure ssh key stuff is present
+- name: Ensure ssh key is present
   copy:
-    src: "cscweb_github_deploy_ssh_key"
-    dest: "/home/{{ item }}/.ssh/id_rsa"
+    src: "deploy_ssh_key"
+    dest: "/home/{{ site_user }}/.ssh/id_rsa"
     mode: 0400
-    owner: "{{ item }}"
+    owner: "{{ site_user }}"
+
+- name: Configure shell
+  include_role:
+    name: system
+    tasks_from: zsh.yml
+  vars:
+    zsh_theme: sunaku
   with_items:
-    - "{{ cscenter_user }}"
-    - "{{ csclub_user }}"
-
-
+    - "{{ site_user }}"
+  tags:
+    - zsh

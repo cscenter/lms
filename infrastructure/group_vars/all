@@ -1,6 +1,46 @@
 ---
-# Global variables here, used in many roles
-group_shared: shared
-aws_ec2_root_user: ubuntu
-cscenter_user: cscenter
-csclub_user: csclub
+aws_ec2_instance_tag: cscweb_new
+aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
+aws_ec2_user: ubuntu
+aws_ec2_root_user: root
+admin_email: webmaster@compscicenter.ru
+python_pkg: python3.6
+certbot_script: /opt/certbot-auto
+available_sites:
+  - site_user: "cscenter"
+    site_user_group: "shared"
+    site_root: "/home/cscenter/site/repo"
+    media_root: "/shared/media"
+    backup_root: "/shared/backup_tmp"
+    app_settings: "cscenter"
+    app_environment: production
+    repo_url: git@github.com:cscenter/site.git
+    db_name: cscdb
+    db_user: csc
+    db_user_password: FooBar
+    main_domain: "compscicenter.ru"
+    enable_https: yes
+    setup_cronjobs: yes
+    certbot_domains:
+      - "compscicenter.ru"
+      - "www.compscicenter.ru"
+    certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
+  - site_user: "csclub"
+    site_user_group: "shared"
+    site_root: "/home/csclub/site/repo"
+    media_root: "/shared/media"
+    backup_root: "/shared/backup_tmp"
+    app_settings: "csclub"
+    app_environment: production
+    repo_url: git@github.com:cscenter/site.git
+    db_name: cscdb
+    db_user: csc
+    db_user_password: FooBar
+    main_domain: "compsciclub.ru"
+    enable_https: yes
+    setup_cronjobs: no
+    certbot_domains:
+      - "compsciclub.ru"
+      - "www.compsciclub.ru"
+      - "kzn.compsciclub.ru"
+    certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"

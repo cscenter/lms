@@ -1,5 +1,5 @@
 ---
-pg_version: 9.4
-python_pkg: python3.6
 app_environment: production
-db_name: cscdb
+certbot_cert_filename: fullchain.pem
+certbot_privkey_filename: privkey.pem
+certbot_trusted_chain_filename: chain.pem
