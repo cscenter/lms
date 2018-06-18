@@ -569,6 +569,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         center_courses = set()
         club_courses = set()
         club_adjusted = 0
+        failed_total = 0
         in_current_term_total = 0  # center, club and shad courses
         in_current_term_courses = set()  # center and club courses
         in_current_term_passed = 0  # Center and club courses
@@ -593,25 +594,39 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
                     if is_negative_grade(e.grade):
+                        failed_total += 1
                         in_current_term_failed += 1
                     else:
                         in_current_term_in_progress += contribution
+                else:
+                    failed_total += 1
             else:
                 if is_positive_grade(e.grade):
                     center_courses.add(e.course_offering.course_id)
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
                     if is_negative_grade(e.grade):
+                        failed_total += 1
                         in_current_term_failed += 1
                     else:
                         in_current_term_in_progress += 1
+                else:
+                    failed_total += 1
         online_total = len(self.onlinecourserecord_set.all())
         shad_total = 0
         for c in self.shadcourserecord_set.all():
-            shad_total += int(is_positive_grade(c.grade))
-            in_current_term_total += int(c.semester_id == current_term.pk)
+            if is_positive_grade(c.grade):
+                shad_total += 1
+            if c.semester_id == current_term.pk:
+                in_current_term_total += 1
+                if is_negative_grade(c.grade):
+                    failed_total += 1
+            # `not graded` == failed for passed terms
+            elif not is_positive_grade(c.grade):
+                failed_total += 1
 
         return {
+            "failed": {"total": failed_total},
             # All the time
             "passed": {
                 "total": len(center_courses) + online_total + shad_total +
