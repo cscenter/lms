@@ -33,7 +33,7 @@ from learning.admission.reports import AdmissionReport
 from learning.models import Semester, CourseOffering, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
-    ProgressReportForSemester
+    ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
     GRADES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_current_term_pair, get_term_index, get_term_by_index
@@ -385,6 +385,17 @@ class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
             return report.output_xlsx()
         else:
             raise ValueError("AdmissionReportView: output format not provided")
+
+
+class WillGraduateStatsReportView(CuratorOnlyMixin, generic.base.View):
+    http_method_names = ['get']
+
+    def get(self, *args, output_format, **kwargs):
+        report = WillGraduateStatsReport()
+        if output_format == "csv":
+            return report.output_csv()
+        elif output_format == "xlsx":
+            return report.output_xlsx()
 
 
 class HintListView(CuratorOnlyMixin, generic.ListView):

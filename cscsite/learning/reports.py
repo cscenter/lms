@@ -7,15 +7,18 @@ from datetime import datetime
 
 import six
 import unicodecsv
+from django.db.models import Q, Prefetch, Count
 from django.http import HttpResponse
 from django.utils import formats
 from django.utils.encoding import force_text
 from xlsxwriter import Workbook
 
+from learning.models import AssignmentComment, Semester, Enrollment
+from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU, \
     TIME_FORMAT_RU
 from learning.utils import get_grade_index, is_positive_grade
-from users.models import CSCUser
+from users.models import CSCUser, SHADCourseRecord
 
 
 # TODO: filter projects by grade?
@@ -623,3 +626,146 @@ class ProgressReportForSemester(ProgressReport):
     def get_filename(self):
         return "sheet_{}_{}".format(self.target_semester.year,
                                     self.target_semester.type)
+
+
+class WillGraduateStatsReport(ReportFileOutput):
+    """Unoptimized piece of code"""
+
+    def __init__(self):
+        self.headers = [
+            "Город",
+            "ФИО",
+            "1. У кого сколько оставлено комментариев на сайте с 23:00 до 8:00 по мск (задания + проекты, входит отправка заданий)",
+            "2. У кого сколько вообще комментариев на сайте центра (задания + проекты, входит отправка заданий)",
+            "3. Процентное соотношение (курсы с оценкой зачёт и выше) / (все взятые курсы)",
+            "4.1 Максимальное количество сданных курсов + практик за один семестр",
+            "4.2 Какой именно это семестр",
+            "5. Сколько проектов сдано осенью? ",
+            "6. Сколько проектов сдано весной?",
+            "7. Сдано курсов всего (ШАД/Клуб/Центр/Онлайн)",
+            "8. Не сдал курсов всего (ШАД/Клуб/Центр/Онлайн)",
+        ]
+
+        self.data = []
+        students = self.get_queryset()
+        current_semester = Semester.get_current()
+        for student in students.all():
+            stats = student.stats(current_semester)
+            # 1. Оставлено комментариев на сайте с 23:00 до 8:00 по мск
+            time_range_in_utc = Q(created__hour__gte=20) | Q(created__hour__lte=5)
+            assignment_comments_after_23 = (
+                AssignmentComment.objects
+                .filter(student_assignment__student_id=student.pk)
+                .filter(time_range_in_utc)
+                .count())
+            report_comments_after_23 = (
+                ReportComment.objects
+                .filter(author_id=student.pk)
+                .filter(time_range_in_utc)
+                .count())
+            comments_after_23_total = report_comments_after_23 + assignment_comments_after_23
+            # 2. Сколько вообще комментариев на сайте центра
+            assignment_comments_count = (
+                AssignmentComment.objects
+                .filter(student_assignment__student_id=student.pk)
+                .count())
+            report_comments_count = (
+                ReportComment.objects
+                .filter(author_id=student.pk)
+                .count())
+            comments_total = assignment_comments_count + report_comments_count
+            # 3. (курсы с оценкой зачёт и выше) / (все взятые курсы)
+            enrollments_qs = student.enrollment_set.filter(is_deleted=False)
+            all_enrollments_count = (enrollments_qs.count() +
+                                     student.onlinecourserecord_set.count() +
+                                     student.shadcourserecord_set.count())
+            passed = (stats["passed"]["total"]) / all_enrollments_count
+            # 4. Максимальное количество сданных курсов + практик за один
+            # семестр, какой именно это семестр
+            # Collect all unique terms among practices, center, shad and
+            # club courses
+            all_enrollments_terms = enrollments_qs.values_list(
+                "course_offering__semester_id",
+                flat=True)
+            semesters = {v for v in all_enrollments_terms}
+            all_shad_terms = (SHADCourseRecord.objects
+                              .filter(student_id=student.pk)
+                              .values_list("semester_id", flat=True))
+            unique_shad_terms = {v for v in all_shad_terms}
+            all_projects_terms = (ProjectStudent.objects
+                                  .filter(student_id=student.pk)
+                                  .values_list("project__semester_id",
+                                               flat=True))
+            project_semesters = {v for v in all_projects_terms}
+            semesters = semesters.union(unique_shad_terms, project_semesters)
+            max_in_term = 0
+            max_in_term_semester_id = 0
+            for semester_id in semesters:
+                enrollments_in_term_qs = enrollments_qs.filter(
+                    course_offering__semester_id=semester_id).all()
+                in_term = sum(int(is_positive_grade(e.grade)) for e in
+                              enrollments_in_term_qs)
+                projects_in_term_qs = ProjectStudent.objects.filter(
+                    project__semester_id=semester_id,
+                    student_id=student.pk).all()
+                in_term += sum(int(is_positive_grade(p.final_grade)) for p in
+                               projects_in_term_qs)
+                shad_courses_in_term_qs = SHADCourseRecord.objects.filter(
+                    student_id=student.pk, semester_id=semester_id).all()
+                in_term += sum(int(is_positive_grade(c.grade)) for c in
+                               shad_courses_in_term_qs)
+                if in_term > max_in_term:
+                    max_in_term = in_term
+                    max_in_term_semester_id = semester_id
+            # 6. Сколько проектов сдано осенью?
+            projects_qs = ProjectStudent.objects.filter(
+                project__semester__type="autumn", student_id=student.pk).all()
+            projects_in_autumn = sum(
+                int(is_positive_grade(p.final_grade)) for p in projects_qs)
+            # 7. Сколько проектов сдано весной?
+            projects_qs = ProjectStudent.objects.filter(
+                project__semester__type="spring", student_id=student.pk).all()
+            projects_in_spring = sum(
+                int(is_positive_grade(p.final_grade)) for p in projects_qs)
+            row = [
+                student.city.name,
+                student.get_abbreviated_short_name(),
+                comments_after_23_total,
+                comments_total,
+                "%.2f" % (passed * 100),
+                max_in_term,
+                Semester.objects.get(pk=max_in_term_semester_id),
+                projects_in_autumn,
+                projects_in_spring,
+                stats["passed"]["total"],
+                stats["failed"]["total"],
+            ]
+            self.data.append(row)
+
+    def get_queryset(self):
+        enrollments_queryset = (
+            Enrollment.active
+            .select_related(
+                'course_offering',
+                'course_offering__semester',
+                'course_offering__course',)
+            .annotate(classes_total=Count('course_offering__courseclass')))
+        shad_courses_queryset = (SHADCourseRecord.objects
+                                 .select_related("semester"))
+        prefetch_list = [
+            Prefetch('enrollment_set', queryset=enrollments_queryset),
+            Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
+            'onlinecourserecord_set',
+        ]
+        qs = (CSCUser.objects
+              .filter(status=CSCUser.STATUS.will_graduate)
+              .prefetch_related(*prefetch_list))
+        return qs
+
+    def export_row(self, row):
+        return row
+
+    def get_filename(self):
+        today = datetime.now()
+        return "will_graduate_report_{}".format(
+            formats.date_format(today, "SHORT_DATE_FORMAT"))
