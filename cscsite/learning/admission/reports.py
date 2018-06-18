@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -42,6 +40,7 @@ class AdmissionReport(ReportFileOutput):
         interviewers_keys = list(interviewers.keys())
         for pk, full_name in interviewers.items():
             self.headers.append('{}, балл'.format(full_name))
+        # TODO: replace with iterator
         self.data = []
 
         for applicant in applicants:
@@ -67,8 +66,8 @@ class AdmissionReport(ReportFileOutput):
                 row.append("")
             try:
                 interview = applicant.interview
-                if interview.average_score() is not None:
-                    formatted = format(interview.average_score(), ".", 2)
+                if interview.average_score is not None:
+                    formatted = format(interview.average_score, ".", 2)
                     row.append(formatted)
                     # Add interviewers comments and score
                     comments = ""
