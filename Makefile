@@ -82,7 +82,7 @@ deploy_remote:
 # it's not in git, sorry --> grunt build
 	$(call check_defined, app_user)
 	git push
-	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "app_user=$(app_user)" -v
+	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "site_user=$(app_user)" -v
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
