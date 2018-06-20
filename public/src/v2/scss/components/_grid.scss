@@ -12,9 +12,9 @@
 }
 
 .page-content {
-  margin-top: 70px;
+  padding-top: 70px;
   padding-bottom: 2rem;
   @include media-breakpoint-up(lg) {
-    margin-top: 40px;
+    padding-top: 40px;
   }
 }

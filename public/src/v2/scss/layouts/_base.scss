@@ -1,7 +1,5 @@
 $footer-height: 90px;
 
-$footer-height: 90px;
-
 @mixin append-hr-to-container() {
   .container::after {
     content: "";
