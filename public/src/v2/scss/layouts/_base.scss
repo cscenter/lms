@@ -1,3 +1,4 @@
+$footer-mobile-height: 134px;
 $footer-height: 90px;
 
 @mixin append-hr-to-container() {
@@ -16,6 +17,7 @@ html {
 }
 
 body {
+  margin-bottom: $footer-mobile-height;
   @include media-breakpoint-up(lg) {
     margin-bottom: $footer-height;
   }
@@ -54,9 +56,10 @@ body {
   overflow: hidden;
   display: block;
   width: 100%;
+  position: absolute;
+  bottom: 0;
+  height: $footer-mobile-height;
   @include media-breakpoint-up(lg) {
-    position: absolute;
-    bottom: 0;
     height: $footer-height;
   }
 

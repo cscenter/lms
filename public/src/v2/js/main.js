@@ -73,12 +73,8 @@ $(function () {
 
     // TODO: section or component-based approach. What to choose?
     let sections = getSections();
-    if (sections.includes("testimonials")) {
-        import(/* webpackChunkName: "testimonials" */ 'sections/testimonials')
-            .then(module => { module.launch(); })
-            .catch(error => showComponentError(error));
-    } else if (sections.includes("honorBoard")) {
-        import(/* webpackChunkName: "honorBoard" */ 'sections/honorBoard')
+    if (sections.includes("honorBoard")) {
+        import(/* webpackChunkName: "honorBoard" */ 'apps/honorBoard')
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     } else {

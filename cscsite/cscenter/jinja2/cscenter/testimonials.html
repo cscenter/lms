@@ -2,7 +2,7 @@
 
 {% block title %}Отзывы выпускников - {{ super() }}{% endblock title %}
 
-{% block body_attrs %}class="_dark" data-init-sections="testimonials"{% endblock body_attrs %}
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
 {% block content %}
     <style type="text/css">
@@ -23,10 +23,10 @@
         }
     </style>
     <script type="text/javascript">
-        document.body.className += " _loading _fullscreen";
+        {#document.body.className += " _loading _fullscreen";#}
     </script>
     <div class="container page-content">
-        <h1>Выпускники о CS центре</h1>
+        <div id="Testimonials" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
 
         <div class="row" id="masonry-grid">
             {% for student in testimonials %}

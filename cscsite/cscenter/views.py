@@ -29,6 +29,7 @@ from core.models import Faq
 from cscenter.serializers import CourseOfferingSerializer
 from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
+from learning.api.views import TestimonialList
 from learning.models import CourseOffering, CourseOfferingTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
@@ -171,17 +172,27 @@ class TestimonialsListView(generic.ListView):
                 .order_by("-graduation_year", "last_name"))
 
 
-class TestimonialsListV2View(ListView):
-    context_object_name = "testimonials"
+class TestimonialsListV2View(TemplateView):
     template_name = "cscenter/testimonials.html"
-    paginate_by = 10
 
-    def get_queryset(self):
-        return (CSCUser.objects
-                .filter(groups=CSCUser.group.GRADUATE_CENTER)
-                .exclude(csc_review='').exclude(photo='')
-                .prefetch_related("areas_of_study")
-                .order_by("-graduation_year", "last_name"))
+    def get_context_data(self, **kwargs):
+        try:
+            current_page = int(self.request.GET.get("page"))
+            current_page = max(current_page, 1)
+        except (ValueError, TypeError):
+            # TODO: redirect instead?
+            current_page = 1
+        return {
+            "app_data": {
+                "state": {
+                    "page": current_page,
+                },
+                "props": {
+                    "entry_url": reverse("api:testimonials"),
+                    "total": TestimonialList.get_base_queryset().count(),
+                }
+            }
+        }
 
 
 class TeachersView(generic.ListView):

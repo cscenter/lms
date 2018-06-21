@@ -47,6 +47,7 @@ class Alumni extends React.Component {
 
     componentDidMount = () => {
         // Set initial state and fetch data
+        // TODO: move to constructor?
         this.setState(this.props.init.state);
     };
 
