@@ -84,7 +84,7 @@ rq==0.8.2
 nbconvert==5.3.1
 jupyter_client==5.1.0
 
-djangorestframework==3.6.4
+djangorestframework==3.8.2
 rest-pandas==0.5.0
 django-js-reverse==0.8.1
 numpy==1.13.1
