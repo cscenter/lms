@@ -67,26 +67,29 @@ class App extends React.Component {
             // use element for option
             columnWidth: '.grid-sizer',
             percentPosition: true,
-            // transitionDuration: 0,
+            transitionDuration: 0,
             initLayout: false
         });
         grid.on('layoutComplete', function() {
+            console.log("layoutComplete");
             hideBodyPreloader();
         });
         // Pagination component controls fetch
-        console.log("componentDidMount");
+        console.debug("componentDidMount");
     };
 
     onChangePage(page) {
+        console.debug("onChangePage");
         this.setState({ loading: true, page: page });
     }
 
     componentDidUpdate = (prevProps, prevState) => {
-        console.log("componentDidUpdate");
+        console.debug("componentDidUpdate");
         if (prevState.items.length === 0 || prevState.page !== this.state.page) {
             const payload = this.getRequestPayload(this.state);
             this.fetch(payload);
         } else {
+        console.log("call layout", this.state);
             let grid = Masonry.data(this.masonryGrid.current);
             grid.reloadItems();
             grid.layout();
@@ -94,14 +97,12 @@ class App extends React.Component {
     };
 
     getRequestPayload(state) {
-        console.log(this.state);
         let {page} = state;
-        console.log(page);
         return { page };
     }
 
     fetch = (payload) => {
-        console.log("fetch");
+        console.debug("fetch");
         this.serverRequest = $.ajax({
             type: "GET",
             url: this.props.entry_url,
@@ -121,15 +122,14 @@ class App extends React.Component {
     };
 
     render() {
-        console.log("render");
-        console.log(this.state.page);
+        console.debug(`render page ${this.state.page}`);
         if (this.state.loading) {
             showBodyPreloader();
         }
         return (
             <div>
                 <h1>Выпускники о CS центре</h1>
-                <div className="row" id="masonry-grid" ref={this.masonryGrid}>
+                <div id="masonry-grid" ref={this.masonryGrid}>
                     {this.state.items.map(item =>
                         <div className="grid-item" key={item.id}>
                             <div className="card mb-2" >

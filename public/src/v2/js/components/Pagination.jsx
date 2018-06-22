@@ -15,14 +15,14 @@ class Pagination extends React.Component {
         this.state = {pager: {}};
     }
 
-    componentWillMount() {
-        console.log("pagination componentWillMount");
+    componentDidMount() {
         this.setPage(this.props.currentPage);
-    }
+    };
 
     componentDidUpdate(prevProps, prevState) {
         if (this.state.pager.currentPage !== prevState.pager.currentPage) {
-            this.setPage(this.state.pager.currentPage);
+            // call change page function in parent component
+            this.props.onChangePage(this.state.pager.currentPage);
         }
     }
 
@@ -43,9 +43,6 @@ class Pagination extends React.Component {
 
         // update state
         this.setState({ pager: pager });
-
-        // call change page function in parent component
-        this.props.onChangePage(pager.currentPage);
     }
 
     getPager(totalItems, currentPage, pageSize) {
@@ -101,7 +98,7 @@ class Pagination extends React.Component {
                 {
                     pager.currentPage !== 1 ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(1)}>First</button>
+                            <button className="page-link" onClick={() => this.setPage(1)}>В начало</button>
                         </li>
                     : ''
                 }
@@ -129,7 +126,7 @@ class Pagination extends React.Component {
                 {
                     pager.currentPage !== pager.totalPages ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(pager.totalPages)}>Last</button>
+                            <button className="page-link" onClick={() => this.setPage(pager.totalPages)}>В конец</button>
                         </li>
                     : ''
                 }
