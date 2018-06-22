@@ -6,6 +6,12 @@
 
 {% block content %}
     <style type="text/css">
+        #masonry-grid {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -.5rem;
+            margin-right: -.5rem;
+        }
         .grid-sizer,
         .grid-item {
             width: 50%;
@@ -22,33 +28,7 @@
             }
         }
     </style>
-    <script type="text/javascript">
-        {#document.body.className += " _loading _fullscreen";#}
-    </script>
     <div class="container page-content">
         <div id="Testimonials" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
-
-        <div class="row" id="masonry-grid">
-            {% for student in testimonials %}
-                <div class="grid-item">
-                    {{ macros.testimonial_card(student) }}
-                </div>
-            {% endfor %}
-            <div class="grid-sizer"></div>
-        </div>
-        {% if is_paginated %}
-            {% set p = pagination(page_obj, request) %}
-            {% if p.page_urls %}
-                <nav aria-label="Page Navigation">
-                  <ul class="pagination">
-{#                    {% if p.first_page_url %}<li class="page-item"><a class="page-link" href="{{ p.first_page_url }}" tabindex="-1"><<</a></li>{% endif %}#}
-                    {% for page_num, url in p.page_urls %}
-                        <li class="page-item{% if page_obj.number == page_num %} active{% endif %}"><a class="page-link" href="{{ url }}">{{ page_num }}</a></li>
-                    {% endfor %}
-{#                    {% if p.last_page_url %}<li class="page-item"><a class="page-link" href="{{ p.last_page_url }}" tabindex="-1">>></a></li>{% endif %}#}
-                  </ul>
-                </nav>
-            {% endif %}
-        {% endif %}
     </div>
 {% endblock content %}
