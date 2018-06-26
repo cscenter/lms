@@ -247,6 +247,7 @@ REST_FRAMEWORK = {
     ),
     'UNAUTHENTICATED_USER': 'users.models.NotAuthenticatedUser',
     'PAGE_SIZE': 20,
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.StandardPagination'
 }
 
 WEBPACK_LOADER = {

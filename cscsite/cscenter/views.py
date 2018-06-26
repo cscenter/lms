@@ -176,11 +176,13 @@ class TestimonialsListV2View(TemplateView):
     template_name = "cscenter/testimonials.html"
 
     def get_context_data(self, **kwargs):
+        total = TestimonialList.get_base_queryset().count()
         try:
             current_page = int(self.request.GET.get("page"))
             current_page = max(current_page, 1)
         except (ValueError, TypeError):
             # TODO: redirect instead?
+            # TODO: compare page num with `total // page_size` and redirect if needed
             current_page = 1
         return {
             "app_data": {
@@ -188,6 +190,7 @@ class TestimonialsListV2View(TemplateView):
                     "page": current_page,
                 },
                 "props": {
+                    "page_size": 16,
                     "entry_url": reverse("api:testimonials"),
                     "total": TestimonialList.get_base_queryset().count(),
                 }
