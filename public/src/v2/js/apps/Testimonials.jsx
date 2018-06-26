@@ -1,4 +1,7 @@
+// TODO: add translation support (error msg)
+
 import FontFaceObserver from 'fontfaceobserver';
+import createHistory from "history/createBrowserHistory"
 import Masonry from 'masonry-layout';
 import $ from 'jquery';
 import React from 'react';
@@ -6,45 +9,13 @@ import _debounce from 'lodash-es/debounce';
 
 import Pagination from 'components/Pagination';
 import Testimonial from 'components/Testimonial';
-import {MOBILE_VIEWPORT_MAX} from 'utils';
+import {MOBILE_VIEWPORT_MAX, showErrorNotification, showBodyPreloader,
+    hideBodyPreloader} from 'utils';
 
 
-function launch() {
-    if (window.screen.availWidth >= MOBILE_VIEWPORT_MAX) {
-        initMasonryGrid();
-    } else {
-        hideBodyPreloader();
-    }
-}
+const MASONRY_ENABLED = (window.screen.availWidth >= MOBILE_VIEWPORT_MAX);
 
-function initMasonryGrid() {
-    const font = new FontFaceObserver('Fira Sans', {
-      style: 'normal',
-      weight: 400,
-    });
-    // Make sure font has been loaded and testimonial content rendered with it
-    font.load().then(function () {
-        let grid = new Masonry(document.querySelector('#masonry-grid'), {
-            itemSelector: '.grid-item',
-            // use element for option
-            columnWidth: '.grid-sizer',
-            percentPosition: true,
-            initLayout: false
-        });
-        grid.once('layoutComplete', function() {
-            hideBodyPreloader();
-        });
-        grid.layout();
-    });
-}
-
-function showBodyPreloader() {
-    $(document.body).addClass("_fullscreen").addClass("_loading");
-}
-
-function hideBodyPreloader() {
-    $(document.body).removeClass("_fullscreen").removeClass("_loading");
-}
+const history = createHistory();
 
 
 class App extends React.Component {
@@ -62,47 +33,77 @@ class App extends React.Component {
     }
 
     componentDidMount = () => {
-        let grid = new Masonry(this.masonryGrid.current, {
-            itemSelector: '.grid-item',
-            // use element for option
-            columnWidth: '.grid-sizer',
-            percentPosition: true,
-            transitionDuration: 0,
-            initLayout: false
+        if (MASONRY_ENABLED) {
+            let grid = new Masonry(this.masonryGrid.current, {
+                itemSelector: '.grid-item',
+                // use element for option
+                columnWidth: '.grid-sizer',
+                percentPosition: true,
+                transitionDuration: 0,
+                initLayout: false
+            });
+            grid.on('layoutComplete', function() {
+                console.log("layoutComplete");
+                hideBodyPreloader();
+            });
+        }
+
+        history.listen((location, action) => {
+          let nextPage = this.props.init.state.page;
+          if (location.state && location.state.page !== this.state.page) {
+              nextPage = location.state.page;
+          }
+          this.setState({
+              loading: true,
+              page: nextPage
+          });
         });
-        grid.on('layoutComplete', function() {
-            console.log("layoutComplete");
-            hideBodyPreloader();
-        });
+        // const font = new FontFaceObserver('Fira Sans', {
+        //   style: 'normal',
+        //   weight: 400,
+        // });
+        // // Make sure font has been loaded before testimonial card rendering
+        // font.load().then(function () {
+        //     grid.layout();
+        // });
+
         // Pagination component controls fetch
+        this.setState({ loading: true, page: this.state.page });
         console.debug("componentDidMount");
     };
 
     onChangePage(page) {
         console.debug("onChangePage");
+        history.push({
+            pathname: history.location.pathname,
+            search: `?page=${page}`,
+            state: {page}
+        });
         this.setState({ loading: true, page: page });
     }
 
     componentDidUpdate = (prevProps, prevState) => {
         console.debug("componentDidUpdate");
-        if (prevState.items.length === 0 || prevState.page !== this.state.page) {
+        if (this.state.loading) {
             const payload = this.getRequestPayload(this.state);
             this.fetch(payload);
         } else {
-        console.log("call layout", this.state);
-            let grid = Masonry.data(this.masonryGrid.current);
-            grid.reloadItems();
-            grid.layout();
+            if (MASONRY_ENABLED) {
+                let grid = Masonry.data(this.masonryGrid.current);
+                grid.reloadItems();
+                grid.layout();
+            } else {
+                hideBodyPreloader();
+            }
         }
     };
 
     getRequestPayload(state) {
         let {page} = state;
-        return { page };
+        return { page, page_size: this.props.page_size };
     }
 
     fetch = (payload) => {
-        console.debug("fetch");
         this.serverRequest = $.ajax({
             type: "GET",
             url: this.props.entry_url,
@@ -118,11 +119,12 @@ class App extends React.Component {
                 loading: false,
                 items: data.results,
             });
+        }).fail(() => {
+            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
     };
 
     render() {
-        console.debug(`render page ${this.state.page}`);
         if (this.state.loading) {
             showBodyPreloader();
         }
@@ -139,7 +141,7 @@ class App extends React.Component {
                     )}
                     <div className="grid-sizer" />
                 </div>
-                <Pagination totalItems={this.props.total} currentPage={this.state.page} onChangePage={this.onChangePage} />
+                <Pagination totalItems={this.props.total} pageSize={this.props.page_size} currentPage={this.state.page} onChangePage={this.onChangePage} />
             </div>
         );
     }

@@ -6,46 +6,31 @@ class Pagination extends React.Component {
     static defaultProps = {
         showPrevious: false,
         showNext: false,
-        currentPage: 1,
-        pageSize: 10
     };
 
     constructor(props) {
         super(props);
-        this.state = {pager: {}};
+        const pager = Pagination.getPager(props.totalItems, props.currentPage, props.pageSize);
+        this.state = { ...pager };
     }
 
-    componentDidMount() {
-        this.setPage(this.props.currentPage);
-    };
-
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.pager.currentPage !== prevState.pager.currentPage) {
-            // call change page function in parent component
-            this.props.onChangePage(this.state.pager.currentPage);
-        }
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.currentPage !== nextProps.currentPage;
     }
 
     setPage(page) {
-        let { pageSize } = this.props;
-        let pager = this.state.pager;
+        let pager = this.state;
 
         if (page < 1 || page > pager.totalPages) {
             return;
         }
 
-        // get new pager object for specified page
-        pager = this.getPager(this.props.totalItems, page, pageSize);
-
-        if (pager.currentPage > pager.totalPages) {
-            pager.currentPage = pager.totalPages;
+        if (page !== this.props.currentPage) {
+            this.props.onChangePage(page);
         }
-
-        // update state
-        this.setState({ pager: pager });
     }
 
-    getPager(totalItems, currentPage, pageSize) {
+    static getPager(totalItems, currentPage, pageSize) {
         // default to first page
         currentPage = currentPage || 1;
 
@@ -61,7 +46,10 @@ class Pagination extends React.Component {
             startPage = 1;
             endPage = totalPages;
         } else {
-            if (currentPage + 4 >= totalPages) {
+            if (currentPage <= 6) {
+                startPage = 1;
+                endPage = 10;
+            } else if (currentPage + 4 >= totalPages) {
                 startPage = totalPages - 9;
                 endPage = totalPages;
             } else {
@@ -76,7 +64,7 @@ class Pagination extends React.Component {
         // return object with all pager properties required by the view
         return {
             totalItems: totalItems,
-            currentPage: currentPage,
+            // currentPage: currentPage,
             pageSize: pageSize,
             totalPages: totalPages,
             startPage: startPage,
@@ -86,32 +74,37 @@ class Pagination extends React.Component {
     }
 
     render() {
-        let pager = this.state.pager;
+        let pager = this.state;
+        let currentPage = this.props.currentPage;
+        if (currentPage > pager.totalPages) {
+            currentPage = pager.totalPages;
+        }
         // FIXME: move to willmount?
         if (!pager.pages || pager.pages.length <= 1) {
             // don't display pager if there is only 1 page
             return null;
         }
+        console.log("start pagination rendering", this.state);
 
         return (
             <ul className="pagination">
                 {
-                    pager.currentPage !== 1 ?
+                    currentPage !== 1 ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(1)}>В начало</button>
+                            <button className="page-link" onClick={() => this.setPage(1)}>В&nbsp;начало</button>
                         </li>
                     : ''
                 }
                 {
                     this.props.showPrevious ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(pager.currentPage - 1)}>Previous</button>
+                            <button className="page-link" onClick={() => this.setPage(currentPage - 1)}>Previous</button>
                         </li>
                     : ''
                 }
                 {
                     pager.pages.map((page, index) =>
-                        <li key={index} className={`page-item ${pager.currentPage === page ? 'active' : ''}`}>
+                        <li key={index} className={`page-item ${currentPage === page ? 'active' : ''}`}>
                             <button className="page-link" onClick={() => this.setPage(page)}>{page}</button>
                         </li>
                     )
@@ -119,14 +112,14 @@ class Pagination extends React.Component {
                 {
                     this.props.showNext ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(pager.currentPage + 1)}>Next</button>
+                            <button className="page-link" onClick={() => this.setPage(currentPage + 1)}>Next</button>
                         </li>
                     : ''
                 }
                 {
-                    pager.currentPage !== pager.totalPages ?
+                    currentPage !== pager.totalPages ?
                         <li className="page-item">
-                            <button className="page-link" onClick={() => this.setPage(pager.totalPages)}>В конец</button>
+                            <button className="page-link" onClick={() => this.setPage(pager.totalPages)}>В&nbsp;конец</button>
                         </li>
                     : ''
                 }
@@ -138,9 +131,9 @@ class Pagination extends React.Component {
 
 Pagination.propTypes = {
     onChangePage: PropTypes.func.isRequired,
+    currentPage: PropTypes.number,
     pageSize: PropTypes.number,
     totalItems: PropTypes.number,
-    currentPage: PropTypes.number,
 };
 
 export default Pagination;
