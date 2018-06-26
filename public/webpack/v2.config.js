@@ -36,6 +36,7 @@ const common = {
             'jquery',
             'popper.js',
             'fontfaceobserver',
+            'noty',
         ],
         main: PATHS.common,
     },
