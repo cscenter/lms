@@ -1,6 +1,4 @@
 ---
-aws_ec2_instance_tag: cscweb_new
-aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
 aws_ec2_user: ubuntu
 aws_ec2_root_user: root
 admin_email: webmaster@compscicenter.ru

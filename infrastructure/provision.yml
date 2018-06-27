@@ -9,6 +9,7 @@
   connection: local
   gather_facts: False
   vars:
+    aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     aws_ec2_region: eu-central-1
     aws_ec2_instance_type: t2.small
     aws_ec2_instance_volume_size: 20

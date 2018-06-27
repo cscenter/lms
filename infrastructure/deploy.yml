@@ -3,8 +3,6 @@
   hosts: "{{ aws_ec2_host }}"
   user: "{{ aws_ec2_user }}"
   vars:
-    aws_ec2_instance_tag: cscweb_new
-    aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     repo_url: git@github.com:cscenter/site.git
     aws_ec2_user: ubuntu
     app_environment: production
