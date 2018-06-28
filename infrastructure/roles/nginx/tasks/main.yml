@@ -9,6 +9,11 @@
     name: nginx
     state: present
 
+- name: Ensure nginx service is enabled
+  systemd:
+    name: nginx.service
+    enabled: yes
+
 - name: Create dir for nginx crypto stuff
   file:
     path: "{{ nginx_tls_path }}"

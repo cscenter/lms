@@ -16,7 +16,10 @@
     - "postgresql-{{ pg_version }}"
 
 - name: Ensure the PostgreSQL service is running
-  service: name=postgresql state=started enabled=yes
+  systemd:
+    name: postgresql.service
+    state: started
+    enabled: yes
 
 - name: Change postgres data storage | Drop cluster if exists
   become: yes

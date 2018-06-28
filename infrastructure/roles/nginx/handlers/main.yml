@@ -1,7 +1,7 @@
 ---
 
 - name: restart nginx
-  service: name=nginx state=restarted
+  service: name=nginx state=restarted enabled=yes
   become: yes
   become_method: sudo
 

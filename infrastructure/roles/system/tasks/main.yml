@@ -96,7 +96,7 @@
   tags:
     - uwsgi
 
-- name: Copy uWSGI emperror.ini config
+- name: Copy uWSGI emperor.ini config
   template:
     src: emperor.ini.jinja2
     dest: /etc/uwsgi/emperor.ini
@@ -107,6 +107,11 @@
   file: path=/etc/uwsgi/vassals state=directory
   tags:
     - uwsgi
+
+- name: Ensure uWSGI is enabled after reboot
+  systemd:
+    name: uwsgi.service
+    enabled: yes
 
 - name: Setup zsh for ec2 user
   include_tasks: zsh.yml

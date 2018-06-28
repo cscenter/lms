@@ -1,6 +1,12 @@
 EC2 provision based on dynamic inventory - [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
 
-TODO: Дать возможность складывать кастомный конфиг для nginx в app/templates? Silently fail если конфиг не был найден и обрабатывать уже общий шаблон.
+XXX:
+
+systemd не включает сервисы при ребуте. Текущая версия ansible 2.5.4. Пока придётся вручную
+
+```
+sudo systemctl enable <service_name>
+```
 
 FIXME:
 
