@@ -1,18 +1,5 @@
 EC2 provision based on dynamic inventory - [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
 
-XXX:
-
-systemd не включает сервисы при ребуте. Текущая версия ansible 2.5.4. Пока придётся вручную
-
-```
-sudo systemctl enable <service_name>
-```
-
-FIXME:
-
-backup_root?
-media_root?
-
 # TODO (critical):
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
