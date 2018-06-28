@@ -49,7 +49,6 @@ xlsxwriter==0.9.6
 # External services
 # Note: Need hand check after updating.
 webdavclient==1.0.5
-git+https://github.com/pacahon/slideshare.git
 
 # Monitoring
 raven==6.1.0

@@ -1,0 +1,16 @@
+[uwsgi]
+
+# try to autoload appropriate plugin if "unknown" option has been specified
+autoload = true
+
+# enable master process manager
+master = true
+
+# spawn 1 uWSGI emperor worker processes
+workers = 1
+
+# automatically kill workers on master's death
+no-orphans = true
+
+# vassals directory
+emperor = /etc/uwsgi/vassals

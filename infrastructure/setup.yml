@@ -30,6 +30,7 @@
         redis_bind: 127.0.0.1
   #      redis_group: "{{ site_user_group }}"
         redis_version: 4.0.10
+        redis_service_name: "redis"
         redis_verify_checksum: true
         redis_socket_path: "/var/run/redis/{{ redis_port }}.sock"
         redis_socket_perm: 770
@@ -42,68 +43,3 @@
       loop: "{{ available_sites }}"
       loop_control:
         loop_var: app_config
-
-    - name: Setup redis queue workers managed by supervisord
-      import_role:
-        name: supervisord
-      vars:
-        cscenter_user: cscenter
-        csclub_user: csclub
-        app_environment: production
-        apps_dir_name: cscsite
-        supervisor_version: 3.3.1
-        supervisor_programs_present:
-          rqworker_default:
-            command: "/home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/manage.py rqworker default --settings={{ cscenter_user }}.settings.{{ app_environment }} --pythonpath='/home/{{ cscenter_user }}/site/repo/{{ apps_dir_name }}' --worker-class='core.queue.CustomRQWorker'"
-            autostart: true
-            autorestart: true
-            startretries: 3
-            stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_default.log"
-            stdout_logfile_maxbytes: 50MB
-            redirect_stderr: true
-            user: "{{ cscenter_user }}"
-            numprocs: 1
-            process_name: "%(program_name)s-%(process_num)s"
-          rqworker_high:
-            command: "/home/{{ cscenter_user }}/site/env/bin/python /home/{{ cscenter_user }}/site/repo/manage.py rqworker high --settings={{ cscenter_user }}.settings.{{ app_environment }} --pythonpath='/home/{{ cscenter_user }}/site/repo/{{ apps_dir_name }}' --worker-class='core.queue.CustomRQWorker'"
-            autostart: true
-            autorestart: true
-            startretries: 3
-            stdout_logfile: "/home/{{ cscenter_user }}/site/logs/rqworker_high.log"
-            stdout_logfile_maxbytes: 50MB
-            redirect_stderr: true
-            user: "{{ cscenter_user }}"
-            numprocs: 1
-            process_name: "%(program_name)s-%(process_num)s"
-          rqworker_club:
-            command: "/home/{{ csclub_user }}/site/env/bin/python /home/{{ csclub_user }}/site/repo/manage.py rqworker club --settings={{ csclub_user }}.settings.{{ app_environment }} --pythonpath='/home/{{ csclub_user }}/site/repo/{{ apps_dir_name }}' --worker-class='core.queue.CustomRQWorker'"
-            autostart: true
-            autorestart: true
-            startretries: 3
-            stdout_logfile: "/home/{{ csclub_user }}/site/logs/rqworker_club.log"
-            stdout_logfile_maxbytes: 50MB
-            redirect_stderr: true
-            user: "{{ csclub_user }}"
-            numprocs: 1
-            process_name: "%(program_name)s-%(process_num)s"
-        supervisor_groups_present:
-          rqworkers:
-            programs:
-              - rqworker_default
-              - rqworker_high
-              - rqworker_club
-            priority: 10
-        supervisor_superlance: true
-        supervisor_events_email_to: "{{ admin_email }}"
-        supervisor_events:
-          # Restart process if it's allocate more than 100MB
-          - name: memmon
-            command: memmon -g rqworkers=300MB -m {{ supervisor_events_email_to }}
-            events: TICK_60
-          # Send email if all attempts to restart process are failed
-          # FIXME: disable, should test first
-  #        - name: fatalmailbatch
-  #          command: fatalmailbatch --toEmail {{ supervisor_events_email_to }}
-  #          events: PROCESS_STATE_FATAL
-  #          process_name: fatalmailbatch
-

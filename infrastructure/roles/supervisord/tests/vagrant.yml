@@ -1,9 +1,0 @@
-# test file for supervisor
----
-- hosts: all
-  remote_user: vagrant
-  become: true
-  pre_tasks:
-    - import_tasks: pre.yml
-  roles:
-    - ../../

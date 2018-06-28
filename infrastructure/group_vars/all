@@ -26,6 +26,11 @@ available_sites:
       - "compscicenter.ru"
       - "www.compscicenter.ru"
     certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
+    rq_workers:
+      - default
+      - high
+    processes_num: 5
+    log_to_file: no
   - site_user: "csclub"
     site_user_group: "shared"
     site_root: "/home/csclub/site/repo"
@@ -48,3 +53,7 @@ available_sites:
       - "www.compsciclub.ru"
       - "kzn.compsciclub.ru"
     certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
+    rq_workers:
+      - club
+    processes_num: 3
+    log_to_file: no

@@ -79,6 +79,8 @@
   tags:
     - venv
 
+- include_tasks: systemd.yml
+
 - name: Copy uwsgi config
   template:
     src: uwsgi.ini.jinja2

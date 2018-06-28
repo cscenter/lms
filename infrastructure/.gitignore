@@ -11,6 +11,7 @@ local/
 .pytest_cache/
 .coverage
 *-debug.log
+*-console.log
 coverage/
 
 deploy_ssh_key

@@ -12,15 +12,20 @@ env             = LANG=en_US.UTF-8
 # process-related settings
 master          = true
 enable-threads  = true
-processes       = 5
+processes       = {{ processes_num }}
 socket          = /tmp/uwsgi_{{ site_user }}.socket
-die-on-term     = true
 chmod-socket    = 666
+harakiri        = 20
+die-on-term     = true
 vacuum          = true
 stats           = /tmp/uwsgi_{{ site_user }}_stats.socket
 uid             = {{ site_user }}
 gid             = {{ site_user_group }}
+# Logging can be disabled here since we use Sentry as a main logging handler in the app
+{% if log_to_file -%}
 logto           = /home/{{ site_user }}/site/logs/uwsgi.log
+log-date        = true
 log-maxsize     = 5242880
+{% endif -%}
 wait-for-socket-timeout = 600
 unprivileged-binary-patch-arg = %(virtualenv)/bin/uwsgi --ini {{ site_user }}.ini

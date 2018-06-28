@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata coverage test_travis test clean cmd refresh deploy deploy_remote check_defined
+.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata coverage test_travis test clean cmd refresh sync deploy check_defined
 
 run:
 	python manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
@@ -69,7 +69,7 @@ cmd:
 refresh:
 	touch $(PROJECT)/*wsgi.py
 
-deploy:
+sync:
 	$(call check_defined, app)
 	$(call check_defined, conf)
 	git pull
@@ -77,12 +77,10 @@ deploy:
 	python manage.py migrate --settings=$(app).settings.$(conf)
 	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore src --ignore *.map
 
-# Note: contains Mac specific commands
-deploy_remote:
-# it's not in git, sorry --> grunt build
+deploy:
 	$(call check_defined, app_user)
 	git push
-	cd infrastructure && ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "site_user=$(app_user)" -v
+	cd infrastructure && make deploy SITE_USER=$(app_user)
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.

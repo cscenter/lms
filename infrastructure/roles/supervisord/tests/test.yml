@@ -1,9 +1,0 @@
-# test file for supervisor
----
-- hosts: localhost
-  connection: local
-  become: true
-  pre_tasks:
-    - import_tasks: pre.yml
-  roles:
-    - ../../
