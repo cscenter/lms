@@ -29,7 +29,7 @@ export function showNotification(msg, options) {
 }
 
 export function showErrorNotification(msg) {
-    showNotification(msg, {type:"error", timeout: false});
+    showNotification(msg, {type: "error", timeout: false});
 }
 
 export function showBodyPreloader() {

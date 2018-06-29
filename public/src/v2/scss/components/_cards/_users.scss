@@ -32,15 +32,16 @@
     width: 190px;
   }
 
-  img {
-    max-width: 100%;
-    height: auto;
-  }
 }
 
 .user-card__photo {
   position: relative;
   margin: 0 auto 5px;
+
+  img {
+    height: auto;
+    max-width: 100%;
+  }
 }
 
 .achievements {

@@ -5,26 +5,27 @@ import _debounce from 'lodash-es/debounce';
 import $ from 'jquery';
 
 import FormSelect from 'components/FormSelect';
+import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
-import {
-    hideBodyPreloader,
-    showBodyPreloader,
-    showErrorNotification
-} from "../utils";
 
 
 // TODO: replace with HOC `UserCardFilter`
-class Alumni extends React.Component {
+class App extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             "loading": true,
             "items": [],
-            ...props.init.state
         };
-        this.fetch = _debounce(this.fetch, 300);
+        this.fetch = _debounce(this._fetch, 300);
     }
+
+    handleSearchInputChange = (value) => {
+        this.setState({
+            query: value,
+        });
+    };
 
     handleYearChange = (year) => {
         this.setState({
@@ -45,11 +46,9 @@ class Alumni extends React.Component {
     };
 
     componentDidMount = () => {
-        const filterState = this.getFilterState(this.state);
-        console.log("filterState", filterState);
-        const newPayload = this.getRequestPayload(filterState);
-        console.log("newPayload", newPayload);
-        this.fetch(newPayload);
+        // Set initial state and fetch data
+        // TODO: move to constructor?
+        this.setState(this.props.init.state);
     };
 
     componentWillUnmount = function () {
@@ -57,76 +56,60 @@ class Alumni extends React.Component {
     };
 
     componentDidUpdate = (prevProps, prevState) => {
-        if (this.state.loading) {
+        if (prevState.items.length === 0) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);
-            this.fetch(newPayload);
+            this._fetch(newPayload);
         } else {
             forceCheck();
-            hideBodyPreloader();
         }
     };
 
     getFilterState(state) {
-        let {year, city} = state;
-        return {year, city};
+        let {year, city, query} = state;
+        return {year, city, query};
     }
 
     getRequestPayload(filterState) {
-        console.log(filterState);
-        Object.keys(filterState).map((k) => {
-            // Convert null and undefined to empty string
-            filterState[k] = !filterState[k] ? "" : filterState[k];
-        });
-        return filterState;
+        let {query, ...payload} = filterState;
+        return payload;
     }
 
-    fetch = (payload) => {
-        console.log("fetch", this.props, payload);
+    _fetch = (payload) => {
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entry_url,
-            dataType: "json",
-            data: payload
+            url: this.props.init.entry_url,
+            dataType: "json"
         }).done((result) => {
             this.setState({
                 loading: false,
                 items: result.data,
             });
-        }).fail(() => {
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
 
     };
 
     render() {
-        if (this.state.loading) {
-            showBodyPreloader();
-        }
         //TODO: prevent rerendering if query < 3 symbols
-        const {year, city, area} = this.state;
-        const {years, cities, areas} = this.props;
+        const {year, city, query, area} = this.state;
+        const {years, cities, areas} = this.props.init.options;
 
         let filteredItems = this.state.items.filter(function(item) {
             let cityCondition = (city !== null) ? item.city === city.value : true;
             let areaCondition = (area !== null) ? item.areas.includes(area.value) : true;
             let yearCondition = (year !== null) ? item.year === year.value : true;
-            return cityCondition && areaCondition && yearCondition;
+            return  cityCondition &&  areaCondition && yearCondition &&
+                    item.name.toLowerCase().search(query.toLowerCase()) !== -1;
         });
 
         return (
-            <Fragment>
-                <h1>Выпускники</h1>
+            <div className={this.state.loading ? "_loading" : ""}>
                 <div className="row mb-4">
                     <div className="col-lg-3">
-                        <FormSelect
-                            onChange={this.handleYearChange}
-                            value={year}
-                            name="year"
-                            isClearable={false}
-                            placeholder="Год выпуска"
-                            options={years}
-                            key="year"
+                        <SearchInput
+                            onChange={this.handleSearchInputChange}
+                            placeholder="Поиск"
+                            value={query}
                         />
                     </div>
                     <div className="col-lg-3">
@@ -142,6 +125,17 @@ class Alumni extends React.Component {
                     </div>
                     <div className="col-lg-3">
                         <FormSelect
+                            onChange={this.handleYearChange}
+                            value={year}
+                            name="year"
+                            isClearable={true}
+                            placeholder="Год выпуска"
+                            options={years}
+                            key="year"
+                        />
+                    </div>
+                    <div className="col-lg-3">
+                        <FormSelect
                             onChange={this.handleCityChange}
                             value={city}
                             name="city"
@@ -153,9 +147,9 @@ class Alumni extends React.Component {
                     </div>
                 </div>
                 <UserCardList users={filteredItems} />
-            </Fragment>
+            </div>
         );
     }
 }
 
-export default Alumni;
+export default App;

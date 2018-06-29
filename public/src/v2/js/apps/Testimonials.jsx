@@ -72,6 +72,10 @@ class App extends React.Component {
         console.debug("componentDidMount");
     };
 
+    componentWillUnmount() {
+        this.serverRequest.abort();
+    };
+
     onChangePage(page) {
         console.debug("onChangePage");
         history.push({
