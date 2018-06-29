@@ -192,7 +192,7 @@ class TestimonialsListV2View(TemplateView):
                 "props": {
                     "page_size": 16,
                     "entry_url": reverse("api:testimonials"),
-                    "total": TestimonialList.get_base_queryset().count(),
+                    "total": total,
                 }
             }
         }
@@ -387,22 +387,24 @@ class AlumniV2View(generic.TemplateView):
     template_name = "cscenter/alumni.html"
 
     def get_context_data(self, **kwargs):
+        # FIXME: А если нет ещё выпуска?
+        now_year = now().year + 1
+        show_year = self.kwargs.get("year", now_year - 1)
         app_data = {
-            "entry_url": reverse("api:alumni"),
             "state": {
-                # FIXME: default values?
+                "year": {"value": show_year, "label": show_year},
                 "area": self.kwargs.get("area", None),
                 "city": self.kwargs.get("city", None),
-                "query": self.kwargs.get("query", ""),
-                "year": self.kwargs.get("year", None)
             },
-            "options": {
+            "props": {
+                "entry_url": reverse("api:alumni"),
                 "cities": [{"label": str(v), "value": k} for k, v
                            in settings.CITIES.items()],
                 "areas": [{"label": a.name, "value": a.code} for a
                           in AreaOfStudy.objects.all()],
                 # TODO: retrieve last year?
-                "years": [{"label": y, "value": y} for y in range(2013, now().year)]
+                "years": [{"label": y, "value": y} for y
+                          in reversed(range(2013, now_year))]
             }
         }
         return {

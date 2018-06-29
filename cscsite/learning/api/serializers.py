@@ -44,6 +44,7 @@ class PhotoSerializerField(serializers.Field):
 class AlumniSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
+    sex = serializers.SerializerMethodField()
     photo = PhotoSerializerField("170x238")
     year = serializers.IntegerField(source="graduation_year")
     city = serializers.CharField(source="city_id")
@@ -52,10 +53,13 @@ class AlumniSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CSCUser
-        fields = ('id', 'name', 'year', 'city', 'photo', 'areas')
+        fields = ('id', 'name', 'sex', 'year', 'city', 'photo', 'areas')
 
     def get_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
+
+    def get_sex(self, obj: CSCUser):
+        return "m" if obj.gender == obj.GENDER_MALE else "f"
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
