@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.messages import get_messages, DEFAULT_LEVELS
 from django.urls import NoReverseMatch, reverse
 from django.utils.translation import pgettext_lazy
 from jinja2.ext import Extension
@@ -14,6 +15,7 @@ class Extensions(Extension):
         super().__init__(environment)
         environment.globals["csc_menu"] = csc_menu
         environment.globals["pagination"] = pagination
+        environment.globals["messages"] = messages
 
 
 def csc_menu(request, menu_name, root_id=False):
@@ -134,3 +136,22 @@ def _get_page_url(url_param_name, page_num, url_get_params):
     if len(url_params) > 0:
         url += '?' + url_params.urlencode()
     return url
+
+
+def messages(request):
+    messages_json = []
+    for m in get_messages(request):
+        if not m.extra_tags or "timeout" not in m.extra_tags:
+            timeout = 0
+        else:
+            timeout = 2000
+        if m.level == DEFAULT_LEVELS["WARNING"]:
+            message_level = 'warning'
+        elif m.level == DEFAULT_LEVELS["ERROR"]:
+            message_level = 'error'
+        elif m.level == DEFAULT_LEVELS["SUCCESS"]:
+            message_level = 'success'
+        else:
+            message_level = 'info'
+        messages_json.append({"text": m.message, "timeout": timeout, "type": message_level})
+    return messages_json
