@@ -22,7 +22,7 @@ class CurrentCampaignsMixin(object):
         self.stdout.write("Selected current campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
-            self.stdout.write(str(campaign))
+            self.stdout.write(f"  {campaign}")
         return campaigns
 
     def get_current_campaign_ids(self, city_code=None):
@@ -62,10 +62,8 @@ class ValidateTemplatesMixin(object):
                                        "not found".format(template_name))
 
     def get_template_name(self, campaign, type):
-        today = now()
-        year = today.year
         return self.TEMPLATE_REGEXP.format(
-            year=year,
+            year=campaign.year,
             city_code=campaign.city_id,
             type=type
         )
