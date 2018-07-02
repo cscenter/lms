@@ -1,0 +1,3 @@
+lvm_packages: [ 'lvm2' ]
+lvm_global_use_lvmetad: '1'
+lvm_volumes: []

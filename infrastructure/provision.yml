@@ -16,8 +16,9 @@
     aws_ec2_keypair: csc-main
     # Ubuntu 14.04 hvm ssd
     aws_ec2_image: ami-accff2b1
-    attach_second_volume: True
+    attach_second_volume: yes
     second_volume_size: 30
+    second_volume_device_name: "/dev/xvdf"
     security_groups:
       - name: ssh
         desc: the security group for ssh-available server
@@ -109,26 +110,12 @@
       local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
       loop: "{{ ec2.tagged_instances }}"
 
-    - name: Create new volume and attach it to EC2 instance
+    - name: Create new volume and attach it to the EC2 instance
       ec2_vol:
         region: "{{ aws_ec2_region }}"
         instance: "{{ ec2.tagged_instances[0].id }}"
         volume_size: "{{ second_volume_size }}"
         volume_type: gp2
-        device_name: /dev/xvdf
+        device_name: "{{ second_volume_device_name }}"
       register: ec2_vol
       when: attach_second_volume
-
-# FIXME: Так не сработает. И нужно выносить настройки provision (localhost?) в отдельный файл
-#- name: Configure new volume
-#  hosts: "{{ aws_ec2_host }}"
-#  user: "{{ aws_ec2_user }}"
-#  become: yes
-#  become_user: "{{ aws_ec2_root_user }}"
-#  include_role:
-#    name: lvm
-#  vars:
-#    attach_second_volume: no
-#  tags:
-#    - lvm
-#  when: attach_second_volume

@@ -1,6 +1,6 @@
 # https://gist.github.com/mrlesmithjr/1da992b648771b9afd50#file-confg_lvm-yml
 
-- name: Install LVM support
+- name: Install necessary packages for LVM support
   apt:
     name:  '{{ item }}'
     state: 'present'
@@ -23,40 +23,28 @@
     backrefs: True
     state:    'present'
 
-- name: Create PV / VG on /dev/xvdf
-  lvg: vg=vg0 pvs=/dev/xvdf
+- name: Create PV / VG on {{ item.block_device_name }}
+  lvg: vg={{ item.vg_name }} pvs="{{ item.block_device_name }}"
+  loop: "{{ lvm_volumes }}"
 
 - name: Creating new LVM logical volume
-  lvol: vg=vg0 lv=shared size=100%FREE
+  lvol: vg={{ item.vg_name }} lv={{ item.lv_name }} size=100%FREE
+  loop: "{{ lvm_volumes }}"
 
 - name: Create filesystem on data LV
-  filesystem: dev=/dev/vg0/shared fstype=ext4
+  filesystem: dev=/dev/{{ item.vg_name }}/{{ item.lv_name }} fstype={{ item.filesystem }}
+  loop: "{{ lvm_volumes }}"
 
 - name: Ensure data mountpoint exists
-  file: path=/shared state=directory owner=ubuntu group=ubuntu mode=0755
+  file: path={{ item.mount }} state=directory owner=ubuntu group=ubuntu mode=0755
+  loop: "{{ lvm_volumes }}"
 
 - name: Mount data LV
-  mount: name=/shared src=/dev/vg0/shared fstype=ext4
+  mount: name={{ item.mount }} src=/dev/{{ item.vg_name }}/{{ item.lv_name }} fstype={{ item.filesystem }}
          state=mounted opts="errors=remount-ro,noatime,barrier=0"
          dump=0 passno=2
+  loop: "{{ lvm_volumes }}"
 
-- name: Again ensure shared/ folder has right owner
-  file: path=/shared state=directory owner=ubuntu group=ubuntu mode=0755
-
-# - name: Configure devices/filter
-#   lineinfile:
-#     dest:        '/etc/lvm/lvm.conf'
-#     insertafter: '^devices\s+{$'
-#     regexp:      '\s+filter\s+=\s+\[\s+\"'
-#     line:        '    filter = [ "{{ lvm_devices_filter | join("\", \"") }}" ]'
-#     state:       'present'
-#   register: lvm_register_devices_filter
-
-# - name: Configure devices/global_filter
-#   lineinfile:
-#     dest:        '/etc/lvm/lvm.conf'
-#     insertafter: '^devices\s+{$'
-#     regexp:      '\s+global_filter\s+=\s+\['
-#     line:        '    global_filter = [ "{{ lvm_devices_global_filter | join("\", \"") }}" ]'
-#     state:       'present'
-#   register: lvm_register_devices_global_filter
+- name: Again ensure mounted folder has right owner
+  file: path={{ item.mount }} state=directory owner=ubuntu group=ubuntu mode=0755
+  loop: "{{ lvm_volumes }}"
