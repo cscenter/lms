@@ -21,7 +21,3 @@
       virtualenv: "/home/{{ app_user }}/site/env/"
     with_items:
       - cscbackup
-    notify: reload uwsgi
-
-  handlers:
-    - import_tasks: roles/app/handlers/main.yml

@@ -5,7 +5,7 @@
     name:  '{{ item }}'
     state: 'present'
     install_recommends: False
-  with_items: lvm_packages
+  with_items: "{{ lvm_packages }}"
 
 - name: Configure global/use_lvmetad
   lineinfile:
