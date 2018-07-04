@@ -181,6 +181,12 @@ class Applicant(TimeStampedModel):
         (VOLUNTEER, _("Applicant|Volunteer")),
         (THEY_REFUSED, _("He or she refused")),
     )
+    FINAL_STATUSES = {
+        ACCEPT,
+        ACCEPT_IF,
+        REJECTED_BY_INTERVIEW,
+        VOLUNTEER
+    }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
     STUDY_PROGRAM_SE = "se"
