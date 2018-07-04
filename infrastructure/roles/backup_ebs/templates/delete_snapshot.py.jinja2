@@ -1,0 +1,64 @@
+# Delete snapshots older than retention period
+import boto3
+from botocore.exceptions import ClientError
+
+from datetime import datetime, timedelta
+
+
+RETENTION_PERIOD_IN_DAYS = {{ retention_period_in_days }}
+
+
+def delete_snapshot(snapshot_id, region_name):
+    print(f"Deleting snapshot {snapshot_id}")
+    try:
+        ec2resource = boto3.resource('ec2', region_name=region_name)
+        snapshot = ec2resource.Snapshot(snapshot_id)
+        snapshot.delete()
+    except ClientError as e:
+        print(f"Caught exception: {e}")
+    return
+
+
+def lambda_handler(event, context):
+    now = datetime.utcnow()
+
+    # Create EC2 client
+    ec2 = boto3.client('ec2')
+
+    regions = ec2.describe_regions(RegionNames=[
+        {% for r in regions -%}
+            '{{ r }}'{% if not loop.last %},
+        {% endif -%}
+        {% endfor %}
+
+    ]).get('Regions', [])
+    for r in regions:
+        region = r['RegionName']
+        print(f"Checking region {region}")
+
+        # Connect to region
+        ec2 = boto3.client('ec2', region_name=region)
+
+        # Filtering by snapshot timestamp comparison is not supported
+        result = ec2.describe_snapshots(Filters=[
+            {
+                'Name': 'tag:{{ ebs_auto_snapshot_tag_name }}',
+                'Values': ['{{ ebs_auto_snapshot_tag_value }}']
+            }
+        ])
+
+        for snapshot in result['Snapshots']:
+            snapshot_id = snapshot['SnapshotId']
+            # Snapshot time should be in UTC
+            snapshot_time = snapshot['StartTime'].replace(tzinfo=None)
+            print(f"Checking snapshot {snapshot_id} created on {snapshot_time} UTC")
+
+            # Subtract snapshot time from now returns a timedelta
+            # Check if the timedelta is greater than retention days
+            if (now - snapshot_time) > timedelta(days=RETENTION_PERIOD_IN_DAYS):
+                print(f"Snapshot is older than configured "
+                      f"retention of {RETENTION_PERIOD_IN_DAYS} days")
+                delete_snapshot(snapshot['SnapshotId'], region)
+            else:
+                print(f"Snapshot is newer than configured retention "
+                      f"of {RETENTION_PERIOD_IN_DAYS} days so we keep it")

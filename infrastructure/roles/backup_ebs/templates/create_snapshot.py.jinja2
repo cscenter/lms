@@ -1,0 +1,62 @@
+# Backup all in-use volumes in target available regions
+
+import boto3
+
+
+def lambda_handler(event, context):
+    ec2 = boto3.client('ec2')
+
+    regions = ec2.describe_regions(RegionNames=[
+        {% for r in regions -%}
+            '{{ r }}'{% if not loop.last %},
+        {% endif -%}
+        {% endfor %}
+
+    ]).get('Regions', [])
+    for r in regions:
+        print("Checking region %s " % r['RegionName'])
+        region = r['RegionName']
+
+        # Connect to region
+        ec2 = boto3.client('ec2', region_name=region)
+
+        # Get all in-use volumes
+        result = ec2.describe_volumes(
+            Filters=[
+                {
+                    'Name': 'status',
+                    'Values': ['in-use']
+                },
+                {
+                    'Name': 'tag:{{ ebs_auto_volume_tag_name }}',
+                    'Values': ['{{ ebs_auto_volume_tag_value }}']
+                }
+            ])
+
+        for volume in result['Volumes']:
+            print(f"Backing up {volume['VolumeId']} in {volume['AvailabilityZone']}")
+
+            # Create snapshot
+            result = ec2.create_snapshot(
+                VolumeId=volume['VolumeId'],
+                Description='Created by Lambda function `{{ item.lambda_function_name }}`')
+
+            # Get snapshot resource and attach tags to it
+            ec2resource = boto3.resource('ec2', region_name=region)
+            snapshot = ec2resource.Snapshot(result['SnapshotId'])
+            tags = [
+                {
+                    'Key': '{{ ebs_auto_snapshot_tag_name }}',
+                    'Value': '{{ ebs_auto_snapshot_tag_value }}'
+                }
+            ]
+            # Attach volume name to snapshot for easier identification
+            volume_name = None
+            if 'Tags' in volume:
+                for tag in volume['Tags']:
+                    if tag["Key"] == 'Name':
+                        volume_name = tag["Value"]
+                        break
+            if volume_name:
+                tags.append({'Key': 'Name', 'Value': volume_name})
+            snapshot.create_tags(Tags=tags)

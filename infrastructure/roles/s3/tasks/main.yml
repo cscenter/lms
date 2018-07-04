@@ -8,6 +8,7 @@
 
 - name: Create IAM users for center and club buckets
   iam:
+    # FIXME: Should be replaced with `role` type
     iam_type: user
     name: "{{ item }}_backups_user"
     state: present
@@ -22,7 +23,7 @@
   when: backup_users.changed
 
 - name: Сreate policies and place them in tmp directory
-  template: src=backup_policy.json.j2 dest=/tmp/{{ item.user_meta.created_user.user_name }}_policy.json
+  template: src=backup_policy.json.jinja dest=/tmp/{{ item.user_meta.created_user.user_name }}_policy.json
   when: backup_users.changed
   with_items: "{{backup_users.results}}"
 

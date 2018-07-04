@@ -9,6 +9,9 @@
   connection: local
   gather_facts: False
   vars:
+    # Remove if no backup volumes was created before (we are launching purely
+    # new instance or manually removed all backup volumes for prev version)
+#    aws_ec2_old_instance_tag: "cscweb_new"
     aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     aws_ec2_region: eu-central-1
     aws_ec2_instance_type: t2.small
@@ -110,12 +113,36 @@
       local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
       loop: "{{ ec2.tagged_instances }}"
 
-    - name: Create new volume and attach it to the EC2 instance
+    - name: Get info about any backup snapshot
+      ec2_snapshot_facts:
+        region: "{{ aws_ec2_region }}"
+        filters:
+          "tag:ForEC2TagName": "{{ aws_ec2_old_instance_tag }}"
+          "tag:EBSBackup": "Yes"
+          status: completed
+      register: snapshots_data
+      when: aws_ec2_old_instance_tag is defined and attach_second_volume
+
+    - name: Find newest backup snapshot
+      set_fact: newest_snapshot={{ snapshots_data.snapshots | sort(attribute='start_time') | last }}
+      when: aws_ec2_old_instance_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
+
+    - name: Create volume and attach it to the EC2 instance
       ec2_vol:
         region: "{{ aws_ec2_region }}"
+        # FIXME: not tested. The idea is to create volume from snapshot if it was created before. Otherwise create blank volume
+        snapshot: {% if newest_snapshot is defined and newest_snapshot.snapshot_id %}{{ newest_snapshot.snapshot_id }}{% else %}null{% endif %}
         instance: "{{ ec2.tagged_instances[0].id }}"
         volume_size: "{{ second_volume_size }}"
         volume_type: gp2
         device_name: "{{ second_volume_device_name }}"
+        tags:
+          ForEC2TagName: "{{ aws_ec2_instance_tag }}"
+          # TODO: Sync `EBSBackup` name (and value) with create_snapshot.py
+          EBSBackup: "Yes"
       register: ec2_vol
       when: attach_second_volume
+
+    - name: EBS volumes backup automation
+      include_role:
+        name: backup_ebs

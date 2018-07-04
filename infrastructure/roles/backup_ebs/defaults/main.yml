@@ -1,0 +1,30 @@
+---
+# Create lambda functions and CloudWatch rules in region
+aws_ec2_region: eu-central-1
+# Take care about volume backup only in regions below
+# https://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
+regions:
+  - 'eu-central-1'
+  - 'eu-west-1'
+  - 'us-east-1'
+iam_role_name: EBSBackup
+# Look for in-use volumes with tag name/value as below
+ebs_auto_volume_tag_name: EBSBackup
+ebs_auto_volume_tag_value: "Yes"
+# Filter snapshots for deletion with tag name/value as below
+ebs_auto_snapshot_tag_name: EBSAutoBackup
+ebs_auto_snapshot_tag_value: "Yes"
+retention_period_in_days: 7
+lambda_functions:
+  - module_name: create_snapshot
+    zip_name: create_snapshot
+    lambda_function_name: ebsCreateSnapshot
+    description: 'Create snapshots of in-use volumes with {{ ebs_auto_volume_tag_name }}={{ ebs_auto_volume_tag_value }} tag presented'
+    schedule_description: "Try to create snapshots of in-use volumes every day at 00:00 UTC (check target description for details)"
+    schedule_expression: "cron(0 0 * * ? *)"
+  - module_name: delete_snapshot
+    zip_name: delete_snapshot
+    lambda_function_name: ebsDeleteSnapshot
+    description: 'Delete snapshots older than retention period ({{ retention_period_in_days }} days) with {{ ebs_auto_snapshot_tag_name }}={{ ebs_auto_snapshot_tag_value }} tag presented'
+    schedule_description: "Try to delete snapshots older than retention period every monday at 00:00 UTC (check target description for details)"
+    schedule_expression: "cron(0 0 ? * MON *)"

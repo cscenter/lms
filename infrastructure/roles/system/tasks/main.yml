@@ -74,12 +74,24 @@
       version: "5.5.0"
     - name: virtualenv
       version: "16.0.0"
-    - name: psycopg2 # (used to make sure db user exists)
-      version: "2.7.5"
     - name: uwsgi
       version: "2.0.17"
     - name: uwsgitop
       version: "0.10"
+
+- name: install pip for managing ansible python dependencies (if 2.x interpreter is used by ansible)
+  easy_install:
+    name: pip
+    state: latest
+
+- name: install ansible python dependencies
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    executable: pip
+  with_items:
+    - name: psycopg2 # (used to make sure db user exists)
+      version: "2.7.5"
 
 - name: Create uwsgi config dir
   file:

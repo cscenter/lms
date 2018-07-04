@@ -1,0 +1,84 @@
+---
+- name: Create IAM role for EBS backup automation
+  iam_role:
+    name: "{{ iam_role_name }}"
+    description: "Allows to manage site backup volume snapshots"
+    state: present
+    # Trust policies are resource-based policies that are attached to a role that define which principals can assume the role.
+    assume_role_policy_document: "{{ lookup('file','policies/trust_policy.json') }}"
+  register: ebs_backup_role
+
+- name: Assign inline policy to the "{{ iam_role_name }}" role
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ iam_role_name }}"
+    policy_name: EBSBackupInlinePolicy
+    state: present
+    policy_json: "{{ lookup('file','policies/inline_policy.json') }}"
+
+- name: Prepare python module {{ item.module_name}} for zip archive
+  local_action:
+    module: template
+    src: "{{ item.module_name }}.py.jinja2"
+    dest: roles/{{ role_name }}/files/runtime/{{ item.module_name }}.py
+  run_once: yes
+  loop: "{{ lambda_functions }}"
+
+- name: Create zip archives for each lambda function
+  local_action:
+    module: archive
+    path:
+    - roles/{{ role_name }}/files/runtime/{{ item.module_name }}.py
+    dest: roles/{{ role_name }}/files/runtime/{{ item.zip_name }}.zip
+    format: zip
+  loop: "{{ lambda_functions }}"
+
+- name: Create snapshots handler functions in Lambda
+  lambda:
+    region: "{{ aws_ec2_region }}"
+    name: "{{ props.lambda_function_name }}"
+    description: "{{ props.description }}"
+    state: present
+    zip_file: roles/{{ role_name }}/files/runtime/{{ props.zip_name }}.zip
+    runtime: 'python3.6'
+    role: "{{ ebs_backup_role.iam_role.arn }}"
+    handler: '{{ props.module_name }}.lambda_handler'
+    timeout: 60
+    tags: {}
+  register: lambda_functions_data
+  loop: "{{ lambda_functions }}"
+  loop_control:
+    loop_var: props
+
+- debug: var=lambda_functions_data
+
+- name: Delete CloudWatch log groups for lambda functions if present
+  cloudwatchlogs_log_group:
+    state: absent
+    log_group_name: /aws/lambda/{{ function_data.configuration.function_name }}
+  loop: "{{ lambda_functions_data.results }}"
+  loop_control:
+    loop_var: function_data
+
+- name: Create log groups and specify retention period for CloudWatch events
+  cloudwatchlogs_log_group:
+    state: present
+    log_group_name: /aws/lambda/{{ function_data.configuration.function_name }}
+    # See valid values for retention in module docs
+    retention: 14
+  loop: "{{ lambda_functions_data.results }}"
+  loop_control:
+    loop_var: function_data
+
+- name: Schedule events for creating/deleting backups
+  cloudwatchevent_rule:
+    region: "{{ aws_ec2_region }}"
+    name: "{{ function_data.configuration.function_name }}LambdaCronTask"
+    schedule_expression: "{{ function_data.props.schedule_expression }}"
+    description: "{{ function_data.props.schedule_description }}"
+    targets:
+      - id: "{{ function_data.configuration.function_name }}LambdaTargetId"
+        arn: "{{ function_data.configuration.function_arn }}"
+  loop: "{{ lambda_functions_data.results }}"
+  loop_control:
+    loop_var: function_data
