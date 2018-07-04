@@ -846,12 +846,23 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
 
         formset.forms.sort(key=cpm_interview_best_score, reverse=True)
         stats = Counter()
+        received_statuses = {
+            Applicant.ACCEPT,
+            Applicant.ACCEPT_IF,
+            Applicant.VOLUNTEER
+        }
+        received = 0
         for form in formset.forms:
             # Select the highest interview score to sort by
             applicant = form.instance
             stats.update((applicant.status,))
+            if applicant.status in received_statuses:
+                received += 1
+
         stats = [(Applicant.get_name_by_status_code(s), cnt) for
                  s, cnt in stats.items()]
+        if received:
+            stats.append(("Планируем принять всего", received))
         context = {
             "filter": filter,
             "formset": formset,
