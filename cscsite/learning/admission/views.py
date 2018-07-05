@@ -60,6 +60,7 @@ from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
     calculate_time
 from learning.settings import DATE_FORMAT_RU
+from learning.utils import now_local
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from learning.views import get_user_city_code
 from tasks.models import Task
@@ -567,20 +568,24 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             current = list(Campaign.objects.filter(current=True)
                            .only("pk", "city_id"))
             try:
-                c = next(c.pk for c in current if c.city_id == user.city_id)
+                current_campaign = next(c for c in current
+                                        if c.city_id == user.city_id)
             except StopIteration:
                 # We didn't find active campaign for user city. Try to get
                 # any current campaign or show all if no active at all.
-                c = next((c.pk for c in current), "")
-            if not c:
+                current_campaign = next((c for c in current), None)
+            if not current_campaign:
                 messages.error(self.request, "Нет активных кампаний по набору.")
+                today_local = timezone.now()  # stub
+            else:
+                today_local = now_local(current_campaign.get_city_timezone())
             # Duplicate initial values from filterset
             statuses = "&".join(f"status={s}" for s in
                                 [Interview.COMPLETED, Interview.APPROVED])
-            date = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
+            date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
             url = "{}?campaign={}&{statuses}&date_from={date_from}&date_to={date_to}".format(
-                reverse("admission:interviews"),
-                c, statuses=statuses, date_from=date, date_to=date)
+                reverse("admission:interviews"), current_campaign.pk,
+                statuses=statuses, date_from=date, date_to=date)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -604,10 +609,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # TODO: collect stats for curators here?
-        context["today"] = self.object_list.filter(
-            date__date=timezone.now(),
-            status=Interview.APPROVED).count()
         context["filter"] = self.filterset
         # Choose results list title for selected campaign
         context["results_title"] = _("Current campaign")
