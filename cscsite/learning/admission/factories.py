@@ -170,7 +170,6 @@ class InterviewInvitationFactory(factory.DjangoModelFactory):
 
     applicant = factory.SubFactory(ApplicantFactory)
     interview = factory.SubFactory(InterviewFactory)
-    stream = factory.SubFactory(InterviewStreamFactory)
-    date = FuzzyDate(datetime.date(2011, 1, 1))
-    expired_at = FuzzyDateTime(datetime.datetime(2017, 1, 1, 13, 0, 0,
-                                                 tzinfo=pytz.UTC))
+    expired_at = factory.Faker('date_time_between',
+                               start_date="now", end_date="+30d",
+                               tzinfo=timezone.utc)

@@ -9,31 +9,16 @@
 
 {% block title %} Анкета {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
-{% block body_attrs %} class="gray admission-applicant-page" data-init-sections="applicant"{% endblock body_attrs %}
+{% block body_attrs %} class="gray admission-applicant-page" data-init-sections="applicant_detail"{% endblock body_attrs %}
 
 
 {% block stylesheets %}
     <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
 {% endblock stylesheets %}
 
 {% block javascripts %}
-    {% render_bundle 'forms' 'js' %}
     {% render_bundle 'admission' 'js' %}
-    {# TODO: move to admission.js? #}
-    <script type="text/javascript">
-        $(function () {
-            // TODO: Maybe I should include this code for all tabs on  site? But what if more than 1 tab holder on a page?
-            var hash = window.location.hash;
-            hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-
-            $('.nav-tabs a').click(function (e) {
-                $(this).tab('show');
-                var scrollmem = $('body').scrollTop() || $('html').scrollTop();
-                $('html,body').scrollTop(scrollmem);
-            });
-        });
-
-    </script>
 {% endblock javascripts %}
 
 {% block content %}

@@ -6,6 +6,7 @@ import re
 import uuid
 from collections import Counter
 from functools import wraps
+from itertools import groupby
 
 from django.apps import apps
 from django.conf import settings
@@ -54,7 +55,8 @@ from learning.admission.forms import InterviewCommentForm, \
     ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
     ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from learning.admission.models import Interview, Comment, Contest, Test, Exam, \
-    Applicant, Campaign, InterviewAssignment, InterviewSlot, InterviewInvitation
+    Applicant, Campaign, InterviewAssignment, InterviewSlot, \
+    InterviewInvitation, InterviewStream
 from learning.admission.serializers import InterviewSlotSerializer
 from learning.admission.services import create_invitation
 from learning.admission.utils import generate_interview_reminder, \
@@ -490,7 +492,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             with transaction.atomic():
                 sid = transaction.savepoint()
                 interview = self.object = form.save()
-                slot_has_taken = InterviewSlot.objects.take(slot, interview)
+                slot_has_taken = InterviewSlot.objects.lock(slot, interview)
                 generate_interview_reminder(interview, slot)
                 if not slot_has_taken:
                     transaction.savepoint_rollback(sid)
@@ -513,9 +515,9 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             return self.form_invalid(stream_form)
 
     def create_invitation(self, applicant, stream_form):
-        stream = stream_form.cleaned_data['stream']
+        streams = stream_form.cleaned_data['streams']
         try:
-            create_invitation(stream, applicant,
+            create_invitation(streams, applicant,
                               uri_builder=self.request.build_absolute_uri)
             messages.success(
                 self.request,
@@ -910,46 +912,67 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 class InterviewAppointmentView(generic.TemplateView):
     template_name = "admission/interview_appointment.html"
 
-    def dispatch(self, request, *args, **kwargs):
-        """Validate GET-parameters"""
+    def get_invitation(self):
         try:
-            date = datetime.datetime.strptime(self.kwargs['date'],
-                                              DATE_FORMAT_RU)
-            secret = uuid.UUID(self.kwargs['secret_code'], version=4)
-        except ValueError:
-            return HttpResponseBadRequest()
-        return super().dispatch(request, *args, **kwargs)
+            # FIXME: если кампания закончилась? тупо 404 или показывать страницу об окончании?
+            secret_code = uuid.UUID(self.kwargs['secret_code'], version=4)
+            return (InterviewInvitation.objects
+                    .select_related("applicant")
+                    .prefetch_related("streams")
+                    .get(secret_code=secret_code,
+                         # FIXME: инфу о годе из ссылки использовать?
+                         applicant__campaign__current=True))
+        except (ValueError, InterviewInvitation.DoesNotExist):
+            raise Http404
 
     def get_context_data(self, **kwargs):
         invitation = self.get_invitation()
-        timezone.activate(invitation.get_city_timezone())
         context = {
             "invitation": invitation,
-            "interview": None
+            "interview": None,
+            "slots": None
         }
-        time_diff = datetime.timedelta(minutes=30)
-        if hasattr(invitation.applicant, "interview"):
-            interview = invitation.applicant.interview
-            if invitation.stream.with_assignments:
-                interview.date -= time_diff
+        if invitation.is_accepted:
+            # No any locked slot if applicant interview was created manually
+            slot = (InterviewSlot.objects
+                    .filter(interview_id=invitation.interview_id,
+                            interview__applicant_id=invitation.applicant_id)
+                    .select_related("interview",
+                                    "stream",
+                                    "interview__applicant__campaign"))
+            slot = get_object_or_404(slot)
+            if slot.interview.applicant_id != invitation.applicant_id:
+                # Interview accepted by invitation could be reassigned
+                # to another applicant
+                # TODO: 404 or show relevant error?
+                raise Http404
+            interview = slot.interview
+            if interview.slot.stream.with_assignments:
+                interview.date -= InterviewStream.WITH_ASSIGNMENTS_TIMEDELTA
             context["interview"] = interview
         elif not invitation.is_expired:
-            slots = invitation.stream.slots.all()
-            if invitation.stream.with_assignments:
-                for slot in slots:
+            streams = [s.id for s in invitation.streams.all()]
+            slots = (InterviewSlot.objects
+                     .filter(stream_id__in=streams)
+                     .select_related("stream")
+                     .order_by("stream__date", "start_at"))
+            time_diff = InterviewStream.WITH_ASSIGNMENTS_TIMEDELTA
+            any_slot_is_empty = False
+            for slot in slots:
+                if slot.is_empty:
+                    any_slot_is_empty = True
+                if slot.stream.with_assignments:
                     slot.start_at = calculate_time(slot.start_at, time_diff)
-            context["slots"] = slots
-        # FIXME: What if slots are all busy? Is it possible?
+            slots = groupby(slots, key=lambda s: s.stream.date)
+            grouped_slots = []
+            for stream_date, g in slots:
+                grouped_slots.append((stream_date, list(g)))
+            context["slots"] = grouped_slots
+            context["show_dates"] = len(grouped_slots) > 1
+            if not any_slot_is_empty:
+                # TODO: Do something bad
+                pass
         return context
-
-    def get_invitation(self):
-        date = datetime.datetime.strptime(self.kwargs['date'],
-                                          DATE_FORMAT_RU)
-        return get_object_or_404(
-            InterviewInvitation.objects
-                .select_related("stream", "stream__venue", "applicant")
-                .filter(date=date,
-                        secret_code=self.kwargs['secret_code']))
 
     def post(self, request, *args, **kwargs):
         invitation = self.get_invitation()
@@ -957,24 +980,23 @@ class InterviewAppointmentView(generic.TemplateView):
             messages.error(self.request, "Вы забыли указать время",
                            extra_tags="timeout")
             return HttpResponseRedirect(invitation.get_absolute_url())
-        # Can't edit through admin interface
-        # TODO: Do I really need to store date in invitation model?
-        assert invitation.date == invitation.stream.date
         slot_id = int(request.POST['time'])
-        slot = get_object_or_404(
-            InterviewSlot.objects
-                .filter(pk=slot_id,
-                        # Additional check that slot consistent
-                        # with invitation stream
-                        stream_id=invitation.stream_id))
-        data = InterviewForm.build_data(invitation.applicant, slot)
-        form = InterviewForm(data=data)
+        slot = get_object_or_404(InterviewSlot.objects.filter(pk=slot_id))
+        # Check that slot is consistent with one of invitation streams
+        if slot.stream_id not in [s.id for s in invitation.streams.all()]:
+            return HttpResponseBadRequest()
+        interview_data = InterviewForm.build_data(invitation.applicant, slot)
+        form = InterviewForm(data=interview_data)
         if form.is_valid():
             with transaction.atomic():
                 sid = transaction.savepoint()
                 interview = form.save()
-                slot_has_taken = InterviewSlot.objects.take(slot, interview)
+                slot_has_taken = InterviewSlot.objects.lock(slot, interview)
                 generate_interview_reminder(interview, slot)
+                # Mark invitation as accepted
+                (InterviewInvitation.objects
+                 .filter(pk=invitation.pk)
+                 .update(interview_id=interview.id))
                 if not slot_has_taken:
                     transaction.savepoint_rollback(sid)
                     messages.error(
@@ -984,23 +1006,28 @@ class InterviewAppointmentView(generic.TemplateView):
                 else:
                     transaction.savepoint_commit(sid)
             return HttpResponseRedirect(invitation.get_absolute_url())
+        else:
+            print(form.errors)
         return HttpResponseBadRequest()
 
 
 class InterviewSlots(APIView):
     """
-    Returns interview slots for requested venue and date.
+    Returns all slots for requested interview streams
     """
     http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
 
     def get(self, request, format=None):
         slots = []
-        if "stream" in request.GET:
+        if "streams[]" in request.GET:
             try:
-                stream = int(self.request.GET["stream"])
+                streams = [int(v) for v in self.request.GET.getlist("streams[]")]
             except ValueError:
                 raise ParseError()
-            slots = InterviewSlot.objects.filter(stream_id=stream)
+            slots = (InterviewSlot.objects
+                     .filter(stream_id__in=streams)
+                     .select_related("stream")
+                     .order_by("stream__date", "start_at"))
         serializer = InterviewSlotSerializer(slots, many=True)
         return Response(serializer.data)

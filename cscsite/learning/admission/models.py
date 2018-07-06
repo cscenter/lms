@@ -703,6 +703,7 @@ class Interview(TimeStampedModel):
 
     @property
     def city_aware_field_name(self):
+        # TODO: store venue in this model?
         return self.__class__.applicant.field.name
 
     def clean(self):
@@ -787,6 +788,10 @@ class Comment(TimeStampedModel):
 
 
 class InterviewStream(TimeStampedModel):
+    # Extract this value from interview datetime before sending notification
+    # to applicant
+    WITH_ASSIGNMENTS_TIMEDELTA = datetime.timedelta(minutes=30)
+
     date = models.DateField(_("Interview day"))
     start_at = models.TimeField(_("Period start"))
     end_at = models.TimeField(_("Period end"))
@@ -857,7 +862,7 @@ class InterviewStream(TimeStampedModel):
 
 
 class InterviewSlotQuerySet(query.QuerySet):
-    def take(self, slot, interview):
+    def lock(self, slot, interview):
         """Try to fill interview slot in a CAS manner"""
         return (self.filter(pk=slot.pk,
                             interview_id__isnull=True)
@@ -890,13 +895,17 @@ class InterviewSlot(TimeStampedModel):
     def __str__(self):
         return time_format(self.start_at)
 
+    @property
+    def is_empty(self):
+        return not bool(self.interview_id)
+
 
 class InterviewInvitationQuerySet(query.QuerySet):
     def for_applicant(self, applicant):
         """Returns last active invitation for requested user"""
         today = timezone.now()
-        return (self.filter(Q(expired_at__gt=today) | Q(expired_at__isnull=True,
-                                                        date__gte=today.date()))
+        return (self.filter(Q(expired_at__gt=today) |
+                            Q(expired_at__isnull=True))
                     .filter(applicant=applicant)
                 .order_by("-pk")
                 .first())
@@ -910,17 +919,18 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interview_invitations")
-    stream = models.ForeignKey(
+    streams = models.ManyToManyField(
         InterviewStream,
-        verbose_name=_("Interview stream"),
-        on_delete=models.PROTECT,
+        verbose_name=_("Interview streams"),
         related_name="interview_invitations")
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
         default=uuid.uuid4)
-    expired_at = models.DateTimeField(_("Expired at"))
-    date = models.DateField(
-        _("Estimated interview day"))
+    expired_at = models.DateTimeField(
+        _("Expired at"),
+        # FIXME: get timezone from applicant
+        help_text=_("Time in UTC since information about city timezone "
+                    "stored in m2m relationship"))
     interview = models.ForeignKey(
         Interview,
         verbose_name=_("Interview"),
@@ -935,21 +945,11 @@ class InterviewInvitation(TimeStampedModel):
 
     objects = InterviewInvitationQuerySet.as_manager()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        # self.stream.venue.get_city_timezone()
-        return next_in_city_aware_mro.get_city_timezone()
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.stream.field.name
+    def __unicode__(self):
+        return str(self.applicant)
 
     def __str__(self):
-        return str(self.date)
+        return self.__unicode__()
 
     @property
     def is_expired(self):
@@ -961,28 +961,36 @@ class InterviewInvitation(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("admission:interview_appointment", kwargs={
-            "date": self.date.strftime(DATE_FORMAT_RU),
+            "year": self.applicant.campaign.year,
             "secret_code": str(self.secret_code).replace("-", "")
         })
 
-    def send_email(self, uri_builder=None):
+    def send_email(self, stream=None, uri_builder=None):
+        # TODO: Add data migration for required templates
+        # FIXME: class property?
+        template_name = "admission-interview-invitation-n-days"
         if uri_builder:
             secret_link = uri_builder(self.get_absolute_url())
         else:
             secret_link = "https://compscicenter.ru{}".format(
                 self.get_absolute_url())
         context = {
-            "SUBJECT_CITY": self.stream.venue.city.name,
-            "SHORT_DATE": date_format(self.stream.date, "d E"),
-            "OFFICE_TITLE": self.stream.venue.name,
-            "WITH_ASSIGNMENTS": self.stream.with_assignments,
             "SECRET_LINK": secret_link,
-            "DIRECTIONS": self.stream.venue.directions,
         }
+        if stream:
+            template_name = self.EMAIL_TEMPLATE
+            context.update({
+                "SUBJECT_CITY": stream.venue.city.name,
+                "SHORT_DATE": date_format(stream.date, "d E"),
+                "OFFICE_TITLE": stream.venue.name,
+                "WITH_ASSIGNMENTS": stream.with_assignments,
+                "DIRECTIONS": stream.venue.directions,
+            })
         return mail.send(
             [self.applicant.email],
-            sender='info@compscicenter.ru',
-            template=self.EMAIL_TEMPLATE,
+            # TODO: move to settings
+            sender='CS центр <info@compscicenter.ru>',
+            template=template_name,
             context=context,
             # Render on delivery, we have no really big amount of
             # emails to think about saving CPU time
