@@ -50,8 +50,6 @@
   loop_control:
     loop_var: props
 
-- debug: var=lambda_functions_data
-
 - name: Delete CloudWatch log groups for lambda functions if present
   cloudwatchlogs_log_group:
     state: absent
@@ -79,6 +77,19 @@
     targets:
       - id: "{{ function_data.configuration.function_name }}LambdaTargetId"
         arn: "{{ function_data.configuration.function_arn }}"
+  register: cloudwatch_events_rule_data
   loop: "{{ lambda_functions_data.results }}"
   loop_control:
     loop_var: function_data
+
+- name: Allow CloudWatch event trigger lambda function (add policy)
+  lambda_policy:
+    state: present
+    function_name: "{{ rule_data.function_data.configuration.function_name }}"
+    statement_id: "AWSEvents_{{ rule_data.rule.name }}_{{ rule_data.function_data.configuration.function_name }}LambdaTargetId"
+    action: lambda:InvokeFunction
+    principal: events.amazonaws.com
+    source_arn: "{{ rule_data.rule.arn }}"
+  loop: "{{ cloudwatch_events_rule_data.results }}"
+  loop_control:
+    loop_var: rule_data
