@@ -1,44 +1,57 @@
 import {restoreTabFromHash} from './utils';
+import {createNotification} from 'utils';
+import _groupBy from 'lodash-es/groupBy';
 
-function interviewFromStreamForm() {
-    const wrapper = $(".admission-applicant-page #create");
-    wrapper.find("select[name=interview_from_stream-stream]")
-        .change({wrapper: wrapper}, _interviewSlotsHandler);
-}
 
-function _interviewSlotsHandler(event) {
-    const wrapper = event.data.wrapper;
-    const streamSelect = wrapper.find("select[name=interview_from_stream-stream]");
-    const slotSelect = wrapper.find("select[name='interview_from_stream-slot']");
-    const streamID = parseInt(streamSelect.val());
-    if (!isNaN(streamID)) {
-        slotSelect
-        // FIXME: По-хорошему надо запоминать предыдущее успешное состояние. Если оно не меняется - избегать запросов. datepicker должен ещё какое-то событие посылать, если значение не валидно и он выставляет сам предыдущее...
-            .find('option')
-            .remove();
-        // TODO: Replace url with data from js_reverse?
+function streamSelectChanged(event) {
+    const streamSelect = event.target;
+    let streamValues = Array(...streamSelect.options).reduce((acc, option) => {
+        if (option.selected === true) {
+            acc.push(parseInt(option.value));
+        }
+        return acc;
+    }, []);
+    const slotSelect = $("select[name='interview_from_stream-slot']");
+    slotSelect.prop("disabled", "disabled");
+    slotSelect.empty();
+    if (streamValues.length > 0) {
         $.ajax({
             dataType: "json",
+            // TODO: Replace url with data from js_reverse?
             url: "/admission/interviews/slots/",
             data: {
-                stream: streamID,
+                streams: streamValues,
             },
-        }).done((data) => {
-            slotSelect.append($('<option>').text("---------").attr('value', ""));
-            data.forEach((slot) => {
-                let title;
-                if (slot.interview_id !== null) {
-                    title = `${slot.start_at} (занято)`;
-                } else {
-                    title = `${slot.start_at}`;
-                }
-                slotSelect.append($('<option>')
-                    .text(title)
-                    .attr('value', slot.pk)
-                    .prop('disabled', slot.interview_id !== null));
+        }).done((slots) => {
+            let options = document.createDocumentFragment();
+            let option = document.createElement('option');
+            option.text = "Отправить приглашение на email";
+            option.value = "";
+            options.appendChild(option);
+            let optGroups = _groupBy(slots, 'stream');
+            Object.keys(optGroups).forEach((group) => {
+                let optGroup = document.createElement('optgroup');
+                optGroup.label = group;
+                optGroups[group].forEach((slot) => {
+                    let option = document.createElement('option');
+                    let title;
+                    if (slot.interview_id !== null) {
+                        option.disabled = true;
+                        title = `${slot.start_at} (занято)`;
+                    } else {
+                        title = `${slot.start_at}`;
+                    }
+                    option.text = title;
+                    option.value = slot.id;
+                    optGroup.appendChild(option);
+                });
+                options.appendChild(optGroup);
             });
+            slotSelect.append(options);
+            slotSelect.prop("disabled", false);
+            slotSelect.selectpicker('refresh');
         }).fail(function (xhr) {
-            console.log(xhr);
+            createNotification(xhr, 'error');
         });
     }
 }
@@ -46,5 +59,22 @@ function _interviewSlotsHandler(event) {
 
 export default function initApplicantDetailSection() {
     restoreTabFromHash();
-    interviewFromStreamForm();
+
+    import('forms')
+        .then(_ => {
+            let streamSelect = $("select[name=interview_from_stream-streams]");
+            streamSelect.selectpicker({
+                actionsBox: true,
+                iconBase: 'fa',
+                tickIcon: 'fa-check'
+            });
+            streamSelect.on('loaded.bs.select', function (e) {
+                $(e.target).selectpicker('setStyle', 'btn-default');
+            });
+            streamSelect.on('changed.bs.select', streamSelectChanged);
+            let slotSelect = $("select[name=interview_from_stream-slot]");
+            slotSelect.selectpicker({
+                actionsBox: true,
+            });
+        });
 }
