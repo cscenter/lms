@@ -7,6 +7,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Field, Row, HTML
 from django import forms
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django_filters.conf import settings as filters_settings
 from django.urls import reverse
@@ -20,6 +21,7 @@ from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
 from learning.admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream, Campaign
+from learning.utils import now_local
 from users.models import CSCUser, GITHUB_ID_VALIDATOR
 
 COURSES = Choices(('', '', '--------')) + CSCUser.COURSES
@@ -410,42 +412,47 @@ class InterviewForm(forms.ModelForm):
 class InterviewFromStreamForm(forms.Form):
     prefix = "interview_from_stream"
 
-    stream = forms.ModelChoiceField(
+    streams = forms.ModelMultipleChoiceField(
         label=_("Interview stream"),
         queryset=InterviewStream.objects.get_queryset(),
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
         required=True)
 
     slot = forms.ModelChoiceField(
         label="Время собеседования",
         queryset=InterviewSlot.objects.select_related("stream").none(),
-        help_text="Если указать, то будет создано собеседование вместо "
-                  "отправки приглашения на почту.",
+        help_text="Выберите время для создания собеседования вместо отправки "
+                  "приглашения выбрать дату из доступных вариантов.",
         required=False)
 
     def clean(self):
         slot = self.cleaned_data.get("slot")
-        stream = self.cleaned_data.get('stream')
+        streams = self.cleaned_data.get('streams')
         if slot:
-            if not stream or slot.stream.pk != stream.pk:
+            if not streams or slot.stream.pk not in {s.pk for s in streams}:
                 raise ValidationError("Выбранный слот должен соответствовать "
                                       "выбранному потоку.")
-        elif not stream or not stream.slots.filter(interview__isnull=True).count():
-            raise ValidationError("Все слоты заняты.")
+        # FIXME: applicant.campaign_id должно совпасть с stream.campaign_id
+        elif streams:
+            empty_slots_qs = (InterviewSlot.objects
+                              .filter(interview__isnull=True,
+                                      stream_id__in=[s.pk for s in streams]))
+            if not empty_slots_qs.exists():
+                raise ValidationError("Все слоты заняты.")
         # TODO: Limit active invitations by slots
 
     def __init__(self, city_code, stream_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        stream_field = self.prefix + "-stream"
-        if 'data' in kwargs and kwargs['data'].get(stream_field):
-            stream_id = kwargs['data'][stream_field]
+        stream_field = self.prefix + "-streams"
+        if 'data' in kwargs and kwargs['data'].getlist(stream_field):
+            stream_ids = kwargs['data'].getlist(stream_field)
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
-                                            .filter(stream_id=stream_id))
-        # TODO: respect timezone
+                                            .filter(stream_id__in=stream_ids))
         # TODO: include current day, but restrict available slots?
-        self.fields['stream'].queryset = InterviewStream.objects.filter(
+        self.fields['streams'].queryset = InterviewStream.objects.filter(
             venue__city_id=city_code,
-            date__gt=now().date()).select_related("venue")
+            date__gt=now_local(city_code).date()).select_related("venue")
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(Submit('create', _('Send')),

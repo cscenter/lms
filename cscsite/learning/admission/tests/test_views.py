@@ -258,9 +258,14 @@ def test_invitation_slots(curator, client, settings):
                                     end_at=datetime.time(15, 0),
                                     duration=20,
                                     date=dt.date(),
-                                    with_assignments=False)
+                                    with_assignments=False,
+                                    campaign__current=True)
     assert stream.slots.count() == 3
-    invitation = InterviewInvitationFactory(expired_at=dt, stream=stream)
+    invitation = InterviewInvitationFactory(
+        expired_at=dt,
+        applicant__campaign=stream.campaign,
+        interview=None)
+    invitation.streams.add(stream)
     client.login(curator)
     response = client.get(invitation.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
@@ -289,7 +294,7 @@ def test_invitation_creation(curator, client, settings):
     assert response.status_code == 200
     assert len(response.context['form'].errors) > 0
     form_data = {
-        InterviewFromStreamForm.prefix + "-stream": stream_nsk.pk
+        InterviewFromStreamForm.prefix + "-streams": stream_nsk.pk
     }
     response = client.post(applicant.get_absolute_url(), form_data, follow=True)
     message = list(response.context['messages'])[0]
@@ -322,10 +327,10 @@ def test_interview_from_slot(curator, client, settings):
     interview = InterviewFactory()
     slot.interview_id = interview.pk
     slot.save()
-    # Try to create interview from busy slot
+    # Try to create interview for reserved slot
     client.login(curator)
     form_data = {
-        InterviewFromStreamForm.prefix + "-stream": stream_nsk.pk,
+        InterviewFromStreamForm.prefix + "-streams": stream_nsk.pk,
         InterviewFromStreamForm.prefix + "-slot": slot.pk
     }
     assert Interview.objects.count() == 1

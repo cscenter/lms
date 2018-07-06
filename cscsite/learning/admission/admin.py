@@ -154,6 +154,7 @@ class InterviewAdmin(admin.ModelAdmin):
     }
     list_display = ['get_date_local', 'applicant', 'status']
     list_filter = ['status', 'applicant__campaign']
+    raw_id_fields = ["applicant"]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
@@ -237,19 +238,21 @@ class InterviewStreamAdmin(admin.ModelAdmin):
             return ['start_at', 'end_at', 'duration', 'date']
 
 
+class InterviewStreamsInline(admin.TabularInline):
+    model = InterviewInvitation.streams.through
+
+    def has_add_permission(self, request):
+        return False
+
+
 class InterviewInvitationAdmin(admin.ModelAdmin):
-    form = CityAwareModelForm
-    formfield_overrides = {
-        models.DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
-        }
-    }
     model = InterviewInvitation
     list_select_related = ["applicant", "applicant__campaign__city"]
-    list_display = ['date', 'get_applicant', 'get_campaign_city', 'get_accepted']
-    raw_id_fields = ("interview", "applicant")
+    list_display = ['get_applicant', 'get_campaign_city', 'get_accepted']
+    raw_id_fields = ("applicant", "interview")
     readonly_fields = ("secret_code",)
+    # Is it possible to restrict streams values by applicant?
+    # inlines = [InterviewStreamsInline]
 
     @meta(_("Accepted"))
     def get_accepted(self, obj):
