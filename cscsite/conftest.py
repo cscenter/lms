@@ -115,7 +115,8 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
         template_names = [
             Interview.FEEDBACK_TEMPLATE,
             Interview.REMINDER_TEMPLATE,
-            InterviewInvitation.EMAIL_TEMPLATE
+            InterviewInvitation.ONE_STREAM_EMAIL_TEMPLATE,
+            "admission-interview-invitation-n-streams"
         ]
         for template_name in template_names:
             EmailTemplate.objects.update_or_create(
