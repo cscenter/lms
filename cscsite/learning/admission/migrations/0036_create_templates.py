@@ -6,7 +6,7 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    from post_office.models import EmailTemplate
+    EmailTemplate = apps.get_model("post_office", "EmailTemplate")
     template_name = "admission-interview-invitation-n-streams"
     if not EmailTemplate.objects.filter(name=template_name).exists():
         template = EmailTemplate(name=template_name)
@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('admission', '0035_auto_20180705_1532'),
+        ('post_office', '0006_attachment_mimetype'),
     ]
 
     operations = [
