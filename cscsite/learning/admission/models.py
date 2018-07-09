@@ -912,7 +912,7 @@ class InterviewInvitationQuerySet(query.QuerySet):
 
 
 class InterviewInvitation(TimeStampedModel):
-    EMAIL_TEMPLATE = "admission-interview-invitation"
+    ONE_STREAM_EMAIL_TEMPLATE = "admission-interview-invitation"
 
     applicant = models.ForeignKey(
         Applicant,
@@ -966,9 +966,8 @@ class InterviewInvitation(TimeStampedModel):
         })
 
     def send_email(self, stream=None, uri_builder=None):
-        # TODO: Add data migration for required templates
-        # FIXME: class property?
-        template_name = "admission-interview-invitation-n-days"
+        # XXX: Create data migration if you changed template name
+        template_name = "admission-interview-invitation-n-streams"
         if uri_builder:
             secret_link = uri_builder(self.get_absolute_url())
         else:
@@ -978,7 +977,7 @@ class InterviewInvitation(TimeStampedModel):
             "SECRET_LINK": secret_link,
         }
         if stream:
-            template_name = self.EMAIL_TEMPLATE
+            template_name = self.ONE_STREAM_EMAIL_TEMPLATE
             context.update({
                 "SUBJECT_CITY": stream.venue.city.name,
                 "SHORT_DATE": date_format(stream.date, "d E"),

@@ -413,7 +413,7 @@ class InterviewFromStreamForm(forms.Form):
     prefix = "interview_from_stream"
 
     streams = forms.ModelMultipleChoiceField(
-        label=_("Interview stream"),
+        label=_("Interview streams"),
         queryset=InterviewStream.objects.get_queryset(),
         widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
         required=True)
@@ -421,8 +421,7 @@ class InterviewFromStreamForm(forms.Form):
     slot = forms.ModelChoiceField(
         label="Время собеседования",
         queryset=InterviewSlot.objects.select_related("stream").none(),
-        help_text="Выберите время для создания собеседования вместо отправки "
-                  "приглашения выбрать дату из доступных вариантов.",
+        help_text="",
         required=False)
 
     def clean(self):
@@ -441,7 +440,7 @@ class InterviewFromStreamForm(forms.Form):
                 raise ValidationError("Все слоты заняты.")
         # TODO: Limit active invitations by slots
 
-    def __init__(self, city_code, stream_id=None, *args, **kwargs):
+    def __init__(self, city_code, *args, **kwargs):
         super().__init__(*args, **kwargs)
         stream_field = self.prefix + "-streams"
         if 'data' in kwargs and kwargs['data'].getlist(stream_field):
@@ -449,14 +448,24 @@ class InterviewFromStreamForm(forms.Form):
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id__in=stream_ids))
-        # TODO: include current day, but restrict available slots?
-        self.fields['streams'].queryset = InterviewStream.objects.filter(
-            venue__city_id=city_code,
-            date__gt=now_local(city_code).date()).select_related("venue")
+        today = now_local(city_code).date()
+        self.fields['streams'].queryset = (InterviewStream.objects
+                                           .filter(venue__city_id=city_code,
+                                                   date__gt=today)
+                                           .select_related("venue"))
         self.helper = FormHelper(self)
-        self.helper.layout.append(
-            FormActions(Submit('create', _('Send')),
-                        css_class="pull-right"))
+        self.helper.layout = Layout(
+            Div(
+                Div(
+                    Div('streams', css_class='col-xs-6'),
+                    css_class='row'
+                ),
+                Div(
+                    Div('slot', css_class='col-xs-6'),
+                    css_class='row'
+                ),
+                FormActions(Submit('create', _('Send')))
+            ))
 
 
 class InterviewAssignmentsForm(forms.ModelForm):

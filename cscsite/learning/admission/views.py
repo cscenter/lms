@@ -976,11 +976,16 @@ class InterviewAppointmentView(generic.TemplateView):
 
     def post(self, request, *args, **kwargs):
         invitation = self.get_invitation()
-        if "time" not in request.POST:
+        if invitation.is_accepted:
+            messages.error(self.request, "Приглашение уже принято",
+                           extra_tags="timeout")
+            return HttpResponseRedirect(invitation.get_absolute_url())
+        try:
+            slot_id = int(request.POST.get('time', ''))
+        except ValueError:
             messages.error(self.request, "Вы забыли указать время",
                            extra_tags="timeout")
             return HttpResponseRedirect(invitation.get_absolute_url())
-        slot_id = int(request.POST['time'])
         slot = get_object_or_404(InterviewSlot.objects.filter(pk=slot_id))
         # Check that slot is consistent with one of invitation streams
         if slot.stream_id not in [s.id for s in invitation.streams.all()]:
@@ -1006,8 +1011,6 @@ class InterviewAppointmentView(generic.TemplateView):
                 else:
                     transaction.savepoint_commit(sid)
             return HttpResponseRedirect(invitation.get_absolute_url())
-        else:
-            print(form.errors)
         return HttpResponseBadRequest()
 
 

@@ -248,43 +248,14 @@ def test_interview_comment_create(curator, client, settings):
 
 
 @pytest.mark.django_db
-def test_invitation_slots(curator, client, settings):
-    settings.LANGUAGE_CODE = 'ru'
-    admission_settings = apps.get_app_config("admission")
-    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
-    # Make sure invitation will be active
-    dt = timezone.now() + datetime.timedelta(hours=expired_after + 30)
-    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
-                                    end_at=datetime.time(15, 0),
-                                    duration=20,
-                                    date=dt.date(),
-                                    with_assignments=False,
-                                    campaign__current=True)
-    assert stream.slots.count() == 3
-    invitation = InterviewInvitationFactory(
-        expired_at=dt,
-        applicant__campaign=stream.campaign,
-        interview=None)
-    invitation.streams.add(stream)
-    client.login(curator)
-    response = client.get(invitation.get_absolute_url())
-    html = BeautifulSoup(response.content, "html.parser")
-    assert any("14:40" in s.text for s in
-               html.find_all('label', {"class": "btn"}))
-    # 30 min diff if stream with assignments
-    stream.with_assignments = True
-    stream.save()
-    response = client.get(invitation.get_absolute_url())
-    html = BeautifulSoup(response.content, "html.parser")
-    assert any("13:30" in s.text for s in
-               html.find_all('label', {"class": "btn"}))
-
-
-@pytest.mark.django_db
 def test_invitation_creation(curator, client, settings):
+    """Create invitation from single stream"""
     settings.LANGUAGE_CODE = 'ru'
     applicant = ApplicantFactory(campaign__city_id='nsk')
     tomorrow = now() + datetime.timedelta(days=1)
+    InterviewStreamFactory(date=tomorrow.date(),
+                           with_assignments=True,
+                           venue__city_id='nsk')
     stream_nsk = InterviewStreamFactory(date=tomorrow.date(),
                                         with_assignments=False,
                                         venue__city_id='nsk')
@@ -301,14 +272,14 @@ def test_invitation_creation(curator, client, settings):
     assert 'success' in message.tags
     assert Email.objects.count() == 1
     invitation_qs = (Email.objects
-                     .filter(template__name=InterviewInvitation.EMAIL_TEMPLATE))
+                     .filter(template__name=InterviewInvitation.ONE_STREAM_EMAIL_TEMPLATE))
     assert invitation_qs.count() == 1
     assert Interview.objects.count() == 0
     assert InterviewInvitation.objects.count() == 1
 
 
 @pytest.mark.django_db
-def test_interview_from_slot(curator, client, settings):
+def test_create_interview_from_slot(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
     admission_settings = apps.get_app_config("admission")
     expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
@@ -352,3 +323,80 @@ def test_interview_from_slot(curator, client, settings):
     assert interview.date.hour == 5  # UTC +7 for nsk
     assert interview.date_local().hour == slot.start_at.hour
     assert interview.date_local().minute == slot.start_at.minute
+
+
+@pytest.mark.django_db
+def test_invitation_slots(curator, client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    admission_settings = apps.get_app_config("admission")
+    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
+    # Make sure invitation will be active
+    dt = timezone.now() + datetime.timedelta(hours=expired_after + 30)
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
+                                    end_at=datetime.time(15, 0),
+                                    duration=20,
+                                    date=dt.date(),
+                                    with_assignments=False,
+                                    campaign__current=True)
+    assert stream.slots.count() == 3
+    invitation = InterviewInvitationFactory(
+        expired_at=dt,
+        applicant__campaign=stream.campaign,
+        interview=None)
+    invitation.streams.add(stream)
+    client.login(curator)
+    response = client.get(invitation.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any("14:40" in s.text for s in
+               html.find_all('label', {"class": "btn"}))
+    # 30 min diff if stream with assignments
+    stream.with_assignments = True
+    stream.save()
+    response = client.get(invitation.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any("13:30" in s.text for s in
+               html.find_all('label', {"class": "btn"}))
+
+
+@pytest.mark.django_db
+def test_create_interview_with_invitation_view(curator, client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    # Invitation have to be active
+    dt = timezone.now() + datetime.timedelta(days=3)
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
+                                    end_at=datetime.time(15, 0),
+                                    duration=20,
+                                    date=dt.date(),
+                                    with_assignments=False,
+                                    campaign__current=True,
+                                    interviewers=[InterviewerFactory()])
+    assert stream.slots.count() == 3
+    slot = stream.slots.first()
+    invitation = InterviewInvitationFactory(
+        expired_at=dt,
+        applicant__campaign=stream.campaign,
+        interview=None)
+    invitation.streams.add(stream)
+    client.login(curator)
+    form_data = {
+        "time": slot.pk
+    }
+    response = client.post(invitation.get_absolute_url(), form_data)
+    assert response.status_code == 302
+    assert Interview.objects.count() == 1
+    interview = Interview.objects.first()
+    invitation.refresh_from_db()
+    assert invitation.interview_id == interview.id
+    response = client.post(invitation.get_absolute_url(), form_data, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'error' in message.tags
+    # Try to lock another slot with this invitation
+    free_slot = None
+    for slot in stream.slots.all():
+        if slot.is_empty:
+            free_slot = slot
+            break
+    form_data = {"time": slot.pk}
+    response = client.post(invitation.get_absolute_url(), form_data, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'error' in message.tags
