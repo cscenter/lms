@@ -6,7 +6,7 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    EmailTemplate = apps.get_model("post_office", "EmailTemplate")
+    from post_office.models import EmailTemplate
     template_name = "admission-interview-invitation-n-streams"
     if not EmailTemplate.objects.filter(name=template_name).exists():
         template = EmailTemplate(name=template_name)
