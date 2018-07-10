@@ -62,17 +62,16 @@
   when: nginx_status.stat.exists
 
 - name: Configure certbot to auto-renew tls certificates
-  include_tasks: certbot.yml
+  include: certbot.yml
+  when: (nginx_status.stat.exists and enable_https)
   tags:
     - certbot
     - tls
-  when: nginx_status.stat.exists and enable_https
 
 - name: Ensure Nginx is started
   service: name=nginx state=started
   when: nginx_status.stat.exists
 
-# FIXME: restart doesn't work right now. Touch config or figure out what's wrong
 - name: Install app dependencies
   include_tasks: venv.yml
   notify: restart uwsgi
@@ -90,15 +89,27 @@
   tags:
     - uwsgi
 
-- name: Create media/ folder
+- name: Get stat about media root
+  stat:
+    path: "{{ media_root }}"
+  register: media_root_stat
+
+- name: Create media/ directory
   file:
     path: "{{ media_root }}"
     state: directory
     owner: "ubuntu"
     group: "{{ site_user_group }}"
     mode: 0775
+  when: not media_root_stat.stat.exists
 
-- name: Create tmp folder for django-dbbackup
+- name: Restore file and dir owners if "{{ media_root }}" were exist before
+  shell: "chown -R {{ site_user }}:{{ site_user_group }} {{ media_root }}"
+  become: yes
+  run_once: yes
+  when: media_root_stat.stat.exists
+
+- name: Create tmp directory for django-dbbackup
   file:
     path: "{{ backup_root }}"
     state: directory

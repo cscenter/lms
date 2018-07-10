@@ -1,9 +1,4 @@
 ---
-# heavily inspired by:
-# https://github.com/tgerla/ansible-aws-examples
-# http://answersforaws.com/episodes/2-ansible-and-aws/
-# http://halberom.co.uk/setting-up-a-blog-environment-on-aws.html
-
 - name: provision EC2 instance
   hosts: localhost
   connection: local
@@ -11,14 +6,14 @@
   vars:
     # Remove if no backup volumes was created before (we are launching purely
     # new instance or manually removed all backup volumes for prev version)
-#    aws_ec2_old_instance_tag: "cscweb_new"
+    aws_ec2_old_instance_tag: "cscweb_new"
     aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     aws_ec2_region: eu-central-1
     aws_ec2_instance_type: t2.small
     aws_ec2_instance_volume_size: 20
-    aws_ec2_keypair: csc-main
-    # Ubuntu 14.04 hvm ssd
-    aws_ec2_image: ami-accff2b1
+    aws_ec2_keypair: csc
+    # Ubuntu 16.04 hvm ssd
+    aws_ec2_image: ami-c7e0c82c
     attach_second_volume: yes
     second_volume_size: 30
     second_volume_device_name: "/dev/xvdf"
@@ -127,11 +122,13 @@
       set_fact: newest_snapshot={{ snapshots_data.snapshots | sort(attribute='start_time') | last }}
       when: aws_ec2_old_instance_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
 
+    - set_fact: snapshot_id={{ newest_snapshot.snapshot_id }}
+      when: newest_snapshot is defined and newest_snapshot.snapshot_id
+
     - name: Create volume and attach it to the EC2 instance
       ec2_vol:
         region: "{{ aws_ec2_region }}"
-        # FIXME: not tested. The idea is to create volume from snapshot if it was created before. Otherwise create blank volume
-        snapshot: {% if newest_snapshot is defined and newest_snapshot.snapshot_id %}{{ newest_snapshot.snapshot_id }}{% else %}null{% endif %}
+        snapshot: "{{ snapshot_id|default(omit) }}"
         instance: "{{ ec2.tagged_instances[0].id }}"
         volume_size: "{{ second_volume_size }}"
         volume_type: gp2

@@ -7,6 +7,8 @@
     owner: "{{ site_user }}"
     group: "{{ site_user }}"
 
+- debug: msg="{{ enable_https }}"
+
 - name: Generate certificates
   command: >
     {{ certbot_script }} certonly --webroot

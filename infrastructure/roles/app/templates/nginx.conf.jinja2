@@ -71,7 +71,7 @@ server {
     # creates fullchain.pem containing all certificates and we use that
     # for ssl_certificate already.
     # ssl_trusted_certificate {{ certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
-    {% endif %}
+    {% endif -%}
     resolver 8.8.8.8;
 
     error_page 404 =404 @show_404;
@@ -119,7 +119,7 @@ server {
             set $frame_options 'SAMEORIGIN';
         }
         add_header X-Frame-Options $frame_options;
-        {% endif %}
+        {% endif -%}
         add_header Cache-Control no-cache,no-store,must-revalidate;
 
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack

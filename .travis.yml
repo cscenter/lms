@@ -3,17 +3,14 @@ language: python
 python:
   - "3.6"
 addons:
-  postgresql: '9.4'
+  postgresql: '9.6'
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python manage.py migrate --noinput --settings=cscenter.settings.test_travis
 env:
   - DJANGO=1.11.13
 install:
-  - pip install pep8
-  - pip install pylint
   - pip install -q Django==$DJANGO
-  - pip install -q psycopg2==2.7.3.2
   - pip install -r requirements/test.txt
 script:
   - py.test --ds=cscenter.settings.test_travis

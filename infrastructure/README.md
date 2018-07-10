@@ -141,9 +141,51 @@ rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscw
 ```
 * dump db
 pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql
+* To pass boolean value with extra vars to playbook use this form `-e "{'var_name':yes}"`
 
 
 
 
 # Update cronjobs
 ansible-playbook -i inventory/ec2.py setup.yml --tags="cronjobs"
+
+
+
+# Как пересоздать машину
+
+* TODO: Ставим заглушку на основном сайте, чтобы не было изменений с начала пересоздания машины.
+* Создаём свежий бэкап диска, на котором хранится папка media/ Добавляем ему необходимые теги. Смотри task `ec2_vol` в `provision.yml`
+* Делаем бэкап БД. Смотри команду `make dbbackup`
+
+Note: Кластер postgresql по идее лежит тоже на диске рядом с `media/` и можно было бы попробовать переиспользовать его, 
+но сейчас БД создаётся с нуля, этот сценарий универсальный и подходит для машин без дополнительного диска.
+
+FIXME: как поведёт себя playbook `setup.yml` для существующего кластера postgresql - не понятно. Пока надеемся, что очистит папку
+
+* Если есть предыдущий snapshot и зачем-то поменяли vg/lv name, то меняем их вручную, иначе просто затрём весь диск
+
+```
+sudo vgrename /dev/vg0 /dev/vg_data
+# Rename `shared` to `lv_media` in `vg_data` volume group
+sudo lvrename /dev/vg_data/shared /dev/vg_data/lv_media
+```
+
+* В файле `Makefile` указываем тег новой машины. В provision.yml выставляем переменную `aws_ec2_old_instance_tag` равной тегу предыдущей машины. 
+Тогда диск для media/ будет создан из сделанного ранее снепшота.
+
+TODO: из cronjobs удалить создание media/ ?
+
+* Запускаем `setup.yml` без установки ssl. Т.к. домен не связан с новой машиной мы не сможем подтвердить право владения.
+* Если всё ок, перенаправляем поток на новую машину и запускаем уже с установкой сертификатов
+
+FIXME: как избежать downtime'а тут? Копировать сертификаты со старой машины??
+
+
+```
+# Show all available LVM volumes
+sudo lvscan
+# Disk stats
+df -h
+```
+
+* Руками восстанавливаем дамп :<

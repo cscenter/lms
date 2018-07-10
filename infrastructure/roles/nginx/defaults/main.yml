@@ -1,4 +1,4 @@
 ---
 
-enable_https: no
+enable_https: yes
 nginx_tls_path: /etc/nginx/crypto

@@ -23,28 +23,32 @@
     backrefs: True
     state:    'present'
 
-- name: Create PV / VG on {{ item.block_device_name }}
-  lvg: vg={{ item.vg_name }} pvs="{{ item.block_device_name }}"
-  loop: "{{ lvm_volumes }}"
+- name: Get partition list
+  command: lsblk
+  register: lsblk_list
+  changed_when: false
 
-- name: Creating new LVM logical volume
-  lvol: vg={{ item.vg_name }} lv={{ item.lv_name }} size=100%FREE
+- name: Create lvm volume(s)
+  include: create-lvm.yml
   loop: "{{ lvm_volumes }}"
-
-- name: Create filesystem on data LV
-  filesystem: dev=/dev/{{ item.vg_name }}/{{ item.lv_name }} fstype={{ item.filesystem }}
-  loop: "{{ lvm_volumes }}"
-
-- name: Ensure data mountpoint exists
-  file: path={{ item.mount }} state=directory owner=ubuntu group=ubuntu mode=0755
-  loop: "{{ lvm_volumes }}"
+  when: lvm_volumes
 
 - name: Mount data LV
-  mount: name={{ item.mount }} src=/dev/{{ item.vg_name }}/{{ item.lv_name }} fstype={{ item.filesystem }}
-         state=mounted opts="errors=remount-ro,noatime,barrier=0"
-         dump=0 passno=2
+  mount:
+    name: "{{ item.mount }}"
+    src: /dev/{{ item.vg_name }}/{{ item.lv_name }}
+    fstype: "{{ item.filesystem }}"
+    state: mounted
+    opts: "{{ item.filesystem_mkfs_opts | default(omit) }}"
+    dump: 0
+    passno: 2
   loop: "{{ lvm_volumes }}"
 
-- name: Again ensure mounted folder has right owner
-  file: path={{ item.mount }} state=directory owner=ubuntu group=ubuntu mode=0755
+- name: Ensure mounted folder has right owner
+  file:
+    path: "{{ item.mount }}"
+    state: directory
+    owner: "{{ item.owner | default(aws_ec2_user) }}"
+    group: "{{ item.group | default(aws_ec2_user) }}"
+    mode: "{{ item.mode | default ('0755') }}"
   loop: "{{ lvm_volumes }}"

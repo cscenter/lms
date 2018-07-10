@@ -4,31 +4,42 @@
   become: yes
   become_user: "{{ aws_ec2_root_user }}"
   tasks:
+
     - name: Install and configure system dependencies
       import_role:
         name: system
+
+    - name: LVM support, mount devices
+      include_role:
+        name: lvm
+      vars:
+        lvm_volumes:
+        - vg_name: vg_data
+          lv_name: lv_media
+          # Keep in sync with values from provision.yml
+          block_device_name: "/dev/xvdf"
+          filesystem: ext4
+          mount: /shared
+          filesystem_mkfs_opts: "errors=remount-ro,noatime,barrier=0"
 
     - name: Setup postgres service
       import_role:
         name: postgres
       vars:
         setup_cluster: yes
-        pg_cluster_dir: "/shared/db/data/"
+        pg_cluster_dir: "/shared/db/data"
       tags:
         - db
 
     - name: Setup nginx and certbot services
       import_role:
         name: nginx
-      vars:
-        enable_https: yes
 
     - name: Setup Redis service
       import_role:
         name: DavidWittman.redis
       vars:
         redis_bind: 127.0.0.1
-  #      redis_group: "{{ site_user_group }}"
         redis_version: 4.0.10
         redis_service_name: "redis"
         redis_verify_checksum: true
@@ -43,15 +54,3 @@
       loop: "{{ available_sites }}"
       loop_control:
         loop_var: app_config
-
-    - name: LVM support, mount devices
-      include_role:
-        name: lvm
-      vars:
-        lvm_volumes:
-          - vg_name: vg_data
-            lv_name: lv_media
-            # Keep in sync with values from provision.yml
-            block_device_name: "/dev/xvdf"
-            filesystem: ext4
-            mount: /shared

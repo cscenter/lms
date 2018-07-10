@@ -1,4 +1,5 @@
 ---
+ansible_python_interpreter: /usr/bin/python3
 aws_ec2_user: ubuntu
 aws_ec2_root_user: root
 admin_email: webmaster@compscicenter.ru
@@ -20,8 +21,8 @@ available_sites:
     db_user_password: FooBar
     main_domain: "compscicenter.ru"
     default_server: yes
-    enable_https: yes
     setup_cronjobs: yes
+    enable_https: no
     certbot_domains:
       - "compscicenter.ru"
       - "www.compscicenter.ru"
@@ -46,8 +47,8 @@ available_sites:
     db_user_password: FooBar
     main_domain: "compsciclub.ru"
     default_server: no
-    enable_https: yes
     setup_cronjobs: no
+    enable_https: no
     certbot_domains:
       - "compsciclub.ru"
       - "www.compsciclub.ru"
