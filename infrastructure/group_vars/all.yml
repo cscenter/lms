@@ -5,6 +5,7 @@ aws_ec2_root_user: root
 admin_email: webmaster@compscicenter.ru
 python_pkg: python3.6
 certbot_script: /opt/certbot-auto
+enable_https: yes
 available_sites:
   - site_user: "cscenter"
     site_user_group: "shared"
@@ -22,7 +23,6 @@ available_sites:
     main_domain: "compscicenter.ru"
     default_server: yes
     setup_cronjobs: yes
-    enable_https: no
     certbot_domains:
       - "compscicenter.ru"
       - "www.compscicenter.ru"
@@ -48,7 +48,6 @@ available_sites:
     main_domain: "compsciclub.ru"
     default_server: no
     setup_cronjobs: no
-    enable_https: no
     certbot_domains:
       - "compsciclub.ru"
       - "www.compsciclub.ru"

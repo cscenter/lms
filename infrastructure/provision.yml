@@ -1,4 +1,6 @@
 ---
+# This playbook has no dependencies. All needed vars in one place.
+
 - name: provision EC2 instance
   hosts: localhost
   connection: local
@@ -6,10 +8,10 @@
   vars:
     # Remove if no backup volumes was created before (we are launching purely
     # new instance or manually removed all backup volumes for prev version)
-    aws_ec2_old_instance_tag: "cscweb_new"
+    aws_ec2_prev_host_tag: "cscweb_new"
     aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     aws_ec2_region: eu-central-1
-    aws_ec2_instance_type: t2.small
+    aws_ec2_instance_type: t2.medium
     aws_ec2_instance_volume_size: 20
     aws_ec2_keypair: csc
     # Ubuntu 16.04 hvm ssd
@@ -112,15 +114,15 @@
       ec2_snapshot_facts:
         region: "{{ aws_ec2_region }}"
         filters:
-          "tag:ForEC2TagName": "{{ aws_ec2_old_instance_tag }}"
+          "tag:ForEC2TagName": "{{ aws_ec2_prev_host_tag }}"
           "tag:EBSBackup": "Yes"
           status: completed
       register: snapshots_data
-      when: aws_ec2_old_instance_tag is defined and attach_second_volume
+      when: aws_ec2_prev_host_tag is defined and attach_second_volume
 
     - name: Find newest backup snapshot
       set_fact: newest_snapshot={{ snapshots_data.snapshots | sort(attribute='start_time') | last }}
-      when: aws_ec2_old_instance_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
+      when: aws_ec2_prev_host_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
 
     - set_fact: snapshot_id={{ newest_snapshot.snapshot_id }}
       when: newest_snapshot is defined and newest_snapshot.snapshot_id

@@ -63,7 +63,7 @@
 
 - name: Configure certbot to auto-renew tls certificates
   include: certbot.yml
-  when: (nginx_status.stat.exists and enable_https)
+  when: nginx_status.stat.exists and enable_https
   tags:
     - certbot
     - tls

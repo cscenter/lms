@@ -8,6 +8,8 @@
     - name: Install and configure system dependencies
       import_role:
         name: system
+      tags:
+        - system-role
 
     - name: LVM support, mount devices
       include_role:
@@ -21,6 +23,8 @@
           filesystem: ext4
           mount: /shared
           filesystem_mkfs_opts: "errors=remount-ro,noatime,barrier=0"
+      tags:
+        - lvm-role
 
     - name: Setup postgres service
       import_role:
@@ -34,6 +38,8 @@
     - name: Setup nginx and certbot services
       import_role:
         name: nginx
+      tags:
+        - nginx-role
 
     - name: Setup Redis service
       import_role:
@@ -47,6 +53,8 @@
         redis_socket_perm: 770
         redis_maxmemory: 256mb
         redis_password: 3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN
+      tags:
+        redis-role
 
     - name: Setup application
       include_role:

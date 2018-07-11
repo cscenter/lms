@@ -21,7 +21,6 @@
   tags:
     - nginx
     - tls
-  when: enable_https
 
 - name: Ensure all nginx crypto materials are present
   copy:
@@ -34,7 +33,6 @@
   tags:
     - nginx
     - tls
-  when: enable_https
 
 - name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
@@ -44,4 +42,3 @@
 
 - name: Download and install certbot
   get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
-  when: enable_https

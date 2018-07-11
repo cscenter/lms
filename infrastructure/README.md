@@ -1,14 +1,15 @@
 EC2 provision based on dynamic inventory - [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
 
 # TODO (critical):
+* Do not delete lambda functions logs on recreation
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * Check that `ntpd` works as expected!
 * fix certbot default email/domain values! They should be real...
-* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.5 used as system 
+* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.6 used as system 
 `python3` (now py3.6 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
-* Problem with restarting supervisor after `Nginx status`
 * Think how to update python version without breaking site for updating period (now it does by removing current venv. No idea how to properly rename venv :<)
+* Clear, then warm cache (social_crawler, /alumni and so on)
 
 TODO (important):
 * add `registration` app to cscenter, then remove club worker?
@@ -119,7 +120,7 @@ Explicitly set host and app_user due to high risk of mix up hosts :<
 DB user must be owner `alter database <DB> owner to <db_user>;` and have previligies to createdb and dropdb. `ALTER USER <currentuser> CREATEDB;`
 You can temporary set current user as superuser `alter role <db_user> with superuser;`
 or you can have a problem with error `must be owner of extension plpgsql`
-~~2. pass parameters to command ./manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local~~
+2. pass parameters to command ./manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local
 
 Note: Бэкап делается bd и media. У сайта клуба и центра это общие ресурсы, поэтому нет смысла делать бэкапы и того и другого
 
@@ -143,6 +144,13 @@ rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscw
 pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql
 * To pass boolean value with extra vars to playbook use this form `-e "{'var_name':yes}"`
 
+```
+# Show all available LVM volumes
+sudo lvscan
+# Disk stats
+df -h
+```
+
 
 
 
@@ -160,8 +168,6 @@ ansible-playbook -i inventory/ec2.py setup.yml --tags="cronjobs"
 Note: Кластер postgresql по идее лежит тоже на диске рядом с `media/` и можно было бы попробовать переиспользовать его, 
 но сейчас БД создаётся с нуля, этот сценарий универсальный и подходит для машин без дополнительного диска.
 
-FIXME: как поведёт себя playbook `setup.yml` для существующего кластера postgresql - не понятно. Пока надеемся, что очистит папку
-
 * Если есть предыдущий snapshot и зачем-то поменяли vg/lv name, то меняем их вручную, иначе просто затрём весь диск
 
 ```
@@ -170,22 +176,42 @@ sudo vgrename /dev/vg0 /dev/vg_data
 sudo lvrename /dev/vg_data/shared /dev/vg_data/lv_media
 ```
 
-* В файле `Makefile` указываем тег новой машины. В provision.yml выставляем переменную `aws_ec2_old_instance_tag` равной тегу предыдущей машины. 
+* В файле `Makefile` указываем тег новой машины. В provision.yml выставляем переменную `aws_ec2_prev_host_tag` равной тегу предыдущей машины. 
 Тогда диск для media/ будет создан из сделанного ранее снепшота.
 
 TODO: из cronjobs удалить создание media/ ?
 
 * Запускаем `setup.yml` без установки ssl. Т.к. домен не связан с новой машиной мы не сможем подтвердить право владения.
+* Руками восстанавливаем дамп БД :< При этом её лучше удалить, т.к. после джанговских migrate как-то не оч идёт восстановление
+
+```
+sudo -u postgres psql
+    DROP DATABASE cscdb;
+    CREATE DATABASE cscdb;
+    GRANT ALL privileges ON DATABASE cscdb TO csc;
+```
+
 * Если всё ок, перенаправляем поток на новую машину и запускаем уже с установкой сертификатов
 
 FIXME: как избежать downtime'а тут? Копировать сертификаты со старой машины??
 
 
-```
-# Show all available LVM volumes
-sudo lvscan
-# Disk stats
-df -h
-```
 
-* Руками восстанавливаем дамп :<
+
+
+
+
+```
+AWS_EC2_INSTANCE_TAG := cscsite
+SITE_USER := cscenter
+make provision
+# Make db backup from prev host
+ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" dbbackup.yml -v
+# Optional (on new instance)
+sudo vgrename /dev/vg0 /dev/vg_data
+sudo lvrename /dev/vg_data/shared /dev/vg_data/lv_media
+# Run setup.yml without ssl
+ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_cscsite setup.yml -v --skip-tags="cronjobs" -e "{'enable_https':no}"
+# Setup ssl and cronjobs
+ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_cscsite setup.yml -v --skip-tags="system-role,cronjobs,lvm-role,db,nginx-role,redis-role" -e "{'enable_https':no}"
+```
