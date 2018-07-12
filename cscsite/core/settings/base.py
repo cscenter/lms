@@ -246,8 +246,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'UNAUTHENTICATED_USER': 'users.models.NotAuthenticatedUser',
-    'PAGE_SIZE': 20,
-    'DEFAULT_PAGINATION_CLASS': 'api.pagination.StandardPagination'
 }
 
 WEBPACK_LOADER = {
