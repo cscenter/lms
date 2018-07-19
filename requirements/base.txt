@@ -1,6 +1,6 @@
 Django==1.11.13
 
-requests==2.13.0
+requests==2.19.1
 unicodecsv==0.14.1
 
 # Py2 and Py3 compability
