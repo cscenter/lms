@@ -14,22 +14,6 @@
       >> /home/{{ site_user }}/site/logs/cscbackup.log
       2>&1
 
-- name: Daily late-night media backup goes in cron
-  become_user: "{{ site_user }}"
-  cron:
-    name: backup media/ dir to S3
-    user: "{{ site_user }}"
-    hour: "4"
-    minute: "12"
-    job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
-      /home/{{ site_user }}/site/repo/manage.py mediabackup
-      --settings={{ app_settings }}.settings.{{ app_environment }}
-      --compress
-      --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
-      >> /home/{{ site_user }}/site/logs/cscbackup.log
-      2>&1
-
 - name: Notify people every 5 minutes (cronjob)
   become_user: "{{ site_user }}"
   cron:

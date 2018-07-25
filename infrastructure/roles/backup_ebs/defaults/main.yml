@@ -26,5 +26,5 @@ lambda_functions:
     zip_name: delete_snapshot
     lambda_function_name: ebsDeleteSnapshot
     description: 'Delete snapshots older than retention period ({{ retention_period_in_days }} days) with {{ ebs_auto_snapshot_tag_name }}={{ ebs_auto_snapshot_tag_value }} tag presented'
-    schedule_description: "Try to delete snapshots older than retention period every monday at 00:00 UTC (check target description for details)"
-    schedule_expression: "cron(0 0 ? * MON *)"
+    schedule_description: "Try to delete snapshots older than retention period every sunday and wednesday at 00:00 UTC (check target description for details)"
+    schedule_expression: "cron(0 0 ? * SUN,WED *)"

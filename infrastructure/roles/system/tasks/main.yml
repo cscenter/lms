@@ -64,7 +64,7 @@
     - python3-pip
     - python-pycurl
 
-- name: install system python dependencies
+- name: install global python 3 dependencies
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"
@@ -78,8 +78,6 @@
       version: "2.0.17"
     - name: uwsgitop
       version: "0.10"
-    - name: psycopg2-binary # (used to make sure db user exists)
-      version: "2.7.5"
 
 - name: Create uwsgi config dir
   file:

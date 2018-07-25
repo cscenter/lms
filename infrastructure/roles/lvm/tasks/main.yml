@@ -39,7 +39,7 @@
     src: /dev/{{ item.vg_name }}/{{ item.lv_name }}
     fstype: "{{ item.filesystem }}"
     state: mounted
-    opts: "{{ item.filesystem_mkfs_opts | default(omit) }}"
+    opts: "{{ item.mount_opts | default(omit) }}"
     dump: 0
     passno: 2
   loop: "{{ lvm_volumes }}"

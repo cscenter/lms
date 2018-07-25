@@ -96,9 +96,11 @@
     become: yes
     become_method: sudo
 
-  - name: Gracefully kill rq workers to reload their state
+  - name: Gracefully restart rq workers
     become: yes
     become_method: sudo
-    shell: "supervisorctl signal SIGTERM rqworkers:"
+    # XXX: `default` and `high` queues are shared between sites,
+    # but could be restarted only with cscenter target unit!
+    shell: "systemctl restart rqworker_{{ site_user }}.target"
 
 

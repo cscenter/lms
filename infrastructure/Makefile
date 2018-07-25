@@ -9,7 +9,10 @@ deploy:
 	ansible-playbook -i inventory/ec2.py deploy.yml -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" -v
 
 dbbackup:
-	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" dbbackup.yml -v
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" backup.yml -v --tags="db"
+
+mediabackup:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" backup.yml -v --tags="media"
 
 provision:
 	ansible-playbook -i hosts -e aws_ec2_instance_tag=$(AWS_EC2_INSTANCE_TAG) provision.yml -v

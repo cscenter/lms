@@ -1,6 +1,5 @@
 ---
 # TODO: limit max memory for rqworker
-# TODO: create `target` for rqworker?
 - name: Create rq worker services
   template:
     src: rqworker.service.jinja2

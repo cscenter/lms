@@ -1,5 +1,5 @@
 ---
-# This playbook has no dependencies. All needed vars in one place.
+# Note: See `group_vars/all.yml` for variables shared between playbooks
 
 - name: provision EC2 instance
   hosts: localhost
@@ -46,7 +46,7 @@
             cidr_ip: 0.0.0.0/0
 
   tasks:
-    - name: Gather facts about any instance with provided tag
+    - name: Gather facts about any instance with tag "{{ aws_ec2_instance_tag }}"
       ec2_instance_facts:
         filters:
           "tag:Name": "{{ aws_ec2_instance_tag }}"
@@ -80,6 +80,7 @@
         exact_count: 1
         count_tag:
           Name: "{{ aws_ec2_instance_tag }}"
+        # TODO: add tag:Name to the root device
         volumes:
           - device_name: /dev/sda1
             volume_size: "{{ aws_ec2_instance_volume_size }}"
@@ -110,12 +111,11 @@
       local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
       loop: "{{ ec2.tagged_instances }}"
 
-    - name: Get info about any backup snapshot
+    - name: Get info about all related backup snapshots
       ec2_snapshot_facts:
         region: "{{ aws_ec2_region }}"
         filters:
-          "tag:ForEC2TagName": "{{ aws_ec2_prev_host_tag }}"
-          "tag:EBSBackup": "Yes"
+          "tag:{{ aws_ec2_instance_related_tag }}": "{{ aws_ec2_prev_host_tag }}"
           status: completed
       register: snapshots_data
       when: aws_ec2_prev_host_tag is defined and attach_second_volume
@@ -136,8 +136,8 @@
         volume_type: gp2
         device_name: "{{ second_volume_device_name }}"
         tags:
-          ForEC2TagName: "{{ aws_ec2_instance_tag }}"
-          # TODO: Sync `EBSBackup` name (and value) with create_snapshot.py
+          "{{ aws_ec2_instance_related_tag }}": "{{ aws_ec2_instance_tag }}"
+          # TODO: Sync `EBSBackup` name (and value) with create_snapshot.py.jinja2
           EBSBackup: "Yes"
       register: ec2_vol
       when: attach_second_volume
