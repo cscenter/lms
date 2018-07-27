@@ -115,7 +115,7 @@
       ec2_snapshot_facts:
         region: "{{ aws_ec2_region }}"
         filters:
-          "tag:{{ aws_ec2_instance_related_tag }}": "{{ aws_ec2_prev_host_tag }}"
+          "tag:Name": "{{ aws_ec2_prev_host_tag }}"
           status: completed
       register: snapshots_data
       when: aws_ec2_prev_host_tag is defined and attach_second_volume
@@ -136,7 +136,7 @@
         volume_type: gp2
         device_name: "{{ second_volume_device_name }}"
         tags:
-          "{{ aws_ec2_instance_related_tag }}": "{{ aws_ec2_instance_tag }}"
+          Name: "{{ aws_ec2_instance_tag }}"
           # TODO: Sync `EBSBackup` name (and value) with create_snapshot.py.jinja2
           EBSBackup: "Yes"
       register: ec2_vol

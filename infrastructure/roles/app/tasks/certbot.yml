@@ -29,6 +29,8 @@
     backup: no
   notify: reload nginx
 
+- meta: flush_handlers
+
 - name: Ensure a cron job to auto-renew the cert exists
   cron:
     name: "daily auto renew cert for {{ main_domain }}"

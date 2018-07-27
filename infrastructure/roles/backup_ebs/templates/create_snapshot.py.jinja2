@@ -54,9 +54,9 @@ def lambda_handler(event, context):
             volume_name = None
             if 'Tags' in volume:
                 for tag in volume['Tags']:
-                    if tag["Key"] == '{{ aws_ec2_instance_related_tag }}':
+                    if tag["Key"] == 'Name':
                         volume_name = tag["Value"]
                         break
             if volume_name:
-                tags.append({'Key': '{{ aws_ec2_instance_related_tag }}', 'Value': volume_name})
+                tags.append({'Key': 'Name', 'Value': volume_name})
             snapshot.create_tags(Tags=tags)

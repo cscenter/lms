@@ -1,7 +1,6 @@
 ---
 # Shared between playbooks
 ansible_python_interpreter: /usr/bin/python3
-aws_ec2_instance_related_tag: ForEC2TagName
 
 aws_ec2_user: ubuntu
 aws_ec2_root_user: root
