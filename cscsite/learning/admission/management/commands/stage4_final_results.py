@@ -54,14 +54,16 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                 for a in applicants.iterator():
                     if a.status in Applicant.FINAL_STATUSES:
                         recipients = [a.email]
+                        # Note: This check doesn't work with
+                        # `render_on_delivery=False`
                         if not Email.objects.filter(to=recipients,
                                                     template=template).exists():
                             mail.send(
                                 recipients,
                                 sender=header_from,
-                                template=template_name,
+                                template=template,
                                 context=context,
-                                render_on_delivery=False,
+                                render_on_delivery=True,
                                 backend='ses',
                             )
                             generated += 1
