@@ -23,6 +23,10 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')
+        parser.add_argument(
+            '--from', type=str,
+            default='CS центр <info@compscicenter.ru>',
+            help='Override default `From` header')
 
     def handle(self, *args, **options):
         city_code = options["city"]
@@ -32,6 +36,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             return
 
         self.validate_templates(campaigns, types=Applicant.FINAL_STATUSES)
+
+        header_from = options["from"]
 
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))
@@ -52,7 +58,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                                     template=template).exists():
                             mail.send(
                                 recipients,
-                                sender='CS центр <info@compscicenter.ru>',
+                                sender=header_from,
                                 template=template_name,
                                 context=context,
                                 render_on_delivery=False,
