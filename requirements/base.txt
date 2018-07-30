@@ -112,7 +112,6 @@ django-bootstrap3==9.1.0
 django-extra-views==0.9.0
 # Generic, reusable mixins
 django-braces==1.11.0
-django-sitemetrics==0.6.1
 django-taggit==0.22.0
 sqlparse==0.2.2
 django-pipeline==1.6.12
