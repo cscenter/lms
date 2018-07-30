@@ -54,7 +54,8 @@ class Campaign(models.Model):
         validators=[MinValueValidator(CENTER_FOUNDATION_YEAR)],
         default=current_year)
     city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE,
-                             verbose_name=_("City"))
+                             verbose_name=_("City"),
+                             on_delete=models.PROTECT)
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
