@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
-
 from collections import OrderedDict
 from decimal import Decimal
 
 from import_export import resources, fields, widgets
 
 from learning.admission.models import Applicant, Test, Exam
+
+
+# XXX: Not tested with django-import-export==1.0.1
 
 
 class JsonFieldWidget(widgets.Widget):

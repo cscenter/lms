@@ -182,8 +182,7 @@ class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
             kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
                 PARTICIPANT_GROUPS.STUDENT_CENTER,
                 PARTICIPANT_GROUPS.VOLUNTEER]).distinct()
-        return super(SHADCourseRecordResourceAdmin,
-                     self).formfield_for_foreignkey(db_field, *args, **kwargs)
+        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
