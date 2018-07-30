@@ -297,7 +297,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         null=True,
         editable=False,
         monitored='status',
-        logging_model=CSCUserStatusLog)
+        logging_model=CSCUserStatusLog,
+        on_delete=models.CASCADE)
 
     areas_of_study = models.ManyToManyField(
         'learning.AreaOfStudy',
