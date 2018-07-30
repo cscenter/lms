@@ -17,15 +17,12 @@ from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-from sitemetrics.models import Keycode
 from modeltranslation.admin import TranslationAdmin
 
 from .models import City, Faq, FaqCategory, University
 
 # Remove groups app from django admin
 admin.site.unregister(Group)
-# Hide sitemetrics app
-admin.site.unregister(Keycode)
 
 
 def get_admin_url(instance_or_qs):
