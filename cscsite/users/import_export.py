@@ -14,14 +14,13 @@ from .models import CSCUser, SHADCourseRecord
 class GradeWidget(widgets.Widget):
     MAPPING = {v.lower(): k for k, v in GRADES._display_map.items()}
 
-    def clean(self, value):
+    def clean(self, value, row=None, *args, **kwargs):
         if value in self.MAPPING:
             return self.MAPPING[value]
+        raise NotImplementedError(f'Undefinded GradeWidget MAPPING '
+                                  f'value {value}')
 
-        raise NotImplementedError('Undefinded GradeWidget MAPPING value' +
-                                   unicode(value))
-
-    def render(self, value):
+    def render(self, value, obj=None):
         for k, v in self.MAPPING.items():
             if value == v:
                 return k
@@ -30,7 +29,7 @@ class GradeWidget(widgets.Widget):
 class SemesterWidget(widgets.Widget):
     MAPPING = {v.lower(): k for k, v in SEMESTER_TYPES._display_map.items()}
 
-    def clean(self, value):
+    def clean(self, value, row=None, *args, **kwargs):
         from learning.models import Semester
         data = value.split()
         if len(data) != 2:
@@ -40,7 +39,7 @@ class SemesterWidget(widgets.Widget):
             type = self.MAPPING[type]
         return Semester.objects.get(type=type, year=year).pk
 
-    def render(self, value):
+    def render(self, value, obj=None):
         # TODO: not implemented for export
         return value
 
