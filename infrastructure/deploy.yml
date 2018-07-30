@@ -48,6 +48,8 @@
       dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
       flat: yes
       fail_on_missing: no
+    become: yes
+    become_user: "{{ site_user }}"
     register: requirements_prev_md5
 
   - name: Get stats for fetched file
