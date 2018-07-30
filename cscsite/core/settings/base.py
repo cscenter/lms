@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'formtools',
     'bootstrap3',
     'taggit',
-    'sitemetrics',
     'micawber.contrib.mcdjango',
     'slides',
     'dbbackup',
