@@ -33,8 +33,10 @@ class Book(models.Model):
 
 class Stock(models.Model):
     book = models.ForeignKey(Book, verbose_name=_("Book"),
-                             related_name="stocks")
-    city = models.ForeignKey(City, verbose_name=_("City"))
+                             related_name="stocks",
+                             on_delete=models.CASCADE)
+    city = models.ForeignKey(City, verbose_name=_("City"),
+                             on_delete=models.CASCADE)
     copies = models.PositiveSmallIntegerField(
         _("Book|number of copies"), default=1)
 
@@ -59,10 +61,11 @@ class Stock(models.Model):
 
 
 class Borrow(models.Model):
-    stock = models.ForeignKey("Stock", related_name="borrows")
+    stock = models.ForeignKey("Stock", related_name="borrows",
+                              on_delete=models.PROTECT)
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="borrows", verbose_name=_("Borrow|student"))
     borrowed_on = models.DateField(_("Borrow|borrowed on"))
 
