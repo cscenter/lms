@@ -90,7 +90,7 @@ class City(models.Model):
 class FaqCategory(models.Model):
     name = models.CharField(_("Category name"), max_length=255)
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
+    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID, on_delete=models.PROTECT)
 
     class Meta:
         ordering = ["sort"]
@@ -106,7 +106,7 @@ class Faq(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID)
+    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID, on_delete=models.PROTECT)
     categories = models.ManyToManyField(
         FaqCategory,
         verbose_name=_("Categories"),
@@ -132,7 +132,8 @@ class University(models.Model):
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     city = models.ForeignKey(City,
                              verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE)
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("University")
