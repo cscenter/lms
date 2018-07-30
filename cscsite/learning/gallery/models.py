@@ -45,7 +45,8 @@ class Image(models.Model):
                        upload_to=gen_path_to_image)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              null=True, blank=True,
-                             related_name='images')
+                             related_name='images',
+                             on_delete=models.CASCADE)
     course_offering = models.ForeignKey(
         CourseOffering,
         verbose_name=_("Course offering"),
@@ -92,7 +93,8 @@ class Album(MPTTModel):
     parent = TreeForeignKey('self', verbose_name=_('Parent'),
                             null=True, blank=True,
                             related_name='children', db_index=True,
-                            help_text=_("Parent album"))
+                            help_text=_("Parent album"),
+                            on_delete=models.CASCADE)
 
     class MPTTMeta:
         order_insertion_by = ['order']
