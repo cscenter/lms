@@ -43,8 +43,9 @@ CURATOR_SCORE_FIELDS = [
 class ProjectStudent(models.Model):
     """Intermediate model for project students"""
     GRADES = GRADES
-    student = models.ForeignKey(settings.AUTH_USER_MODEL)
-    project = models.ForeignKey('Project')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE)
     supervisor_grade = models.SmallIntegerField(
         verbose_name=_("Supervisor grade"),
         validators=[MinValueValidator(-15), MaxValueValidator(15)],
@@ -203,7 +204,8 @@ class Project(TimeStampedModel):
         _("SlideShare URL for participants presentation"),
         null=True, blank=True)
     city = models.ForeignKey(City, verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE)
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.CASCADE)
     is_external = models.BooleanField(
         _("External project"),
         default=False)
@@ -388,7 +390,7 @@ class Report(ReviewCriteria):
         (2, _("Good report quality and sensible comments")),
     )
 
-    project_student = models.OneToOneField(ProjectStudent)
+    project_student = models.OneToOneField(ProjectStudent, on_delete=models.PROTECT)
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Status"),
@@ -521,7 +523,7 @@ class Report(ReviewCriteria):
 
 @python_2_unicode_compatible
 class Review(ReviewCriteria):
-    report = models.ForeignKey(Report)
+    report = models.ForeignKey(Report, on_delete=models.PROTECT)
     reviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Project reviewer"),
@@ -574,7 +576,7 @@ def report_comment_attachment_upload_to(self, filename):
 
 @python_2_unicode_compatible
 class ReportComment(TimeStampedModel):
-    report = models.ForeignKey(Report)
+    report = models.ForeignKey(Report, on_delete=models.PROTECT)
     text = models.TextField(
         _("ReportComment|text"),
         help_text=_("LaTeX+Markdown is enabled"),
