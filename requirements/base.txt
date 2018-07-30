@@ -33,7 +33,7 @@ beautifulsoup4==4.6.0
 
 # Translation utils
 django-rosetta==0.7.13
-django-modeltranslation==0.12.2
+django-modeltranslation==0.13b1
 
 # Mailing support
 django-post_office==3.0.4
