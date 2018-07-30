@@ -125,17 +125,19 @@ class Notification(models.Model):
     LEVELS = Choices('success', 'info', 'warning', 'error')
     level = models.CharField(choices=LEVELS, default=LEVELS.info, max_length=20)
 
-    type = models.ForeignKey(Type, related_name="+")
+    type = models.ForeignKey(Type, related_name="+", on_delete=models.CASCADE)
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   blank=True,
                                   null=True,
-                                  related_name='notifications')
+                                  related_name='notifications',
+                                  on_delete=models.CASCADE)
     unread = models.BooleanField(default=True, blank=False)
 
     actor_content_type = models.ForeignKey(ContentType,
                                            related_name='notify_actor',
-                                           blank=True, null=True)
+                                           blank=True, null=True,
+                                           on_delete=models.CASCADE)
     actor_object_id = models.PositiveIntegerField(blank=True, null=True)
     actor = GenericForeignKey('actor_content_type', 'actor_object_id')
 
@@ -145,7 +147,8 @@ class Notification(models.Model):
     target_content_type = models.ForeignKey(ContentType,
                                             related_name='notify_target',
                                             blank=True,
-                                            null=True)
+                                            null=True,
+                                            on_delete=models.CASCADE)
     target_object_id = models.PositiveIntegerField(blank=True, null=True)
     target = GenericForeignKey('target_content_type', 'target_object_id')
 
@@ -153,7 +156,8 @@ class Notification(models.Model):
         ContentType,
         blank=True,
         null=True,
-        related_name='notify_action_object')
+        related_name='notify_action_object',
+        on_delete=models.CASCADE)
     action_object_object_id = models.PositiveIntegerField(blank=True, null=True)
     action_object = GenericForeignKey('action_object_content_type',
                                       'action_object_object_id')
