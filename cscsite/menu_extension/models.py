@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 
 
 class MenuItemExtension(models.Model):
-    menu_item = models.OneToOneField(MenuItem, related_name="extension", primary_key=True)
+    menu_item = models.OneToOneField(MenuItem, related_name="extension", primary_key=True, on_delete=models.CASCADE)
     open_in_new_window = models.BooleanField(default=False, help_text=_("Open link in new tab is selected"))
     protected = models.BooleanField(default=False, help_text=_("Check if visible only for authenticated user"))
     unauthenticated = models.BooleanField(default=False, help_text=_("Check if visible only for unauthenticated user"))

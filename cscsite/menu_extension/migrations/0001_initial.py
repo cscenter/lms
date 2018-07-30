@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MenuItemExtension',
             fields=[
-                ('menu_item', models.OneToOneField(related_name='extension', primary_key=True, serialize=False, to='treemenus.MenuItem')),
+                ('menu_item', models.OneToOneField(related_name='extension', primary_key=True, serialize=False, to='treemenus.MenuItem', on_delete=models.deletion.CASCADE,)),
                 ('protected', models.BooleanField(default=False, help_text='Check if visible only for authenticated user')),
                 ('unauthenticated', models.BooleanField(default=False, help_text='Check if visible only for unauthenticated user')),
                 ('staff_only', models.BooleanField(default=False, help_text='Check if visible only for staff')),
