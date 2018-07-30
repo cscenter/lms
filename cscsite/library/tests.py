@@ -6,7 +6,7 @@ from library.factories import BorrowFactory
 from users.factories import UserFactory, StudentCenterFactory
 
 
-# TODO: borrows tests
+# TODO: borrows tests. Например. Убедиться, что нельзя удалить книгу, если её кто-то занял из резерва.
 
 
 @pytest.mark.django_db
