@@ -264,7 +264,8 @@ class CourseOffering(TimeStampedModel):
         _("Correspondence course"),
         default=False)
     city = models.ForeignKey(City, verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE)
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.PROTECT)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
@@ -448,8 +449,8 @@ class CourseOffering(TimeStampedModel):
 @python_2_unicode_compatible
 class CourseOfferingTeacher(models.Model):
     # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
-    teacher = models.ForeignKey(settings.AUTH_USER_MODEL)
-    course_offering = models.ForeignKey(CourseOffering)
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    course_offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE)
     roles = BitField(flags=(
         ('lecturer', _('Lecturer')),
         ('reviewer', _('Reviewer')),
@@ -589,7 +590,8 @@ class Venue(models.Model):
 
     city = models.ForeignKey(City, null=True, blank=True,
                              verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE)
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.PROTECT)
     sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(
@@ -1450,8 +1452,10 @@ class StudyProgram(TimeStampedModel):
         _("Year"), validators=[MinValueValidator(1990)])
     city = models.ForeignKey(City,
                              verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE)
-    area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"))
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.CASCADE)
+    area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"),
+                             on_delete=models.CASCADE)
     description = models.TextField(
         _("StudyProgram|description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
@@ -1552,7 +1556,8 @@ class Useful(models.Model):
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     site = models.ForeignKey(Site, verbose_name=_("Site"),
-                             default=settings.CENTER_SITE_ID)
+                             default=settings.CENTER_SITE_ID,
+                             on_delete=models.CASCADE)
 
     class Meta:
         ordering = ["sort"]
@@ -1567,7 +1572,8 @@ class InternshipCategory(models.Model):
     name = models.CharField(_("Category name"), max_length=255)
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     site = models.ForeignKey(Site, verbose_name=_("Site"),
-                             default=settings.CENTER_SITE_ID)
+                             default=settings.CENTER_SITE_ID,
+                             on_delete=models.CASCADE)
 
     class Meta:
         ordering = ["sort"]
@@ -1585,7 +1591,8 @@ class Internship(TimeStampedModel):
     category = models.ForeignKey(InternshipCategory,
                                  verbose_name=_("Internship category"),
                                  null=True,
-                                 blank=True)
+                                 blank=True,
+                                 on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ["sort"]
