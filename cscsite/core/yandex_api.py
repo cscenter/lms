@@ -1,6 +1,6 @@
 import logging
 import requests
-
+# TODO: move to api/ ?
 
 logger = logging.getLogger(__name__)
 
