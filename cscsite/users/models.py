@@ -136,14 +136,16 @@ class CSCUserStatusLog(models.Model):
     created = models.DateField(_("created"), default=now)
     semester = models.ForeignKey(
         "learning.Semester",
-        verbose_name=_("Semester"))
+        verbose_name=_("Semester"),
+        on_delete=models.CASCADE)
     status = models.CharField(
         choices=STUDENT_STATUS,
         verbose_name=_("Status"),
         max_length=15)
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"))
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-pk']
@@ -223,7 +225,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         null=True)
     city = models.ForeignKey(City, verbose_name=_("Default city"),
                              help_text=_("CSCUser|city"),
-                             blank=True, null=True)
+                             blank=True, null=True,
+                             on_delete=models.SET_NULL)
     # FIXME: why not null? The same for github_id
     yandex_id = models.CharField(
         _("Yandex ID"),

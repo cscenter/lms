@@ -17,8 +17,6 @@ import users.models
 
 class Migration(migrations.Migration):
 
-    replaces = [('users', '0001_initial'), ('users', '0002_auto_20170414_1717'), ('users', '0003_auto_20170414_1919'), ('users', '0004_auto_20180313_1440'), ('users', '0005_auto_20180730_1103')]
-
     initial = True
 
     dependencies = [
@@ -64,10 +62,10 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(blank=True, choices=[('expelled', 'StudentInfo|Expelled'), ('reinstated', 'StudentInfo|Reinstalled'), ('will_graduate', 'StudentInfo|Will graduate')], max_length=15, verbose_name='Status')),
                 ('workplace', models.CharField(blank=True, max_length=200, verbose_name='Workplace')),
                 ('areas_of_study', models.ManyToManyField(blank=True, to='learning.AreaOfStudy', verbose_name='StudentInfo|Areas of study')),
-                ('city', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.City', verbose_name='Default city')),
+                ('city', models.ForeignKey(blank=True, null=True, help_text='CSCUser|city', on_delete=django.db.models.deletion.CASCADE, to='core.City', verbose_name='Default city')),
                 ('comment_last_author', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='cscuser_commented', to=settings.AUTH_USER_MODEL, verbose_name='Author of last edit')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('status_changed_at', users.models.MonitorStatusField(blank=True, help_text='Укажите, если хотите, чтобы при изменении поля status в логе появилась запись со значением, отличным от значения по-умолчанию.', logging_model=users.models.CSCUserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='learning.Semester', verbose_name='Status changed')),
+                ('status_last_change', users.models.MonitorStatusField(blank=True, help_text='Укажите, если хотите, чтобы при изменении поля status в логе появилась запись со значением, отличным от значения по-умолчанию.', logging_model=users.models.CSCUserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='learning.Semester', verbose_name='Status changed')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],
             options={
@@ -141,18 +139,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='cscuser',
-            name='city',
-            field=models.ForeignKey(blank=True, help_text='CSCUser|city', null=True, on_delete=django.db.models.deletion.CASCADE, to='core.City', verbose_name='Default city'),
-        ),
-        migrations.AlterField(
-            model_name='cscuser',
             name='status',
             field=models.CharField(blank=True, choices=[('expelled', 'StudentInfo|Expelled'), ('reinstated', 'StudentInfo|Reinstalled'), ('will_graduate', 'StudentInfo|Will graduate')], help_text='Status|HelpText', max_length=15, verbose_name='Status'),
-        ),
-        migrations.RenameField(
-            model_name='cscuser',
-            old_name='status_changed_at',
-            new_name='status_last_change',
         ),
         migrations.AlterField(
             model_name='cscuser',
