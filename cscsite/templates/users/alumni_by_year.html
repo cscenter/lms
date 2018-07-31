@@ -124,7 +124,7 @@
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                             {% endthumbnail %}
                             {% endif %}
-                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span>{{  student.areas_of_study.all|join:", " }}
+                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span>{% for a in  student.areas_of_study.all %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}
                         </div>
                     </div>
                 </div>
