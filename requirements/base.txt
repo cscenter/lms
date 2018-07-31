@@ -7,7 +7,7 @@ unicodecsv==0.14.1
 six==1.10.0
 
 # Time zones support
-pytz==2017.3
+pytz==2018.5
 
 # Db support
 psycopg2-binary==2.7.5
@@ -32,16 +32,16 @@ django-model-utils==2.6.1
 beautifulsoup4==4.6.0
 
 # Translation utils
-django-rosetta==0.7.13
+django-rosetta==0.8.1
 django-modeltranslation==0.13b1
 
 # Mailing support
 django-post_office==3.0.4
-django-ses==0.8.2
+django-ses==0.8.5
 
 # Amazon services
-boto==2.48.0
-boto3==1.5.16
+boto==2.49.0
+boto3==1.7.66
 
 # Excel 2010 support
 xlsxwriter==0.9.6
@@ -51,8 +51,8 @@ xlsxwriter==0.9.6
 webdavclient==1.0.5
 
 # Monitoring
-raven==6.1.0
-newrelic==2.92.0.78
+raven==6.9.0
+newrelic==4.0.0.99
 
 # Localization
 
@@ -96,10 +96,10 @@ python-dateutil==2.6.1
 django-jinja==2.4.1
 
 # Misc utils
-django-vanilla-views==1.0.4
+django-vanilla-views==1.0.5
 django-autocomplete-light==3.2.10
-django-mptt==0.8.7
-django-bootstrap-pagination==1.6.3
+django-mptt==0.9.0
+django-bootstrap-pagination==1.6.4
 django-bitfield==1.9.3
 django-multiselectfield==0.1.8
 django-filter==1.1.0
@@ -111,8 +111,8 @@ django-annoying==0.10.3
 django-bootstrap3==9.1.0
 django-extra-views==0.9.0
 # Generic, reusable mixins
-django-braces==1.11.0
-django-taggit==0.22.0
+django-braces==1.13.0
+django-taggit==0.22.2
 sqlparse==0.2.2
 django-pipeline==1.6.12
 django-loginas==0.3.3

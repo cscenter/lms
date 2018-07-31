@@ -83,8 +83,6 @@ def test_smoke(client, curator, settings):
 
 @pytest.mark.django_db
 def test_events(client):
-    # XXX: Some tests ruin factory.Iterator. It started return unexpected values
-    VenueFactory.city.reset()
     file_name = 'csc_events.ics'
     # Empty calendar
     response = client.get(reverse('ical_events'))

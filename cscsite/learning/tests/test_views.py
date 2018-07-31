@@ -19,7 +19,7 @@ from learning.forms import CourseClassForm
 from learning.settings import GRADES, STUDENT_STATUS
 from learning.tests.utils import check_url_security
 from users.factories import TeacherCenterFactory, StudentFactory, \
-    StudentCenterFactory, StudentClubFactory
+    StudentCenterFactory, StudentClubFactory, GraduateFactory
 from .mixins import *
 from ..factories import *
 
@@ -1076,3 +1076,10 @@ def test_student_courses_list_csclub(client, settings, mocker):
     assert len(response.context['ongoing_rest']) == 1
     assert len(response.context['archive_enrolled']) == 1
     assert set(response.context['archive_enrolled']) == {co}
+
+
+@pytest.mark.django_db
+def test_api_testimonials_smoke(client):
+    GraduateFactory(csc_review='test', photo='stub.JPG')
+    response = client.get(reverse("api:testimonials"))
+    assert response.status_code == 200

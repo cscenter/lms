@@ -125,7 +125,7 @@ urlpatterns = [
     url(r'^', include('learning.urls')),
     url(r'^', include('learning.admission.urls')),
     url(r'^', include('learning.projects.urls')),
-    url(r'^narnia/', include(admin.site.urls)),
+    url(r'^narnia/', admin.site.urls),
     url(r'^narnia/', include(loginas_urls)),
     # TODO: remove after testing
     url(r'^', include('admission_test.urls')),

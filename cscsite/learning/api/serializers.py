@@ -84,7 +84,7 @@ class TestimonialSerializer(serializers.ModelSerializer):
         except InvalidCacheBackendError:
             fragment_cache = caches['default']
         expire_time = 3600
-        vary_on = [obj.pk, obj.modified]
+        vary_on = [bytes(obj.pk), force_bytes(obj.modified)]
         cache_key = make_api_fragment_key("csc_review", vary_on)
         value = fragment_cache.get(cache_key)
         if value is None:
