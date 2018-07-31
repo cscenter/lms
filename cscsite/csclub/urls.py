@@ -117,7 +117,7 @@ urlpatterns += [
     teaching_section_patterns,
     venues_patterns,
 
-    url(r'^narnia/', include(admin.site.urls)),
+    url(r'^narnia/', admin.site.urls),
     url(r'^narnia/', include(loginas_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

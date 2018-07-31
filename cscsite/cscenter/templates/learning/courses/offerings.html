@@ -19,7 +19,7 @@
         });
     </script>
     <script type="text/javascript">
-        window.courseOfferingsData = {{ json|safe }};
+        window.courseOfferingsData = JSON.parse('{{ json|escapejs|safe }}');
     </script>
 
     <script type="text/template" id="courses-list-table-row">

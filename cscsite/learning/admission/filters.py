@@ -111,7 +111,7 @@ class ApplicantFilter(django_filters.FilterSet):
 
 class InterviewsBaseFilter(django_filters.FilterSet):
     date = django_filters.DateFromToRangeFilter(
-        name="date",
+        field_name="date",
         label="Период собеседований",
         help_text="",
         widget=DateTimeRangeWidget)

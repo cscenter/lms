@@ -350,7 +350,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
         widget = forms.Select(attrs={
             'initial': student.final_grade
         })
-        super().__init__(GRADES,
+        super().__init__(choices=GRADES,
                          required=False,
                          show_hidden_initial=True,
                          widget=widget)

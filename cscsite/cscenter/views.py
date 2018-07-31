@@ -486,7 +486,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 "terms": terms,
                 "termOptions": TERM_TYPES,
                 "courses": courses
-            }),
+            }).decode('utf-8'),
         }
         return context
 

@@ -143,20 +143,20 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="bar")
         user.save()
-        user.groups = [user.group.STUDENT_CENTER]
+        user.groups.set([user.group.STUDENT_CENTER])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baz")
         user.save()
-        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
+        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = CSCUser(username="baq")
         user.save()
-        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
-                       user.group.GRADUATE_CENTER]
+        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
+                         user.group.GRADUATE_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
@@ -198,14 +198,14 @@ class UserTests(MyUtilitiesMixin, TestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         assertLoginRedirect(url)
-        user.groups = [user.group.STUDENT_CENTER]
+        user.groups.set([user.group.STUDENT_CENTER])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('assignment_list_teacher'))
         assertLoginRedirect(url)
-        user.groups = [user.group.STUDENT_CENTER, user.group.TEACHER_CENTER]
+        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
         # Teacher has no course offering and redirects to courses list
@@ -262,7 +262,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = CSCUser.objects.create_user(**UserFactory.attributes())
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
-        user.groups = [user.group.TEACHER_CENTER]
+        user.groups.set([user.group.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
@@ -305,7 +305,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
-        user.groups = [user.group.GRADUATE_CENTER]
+        user.groups.set([user.group.GRADUATE_CENTER])
         user.graduation_year = 2014
         user.save()
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -463,7 +463,7 @@ def test_login_restrictions(client, settings):
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer
-    student.groups = [PARTICIPANT_GROUPS.VOLUNTEER]
+    student.groups.set([PARTICIPANT_GROUPS.VOLUNTEER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
@@ -474,7 +474,7 @@ def test_login_restrictions(client, settings):
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as graduate only
-    student.groups = [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+    student.groups.set([PARTICIPANT_GROUPS.GRADUATE_CENTER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
@@ -485,7 +485,7 @@ def test_login_restrictions(client, settings):
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Only club gtfo
-    student.groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
+    student.groups.set([PARTICIPANT_GROUPS.STUDENT_CLUB])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
@@ -612,7 +612,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.groups = [CSCUser.group.STUDENT_CENTER]
+        student.groups.set([CSCUser.group.STUDENT_CENTER])
         student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)
